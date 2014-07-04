@@ -39,7 +39,7 @@ function _moduleContent(&$smarty, $module_name)
     include_once "libs/misc.lib.php";
     include_once "libs/paloSantoForm.class.php";
     include_once "libs/paloSantoACL.class.php";
-
+    include_once "libs/paloSantoJSON.class.php";
 
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
@@ -497,8 +497,9 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
             $arrTmp[2]  = ($directory_type=='external')?"<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'>".htmlspecialchars($adress_book['last_name'], ENT_QUOTES, "UTF-8")." ".htmlspecialchars($adress_book['name'], ENT_QUOTES, "UTF-8")."</a>":"<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'>".$adress_book['description']."</a>";
             $arrTmp[3]  = ($directory_type=='external')?$adress_book['work_phone']:$adress_book['id'];
             $arrTmp[4]  = $email;
-            $arrTmp[5]  = "<a href='?menu=$module_name&action=call2phone&id=".$adress_book['id']."&type=".$directory_type."'><img border=0 src='/modules/$module_name/images/call.png' /></a>";
-            $arrTmp[6]  = "<a href='?menu=$module_name&action=transfer_call&id=".$adress_book['id']."&type=".$directory_type."'>{$arrLang["Transfer"]}</a>";
+            $arrTmp[5]  = "<a href='#' onclick='callContact({$adress_book['id']},\"{$directory_type}\");'><img border=0 src='/modules/$module_name/images/call.png' /></a>";
+            //$arrTmp[6]  = "<a href='?menu=$module_name&action=transfer_call&id=".$adress_book['id']."&type=".$directory_type."'>{$arrLang["Transfer"]}</a>";
+            $arrTmp[6]  = "<a href='#' onclick='transferCall({$adress_book['id']},\"{$directory_type}\");'>{$arrLang["Transfer"]}</a>";
             $arrTmp[7]  = $typeContact;
             $arrData[]  = $arrTmp;
         }
@@ -1055,11 +1056,13 @@ function view_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pD
 
 function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $arrLang, $arrConf, $dsn_agi_manager, $dsnAsterisk)
 {
-
-
+    $jsonObject = new PaloSantoJSON();
     $padress_book = new paloAdressBook($pDB);
     $pACL         = new paloACL($pDB_2);
     $id_user      = $pACL->getIdUser($_SESSION["elastix_user"]);
+    $idContact=getParameter('idContact');
+    $typeContact=getParameter('typeContact');
+
     if($id_user != FALSE)
     {
         $user = $pACL->getUsers($id_user);
@@ -1067,11 +1070,16 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $
         {
             $extension = $user[0][3];
             if($extension != "")
-            {
-                $id = isset($_GET['id'])?$_GET['id']:(isset($_POST['id'])?$_POST['id']:"");
+            {   
+                if (isset($idContact)){
+		    $id=$idContact;	
+		}
+		else{
+		    $id="";
+ 		}
 
                 $phone2call = '';
-                if(isset($_GET['type']) && $_GET['type']=='external')
+		if(isset($typeContact) && $typeContact=='external')
                 {
                     $contactData = $padress_book->contactData($id, $id_user,"external",false,null);
                     $phone2call = $contactData['telefono'];
@@ -1084,35 +1092,39 @@ function call2phone($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $
                     $result = $padress_book->Call2Phone($dsn_agi_manager, $extension, $phone2call, $result['dial'], $result['description']);
                     if(!$result)
                     {
-                        $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                        $smarty->assign("mb_message", $arrLang["The call couldn't be realized"]);
+                        $jsonObject->set_error(_tr("The call couldn't be realized"));
+                        return $jsonObject->createJSON();
                     }
                 }
                 else {
-                    $smarty->assign("mb_title", $arrLang["Validation Error"]);
-                    $smarty->assign("mb_message", $padress_book->errMsg);
+                     $jsonObject->set_error($padress_book->errMsg);
+                     return $jsonObject->createJSON();
                 }
             }
         }
         else{
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
-            $smarty->assign("mb_message", $padress_book->errMsg);
+            $jsonObject->set_error($padress_book->errMsg);
+            return $jsonObject->createJSON();
         }
     }
     else{
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
-        $smarty->assign("mb_message", $padress_book->errMsg);
+        $jsonObject->set_error($padress_book->errMsg);
+        return $jsonObject->createJSON();
     }
 
-    $content = report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $arrLang, $arrConf, $dsn_agi_manager, $dsnAsterisk);
-    return $content;
+    return $jsonObject->createJSON();
 }
+
 
 function transferCALL($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $arrLang, $arrConf, $dsn_agi_manager, $dsnAsterisk)
 {
+    $jsonObject = new PaloSantoJSON();
     $padress_book = new paloAdressBook($pDB);
     $pACL         = new paloACL($pDB_2);
     $id_user      = $pACL->getIdUser($_SESSION["elastix_user"]);
+    $idContact=getParameter('idContact');
+    $typeContact=getParameter('typeContact');
+
     if($id_user != FALSE)
     {
         $user = $pACL->getUsers($id_user);
@@ -1121,10 +1133,15 @@ function transferCALL($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2,
             $extension = $user[0][3];
             if($extension != "")
             {
-                $id = isset($_GET['id'])?$_GET['id']:(isset($_POST['id'])?$_POST['id']:"");
+                if (isset($idContact)){
+                    $id=$idContact;
+                }
+                else{
+                    $id="";
+                }
 
                 $phone2tranfer = '';
-                if(isset($_GET['type']) && $_GET['type']=='external')
+                if(isset($typeContact) && $typeContact=='external')
                 {
                     $contactData   = $padress_book->contactData($id, $id_user,"external",false,null);
                     $phone2tranfer = $contactData['telefono'];
@@ -1137,32 +1154,33 @@ function transferCALL($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2,
                     $result = $padress_book->TranferCall($dsn_agi_manager, $extension, $phone2tranfer, $result['dial'], $result['description']);
                     if(!$result)
                     {
-                        $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                        $smarty->assign("mb_message", $arrLang["The transfer couldn't be realized, maybe you don't have any conversation now."]);
+                        $jsonObject->set_error(_tr("The transfer couldn't be realized, maybe you don't have any conversation now."));
+                        return $jsonObject->createJSON();
                     }
                 }
                 else {
-                    $smarty->assign("mb_title", $arrLang["Validation Error"]);
-                    $smarty->assign("mb_message", $padress_book->errMsg);
+                    $jsonObject->set_error($padress_book->errMsg);
+                    return $jsonObject->createJSON();
                 }
             }
         }
         else{
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
-            $smarty->assign("mb_message", $padress_book->errMsg);
+            $jsonObject->set_error($padress_book->errMsg);
+            return $jsonObject->createJSON();
         }
     }
     else{
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
-        $smarty->assign("mb_message", $padress_book->errMsg);
+        $jsonObject->set_error($padress_book->errMsg);
+        return $jsonObject->createJSON();
     }
 
-    $content = report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $pDB_2, $arrLang, $arrConf, $dsn_agi_manager, $dsnAsterisk);
-    return $content;
+    return $jsonObject->createJSON();
 }
 /*
 ******** Fin
 */
+
+
 
 function getAction()
 {

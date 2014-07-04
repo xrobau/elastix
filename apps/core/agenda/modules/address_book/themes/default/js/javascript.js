@@ -12,3 +12,42 @@ $(document).ready(function(){
     });
 
 });
+
+function callContact(idContact,typeContact){
+    var arrAction = new Array();
+    arrAction["menu"]="address_book";
+    arrAction["action"]="call2phone";
+    arrAction["rawmode"]="yes";
+    arrAction["idContact"]=idContact;
+    arrAction["typeContact"]=typeContact;
+
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error != ''){
+                alert(error);
+            }else{
+                //se rrealiza la llamada.
+            }
+        }
+    );
+}
+
+function transferCall(idContact,typeContact){
+    var arrAction = new Array();
+    arrAction["menu"]="address_book";
+    arrAction["action"]="transfer_call";
+    arrAction["rawmode"]="yes";
+    arrAction["idContact"]=idContact;
+    arrAction["typeContact"]=typeContact;
+
+    request("index.php", arrAction, false,
+        function(arrData,statusResponse,error){
+            if(error != ''){
+                alert(error);
+            }else{
+                //se realiza la transferencia de llamada.
+            }
+        }
+    );
+}
+

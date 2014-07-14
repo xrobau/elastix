@@ -377,6 +377,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jul 14 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: Disable topology hiding for now - does not work correctly 
+  with NOTIFY routing for BLF. Route SUBSCRIBE(Event==message-summary) to 
+  asterisk for correct voicemail operation. Disable MSRP authentication, as 
+  Kamailio authentication functions are unsuitable for it.
+  SVN Rev[6663]
+
 * Mon Jun 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: queues: introduce field queue_member.member_order and modify keys to
   include this field. This hack force MySQL to use member_order as a sort 

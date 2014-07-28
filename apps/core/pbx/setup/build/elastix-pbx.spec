@@ -21,7 +21,7 @@ Prereq: mysql-connector-odbc
 Prereq: asterisk-odbc
 Requires: festival >= 1.95
 Requires: asterisk, asterisk-chan-allogsm, asterisk-chan-extra, asterisk-dahdi, asterisk-festival, asterisk-odbc, asterisk-voicemail
-Requires: kamailio, kamailio-unixodbc, kamailio-mysql, kamailio-utils, kamailio-presence
+Requires: kamailio >= 4.1.4-1, kamailio-unixodbc, kamailio-mysql, kamailio-utils, kamailio-presence
 
 %description
 Elastix Module PBX
@@ -377,6 +377,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jul 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: revert change of BLOB columns through the kamailio database.
+  The root cause of decoding errors was in the db_unixodbc module in kamailio,
+  which was locally patched in kamailio-4.1.4-1.
+  SVN Rev[6664]
+
 * Mon Jul 14 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: Disable topology hiding for now - does not work correctly 
   with NOTIFY routing for BLF. Route SUBSCRIBE(Event==message-summary) to 

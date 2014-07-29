@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 12
+Release: 14
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -94,9 +94,27 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Jul 29 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-14
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - core/specs: Update specfile with latest SVN history. Bump
+  Release in specfile.
+  SVN Rev[6650]
+
+* Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: languages modules were updated.
+  SVN Rev[6619]
+
+* Fri Apr 25 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: apps - Build/spec's: Commented some code that actually its not used.
+  SVN Rev[6608]
+
 * Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-13
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6600]
 
 * Wed Mar 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar - restore old behavior of allowing empty event descriptions.

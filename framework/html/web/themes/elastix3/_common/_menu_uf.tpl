@@ -13,7 +13,7 @@
         <div id="elx-button-setup" class="btn-group">
             <img class="dropdown-toggle" data-toggle="dropdown" src="web/_common/images/elastix3_icon-setup.png" alt="Setup">
             <ul class="dropdown-menu" role="menu">
-                <li><a href="javascript:showProfile()">Profile</a></li>
+                <li><a href="javascript:showProfile()">{$Profile_l}</a></li>
                 <li class="divider"></li>
                 {foreach from=$arrMainMenu key=idMenu item=menu}
                     {if $menu.id eq "mysettings"}

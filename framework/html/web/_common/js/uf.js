@@ -158,7 +158,8 @@ $(document).ready(function(){
                 //hacer que el texto del text area desaparezca y sea enviado la divdel chat al que corresponde
                 var elx_txt_chat=$(this).val();
                 var elx_tab_chat=$(this).parents('.elx_tab_chat:first');
-                addMessageElxChatTab(elx_tab_chat,'out',elx_txt_chat);
+                
+                //addMessageElxChatTab(elx_tab_chat,'out',elx_txt_chat);
                 $(this).val('');
                 sendMessage(elx_txt_chat,elx_tab_chat.attr('data-alias'));
                 // Ignore Enter when empty input.
@@ -328,6 +329,7 @@ function scrollContentModule(){
     }  
 }
 function elxTitleAlert(message){
+       
      $.titleAlert(message, {
         requireBlur:true,
         stopOnFocus:true,
@@ -433,7 +435,7 @@ function getElastixContacts(){
                     typeAcc=arrType[i];
                     if( typeof arrData[typeAcc] !== 'undefined'){
                         for( var x in arrData[typeAcc]){
-                            var div=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['alias'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code'], visibility);
+                            var div=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['username'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code'], visibility);
                             $("#elx_ul_list_contacts").append(div);
                         }
                     }
@@ -512,7 +514,7 @@ function getColorPresence(presence_code){
 /******************************************************************
  * Funciones usadas para el crear el dispositivo sip del usuario
 *******************************************************************/
-function createUserAgent(UAParams){
+/*function createUserAgent(UAParams){
     var configuration = new Array();
     var UAManParam = new Array('uri','password','ws_servers');
     var UAOpParam = new Array('display_name', 'authorization_user', 'register', 'register_expires', 'no_answer_timeout', 'trace_sip', 'stun_servers', 'turn_servers', 'use_preloaded_route', 'connection_recovery_min_interval', 'connection_recovery_max_interval', 'hack_via_tcp', 'hack_ip_in_contact');
@@ -574,7 +576,77 @@ function createUserAgent(UAParams){
         }
     });
     elx_phone.start();
+}*/
+var uri="";
+var ua;
+function createUserAgent(UAParams){
+//console.log(UAParams);
+
+UAParam = UAParams;
+var config = {
+     uri: UAParams.elxuser_username,
+     wsServers: UAParams.ws_servers,
+     displayName: UAParams.display_name,
+     password: UAParams.password,
+     hackIpInContact: UAParams.hack_ip_in_contact,
+     autostart: true,
+     register: true,
+     traceSip: true,
+    
+    };
+
+
+    uri = UAParams.elxuser_username;
+    ua = new SIP.UA(config);
+     
+    ua.on('connected', function () {
+        console.log('Connected');
+    });
+
+    ua.on('registered', function () {
+        console.log('(Registered)');
+    });
+
+    ua.on('unregistered', function () {
+        console.log('Unregistered');
+    });
+
+    ua.on('message', receiveMessage);
+
 }
+
+function getDisplayName(user)
+{
+ $(".margin_padding_0").each(function(i) {
+      if (user == $(this).attr("data-alias")) {
+           dname = $(this).attr("data-name");
+      }
+  })
+ return dname;
+}
+
+function receiveMessage (e) {
+
+  var remoteUri = e.remoteIdentity.uri.toString();
+  remoteUser = remoteUri.split('sip:');
+ 
+  uri2 = remoteUser[1];
+  var elx_txt_chat = e.body;
+            
+  //verificamos si existe una conversacion abierta con el dispositivo
+  //si no existe la creamos
+  var elx_tab_chat=startChatUser(uri2,uri2,uri2,'receive');
+        if(!elx_tab_chat.hasClass('elx_chat_min')){
+                if(!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
+                    //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
+                    elx_tab_chat.children('.elx_header_tab_chat').addClass('elx_blink_chat');
+                }
+        }
+ 
+  addMessageElxChatTab(elx_tab_chat,'in',elx_txt_chat);
+
+}
+
 function undefinedUAParam(param){
     if(typeof param !== 'undefined'){
         if(param != '')
@@ -582,29 +654,29 @@ function undefinedUAParam(param){
     }
     return true;
 }
+
 function sendMessage(msg_txt,alias)
-{
-    var eventHandlers = {
-        'succeeded'   : function(e){ /* Your code here */ },
-        'failed'      : function(e) { 
-                var response = e.data.response;
-                var elx_tab_chat=getTabElxChat(alias);
+{    
+    var elx_tab_chat=getTabElxChat(alias);
+    
+    addMessageElxChatTab(elx_tab_chat,'out',msg_txt);
+
+    ua.message(alias, msg_txt).on('failed', function (response, cause) {
+                elx_tab_chat.find(".elx_content_chat").find("div").last().css("color","red");
                 if(elx_tab_chat!=false){
                     if (response)
-                        var error_msg='<span style="color:red">'+response.status_code.toString()+" "+response.reason_phrase+'</span>';
+                        var error_msg='<span style="color:red"> '+response.status_code.toString()+" "+response.reason_phrase+'</span>';
                     else
-                        var error_msg='<span style="color:red">'+e.data.cause.toString()+'</span>';
+                        var error_msg='<span style="color:red"> '+cause+'</span>';
                         addMessageElxChatTab(elx_tab_chat,'in',error_msg);
                 }else{
                     if (response)
                         alert(response.status_code.toString()+" "+response.reason_phrase);
                     else
-                        alert(e.data.cause.toString());
+                        alert(cause);
                 }
-            },
-    };
-    var options = { 'eventHandlers': eventHandlers };
-    elx_phone.sendMessage("sip:"+alias, msg_txt, options);
+    });
+ 
 }
 function inconmigMessage(){
     
@@ -645,9 +717,13 @@ function startChatUser(uri,name,alias,action){
     //name
     //uri chat
     //verificamos si existe la ventana actual, si no existe se la crea
-    var elx_tab_chat=getTabElxChat(alias);
+    console.log(name);
+    var elx_tab_chat=getTabElxChat(uri);
+
     var existTabChat=false;
     if(!elx_tab_chat){
+        if (action=='receive') var name = getDisplayName(name);
+        
         var elx_im_cabecera="<div class='elx_header_tab_chat'>";
         elx_im_cabecera +="<div class='elx_tab_chat_name'>";
         elx_im_cabecera +="<span class='elx_tab_chat_name_span'>"+name+"</span>";
@@ -685,6 +761,7 @@ function startChatUser(uri,name,alias,action){
     }else{
         //la ventana existe y esta activa, no tenemos nada que hacer
         var can_add_chat=true;
+        
         if(!elx_tab_chat.hasClass('elx_chat_active')){
             //la ventana solicitada esta minimizada o fue cerrada nateriormente
             //procedemos a abrirla pero antes comprabamos si ahi sufieciente espacio para ello
@@ -701,8 +778,10 @@ function startChatUser(uri,name,alias,action){
                     removeElxUserNotifyChatMini(elx_tab_chat);
                 }
             }
+
         }
     }
+
     //se recibio un nuevo mensaje y la pestaña del chat del que envia el mensaje no puede
     //ser abierta por falta de espacio
     //debemos mostrar una notificacion del nuevo mensaje
@@ -717,6 +796,7 @@ function startChatUser(uri,name,alias,action){
             }
         });
     }
+
     return elx_tab_chat;
 }
 
@@ -787,8 +867,8 @@ function errorRegisterChatBar(error){
     $('#startingSession').css({'display':'block',margin:'5px'});
 }
 function addMessageElxChatTab(chatTab,direction,message){
-     var elx_content_chat = chatTab.children('.elx_body_tab_chat:first').children('.elx_content_chat:first');
-    
+
+    var elx_content_chat = chatTab.children('.elx_body_tab_chat:first').children('.elx_content_chat:first');
     if(direction=='out'){
         elx_who="<b>me: </b>";
     }else{
@@ -806,6 +886,8 @@ function addMessageElxChatTab(chatTab,direction,message){
         }else{
             elx_who="<b>receive: </b>";
         }
+
+        elxTitleAlert("New Message "+send_name);
     }
     elx_content_chat.append("<div>"+elx_who+message+"</div>");
     elx_content_chat.scrollTop(1e4);
@@ -1191,7 +1273,7 @@ function checkChatContactsStatus()
                     typeAcc=arrType[i];
                     if( typeof arrData[typeAcc] !== 'undefined'){
                         for( var x in arrData[typeAcc]){
-                            div +=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['alias'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code']);
+                            div +=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['username'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code']);
                             $("#elx_ul_list_contacts").html(div);
                         }
                     } 
@@ -1234,7 +1316,7 @@ function elx_newEmail(alias){
                 $("#elx-compose-email").remove();
                 $("#elx_popup_content").html(arrData['modulo']);
                 $("#elx-compose-email").addClass("modal-content");
-                $("#elx-compose-email").prepend("<div class='modal-header'><button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button><h3 id='myModalLabel'>Send Mail</h3></div>");
+                $("#elx-compose-email").prepend("<div class='modal-header'><button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button><h3 id='myModalLabel'>Send Mail/Enviar Mail</h3></div>");
                 $("#elx-compose-email").append("<div class='modal-footer'><button type='button' class='btn btn-primary' id='elx_attachButton'>Attach<input type='file' name='attachFileButton' id='attachFileButton'></button><button type='button' class='btn btn-primary' onclick='composeEmail(\"popup\")'>Send</button></div>");    
                 emailAttachFile();
                 var options = {

@@ -30,7 +30,7 @@
                 <div class="row">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <p>
-                            <button type="button" class="btn btn-default btn-xs" id="deleteImageProfile">Delete Image</button>
+                            <button type="button" class="btn btn-default btn-xs" id="deleteImageProfile">{$DeleteImage}</button>
                         </p>
                     </div>
                 </div>

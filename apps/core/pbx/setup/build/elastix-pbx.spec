@@ -377,6 +377,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jul 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: attempt to store Jitsi status icon using the URL supplied
+  by Blink.
+  SVN Rev[6667]
+
 * Mon Jul 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: revert change of BLOB columns through the kamailio database.
   The root cause of decoding errors was in the db_unixodbc module in kamailio,

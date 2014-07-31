@@ -377,6 +377,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jul 31 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: fix route[NATDETECT] to run fix_nated_contact() for both
+  REGISTER and SUBSCRIBE when source is a websocket.
+  SVN Rev[6669]
+
 * Wed Jul 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: attempt to store Jitsi status icon using the URL supplied
   by Blink.

@@ -377,6 +377,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Aug  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: do not mangle To header when routing a BLF SUBSCRIBE to
+  asterisk, since the mangled header is then used as an XML attribute in 
+  subsequent NOTIFY packets, which breaks BLF in some phones.
+  SVN Rev[6670]
+
 * Thu Jul 31 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: fix route[NATDETECT] to run fix_nated_contact() for both
   REGISTER and SUBSCRIBE when source is a websocket.

@@ -24,3 +24,7 @@ INSERT INTO `model_properties` (`property_key`, `property_value`, `id_model`) VA
 ("max_iax2_accounts", "0", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Hanlong" AND model.name = "UC862")),
 ("http_username", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Hanlong" AND model.name = "UC862")),
 ("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Hanlong" AND model.name = "UC862"));
+
+/* Nuevos MAC para Fanvil */
+INSERT INTO `mac_prefix` (id_manufacturer, mac_prefix, description) VALUES
+((SELECT `id` FROM manufacturer WHERE `name` = "Fanvil"), "00:38:3E", "Fanvil");

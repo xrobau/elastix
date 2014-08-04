@@ -155,6 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Aug  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: add new MAC prefix for Fanvil.
+  SVN Rev[6672]
+
 * Mon May 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: introduce new manufacturer Hanlong.
   SVN Rev[6631]

@@ -377,6 +377,15 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Aug  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: some phones require the 200 OK from a BLF subscription to
+  arrive before the NOTIFY for the first update of said subscription. Since 
+  Kamailio is multiprocess, each packet may be handled by two different 
+  processes, and get sent out of order. Fix this by remembering the Call-ID
+  header value for the SUBSCRIBE and dropping NOTIFY packets until the reply to
+  the SUBSCRIBE has been transmitted.
+  SVN Rev[6671]
+
 * Fri Aug  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: do not mangle To header when routing a BLF SUBSCRIBE to
   asterisk, since the mangled header is then used as an XML attribute in 

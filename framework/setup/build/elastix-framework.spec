@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Aug 07 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Backport sip.js commit 9a3ad2d5aa8bfa7def706638a992f27219ffbfe1 and undo hacky
+  patch for parsing of "event.winfo".
+  SVN Rev[6674]
 - Update sip.js to version 0.6.2
   SVN Rev[6673]
 

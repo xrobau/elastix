@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="{$WEBCOMMON}css/bootstrap.min.css" />
         <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css" />
         {$HEADER_LIBS_JQUERY}
-        <script type='text/javascript' src="{$WEBCOMMON}js/sip-0.5.0.js"></script>
+        <script type='text/javascript' src="{$WEBCOMMON}js/sip-0.6.2.js"></script>
 	<script type='text/javascript' src="{$WEBCOMMON}js/bootstrap.min.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/bootstrap-paginator.js"></script>
         <script type='text/javascript' src="{$WEBCOMMON}js/jquery-title-alert.js"></script>

@@ -402,6 +402,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Aug 07 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Update sip.js to version 0.6.2
+  SVN Rev[6673]
+
 * Tue Jun 17 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Aug 13 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Backport sip.js commit 7f82bb870d762d9eb0d6ed3509409ec2055fb8f5 in order to
+  enable accepted event for subscription.
+  SVN Rev[6675]
+
 * Thu Aug 07 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Backport sip.js commit 9a3ad2d5aa8bfa7def706638a992f27219ffbfe1 and undo hacky
   patch for parsing of "event.winfo".

@@ -434,7 +434,7 @@ img {
     margin: 0px;
     padding: 0px;
 }
-#elx_li_contact{
+.elx_li_contact{
     list-style:none;
     font-size:12px;
 }

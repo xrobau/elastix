@@ -110,7 +110,7 @@ $(document).ready(function(){
         });
     });
     
-    $(this).on('click','#elx_li_contact',function(){
+    $(this).on('click','.elx_li_contact',function(){
             var uri=$(this).attr('data-uri');
             var alias=$(this).attr('data-alias');
             var name=$(this).attr('data-name');
@@ -313,10 +313,7 @@ $(document).ready(function(){
     });
     
     // invocamos la funcion recursiva para chequear el estado de los contactos 
-    checkChatContactsStatus();
-    
-
-    
+    //checkChatContactsStatus();
 });
 //se calcula el alto del contenido del modulo y se resta del alto del navegador cada
 //que se haga un resize, para que aparezca el scroll cuando sea necesario
@@ -464,16 +461,27 @@ function searchElastixContacts(){
     });
 }
 
-function createDivContact(idUser,display_name,uri,alias,presence,presence_code, visibility){
-    var color=getColorPresence(presence_code);
-    var divContact ='<li id="elx_li_contact" class="margin_padding_0" data-uri="'+uri+'" data-alias="'+alias+'" data-name="'+display_name+'" data-idUser="'+idUser+'"><div class="elx_contact '+visibility+'">';
-    divContact +="<div id='elx_im_status_user' class='elx_im_status_user'><div class='box_status_contact' style='background-color:"+color+"'></div></div>";
-    divContact +="<div class='elx_contact_div'>"
-    divContact +="<div class='elx_im_name_user'>"+display_name+"</div>";
-    divContact +="<div class='extension_status'>"+presence+"</div>";
-    divContact +="</div>";
-    divContact +="</div></li>";
-    return divContact; 
+function createDivContact(idUser, display_name, uri, alias, presence, presence_code, visibility)
+{
+	var divTemplate =
+		'<li class="margin_padding_0 elx_li_contact"><div class="elx_contact">'+
+			'<div id="elx_im_status_user" class="elx_im_status_user"><div class="box_status_contact" /></div>'+
+			'<div class="elx_contact_div">'+
+				'<div class="elx_im_name_user" />'+
+				'<div class="extension_status" />'+
+			'</div>'+
+		'</div></li>';
+	var liContact = $(divTemplate);
+	liContact
+		.attr('data-uri', uri)
+		.attr('data-alias', alias)
+		.attr('data-name', display_name)
+		.attr('data-idUser', idUser);
+	liContact.find('div.elx_contact').addClass(visibility);
+	liContact.find('.box_status_contact').css('background-color', 'grey');
+	liContact.find('.elx_im_name_user').text(display_name);
+	liContact.find('.extension_status').text(presence);
+	return liContact;
 }
 /*
 function createDivPersonal(){
@@ -579,6 +587,7 @@ function getColorPresence(presence_code){
 }*/
 var uri="";
 var ua;
+var sp;
 function createUserAgent(UAParams){
 //console.log(UAParams);
 
@@ -605,6 +614,11 @@ var config = {
 
     ua.on('registered', function () {
         console.log('(Registered)');
+        if (sp == null) {
+	        sp = new SIPPresence(ua);
+	        sp.publishPresence();
+	        $(".elx_li_contact").each(function(i, v) { sp.subscribeToRoster($(v).data('alias')) });
+        }
     });
 
     ua.on('unregistered', function () {
@@ -1389,3 +1403,362 @@ $(window).resize(function(){
         $('.ui-autocomplete').width(ancho);
 });
  
+/**
+ * La clase Presentity es una clase que modela el documento XML que contiene la
+ * información de presencia RPID. La presencia rica puede estar activa (propiedad
+ * open en TRUE) o inactiva. Se puede agregar una nota para describir con más
+ * detalle el tipo de actividad en que se encuentra el usuario. Además se soporta
+ * una lista de actividades (propiedad activities) cuyo contenido determina si
+ * el usuario está disponible, ocupado, ausente, u otra cosa. 
+ * 
+ * La clase soporta generar el XML a partir de las propiedades, y además parsear
+ * un documento XML y separar sus propiedades. La implementación se ha probado
+ * con el documento XML publicado por Jitsi.
+ */
+function Presentity()
+{
+	// urn:ietf:params:xml:ns:pidf      http://tools.ietf.org/html/rfc3863
+	// urn:ietf:params:xml:ns:pidf:rpid http://tools.ietf.org/html/rfc4480
+	this.user = "user";
+	this.domain = "example.com";
+	this.activities = [];
+	this.status_icon = null;
+	this.open = true;
+	this.note = "Online";
+	
+	/** Generación del documento XML a partir de las propiedades */
+	this.toXML = function() {
+		var xml_presence = $.parseXML(
+			'<?xml version="1.0" encoding="UTF-8" standalone="no"?>' +
+			'<presence xmlns="urn:ietf:params:xml:ns:pidf" xmlns:dm="urn:ietf:params:xml:ns:pidf:data-model" xmlns:rpid="urn:ietf:params:xml:ns:pidf:rpid"/>');
+		var sipuri = 'sip:' + this.user + '@' + this.domain;
+
+		/* A partir de aquí se usan funciones nativas de XMLDocument porque la
+		 * abstracción de jQuery no permite agregar elementos con namespace
+		 */
+		var xmlpr = xml_presence.getElementsByTagName('presence')[0];
+		xmlpr.setAttribute('entity', sipuri);
+				
+		var xmlpers = xml_presence.createElementNS("urn:ietf:params:xml:ns:pidf:data-model", "person");
+		xmlpers.setAttribute('id', 'p1401');
+		var xmlactivities = xml_presence.createElementNS("urn:ietf:params:xml:ns:pidf:rpid", "activities");
+
+		// http://tools.ietf.org/html/rfc4480
+		var knownactivities = ['appointment', 'away', 'breakfast', 'busy', 'dinner',
+			'holiday', 'in-transit', 'looking-for-work', 'lunch', 'meal', 'meeting',
+			'on-the-phone', 'performance', 'permanent-absence', 'playing', 'presentation',
+			'shopping', 'sleeping', 'spectator', 'steering', 'travel', 'tv', 'unknown',
+			'vacation', 'working', 'worship'];
+		for (var i = 0; i < this.activities.length; i++) {
+			var xmlactv
+			if (-1 != knownactivities.indexOf(this.activities[i])) {
+				xmlactv = xml_presence.createElementNS("urn:ietf:params:xml:ns:pidf:rpid", this.activities[i]);
+			} else {
+				xmlactv = xml_presence.createElementNS("urn:ietf:params:xml:ns:pidf:rpid", 'other');
+				xmlactv.appendChild(xml_presence.createTextNode(this.activities[i]));
+			}
+			xmlactivities.appendChild(xmlactv);
+		}
+		xmlpers.appendChild(xmlactivities);
+		if (this.status_icon != null) {
+			var xmlicon = xml_presence.createElementNS("urn:ietf:params:xml:ns:pidf:rpid", "status-icon");
+			xmlicon.appendChild(xml_presence.createTextNode(this.status_icon));
+			xmlpers.appendChild(xmlicon);
+		}
+		xmlpr.appendChild(xmlpers);
+		
+
+		var xmltuple = xml_presence.createElement('tuple');
+		xmltuple.setAttribute('id', 't1072');
+
+		var xmlstatus = xml_presence.createElement('status');
+		var xmlbasic = xml_presence.createElement('basic');
+		xmlbasic.appendChild(xml_presence.createTextNode(this.open ? 'open' : 'closed'));
+		xmlstatus.appendChild(xmlbasic);
+		xmltuple.appendChild(xmlstatus);
+		var xmlcontact = xml_presence.createElement('contact');
+		xmlcontact.appendChild(xml_presence.createTextNode(sipuri));
+		xmltuple.appendChild(xmlcontact);
+		var xmlnote = xml_presence.createElement('note');
+		xmlnote.appendChild(xml_presence.createTextNode(this.note));
+		xmltuple.appendChild(xmlnote);
+		xmlpr.appendChild(xmltuple);
+		
+		return xml_presence;
+	}
+	
+	/** Parseo de un XML y extracción de las propiedades */
+	this.fromXML = function(xml_presence) {
+		var xmlpr = xml_presence.getElementsByTagName('presence')[0];
+		
+		var sipuri = xmlpr.getAttribute('entity');
+		var m = /^(sip:)?(\S+)@(\S+)$/.exec(sipuri);
+		this.user = m[2];
+		this.domain = m[3];
+		
+		this.activities = [];
+		var xmlactivities = xml_presence.getElementsByTagNameNS("urn:ietf:params:xml:ns:pidf:rpid", "activities");
+		if (xmlactivities.length > 0) for (var i = 0; i < xmlactivities[0].childNodes.length; i++) {
+			var xmlactv = xmlactivities[0].childNodes[i];
+			if (xmlactv.nodeType == xml_presence.ELEMENT_NODE) {
+				var m = /^(\S+:)?(\S+)/.exec(xmlactv.nodeName);
+				var nodeName = m[2];
+			
+				if (nodeName == 'other') {
+					// Asume que el texto es el único contenido
+					if (xmlactv.childNodes.length > 0)
+						this.activities.push(xmlactv.childNodes[0].nodeValue);
+				} else {
+					this.activities.push(nodeName);
+				}
+			}
+		}
+		
+		this.status_icon = null;
+		var xmlicons = xml_presence.getElementsByTagNameNS("urn:ietf:params:xml:ns:pidf:rpid", "status-icon");
+		if (xmlicons.length > 0) {
+			// Asume que el texto es el único contenido
+			if (xmlicons[0].childNodes.length > 0)
+				this.status_icon = xmlicons[0].childNodes[0].nodeValue;
+		}
+		
+		var xmltuple = xml_presence.getElementsByTagName('tuple');
+		if (xmltuple.length > 0) {
+		
+			this.open = false;
+			var xmlstatus = xmltuple[0].getElementsByTagName('status');
+			if (xmlstatus.length > 0) {
+				var xmlbasic = xmlstatus[0].getElementsByTagName('basic');
+				if (xmlbasic.length > 0) {
+					this.open = ('open' == xmlbasic[0].childNodes[0].nodeValue);
+				}
+			}
+			this.note = "Offline";
+			var xmlnote = xmltuple[0].getElementsByTagName('note');
+			if (xmlnote.length > 0) {
+				this.note = xmlnote[0].childNodes[0].nodeValue;
+			}
+		}
+	}
+	
+	this.toString = function() {
+		var xml = (new XMLSerializer()).serializeToString(this.toXML());
+		xml = xml.replace(/ xmlns=""/g, '');
+		return xml;
+	}
+	
+	this.fromString = function(s) {
+		return this.fromXML($.parseXML(s));
+	}
+}
+
+function SIPPresence(ua)
+{
+	this.ua = ua;
+	this.presentity = new Presentity();
+	this.presentity.user = ua.configuration.authorizationUser;
+	this.presentity.domain = ua.configuration.hostportParams;
+	this.presenceETag = null;
+	this.presenceTimer = null;
+	this.publishRequest = null;
+	this.roster = {}; // Subscripciones a lista de contactos
+	this.subsWatch = null;	// Subscripción a presence.winfo
+	
+	this.getLocalContact = function() {
+		return this.ua.configuration.authorizationUser + '@' + this.ua.configuration.hostportParams;
+	}
+	
+	/**
+	 * Método para iniciar la publicación de la presencia del usuario local.
+	 * Para mitigar la situación de que no es posible cerrar la presencia de 
+	 * forma síncrona, se establece la expiración de la presencia a 90 segundos,
+	 * y se actualiza la presencia cada 60 segundos con un timer.
+	 */
+	this.publishPresence = function () {
+	
+		if (this.presenceETag == null) {
+			// Verificar si se tiene un PUBLISH previo en el servidor
+			$.get('index.php', {
+				menu: '_elastixutils',
+				action: 'getPublishETag'			
+			}, function(data) {
+				if (data['message'] != "") {
+					//console.log('SE TIENE PUBLISH PREVIO!');
+					this.presenceETag = data['message'];
+				}
+				this._publishPresence();
+			}.bind(this));
+		} else {
+			this._publishPresence();
+		}
+	}
+	this._publishPresence = function() {
+		if (this.publishRequest == null) {
+			var extrahdr = [
+				'Event: presence',
+				'Content-Type: application/pidf+xml',
+				'Contact: ' + ua.contact.toString()
+			];
+			this.publishRequest = this.ua.request('PUBLISH', this.getLocalContact(), {
+				body: this.presentity.toString(),
+				extraHeaders: extrahdr
+			});
+			this.publishRequest.request.setHeader('Expires', '90');
+			if (this.presenceETag != null) {
+				this.publishRequest.request.setHeader('SIP-If-Match', this.presenceETag);
+			}
+			this.publishRequest.on('accepted', function (response, cause) {
+				if (response.getHeader('Expires') != "0") {
+					this.presenceETag = response.getHeader('Sip-Etag');
+					// mandar this.presenceETag al servidor para recuperar 
+					// SIP-If-Match luego de recargar la página
+					$.post('index.php', {
+						menu: '_elastixutils',
+						action: 'setPublishETag',
+						PublishETag: this.presenceETag
+					}, function(data) {});
+					
+					this.publishRequest.request.setHeader('SIP-If-Match', this.presenceETag);
+				} else {
+					this.publishRequest = null;
+					this.presenceETag = null;
+					$.post('index.php', {
+						menu: '_elastixutils',
+						action: 'setPublishETag',
+						PublishETag: ''
+					}, function(data) {});
+				}
+			}.bind(this));
+		} else {
+			this.publishRequest.send();
+		}
+
+		if (null == this.presenceTimer)
+			this.presenceTimer = window.setInterval(this.publishPresence.bind(this), 60 * 1000);
+	}
+	
+	/**
+	 * Método para retirar la presencia de la cuenta local, efectivamente indicado
+	 * que se retira la sesión de chat.
+	 */
+	this.withdrawPresence = function () {
+		
+		if (null != this.presenceTimer) {
+			window.clearInterval(this.presenceTimer);
+			this.presenceTimer = null;
+		}
+
+		if (null == this.publishRequest) return;
+		
+		this.publishRequest.request.setHeader('Expires', '0');
+		this.publishRequest.send();
+
+		this._unsubscribeWithServerCheck(this.getLocalContact(), this.subsWatch);
+		this.subsWatch = null;
+		for (var contact in this.roster) this.unsubscribeFromRoster(contact);
+		
+	}
+	
+	/**
+	 * Método privado que encapsula una subscripción a un contacto para que se
+	 * verifique si hay un Call-ID previo para una subscripción previa a ese 
+	 * mismo contacto. Si la hay, la subscripción resultante renueva la 
+	 * subscripción anterior en lugar de crear una nueva subscripción.
+	 */
+	this._subscribeWithServerCheck = function(contact, event, checkCallback, notifyCallback) {
+		var subscription = this.ua.subscribe(contact, event, {expires: 120});
+		subscription.on('notify', notifyCallback);
+		checkCallback(contact, subscription);
+	}
+	
+	/**
+	 * Método privado para deshacer una subscripción y anular el Call-ID de la
+	 * subscripción que se destruye.
+	 */
+	this._unsubscribeWithServerCheck = function(contact, subscription) {
+		if (subscription != null) subscription.unsubscribe();
+	}
+	
+	/* Ejecutar la subscripción al evento presence.winfo . Este evento informa de
+	 * quién desea observar al usuario local, y la política seguida aquí es la
+	 * de autorizar de inmediato la escucha. */
+	/*
+	<?xml version="1.0"?>
+	<watcherinfo xmlns="urn:ietf:params:xml:ns:watcherinfo" version="1" state="full">
+	  <watcher-list resource="sip:avillacis@pbx.villacis.com" package="presence"/>
+	</watcherinfo>
+	
+	<?xml version="1.0"?>
+	<watcherinfo xmlns="urn:ietf:params:xml:ns:watcherinfo" version="2" state="partial">
+	  <watcher-list resource="sip:avillacis@pbx.villacis.com" package="presence">
+	    <watcher id="87590e851228150e5980f7ca45a1b9ce@0:0:0:0:0:0:0:0" event="subscribe" status="pending">sip:gmacas@pbx.villacis.com</watcher>
+	  </watcher-list>
+	</watcherinfo>
+
+	*/
+	this._subscribeWithServerCheck(this.getLocalContact(), 'presence.winfo', function(contact, subscription) {
+		this.subsWatch = subscription;
+	}.bind(this), function(notification) {
+		var xmlwatch = $.parseXML(notification.request.body);
+
+		$(xmlwatch).find('watcherinfo > watcher-list[package=presence] watcher[event=subscribe][status=pending]')
+			.each(function(idx, value) {			
+			//console.log("Aprobando ingreso a roster de contacto: " + $(value).text());
+			this.subscribeToRoster($(value).text().replace(/^sip:/, ''));
+		}.bind(this));		
+	}.bind(this))
+	
+	/**
+	 * Método para subscribirse a la presencia de un contacto, y recibir estado
+	 * de presencia. Hasta ahora funciona con Jitsi. 
+	 */
+	this.subscribeToRoster = function(contact) {
+		//console.log('Analizando ingreso de contacto ' + contact);
+		if (this.roster[contact] != null) return;
+		
+		//console.log('Suscribiendo a contacto ' + contact);
+		
+		this._subscribeWithServerCheck(contact, 'presence', function(contact, subscription) {
+			this.roster[contact] = subscription;
+		}.bind(this), function (notification) {
+			//console.log("RECIBIDO presence");
+			//console.log(notification);
+
+			var pres = new Presentity();
+			pres.open = false;
+			pres.note = 'Offline';
+			pres.user = notification.request.from.uri.user;
+			pres.domain = notification.request.from.uri.host;
+			if ('' != notification.request.body) {
+				pres.fromString(notification.request.body);
+			}
+			
+			var newColor = 'grey';
+			if (pres.open) {
+				newColor = '#8cbe29';
+				if (pres.activities.length > 0) newColor = 'orange';
+				if (-1 != pres.activities.indexOf('busy')) newColor = 'red';
+				if (-1 != pres.activities.indexOf('on-the-phone')) newColor = 'red';
+			}
+			
+			this._updateContactStatus(pres.user + "@" + pres.domain, newColor, pres.note);
+		}.bind(this))
+	}
+	
+	/**
+	 * Método para quitar la subscripción del contacto.
+	 */
+	this.unsubscribeFromRoster = function(contact) {
+		if (this.roster[contact] == null) return;
+		this._unsubscribeWithServerCheck(contact, this.roster[contact]);
+		delete this.roster[contact];
+
+		this._updateContactStatus(contact, 'grey', 'Offline');
+	}
+	
+	this._updateContactStatus = function(contact, newColor, newNote) {
+		var liContact = $(".elx_li_contact[data-alias='" + contact + "']");
+		liContact.find('.box_status_contact').css('background-color', newColor);
+		liContact.find('.extension_status').text(newNote);
+	}
+}

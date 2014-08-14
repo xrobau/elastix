@@ -403,20 +403,25 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Aug 14 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Backport sip.js commit 9ed72b5d739de6e3305ef523b00769da72ed4eeb in order to
-  fix accumulation of subscriptions in SIP.UA.subscriptions object.
+- CHANGED: Initial implementation of SIP presence for chat using presentity, 
+  should replace the previous implementation that reported presence from the
+  registered state for the phone.
+  SVN Rev[6678]
+
+- CHANGED: Backport sip.js commit 9ed72b5d739de6e3305ef523b00769da72ed4eeb in 
+  order to fix accumulation of subscriptions in SIP.UA.subscriptions object.
   SVN Rev[6676]
 
 * Wed Aug 13 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Backport sip.js commit 7f82bb870d762d9eb0d6ed3509409ec2055fb8f5 in order to
-  enable accepted event for subscription.
+- CHANGED: Backport sip.js commit 7f82bb870d762d9eb0d6ed3509409ec2055fb8f5 in 
+  order to enable accepted event for subscription.
   SVN Rev[6675]
 
 * Thu Aug 07 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Backport sip.js commit 9a3ad2d5aa8bfa7def706638a992f27219ffbfe1 and undo hacky
+- CHANGED: Backport sip.js commit 9a3ad2d5aa8bfa7def706638a992f27219ffbfe1 and undo hacky
   patch for parsing of "event.winfo".
   SVN Rev[6674]
-- Update sip.js to version 0.6.2
+- CHANGED: Update sip.js to version 0.6.2
   SVN Rev[6673]
 
 * Tue Jun 17 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8

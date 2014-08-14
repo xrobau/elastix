@@ -404,6 +404,25 @@ function handleJSON_checkChatContactsStatus($smarty, $module_name){
 return $data;
 }
 
+function handleJSON_setPublishETag($smarty, $module_name)
+{
+	Header('Content-Type: application/json');
+	$jsonObject = new PaloSantoJSON();
+	if (isset($_POST['PublishETag'])) $_SESSION['PublishETag'] = $_POST['PublishETag'];
+	$jsonObject->set_message('OK');
+	return $jsonObject->createJSON();
+}
+
+function handleJSON_getPublishETag($smarty, $module_name)
+{
+	Header('Content-Type: application/json');
+	$tag = NULL;
+	if (isset($_SESSION['PublishETag'])) $tag = $_SESSION['PublishETag'];
+	$jsonObject = new PaloSantoJSON();
+	$jsonObject->set_message($tag);
+	return $jsonObject->createJSON();
+}
+
 function createProfileForm($langElastix)
 {   
     $arrFields = array(

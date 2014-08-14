@@ -377,6 +377,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Aug 14 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: presence_xml.force_active must be 1 in order to be able to
+  work with SIP client that announce presence but do not use XCAP to authorize
+  notifying their presence.
+  SVN Rev[6677]
+
 * Mon Aug  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: some phones require the 200 OK from a BLF subscription to
   arrive before the NOTIFY for the first update of said subscription. Since 

@@ -6883,9 +6883,7 @@ SIP.Subscription = function (ua, target, event, options) {
     this.event = event;
   }
 
-  if (!options.expires || options.expires < 3600) {
-    this.expires = 3600; //1 hour (this is minimum by RFC 6665)
-  } else if(typeof options.expires !== 'number'){
+  if(typeof options.expires !== 'number'){
     ua.logger.warn('expires must be a number. Using default of 3600.');
     this.expires = 3600;
   } else {
@@ -7019,6 +7017,7 @@ SIP.Subscription.prototype = {
   createConfirmedDialog: function(message, type) {
     var dialog;
 
+    this.terminateDialog();
     dialog = new SIP.Dialog(this, message, type);
 
     if(!dialog.error) {
@@ -7036,6 +7035,7 @@ SIP.Subscription.prototype = {
   */
   terminateDialog: function() {
     if(this.dialog) {
+      delete this.ua.subscriptions[this.id];
       this.dialog.terminate();
       delete this.dialog;
     }
@@ -7050,7 +7050,7 @@ SIP.Subscription.prototype = {
     function setExpiresTimeout() {
       if (sub_state.expires) {
         sub_state.expires = Math.min(sub.expires,
-                                     Math.max(sub_state.expires, 3600));
+                                     Math.max(sub_state.expires, 0));
         sub.timers.sub_duration = SIP.Timers.setTimeout(sub.subscribe.bind(sub),
                                                     sub_state.expires * 1000);
       }

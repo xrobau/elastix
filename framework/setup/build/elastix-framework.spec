@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Aug 14 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- Backport sip.js commit 9ed72b5d739de6e3305ef523b00769da72ed4eeb in order to
+  fix accumulation of subscriptions in SIP.UA.subscriptions object.
+  SVN Rev[6676]
+
 * Wed Aug 13 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Backport sip.js commit 7f82bb870d762d9eb0d6ed3509409ec2055fb8f5 in order to
   enable accepted event for subscription.

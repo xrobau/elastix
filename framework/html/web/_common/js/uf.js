@@ -170,7 +170,6 @@ $(document).ready(function(){
                 var elx_txt_chat=$(this).val();
                 var elx_tab_chat=$(this).parents('.elx_tab_chat:first');
                 
-                //addMessageElxChatTab(elx_tab_chat,'out',elx_txt_chat);
                 $(this).val('');
                 sendMessage(elx_txt_chat,elx_tab_chat.attr('data-alias'));
                 // Ignore Enter when empty input.
@@ -643,36 +642,25 @@ var config = {
 
 }
 
-function getDisplayName(user)
+function receiveMessage (e)
 {
- $(".margin_padding_0").each(function(i) {
-      if (user == $(this).attr("data-alias")) {
-           dname = $(this).attr("data-name");
-      }
-  })
- return dname;
-}
-
-function receiveMessage (e) {
-
-  var remoteUri = e.remoteIdentity.uri.toString();
-  remoteUser = remoteUri.split('sip:');
+    var remoteUri = e.remoteIdentity.uri.toString();
+    remoteUser = remoteUri.split('sip:');
  
-  uri2 = remoteUser[1];
-  var elx_txt_chat = e.body;
+    uri2 = remoteUser[1];
+    var elx_txt_chat = e.body;
             
-  //verificamos si existe una conversacion abierta con el dispositivo
-  //si no existe la creamos
-  var elx_tab_chat=startChatUser(uri2,uri2,uri2,'receive');
-        if(!elx_tab_chat.hasClass('elx_chat_min')){
-                if(!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
-                    //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
-                    elx_tab_chat.children('.elx_header_tab_chat').addClass('elx_blink_chat');
-                }
+    //verificamos si existe una conversacion abierta con el dispositivo
+    //si no existe la creamos
+    var elx_tab_chat = startChatUser(uri2,uri2,uri2,'receive');
+    if (!elx_tab_chat.hasClass('elx_chat_min')){
+        if (!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
+            //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
+            elx_tab_chat.children('.elx_header_tab_chat').addClass('elx_blink_chat');
         }
+    }
  
-  addMessageElxChatTab(elx_tab_chat,'in',elx_txt_chat);
-
+    addMessageElxChatTab(elx_tab_chat,'in',elx_txt_chat);
 }
 
 function undefinedUAParam(param){
@@ -683,28 +671,30 @@ function undefinedUAParam(param){
     return true;
 }
 
-function sendMessage(msg_txt,alias)
+/**
+ * Función para implementar el envío de un mensaje escrito en el textarea de un
+ * chat
+ * 
+ * @param msg_txt	Cadena de texto a enviar
+ * @param alias		Contacto SIP al cual se envía mensaje
+ */
+function sendMessage(msg_txt, alias)
 {    
-    var elx_tab_chat=getTabElxChat(alias);
-    
-    addMessageElxChatTab(elx_tab_chat,'out',msg_txt);
+    var elx_tab_chat = getTabElxChat(alias);    
+    addMessageElxChatTab(elx_tab_chat, 'out', msg_txt);
 
     ua.message(alias, msg_txt).on('failed', function (response, cause) {
-                elx_tab_chat.find(".elx_content_chat").find("div").last().css("color","red");
-                if(elx_tab_chat!=false){
-                    if (response)
-                        var error_msg='<span style="color:red"> '+response.status_code.toString()+" "+response.reason_phrase+'</span>';
-                    else
-                        var error_msg='<span style="color:red"> '+cause+'</span>';
-                        addMessageElxChatTab(elx_tab_chat,'in',error_msg);
-                }else{
-                    if (response)
-                        alert(response.status_code.toString()+" "+response.reason_phrase);
-                    else
-                        alert(cause);
-                }
+        var error_msg = (response) 
+            ? response.status_code.toString() + " " + response.reason_phrase 
+            : cause;
+
+        if (elx_tab_chat != false) {
+            elx_tab_chat.find(".elx_content_chat").find("div").last().css("color","red");
+            addMessageElxChatTab(elx_tab_chat, 'in', $('<span style="color: red;"></span>').text(error_msg));
+        } else {
+            alert(error_msg);
+        }
     });
- 
 }
 function inconmigMessage(){
     
@@ -733,6 +723,21 @@ function getTabElxChat(alias)
 //funcion que crea una nueva pestaña de chat
 //con las opciones dadas
 //devuelve el objeto jquery del div que continene el chat
+
+/**
+ * Función que crea una nueva ventana de chat con el nombre, uri, y alias 
+ * indicados. Si no existía previamente una ventana de chat para el usuario, se
+ * la crea. Si la ventana encontrada está minimizada, se intenta activarla, a
+ * menos que no haya suficiente espacio. Si se está obteniendo un chat debido
+ * a la recepción de un mensaje, y no se puede abrir la ventana, se agrega la
+ * indicación de mensaje nuevo.
+ * 
+ * @param uri	URI SIP del usuario para el chat
+ * @param name	Nombre completo del usuario de chat
+ * @param alias URI alternativo para el usuario del chat
+ * @param action 'send' o 'receive'
+ * @returns jQuery
+ */
 function startChatUser(uri, name, alias, action)
 {
     var can_add_chat = true;
@@ -742,7 +747,9 @@ function startChatUser(uri, name, alias, action)
 
     if (!elx_tab_chat) {
     	// Ventana para este usuario no existe, se debe de crear una nueva
-        if (action=='receive') var name = getDisplayName(name);
+        if (action == 'receive') {
+        	name = $(".elx_li_contact[data-alias='" + name + "']").data('name');
+        }
         
         var content = $('#elx_template_tab_chat > .elx_tab_chat').clone()
         	.attr('data-alias', alias)
@@ -860,32 +867,37 @@ function errorRegisterChatBar(error){
     $('#startingSession').html(error);
     $('#startingSession').css({'display':'block',margin:'5px'});
 }
-function addMessageElxChatTab(chatTab,direction,message){
 
-    var elx_content_chat = chatTab.children('.elx_body_tab_chat:first').children('.elx_content_chat:first');
-    if(direction=='out'){
-        elx_who="<b>me: </b>";
-    }else{
-        
-        var send_name=chatTab.find('.elx_tab_chat_name > .elx_tab_chat_name_span').text();
-        if(send_name!=='undefined' && send_name!=''){
-            //si el nombre del que esta enviando el mensaje contine espacios en blanco
-            //lo cortamos para evitar que el nombre ocupe mucho espacio
-            var space_pos=send_name.indexOf(" ");
-            if(space_pos!=-1){
-                elx_who="<b>"+send_name.substr(0,space_pos)+": </b>";
-            }else{
-                elx_who="<b>"+send_name+": </b>";
-            }
-        }else{
-            elx_who="<b>receive: </b>";
-        }
-
-        elxTitleAlert("New Message "+send_name);
-    }
-    elx_content_chat.append("<div>"+elx_who+message+"</div>");
-    elx_content_chat.scrollTop(1e4);
+/**
+ * Procedimiento para agregar un nuevo mensaje de chat (enviado o recibido) al
+ * historial que se muestra encima del textarea del siguiente mensaje.
+ * TODO: i18n
+ * 
+ * @param chatTab	Objeto jQuery de la ventana de chat a actualizar
+ * @param direction	'in' para mensajes entrantes, 'out' para mensajes salientes
+ * @param message	Texto del mensaje, o un objeto jQuery con formato
+ */
+function addMessageElxChatTab(chatTab, direction, message)
+{
+    var send_name = (direction == 'out') 
+        ? 'me'
+        : chatTab.find('.elx_tab_chat_name > .elx_tab_chat_name_span').text();
+    
+    // Para ahorrar espacio, se toma el primer elemento sin espacios
+    var tokens = send_name.trim().split(' ');
+    send_name = tokens[0];    
+    if (send_name == 'undefined' || send_name == '') send_name = 'receive';
+    if (direction != 'out') elxTitleAlert('New Message ' + send_name);
+    
+    var messagediv = $('<div></div>');
+    if (typeof message == 'string') 
+    	messagediv.text(message);
+    else messagediv.append(message);
+    chatTab.find('.elx_body_tab_chat:first .elx_content_chat:first')
+    	.append(messagediv.prepend($('<b></b>').text(send_name + ': ')))
+    	.scrollTop(1e4);
 }
+
 function addElxUserNotifyChatMini(elxTabChatToMin){
     alias=elxTabChatToMin.attr('data-alias');
     var exist=false;

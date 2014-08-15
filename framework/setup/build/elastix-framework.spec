@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Aug 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: rework updates of chat windows in order to fix XSS 
+  injections found during code inspection.
+  SVN Rev[6681]
 - CHANGED: Framework: switch generation of chat window from hardcoded HTML in
   javascript, to cloning of a specific item selected from the template. Some
   code optimization.

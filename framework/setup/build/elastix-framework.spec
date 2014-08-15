@@ -403,6 +403,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Aug 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: switch generation of chat window from hardcoded HTML in
+  javascript, to cloning of a specific item selected from the template. Some
+  code optimization.
+  SVN Rev[6680] 
 - CHANGED: Framework: switch generation of contact item in SIP roster from 
   hardcoded HTML in javascript, to cloning of a specific item selected from the
   template. Fix an unmatched span in template. Remove dead code left over from

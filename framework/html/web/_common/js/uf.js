@@ -124,28 +124,39 @@ $(document).ready(function(){
             $("#elx_chat_space").show(10);
         }
     );
-    //actions to chat tabs
-    $(this).on('click','.elx_close_chat',function(){
-            $(this).parents(".elx_tab_chat").removeClass('elx_chat_active').addClass('elx_chat_close');
-            //debemos comprobar si ahi pestañas minimizadas por falta de espacio
-            //si existen entonces abrimos la ultima pestaña
-            var chatMIn=$("#elx_chat_space_tabs > .elx_chat_min").last();
-            if(chatMIn!=='undefined'){
-                chatMIn.removeClass('elx_chat_min').addClass('elx_chat_active');
-                removeElxUserNotifyChatMini(chatMIn);
-            }
+    
+    // Acciones para controlar las ventanas de chat
+    $(this).on('click', '.elx_close_chat', function() {
+    	// Cerrar la ventana del chat (realmente la oculta, pero el div sigue presente)
+    	
+        $(this).parents(".elx_tab_chat").removeClass('elx_chat_active').addClass('elx_chat_close');
+        //debemos comprobar si ahi pestañas minimizadas por falta de espacio
+        //si existen entonces abrimos la ultima pestaña
+        var chatMIn=$("#elx_chat_space_tabs > .elx_chat_min").last();
+        if(chatMIn!=='undefined'){
+            chatMIn.removeClass('elx_chat_min').addClass('elx_chat_active');
+            removeElxUserNotifyChatMini(chatMIn);
         }
-    );
-    $(this).on('click','.elx_min_chat',function(){
-            $(this).removeClass("glyphicon-minus elx_min_chat").addClass("glyphicon-resize-vertical elx_max_chat");
-            $(this).parents(".elx_header_tab_chat").next('.elx_body_tab_chat').css('display','none');
-        }
-    );
-    $(this).on('click','.elx_max_chat',function(){
-            $(this).removeClass("glyphicon-resize-vertical elx_max_chat").addClass("glyphicon-minus elx_min_chat");
-            $(this).parents(".elx_header_tab_chat").next('.elx_body_tab_chat').css('display','block');
-        }
-    );
+    });
+    $(this).on('click', '.elx_min_chat', function() {
+    	// Minimizar la ventana de chat    	
+        $(this).removeClass("glyphicon-minus elx_min_chat").addClass("glyphicon-resize-vertical elx_max_chat");
+        $(this).parents(".elx_header_tab_chat").next('.elx_body_tab_chat').css('display','none');
+    });
+    $(this).on('click', '.elx_max_chat', function() {
+    	// Restaurar la ventana de chat    	
+        $(this).removeClass("glyphicon-resize-vertical elx_max_chat").addClass("glyphicon-minus elx_min_chat");
+        $(this).parents(".elx_header_tab_chat").next('.elx_body_tab_chat').css('display','block');
+    });
+    $(this).on('click', 'div.elx_header2_tab_chat > span.glyphicon-envelope', function() {
+    	// Envío de correo al usuario del chat
+    	elx_newEmail($(this).parents('.elx_tab_chat').data('alias'));
+    });
+    $(this).on('click', 'div.elx_header2_tab_chat > span.glyphicon-print', function() {
+    	// Envío de fax al usuario del chat
+    	showSendFax($(this).parents('.elx_tab_chat').data('alias'));
+    });
+    
     //accion que controla cuando damos enter en el text-area de una de la pestañas del chat
     $(this).on("keydown",".elx_chat_imput", function( event ) {
             // Ignore TAB and ESC.
@@ -709,96 +720,62 @@ function unregisterPhone()
 {
     elx_phone.unregister();
 }
+
 /**
- * function que busca el div que contine la conversacion de un usario dado su alias
- * En caso de existir retorna el div del chat
- * Si no existe retorn false
- **/
-function getTabElxChat(alias){
-    var chatTab=null;
-    $("#elx_chat_space_tabs > .elx_tab_chat").each(function(i, chat) {
-      if (alias == $(this).attr("data-alias")) {
-        chatTab = $(chat);
-        return false;
-      }
-    });
-    if (chatTab)
-      return chatTab;
-    else
-      return false;
+ * Función para buscar el div de la conversación del usuario, dado su alias.
+ * Se devuelve el div del chat, si se encuentra, o false si no existe.
+ */
+function getTabElxChat(alias)
+{
+	var chatTab = $("#elx_chat_space_tabs > .elx_tab_chat[data-alias='" + alias + "'] :first");
+	return chatTab.length > 0 ? chatTab : false;
 }
 //funcion que crea una nueva pestaña de chat
 //con las opciones dadas
 //devuelve el objeto jquery del div que continene el chat
-function startChatUser(uri,name,alias,action){
-    //name
-    //uri chat
-    //verificamos si existe la ventana actual, si no existe se la crea
-    console.log(name);
-    var elx_tab_chat=getTabElxChat(uri);
+function startChatUser(uri, name, alias, action)
+{
+    var can_add_chat = true;
 
-    var existTabChat=false;
-    if(!elx_tab_chat){
+    // Se intenta reutilizar la ventana activa de un chat previo
+    var elx_tab_chat = getTabElxChat(alias);
+
+    if (!elx_tab_chat) {
+    	// Ventana para este usuario no existe, se debe de crear una nueva
         if (action=='receive') var name = getDisplayName(name);
         
-        var elx_im_cabecera="<div class='elx_header_tab_chat'>";
-        elx_im_cabecera +="<div class='elx_tab_chat_name'>";
-        elx_im_cabecera +="<span class='elx_tab_chat_name_span'>"+name+"</span>";
-        elx_im_cabecera +="</div>";
-        elx_im_cabecera +="<div class='elx_tab_tittle_icon'>";
-        elx_im_cabecera +="<span class='glyphicon glyphicon-minus elx_icon_chat elx_min_chat' alt='Minimize' data-tooltip='Minimize' aria-label='Minimize'></span>";
-        elx_im_cabecera +="<span class='glyphicon glyphicon-remove elx_icon_chat elx_close_chat' alt='Close' data-tooltip='Close' aria-label='Close'></span>";
-        elx_im_cabecera +="</div>";
-        elx_im_cabecera +="</div>"
-        
-        var elx_im_cabecera2="<div class='elx_header2_tab_chat'>";
-        //elx_im_cabecera2 +="<span class='glyphicon glyphicon-earphone elx_icon_chat elx_icon_chat2' alt='Call' data-tooltip='Call' aria-label='Call'></span>";
-        elx_im_cabecera2 +="<span class='glyphicon glyphicon-envelope elx_icon_chat elx_icon_chat2' onclick='elx_newEmail(\""+alias+"\")' alt='Send E-Mail' data-tooltip='Send E-Mail' aria-label='Send E-Mail'></span>";
-        elx_im_cabecera2 +="<span class='glyphicon glyphicon-print elx_icon_chat elx_icon_chat2' onclick='showSendFax(\""+alias+"\")' alt='Send Fax' data-tooltip='Send Fax' aria-label='Send Fax'></span>";
-        elx_im_cabecera2 +="</div>";
-        
-        var conversation="<div class='elx_content_chat'>";
-        conversation +="</div>";
-        
-        var elx_text_area_chat="<div class='elx_text_area_chat'>";
-        elx_text_area_chat +="<textarea class='elx_chat_imput'></textarea>";
-        elx_text_area_chat +="</div>"
-        
-        var content="<div class='elx_tab_chat elx_chat_min' data-alias='"+alias+"' data-uri='"+uri+"'>";
-        content +=elx_im_cabecera+"<div class='elx_body_tab_chat'>"+elx_im_cabecera2+conversation+elx_text_area_chat+"</div>";
-        content +="</div>";
+        var content = $('#elx_template_tab_chat > .elx_tab_chat').clone()
+        	.attr('data-alias', alias)
+        	.attr('data-uri', uri);
+        content.find('.elx_tab_chat_name_span').text(name);
     
-        var can_add_chat=resizeElxChatTab($(window).width(),action);
-        //añadimos el nuevo chat
+        // Se agrega el nuevo chat a la lista de ventanas de chat
         $("#elx_chat_space_tabs").prepend(content);
         elx_tab_chat = $("#elx_chat_space_tabs > .elx_tab_chat:first");
-        if(can_add_chat){
-            elx_tab_chat.removeClass('elx_chat_min').addClass('elx_chat_active');
-        }
-    }else{
-        //la ventana existe y esta activa, no tenemos nada que hacer
-        var can_add_chat=true;
         
-        if(!elx_tab_chat.hasClass('elx_chat_active')){
-            //la ventana solicitada esta minimizada o fue cerrada nateriormente
-            //procedemos a abrirla pero antes comprabamos si ahi sufieciente espacio para ello
-            var can_add_chat=resizeElxChatTab($(window).width(),action);
-            if(can_add_chat){
-                //funcion que maneja el hecho de que aparezca una venta del chat que estaba aculta
-                if(elx_tab_chat.hasClass('elx_chat_close')){
-                    //si existia el tab pero tenia esta clase significa que se chateo en un momento pero
-                    //de ahi se cerro la ventana del chat por lo que la volvemos a abrir
-                    elx_tab_chat.removeClass('elx_chat_close').addClass('elx_chat_active');
-                    removeElxUserNotifyChatMini(elx_tab_chat);
-                }else if(elx_tab_chat.hasClass('elx_chat_min')){
-                    elx_tab_chat.removeClass('elx_chat_min').addClass('elx_chat_active');
-                    removeElxUserNotifyChatMini(elx_tab_chat);
-                }
-            }
-
-        }
+        /* Llegado a este punto, la situación es igual que si se hubiese 
+         * encontrado anteriormente la ventana, en estado minimizado. */
     }
 
+    if (!elx_tab_chat.hasClass('elx_chat_active')) {
+        /* La ventana solicitada esta minimizada o fue cerrada nateriormente. Se
+         * procede a abrirla si se dispone de suficiente espacio. */
+        can_add_chat = resizeElxChatTab($(window).width(), action);
+        if (can_add_chat) {
+            //funcion que maneja el hecho de que aparezca una venta del chat que estaba aculta
+            if(elx_tab_chat.hasClass('elx_chat_close')){
+                //si existia el tab pero tenia esta clase significa que se chateo en un momento pero
+                //de ahi se cerro la ventana del chat por lo que la volvemos a abrir
+                elx_tab_chat.removeClass('elx_chat_close').addClass('elx_chat_active');
+                removeElxUserNotifyChatMini(elx_tab_chat);
+            } else if(elx_tab_chat.hasClass('elx_chat_min')){
+                elx_tab_chat.removeClass('elx_chat_min').addClass('elx_chat_active');
+                removeElxUserNotifyChatMini(elx_tab_chat);
+            }
+        }
+    }
+    
+    
     //se recibio un nuevo mensaje y la pestaña del chat del que envia el mensaje no puede
     //ser abierta por falta de espacio
     //debemos mostrar una notificacion del nuevo mensaje

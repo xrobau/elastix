@@ -94,6 +94,38 @@
                 </a>
             </div>
             <div id='elx_chat_space_tabs'>
+                <!-- Dentro de este div se encuentra la plantilla que define un recuadro de chat -->
+                <div id="elx_template_tab_chat" style="display: none">
+                    <!-- El código asume que el chat inicia minimizado (elx_chat_min) -->
+                    <div class='elx_tab_chat elx_chat_min'>
+	                    <div class='elx_header_tab_chat'><div 
+	                       class='elx_tab_chat_name'><span class='elx_tab_chat_name_span'><!-- Aquí va el nombre del contacto --></span></div><div
+	                       class='elx_tab_tittle_icon'><span 
+                                class='glyphicon glyphicon-minus elx_icon_chat elx_min_chat'
+                                alt='Minimize' data-tooltip='Minimize' aria-label='Minimize'
+                                ></span><span 
+                                class='glyphicon glyphicon-remove elx_icon_chat elx_close_chat'
+                                alt='Close' data-tooltip='Close' aria-label='Close'
+                            ></span></div>
+                        </div>
+	                    <div class='elx_body_tab_chat'>
+	                        <div class='elx_header2_tab_chat'>
+                                <!--  <span class='glyphicon glyphicon-earphone elx_icon_chat elx_icon_chat2' alt='Call' data-tooltip='Call' aria-label='Call'></span> -->
+                                <span
+                                    class='glyphicon glyphicon-envelope elx_icon_chat elx_icon_chat2'
+                                    alt='Send E-Mail' data-tooltip='Send E-Mail' aria-label='Send E-Mail'
+                                ></span><span 
+                                    class='glyphicon glyphicon-print elx_icon_chat elx_icon_chat2'
+                                    alt='Send Fax' data-tooltip='Send Fax' aria-label='Send Fax'
+                                ></span>
+                            </div>
+	                        <div class='elx_content_chat'></div>
+	                        <div class='elx_text_area_chat'>
+                                <textarea class='elx_chat_imput'></textarea>
+                            </div>
+	                    </div>
+                    </div>
+                </div>
             </div>            
         </div>
     </body>

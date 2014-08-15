@@ -380,30 +380,7 @@ function handleJSON_changeImageProfile($smarty, $module_name){
     
 }
 
-function handleJSON_checkChatContactsStatus($smarty, $module_name){
-    $searchFilter = getParameter('searchFilter');
-    
-    $executed_time = 5; //en segundos
-    $max_time_wait = 30; //en segundos
-    $event_flag    = false;
-    $data          = null;
-
-    $i = 1;
-    //con estos parámetros esta configurado para que muestre el cambio cada 30 segundos
-    //(y en sese tiempo se ejecuta 6 veces la petición)
-    while(($i*$executed_time) <= $max_time_wait){
-        $return = getChatContactsStatus($searchFilter);
-        $data   = $return['data'];
-        if($return['there_was_change']){
-            $event_flag = true;
-            break;
-        }
-        $i++;
-        sleep($executed_time); //cada $executed_time estoy revisando si hay algo nuevo....
-    }
-return $data;
-}
-
+// Manejo del guardado del ETag de la petición PUBLISH de presencia del usuario
 function handleJSON_setPublishETag($smarty, $module_name)
 {
 	Header('Content-Type: application/json');
@@ -413,6 +390,7 @@ function handleJSON_setPublishETag($smarty, $module_name)
 	return $jsonObject->createJSON();
 }
 
+// Petición del ETag previamente guardado para el PUBLISH de presencia del usuario
 function handleJSON_getPublishETag($smarty, $module_name)
 {
 	Header('Content-Type: application/json');

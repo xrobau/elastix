@@ -402,6 +402,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Aug 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: switch generation of contact item in SIP roster from 
+  hardcoded HTML in javascript, to cloning of a specific item selected from the
+  template. Fix an unmatched span in template. Remove dead code left over from
+  the switch to presentity-based SIP presence.
+  SVN Rev[6679] 
+
 * Thu Aug 14 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Initial implementation of SIP presence for chat using presentity, 
   should replace the previous implementation that reported presence from the

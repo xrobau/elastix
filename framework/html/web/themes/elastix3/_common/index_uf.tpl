@@ -19,8 +19,8 @@
         {$HEADER_MODULES}
     </head>
     <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" class="mainBody" {$BODYPARAMS}>
-    <input type="hidden" id="elastix_framework_module_id" value="">
-    <input type="hidden" id="elastix_framework_webCommon" value="">
+        <input type="hidden" id="elastix_framework_module_id" value="" />
+        <input type="hidden" id="elastix_framework_webCommon" value="" />
     
         <div id='elastix_app_body' class='elx_app_body'>
             {$MENU} <!-- Viene del tpl menu.tlp-->   
@@ -50,18 +50,33 @@
                     </div>
                     -->
                     <div id='elx_im_contact_search'>
-                        <input type='text' maxlength='50' id='im_search_filter' name='im_search_filter' class='im_search_filter form-control input-sm' >
+                        <input type='text' maxlength='50' id='im_search_filter' name='im_search_filter' class='im_search_filter form-control input-sm' />
                         <div class='contactSearchResult' class='contactSearchResult'>
                         </div>
                     </div>
                 </div>
                 <div id='elx_im_list_contacts'>
+		            <!-- Dentro de este ul se encuentra la plantilla que define un item de contacto -->
+		            <ul id="elx_template_contact_status" style="display: none">
+		                <li class="margin_padding_0">
+		                    <div class="elx_contact">
+		                        <div id="elx_im_status_user" class="elx_im_status_user">
+		                            <div class="box_status_contact"></div>
+		                        </div>
+		                        <div class="elx_contact_div">
+		                            <div class="elx_im_name_user"></div>
+		                            <div class="extension_status"></div>
+		                        </div>
+		                    </div>
+		                </li>                
+		            </ul>
+                    <!-- El ul de abajo es la lista de contactos reales -->
                     <ul id='elx_ul_list_contacts' class='margin_padding_0'>
                     </ul>
                 </div>
             </div>
             <div id='startingSession' style='position:relative'>
-                <img id='login_loading_chat' style='display:inline' src='{$WEBCOMMON}images/loading.gif' /><span class='elx_contact_starting'>{$INT_SESSION}<span>
+                <img id='login_loading_chat' style='display:inline' src='{$WEBCOMMON}images/loading.gif' /><span class='elx_contact_starting'>{$INT_SESSION}</span>
             </div>
         </div>
         <div id='elx_chat_space'>
@@ -72,14 +87,14 @@
                         </ul>
                     </div>
                 </div>
-                <input type='hidden' id='elx_hide_min_list' value='no'>
+                <input type='hidden' id='elx_hide_min_list' value='no' />
                 <a id='elx_notify_min_chat_box' href="#" rel="toggle" role="button">
                     <span class="icn_d elx_icn_notify_chat">h</span>
                     <span id='elx_num_mim_chat'>0</span>
                 </a>
             </div>
             <div id='elx_chat_space_tabs'>
-            </div>
+            </div>            
         </div>
     </body>
 </html>

@@ -311,9 +311,6 @@ $(document).ready(function(){
     $(this).on('keyup','#im_search_filter',function(){
         searchElastixContacts();
     });
-    
-    // invocamos la funcion recursiva para chequear el estado de los contactos 
-    //checkChatContactsStatus();
 });
 //se calcula el alto del contenido del modulo y se resta del alto del navegador cada
 //que se haga un resize, para que aparezca el scroll cuando sea necesario
@@ -461,18 +458,24 @@ function searchElastixContacts(){
     });
 }
 
+/**
+ * Esta función construye una nueva instancia de una plantilla donde se muestra
+ * la información del contacto SIP para chat, con los datos ya rellenados. La
+ * plantilla base está definida en index_uf.tpl .
+ * 
+ * @param idUser			ID del usuario representado
+ * @param display_name		Nombre completo del usuario representado
+ * @param uri				URI del contacto SIP IM para el usuario (ya no se usa?)
+ * @param alias				URI del contacto SIP telefónico para el usuario
+ * @param presence			Descripción inicial del estado de presencia
+ * @param presence_code		Código para el estado de presencia (ya no se usa?)
+ * @param visibility		Clase que define estado inicial de visibilidad
+ * @returns
+ */
 function createDivContact(idUser, display_name, uri, alias, presence, presence_code, visibility)
 {
-	var divTemplate =
-		'<li class="margin_padding_0 elx_li_contact"><div class="elx_contact">'+
-			'<div id="elx_im_status_user" class="elx_im_status_user"><div class="box_status_contact" /></div>'+
-			'<div class="elx_contact_div">'+
-				'<div class="elx_im_name_user" />'+
-				'<div class="extension_status" />'+
-			'</div>'+
-		'</div></li>';
-	var liContact = $(divTemplate);
-	liContact
+	var liContact = $('#elx_template_contact_status > li').clone()
+		.addClass('elx_li_contact')
 		.attr('data-uri', uri)
 		.attr('data-alias', alias)
 		.attr('data-name', display_name)
@@ -1265,51 +1268,6 @@ function formSendFax(){
             }
         }
     });
-}
-
-
-function checkChatContactsStatus()
-{
-    var hDiv=$('#rightdiv').height();
-    var arrAction = new Array();
-    arrAction["action"]  = "checkChatContactsStatus";
-    arrAction["menu"] = "_elastixutils";
-    arrAction["rawmode"] = "yes";
-
-    request("index.php",arrAction,true,
-        function(arrData,statusResponse,error){
-            if(statusResponse=="CHANGED"){
-                //contactos disponibles
-                var arrType = new Array('ava','unava','not_found');
-                
-                var div='';
-                for( var i=0; i<arrType.length; i++){
-                    typeAcc=arrType[i];
-                    if( typeof arrData[typeAcc] !== 'undefined'){
-                        for( var x in arrData[typeAcc]){
-                            div +=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['username'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code']);
-                            $("#elx_ul_list_contacts").html(div);
-                        }
-                    } 
-                }
-                //una vez teniendo el nuevo listado, verificamos si existe un criterio de busqueda.
-                var pattern = $("input[name='im_search_filter']").val();  
-                
-                $(".elx_contact .elx_im_name_user").each(function ()
-                {
-                    var str = $(this).html();
-                    if (str.match(pattern)) {
-                        ($(this).parent()).parent().removeClass("oculto");
-                        ($(this).parent()).parent().addClass("visible");
-                    }else{
-                        ($(this).parent()).parent().removeClass("visible");
-                        ($(this).parent()).parent().addClass("oculto");
-                    }
-                    
-                });
-            }
-    
-        });
 }
 
 function elx_newEmail(alias){

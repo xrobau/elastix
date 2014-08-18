@@ -274,6 +274,7 @@ function handleJSON_getUserProfile($smarty, $module_name){
     $smarty->assign("faxProfile",$dataProfile['fax_extension']);
     $smarty->assign("nameProfile",$dataProfile['name']);
     $smarty->assign('ID_PICTURE',$arrCredentials['idUser']);
+    $smarty->assign('DeleteImage', _tr('Delete Image'));
     
     $dataProfile['languageProfile']=$selectedLanguage;
     

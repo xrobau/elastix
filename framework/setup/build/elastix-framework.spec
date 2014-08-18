@@ -403,6 +403,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Aug 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: add Smarty assignment of DeleteImage label that was missing.
+  SVN Rev[6683]
 - FIXED: Framework: add Smarty assignment of Profile label that was accidentally
   left out on SVN commit #6666
   SVN Rev[6682]

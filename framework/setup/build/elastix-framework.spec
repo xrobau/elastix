@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Aug 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: add Smarty assignment of Profile label that was accidentally
+  left out on SVN commit #6666
+  SVN Rev[6682]
+
 * Fri Aug 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: rework updates of chat windows in order to fix XSS 
   injections found during code inspection.

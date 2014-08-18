@@ -165,6 +165,7 @@ if (isset($_SESSION['elastix_user']) &&
     $smarty->assign("currentyear", $sCurYear);
     $smarty->assign("ABOUT_ELASTIX_CONTENT", _tr('About Elastix Content'));
     $smarty->assign("ABOUT_CLOSED", _tr('About Elastix Closed'));
+    $smarty->assign("Profile_l", _tr('Profile'));
     $smarty->assign("LOGOUT", _tr('Logout'));
     $smarty->assign("textMode", _tr('textMode'));
     $smarty->assign("htmlMode", _tr('htmlMode'));

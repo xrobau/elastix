@@ -515,7 +515,7 @@ img {
     padding: 5px 5px 3px 5px;
     position: relative;
 }
-.elx_chat_imput{
+.elx_chat_input{
     display: block;
     height: 36px;
     margin: 0;
@@ -534,7 +534,7 @@ img {
     -webkit-border-radius: 1px;
     -webkit-transition: none;
 }
-.elx_chat_imput:focus{
+.elx_chat_input:focus{
     border-color:#ff6600!important;
     border-top-color:#FF3300!important;
     -webkit-box-shadow: 0 0 1px #ff6600;

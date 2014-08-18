@@ -1,32 +1,14 @@
-var elx_phone = null;
 var elx_flag_changed_profile = false;
 $(document).ready(function(){
-    pull = $('#pull');
-    menu = $('nav.elx_nav_main_menu > ul');
-    menuHeight = menu.height();
-    //leftdiv = $('#leftdiv');
-    //centerdiv = $('#centerdiv');
     main_content_div = $('#main_content_elastix'); //div que contiene lo que cada modulo tiene 
     rightdiv = $('#rightdiv'); //panel lateral en donde aparece el chat
-    pull3 = $('#icn_disp2'); //icono que despliega y oculta el chat
-    
-    /*despliegue del menu en pantallas pequeñas*/           
-    /*$(this).on('click','#pull',function(e){
-        e.preventDefault();
-        menu.slideToggle();
-    });*/
-    
-   /* $(this).on('click','nav.elx_nav_main_menu > ul li',function(e){
-        var ul=$(this).children('ul')
-        ul.css('display:block','opacity: 1','visibility: visible');
-    });*/
     
     $(this).on('click','.elx-msg-area-close',function(e){
         $("#elx_msg_area").slideUp();  
     });
                             
     $(window).resize(function(){
-        w = $(window).width();
+        var w = $(window).width();
         var tmpSize=0;
         if(w>=500){
             if(rightdiv.is(':hidden') == false){ //esta abierto
@@ -47,10 +29,6 @@ $(document).ready(function(){
         }
         
         adjustTabChatToWindow(w);
-        
-        /*setea el estilo del menu una vez que se maximiza la pantalla*/   
-        /*if(menu.is(':hidden')) 
-            menu.removeAttr('style');*/
         
         //calulamos la altura maxima del div del chat donde estan los contactos
         if(rightdiv.is(':hidden') == false){
@@ -100,189 +78,10 @@ $(document).ready(function(){
             adjustTabChatToWindow(w);
         }
     });
-    
-   
 
-    $(this).on('click','#boxclose',function(){
-    //$('#boxclose').click(function(){
-        $('#box').animate({'top':'-200px'},500,function(){
-            $('#overlay').fadeOut('fast');
-        });
-    });
+    setupChatWindowHandlers(this);
     
-    $(this).on('click','.elx_li_contact',function(){
-            var uri=$(this).attr('data-uri');
-            var alias=$(this).attr('data-alias');
-            var name=$(this).attr('data-name');
-            //verifcamos si ya existe un chat abierto a este usuario
-            //en caso de existir se lo crea
-            if($(window).width()<500){
-                rightdiv.hide(10);
-            }
-            var elx_tab_chat=startChatUser(uri,name,alias,'sent');
-            elx_tab_chat.find('.elx_text_area_chat > textarea').focus();
-            $("#elx_chat_space").show(10);
-        }
-    );
-    
-    // Acciones para controlar las ventanas de chat
-    $(this).on('click', '.elx_close_chat', function() {
-    	// Cerrar la ventana del chat (realmente la oculta, pero el div sigue presente)
-    	
-        $(this).parents(".elx_tab_chat").removeClass('elx_chat_active').addClass('elx_chat_close');
-        //debemos comprobar si ahi pestañas minimizadas por falta de espacio
-        //si existen entonces abrimos la ultima pestaña
-        var chatMIn=$("#elx_chat_space_tabs > .elx_chat_min").last();
-        if(chatMIn!=='undefined'){
-            chatMIn.removeClass('elx_chat_min').addClass('elx_chat_active');
-            removeElxUserNotifyChatMini(chatMIn);
-        }
-    });
-    $(this).on('click', '.elx_min_chat', function() {
-    	// Minimizar la ventana de chat    	
-        $(this).removeClass("glyphicon-minus elx_min_chat").addClass("glyphicon-resize-vertical elx_max_chat");
-        $(this).parents(".elx_header_tab_chat").next('.elx_body_tab_chat').css('display','none');
-    });
-    $(this).on('click', '.elx_max_chat', function() {
-    	// Restaurar la ventana de chat    	
-        $(this).removeClass("glyphicon-resize-vertical elx_max_chat").addClass("glyphicon-minus elx_min_chat");
-        $(this).parents(".elx_header_tab_chat").next('.elx_body_tab_chat').css('display','block');
-    });
-    $(this).on('click', 'div.elx_header2_tab_chat > span.glyphicon-envelope', function() {
-    	// Envío de correo al usuario del chat
-    	elx_newEmail($(this).parents('.elx_tab_chat').data('alias'));
-    });
-    $(this).on('click', 'div.elx_header2_tab_chat > span.glyphicon-print', function() {
-    	// Envío de fax al usuario del chat
-    	showSendFax($(this).parents('.elx_tab_chat').data('alias'));
-    });
-    
-    //accion que controla cuando damos enter en el text-area de una de la pestañas del chat
-    $(this).on("keydown",".elx_chat_imput", function( event ) {
-            // Ignore TAB and ESC.
-            if (event.which == 9 || event.which == 27) {
-                return false;
-                // Enter pressed? so send chat.
-            }else if ( event.which == 13 && $(this).val()!='') {
-                event.preventDefault();
-                //debemos mandar el mensaje y 
-                //hacer que el texto del text area desaparezca y sea enviado la divdel chat al que corresponde
-                var elx_txt_chat=$(this).val();
-                var elx_tab_chat=$(this).parents('.elx_tab_chat:first');
-                
-                $(this).val('');
-                sendMessage(elx_txt_chat,elx_tab_chat.attr('data-alias'));
-                // Ignore Enter when empty input.
-            }else if (event.which == 13 && $(this).val() == "") {
-                event.preventDefault();
-                return false;
-            }
-        }
-    );
-    $(this).on("click",".elx_tab_chat", function( event ) {
-        $(this).children('.elx_header_tab_chat').removeClass('elx_blink_chat');
-        $(this).find('.elx_text_area_chat > textarea').focus();
-    });
-    getElastixContacts();
-    
-    //motificaciones en pestañas de chat minimizadas por falta de espacio
-    $('#elx_notify_min_chat_box').on("click",function(event){
-        var hidMinList=$('#elx_hide_min_list').val();
-        if(hidMinList=='yes'){
-            //se deben ocultar la lista de las conversaciones minimizadas por falta de espacio
-            $("#elx_notify_min_chat_box").removeClass('elx_notify_min_chat_box_act');
-            $('#elx_hide_min_list').val('no');
-            $("#elx_list_min_chat").css('visibility','hidden');
-        }else{
-            //antes de mostrar la lista debemos calcular si el espacio que queda es suficiente para
-            //mostrar los elementos de la lista
-            //si no queda mucho espacio cambiamos la direccion de la lista al otro lado
-            //se deben mostrar la lista de las conversaciones minimizadas por falta de espacio
-            $("#elx_notify_min_chat_box").addClass('elx_notify_min_chat_box_act');
-            $('#elx_hide_min_list').val('yes');
-            var offElement=$("#elx_notify_min_chat_box").offset();
-            var widthList = $("#elx_list_min_chat > div > .elx_list_min_chat_ul").width();
-            if((offElement.left-40)>(widthList)){
-                //existe suficiente espacio para mostrar la lista 
-                $("#elx_list_min_chat").css('right','0px');
-                $("#elx_list_min_chat").css('left','');
-            }else{
-                //no existe suficiente espacio para mostrar la lista 
-                $("#elx_list_min_chat").css('left','0px');
-                $("#elx_list_min_chat").css('right','');
-            }
-            $("#elx_list_min_chat").css('visibility','visible');
-        }
-    });
-    $(this).on('click','.elx_min_name',function(event){
-        $(this).children(".elx_min_chat_num").css('visibility','hidden');
-        //se deben ocultar la lista de las conversaciones minimizadas por falta de espacio
-        $("#elx_notify_min_chat_box").removeClass('elx_notify_min_chat_box_act');
-        $('#elx_hide_min_list').val('no');
-        $("#elx_list_min_chat").css('visibility','hidden');
-        var alias=$(this).parents('.elx_list_min_chat_li:first').attr('data-alias');
-        var elx_tab_chat=startChatUser(alias,name,alias,'sent');
-        elx_tab_chat.find('.elx_text_area_chat > textarea').focus();
-        elx_tab_chat.find('.elx_tab_tittle_icon > span:first').removeClass("glyphicon-resize-vertical elx_max_chat").addClass("glyphicon-minus elx_min_chat");
-        elx_tab_chat.find('.elx_body_tab_chat').css('display','block');
-    });
-    $(this).on('click','.elx_min_remove',function(event){
-        var liIcon=$(this).parents('.elx_list_min_chat_li:first');
-        var alias=liIcon.attr('data-alias');
-        liIcon.remove();
-        var tabChat=getTabElxChat(alias);
-        tabChat.removeClass('elx_chat_min').addClass('elx_chat_close');
-        //disminuir la cuenta de las conversaciones minimizadas y en caso de no quedar niguna ocultar tab notificaciones
-        removeElxUserNotifyChatMini(tabChat);
-    });
-    
-    //ejecuta la accion de cambio de lenguaje del usuario del popup de profile
-    $(this).on('change','#languageProfile',function(){
-        var language = $("select[name='languageProfile'] option:selected").val();
-        changeLanguageProfile(language);
-    });
-    
-    //ejecuta la accion de eliminar la imagen que contiene el popup de profile del usuario
-    $(this).on('click','#deleteImageProfile',function(){
-            deleteImageProfile();
-    });
-    
-    //ejecuta la funcion de cambio de imagen del popup de profile del usuario
-    $(this).on('click','#picture',function(){
-        changeImageProfile();
-    });
-    
-    //muestra y oculta el div que contiene las cajas de textos para cambiar las contraseñas dentro del popup de profile
-    $(this).on('click','#elx_link_change_passwd',function(){
-        if($('#elx_data_change_passwd').hasClass('visible')== true){
-            $("#elx_data_change_passwd").removeClass("visible").addClass("oculto");
-        }else{
-            $("#elx_data_change_passwd").removeClass("oculto").addClass("visible");
-        }
-    });
-    
-    //manda a recagar la pagina, luego de haber hecho algun cambio en el popup de profile del usuario
-    $(this).on('click','.elx_close_popup_profile',function(){
-        if(elx_flag_changed_profile==true){
-            location.reload();
-        }
-    });
-    
-    
-    //funcionpara habilitar los campos de cambio de contraseña, luego que escriban la contraseña actual
-    $(this).on('click','#currentPasswordProfile',function(){
-        $('#currentPasswordProfile').keyup(function(){
-            if($('#currentPasswordProfile').val() != ''){
-                $('#newPasswordProfile').removeAttr('disabled');
-                $('#repeatPasswordProfile').removeAttr('disabled');
-                $('#elx_save_change_passwd').removeAttr('disabled');
-            }else{
-                $('#newPasswordProfile').attr('disabled','disabled');
-                $('#repeatPasswordProfile').attr('disabled','disabled');
-                $('#elx_save_change_passwd').attr('disabled','disabled');
-            }
-        });
-    });
+    setupUserProfileHandlers(this);
     
     //despliega en efecto slider el menu oculto, en tamño < 480px;
     $(this).on('click','#elx-navbar-min',function(){
@@ -321,16 +120,213 @@ $(document).ready(function(){
     $(this).on('keyup','#im_search_filter',function(){
         searchElastixContacts();
     });
+
+    getElastixContacts();
+
 });
+
+/**
+ * Procedimiento que inicializa todos los manejadores asociados al soporte de
+ * chat, excepto la carga remota y registro en sí.
+ * 
+ * @returns void
+ */
+function setupChatWindowHandlers(doc)
+{
+    // Click en contacto para abrir la ventana de chat correspondiente
+	$(doc).on('click', '.elx_li_contact', function() {
+        // Ahorrar espacio para caso de ventana estrecha
+        if ($(window).width() < 500) rightdiv.hide(10);
+        
+        //var elx_tab_chat = 
+        startChatUser(
+            $(this).data('uri'),
+            $(this).data('name'),
+            $(this).data('alias'),
+            'sent').find('.elx_text_area_chat > textarea').focus();
+        //elx_tab_chat.find('.elx_text_area_chat > textarea').focus();
+        $("#elx_chat_space").show(10);
+    });
+
+	// Acciones para controlar las ventanas de chat
+    $(doc).on('click', '.elx_close_chat', function() {
+        // Cerrar la ventana del chat (realmente la oculta, pero el div sigue presente)
+
+        $(this).parents(".elx_tab_chat").removeClass('elx_chat_active').addClass('elx_chat_close');
+        //debemos comprobar si ahi pestañas minimizadas por falta de espacio
+        //si existen entonces abrimos la ultima pestaña
+        var chatMIn=$("#elx_chat_space_tabs > .elx_chat_min").last();
+        if(chatMIn!=='undefined'){
+            chatMIn.removeClass('elx_chat_min').addClass('elx_chat_active');
+            removeElxUserNotifyChatMini(chatMIn);
+        }
+    });
+    $(doc).on('click', '.elx_min_chat', function() {
+        // Minimizar la ventana de chat    	
+        $(this).removeClass("glyphicon-minus elx_min_chat").addClass("glyphicon-resize-vertical elx_max_chat");
+        $(this).parents(".elx_header_tab_chat").next('.elx_body_tab_chat').css('display','none');
+    });
+    $(doc).on('click', '.elx_max_chat', function() {
+        // Restaurar la ventana de chat    	
+        $(this).removeClass("glyphicon-resize-vertical elx_max_chat").addClass("glyphicon-minus elx_min_chat");
+        $(this).parents(".elx_header_tab_chat").next('.elx_body_tab_chat').css('display','block');
+	});
+	$(doc).on('click', 'div.elx_header2_tab_chat > span.glyphicon-envelope', function() {
+		// Envío de correo al usuario del chat
+		elx_newEmail($(this).parents('.elx_tab_chat').data('alias'));
+	});
+	$(doc).on('click', 'div.elx_header2_tab_chat > span.glyphicon-print', function() {
+		// Envío de fax al usuario del chat
+		showSendFax($(this).parents('.elx_tab_chat').data('alias'));
+	});
+	
+	//accion que controla cuando damos enter en el text-area de una de la pestañas del chat
+	$(doc).on("keydown",".elx_chat_input", function( event ) {
+        // Ignore TAB and ESC.
+        if (event.which == 9 || event.which == 27) {
+            return false;
+            // Enter pressed? so send chat.
+        } else if ( event.which == 13 && $(this).val() !='') {
+            event.preventDefault();
+            //debemos mandar el mensaje y 
+            //hacer que el texto del text area desaparezca y sea enviado la divdel chat al que corresponde
+            var elx_txt_chat=$(this).val();
+            var elx_tab_chat=$(this).parents('.elx_tab_chat:first');
+            
+            $(this).val('');
+            sendMessage(elx_txt_chat, elx_tab_chat.attr('data-alias'));
+            // Ignore Enter when empty input.
+        } else if (event.which == 13 && $(this).val() == "") {
+            event.preventDefault();
+            return false;
+        }
+    });
+	$(doc).on("click",".elx_tab_chat", function( event ) {
+	    $(this).children('.elx_header_tab_chat').removeClass('elx_blink_chat');
+	    $(this).find('.elx_text_area_chat > textarea').focus();
+	});
+	
+	//motificaciones en pestañas de chat minimizadas por falta de espacio
+	$('#elx_notify_min_chat_box').on("click",function(event){
+	    var hidMinList=$('#elx_hide_min_list').val();
+	    if(hidMinList=='yes'){
+	        //se deben ocultar la lista de las conversaciones minimizadas por falta de espacio
+	        $("#elx_notify_min_chat_box").removeClass('elx_notify_min_chat_box_act');
+	        $('#elx_hide_min_list').val('no');
+	        $("#elx_list_min_chat").css('visibility','hidden');
+	    }else{
+	        //antes de mostrar la lista debemos calcular si el espacio que queda es suficiente para
+	        //mostrar los elementos de la lista
+	        //si no queda mucho espacio cambiamos la direccion de la lista al otro lado
+	        //se deben mostrar la lista de las conversaciones minimizadas por falta de espacio
+	        $("#elx_notify_min_chat_box").addClass('elx_notify_min_chat_box_act');
+	        $('#elx_hide_min_list').val('yes');
+	        var offElement=$("#elx_notify_min_chat_box").offset();
+	        var widthList = $("#elx_list_min_chat > div > .elx_list_min_chat_ul").width();
+	        if((offElement.left-40)>(widthList)){
+	            //existe suficiente espacio para mostrar la lista 
+	            $("#elx_list_min_chat").css('right','0px');
+	            $("#elx_list_min_chat").css('left','');
+	        }else{
+	            //no existe suficiente espacio para mostrar la lista 
+	            $("#elx_list_min_chat").css('left','0px');
+	            $("#elx_list_min_chat").css('right','');
+	        }
+	        $("#elx_list_min_chat").css('visibility','visible');
+	    }
+	});
+	$(doc).on('click','.elx_min_name',function(event){
+	    $(this).children(".elx_min_chat_num").css('visibility','hidden');
+	    //se deben ocultar la lista de las conversaciones minimizadas por falta de espacio
+	    $("#elx_notify_min_chat_box").removeClass('elx_notify_min_chat_box_act');
+	    $('#elx_hide_min_list').val('no');
+	    $("#elx_list_min_chat").css('visibility','hidden');
+	    var alias=$(this).parents('.elx_list_min_chat_li:first').attr('data-alias');
+	    var elx_tab_chat=startChatUser(alias,name,alias,'sent');
+	    elx_tab_chat.find('.elx_text_area_chat > textarea').focus();
+	    elx_tab_chat.find('.elx_tab_tittle_icon > span:first').removeClass("glyphicon-resize-vertical elx_max_chat").addClass("glyphicon-minus elx_min_chat");
+	    elx_tab_chat.find('.elx_body_tab_chat').css('display','block');
+	});
+	$(doc).on('click','.elx_min_remove',function(event){
+	    var liIcon=$(this).parents('.elx_list_min_chat_li:first');
+	    var alias=liIcon.attr('data-alias');
+	    liIcon.remove();
+	    var tabChat=getTabElxChat(alias);
+	    tabChat.removeClass('elx_chat_min').addClass('elx_chat_close');
+	    //disminuir la cuenta de las conversaciones minimizadas y en caso de no quedar niguna ocultar tab notificaciones
+	    removeElxUserNotifyChatMini(tabChat);
+	});
+}
+
+
+/**
+ * Procedimiento que inicializa todos los manejadores asociados a la 
+ * administración del popup de perfil de usuario.
+ * 
+ * @param doc Referencia al documento
+ * 
+ * @returns void
+ */
+function setupUserProfileHandlers(doc)
+{
+    //ejecuta la accion de cambio de lenguaje del usuario del popup de profile
+    $(doc).on('change','#languageProfile',function(){
+        var language = $("select[name='languageProfile'] option:selected").val();
+        changeLanguageProfile(language);
+    });
+    
+    //ejecuta la accion de eliminar la imagen que contiene el popup de profile del usuario
+    $(doc).on('click','#deleteImageProfile',function(){
+        deleteImageProfile();
+    });
+    
+    //ejecuta la funcion de cambio de imagen del popup de profile del usuario
+    $(doc).on('click','#picture',function(){
+        changeImageProfile();
+    });
+    
+    //muestra y oculta el div que contiene las cajas de textos para cambiar las contraseñas dentro del popup de profile
+    $(doc).on('click','#elx_link_change_passwd',function(){
+        if($('#elx_data_change_passwd').hasClass('visible')== true){
+            $("#elx_data_change_passwd").removeClass("visible").addClass("oculto");
+        }else{
+            $("#elx_data_change_passwd").removeClass("oculto").addClass("visible");
+        }
+    });
+    
+    //manda a recagar la pagina, luego de haber hecho algun cambio en el popup de profile del usuario
+    $(doc).on('click','.elx_close_popup_profile',function(){
+        if(elx_flag_changed_profile==true){
+            location.reload();
+        }
+    });
+    
+    
+    //funcionpara habilitar los campos de cambio de contraseña, luego que escriban la contraseña actual
+    $(doc).on('click','#currentPasswordProfile',function(){
+        $('#currentPasswordProfile').keyup(function(){
+            if($('#currentPasswordProfile').val() != ''){
+                $('#newPasswordProfile').removeAttr('disabled');
+                $('#repeatPasswordProfile').removeAttr('disabled');
+                $('#elx_save_change_passwd').removeAttr('disabled');
+            }else{
+                $('#newPasswordProfile').attr('disabled','disabled');
+                $('#repeatPasswordProfile').attr('disabled','disabled');
+                $('#elx_save_change_passwd').attr('disabled','disabled');
+            }
+        });
+    });
+}
+
 //se calcula el alto del contenido del modulo y se resta del alto del navegador cada
 //que se haga un resize, para que aparezca el scroll cuando sea necesario
 function scrollContentModule(){
-    if( $('.elx-modules-content').length )
+	if( $('.elx-modules-content').length )
     {
         var height_browser = $(window).height();
         var offElement=$(".elx-modules-content").offset();
         $(".elx-modules-content").css("height",height_browser-offElement.top +"px");
-    }  
+    }
 }
 function elxTitleAlert(message){
        
@@ -341,10 +337,11 @@ function elxTitleAlert(message){
     });
 }
 function adjustHeightElxListUser(){
-    h = $("#b3_1").height();
-    max_h=h-$("#head_rightdiv").height()-15;
+    var h = $("#b3_1").height();
+    var max_h=h-$("#head_rightdiv").height()-15;
     $("#elx_im_list_contacts").css('height',max_h+"px");
 }
+/*
 function changeModuleUF(moduleName){
     if(typeof(moduleName) == 'undefined' || moduleName === null) //nada que hacer no paso el modulo
         return false;
@@ -379,7 +376,7 @@ function changeModuleUF(moduleName){
         }
     );
 }
-
+*/
 function showElastixUFStatusBar(msgbar){
     $("#notify_change_elastix").css('display','block');
     if(msgbar){
@@ -406,7 +403,7 @@ function getElastixContacts(){
     var arrAction = new Array();
     arrAction["action"]  = "getElastixAccounts";
     arrAction["menu"] = "_elastixutils";
-    visibility="visible";
+
     request("index.php",arrAction,false,
         function(arrData,statusResponse,error){
             if(error!=''){
@@ -439,8 +436,15 @@ function getElastixContacts(){
                     typeAcc=arrType[i];
                     if( typeof arrData[typeAcc] !== 'undefined'){
                         for( var x in arrData[typeAcc]){
-                            var div=createDivContact(arrData[typeAcc][x]['idUser'],arrData[typeAcc][x]['display_name'],arrData[typeAcc][x]['uri'],arrData[typeAcc][x]['username'],arrData[typeAcc][x]['presence'],arrData[typeAcc][x]['st_code'], visibility);
-                            $("#elx_ul_list_contacts").append(div);
+                            $("#elx_ul_list_contacts").append(
+                            		createDivContact(
+                            				arrData[typeAcc][x]['idUser'],
+                            				arrData[typeAcc][x]['display_name'],
+                            				arrData[typeAcc][x]['uri'],
+                            				arrData[typeAcc][x]['username'],
+                            				arrData[typeAcc][x]['presence'],
+                            				arrData[typeAcc][x]['st_code'], 
+                            				'visible'));
                         }
                     }
                 }
@@ -496,15 +500,7 @@ function createDivContact(idUser, display_name, uri, alias, presence, presence_c
 	liContact.find('.extension_status').text(presence);
 	return liContact;
 }
-/*
-function createDivPersonal(){
-    var divContact ="<div class='elx_personal_info'>";
-    divContact +="<div class='elx_im_name_user'>"+display_name+"</div>";
-    divContact +="<div id='elx_im_status_user' class='elx_im_status_user'><div class='box_status_contact' style='background-color:green'></div></div>";
-    divContact +="</div>";
-    return divContact;
-}
-*/
+
 function getColorPresence(presence_code){
     /*-1 = Extension not found
     0 = Idle
@@ -535,140 +531,49 @@ function getColorPresence(presence_code){
 /******************************************************************
  * Funciones usadas para el crear el dispositivo sip del usuario
 *******************************************************************/
-/*function createUserAgent(UAParams){
-    var configuration = new Array();
-    var UAManParam = new Array('uri','password','ws_servers');
-    var UAOpParam = new Array('display_name', 'authorization_user', 'register', 'register_expires', 'no_answer_timeout', 'trace_sip', 'stun_servers', 'turn_servers', 'use_preloaded_route', 'connection_recovery_min_interval', 'connection_recovery_max_interval', 'hack_via_tcp', 'hack_ip_in_contact');
-    for( var i=0; i<UAManParam.length; i++){
-        param=UAManParam[i];
-        if(undefinedUAParam(UAParams[param])){
-            errorRegisterChatBar("Missing Mandatory Param: '"+param+"'");
-            return false;
-        }else{
-            configuration[param] = UAParams[param];
-        }
-    }
-    for( var i=0; i<UAOpParam.length; i++){
-        param=UAOpParam[i];
-        if(!undefinedUAParam(UAParams[param])){
-            configuration[param] = UAParams[param];
-        }
-    }
-    elx_phone = new JsSIP.UA(configuration);
-    elx_phone.on('newMessage', function(e){
-        var text,
-        message = e.data.message,
-        request = e.data.request;
-        uri = message.remote_identity;
-        if(message.direction === 'incoming'){
-            var display_name = request.from.display_name || request.from.uri.user;
-            var elx_txt_chat = request.body;
-            
-            if(uri instanceof JsSIP.URI) {
-                var uri2=uri.toAor().substr(4);
-            }else{
-                //revisar el formato de string y parsearlo para asegurarnos que tenemos
-                //algo con el  fromato user@domain
-                var uri2=uri.substr(4);
-            }
-            //verificamos si existe una conversacion abierta con el dispositivo
-            //si no existe la creamos
-            var elx_tab_chat=startChatUser(uri2,display_name,uri2,'receive');
-            if(!elx_tab_chat.hasClass('elx_chat_min')){
-                if(!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
-                    //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
-                    elx_tab_chat.children('.elx_header_tab_chat').addClass('elx_blink_chat');
-                }
-            }
-            elxTitleAlert("New Message "+display_name);
-            addMessageElxChatTab(elx_tab_chat,'in',elx_txt_chat);
-        }
-    });
-    elx_phone.on('unregistered', function(e){
-        alert("Desconectado... " + elx_phone.configuration.display_name );    
-    });
-    elx_phone.on('registrationFailed', function(e) {
-        if (! e.data.response) {
-            console.info("SIP registration error:\n" + e.data.cause);
-            errorRegisterChatBar("SIP registration error:\n" + e.data.cause);
-        }else {
-            console.info("SIP registration error:\n" + e.data.response.status_code.toString() + " " + e.data.response.reason_phrase)
-            errorRegisterChatBar("SIP registration error:\n" + e.data.response.status_code.toString() + " " + e.data.response.reason_phrase);
-        }
-    });
-    elx_phone.start();
-}*/
-var uri="";
 var ua;
 var sp;
-function createUserAgent(UAParams){
-//console.log(UAParams);
-
-UAParam = UAParams;
-var config = {
-     uri: UAParams.elxuser_username,
-     wsServers: UAParams.ws_servers,
-     displayName: UAParams.display_name,
-     password: UAParams.password,
-     hackIpInContact: UAParams.hack_ip_in_contact,
-     autostart: true,
-     register: true,
-     traceSip: true,
-    
+function createUserAgent(UAParams)
+{
+    var config = {
+        uri: UAParams.elxuser_username,
+        wsServers: UAParams.ws_servers,
+        displayName: UAParams.display_name,
+        password: UAParams.password,
+        hackIpInContact: UAParams.hack_ip_in_contact,
+        autostart: true,
+        register: UAParams.register,
+        traceSip: UAParams.trace_sip,    
     };
 
 
-    uri = UAParams.elxuser_username;
     ua = new SIP.UA(config);
+    
+    ua.on('message', function (e) {
+        var remoteUri = e.remoteIdentity.uri.toString();
+        var remoteUser = remoteUri.split('sip:');
      
-    ua.on('connected', function () {
-        console.log('Connected');
-    });
-
-    ua.on('registered', function () {
-        console.log('(Registered)');
+        var uri2 = remoteUser[1];
+        var elx_txt_chat = e.body;
+                
+        //verificamos si existe una conversacion abierta con el dispositivo
+        //si no existe la creamos
+        var elx_tab_chat = startChatUser(uri2, uri2, uri2, 'receive');
+        if (!elx_tab_chat.hasClass('elx_chat_min')){
+            if (!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
+                //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
+                elx_tab_chat.children('.elx_header_tab_chat').addClass('elx_blink_chat');
+            }
+        }
+     
+        addMessageElxChatTab(elx_tab_chat,'in',elx_txt_chat);
+    }).on('registered', function () {
         if (sp == null) {
-	        sp = new SIPPresence(ua);
+	        sp = new SIPPresence(this);
 	        sp.publishPresence();
 	        $(".elx_li_contact").each(function(i, v) { sp.subscribeToRoster($(v).data('alias')) });
         }
     });
-
-    ua.on('unregistered', function () {
-        console.log('Unregistered');
-    });
-
-    ua.on('message', receiveMessage);
-
-}
-
-function receiveMessage (e)
-{
-    var remoteUri = e.remoteIdentity.uri.toString();
-    remoteUser = remoteUri.split('sip:');
- 
-    uri2 = remoteUser[1];
-    var elx_txt_chat = e.body;
-            
-    //verificamos si existe una conversacion abierta con el dispositivo
-    //si no existe la creamos
-    var elx_tab_chat = startChatUser(uri2,uri2,uri2,'receive');
-    if (!elx_tab_chat.hasClass('elx_chat_min')){
-        if (!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
-            //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
-            elx_tab_chat.children('.elx_header_tab_chat').addClass('elx_blink_chat');
-        }
-    }
- 
-    addMessageElxChatTab(elx_tab_chat,'in',elx_txt_chat);
-}
-
-function undefinedUAParam(param){
-    if(typeof param !== 'undefined'){
-        if(param != '')
-            return false;
-    }
-    return true;
 }
 
 /**
@@ -695,20 +600,6 @@ function sendMessage(msg_txt, alias)
             alert(error_msg);
         }
     });
-}
-function inconmigMessage(){
-    
-}
-function inconmigMessageNotify(){
-    
-}
-function registerPhone()
-{
-    elx_phone.register();
-}
-function unregisterPhone()
-{
-    elx_phone.unregister();
 }
 
 /**

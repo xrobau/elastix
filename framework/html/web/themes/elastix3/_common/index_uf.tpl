@@ -121,7 +121,7 @@
                             </div>
 	                        <div class='elx_content_chat'></div>
 	                        <div class='elx_text_area_chat'>
-                                <textarea class='elx_chat_imput'></textarea>
+                                <textarea class='elx_chat_input'></textarea>
                             </div>
 	                    </div>
                     </div>

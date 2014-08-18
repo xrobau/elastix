@@ -76,13 +76,13 @@
                 </table>
             </div>
         </div>
-        
+<!--         
         <div class="row" >
             <div id="prueba" class="col-lg-12">
 
             </div>
         </div>
-        
+ -->
     </div>
 </div>
 <input type="hidden" value="{$currentPage}" id="elxGridCurrent">

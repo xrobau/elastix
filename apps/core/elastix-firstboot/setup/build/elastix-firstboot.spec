@@ -99,6 +99,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Tue Aug 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: in generated configuration, the Asterisk IP and port are now also
+  defined as substdef, in order to be used by a kamailio.cfg patch.
+  SVN Rev[6685]
+
 * Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.

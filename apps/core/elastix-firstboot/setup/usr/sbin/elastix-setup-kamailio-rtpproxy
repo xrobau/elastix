@@ -262,8 +262,10 @@ ROUTE_DEFAULT;
 
 $route_mhomed_elastix = <<<ROUTE_MHOMED_ELASTIX
 #!ifdef WITH_ASTERISK
-asterisk.bindip = "{$asterisk_ip}" desc "Asterisk IP Address"
-asterisk.bindport = "{$asterisk_port}" desc "Asterisk Port"
+#!substdef "/ASTERISKIP/{$asterisk_ip}/"
+#!substdef "/ASTERISKPORT/{$asterisk_port}/"
+asterisk.bindip = "ASTERISKIP" desc "Asterisk IP Address"
+asterisk.bindport = "ASTERISKPORT" desc "Asterisk Port"
 kamailio.bindip = "{$kamailio_ip}" desc "Kamailio IP Address"
 kamailio.bindport = "5060" desc "Kamailio Port"
 #!endif

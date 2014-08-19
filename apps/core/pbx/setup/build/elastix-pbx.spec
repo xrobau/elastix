@@ -13,7 +13,7 @@ Source2: conf-has-not-started.wav
 Source3: conf-will-end-in.wav
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 3.0.0-5
 Prereq: elastix-system >= 3.0.0-1
 Prereq: tftp-server, vsftpd
 Prereq: asterisk >= 1.8
@@ -377,6 +377,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Aug 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: the Asterisk NOTIFY for BLF has Contact: header set to
+  someextension@127.0.0.1:5080. This breaks some phones. Fix this by substituting
+  the contact value back to someextension@domain.com.
+  SVN Rev[6686]
+
 * Thu Aug 14 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: presence_xml.force_active must be 1 in order to be able to
   work with SIP client that announce presence but do not use XCAP to authorize

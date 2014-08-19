@@ -133,10 +133,10 @@ fi
   elastix registration server requiere have a account in elastix cloud.
   SVN Rev[6689]
 
-* Mon Jan 13 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+* Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.
-  SVN Rev[6570]
+  SVN Rev[6571]
 
 * Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: addons - elastix-addons.spec: It has been made a proper correction

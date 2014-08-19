@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 14
+Release: 15
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -329,9 +329,45 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Aug 19 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-15
+- FIXED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Tue Aug 19 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: framework - all themes, process registration has been changed, now
+  elastix registration server requiere have a account in elastix cloud.
+  SVN Rev[6691]
+
+* Tue Aug 19 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: framework - libs/misc.lib.php, process registration has been
+  changed, now elastix registration server requiere have a account in elastix cloud.
+  SVN Rev[6690]
+
+* Tue Aug 19 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: framework - javascript base.js, process registration has been
+  changed, now elastix registration server requiere have a account in elastix cloud.
+  SVN Rev[6688]
+
+* Tue Aug 19 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: framework - module register, process registration has been changed,
+  now elastix registration server requiere have a account in elastix cloud.
+  SVN Rev[6687]
+
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
+  packages were depreciated many functions, the equivalent functions are
+  updated in the files that use to have the menctioned functions.
+  SVN Rev[6638]
+
+* Mon May 26 2014 Bruno Macias <bmacias@palosanto.com> 
+- DELETED: extras - vtigerCRM, vtigerCRM software was removed on core elastix
+  apps. Now is a addon.
+  SVN Rev[6634]
+
 * Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-14
 - FIXED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6579]
 
 * Wed Apr 09 2014 Sergio Broncano <sbroncano@palosanto.com> 
 - FIXED: framework elastix 2, empty validation for document root now is denied.

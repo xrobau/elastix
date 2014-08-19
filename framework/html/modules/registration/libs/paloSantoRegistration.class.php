@@ -1,5 +1,6 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 2.0.0-31                                               |
@@ -28,17 +29,20 @@
   $Id: paloSantoRegistration.class.php,v 1.1 2011-02-25 10:08:51 Eduardo Cueva ecueva@palosanto.com Exp $ */
 
 class paloSantoRegistration {
+
     var $_DB;
     var $errMsg;
+    var $_webserviceURL;
 
-    function paloSantoRegistration(&$pDB)
-    {
+    public function paloSantoRegistration(&$pDB, $url) {
+        $this->_webserviceURL = $url;
+        
         // Se recibe como parámetro una referencia a una conexión paloDB
         if (is_object($pDB)) {
-            $this->_DB =& $pDB;
+            $this->_DB = & $pDB;
             $this->errMsg = $this->_DB->errMsg;
         } else {
-            $dsn = (string)$pDB;
+            $dsn = (string) $pDB;
             $this->_DB = new paloDB($dsn);
 
             if (!$this->_DB->connStatus) {
@@ -50,120 +54,390 @@ class paloSantoRegistration {
         }
     }
 
-    function getDataRegister()
-    {
+    public function getDataLocalRegister() {
+        if(!$this->columnExists("has_account")){
+            if(!$this->addColumnTableRegister("has_account char(3) default 'no'")) {
+                $this->errMsg = "The column 'has_account' does not exist and could not be created";
+                return null;
+            }
+        }
+        
         $query = "SELECT 
-                        id                   AS id,
-                        contact_name         AS contactNameReg,
-                        email                AS emailReg,
-                        phone                AS phoneReg,
-                        company              AS companyReg,
-                        address              AS addressReg,
-                        city                 AS cityReg,
-                        country              AS countryReg,
-                        idPartner            AS idPartnerReg
-                    FROM 
-                        register";
-        $result=$this->_DB->getFirstRowQuery($query, true);
+            id             AS id,
+            contact_name   AS contactNameReg,
+            email          AS emailReg,
+            phone          AS phoneReg,
+            company        AS companyReg,
+            address        AS addressReg,
+            city           AS cityReg,
+            country        AS countryReg,
+            idPartner      AS idPartnerReg,
+            has_account    AS has_account
+            FROM register";
+        $result = $this->_DB->getFirstRowQuery($query, true);
 
-        if($result==FALSE){
+        if ($result == FALSE) {
             $this->errMsg = $this->_DB->errMsg;
             return null;
         }
         return $result;
     }
 
-    private function _getSOAP()
-    {
+    public function processSaveDataRegister($data, $method=NULL) {
+        // 1er. Verifico si la tabla register.db existe
+        if (!$this->tableRegisterExists()) {
+            if (!$this->createTableRegister()) {
+                $this->errMsg = "The table register does not exist and could not be created";
+                return false;
+            }                
+        }
+        
+        //// 2do. Verifico si la columna has_account existe
+        if(!$this->columnExists("has_account")){
+            if(!$this->addColumnTableRegister("has_account char(3) default 'no'")) {
+                $this->errMsg = "The column 'has_account' does not exist and could not be created";
+                return false;
+            }
+        }
+        
+        // 3ro. Se debe verificar si ya existe algo en la base local, 
+        // si existe entonces es una actualizacion si no es una insercion
+        $newAccount_password = null;
+        if($method=="byAccount")
+            $dataOK = array("",$data[0],"","","","","");
+        else if($method=="newAccount"){
+            $newAccount_password =  array_shift($data);
+            $dataOK   = $data;        
+        }
+        
+        $dataOK[4] = (isset($dataOK[4]) & $dataOK[4] != "") ? $dataOK[4] : ""; //address
+        $dataOK[7] =  ""; //idpartner        
+        $dataOK[8] =  "yes"; //has_account, si el resultado del webservice es exitoso se inserta en db
+        $this->_DB->beginTransaction();
+        
+        $DATA = $this->getDataLocalRegister();
+        if (isset($DATA) & $DATA != "") { // actualizacion
+            $dataOK[9] = 1; //id
+            $status  = $this->updateDataRegister($dataOK);
+        } else { // insercion
+            $status  = $this->insertDataRegister($dataOK);
+        }
+
+        if (!$status) {
+            $this->errMsg = "There are some problem with the local database. Information cannot be saved in database.";
+            $this->_DB->rollBack();
+            return false;
+        }
+        
+        // 3ero. Saving to web service
+        $rsa_key = "";
+        if (!is_file("/etc/elastix.key"))            
+            $rsa_key = file_get_contents('/etc/ssh/ssh_host_rsa_key.pub');
+        else 
+            $rsa_key = file_get_contents("/etc/elastix.key");
+        
+        if($method=="byAccount")
+            $dataOK = array("byAccount", $data[0], $data[1], $rsa_key);
+        else if($method=="newAccount"){
+            $dataOK[8] = trim($rsa_key);
+            $dataOK[9] = $newAccount_password;
+            $dataOK = array_merge(array("newAccount"),$dataOK);
+        }
+        
+        $response = $this->sendDataWebService($dataOK);
+        
+        if ($response == null) {
+            $this->errMsg = "Impossible connect to Elastix Web services. Please check your internet connection.";
+            $this->_DB->rollBack();
+            return false;
+        }
+        
+        $arrResponse = explode("|",$response);
+        if (!(is_array($arrResponse) && count($arrResponse)==3)) {
+            $this->errMsg = "Your information cannot be saved. Please try again.";
+            $this->_DB->rollBack();
+            return false;
+        } 
+        
+        if($arrResponse[0]=="ERROR") {
+            if($arrResponse[2]=="PWD INVALID FORMAT")
+                $this->errMsg = "* Password: Must be at least 10 ";
+            else 
+                $this->errMsg = $arrResponse[1];
+            
+            $this->_DB->rollBack();
+            return false;
+        }
+        
+        $h = popen('/usr/bin/elastix-helper elastixkey', 'w');
+        fwrite($h, $arrResponse[1]);
+        pclose($h);   
+        
+        // 4to. Obtengo toda la información de la cuenta 
+        // para guardarla en la base local, puesto que en el 
+        // caso de byAccount solo se ingresaron pocos datos
+        // correo y clave, entonces es necesario traer los datos
+        // antes registrados en la cuenta cloud elastix.
+        if($method=="byAccount") {
+            $AccountData = $this->getDataServerRegistration();
+            if(!(is_array($AccountData)&& count($AccountData)>0)){
+                $this->errMsg = "Your information cannot be saved. Please try again.";
+                $this->_DB->rollBack();
+                return false;
+            }
+            $updtData[0] = $AccountData['contactNameReg'];
+            $updtData[1] = $AccountData['emailReg'];
+            $updtData[2] = $AccountData['phoneReg'];
+            $updtData[3] = $AccountData['companyReg'];
+            $updtData[4] = $AccountData['addressReg'];
+            $updtData[5] = $AccountData['cityReg'];
+            $updtData[6] = $AccountData['countryReg'];
+            $updtData[7] = $AccountData['idPartnerReg'];
+            $updtData[8] = $AccountData['has_account'];
+            $updtData[9] = 1;
+
+            $status  = $this->updateDataRegister($updtData);                    
+            if (!$status) {
+                $this->errMsg = "There are some problem with the local database. Information cannot be saved in database.";
+                $this->_DB->rollBack();
+                return false;
+            }                    
+        }            
+        $this->_DB->commit();
+        return true;
+    }
+    
+    public function isRegistered() {
+        //si el archivo existe entonces tenemos 2 casos
+        //1ero. es un registro completo o 2do es un
+        //registro incompleto.
+        if (is_file("/etc/elastix.key")) { 
+            if($this->columnExists("has_account")) {
+                $result = $this->_DB->getFirstRowQuery("select has_account from register;", true);
+                if (is_array($result) && count($result)>0){
+                    return ($result['has_account']=="yes")?"yes-all":"yes-inc";
+                }
+                else return "yes-inc";
+            }
+            else {
+                //intento crear la columna 
+                if(!$this->addColumnTableRegister("has_account char(3) default 'no'")) {
+                    $this->errMsg = "The column 'has_account' does not exist and could not be created";
+                    return "yes-inc";
+                }
+
+                //Actualizo el valor de la columna
+                //con la info desde webservice
+                $dataWebService = $this->getDataServerRegistration();
+                if(!(is_array($dataWebService) && count($dataWebService)>0)) // no se puedo conectar al webservice
+                    return "yes-inc";
+                
+                if($this->updateHasAccount(1,$dataWebService['has_account']))
+                        return ($dataWebService['has_account']=="yes")?"yes-all":"yes-inc";
+                else return "yes-inc";
+            }
+        }
+        else return "no";
+    }
+    
+    public function isRegisteredInfo() {
+        $info = array();
+        $info['registered'] = $this->isRegistered();
+        
+        switch ($info['registered']) {
+            case "yes-all":
+            $info['label'] = _tr("Registered");
+            $info['color'] = "#008800";
+            $key = file_get_contents("/etc/elastix.key");
+            $info['sid']   = trim($key);            
+            break; 
+            case "yes-inc":
+                $info['label'] = _tr("Incomplete registration");
+                $info['color'] = "yellow";
+                $key = file_get_contents("/etc/elastix.key");
+                $info['sid']   = trim($key);
+                break;
+            case "no":
+            default:
+                $info['label'] = _tr("Register");
+                $info['color'] = "#FF0000";
+                $info['sid']   = "";
+        }
+        
+        return $info;
+    }
+    
+    private function insertDataRegister($data) {
+        $query = "INSERT INTO register(contact_name, email, phone, company, address, city, country, idPartner,has_account) VALUES(?,?,?,?,?,?,?,?,?)";
+        $result = $this->_DB->genQuery($query, $data);
+        if ($result == FALSE) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    private function updateDataRegister($data) {
+        $query = "UPDATE register SET contact_name=?, email=?, phone=?, company=?, address=?, city=?, country=?, idPartner=?, has_account=? WHERE id=?";
+        $result = $this->_DB->genQuery($query, $data);
+        if ($result == FALSE) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    private function updateHasAccount($id, $has_account) {
+        $query = "UPDATE register SET has_account=? WHERE id=?";
+        $result = $this->_DB->genQuery($query, array($has_account,$id));
+        if ($result == FALSE) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
+    }
+    
+    private function createTableRegister() {
+        $query = "CREATE TABLE register(
+            id              integer primary key,
+            contact_name    varchar(50),
+            email           varchar(50),
+            phone           varchar(20),
+            company         varchar(50),
+            address         varchar(100),
+            city            varchar(25),
+            country         varchar(25),
+            idPartner       varchar(25),
+            has_account     char(3) default 'no'
+        )";
+        return $this->_DB->genExec($query);
+    }
+    
+    private function addColumnTableRegister($column) {
+        $query = "ALTER TABLE register ADD COLUMN $column;";
+        return $this->_DB->genExec($query);
+    }
+
+    private function tableRegisterExists() {
+        $query = "SELECT * FROM register";
+        $result = $this->_DB->genQuery($query);
+        if ($result === false) {
+            if (preg_match("/No such table/i", $this->_DB->errMsg))
+                return false;
+            else
+                return true;
+        }
+        else
+            return true;
+    }
+    
+    private function columnExists($column) {
+        $query = "SELECT $column FROM register";
+        $result = $this->_DB->genQuery($query);
+        if ($result === false) {
+            if (preg_match("/No such column/i", $this->_DB->errMsg))
+                return false;
+            else
+                return true;
+        }
+        else
+            return true;
+    }
+
+    private function _getSOAP() {
         ini_set("soap.wsdl_cache_enabled", "0");
-        $url_webservices = "https://webservice.elastix.org/modules/installations/webservice/registerWSDL.wsdl";
-    	
+
         /* La presencia de xdebug activo interfiere con las excepciones de
          * SOAP arrojadas por SoapClient, convirtiéndolas en errores 
          * fatales. Por lo tanto se desactiva la extensión. */
-        if (function_exists("xdebug_disable")) xdebug_disable(); 
+        if (function_exists("xdebug_disable"))
+            xdebug_disable();
+
+        return @new SoapClient($this->_webserviceURL);
+    }
+
+    public function processGetDataRegister() {
+        //1ero. Verifico existencia de registro
+        $registered = $this->isRegistered();
+        if($registered=="no") {
+            $this->errMsg = "Your Elastix Server is not registered";
+            return null;
+        }
         
-        return @new SoapClient($url_webservices);
-    }
+        //2do. obtengo datos desde el webservice
+        $dataWebService = $this->getDataServerRegistration();
+        if($dataWebService) {
+            $updtData    = array();
+            $updtData[0] = $dataWebService['contactNameReg'];
+            $updtData[1] = $dataWebService['emailReg'];
+            $updtData[2] = $dataWebService['phoneReg'];
+            $updtData[3] = $dataWebService['companyReg'];
+            $updtData[4] = $dataWebService['addressReg'];
+            $updtData[5] = $dataWebService['cityReg'];
+            $updtData[6] = $dataWebService['countryReg'];
+            $updtData[7] = $dataWebService['idPartnerReg'];
+            $updtData[8] = $dataWebService['has_account'];
+            $updtData[9] = 1;
 
-    function getDataServerRegistration()
-    {
-		if(is_file("/etc/elastix.key"))
-	    	$serverKey = file_get_contents("/etc/elastix.key");
-		else
-	    	$serverKey = "";
-	    	
-	    try {
-            $client = $this->_getSOAP();
-        	$content = $client->getDataServerRegistration($serverKey);
-        	return $content;
-	    } catch(SoapFault $e) {
-        	return null;
+            //3ero. Mantengo la base local actualizada, puede darse que desde la 
+            //administración del cloud.elastix.com haya cambiado.
+            if (!$this->updateDataRegister($updtData)) {
+                $this->errMsg = "There are some problem with the local database. Information cannot be saved in database.";
+            }   
+            return $dataWebService;
+        }
+        else {
+            //4to. obtengo datos desde la base local
+            $this->errMsg  = "Impossible connect to Elastix Web services. Please check your internet connection. Showing local information cache.";
+            $dataLocalCache = $this->getDataLocalRegister();
+            
+            if($dataLocalCache) {
+                $dataLocalCache['identitykeyReg'] = file_get_contents("/etc/elastix.key");
+                return $dataLocalCache;
+            }
+            else {
+                $this->errMsg = "Unable to get local information cache. Nor from Elastix Web services.";
+                return null;
+            }               
         }
     }
+    
+    private function getDataServerRegistration() {
+        if (is_file("/etc/elastix.key"))
+            $serverKey = file_get_contents("/etc/elastix.key");
+        else
+            return null;
 
-    function insertDataRegister($data)
-    {
-        $query = "INSERT INTO register(contact_name, email, phone, company, address, city, country, idPartner) VALUES(?,?,?,?,?,?,?,?)";
-        $result = $this->_DB->genQuery($query, $data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-
-    function updateDataRegister($data)
-    {
-        $query = "UPDATE register SET contact_name=?, email=?, phone=?, company=?, address=?, city=?, country=?, idPartner=? WHERE id=?";
-        $result = $this->_DB->genQuery($query, $data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return FALSE;
-        }
-        return TRUE;
-    }
-
-    function createTableRegister()
-    {
-	$query = "CREATE TABLE register(
-	id 		integer 	primary key,
-	contact_name 	varchar(25),
-	email 		varchar(25),
-	phone 		varchar(20),
-	company 	varchar(25),
-	address 	varchar(100),
-	city 		varchar(25),
-	country 	varchar(25),
-	idPartner	varchar(25)
-)";
-	return $this->_DB->genExec($query);
-    }
-
-    function tableRegisterExists()
-    {  
-	$query = "SELECT * FROM register";
-	$result = $this->_DB->genQuery($query);
-	if($result === false){
-	    if(preg_match("/No such table/i",$this->_DB->errMsg))
-		return false;
-	    else
-		return true;
-	}
-	else
-	  return true;
-    }
-
-    function sendDataWebService($data)
-    {
         try {
             $client = $this->_getSOAP();
-           	$content = $client->saveInstallation($data);
-        	return $content;
-        } catch(SoapFault $e) {
-        	return null;
+            $content = $client->getDataServerRegistration($serverKey);
+            return $content;
+        } catch (SoapFault $e) {
+            return null;
         }
+    }
+    
+    private function sendDataWebService($data) {
+        try {
+            $client  = $this->_getSOAP();
+            $content = $client->saveInstallation($data);
+            return $content;
+        } catch (SoapFault $e) {
+            return null;
+        }
+    }
+    
+    public function isStrongPassword($password){
+        if(strlen($password)>=10){
+            if(preg_match("/[a-z]+/",$password)){
+                if(preg_match("/[A-Z]+/",$password)){
+                    if(preg_match("/[0-9]+/",$password)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }
 ?>

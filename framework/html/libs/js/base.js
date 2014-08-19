@@ -225,13 +225,35 @@ function hideModalPopUP()
     modal_elastix_popup_shown = false;
 }
 
-function showPopupElastix(id, title, width, height){
-    var arrAction = "action=registration&rawmode=yes";
-    $.post("register.php",arrAction,
+function isRegisteredServer()
+{
+    var arrAction         = new Array();
+    arrAction['action']   = "isRegistered";
+    arrAction["rawmode"]  = "yes";
+    
+    request("register.php",arrAction,false,
         function(arrData,statusResponse,error)
         {
-            ShowModalPopUP(title,width,height,arrData);
-            getDataWebServer();
+            $('.register_link').css('color',arrData['color']);
+            $('.register_link').text(arrData['label']);
+        }
+    );
+}
+
+function showPopupCloudLogin(title, width, height){
+    var arrAction         = new Array();
+    arrAction['action']   = "cloudlogin";
+    arrAction["rawmode"]  = "yes";
+    
+    request("register.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            ShowModalPopUP(title,width,height,arrData['form']);
+            
+            if(arrData['registered']=="yes-all"){
+                showLoading(arrData['msgloading']);
+                getDataWebServer();
+            }
         }
     );
 }
@@ -250,163 +272,26 @@ function mostrar()
     );
 }
 
-function registration(){
-    var contactName = $('#contactNameReg').val();
-    var email       = $('#emailReg').val();
-    var phone       = $('#phoneReg').val();
-    var company     = $('#companyReg').val();
-    var address     = $('#addressReg').val();
-    var city        = $('#cityReg').val();
-    var country     = $('#countryReg option:selected').val();
-    var idPartner   = $('#idPartnerReg').val();
-
-    error = false;
-    txtError = "Please fill the correct values in fields: \n";
-    if(contactName == ""){ /*solo letras*/
-        error = true;
-        txtError += "* Contact Name: Only text \n";
-    }
-    if(!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) || email == ""){ /*solo email*/
-        error = true;
-        txtError += "* Email: Only format email \n";
-    }
-    if(!(/^[0-9\(\)\+\-]+\d$/.test(phone)) || phone == ""){ /*numeros y letras*/
-        error = true;
-        txtError += "* Phone: text or number \n";
-    }
-    if(company == ""){
-        error = true;
-        txtError += "* Company: text \n";
-    }
-    /*if(!(/^[A-Za-z\_\-\.\s\xF1\xD1]+$/.test(address)) || address == ""){
-        error = true;
-        txtError += "* Address: text \n";
-    }*/
-    if(city == ""){
-        error = true;
-        txtError += "* City: text \n";
-    }
-    if(!(/^.+$/.test(country)) || country == "none"){
-        error = true;
-        txtError += "* Country: Selected a country \n";
-    }
-    /*if(idPartner == ""){
-        error = true;
-        txtError += "* Id Partner: text \n";
-    }*/
-    if(error)
-        alert(txtError);
-    else{
-	$('#tdButtons').hide();
-        $('#tdloaWeb').show();
-        var arrAction = "action=saveregister&contactNameReg="+contactName+"&emailReg="+email+"&phoneReg="+phone+"&companyReg="+company+"&addressReg="+address+"&cityReg="+city+"&countryReg="+country+"&idPartnerReg="+idPartner+"&rawmode=yes";
-        $.post("register.php",arrAction,
-            function(arrData,statusResponse,error)
-            {
-                var response = JSONRPMtoString(arrData);
-                var registerText   = $('#lblRegisterCm').val();
-                var registeredText = $('#lblRegisteredCm').val();
-                alert(response["message"]);
-                if(response["statusResponse"]=="TRUE"){
-                        $('#registrar').hide();
-                        $('.register_link').css('color','#008800');
-                        $('.register_link').text(registeredText);
-                        getElastixKey();
-                        $('#tdButtons').show();
-                        $('#tdloaWeb').hide();
-                }else{
-                        $('.register_link').css('color','#FF0000');
-                        $('.register_link').text(registerText);
-                        $('#tdloaWeb').hide();
-                        $('#tdButtons').show();
-                }
-            }
-        );
-    }
-}
-
-function getDataWebServer()
+function getElastixKey()
 {
-    var arrAction = "action=getDataRegisterServer&rawmode=yes";
-    $('#btnAct').hide();
-    $('.tdIdServer').hide();
-    $.post("register.php",arrAction,
-	function(arrData,statusResponse,error)
-	{
-	    $('#getinfo').hide();
-	    if(arrData != null){
-		var response = JSONRPMtoString(arrData);
-		var status = response['statusResponse'];
-		if(status == "OK"){
-		    $('#btnAct').show();
-		    $('.tdIdServer').show();
-		    $('#msnTextErr').hide();
-		    $('#contactNameReg').val(response['message']['contactNameReg']);
-		    $('#emailReg').val(response['message']['emailReg']);
-		    $('#phoneReg').val(response['message']['phoneReg']);
-		    $('#companyReg').val(response['message']['companyReg']);
-		    $('#addressReg').val(response['message']['addressReg']);
-		    $('#cityReg').val(response['message']['cityReg']);
-		    $('#countryReg').val(response['message']['countryReg']);
-		    $('#identitykey').text(response['message']['identitykeyReg']);
-		}else{
-		    if(response['error'] != "no registrado"){
-			$('#btnAct').show();
-			$('.tdIdServer').hide();
-			if(response['statusResponse'] == "error"){
-			    $('#msnTextErr').show();
-			    $('#msnTextErr').text(response['error']);
-			    $('#btnAct').hide();
-			}else if(response['statusResponse'] == "error-update"){
-                            $('#msnTextErr').show();
-                            $('#msnTextErr').text(response['error']);
-                        }
-
-			if(response['message'] != null){
-			    if(response['message']['contactNameReg'])
-				$('#contactNameReg').val(response['message']['contactNameReg']);
-			    if(response['message']['emailReg'])
-				$('#emailReg').val(response['message']['emailReg']);
-			    if(response['message']['phoneReg'])
-				$('#phoneReg').val(response['message']['phoneReg']);
-			    if(response['message']['companyReg'])
-				$('#companyReg').val(response['message']['companyReg']);
-			    if(response['message']['addressReg'])
-				$('#addressReg').val(response['message']['addressReg']);
-			    if(response['message']['cityReg'])
-				$('#cityReg').val(response['message']['cityReg']);
-			    if(response['message']['countryReg'])
-				$('#countryReg').val(response['message']['countryReg']);
-			    if(response['message']['identitykeyReg'])
-				$('#identitykey').text(response['message']['identitykeyReg']);
-			}
-
-		    }else if(response['error'] == "no registrado")
-			      $('#btnAct').show();
-		}
-	    }
-	}
-    );
-}
-
-function getElastixKey(){
-    var arrAction = "action=getServerKey&rawmode=yes&menu=addons";
-    $.post("index.php",arrAction,
-	function(arrData,statusResponse,error)
-	{
-	    var serverKey = arrData["server_key"];
-	    if(serverKey && serverKey != ""){
+    var arrAction         = new Array();
+    arrAction['action']   = "isRegistered";
+    arrAction["rawmode"]  = "yes";
+    
+    request("register.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            if(arrData["registered"]=="yes-all"){
 		hideModalPopUP();
 		var callback = $('#callback').val();
 		if(callback && callback !=""){
 		    if(callback=="do_checkDependencies")
-		      do_checkDependencies(serverKey);
+		      do_checkDependencies(arrData["sid"]);
 		    else if(callback=="do_iniciarInstallUpdate")
 		      do_iniciarInstallUpdate();
 		}
 	    }
-	}
-    );
+        });
 }
 
 function setAdminPassword(){
@@ -952,4 +837,10 @@ function getCurrentElastixModule()
 // clase global para que hereden todos los input radio el nuevo estilo.
 $(document).ready(function(){
     $( ".radio_buttonset_elx" ).buttonset();
+});
+
+// En el index.php del framework se hacía uso de smarty para
+// setear el estado del registro, ahora se hace desde javascript.
+$(document).ready(function(){
+    isRegisteredServer();
 });

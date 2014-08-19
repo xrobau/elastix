@@ -3,14 +3,14 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 7
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 2.4.0-15
 Prereq: chkconfig, php-soap
 Requires: yum
 
@@ -124,6 +124,26 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Aug 19 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-9
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Tue Aug 19 2014 Bruno Macias <bmacias@palosanto.com> 
+- CHANGED: apps - module addons, process registration has been changed, now
+  elastix registration server requiere have a account in elastix cloud.
+  SVN Rev[6689]
+
+* Mon Jan 13 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[6570]
+
+* Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com>
+- CHANGED: addons - elastix-addons.spec: It has been made a proper correction
+  in the date of an entry in the changelog that interferes with the creation of
+  this module as an rpm.
+  SVN Rev[6570]
+
 * Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: disable xdebug before creating a SoapClient in order to
   work around xdebug generating fatal errors for SOAP exceptions on creation.
@@ -138,6 +158,7 @@ fi
 * Mon Jan 13 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6375]
 
 * Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com> 
 - UPDATED: Update to the changelog about the english and spanish help files in

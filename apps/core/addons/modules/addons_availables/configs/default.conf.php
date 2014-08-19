@@ -36,7 +36,7 @@ $arrConfModule = array(
     'dsn_conn_database' =>  "sqlite3:///$arrConf[elastix_dbdir]/addons.db",
     'socket_conn_ip'    =>  'localhost',
     'socket_conn_port'  =>  20004,
-    'url_webservice'    =>  'http://webservice.elastix.org/modules/addons_availables/webservice/addons.wsdl',
-    'url_images'        =>  'http://webservice.elastix.org/modules/addons_availables/images_newAddons',
+    'url_webservice'    =>  'http://cloud.elastix.org/wsdl.php?type=wsdl&name=addons',
+    'url_images'        =>  'http://cloud.elastix.org/modules/addons_availables/images_newAddons',
 );
 ?>

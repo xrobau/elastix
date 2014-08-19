@@ -176,29 +176,29 @@ function do_listarAddons(list_offset)
 
 function checkServerID(isPurchase)
 {
-    $.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
-		rawmode:	'yes',
-		action:		'getServerKey'
-	},
-	function (respuesta) {
-		$('body').css('cursor','default');
-		$('.neo-addons-row-button-buy-left, .neo-addons-row-button-buy-right, .neo-addons-row-button-install-left, .neo-addons-row-button-install-right, .neo-addons-row-button-trial-left, .neo-addons-row-button-trial-right').css('cursor','pointer');
-		if(respuesta["server_key"]){
-		    if(isPurchase)
-			do_checkDependencies(null);
-		    else
-			do_iniciarInstallUpdate();
-		}
-		else{
-		    if(isPurchase)
-		      var callback = "do_checkDependencies";
-		    else
-		      var callback = "do_iniciarInstallUpdate";
-		    $('#callback').val(callback);
-		    showPopupElastix('registrar','Register',600,400);
-		}
-	});
+    var arrAction         = new Array();
+    arrAction['action']   = "isRegistered";
+    arrAction["rawmode"]  = "yes";
+    
+    request("register.php",arrAction,false,
+        function(arrData,statusResponse,error)
+        {
+            $('body').css('cursor','default');
+            $('.neo-addons-row-button-buy-left, .neo-addons-row-button-buy-right, .neo-addons-row-button-install-left, .neo-addons-row-button-install-right, .neo-addons-row-button-trial-left, .neo-addons-row-button-trial-right').css('cursor','pointer');
+	
+	    if(arrData["registered"]=="yes-all"){
+                if(isPurchase)
+                    do_checkDependencies(null);
+                else
+                    do_iniciarInstallUpdate();
+            }
+            else{
+                var callback = (isPurchase) ? "do_checkDependencies" : "do_iniciarInstallUpdate";
+                $('#callback').val(callback);
+                showPopupCloudLogin('Register',540,460);
+            }
+        }
+    );
 }
 
 function keyPressed(e)

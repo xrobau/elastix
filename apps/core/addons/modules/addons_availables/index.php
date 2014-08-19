@@ -143,7 +143,6 @@ function _moduleContent(&$smarty, $module_name)
 	'deleteActionTmp', // AJAX - se elimina las acciones de la tabla action_tmp
 	//'invalidarCacheAddons', // AJAX - se elimina la cache que almacena los addons
 	'iniciarUninstall', // AJAX - inicio de desinstalación de un addon
-	'getServerKey', // AJAX - se obtiene el Server Key
 	'checkDependencies', // AJAX - se inicia la verificación de dependencias
 	'cancelTransaction', // AJAX - cancela una transacción en progreso
         );
@@ -564,16 +563,6 @@ function do_deleteActionTmp($smarty, $module_name, $local_templates_dir)
     $oAddons = new paloSantoAddons();
     $oAddons->deleteActionTmp();
     return $json->encode(NULL);
-}
-
-function do_getServerKey($smarty, $module_name, $local_templates_dir)
-{
-    $json = new Services_JSON();
-    Header('Content-Type: application/json');
-
-    $oAddons = new paloSantoAddons();
-    $respuesta["server_key"] = $oAddons->getSID();
-    return $json->encode($respuesta);
 }
 
 function do_cancelTransaction($smarty, $module_name, $local_templates_dir)

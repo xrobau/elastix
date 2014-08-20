@@ -2,9 +2,19 @@
     <div id="cont_logo">
         <div id="logo"></div>
     </div>
-    <div id="icn_prof" class='tooldivicons hidden-xs'>
+    <div class="dropdown tooldivicons">
+    <div id="icn_prof" class=' hidden-xs dropdown-toggle' data-toggle="dropdown">
         <div id="name" class="hidden-xs hidden-sm"><p id="elx-username">{$USER_NAME}<br/>{$USER_ESTENSION}</p></div>
         <div class="elx-content-photo"><img id="photo" alt="image" src="index.php?menu=_elastixutils&action=getImage&ID={$ID_ELX_USER}&rawmode=yes"/></div>
+    </div>
+    <ul class="dropdown-menu" role="menu">
+       <li><a id="elx_presence_online" href="#"><div class="box_status_contact" style="display: inline-block; background-color: #8cbe29"></div>Online</a></li>
+       <li><a id="elx_presence_away" href="#"><div class="box_status_contact" style="display: inline-block; background-color: orange"></div>Away</a></li>
+       <li><a id="elx_presence_meeting" href="#"><div class="box_status_contact" style="display: inline-block; background-color: orange"></div>On the phone</a></li>
+       <li><a id="elx_presence_busy" href="#"><div class="box_status_contact" style="display: inline-block; background-color: red"></div>Busy</a></li>
+       <li class="divider"></li>
+       <li><a id="elx_presence_offline" href="#"><div class="box_status_contact" style="display: inline-block; background-color: gray"></div>Offline</a></li>
+    </ul>
     </div>
     <div id="elx-navbar-min" class="visible-xs"><a href="#"><img src="web/_common/images/elastix3_icon-mini-menu.png"></a></div>
     

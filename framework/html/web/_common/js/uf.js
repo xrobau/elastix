@@ -1,13 +1,12 @@
 var elx_flag_changed_profile = false;
 $(document).ready(function(){
-    main_content_div = $('#main_content_elastix'); //div que contiene lo que cada modulo tiene 
-    rightdiv = $('#rightdiv'); //panel lateral en donde aparece el chat
-    
     $(this).on('click','.elx-msg-area-close',function(e){
         $("#elx_msg_area").slideUp();  
     });
                             
     $(window).resize(function(){
+    	var main_content_div = $('#main_content_elastix'); //div que contiene lo que cada modulo tiene
+    	var rightdiv = $('#rightdiv'); //panel lateral en donde aparece el chat
         var w = $(window).width();
         var tmpSize=0;
         if(w>=500){
@@ -47,13 +46,15 @@ $(document).ready(function(){
     /* evento que modifica el estilo de todos los paneles, al pulsar el icono para desplegar u ocultar 
     el panel lateral derecho (rightpanel)*/         
     $(this).on('click','#icn_disp2',function(e){
+    	var main_content_div = $('#main_content_elastix'); //div que contiene lo que cada modulo tiene
+    	var rightdiv = $('#rightdiv'); //panel lateral en donde aparece el chat
         var w = $(window).width();
         if( rightdiv.is(':hidden') ){ //estaba oculto y lo abrimos
             //es necesario modificar la el margin right del espacio del chat
             if(w>=500){
                 $("#elx_chat_space").css("right",200+"px");
                 //modificamos el tamaño del div principal
-                tmpSize = w - 180;
+                var tmpSize = w - 180;
                 main_content_div.css("width",tmpSize+"px");
             }else{
                 //escondemos las pestañas del chat activas
@@ -82,6 +83,8 @@ $(document).ready(function(){
     setupChatWindowHandlers(this);
     
     setupUserProfileHandlers(this);
+    
+    setupPresenceHandlers(this);
     
     //despliega en efecto slider el menu oculto, en tamño < 480px;
     $(this).on('click','#elx-navbar-min',function(){
@@ -121,7 +124,7 @@ $(document).ready(function(){
         searchElastixContacts();
     });
 
-    getElastixContacts();
+    setupSIPClient();
 
 });
 
@@ -136,7 +139,7 @@ function setupChatWindowHandlers(doc)
     // Click en contacto para abrir la ventana de chat correspondiente
 	$(doc).on('click', '.elx_li_contact', function() {
         // Ahorrar espacio para caso de ventana estrecha
-        if ($(window).width() < 500) rightdiv.hide(10);
+        if ($(window).width() < 500) $('#rightdiv').hide(10);
         
         //var elx_tab_chat = 
         startChatUser(
@@ -318,6 +321,25 @@ function setupUserProfileHandlers(doc)
     });
 }
 
+function setupPresenceHandlers(doc)
+{
+	$(doc).on('click', '#elx_presence_online', function() {
+		if (sp != null) sp.setPresenceStatus('Online', []);
+	});
+	$(doc).on('click', '#elx_presence_away', function() {
+		if (sp != null) sp.setPresenceStatus('Away', ['away']);
+	});
+	$(doc).on('click', '#elx_presence_meeting', function() {
+		if (sp != null) sp.setPresenceStatus('On the phone', ['on-the-phone']);
+	});
+	$(doc).on('click', '#elx_presence_busy', function() {
+		if (sp != null) sp.setPresenceStatus('Busy (DND)', ['busy']);
+	});
+	$(doc).on('click', '#elx_presence_offline', function() {
+		if (sp != null) sp.withdrawPresence();
+	});
+}
+
 //se calcula el alto del contenido del modulo y se resta del alto del navegador cada
 //que se haga un resize, para que aparezca el scroll cuando sea necesario
 function scrollContentModule(){
@@ -397,61 +419,124 @@ function showElxUFMsgBar(status,msgbar){
     $("#elx_msg_area_text").html(msgbar);
     $("#elx_msg_area").slideDown(); 
 }
-function getElastixContacts(){
-    var hDiv=$('#rightdiv').height();
-    $('#startingSession').css({'top':hDiv/2-10,'display':'block'});
-    var arrAction = new Array();
-    arrAction["action"]  = "getElastixAccounts";
-    arrAction["menu"] = "_elastixutils";
 
-    request("index.php",arrAction,false,
-        function(arrData,statusResponse,error){
-            if(error!=''){
-                errorRegisterChatBar(error);
-            }else{
-                //revisamos la informacion del contacto
-                if(arrData['my_info'] !== 'undefined'){
-                    //mandamos a crear la instancia del web phone para el usario
-                    if(createUserAgent(arrData['my_info'])===false){
-                        //argumentos faltantes
-                        return false;
-                    }
-                    //setear el color de la presencia del usuario
-                    var color_ps_user=getColorPresence(arrData['my_info']['st_code']);
-                    $(".elx-content-photo").attr('border-color', color_ps_user);
-                }else{
-                    //error porque no tenemos los datos del configuración del usuario
-                    errorRegisterChatBar('Missing Configurations..');
-                    return false;
-                }
-                
-                $('#startingSession').css('display','none');
-                $('#b3_1').css('display','block');
-                
-                //contactos disponibles
-                var arrType = new Array('ava','unava','not_found');
-                //eliminamos el contenido del div, para poner el nuevo contenido (de la busqueda)
-                $("#elx_ul_list_contacts").empty();
-                for( var i=0; i<arrType.length; i++){
-                    typeAcc=arrType[i];
-                    if( typeof arrData[typeAcc] !== 'undefined'){
-                        for( var x in arrData[typeAcc]){
-                            $("#elx_ul_list_contacts").append(
-                            		createDivContact(
-                            				arrData[typeAcc][x]['idUser'],
-                            				arrData[typeAcc][x]['display_name'],
-                            				arrData[typeAcc][x]['uri'],
-                            				arrData[typeAcc][x]['username'],
-                            				arrData[typeAcc][x]['presence'],
-                            				arrData[typeAcc][x]['st_code'], 
-                            				'visible'));
-                        }
-                    }
-                }
-            }
+var ua;	// Objeto de SIP.UA
+var sp; // Objeto de SIPPresence
+
+/**
+ * Procedimiento que inicia la configuración de las configuraciones SIP. Las
+ * dependencias que hay que resolver hasta ahora son las siguientes:
+ * 
+ * Carga credenciales SIP,
+ * 	requiere: (nada)
+ * Inicio cliente SIP
+ * 	requiere: Carga credenciales SIP
+ * Carga lista de contactos
+ * 	requiere: (nada)
+ * Creación de lista de contactos con data
+ * 	requiere: Carga lista de contactos
+ * Publicación de presencia propia
+ * 	requiere: Inicio cliente SIP
+ * Subscripción a lista de contactos
+ * 	requiere: Inicio cliente SIP, Creación de lista de contactos con data
+ * 
+ * @return void
+ */
+function setupSIPClient()
+{
+    // Centrar spinner en el recuadro de chat
+    var alturaDiv = $('#rightdiv').height();
+    $('#startingSession').css({'top': alturaDiv/2 - 10, 'display':'block'});
+
+    // Marcar color de presencia como desconectado hasta actualizar
+    $(".elx-content-photo").css('border-color', 'gray');
+    
+    var deferred_registerUA = new $.Deferred();
+    var deferred_rosterLoad = new $.Deferred();
+
+    // Iniciar la carga de las credenciales SIP
+    $.get('index.php', {
+        menu:	'_elastixutils',
+        action:	'getSIPParameters'
+    }, function (response) {
+        if (response.error != '') {
+            // Rechazar la promesa con el mensaje de error
+            deferred_registerUA.reject(response.error);
+        } else {
+            // Con las credenciales, se puede iniciar el SIP.UA
+            ua = new SIP.UA({
+                uri:                response.message.elxuser_username,
+                wsServers:          response.message.ws_servers,
+                displayName:        response.message.display_name,
+                password:           response.message.password,
+                hackIpInContact:    response.message.hack_ip_in_contact,
+                autostart:          true,
+                register:           response.message.register,
+                registerExpires:    response.message.register_expires,
+                usePreloadedRoute:  response.message.use_preloaded_route,
+                noAnswerTimeout:    response.message.no_answer_timeout,
+                traceSip:           response.message.trace_sip
+            });
+            ua.on('message', function (e) {
+                var remoteUri = e.remoteIdentity.uri.toString();
+                var remoteUser = remoteUri.split('sip:');     
+                var uri2 = remoteUser[1];
+                var elx_txt_chat = e.body;
+
+                receiveMessage(uri2, e.contentType, elx_txt_chat);
+            }).on('registered', function () {
+                // El registro exitoso es uno de los requisitos para iniciar suscripción
+            	deferred_registerUA.resolve();
+            }).on('registrationFailed', function(cause) {
+                deferred_registerUA.reject('Failed to register: ' + cause);
+            });
         }
-    );
+    }).fail(function() {
+        deferred_registerUA.reject('Failed to load SIP parameters!');
+    });
+    
+    // Iniciar la carga de la lista de contactos
+    $.get('index.php', {
+        menu:	'_elastixutils',
+        action:	'getSIPRoster'
+    }, function (response) {
+        if (response.error != '') {
+            // Rechazar la promesa con el mensaje de error
+        	deferred_rosterLoad.reject(response.error);
+        } else {
+            for (var i = 0; i < response.message.length; i++) {
+                $("#elx_ul_list_contacts").append(
+                	createDivContact(
+                        response.message[i]['idUser'],
+                        response.message[i]['display_name'],
+                        response.message[i]['uri'],
+                        response.message[i]['username'],
+                        '(unknown)',
+                        null, 
+                        'visible'));
+            }
+            
+            // La carga exitosa del roster es uno de los requisitos para subscripción
+            deferred_rosterLoad.resolve();
+        }
+    }).fail(function() {
+    	deferred_rosterLoad.reject('Failed to load SIP roster!');
+    });
+    
+    // Iniciar la subscripción cuando ambas promesas puedan resolverse
+    $.when(deferred_registerUA, deferred_rosterLoad)
+    .done(function() {
+    	$('#startingSession').css('display','none');
+        $('#b3_1').css('display','block');
+        
+        sp = new SIPPresence(ua);
+        sp.publishPresence();
+        $(".elx_li_contact").each(function(i, v) { sp.subscribeToRoster($(v).data('alias')) });
+    }).fail(function(msg) {
+    	errorRegisterChatBar(msg);
+    });
 }
+
 /******************************************************************************************
 * función que muestra el listado de los contactos del chat, segun el criterio de busqueda
 ******************************************************************************************/
@@ -501,79 +586,30 @@ function createDivContact(idUser, display_name, uri, alias, presence, presence_c
 	return liContact;
 }
 
-function getColorPresence(presence_code){
-    /*-1 = Extension not found
-    0 = Idle
-    1 = In Use
-    2 = Busy
-    4 = Unavailable
-    8 = Ringing
-    16 = On Hold*/
-    
-    var color='';
-    if(presence_code=='-1'){
-       color='';
-    }else if(presence_code=='0'){
-       color='#8cbe29';
-    }else if(presence_code=='1'){
-        color='red';
-    }else if(presence_code=='2'){
-        color='black';
-    }else if(presence_code=='4'){
-        color='grey';
-    }else if(presence_code=='8'){
-        color='orange';
-    }else if(presence=='16'){
-        color='orange';
-    }
-    return color;
-}
 /******************************************************************
  * Funciones usadas para el crear el dispositivo sip del usuario
 *******************************************************************/
-var ua;
-var sp;
-function createUserAgent(UAParams)
+function receiveMessage(alias, content_type, msg_txt)
 {
-    var config = {
-        uri: UAParams.elxuser_username,
-        wsServers: UAParams.ws_servers,
-        displayName: UAParams.display_name,
-        password: UAParams.password,
-        hackIpInContact: UAParams.hack_ip_in_contact,
-        autostart: true,
-        register: UAParams.register,
-        traceSip: UAParams.trace_sip,    
-    };
-
-
-    ua = new SIP.UA(config);
-    
-    ua.on('message', function (e) {
-        var remoteUri = e.remoteIdentity.uri.toString();
-        var remoteUser = remoteUri.split('sip:');
-     
-        var uri2 = remoteUser[1];
-        var elx_txt_chat = e.body;
-                
-        //verificamos si existe una conversacion abierta con el dispositivo
-        //si no existe la creamos
-        var elx_tab_chat = startChatUser(uri2, uri2, uri2, 'receive');
-        if (!elx_tab_chat.hasClass('elx_chat_min')){
-            if (!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
-                //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
-                elx_tab_chat.children('.elx_header_tab_chat').addClass('elx_blink_chat');
-            }
+    //verificamos si existe una conversacion abierta con el dispositivo
+    //si no existe la creamos
+    var elx_tab_chat = startChatUser(alias, alias, alias, 'receive');
+    if (!elx_tab_chat.hasClass('elx_chat_min')){
+        if (!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
+            //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
+            elx_tab_chat.children('.elx_header_tab_chat').addClass('elx_blink_chat');
         }
-     
-        addMessageElxChatTab(elx_tab_chat,'in',elx_txt_chat);
-    }).on('registered', function () {
-        if (sp == null) {
-	        sp = new SIPPresence(this);
-	        sp.publishPresence();
-	        $(".elx_li_contact").each(function(i, v) { sp.subscribeToRoster($(v).data('alias')) });
-        }
-    });
+    }
+ 
+    if (content_type == 'application/im-iscomposing+xml') {
+        // El mensaje es una indicación de que el usuario remoto está escribiendo
+    	var xml = $.parseXML(msg_txt);
+    	var state = $(xml).find('isComposing > state').text();
+    	if (state != 'active') state = 'idle';
+    	setComposingStateElxChatTab(elx_tab_chat, state);
+    } else {
+        addMessageElxChatTab(elx_tab_chat, 'in', msg_txt);
+    }
 }
 
 /**
@@ -611,9 +647,6 @@ function getTabElxChat(alias)
 	var chatTab = $("#elx_chat_space_tabs > .elx_tab_chat[data-alias='" + alias + "'] :first");
 	return chatTab.length > 0 ? chatTab : false;
 }
-//funcion que crea una nueva pestaña de chat
-//con las opciones dadas
-//devuelve el objeto jquery del div que continene el chat
 
 /**
  * Función que crea una nueva ventana de chat con el nombre, uri, y alias 
@@ -787,10 +820,32 @@ function addMessageElxChatTab(chatTab, direction, message)
     chatTab.find('.elx_body_tab_chat:first .elx_content_chat:first')
     	.append(messagediv.prepend($('<b></b>').text(send_name + ': ')))
     	.scrollTop(1e4);
+    if (direction != 'out') {
+    	chatTab.find('.elx_body_tab_chat:first .elx_content_chat:first div.elx_chat_composing').remove();
+    }
+}
+
+/**
+ * Procedimiento para actualizar el estado de composición remota en el chat.
+ * 
+ * @param chatTab	Objeto jQuery de la ventana de chat a actualizar
+ * @param state		'active' o 'idle'
+ */
+function setComposingStateElxChatTab(chatTab, state)
+{
+	console.log(state);
+	
+	var target = chatTab.find('.elx_body_tab_chat:first .elx_content_chat:first');
+	target.find('div.elx_chat_composing').remove();
+	if (state == 'active') {
+		var messagediv = $('<div class="elx_chat_composing"></div>');
+		messagediv.text('composing...');
+		target.append(messagediv).scrollTop(1e4);
+	}
 }
 
 function addElxUserNotifyChatMini(elxTabChatToMin){
-    alias=elxTabChatToMin.attr('data-alias');
+    var alias=elxTabChatToMin.attr('data-alias');
     var exist=false;
     var numMinchat=0;
     //debemos comprabar si el nuevo tab que se quiere añadir ya se encuentra en la lista
@@ -803,7 +858,7 @@ function addElxUserNotifyChatMini(elxTabChatToMin){
     });
     
     if(!exist){
-        name=elxTabChatToMin.find('.elx_tab_chat_name > .elx_tab_chat_name_span').html();
+        var name=elxTabChatToMin.find('.elx_tab_chat_name > .elx_tab_chat_name_span').html();
         var elx_chat_user = "<li class='elx_list_min_chat_li' data-alias='"+alias+"'>";
         elx_chat_user +="<span class='elx_min_span'>";
         elx_chat_user +="<div class='glyphicon glyphicon-remove elx_min_remove'></div>"; //imagen de x para cerrar
@@ -821,7 +876,7 @@ function addElxUserNotifyChatMini(elxTabChatToMin){
     }
 }
 function removeElxUserNotifyChatMini(elxTabChatToMin){
-    alias=elxTabChatToMin.attr('data-alias');
+    var alias=elxTabChatToMin.attr('data-alias');
     var numMinchat=0
     $('#elx_list_min_chat > div > .elx_list_min_chat_ul > .elx_list_min_chat_li').each(function() {
         if(alias == $(this).attr('data-alias')){
@@ -1418,11 +1473,12 @@ function SIPPresence(ua)
 			// Verificar si se tiene un PUBLISH previo en el servidor
 			$.get('index.php', {
 				menu: '_elastixutils',
-				action: 'getPublishETag'			
+				action: 'getPublishState'			
 			}, function(data) {
-				if (data['message'] != "") {
-					//console.log('SE TIENE PUBLISH PREVIO!');
-					this.presenceETag = data['message'];
+				if (data.message != "") {
+					this.presenceETag = (data.message.ETag != "") ? data.message.ETag : null; // puede ser null
+					this.presentity.note = data.message.note;
+					this.presentity.activities = data.message.activities;
 				}
 				this._publishPresence();
 			}.bind(this));
@@ -1452,22 +1508,32 @@ function SIPPresence(ua)
 					// SIP-If-Match luego de recargar la página
 					$.post('index.php', {
 						menu: '_elastixutils',
-						action: 'setPublishETag',
-						PublishETag: this.presenceETag
+						action: 'setPublishState',
+						ETag: this.presenceETag,
+						note: this.presentity.note,
+						activities: this.presentity.activities
 					}, function(data) {});
 					
 					this.publishRequest.request.setHeader('SIP-If-Match', this.presenceETag);
+					
+					// Elegir el color a mostrar según notas y actividades
+					var color = '#8cbe29';
+					if (this.presentity.activities.length > 0) color = 'orange';
+					if (this.presentity.activities.indexOf('busy') != -1) color = 'red';
+					$(".elx-content-photo").css('border-color', color);					
 				} else {
 					this.publishRequest = null;
 					this.presenceETag = null;
 					$.post('index.php', {
 						menu: '_elastixutils',
-						action: 'setPublishETag',
-						PublishETag: ''
+						action: 'setPublishState',
+						ETag: ''
 					}, function(data) {});
+					$(".elx-content-photo").css('border-color', 'gray');
 				}
 			}.bind(this));
 		} else {
+			this.publishRequest.request.body = this.presentity.toString();
 			this.publishRequest.send();
 		}
 
@@ -1495,6 +1561,12 @@ function SIPPresence(ua)
 		this.subsWatch = null;
 		for (var contact in this.roster) this.unsubscribeFromRoster(contact);
 		
+	}
+	
+	this.setPresenceStatus = function (note, activities) {
+		this.presentity.note = note;
+		this.presentity.activities = activities;
+		this.publishPresence();
 	}
 	
 	/**
@@ -1559,9 +1631,6 @@ function SIPPresence(ua)
 		this._subscribeWithServerCheck(contact, 'presence', function(contact, subscription) {
 			this.roster[contact] = subscription;
 		}.bind(this), function (notification) {
-			//console.log("RECIBIDO presence");
-			//console.log(notification);
-
 			var pres = new Presentity();
 			pres.open = false;
 			pres.note = 'Offline';

@@ -217,6 +217,73 @@ function handleJSON_getElastixAccounts($smarty, $module_name)
     return $jsonObject->createJSON();
 }
 
+function handleJSON_getSIPParameters($smarty, $module_name)
+{
+    global $arrConf;
+
+    Header('Content-Type: application/json');
+    $jsonObject = new PaloSantoJSON();
+
+    $error = '';
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $paramSIP = getChatClientConfig($pDB, $error);
+    if (!is_array($paramSIP)) {
+        $jsonObject->set_error(_tr("An error has ocurred to retrieved server configuration params:  ").': '.$error);
+        return $jsonObject->createJSON();
+    }
+    
+    $pACL = new paloACL($pDB);
+    $arrCredentials = getUserCredentials($_SESSION['elastix_user']);
+    $accountInfo = $pACL->getUserAccountInfo($arrCredentials['idUser'], $arrCredentials['id_organization']);
+
+    /* Agregar los siguientes parámetros requeridos: 
+     * elxuser_username display_name password  */
+    $paramSIP += array(
+        'elxuser_username'  =>  $accountInfo['username'],
+        'display_name'      =>  $accountInfo['name'],
+        'password'          =>  $_SESSION['elastix_pass2']
+    );
+    $jsonObject->set_message($paramSIP);
+
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_getSIPRoster($smarty, $module_name)
+{
+    global $arrConf;
+    
+    Header('Content-Type: application/json');
+    $jsonObject = new PaloSantoJSON();
+    
+    $error = '';
+    $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+    $pACL = new paloACL($pDB);
+    $arrCredentials = getUserCredentials($_SESSION['elastix_user']);
+    $accountList = $pACL->getUsersAccountsInfoByDomain($arrCredentials["id_organization"]);
+    if (!is_array($accountList)) {
+        $jsonObject->set_error(_tr("An error has ocurred to retrieved Contacts Info").': '.$pACL->errMsg);
+        return $jsonObject->createJSON();
+    }
+    $paramSIP = getChatClientConfig($pDB, $error);
+    if (!is_array($paramSIP)) {
+        $jsonObject->set_error(_tr("An error has ocurred to retrieved server configuration params:  ").': '.$error);
+        return $jsonObject->createJSON();
+    }
+    
+    $result = array();
+    foreach ($accountList as $tupla) if ($tupla['id'] != $arrCredentials['idUser']) {
+        $result[] = array(
+            'idUser'        =>  $tupla['id'],
+            'display_name'  =>  $tupla['name'],
+            'uri'           =>  $tupla['elxweb_device'].'@'.$paramSIP['elastix_chat_server'],
+            'username'      =>  $tupla['username'],
+        );
+    }
+    $jsonObject->set_message($result);
+    
+    return $jsonObject->createJSON();
+}
+
 //action = getUserProfile
 function handleJSON_getUserProfile($smarty, $module_name){
     include_once "libs/paloSantoForm.class.php";
@@ -382,23 +449,52 @@ function handleJSON_changeImageProfile($smarty, $module_name){
 }
 
 // Manejo del guardado del ETag de la petición PUBLISH de presencia del usuario
-function handleJSON_setPublishETag($smarty, $module_name)
+function handleJSON_setPublishState($smarty, $module_name)
 {
 	Header('Content-Type: application/json');
-	$jsonObject = new PaloSantoJSON();
+	/*
 	if (isset($_POST['PublishETag'])) $_SESSION['PublishETag'] = $_POST['PublishETag'];
+	*/
+	
+    $publishState = array(
+        'ETag'          => NULL,
+        'note'          => 'Online',    // TODO: i18n, pero investigar interacción con Jitsi
+        'activities'    =>  array(),
+    );
+    if (isset($_POST['ETag'])) {
+        $publishState['ETag'] = $_POST['ETag'];
+        if (empty($publishState['ETag'])) $publishState['ETag'] = NULL;
+    }
+    if (isset($_POST['note']) && is_string($_POST['note']))
+        $publishState['note'] = $_POST['note'];
+    if (isset($_POST['activities']) && is_array($_POST['activities'])) {
+        $publishState['activities'] = array_map(function($x) { return "$x"; }, $_POST['activities']);
+    }
+    $_SESSION['publish_state'] = $publishState;
+    
+	$jsonObject = new PaloSantoJSON();
 	$jsonObject->set_message('OK');
 	return $jsonObject->createJSON();
 }
 
 // Petición del ETag previamente guardado para el PUBLISH de presencia del usuario
-function handleJSON_getPublishETag($smarty, $module_name)
+function handleJSON_getPublishState($smarty, $module_name)
 {
 	Header('Content-Type: application/json');
+	/*
 	$tag = NULL;
 	if (isset($_SESSION['PublishETag'])) $tag = $_SESSION['PublishETag'];
+	*/
+    
+    $publishState = array(
+        'ETag'          => NULL,
+        'note'          => 'Online',    // TODO: i18n, pero investigar interacción con Jitsi
+        'activities'    =>  array(),
+    );
+    if (isset($_SESSION['publish_state'])) $publishState = $_SESSION['publish_state'];
+	
 	$jsonObject = new PaloSantoJSON();
-	$jsonObject->set_message($tag);
+	$jsonObject->set_message($publishState);
 	return $jsonObject->createJSON();
 }
 

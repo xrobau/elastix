@@ -207,6 +207,7 @@ img {
 #icn_prof{	
  width:180px; 	
  border-left: 1px solid grey;
+ cursor: pointer;
 }
 
 #icn_prof:hover > ul {
@@ -549,6 +550,10 @@ img {
 }
 .elx_chat_min{
     display :none;
+}
+div.elx_chat_composing {
+	color: gray;
+	font-style: italic;
 }
 .elx_nodisplay{
     display:none!important;

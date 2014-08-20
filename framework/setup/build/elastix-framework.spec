@@ -402,6 +402,18 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Aug 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: fix unintended global variables in uf.js .
+- CHANGED: Framework: rework SIP client initialization to split SIP credentials 
+  fetch as separate from SIP roster.
+- CHANGED: Framework: implement basic presence status change through websocket 
+  client
+- CHANGED: Framework: implement handling of composing notifications 
+  (application/im-iscomposing+xml)
+- CHANGED: Framework: store presence state across page reloads in addition to 
+  ETag.
+  SVN Rev[6695]
+
 * Mon Aug 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: some code cleanup in uf.js
   SVN Rev[6684]

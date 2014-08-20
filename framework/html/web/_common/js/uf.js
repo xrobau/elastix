@@ -530,8 +530,7 @@ function setupSIPClient()
         $('#b3_1').css('display','block');
         
         sp = new SIPPresence(ua);
-        sp.publishPresence();
-        $(".elx_li_contact").each(function(i, v) { sp.subscribeToRoster($(v).data('alias')) });
+        sp.publishPresence();        
     }).fail(function(msg) {
     	errorRegisterChatBar(msg);
     });
@@ -1485,6 +1484,10 @@ function SIPPresence(ua)
 		} else {
 			this._publishPresence();
 		}
+		
+		$(".elx_li_contact").each(function(i, v) {
+			this.subscribeToRoster($(v).data('alias'));
+		}.bind(this));
 	}
 	this._publishPresence = function() {
 		if (this.publishRequest == null) {
@@ -1623,10 +1626,7 @@ function SIPPresence(ua)
 	 * de presencia. Hasta ahora funciona con Jitsi. 
 	 */
 	this.subscribeToRoster = function(contact) {
-		//console.log('Analizando ingreso de contacto ' + contact);
 		if (this.roster[contact] != null) return;
-		
-		//console.log('Suscribiendo a contacto ' + contact);
 		
 		this._subscribeWithServerCheck(contact, 'presence', function(contact, subscription) {
 			this.roster[contact] = subscription;
@@ -1660,7 +1660,7 @@ function SIPPresence(ua)
 		this._unsubscribeWithServerCheck(contact, this.roster[contact]);
 		delete this.roster[contact];
 
-		this._updateContactStatus(contact, 'grey', 'Offline');
+		this._updateContactStatus(contact, 'grey', '(unknown)');
 	}
 	
 	this._updateContactStatus = function(contact, newColor, newNote) {

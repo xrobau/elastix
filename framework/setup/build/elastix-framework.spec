@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Aug 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix re-subscription of SIP roster when web user signs offline
+  and back online in the same page.
+  SVN Rev[6696]
 - CHANGED: Framework: fix unintended global variables in uf.js .
 - CHANGED: Framework: rework SIP client initialization to split SIP credentials 
   fetch as separate from SIP roster.

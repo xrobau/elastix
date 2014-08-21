@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Aug 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: make PUBLISH of presence more robust in a scenario where
+  ETag fetched from server becomes stale.
+  SVN Rev[6697]
+
 * Wed Aug 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix re-subscription of SIP roster when web user signs offline
   and back online in the same page.

@@ -1535,6 +1535,23 @@ function SIPPresence(ua)
 					$(".elx-content-photo").css('border-color', 'gray');
 				}
 			}.bind(this));
+			this.publishRequest.on('rejected', function (response, cause) {
+				if (response.status_code == 412) {
+					/* 412 Conditional request failed */
+					if (this.presenceETag != null) {
+						/* Si ocurre este error, entonces ha ocurrido un error 
+						 * de sincronización, y el ETag almacenado es inválido.
+						 */
+						this.presenceETag = null;
+						delete this.publishRequest.request.headers['Sip-If-Match'];
+						this.publishRequest.send();
+						return;
+					}
+				}
+				
+				// Ha ocurrido otro error que no se sabe manejar
+				errorRegisterChatBar('Failed to PUBLISH presence: ' + response.status_code + ' ' + cause);
+			}.bind(this));
 		} else {
 			this.publishRequest.request.body = this.presentity.toString();
 			this.publishRequest.send();

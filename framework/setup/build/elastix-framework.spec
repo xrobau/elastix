@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Aug 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: implement filtering by online status. By default, only
+  non-offline contacts are shown.
+  SVN Rev[6699]
 - CHANGED: Framework: unify color selection for state as a method in Presentity
   object. Extend presentity XML parsing to cope with Blink style presentity.
   SVN Rev[6698]

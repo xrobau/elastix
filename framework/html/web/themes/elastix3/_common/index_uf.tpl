@@ -55,6 +55,9 @@
                         </div>
                     </div>
                 </div>
+                <div class="checkbox">                    
+                    <label><input type="checkbox" id="elx-chk-show-offline-contacts" />Show offline</label>
+                </div>
                 <div id='elx_im_list_contacts'>
 		            <!-- Dentro de este ul se encuentra la plantilla que define un item de contacto -->
 		            <ul id="elx_template_contact_status" style="display: none">

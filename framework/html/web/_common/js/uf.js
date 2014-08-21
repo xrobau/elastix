@@ -120,9 +120,8 @@ $(document).ready(function(){
     });
     
     //captura ingresado por el teclado y manda a consultar a la base los contactos del chat
-    $(this).on('keyup','#im_search_filter',function(){
-        searchElastixContacts();
-    });
+    $(this).on('keyup', '#im_search_filter', updateContactVisibility);
+    $('#elx-chk-show-offline-contacts').click(updateContactVisibility);
 
     setupSIPClient();
 
@@ -510,10 +509,7 @@ function setupSIPClient()
                         response.message[i]['idUser'],
                         response.message[i]['display_name'],
                         response.message[i]['uri'],
-                        response.message[i]['username'],
-                        '(unknown)',
-                        null, 
-                        'visible'));
+                        response.message[i]['username']));
             }
             
             // La carga exitosa del roster es uno de los requisitos para subscripción
@@ -536,23 +532,23 @@ function setupSIPClient()
     });
 }
 
-/******************************************************************************************
-* función que muestra el listado de los contactos del chat, segun el criterio de busqueda
-******************************************************************************************/
-function searchElastixContacts(){
+/**
+ * Esta función actualiza el estado de visibilidad de todos los contactos. Un
+ * contacto debe mostrarse si su nombre coincide con el patrón de búsqueda (una
+ * cadena vacía coincide con todo), y si deben mostrarse los contactos offline,
+ * o si el contacto en sí está online.
+ */
+function updateContactVisibility()
+{
     var pattern = $("input[name='im_search_filter']").val();
-    
-    $(".elx_contact .elx_im_name_user").each(function ()
-    {
-        var str = $(this).html();
-        if (str.match(pattern)) {
-            ($(this).parent()).parent().removeClass("oculto");
-            ($(this).parent()).parent().addClass("visible");
-        }else{
-            ($(this).parent()).parent().removeClass("visible");
-            ($(this).parent()).parent().addClass("oculto");
-        }
-        
+    var mostrarTodos = $('#elx-chk-show-offline-contacts').is(':checked');
+
+    // Ocultar todos los contactos, y volver a mostrar sólo coincidencias 
+    $("#elx_ul_list_contacts > li.elx_li_contact").hide().each(function() {
+    	if ($(this).data('name').match(pattern) &&
+    		(mostrarTodos || $(this).data('status') != 'offline')) {
+    		$(this).show();
+    	}
     });
 }
 
@@ -565,23 +561,20 @@ function searchElastixContacts(){
  * @param display_name		Nombre completo del usuario representado
  * @param uri				URI del contacto SIP IM para el usuario (ya no se usa?)
  * @param alias				URI del contacto SIP telefónico para el usuario
- * @param presence			Descripción inicial del estado de presencia
- * @param presence_code		Código para el estado de presencia (ya no se usa?)
- * @param visibility		Clase que define estado inicial de visibilidad
  * @returns
  */
-function createDivContact(idUser, display_name, uri, alias, presence, presence_code, visibility)
+function createDivContact(idUser, display_name, uri, alias)
 {
 	var liContact = $('#elx_template_contact_status > li').clone()
 		.addClass('elx_li_contact')
+		.attr('data-status', 'offline')
 		.attr('data-uri', uri)
 		.attr('data-alias', alias)
 		.attr('data-name', display_name)
 		.attr('data-idUser', idUser);
-	liContact.find('div.elx_contact').addClass(visibility);
 	liContact.find('.box_status_contact').css('background-color', 'grey');
 	liContact.find('.elx_im_name_user').text(display_name);
-	liContact.find('.extension_status').text(presence);
+	liContact.find('.extension_status').text('(unknown)');
 	return liContact;
 }
 
@@ -1701,7 +1694,10 @@ function SIPPresence(ua)
 	
 	this._updateContactStatus = function(contact, newColor, newNote) {
 		var liContact = $(".elx_li_contact[data-alias='" + contact + "']");
+		liContact.data('status', (newColor != 'grey') ? 'online' : 'offline');
 		liContact.find('.box_status_contact').css('background-color', newColor);
 		liContact.find('.extension_status').text(newNote);
+		
+		updateContactVisibility();
 	}
 }

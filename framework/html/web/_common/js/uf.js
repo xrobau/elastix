@@ -330,7 +330,7 @@ function setupPresenceHandlers(doc)
 		if (sp != null) sp.setPresenceStatus('Away', ['away']);
 	});
 	$(doc).on('click', '#elx_presence_meeting', function() {
-		if (sp != null) sp.setPresenceStatus('On the phone', ['on-the-phone']);
+		if (sp != null) sp.setPresenceStatus('On a meeting', ['meeting']);
 	});
 	$(doc).on('click', '#elx_presence_busy', function() {
 		if (sp != null) sp.setPresenceStatus('Busy (DND)', ['busy']);
@@ -530,7 +530,7 @@ function setupSIPClient()
         $('#b3_1').css('display','block');
         
         sp = new SIPPresence(ua);
-        sp.publishPresence();        
+        sp.publishPresence();
     }).fail(function(msg) {
     	errorRegisterChatBar(msg);
     });
@@ -1383,7 +1383,8 @@ function Presentity()
 	this.fromXML = function(xml_presence) {
 		var xmlpr = xml_presence.getElementsByTagName('presence')[0];
 		
-		var sipuri = xmlpr.getAttribute('entity');
+		// Blink manda el atributo entity codificado
+		var sipuri = decodeURIComponent(xmlpr.getAttribute('entity'));
 		var m = /^(sip:)?(\S+)@(\S+)$/.exec(sipuri);
 		this.user = m[2];
 		this.domain = m[3];
@@ -1429,6 +1430,15 @@ function Presentity()
 			var xmlnote = xmltuple[0].getElementsByTagName('note');
 			if (xmlnote.length > 0) {
 				this.note = xmlnote[0].childNodes[0].nodeValue;
+			} else {
+				// Blink no asigna la nota. Se sintetiza una en base a las actividades
+				if (this.activities.indexOf('available') != -1) {
+					this.note = 'Online';
+				} else if (this.activities.indexOf('away') != -1) {
+					this.note = 'Away';
+				} else if (this.activities.indexOf('busy') != -1) {
+					this.note = 'Busy (DND)';
+				}
 			}
 		}
 	}
@@ -1441,6 +1451,25 @@ function Presentity()
 	
 	this.fromString = function(s) {
 		return this.fromXML($.parseXML(s));
+	}
+	
+	// Elegir el color a mostrar según notas y actividades
+	this.suggestStateColor = function() {		
+		var color = '#8cbe29';
+		if (this.open) {
+			if (this.activities.length == 1 && this.activities.indexOf('available') != -1) {
+				// Estado disponible estilo Blink
+				color = '#8cbe29';
+			} else {
+				if (this.activities.length > 0) color = 'orange';
+				if (this.activities.indexOf('busy') != -1) color = 'red';
+				if (this.activities.indexOf('on-the-phone') != -1) color = 'red';
+			}
+		} else {
+			color = 'grey';
+		}
+
+		return color;
 	}
 }
 
@@ -1520,10 +1549,7 @@ function SIPPresence(ua)
 					this.publishRequest.request.setHeader('SIP-If-Match', this.presenceETag);
 					
 					// Elegir el color a mostrar según notas y actividades
-					var color = '#8cbe29';
-					if (this.presentity.activities.length > 0) color = 'orange';
-					if (this.presentity.activities.indexOf('busy') != -1) color = 'red';
-					$(".elx-content-photo").css('border-color', color);					
+					$(".elx-content-photo").css('border-color', this.presentity.suggestStateColor());					
 				} else {
 					this.publishRequest = null;
 					this.presenceETag = null;
@@ -1657,15 +1683,8 @@ function SIPPresence(ua)
 				pres.fromString(notification.request.body);
 			}
 			
-			var newColor = 'grey';
-			if (pres.open) {
-				newColor = '#8cbe29';
-				if (pres.activities.length > 0) newColor = 'orange';
-				if (-1 != pres.activities.indexOf('busy')) newColor = 'red';
-				if (-1 != pres.activities.indexOf('on-the-phone')) newColor = 'red';
-			}
-			
-			this._updateContactStatus(pres.user + "@" + pres.domain, newColor, pres.note);
+			this._updateContactStatus(pres.user + "@" + pres.domain,
+				pres.suggestStateColor(), pres.note);
 		}.bind(this))
 	}
 	

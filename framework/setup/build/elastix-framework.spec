@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Aug 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: switch links for Profile and Send Fax from javascript:
+  action URLs to handlers installed by jQuery.
+  SVN Rev[6701]
 - CHANGED: Framework: implement generic link handler that traps the page switch
   and attempts to shutdown the SIP client before navigating. For now, implemented
   for <a> links only.

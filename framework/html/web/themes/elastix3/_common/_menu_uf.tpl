@@ -23,7 +23,7 @@
         <div id="elx-button-setup" class="btn-group">
             <img class="dropdown-toggle" data-toggle="dropdown" src="web/_common/images/elastix3_icon-setup.png" alt="Setup">
             <ul class="dropdown-menu" role="menu">
-                <li><a href="javascript:showProfile()">{$Profile_l}</a></li>
+                <li><a class="elx-display-dialog-show-profile" href="#">{$Profile_l}</a></li>
                 <li class="divider"></li>
                 {foreach from=$arrMainMenu key=idMenu item=menu}
                     {if $menu.id eq "mysettings"}
@@ -51,7 +51,7 @@
                 <a href="index.php?menu={$idMenu}"><img src="web/_common/images/elastix3_icon-mail.png" alt="Mail"></a>
             {/if}
         {/foreach}
-        <a href="javascript:showSendFax(false)"><img id="elx-button-fax" src="web/_common/images/elastix3_icon-fax.png" alt="Fax"></a>
+        <a class="elx-display-dialog-show-sendfax" href="#"><img src="web/_common/images/elastix3_icon-fax.png" alt="Fax"></a>
         <a href="#"><img id="icn_disp2" src="web/_common/images/elastix3_icon-chat.png" alt="Chat"></a>
     </div>
     
@@ -64,7 +64,7 @@
         <div id="elx-button-setup" class="btn-group">
             <img class="dropdown-toggle" data-toggle="dropdown" src="web/_common/images/elastix3_icon-setup.png" alt="Setup">
             <ul class="dropdown-menu" role="menu">
-                <li><a href="javascript:showProfile()">{$Profile_l}</a></li>
+                <li><a class="elx-display-dialog-show-profile" href="#">{$Profile_l}</a></li>
                 <li class="divider"></li>
                 {foreach from=$arrMainMenu key=idMenu item=menu}
                     {if $menu.id eq "mysettings"}
@@ -92,7 +92,7 @@
                 <a href="index.php?menu={$idMenu}"><img src="web/_common/images/elastix3_icon-mail.png" alt="Mail"></a>
             {/if}
         {/foreach}
-        <a href="javascript:showSendFax(false)"><img id="elx-button-fax" src="web/_common/images/elastix3_icon-fax.png" alt="Fax"></a>
+        <a class="elx-display-dialog-show-sendfax" href="#"><img src="web/_common/images/elastix3_icon-fax.png" alt="Fax"></a>
         <a href="#"><img id="icn_disp2" src="web/_common/images/elastix3_icon-chat.png" alt="Chat"></a>
     </div>
 </div>

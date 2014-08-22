@@ -86,6 +86,8 @@ $(document).ready(function(){
     
     setupPresenceHandlers(this);
     
+    setupSendFaxHandlers(this);
+
     //despliega en efecto slider el menu oculto, en tamño < 480px;
     $(this).on('click','#elx-navbar-min',function(){
         if ($("#elx-slide-menu-mini").is(":hidden") ) {
@@ -103,21 +105,6 @@ $(document).ready(function(){
         
     });
     
-    //oculta o muestra la opcion de subir archivo para la opción "sendfax"
-    $(this).on('click','#elx-chk-attachment-file',function(){
-        if($(this).is(':checked')) {
-            $("#elx-body-fax-label").removeClass("visible").addClass("oculto");
-            $("#elx-body-fax-content").removeClass("visible").addClass("oculto");
-            $("#elx-attached-fax-file").removeClass("oculto").addClass("visible");
-            $("#elx-notice-fax-file").removeClass("oculto").addClass("visible");
-            $("textarea[name='faxContent']").val("")
-        }else{
-            $("#elx-body-fax-label").removeClass("oculto").addClass("visible");
-            $("#elx-body-fax-content").removeClass("oculto").addClass("visible");
-            $("#elx-attached-fax-file").removeClass("visible").addClass("oculto");
-            $("#elx-notice-fax-file").removeClass("visible").addClass("oculto");
-        }
-    });
     
     //captura ingresado por el teclado y manda a consultar a la base los contactos del chat
     $(this).on('keyup', '#im_search_filter', updateContactVisibility);
@@ -281,6 +268,9 @@ function setupChatWindowHandlers(doc)
  */
 function setupUserProfileHandlers(doc)
 {
+	// Abrir el diálogo de cambio de perfil
+	$(doc).on('click', '.elx-display-dialog-show-profile', showProfile);
+	
     //ejecuta la accion de cambio de lenguaje del usuario del popup de profile
     $(doc).on('change','#languageProfile',function(){
         var language = $("select[name='languageProfile'] option:selected").val();
@@ -330,6 +320,12 @@ function setupUserProfileHandlers(doc)
     });
 }
 
+/**
+ * Procedimiento que inicializa los manejadores que hacen cambios de la presencia
+ * del propio usuario.
+ * 
+ * @param doc Referencia al documento
+ */
 function setupPresenceHandlers(doc)
 {
 	$(doc).on('click', '#elx_presence_online', function() {
@@ -347,6 +343,35 @@ function setupPresenceHandlers(doc)
 	$(doc).on('click', '#elx_presence_offline', function() {
 		if (sp != null) sp.withdrawPresence();
 	});
+}
+
+/**
+ * Procedimiento que inicializa los manejadores asociados al diálogo de envío
+ * de fax.
+ * 
+ * @param doc Referencia al documento
+ */
+function setupSendFaxHandlers(doc)
+{
+    $(doc).on('click', '.elx-display-dialog-show-sendfax', function() {
+    	showSendFax(false);
+    })    
+    
+    //oculta o muestra la opcion de subir archivo para la opción "sendfax"
+    $(doc).on('click','#elx-chk-attachment-file',function(){
+        if($(this).is(':checked')) {
+            $("#elx-body-fax-label").removeClass("visible").addClass("oculto");
+            $("#elx-body-fax-content").removeClass("visible").addClass("oculto");
+            $("#elx-attached-fax-file").removeClass("oculto").addClass("visible");
+            $("#elx-notice-fax-file").removeClass("oculto").addClass("visible");
+            $("textarea[name='faxContent']").val("")
+        }else{
+            $("#elx-body-fax-label").removeClass("oculto").addClass("visible");
+            $("#elx-body-fax-content").removeClass("oculto").addClass("visible");
+            $("#elx-attached-fax-file").removeClass("visible").addClass("oculto");
+            $("#elx-notice-fax-file").removeClass("visible").addClass("oculto");
+        }
+    });
 }
 
 //se calcula el alto del contenido del modulo y se resta del alto del navegador cada

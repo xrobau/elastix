@@ -402,6 +402,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Aug 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: implement generic link handler that traps the page switch
+  and attempts to shutdown the SIP client before navigating. For now, implemented
+  for <a> links only.
+  SVN Rev[6700]
+
 * Thu Aug 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: implement filtering by online status. By default, only
   non-offline contacts are shown.

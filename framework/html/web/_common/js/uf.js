@@ -125,6 +125,16 @@ $(document).ready(function(){
 
     setupSIPClient();
 
+    /* Instalar manejador que intenta apagar el cliente SIP antes de cambiar de 
+     * página, para mitigar las sesiones inválidas. */
+	$('a').on('click', function(e) {
+		if ($(this).attr('href').match(/^(index.php)?\?/)) {
+			e.preventDefault();
+			shutdownSIPClient(function() {
+				document.location = $(this).attr('href');				
+			}.bind(this));
+		}
+	});
 });
 
 /**
@@ -530,6 +540,25 @@ function setupSIPClient()
     }).fail(function(msg) {
     	errorRegisterChatBar(msg);
     });
+}
+
+/**
+ * Procedimiento que apaga de forma ordenada el cliente SIP antes de navegar
+ * usando GET al URL indicado por el parámetro.
+ * 
+ * @param callback Funcion a la cual llamar luego de finalizar cliente SIP
+ */
+function shutdownSIPClient(callback)
+{
+	if (ua != null && (ua.isConnected() || ua.isRegistered())) {
+		$('body').css('cursor', 'progress');
+		if (sp != null) sp.withdrawPresence();
+		ua.on('disconnected', callback);
+		ua.unregister();
+		ua.stop();
+	} else {
+		callback();
+	}
 }
 
 /**
@@ -1625,7 +1654,10 @@ function SIPPresence(ua)
 	 * subscripción que se destruye.
 	 */
 	this._unsubscribeWithServerCheck = function(contact, subscription) {
-		if (subscription != null) subscription.unsubscribe();
+		if (subscription != null) {
+			subscription.unsubscribe();
+			subscription.close();
+		}
 	}
 	
 	/* Ejecutar la subscripción al evento presence.winfo . Este evento informa de

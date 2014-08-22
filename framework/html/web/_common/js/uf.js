@@ -1,4 +1,3 @@
-var elx_flag_changed_profile = false;
 $(document).ready(function(){
     $(this).on('click','.elx-msg-area-close',function(e){
         $("#elx_msg_area").slideUp();  
@@ -82,12 +81,26 @@ $(document).ready(function(){
 
     setupChatWindowHandlers(this);
     
-    setupUserProfileHandlers(this);
-    
     setupPresenceHandlers(this);
     
     setupSendFaxHandlers(this);
 
+    // Al hacer click en opción Profile, se inicia carga de formulario
+    $(this).on('click', '.elx-display-dialog-show-profile', function() {
+    	$.get('index.php', {
+    		menu:	'_elastixutils',
+    		action:	'getUserProfile',
+    		rawmode:'yes'
+    	}, function(response) {
+    		if (response.error != '') {
+    			alert(response.error);
+    			return;
+    		}
+    		$("#elx_popup_content").html(response.message);
+    		$('#elx_general_popup').modal({show: true});
+    	});
+    });
+    
     //despliega en efecto slider el menu oculto, en tamño < 480px;
     $(this).on('click','#elx-navbar-min',function(){
         if ($("#elx-slide-menu-mini").is(":hidden") ) {
@@ -255,69 +268,6 @@ function setupChatWindowHandlers(doc)
 	    //disminuir la cuenta de las conversaciones minimizadas y en caso de no quedar niguna ocultar tab notificaciones
 	    removeElxUserNotifyChatMini(tabChat);
 	});
-}
-
-
-/**
- * Procedimiento que inicializa todos los manejadores asociados a la 
- * administración del popup de perfil de usuario.
- * 
- * @param doc Referencia al documento
- * 
- * @returns void
- */
-function setupUserProfileHandlers(doc)
-{
-	// Abrir el diálogo de cambio de perfil
-	$(doc).on('click', '.elx-display-dialog-show-profile', showProfile);
-	
-    //ejecuta la accion de cambio de lenguaje del usuario del popup de profile
-    $(doc).on('change','#languageProfile',function(){
-        var language = $("select[name='languageProfile'] option:selected").val();
-        changeLanguageProfile(language);
-    });
-    
-    //ejecuta la accion de eliminar la imagen que contiene el popup de profile del usuario
-    $(doc).on('click','#deleteImageProfile',function(){
-        deleteImageProfile();
-    });
-    
-    //ejecuta la funcion de cambio de imagen del popup de profile del usuario
-    $(doc).on('click','#picture',function(){
-        changeImageProfile();
-    });
-    
-    //muestra y oculta el div que contiene las cajas de textos para cambiar las contraseñas dentro del popup de profile
-    $(doc).on('click','#elx_link_change_passwd',function(){
-        if($('#elx_data_change_passwd').hasClass('visible')== true){
-            $("#elx_data_change_passwd").removeClass("visible").addClass("oculto");
-        }else{
-            $("#elx_data_change_passwd").removeClass("oculto").addClass("visible");
-        }
-    });
-    
-    //manda a recagar la pagina, luego de haber hecho algun cambio en el popup de profile del usuario
-    $(doc).on('click','.elx_close_popup_profile',function(){
-        if(elx_flag_changed_profile==true){
-            location.reload();
-        }
-    });
-    
-    
-    //funcionpara habilitar los campos de cambio de contraseña, luego que escriban la contraseña actual
-    $(doc).on('click','#currentPasswordProfile',function(){
-        $('#currentPasswordProfile').keyup(function(){
-            if($('#currentPasswordProfile').val() != ''){
-                $('#newPasswordProfile').removeAttr('disabled');
-                $('#repeatPasswordProfile').removeAttr('disabled');
-                $('#elx_save_change_passwd').removeAttr('disabled');
-            }else{
-                $('#newPasswordProfile').attr('disabled','disabled');
-                $('#repeatPasswordProfile').attr('disabled','disabled');
-                $('#elx_save_change_passwd').attr('disabled','disabled');
-            }
-        });
-    });
 }
 
 /**
@@ -1045,127 +995,6 @@ function elxGridData(moduleName, action, arrFilter, page){
 
             }
     });
-}
-
-/*funcion que muestra la ventana del popup para editar datos del perfil de usuaurio en sesion*/
-function showProfile(){
-    var arrAction = new Array();
-    arrAction["menu"]="_elastixutils";
-    arrAction["action"]="getUserProfile";
-    arrAction["rawmode"]="yes";
-    request("index.php", arrAction, false,
-        function(arrData,statusResponse,error){
-            if(error != ''){
-                alert(error);
-            }else{
-                $("#elx_popup_content").html(arrData);
-                var options = {
-                    show: true
-                    }
-                $('#elx_general_popup').modal(options);
-            }
-        }
-    );       
-}
-
-/*funcion que permte cambiar la contraseña al usuario*/
-function saveNewPasswordProfile(){
-    var oldPass   = $("input[name='currentPasswordProfile']").val();
-    var newPass   = $("input[name='newPasswordProfile']").val();
-    var newPassRe = $("input[name='newPasswordProfile']").val();
-    var arrAction = new Array();
-    arrAction["menu"]="_elastixutils";
-    arrAction["action"]="changePasswordElastix";
-    arrAction["oldPassword"]   = oldPass;
-    arrAction["newPassword"]   = newPass;
-    arrAction["newRePassword"] = newPassRe;
-    arrAction["rawmode"]="yes";
-    request("index.php", arrAction, false,
-        function(arrData,statusResponse,error){
-            if(error != ''){
-                alert(error);
-            }else{
-                //alert("Changed");
-            }
-        }
-    );       
-}
-
-/*funcion para fuardar el leguaje escogido por el usuario*/
-function changeLanguageProfile(language){
-    var arrAction = new Array();
-    arrAction["menu"]="_elastixutils";
-    arrAction["action"]="changeLanguageProfile";
-    arrAction["newLanguage"]   = language;
-    arrAction["rawmode"]="yes";
-    request("index.php", arrAction, false,
-        function(arrData,statusResponse,error){
-            if(error != ''){
-                alert(error);
-            }else{
-                elx_flag_changed_profile = true;
-                //alert(arrData);
-            }
-        }
-    );       
-}
-
-/*funcion para eliminar imagen del perfil de usuario*/
-function deleteImageProfile(){
-    var arrAction = new Array();
-    arrAction["menu"]="_elastixutils";
-    arrAction["action"]="deleteImageProfile";
-    arrAction["rawmode"]="yes";
-    request("index.php", arrAction, false,
-        function(arrData,statusResponse,error){
-            if(error != ''){
-                alert(error);
-            }else{
-                elx_flag_changed_profile = true;
-                resetImage(arrData);
-            }
-        }
-    );    
-}
-
-/*funcion para cambiar la imagen del perfil de usuario*/
-function changeImageProfile(){
-    
-    $('.picturePopupProfile').liteUploader(
-    {
-        script: '?menu=_elastixutils&action=changeImageProfile&rawmode=yes',
-        allowedFileTypes: null,
-        maxSizeInBytes: null,
-        customParams: {
-            'custom': 'tester'
-        },
-        before: function (files)
-        {
-            $('#previews').empty();
-        },
-        success: function (response)
-        {   
-            var response = $.parseJSON(response);
-            if(response.error !== ''){
-                alert(response.error);
-            }else{
-                elx_flag_changed_profile = true;
-                resetImage(response.message);
-            }
-        }
-    });   
-}
-
-
-function resetImage(url)
-{
-    $('#previews').empty();
-    $('#previews').append($('<img>', {
-        'id':'preview',
-        'class':'img-responsive',
-        'src': url  + '#' + new Date().getTime(),
-        'width': 159
-        }));
 }
 
 //llama a la función "showSendFax" que muestra la ventana del popup para enviar fax

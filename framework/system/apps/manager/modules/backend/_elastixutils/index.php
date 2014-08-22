@@ -50,6 +50,8 @@ function handleJSON_versionRPM($smarty, $module_name)
 
 function handleJSON_changePasswordElastix($smarty, $module_name)
 {
+    Header('Content-Type: application/json');
+    
     $jsonObject = new PaloSantoJSON();
     $output = setUserPassword();
     $jsonObject->set_status(($output['status'] === TRUE) ? 'true' : 'false');
@@ -290,6 +292,7 @@ function handleJSON_getUserProfile($smarty, $module_name){
     include "configs/languages.conf.php"; //este archivo crea el arreglo language que contine los idiomas soportados
                                           //por elastix
                                      
+    Header('Content-Type: application/json');
     $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
    
     $lang=get_language();
@@ -357,6 +360,7 @@ function handleJSON_getUserProfile($smarty, $module_name){
 function handleJSON_changeLanguageProfile($smarty, $module_name){
     global $arrConf;
     
+    Header('Content-Type: application/json');
     $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
     
     $ERROR='';
@@ -380,6 +384,9 @@ function handleJSON_changeLanguageProfile($smarty, $module_name){
 
 function handleJSON_deleteImageProfile($smarty, $module_name){
     global $arrConf;
+    
+    Header('Content-Type: application/json');
+	
     $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
     $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
     $pACL = new paloACL($pDB);
@@ -399,6 +406,9 @@ function handleJSON_deleteImageProfile($smarty, $module_name){
 
 function handleJSON_changeImageProfile($smarty, $module_name){
     global $arrConf;
+	
+    Header('Content-Type: application/json');
+	
     $arrCredentials=getUserCredentials($_SESSION['elastix_user']);
     $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
     $pACL = new paloACL($pDB);
@@ -452,9 +462,6 @@ function handleJSON_changeImageProfile($smarty, $module_name){
 function handleJSON_setPublishState($smarty, $module_name)
 {
 	Header('Content-Type: application/json');
-	/*
-	if (isset($_POST['PublishETag'])) $_SESSION['PublishETag'] = $_POST['PublishETag'];
-	*/
 	
     $publishState = array(
         'ETag'          => NULL,
@@ -481,10 +488,6 @@ function handleJSON_setPublishState($smarty, $module_name)
 function handleJSON_getPublishState($smarty, $module_name)
 {
 	Header('Content-Type: application/json');
-	/*
-	$tag = NULL;
-	if (isset($_SESSION['PublishETag'])) $tag = $_SESSION['PublishETag'];
-	*/
     
     $publishState = array(
         'ETag'          => NULL,

@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Aug 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: refactor all methods concerning the profile update to a
+  separate file which is loaded on demand.
+  SVN Rev[6702]
 - CHANGED: Framework: switch links for Profile and Send Fax from javascript:
   action URLs to handlers installed by jQuery.
   SVN Rev[6701]

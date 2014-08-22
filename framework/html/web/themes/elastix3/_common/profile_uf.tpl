@@ -1,5 +1,6 @@
 {literal}
 <script type='text/javascript' src="web/_common/js/jquery.liteuploader.js"></script>
+<script type='text/javascript' src="web/_common/js/profile_uf.js"></script>
 {/literal}
 
 <div class="modal-content">
@@ -62,7 +63,7 @@
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center text-info"><label id="elx_link_change_passwd">{$CHANGE_PASSWD_POPUP}</label></div>
             </div>
         </div>
-        <div class="row oculto" id="elx_data_change_passwd">
+        <div class="row" style="display: none;" id="elx_data_change_passwd">
             <div class="row">
                 <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5"><label>{$currentPasswordProfile.LABEL}</label></div>
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6"><p>{$currentPasswordProfile.INPUT}</p></div>
@@ -77,7 +78,7 @@
             </div>
             <div class="row">
                 <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5">
-                    <button id="elx_save_change_passwd" disabled="disabled" type="button" class="btn btn-primary" onclick='saveNewPasswordProfile()'>{$SAVE_POPUP}</button>
+                    <button id="elx_save_change_passwd" disabled="disabled" type="button" class="btn btn-primary">{$SAVE_POPUP}</button>
                 </div>
             </div>
         </div>

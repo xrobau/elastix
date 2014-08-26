@@ -487,13 +487,10 @@ class paloSantoTrunk extends paloAsteriskDB{
             return false;
         }
         
-        //los campos deny y permit no pueden ser vacios en caso que se use tecnologia iax2
-        if(!$this->validateIP($arrProp['deny'])){
-            $arrProp['deny']="0.0.0.0/0.0.0.0";
-        }
-        
-        if(!$this->validateIP($arrProp['permit'])){
-            $arrProp['permit']="0.0.0.0/0.0.0.0";
+        /* Los campos deny y permit pueden ser NULL para heredar los valores
+         * globales de su respectiva tecnología. */
+        foreach (array('deny', 'permit') as $k) {
+            if (!$this->validateIP($arrProp[$k])) $arrProp[$k] = NULL;
         }
         
         if(empty($arrProp['host'])){
@@ -824,13 +821,10 @@ class paloSantoTrunk extends paloAsteriskDB{
         if(!(isset($arrProp["secret"]) && $arrProp["secret"]!=""))
             $arrProp["secret"]=null;
         
-        //los campos deny y permit no pueden ser vacios en caso que se use tecnologia iax2
-        if(!$this->validateIP($arrProp['deny'])){
-            $arrProp['deny']="0.0.0.0/0.0.0.0";
-        }
-        
-        if(!$this->validateIP($arrProp['permit'])){
-            $arrProp['permit']="0.0.0.0/0.0.0.0";
+        /* Los campos deny y permit pueden ser NULL para heredar los valores
+         * globales de su respectiva tecnología. */
+        foreach (array('deny', 'permit') as $k) {
+            if (!$this->validateIP($arrProp[$k])) $arrProp[$k] = NULL;
         }
         
         if(empty($arrProp['host'])){

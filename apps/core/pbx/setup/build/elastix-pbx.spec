@@ -377,6 +377,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Aug 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Trunks: previously, when creating or updating a SIP/IAX trunk, the
+  deny/permit fields were assigned 0.0.0.0/0.0.0.0 if they were left empty. This
+  behavior is incorrect and prevents setting up a trunk that inherits the global
+  deny/permit setting for the technology. Fix this by setting to NULL instead.
+  SVN Rev[6703]
+
 * Tue Aug 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: the Asterisk NOTIFY for BLF has Contact: header set to
   someextension@127.0.0.1:5080. This breaks some phones. Fix this by substituting

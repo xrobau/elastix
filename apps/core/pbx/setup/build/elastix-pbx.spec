@@ -378,6 +378,9 @@ fi
 
 %changelog
 * Wed Aug 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: kamailio: remove use of rtpproxy, as it does not work correctly with
+  WebRTC.
+  SVN Rev[6705]
 - CHANGED: sip.conf: rtpproxy does not work correctly for WebRTC, so it will be
   removed. Instead of binding SIP to localhost:5080, asterisk will now deny
   access to any source other than localhost.

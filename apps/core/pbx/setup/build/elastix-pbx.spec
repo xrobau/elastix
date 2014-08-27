@@ -377,6 +377,14 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Aug 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: sip.conf: rtpproxy does not work correctly for WebRTC, so it will be
+  removed. Instead of binding SIP to localhost:5080, asterisk will now deny
+  access to any source other than localhost.
+- CHANGED: add realtime columns required for WebRTC accounts, and fill required
+  values for IM accounts, now repurposed for WebRTC.
+  SVN Rev[6704]
+
 * Tue Aug 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Trunks: previously, when creating or updating a SIP/IAX trunk, the
   deny/permit fields were assigned 0.0.0.0/0.0.0.0 if they were left empty. This

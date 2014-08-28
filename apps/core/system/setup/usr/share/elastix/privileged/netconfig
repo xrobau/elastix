@@ -423,7 +423,12 @@ function refreshKamailioConfiguration()
         return FALSE;
     }
     
-    // Restart Kamailio service
+    // Restart Kamailio and rtpproxy services
+    exec("/sbin/service rtpproxy-multi restart 2>&1", $output, $ret);
+    if ($ret != 0) {
+        fputs(STDERR, "ERR: failed to restart rtpproxy. Output follows:\n\n".implode("\n", $output));
+        return FALSE;
+    }
     exec("/sbin/service kamailio restart 2>&1", $output, $ret);
     if ($ret != 0) {
         fputs(STDERR, "ERR: failed to restart kamailio. Output follows:\n\n".implode("\n", $output));

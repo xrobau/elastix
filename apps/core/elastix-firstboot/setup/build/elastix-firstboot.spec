@@ -13,6 +13,7 @@ Requires: coreutils
 Conflicts: elastix-mysqldbdata
 Requires(post): chkconfig, /bin/cp
 Requires: kamailio
+Requires: rtpproxy
 
 %description
 This module contains (or should contain) utilities and configurations that
@@ -40,8 +41,11 @@ chkconfig --level 2345 elastix-firstboot on
 
 # Kamailio and rtpproxy setup
 chkconfig --del kamailio
+chkconfig --del rtpproxy-multi
 chkconfig --add kamailio
+chkconfig --add rtpproxy-multi
 chkconfig kamailio on
+chkconfig rtpproxy-multi on
 
 # If installing, the system might have mysql running (upgrading from a RC). 
 # The default password is written to the configuration file. 
@@ -95,10 +99,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
-* Wed Aug 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: removed rtpproxy dependency and associated logic. Simplify script.
-  SVN Rev[6707]
-
 * Tue Aug 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: in generated configuration, the Asterisk IP and port are now also
   defined as substdef, in order to be used by a kamailio.cfg patch.

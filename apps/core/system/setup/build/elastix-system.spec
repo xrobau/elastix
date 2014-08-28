@@ -156,11 +156,6 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
-* Wed Aug 27 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGED: Network Configuration: since rtpproxy is to be removed, do not bother
-  restarting it anymore.
-  SVN Rev[6706]
-
 * Fri Jun 20 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Network Configuration: ignore IP and mask fields when using DHCP.
   SVN Rev[6656]

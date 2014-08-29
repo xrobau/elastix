@@ -18,3 +18,6 @@ UPDATE sip SET encryption = 'yes', avpf = 'yes', force_avp = 'yes',
     `dtlsprivatekey` = '/etc/pki/tls/private/localhost_asterisk.key',
     `dtlssetup` = 'actpass'
 WHERE NAME LIKE '%IM_%';
+
+/* Kamailio talks to Asterisk via UDP, so nobody should use anything else */
+UPDATE sip SET transport = 'udp' WHERE transport IS NOT NULL;

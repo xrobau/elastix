@@ -377,6 +377,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Aug 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: restrict allowed protocols for SIP accounts to udp.
+  SVN Rev[6709]
+
 * Wed Aug 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: sip.conf: rtpproxy does not work correctly for WebRTC, so it will be
   removed. Instead of binding SIP to localhost:5080, asterisk will now deny

@@ -92,6 +92,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Sep  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: CDR Report: fix fallout resulting from commit 6638 breaking any regexp
+  with unescaped embedded slash. Fixes Elastix bug #1975.
+  SVN Rev[6711]
+
 * Wed Feb 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk Logs: update log parsing for changed date format resulting 
   from update to FreePBX 2.11.

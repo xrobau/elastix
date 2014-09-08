@@ -124,7 +124,7 @@ function _moduleContent(&$smarty, $module_name)
                             "INPUT_TYPE"             => "TEXT",
                             "INPUT_EXTRA_PARAM"      => "",
                             "VALIDATION_TYPE"        => "ereg",
-                            "VALIDATION_EXTRA_PARAM" => "^[\*|[:alnum:]@_\.,/\-]+$"),
+                            "VALIDATION_EXTRA_PARAM" => "^[\*|[:alnum:]@_\.,\/\-]+$"),
         "status"  => array("LABEL"                  => _tr("Status"),
                             "REQUIRED"               => "no",
                             "INPUT_TYPE"             => "SELECT",

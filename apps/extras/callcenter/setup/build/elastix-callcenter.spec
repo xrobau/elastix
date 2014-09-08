@@ -97,6 +97,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Sep 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): optimize the getagentactivitysummary request by inserting
+  keys and restructuring queries to only run once per request, instead of once
+  per agent.
+  SVN Rev[6710]
+
 * Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Monitoring: update Ember.js to 1.5.1, Handlebars to 1.3.0.
   SVN Rev[6648]

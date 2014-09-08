@@ -85,6 +85,16 @@ if (file_exists($path_script_db))
         'type', 
         "ADD COLUMN type enum('Agent','SIP','IAX2') DEFAULT 'Agent' NOT NULL AFTER id");
 
+    crearIndiceSiNoExiste($pDB, 'call_center', 'audit',
+        'agent_break_datetime',
+        "ADD KEY agent_break_datetime (id_agent, id_break, datetime_init)");
+    crearIndiceSiNoExiste($pDB, 'call_center', 'calls',
+        'agent_break_datetime',
+        "ADD KEY datetime_init (start_time)");
+    crearIndiceSiNoExiste($pDB, 'call_center', 'call_entry',
+        'agent_break_datetime',
+        "ADD KEY datetime_init (datetime_init)");
+    
     // Asegurarse de que todo agente tiene una contraseña de ECCP
     $pDB->genQuery('UPDATE agent SET eccp_password = SHA1(CONCAT(NOW(), RAND(), number)) WHERE eccp_password IS NULL');
 
@@ -138,6 +148,29 @@ EXISTE_COLUMNA;
         if (!$r) fputs(STDERR, "ERR: ".$pDB->errMsg."\n");
     } else {
         fputs(STDERR, "INFO: Ya existe $sTabla.$sColumna en base de datos $sDatabase.\n");
+    }
+}
+
+function crearIndiceSiNoExiste($pDB, $sDatabase, $sTabla, $sIndice, $sIndiceDef)
+{
+    $sPeticionSQL = <<<EXISTE_INDICE
+SELECT COUNT(*)
+FROM INFORMATION_SCHEMA.STATISTICS
+WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?
+EXISTE_INDICE;
+    $r = $pDB->getFirstRowQuery($sPeticionSQL, FALSE, array($sDatabase, $sTabla, $sIndice));
+    if (!is_array($r)) {
+        fputs(STDERR, "ERR: al verificar tabla $sTabla.$sIndice - ".$pDB->errMsg."\n");
+        return;
+    }
+    if ($r[0] <= 0) {
+        fputs(STDERR, "INFO: No se encuentra $sTabla.$sIndice en base de datos $sDatabase, se ejecuta:\n");
+        $sql = "ALTER TABLE $sTabla $sIndiceDef";
+        fputs(STDERR, "\t$sql\n");
+        $r = $pDB->genQuery($sql);
+        if (!$r) fputs(STDERR, "ERR: ".$pDB->errMsg."\n");
+    } else {
+        fputs(STDERR, "INFO: Ya existe $sTabla.$sIndice en base de datos $sDatabase.\n");
     }
 }
 

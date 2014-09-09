@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Tue Sep  9 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: fix detection of Yealink SIP-T20 endpoint with
+  updated firmware.
+  SVN Rev[6713]
 - CHANGED: Endpoint Configurator: fix Snom exception when attempting to remove
   a Snom endpoint without a configured model.
   SVN Rev[6712]

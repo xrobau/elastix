@@ -90,44 +90,62 @@ class Endpoint(BaseEndpoint):
                 if sModel == None:
                     logging.warning('Endpoint %s@%s failed to identify model from WWW-Authenticate: %s' %
                             (self._vendorname, self._ip, e.headers['WWW-Authenticate']))
+            else:
+                logging.warning('Endpoint %s@%s failed to identify model from WWW-Authenticate: %s' %
+                        (self._vendorname, self._ip, str(e)))
         except Exception, e:
             #print str(e)
             pass
         
-        # Failed to tickle 401 Unauthorized. Try fetching the phone config
-        configSources = (
-            (
-                '/cgi-bin/ConfigManApp.com?Id=26',
-            ),            
-            (
-                '/cgi-bin/cgiServer.exx?command=msgSendMessage(%22app_vpPhone%22,%220x30007%22,%220%22,%221%22)',
-                '/cgi-bin/cgiServer.exx?command=getDownloadConfig(%221%22)',
-                '/cgi-bin/cgiServer.exx?download=/tmp/config.bin',
-            ),
-        )
-        if sModel == None and realm != None:
-            for sourceList in configSources:
-                basic_auth_handler = urllib2.HTTPBasicAuthHandler()
-                basic_auth_handler.add_password(
-                    realm=realm,
-                    uri='http://' + self._ip + '/',
-                    user='admin',
-                    passwd='admin')
-                opener = urllib2.build_opener(basic_auth_handler)
-                try:
-                    for sourceUrl in sourceList:
-                        response = opener.open('http://' + self._ip + sourceUrl)
-                        htmlbody = response.read()
-                        m = re.search(r'UserAgent\s*=\s*(Yealink)?\s*(\S+)', htmlbody)
-                        if (m != None): sModel = m.group(2)
-                except urllib2.HTTPError, e:
-                    if e.code != 404:
-                        print str(e)
+        if sModel == None:
+            if realm != None:
+                # The 401 Unauthorized provided unhelpful realm. Try fetching the phone config
+                configSources = (
+                    (
+                        '/cgi-bin/ConfigManApp.com?Id=26',
+                    ),            
+                    (
+                        '/cgi-bin/cgiServer.exx?command=msgSendMessage(%22app_vpPhone%22,%220x30007%22,%220%22,%221%22)',
+                        '/cgi-bin/cgiServer.exx?command=getDownloadConfig(%221%22)',
+                        '/cgi-bin/cgiServer.exx?download=/tmp/config.bin',
+                    ),
+                )
+                for sourceList in configSources:
+                    basic_auth_handler = urllib2.HTTPBasicAuthHandler()
+                    basic_auth_handler.add_password(
+                        realm=realm,
+                        uri='http://' + self._ip + '/',
+                        user='admin',
+                        passwd='admin')
+                    opener = urllib2.build_opener(basic_auth_handler)
+                    try:
+                        for sourceUrl in sourceList:
+                            response = opener.open('http://' + self._ip + sourceUrl)
+                            htmlbody = response.read()
+                            m = re.search(r'UserAgent\s*=\s*(Yealink)?\s*(\S+)', htmlbody)
+                            if (m != None): sModel = m.group(2)
+                    except urllib2.HTTPError, e:
+                        if e.code != 404:
+                            logging.warning('Endpoint %s@%s failed to identify model from WWW-Authenticate: %s' %
+                                    (self._vendorname, self._ip, str(e)))
+                            break
+                    except Exception, e:
+                        #print str(e)
                         break
+                    if sModel != None: break
+            else:
+                # Failed to tickle 401 unauthorized. Newer firmware with form login
+                try:
+                    response = urllib2.urlopen('http://' + self._ip + '/servlet?p=login&q=loginForm&jumpto=status')
+                    htmlbody = response.read()
+                    m = re.search(r'T\("Enterprise IP phone (\S+)"\)', htmlbody, re.IGNORECASE)
+                    if (m != None): sModel = m.group(1)
+                except urllib2.HTTPError, e:
+                    logging.warning('Endpoint %s@%s failed to identify model from form login: %s' %
+                            (self._vendorname, self._ip, str(e)))
                 except Exception, e:
                     #print str(e)
-                    break
-                if sModel != None: break
+                    pass
         
         if sModel != None:
             # Remove trailing 'P' from SIP-T28P and VP530P

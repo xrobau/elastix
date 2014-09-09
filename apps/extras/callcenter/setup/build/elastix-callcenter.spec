@@ -97,6 +97,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Sep 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calls per Agent: replace ambiguous filtering system with a cleaner
+  filter that properly validates that agent and queue are both numeric. Also
+  fix Elastix bug #1976.
+  SVN Rev[6714]
+
 * Mon Sep 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer (ECCP): optimize the getagentactivitysummary request by inserting
   keys and restructuring queries to only run once per request, instead of once

@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Sep  9 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: fix Snom exception when attempting to remove
+  a Snom endpoint without a configured model.
+  SVN Rev[6712]
+
 * Mon Aug  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: add new MAC prefix for Fanvil.
   SVN Rev[6672]

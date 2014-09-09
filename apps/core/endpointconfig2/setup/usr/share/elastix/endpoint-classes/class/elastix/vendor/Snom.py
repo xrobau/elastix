@@ -105,7 +105,7 @@ class Endpoint(BaseEndpoint):
         return True
 
     def _getHttpInterfaceClass(self):
-        if self._model in ('m9'):
+        if self._model != None and self._model in ('m9'):
             return SNOM_HTTP_V2
         return SNOM_HTTP_V1
 

@@ -98,6 +98,12 @@ fi
 
 %changelog
 * Wed Sep 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Incoming Calls Monitoring: complete rewrite. This rewrite removes the
+  use of xajax and periodic database reads, and replaces it with an ECCP client
+  that uses Server Sent Events if available, just like the Agent Console. This
+  also fixes a serious scenario where a query that takes more than 5 seconds
+  would cause the server to accumulate unfinished SQL queries.
+  SVN Rev[6716]
 - CHANGED: Dialer (ECCP): emit queue number (if available) when linking and 
   unlinking a call, to save the client the trouble of asking for it. Required
   for next commit.

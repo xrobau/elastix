@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Sep 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): fix copy/paste error in previous commit to SQL files.
+  Add additional indexes for calls.
+  SVN Rev[6715]
+
 * Tue Sep 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calls per Agent: replace ambiguous filtering system with a cleaner
   filter that properly validates that agent and queue are both numeric. Also

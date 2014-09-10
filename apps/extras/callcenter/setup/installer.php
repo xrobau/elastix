@@ -89,11 +89,17 @@ if (file_exists($path_script_db))
         'agent_break_datetime',
         "ADD KEY agent_break_datetime (id_agent, id_break, datetime_init)");
     crearIndiceSiNoExiste($pDB, 'call_center', 'calls',
-        'agent_break_datetime',
+        'datetime_init',
         "ADD KEY datetime_init (start_time)");
+    crearIndiceSiNoExiste($pDB, 'call_center', 'calls',
+        'datetime_entry_queue',
+        "ADD KEY datetime_entry_queue (start_time)");
     crearIndiceSiNoExiste($pDB, 'call_center', 'call_entry',
-        'agent_break_datetime',
+        'datetime_init',
         "ADD KEY datetime_init (datetime_init)");
+    crearIndiceSiNoExiste($pDB, 'call_center', 'call_entry',
+        'datetime_entry_queue',
+        "ADD KEY datetime_entry_queue (datetime_init)");
     
     // Asegurarse de que todo agente tiene una contraseña de ECCP
     $pDB->genQuery('UPDATE agent SET eccp_password = SHA1(CONCAT(NOW(), RAND(), number)) WHERE eccp_password IS NULL');

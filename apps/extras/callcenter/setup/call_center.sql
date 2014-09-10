@@ -845,7 +845,9 @@ BEGIN
     IF l_existe_indice = 0 THEN
         ALTER TABLE audit ADD KEY agent_break_datetime (id_agent, id_break, datetime_init);
         ALTER TABLE calls ADD KEY datetime_init (start_time);
+        ALTER TABLE calls ADD KEY datetime_entry_queue (datetime_entry_queue);
         ALTER TABLE call_entry ADD KEY datetime_init (datetime_init);
+        ALTER TABLE call_entry ADD KEY datetime_entry_queue (datetime_entry_queue);
     END IF;
 END;
 ++
@@ -853,7 +855,6 @@ DELIMITER ; ++
 
 CALL temp_indice_agent_calls_2014_09_08();
 DROP PROCEDURE IF EXISTS temp_indice_agent_calls_2014_09_08;
-
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

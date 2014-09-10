@@ -98,6 +98,10 @@ fi
 
 %changelog
 * Wed Sep 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): emit queue number (if available) when linking and 
+  unlinking a call, to save the client the trouble of asking for it. Required
+  for next commit.
+  SVN Rev[6716]
 - FIXED: Dialer (ECCP): fix copy/paste error in previous commit to SQL files.
   Add additional indexes for calls.
   SVN Rev[6715]

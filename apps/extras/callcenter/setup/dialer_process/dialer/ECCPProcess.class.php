@@ -838,7 +838,8 @@ INFO_FORMULARIOS;
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
 
-        list($sTipoLlamada, $idCampania, $idLlamada, $sChannel, $sRemChannel, $sFechaLink, $id_agent, $trunk) = $datos;
+        list($sTipoLlamada, $idCampania, $idLlamada, $sChannel, $sRemChannel,
+            $sFechaLink, $id_agent, $trunk, $queue) = $datos;
         try {
         	$infoLlamada = $this->leerInfoLlamada($sTipoLlamada, $idCampania, $idLlamada);
             /* Ya que la escritura a la base de datos es asíncrona, puede 
@@ -848,6 +849,8 @@ INFO_FORMULARIOS;
                 $infoLlamada['status'] = 'activa';
             if ($infoLlamada['calltype'] == 'outgoing')
                 $infoLlamada['status'] = 'Success';
+            if (!isset($infoLlamada['queue']) && !is_null($queue))
+                $infoLlamada['queue'] = $queue;
             $infoLlamada['datetime_linkstart'] = $sFechaLink;
             if (!isset($infoLlamada['trunk']) || is_null($infoLlamada['trunk']))
                 $infoLlamada['trunk'] = $trunk;
@@ -892,6 +895,7 @@ INFO_FORMULARIOS;
             'duration'      =>  $iDuracion,
             'shortcall'     =>  $bShortFlag ? 1 : 0,
             'campaignlog_id'=>  $campaignlog_id,
+            'queue'         =>  $paramProgreso['queue'],
         ));
     }
 
@@ -1000,6 +1004,7 @@ INFO_FORMULARIOS;
             $tuplaAnterior = array_merge($tuplaAnterior, $prop);
             
             // Escribir los valores nuevos en un nuevo registro
+            unset($tuplaAnterior['queue']);
             $columnas = array_keys($tuplaAnterior);
             $paramSQL = array();
             foreach ($columnas as $k) $paramSQL[] = $tuplaAnterior[$k];

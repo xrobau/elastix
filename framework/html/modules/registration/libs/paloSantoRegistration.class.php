@@ -92,10 +92,17 @@ class paloSantoRegistration {
             }                
         }
         
-        //// 2do. Verifico si la columna has_account existe
+        //// 2do. Verifico si las columnas has_account u link_auto_login existen
         if(!$this->columnExists("has_account")){
             if(!$this->addColumnTableRegister("has_account char(3) default 'no'")) {
                 $this->errMsg = "The column 'has_account' does not exist and could not be created";
+                return false;
+            }
+        }
+        
+        if(!$this->columnExists("link_auto_login")){
+            if(!$this->addColumnTableRegister("link_auto_login varchar(100)")) {
+                $this->errMsg = "The column 'link_auto_login' does not exist and could not be created";
                 return false;
             }
         }
@@ -170,8 +177,9 @@ class paloSantoRegistration {
         }
         
         $h = popen('/usr/bin/elastix-helper elastixkey', 'w');
-        fwrite($h, $arrResponse[1]);
-        pclose($h);   
+        fwrite($h, $arrResponse[1]); // sid
+        pclose($h);           
+        $this->updateLinkAutoLogin($arrResponse[2],1);  //link_auto_login, TODO validar
         
         // 4to. Obtengo toda la información de la cuenta 
         // para guardarla en la base local, puesto que en el 
@@ -286,6 +294,34 @@ class paloSantoRegistration {
         }
         return TRUE;
     }
+    
+    public function getLinkAutoLogin() {
+        $result = $this->_DB->getFirstRowQuery("SELECT link_auto_login from register where id=?", false, array(1));
+        if(!(is_array($result) && count($result)>0)){
+            $this->errMsg = $this->_DB->errMsg;
+            return "";
+        }        
+        return $result[0];
+    }
+    
+    public function getUsername() {
+        $result = $this->_DB->getFirstRowQuery("SELECT email from register where id=?", false, array(1));
+        if(!(is_array($result) && count($result)>0)){
+            $this->errMsg = $this->_DB->errMsg;
+            return "";
+        }        
+        return $result[0];
+    }
+    
+    private function updateLinkAutoLogin($link, $id) {
+        $query = "UPDATE register SET link_auto_login=? WHERE id=?";
+        $result = $this->_DB->genQuery($query, array($link,$id));
+        if ($result == FALSE) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
+    }
 
     private function updateHasAccount($id, $has_account) {
         $query = "UPDATE register SET has_account=? WHERE id=?";
@@ -308,7 +344,8 @@ class paloSantoRegistration {
             city            varchar(25),
             country         varchar(25),
             idPartner       varchar(25),
-            has_account     char(3) default 'no'
+            has_account     char(3) default 'no',
+            link_auto_login varchar(100)
         )";
         return $this->_DB->genExec($query);
     }

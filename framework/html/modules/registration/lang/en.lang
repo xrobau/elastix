@@ -40,7 +40,7 @@ $arrLangModule=array(
 "City" => "City",
 "idPartner" => "idPartner",
 "registration" => "Elastix Server Registration Form",
-"registration_server" => "Elastix Server Registration",    
+"registration_server" => "Register your server with Elastix",    
 "alert_message_unregister" => "By Registering your Elastix server, you will be able to install addons for Elastix. To access the gallery of available addons, just click on the Addons tab. If you already have a Elatix Cloud account, proceed with the registration.",
 "alert_message_form" => "Be sure to correctly fill out the fields of this form, and remember the email field, because its your username which will allow you to get access to your Elastix Cloud Interface and any licenses of addons that you will bought in the future.",
 "alert_message_registered" => "Thanks for register your Elastix Server. Now you can enjoy the posibility of install Elastix Addons. To access the gallery of available addons, click on the Addons tab. <br />Your Elastix Server its NOW REGISTERED in Elastix Cloud.",    
@@ -72,7 +72,7 @@ $arrLangModule=array(
 "Don't have an Elastix Cloud account?" => "Don't have an Elastix Cloud account?",
 "is licensed under" => "is licensed under",
 "by" => "by",    
-"REGISTER_ACTION" => "Register",    
+"REGISTER_ACTION" => "Login",    
 "USERNAME" => "Username",  
 "Your Elastix server is registered" => "Your Elastix server is registered",
 "Access my account Elastix Cloud" =>  "Access my account \"Elastix Cloud\"",
@@ -89,5 +89,7 @@ $arrLangModule=array(
 "ACCOUNT EXISTS" => "From webservice, An account with the email entered already exists.",
 "Customer could not be created" => "From webservice, Account could not be created.", 
 "Installation data could not be saved" => "From webservice, Installation data could not be saved.",    
+"SIGN_UP"=>"Sign Up",
+"INFO_REGISTER" =>"You must be logged in to install Addons"
 );
 ?>

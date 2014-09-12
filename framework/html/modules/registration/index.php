@@ -128,7 +128,7 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
 
     $smarty->assign("identitykeylbl", _tr("Your Server ID"));
     $smarty->assign("registration", _tr("registration"));
-    $smarty->assign("registered_server", _tr("Your Elastix server is registered"));
+    $smarty->assign("registered_server", _tr("Thanks for registering your server"));
     $smarty->assign("registration_server", _tr("registration_server"));
     $smarty->assign("Cancel", _tr("Cancel"));
     $smarty->assign("module_name", $module_name);
@@ -137,11 +137,15 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
     $smarty->assign("EMAIL", _tr("EMAIL"));
     $smarty->assign("PASSWORD", _tr("PASSWORD"));
     $smarty->assign("USERNAME", _tr("USERNAME"));
-    $smarty->assign("DONT_HAVE_ACCOUNT", _tr("Don't have an Elastix Cloud account?"));
+    //$smarty->assign("DONT_HAVE_ACCOUNT", _tr("Don't have an Elastix Cloud account?"));
+    $smarty->assign("FORGET_PASSWORD", _tr("Forgot your password?"));
     $smarty->assign("ACCESS_ACCOUNT",_tr("Access my account Elastix Cloud"));
     $smarty->assign("ELASTIX_LICENSED", _tr("is licensed under"));
     $smarty->assign("REGISTER_ACTION", _tr("REGISTER_ACTION"));
+    $smarty->assign("SIGNUP_ACTION", _tr("SIGN_UP"));
     $smarty->assign("BY", _tr("by"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("INFO_REGISTER", _tr("INFO_REGISTER"));
 
     $user = isset($_SESSION['elastix_user']) ? $_SESSION['elastix_user'] : "";
 
@@ -152,7 +156,7 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
     $pRegister = new paloSantoRegistration($pDB,$arrConf["url_webservice"]);
     $registered = $pRegister->isRegistered();
     if ($registered=="no")
-        $smarty->assign("Activate_registration", _tr("Activate registration"));
+        $smarty->assign("Activate_registration", _tr("Create Account"));
     else
         $smarty->assign("Activate_registration", _tr("Update Information"));
     
@@ -247,27 +251,18 @@ function saveRegister(&$pDB, $arrConf) {
         $str_error .= _tr("* Country: Selected a country ") . ".\n";
     if ($city == '')
         $str_error .= _tr("* City: text ") . ".\n";
-    if (!preg_match("/^[0-9\+\-]+$/", $phone))
-        $str_error .= _tr("* Phone: number ") . ".\n";
-    if ($address == '')
-        $str_error .= _tr("* Address: text ") . ".\n";
     if ($contact_name == '')
         $str_error .= _tr("* Contact Name: Only text ") . ".\n";
-
     if (!preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/", $email))
         $str_error .= _tr("* Email: Only format email ") . ".\n";
-    if (!preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/", $emailConf))
-        $str_error .= _tr("* Email Confirm: Only format email ") . ".\n";
     if ($email != $emailConf)
         $str_error .= _tr("* Emails do not match ")  . ".\n";
-    
     if(!$pRegister->isStrongPassword($password))
         $str_error .= _tr("* Password: Must be at least 10 ") . ".\n";
     if(!$pRegister->isStrongPassword($passwordConf))
         $str_error .= _tr("* Password Confirm: Must be at least 10 ") . ".\n";
     if ($password != $passwordConf)
         $str_error .= _tr("* Passwords do not match ")  . ".\n";
-    
     if ($str_error !== "") {
         $jsonObject->set_status("FALSE");
         $jsonObject->set_error(_tr("Please fill the correct values in fields: ") . "\n\n" . $str_error);
@@ -318,7 +313,7 @@ function createFieldForm($arrConf) {
         "emailReg" => array("LABEL" => _tr("Email"),
             "REQUIRED" => "yes",
             "INPUT_TYPE" => "TEXT",
-            "INPUT_EXTRA_PARAM" => array("id" => "emailReg", "style" => "width: 230px; margin: 2px 0px;"),
+            "INPUT_EXTRA_PARAM" => array("id" => "emailReg", "style" => "width: 230px; margin: 2px 0px;", "placeholder"=>_tr("Confirmation will be sent to this email")),
             "VALIDATION_TYPE" => "email",
             "VALIDATION_EXTRA_PARAM" => "",
             "EDITABLE" => "",

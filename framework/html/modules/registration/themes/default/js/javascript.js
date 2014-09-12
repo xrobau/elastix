@@ -29,9 +29,15 @@ function showPopupCloudRegister(title, width, height){
         {            
             ShowModalPopUP(title,width,height,arrData['form']);
             $('.tdIdServer').hide();
+            $('.neo-modal-elastix-popup-box').css({
+                height: '388px',
+            });
             
             if(arrData['registered']=="yes-inc"){
-                $('.tdIdServer').show();
+                $('.tdIdServer').css("display","");
+                $('.neo-modal-elastix-popup-box').css({
+                  height: '410px',
+                });
                 showLoading(arrData['msgloading']);
                 getDataWebServer();
             }
@@ -45,7 +51,7 @@ function registration(){
     arrAction["rawmode"]        = "yes";
     arrAction['contactNameReg'] = $('#contactNameReg').val();
     arrAction["emailReg"]       = $('#emailReg').val();
-    arrAction["emailConfReg"]   = $('#emailConfReg').val();
+    arrAction["emailConfReg"]   = $('#emailReg').val();
     arrAction["passwdReg"]      = $('#passwdReg').val();
     arrAction["passwdConfReg"]  = $('#passwdConfReg').val();
     arrAction["phoneReg"]       = $('#phoneReg').val();
@@ -54,13 +60,12 @@ function registration(){
     arrAction["cityReg"]        = $('#cityReg').val();
     arrAction["countryReg"]     = $('#countryReg option:selected').val();
 
-    $('#btnAct').hide();
     showLoading($('#msgtmp').val());
+    $('#btnAct').css("visibility","hidden");
     
     request("register.php",arrAction,false,
         function(arrData,statusResponse,error)
         {   
-            $('#btnAct').show();
             
             if(error!=""){
                 alert(error);
@@ -76,6 +81,7 @@ function registration(){
                     registrationEnd(arrData);                    
                 }
             }
+            $('#btnAct').css("visibility","visible");
         }
     );
 }
@@ -137,12 +143,24 @@ function registrationByAccount()
         arrAction["rawmode"]  = "yes";
         arrAction["username"] = username;
         arrAction["password"] = password;
+
+        $(".action_register_button").css({
+            visibility: 'hidden'
+        });
         
         request("register.php",arrAction,false,
             function(arrData,statusResponse,error)
             {
-                showMessage(arrData['msg']);
-                
+
+                $(".action_register_button").css({
+                    visibility: ''
+                });
+                if(arrData['msg'])
+                   showMessage(arrData['msg']);
+                else
+                   showMessage(arrData);
+                                
+                console.log(arrData['msg']);
                 $('.register_link').css('color',arrData['color']);
                 $('.register_link').text(arrData['label']);    
                 
@@ -156,7 +174,9 @@ function registrationByAccount()
 
 function showMessage(msg)
 {
-    $('#msnTextErr').text(msg);
+    $('#msnTextErr').text(msg).css({
+        color: '#FF0000',
+    });
 }
 
 function clearMessage()
@@ -167,7 +187,9 @@ function clearMessage()
 function showLoading(msg)
 {var shtml  = "<div align='center'>" + msg + "</div>";
         shtml += "<img src='../../../images/loading.gif' width='22px' height='18px' alt='loading' />";
-    $('#msnTextErr').html(shtml);
+    $('#msnTextErr').html(shtml).css({
+        color: '#000000',
+    });
 }
 
 function registrationEnd(arrData)
@@ -180,9 +202,26 @@ function registrationEnd(arrData)
     else {
         $('.cloud-login-button').hide();
         showLoading(arrData['msg']);
-
+        
         setTimeout(function(){
-            showPopupCloudLogin(arrData['label'],540,460)
+            showPopupCloudLogin("",540,335)
         }, 3000);
     }
 }
+
+function checkSubmit(e)
+{
+   if(e && e.keyCode == 13)
+   {
+      registrationByAccount();
+   }
+}
+
+function showInfoRegistration(){
+    $(".text_info_registration").show('400', function() {});
+}
+
+function hideInfoRegistration(){
+    $(".text_info_registration").hide('400', function() {});
+}
+

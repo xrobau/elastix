@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Fri Sep 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): add debugging information to getagentstatus request to
+  catch inconsistent state being returned to the client.
+  SVN Rev[6720]
+
 * Wed Sep 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dont Call List: remove unused xajax reference
   SVN Rev[6718]

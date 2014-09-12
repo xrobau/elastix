@@ -454,7 +454,7 @@ LISTA_EXTENSIONES;
             } elseif ($estado['extension'] != $sExtension && preg_match('|^Agent/(\d+)$|', $this->_agent, $regs)) {
                 $estado['estadofinal'] = 'mismatch';
                 $this->errMsg = _tr('Specified agent already connected to extension').
-                    ': '.(string)$connStatus->extension;
+                    ' '.(string)$connStatus->extension.' status '.$estado['status'];
             }
             return $estado;
         } catch (Exception $e) {

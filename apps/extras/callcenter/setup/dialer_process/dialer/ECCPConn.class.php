@@ -1981,19 +1981,18 @@ LISTA_EXTENSIONES;
         }
         
         // Reportar los estados conocidos
-        $bEstadoConocido = FALSE;
+        $sAgentStatus = NULL;
         if ($infoSeguimiento['num_pausas'] > 0) {
-            $xml_getAgentStatusResponse->addChild('status', 'paused');
-            $bEstadoConocido = TRUE;
+            $sAgentStatus = 'paused';
         } elseif ($infoSeguimiento['oncall']) {
-            $xml_getAgentStatusResponse->addChild('status', 'oncall');
-            $bEstadoConocido = TRUE;
+            $sAgentStatus = 'oncall';
         } elseif ($infoSeguimiento['estado_consola'] == 'logged-in') {
-            $xml_getAgentStatusResponse->addChild('status', 'online');
-            $bEstadoConocido = TRUE;
+            $sAgentStatus = 'online';
         } else {
-            $xml_getAgentStatusResponse->addChild('status', 'offline');
-            $bEstadoConocido = TRUE;
+            $sAgentStatus = 'offline';
+        }
+        if (!is_null($sAgentStatus)) {
+            $xml_getAgentStatusResponse->addChild('status', $sAgentStatus);
         }
 
         // Reportar el canal remoto al cual está conectado el agente
@@ -2038,9 +2037,14 @@ LISTA_EXTENSIONES;
                 $xml_callInfo->addChild('queuenumber', $infoLlamada['queuenumber']);
         }
 
-        if ($bEstadoConocido) {
+        if (!is_null($sAgentStatus)) {
             if (!is_null($sCanalExt)) $xml_getAgentStatusResponse->addChild('channel', str_replace('&', '&amp;', $sCanalExt));
             if (!is_null($sExtension)) $xml_getAgentStatusResponse->addChild('extension', $sExtension);
+            if ($sAgentStatus != 'offline' && is_null($sExtension)) {
+                $this->_log->output("ERR: (internal) estado inconsistente (status=$sAgentStatus extension=null) para agente $sAgente\n".
+                    "\tinfoSeguimiento => ".print_r($infoSeguimiento, TRUE).
+                    "\tinfoLlamada => ".print_r($infoLlamada, TRUE));
+            }
         } else {
             $xml_getAgentStatusResponse->addChild('status', 'offline');
             $this->_agregarRespuestaFallo($xml_getAgentStatusResponse, 500, 'Unknown status');

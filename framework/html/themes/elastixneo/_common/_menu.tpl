@@ -454,7 +454,7 @@ function oneClickEvent()
 	  <p><input type="search"  id="search_module_elastix" name="search_module_elastix"  value="" autofocus="autofocus" placeholder="search" /></p>
 	</div>
 	<div id="neo-cmenu-showbox-info" class="neo-cmenu-showbox neo-display-none">
-	  <p><span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('{$Register}',540,460)">{$Registered}</a></span></p>
+	  <p><span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('',540,335)">{$Registered}</a></span></p>
 	  <p><span><a id="viewDetailsRPMs">{$VersionDetails}</a></span></p>
 	  <p><span><a href="http://www.elastix.org" target="_blank">Elastix Website</a></span></p>
 	  <p><span><a href="javascript:mostrar();">{$ABOUT_ELASTIX2}</a></span></p>

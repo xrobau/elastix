@@ -25,7 +25,7 @@
 {else}
     <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
 {/if}<img src="images/icon-help.png" border="0" align="absmiddle"></a>
-&nbsp;<a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('{$Register}',540,460)">{$Registered}</a>
+&nbsp;<a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('',540,335)">{$Registered}</a>
 &nbsp;<a id="viewDetailsRPMs">{$VersionDetails}</a>
 &nbsp;<a href="javascript:mostrar();">{$ABOUT_ELASTIX}</a>
 &nbsp;<a href="index.php?logout=yes">{$LOGOUT}</a>

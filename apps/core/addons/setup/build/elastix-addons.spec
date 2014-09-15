@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -124,9 +124,18 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Sep 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-10
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Sep 15 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: module addons, height popup Cloud login was updated.
+  SVN Rev[6724]
+
 * Tue Aug 19 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6693]
 
 * Tue Aug 19 2014 Bruno Macias <bmacias@palosanto.com> 
 - CHANGED: apps - module addons, process registration has been changed, now

@@ -1,0 +1,11 @@
+tr.formfield_row {
+	background-color: #ffffff;
+}
+
+tr.formfield_row:hover {
+	background-color: #f2f2f2;
+}
+
+tr.formfield_new {
+	background-color: #ffeeee;
+}

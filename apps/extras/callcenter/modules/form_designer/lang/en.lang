@@ -92,5 +92,6 @@ $arrLangModule=array(
 "View" => "View",
 "All" => "All",
 'No Data Found'=>'No Data Found',
+'Drag and drop to reorder fields'=>'Drag and drop to reorder fields',
 );
 ?>

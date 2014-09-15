@@ -9,7 +9,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.2.0-18
+Prereq: elastix-framework >= 2.3.0-12
 Requires: asterisk
 Requires: freePBX
 Requires: php-mbstring
@@ -97,6 +97,12 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Mon Sep 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: complete rewrite. This rewrite removes the use of
+  xajax, fixes a few potential SQL injection scenarios, streamlines the form
+  creation interface, and updates the report grid to the latest support.
+  SVN Rev[6726]
+
 * Fri Sep 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): add debugging information to getagentstatus request to
   catch inconsistent state being returned to the client.

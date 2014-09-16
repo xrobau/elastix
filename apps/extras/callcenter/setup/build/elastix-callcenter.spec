@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Tue Sep 16 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Form Designer: re-add method that is used by both Outgoing Campaign and
+  Incoming Campaign modules, as a compatibility stub.
+  SVN Rev[6727]
+
 * Mon Sep 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Form Designer: complete rewrite. This rewrite removes the use of
   xajax, fixes a few potential SQL injection scenarios, streamlines the form

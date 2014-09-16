@@ -113,6 +113,14 @@ class paloSantoDataForm
         return $tupla;
     }
     
+    // Función exclusivamente para compatibilidad con campaign_out/campaign_in
+    function getFormularios($id_formulario = NULL, $estatus='all')
+    {
+        if (is_null($id_formulario))
+            return $this->listarFormularios($estatus);
+        return NULL;
+    }
+    
     function leerCamposFormulario($id_formulario)
     {
         $sql = 'SELECT id, etiqueta, value, tipo, orden FROM form_field WHERE id_form = ? ORDER by orden';

@@ -200,7 +200,7 @@ function registrationEnd(arrData)
         hideModalPopUP();
     }
     else {
-        $('.cloud-login-button').hide();
+        $('.cloud-login-button, .cloud-signup-button').hide();
         showLoading(arrData['msg']);
         
         setTimeout(function(){

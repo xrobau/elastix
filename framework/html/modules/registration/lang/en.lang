@@ -84,11 +84,11 @@ $arrLangModule=array(
 "* Passwords do not match " => "* Passwords do not match",
 "* Password: Must be at least 10 " => "* Password: Must be at least 10 characters and contain at least one uppercase letter, at least one lowercase letter, and at least one digit",    
 "* Password Confirm: Must be at least 10 " => "* Password Confirm: Must be at least 10 characters and contain at least one uppercase letter, at least one lowercase letter, and at least one digit",
-"FIELD VALIDATION" => "From webservice, Customer data is invalid.",  
-"INVALID LOGIN" => "From webservice, Email and/or password are incorrect.", 
-"ACCOUNT EXISTS" => "From webservice, An account with the email entered already exists.",
-"Customer could not be created" => "From webservice, Account could not be created.", 
-"Installation data could not be saved" => "From webservice, Installation data could not be saved.",    
+"FIELD VALIDATION" => "Customer data is invalid.",  
+"INVALID LOGIN" => "Email and/or password are incorrect.", 
+"ACCOUNT EXISTS" => "An account with the email entered already exists.",
+"Customer could not be created" => "Account could not be created.", 
+"Installation data could not be saved" => "Installation data could not be saved.",    
 "SIGN_UP"=>"Sign Up",
 "INFO_REGISTER" =>"You must be logged in to install Addons"
 );

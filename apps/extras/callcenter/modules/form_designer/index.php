@@ -137,11 +137,6 @@ function listarFormularios($pDB, $smarty, $module_name)
     }    
     $oGrid->setTotal($total);
     $offset = $oGrid->calculateOffset();
-    $arrDataForm = array();
-    if (!is_array($arrDataForm)) {
-        $smarty->assign("mb_message", _tr("Error when connecting to database")." ".$oDataForm->errMsg);
-        return '';
-    }
     $arrDataForm = $oDataForm->listarFormularios($cbo_estado, $limit, $offset);
     if (!is_array($arrDataForm)) {
         $smarty->assign("mb_message", _tr("Error when connecting to database")." ".$oDataForm->errMsg);

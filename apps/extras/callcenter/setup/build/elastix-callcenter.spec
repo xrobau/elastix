@@ -98,6 +98,8 @@ fi
 
 %changelog
 * Tue Sep 16 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: clean up grid used for form field manipulation.
+  SVN Rev[6728]
 - FIXED: Form Designer: re-add method that is used by both Outgoing Campaign and
   Incoming Campaign modules, as a compatibility stub.
   SVN Rev[6727]

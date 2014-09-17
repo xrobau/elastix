@@ -4,6 +4,9 @@ var template_formfield = null;
 $(document).ready(function() {
 	if (typeof CAMPOS_FORM == 'undefined') return;
 	
+	// Esconder recuadro de error hasta que se deba mostrar un mensaje
+	$('#message_error, .message_board').hide();
+	
 	// Preparar la plantilla para inserción de campos
 	var tbody_formlist = $('#tbody_fieldlist');
 	template_formfield = $('#tbody_fieldlist > tr').detach();
@@ -158,6 +161,7 @@ $(document).ready(function() {
 			if (response.action == 'error') {
 				$('#mb_title').text(response.message.title);
 				$('#mb_message').text(response.message.message);
+				$('#message_error, .message_board').show().delay(10 * 1000).fadeOut(500);
 			} else {
 				window.open('?menu=' + module_name, '_parent');
 			}

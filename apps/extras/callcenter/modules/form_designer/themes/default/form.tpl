@@ -1,6 +1,3 @@
-<!-- Message board -->
-<div class="mb_title" id="mb_title"></div>
-<div class="mb_message" id="mb_message"></div>
 <!-- end of Message board -->
 <form method="POST" name="form_formulario">
     <table width="99%" border="0" cellspacing="0" cellpadding="0" align="center">

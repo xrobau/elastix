@@ -98,6 +98,9 @@ fi
 
 %changelog
 * Wed Sep 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: tweak error message handling to integrate it better
+  into current Elastix theme.
+  SVN Rev[6733]
 - FIXED: Form Designer: only field removal should be blocked if a form is used
   by a campaign. Other operations must be allowed.
   SVN Rev[6732]

@@ -240,6 +240,11 @@ function modificarFormulario($pDB, $smarty, $module_name, $local_templates_dir)
             'LABEL'     =>  _tr('Type Label'),
         ), 'TEXT'),
         'CAMPOS_FORM'       =>  $json->encode($camposForm),
+
+        // Estos campos sólo se asignan para hacer aparecer el widget de mensajes
+        // con el propósito de manipularlo
+        'mb_title'      =>  '<span class="mb_title" id="mb_title">mb_title</span>',
+        'mb_message'    =>  '<span class="mb_message" id="mb_message">mb_message</span>',
     ));
     return $oForm->fetchForm("$local_templates_dir/form.tpl", $sTitulo, $valoresForm);
 }

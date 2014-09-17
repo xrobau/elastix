@@ -97,6 +97,11 @@ fi
 /etc/logrotate.d/elastixdialer
 
 %changelog
+* Wed Sep 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Form Designer: only field removal should be blocked if a form is used
+  by a campaign. Other operations must be allowed.
+  SVN Rev[6732]
+
 * Tue Sep 16 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Form Designer: clean up grid used for form field manipulation.
   SVN Rev[6728]

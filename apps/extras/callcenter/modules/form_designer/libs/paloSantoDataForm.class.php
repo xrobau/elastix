@@ -233,6 +233,7 @@ class paloSantoDataForm
         $camposBorrar = array();
         $camposActualizar = array();
         $camposInsertar = array();
+        $iNumCampaniasUsanForm = 0;
         if (!is_null($id)) {
             // Revisar si hay datos recolectados para este formulario
             foreach (array('form_data_recolected', 'form_data_recolected_entry') as $tabla) {
@@ -244,10 +245,7 @@ class paloSantoDataForm
                     $this->errMsg = $this->_db->errMsg;
                     return FALSE;
                 }
-                if ($tupla['N'] > 0) {
-                    $this->errMsg = _tr("This form is been used by any campaign");
-                    return FALSE;
-                }
+                $iNumCampaniasUsanForm += $tupla['N'];
             }
             
             // Leer los IDs de los campos del formulario
@@ -298,6 +296,12 @@ class paloSantoDataForm
             }
         }
         $camposBorrar = array_diff($camposExistentes, $camposRef);
+        
+        // No debe de borrarse campos de un formulario si lo usan las campañas
+        if (count($camposBorrar) > 0 && $iNumCampaniasUsanForm > 0) {
+            $this->errMsg = _tr("This form is been used by any campaign");
+            return FALSE;
+        }        
         
         // Ejecutar la actualización
         $this->_db->beginTransaction();

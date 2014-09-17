@@ -100,6 +100,9 @@ if (file_exists($path_script_db))
     crearIndiceSiNoExiste($pDB, 'call_center', 'call_entry',
         'datetime_entry_queue',
         "ADD KEY datetime_entry_queue (datetime_init)");
+    crearIndiceSiNoExiste($pDB, 'call_center', 'dont_call',
+        'callerid',
+        "ADD KEY callerid (caller_id)");
     
     // Asegurarse de que todo agente tiene una contraseña de ECCP
     $pDB->genQuery('UPDATE agent SET eccp_password = SHA1(CONCAT(NOW(), RAND(), number)) WHERE eccp_password IS NULL');

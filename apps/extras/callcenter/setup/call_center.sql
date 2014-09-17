@@ -856,6 +856,35 @@ DELIMITER ; ++
 CALL temp_indice_agent_calls_2014_09_08();
 DROP PROCEDURE IF EXISTS temp_indice_agent_calls_2014_09_08;
 
+
+/* Procedimiento para agregar índices necesarios para acelerar dont_call */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_indice_dont_call_2014_09_16 ++
+CREATE PROCEDURE temp_indice_dont_call_2014_09_16 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_columna tinyint(1);
+    
+    SET l_existe_indice = 0;
+
+    /* Verificar existencia de índices que deben agregarse */
+    SELECT COUNT(*) INTO l_existe_indice 
+    FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'dont_call'
+        AND INDEX_NAME = 'callerid';
+    IF l_existe_indice = 0 THEN
+        ALTER TABLE dont_call ADD KEY callerid (caller_id);
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_indice_dont_call_2014_09_16();
+DROP PROCEDURE IF EXISTS temp_indice_dont_call_2014_09_16;
+
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

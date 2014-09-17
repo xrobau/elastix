@@ -1,232 +1,248 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
-  +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
-  | http://www.elastix.org                                               |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
-  +----------------------------------------------------------------------+
-  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
-  | Telfs. 2283-268, 2294-440, 2284-356                                  |
-  | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com                                             |
-  +----------------------------------------------------------------------+
-  | The contents of this file are subject to the General Public License  |
-  | (GPL) Version 2 (the "License"); you may not use this file except in |
-  | compliance with the License. You may obtain a copy of the License at |
-  | http://www.opensource.org/licenses/gpl-license.php                   |
-  |                                                                      |
-  | Software distributed under the License is distributed on an "AS IS"  |
-  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
-  | the License for the specific language governing rights and           |
-  | limitations under the License.                                       |
-  +----------------------------------------------------------------------+
-  | The Original Code is: Elastix Open Source.                           |
-  | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  +----------------------------------------------------------------------+
-  $Id: new_campaign.php $ */
-
+ Codificación: UTF-8
++----------------------------------------------------------------------+
+| Elastix version 0.8                                                  |
+| http://www.elastix.org                                               |
++----------------------------------------------------------------------+
+| Copyright (c) 2006 Palosanto Solutions S. A.                         |
++----------------------------------------------------------------------+
+| Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+| Telfs. 2283-268, 2294-440, 2284-356                                  |
+| Guayaquil - Ecuador                                                  |
+| http://www.palosanto.com                                             |
++----------------------------------------------------------------------+
+| The contents of this file are subject to the General Public License  |
+| (GPL) Version 2 (the "License"); you may not use this file except in |
+| compliance with the License. You may obtain a copy of the License at |
+| http://www.opensource.org/licenses/gpl-license.php                   |
+|                                                                      |
+| Software distributed under the License is distributed on an "AS IS"  |
+| basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+| the License for the specific language governing rights and           |
+| limitations under the License.                                       |
++----------------------------------------------------------------------+
+| The Original Code is: Elastix Open Source.                           |
+| The Initial Developer of the Original Code is PaloSanto Solutions    |
++----------------------------------------------------------------------+
+*/
 require_once "libs/paloSantoForm.class.php";
-require_once "libs/paloSantoTrunk.class.php";
-include_once "libs/paloSantoConfig.class.php";
-include_once "libs/paloSantoGrid.class.php";
+require_once "libs/paloSantoGrid.class.php";
 
-require_once "modules/agent_console/libs/elastix2.lib.php";
-
-function _moduleContent(&$smarty, $module_name){
-
-    load_language_module($module_name);
-
+function _moduleContent(&$smarty, $module_name)
+{
     //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
+    require_once "modules/$module_name/configs/default.conf.php";
+    require_once "modules/$module_name/libs/paloSantoDontCall.class.php";
+
     global $arrConf;
 
     // Se fusiona la configuración del módulo con la configuración global
     $arrConf = array_merge($arrConf, $arrConfModule);
 
-    require_once "modules/$module_name/libs/PaloSantoDontCalls.class.php";
+    load_language_module($module_name);
+
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
+    $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
+    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-    // se conecta a la base
-    $pDB = new paloDB($arrConf["cadena_dsn"]);
-    if(!empty($pDB->errMsg)) {
-        $smarty->assign("mb_message", _tr('Error when connecting to database')."<br/>".$pDB->errMsg);
-    }
-    $smarty->assign("MODULE_NAME", _tr('Add Number'));
-    $smarty->assign("label_file", _tr('Upload File'));
-    $smarty->assign("label_text", _tr('Add new Number'));
-    $smarty->assign("NAME_BUTTON_SUBMIT", _tr('SAVE'));
-    $smarty->assign("NAME_BUTTON_CANCEL", _tr('CANCEL'));
+    $smarty->assign("MODULE_NAME", $module_name);
 
-    $formCampos = array();
-    $oForm = new paloForm($smarty, $formCampos);
-
-    if (isset($_POST['submit_Add_Call'])) {
-        $contenidoModulo = AddCalls($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm);
-
-    } else if (isset($_POST['submit_new'])) {
-        $contenidoModulo = newCalls($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm);
-    } else if ( isset( $_POST['submit_Apply'] ) ) {
-        $contenidoModulo = applyList($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm);
-    } else if ( isset( $_POST['submit_delete'] ) ){
-        $contenidoModulo = deleteCalls($pDB, $smarty, $module_name, $local_templates_dir);
-    } else  if ( isset( $_POST['submit_cancel'] ) ){
-        $contenidoModulo = listCalls($pDB, $smarty, $module_name, $local_templates_dir);
-    }else{
-        $contenidoModulo = listCalls($pDB, $smarty, $module_name, $local_templates_dir);
+    $pDB = new paloDB($arrConf['cadena_dsn']);
+    if (!is_object($pDB->conn) || $pDB->errMsg!="") {
+        $smarty->assign("mb_message", _tr('Error when connecting to database')." ".$pDB->errMsg);
     }
 
-    return $contenidoModulo;
+    switch (getParameter('action')) {
+    case 'add':
+        return agregarNumeros($pDB, $smarty, $module_name, $local_templates_dir);
+    case 'list':
+    default:
+        return listarNumeros($pDB, $smarty, $module_name);
+    }
 }
 
-
-function AddCalls($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm) {
-    $smarty->assign('FRAMEWORK_TIENE_TITULO_MODULO', existeSoporteTituloFramework());
-    $smarty->assign('icon', 'images/list.png');
-    $contenidoModulo = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr('Add Number'),$_POST);
-    return $contenidoModulo;
-}
-
-function newCalls($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm) {
-    $fContenido="";
-    $msgResultado="";
-
-    $smarty->assign('FRAMEWORK_TIENE_TITULO_MODULO', existeSoporteTituloFramework());
-    if (isset($_FILES['file_number'])) {
-        if($_FILES['file_number']['name']!=""){
-	    $file = $_FILES['file_number'];
-	    $cargaDatos = new Cargar_File($file);
-	    if( is_object($cargaDatos) )  {
-		$nameFile=$cargaDatos->getFileName();
-		$flag = $cargaDatos->guardarDatosCallsFromFile($pDB,$nameFile);
-	    } else { 
-		$smarty->assign("mb_title", _tr('Error'));
-		$smarty->assign("mb_message", _tr('Error when is loading file'));
-	    }
-        }else{
-            $msgResultado = _tr('Please select any file');
-        }
-    }elseif( isset( $_POST["txt_new_number"] ) ){
-        if( $_POST["txt_new_number"]!="" ){
-            $new_number = $_POST["txt_new_number"];
-            if(is_numeric($new_number) && $new_number>0){
-                $msgResultado = registrarNuevoNumero($pDB,$new_number);
-            }else{
-                $msgResultado = _tr('Number phone is not numeric value');
-            }
-        }else{
-            $msgResultado = _tr('Please enter a number phone');
-        }
-    }
-
-    $oForm->setViewMode();
-
-    if($msgResultado==""){
-        header("Location: ?menu=dont_call_list");
-    }else{
-        $smarty->assign("mb_title", _tr('Result'));
-        $smarty->assign("mb_message",$msgResultado);
-    }
-    $smarty->assign('icon', 'images/list.png');
-    $fContenido = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr('Load File') ,null);
-    return $fContenido;
-}
-
-function listCalls($pDB, $smarty, $module_name, $local_templates_dir) {
-    global $arrLang;
-
-    $arrCalls=array();
-    $oCalls = new PaloSantoDontCalls($pDB);
-    $arrCalls = $oCalls->getCalls();
-    $end = count($arrCalls);
-
-    if (is_array($arrCalls) && count($arrCalls)>0) {
-        foreach($arrCalls as $call) {
-            $arrTmp    = array();
-            $arrTmp[0] = construirCheck($call['id']);
-            $arrTmp[1] = $call['caller_id'];
-            $arrTmp[2] = $call['date_income'];
-            if($call['status']=='I'){
-                $arrTmp[3] = _tr('Inactive');
-            }else{
-                $arrTmp[3] = _tr('Active');
-            } 
-            $arrData[] = $arrTmp;
-         }
-    }else{
-        $arrData=array();
-    }
-
-    $button_delete="<input class='button' type='submit' name='submit_delete'".
-                    " value='"._tr('Remove')."'>";
-
-    $url = construirURL(array('menu' => $module_name), array('nav', 'start'));
-    $arrGrid = array("title"    => _tr('Phone List'),
-        "url"      => $url,
-        "icon"     => "images/list.png",
-        "width"    => "99%",
-        "start"    => ($end==0) ? 0 : 1,
-        "end"      => $end,
-        "total"    => $end,
-        "columns"  => array(0 => array("name"      => $button_delete,
-                                       "property1" => ""),
-                            1 => array("name"      => _tr("Number Phone's"),
-                                       "property1" => ""),
-                            2 => array("name"      => _tr('Date Income'),
-                                       "property1" => ""),
-                            3 => array("name"     => _tr('Status'),
-                                       "property1" => "")));
-
+function listarNumeros($pDB, $smarty, $module_name)
+{
+    $arrColumns = array('', _tr("Number Phone's"), _tr('Date Income'), _tr('Status'));
+    $url = array('menu' => $module_name);
+    $limit = 15;
+    
     $oGrid = new paloSantoGrid($smarty);
-    $oGrid->showFilter(
-        "<input type='submit' name='submit_Add_Call' value='"._tr('Add')."' class='button' />&nbsp&nbsp&nbsp&nbsp".
-        "<input type='submit' name='submit_Apply' value='"._tr('Apply')."' class='button' />");
-    $sContenido = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    if (strpos($sContenido, '<form') === FALSE)
-        $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
-    return $sContenido;
-}
-
-function applyList($pDB, $smarty, $module_name, $local_templates_dir, $formCampos, $oForm){
-    $contenido="";
-    $oCalls = new PaloSantoDontCalls($pDB);
-    $oCalls->applyList();
-    header("Location:?menu=dont_call_list");
-    return $contenido;
-}
-
-function deleteCalls($pDB, $smarty, $module_name, $local_templates_dir){
-    $sContenido="";
-    $arrIdCalls=array();
-    $patronBusqueda = '^chk_[0-9]+$';
-    foreach($_POST as $nombre => $valor) {
-	if( ereg( $patronBusqueda , $nombre ) ) {
-	    $arrIdCalls[] = $valor;
-	}
+    $oGrid->pagingShow(true);
+    $oGrid->setLimit($limit);
+    $oGrid->addNew("?menu=$module_name&action=add", _tr('Add'), TRUE);
+    $oGrid->deleteList('Are you sure to remove selected DNC?', 'remove', _tr('Delete'));
+    $oGrid->setColumns($arrColumns);
+    $oGrid->setURL($url);
+    $oGrid->setTitle(_tr('Phone List'));
+    
+    // Ejecutar operaciones indicadas en formularios
+    $oDataForm = new paloSantoDontCall($pDB);
+    if (isset($_POST['id']) && is_array($_POST['id']) && count($_POST['id']) > 0) {
+        $bExito = TRUE;
+        if (isset($_POST['remove'])) {
+            $mb = array(
+                'mb_title'  => _tr('Delete Error'), 
+                'mb_message'=> _tr('Could not remove batch')
+            );
+            $bExito = $oDataForm->borrarDontCall($_POST['id']);
+        }
+        if (!$bExito) {
+            $mb['mb_message'] .= ': '.$oDataForm->errMsg;
+            $smarty->assign($mb);
+        }
     }
-    if(count($arrIdCalls)<=0){
-        $smarty->assign("mb_title", _tr('Result'));
-        $smarty->assign("mb_message","No data selected");
-    }else{
-	$oCalls = new PaloSantoDontCalls($pDB);
-	$bExito = $oCalls->deleteCalls($arrIdCalls);
-	if($bExito){
-	    header("Location: ?menu=dont_call_list");
-	}else{
-	    //$sContenido .=$insTpl->crearAlerta("error","Error",$oMasterSet->getMessage());
-	}
-
+    
+    // Obtener listado de formularios
+    $total = $oDataForm->contarDontCall();
+    if ($total === FALSE) {
+        $smarty->assign("mb_message", _tr("Error when connecting to database")." ".$oDataForm->errMsg);
+        return '';
     }
-    return $sContenido;
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+    $arrDataNumbers = $oDataForm->listarDontCall($limit, $offset);
+    if (!is_array($arrDataNumbers)) {
+        $smarty->assign("mb_message", _tr("Error when connecting to database")." ".$oDataForm->errMsg);
+        return '';
+    }
+    $arrData = array();
+    foreach ($arrDataNumbers as $tuplaNumber) {
+    	$arrData[] = array(
+    	    '<input type="checkbox" name="id[]" value="'.$tuplaNumber['id'].'"/>',
+            $tuplaNumber['caller_id'],
+            $tuplaNumber['date_income'],
+            ($tuplaNumber['status'] == 'I' ? _tr('Inactive') : _tr('Active')),
+        );
+    }
+
+    $oGrid->setData($arrData);
+    return $oGrid->fetchGrid();
 }
 
-function construirCheck($id){
-    $html_chk = "<input type='checkbox' name='chk_{$id}' value='{$id}'/>";
-    return $html_chk;
+function agregarNumeros($pDB, $smarty, $module_name, $local_templates_dir)
+{
+    if (isset($_POST['cancel'])) {
+        Header('Location: ?menu='.$module_name);
+        return '';
+    }
+    $oForm = new paloForm($smarty, array(
+        'new_accion'           =>  array(
+            'LABEL'             =>  '',
+            'REQUIRED'          =>  'yes',
+            'INPUT_TYPE'        =>  'RADIO',
+            'INPUT_EXTRA_PARAM' =>  array(
+                'file'  =>  _tr('Upload File'),
+                'text'  =>  _tr('Add new Number')
+            ),
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => "",
+        ),
+        'txt_new_number'       =>    array(
+            "LABEL"                => _tr('Add new Number'),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "TEXT",
+            "INPUT_EXTRA_PARAM"      => array(
+                "size"          => "15",
+                'pattern'       => '^\d+$',
+                'placeholder'   =>  '5551234'),
+            "VALIDATION_TYPE"        => "numeric",
+            "VALIDATION_EXTRA_PARAM" => "",
+        ),
+        'file_number'  =>    array(
+            "LABEL"                => _tr('Load File'),
+            "REQUIRED"               => "no",
+            "INPUT_TYPE"             => "FILE",
+            "INPUT_EXTRA_PARAM"      => "",
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => "",
+        ),
+    ));
+    if (isset($_POST['apply_changes'])) {
+        $mb = NULL;
+        $oDataForm = new paloSantoDontCall($pDB);
+        if (!$oForm->validateForm($_POST)) {
+            $mb = array(
+                'mb_title'      =>  _tr('Validation Error'),
+                'mb_message'    =>  '<b>'._tr('The following fields contain errors').':</b><br/>'
+                    .implode(', ', array_keys($oForm->arrErroresValidacion)),
+            );
+        } elseif ($_POST['new_accion'] == 'text') {
+            if (!$oDataForm->insertarNumero($_POST['txt_new_number'])) {
+                $mb = array(
+                    'mb_title'      =>  _tr('Error'),
+                    'mb_message'    =>  $oDataForm->errMsg,
+                );
+            } else {
+                $mb = array(
+                    'mb_title'      =>  _tr('Result'),
+                    'mb_message'    =>  _tr('DNC inserted correctly'),
+                );
+                
+            }
+        } elseif ($_POST['new_accion'] == 'file') {
+            if ($_FILES['file_number']['error'] != UPLOAD_ERR_OK) {
+                $uperr = $_FILES['file_number']['error'];
+                $msgmap = array(
+                    UPLOAD_ERR_INI_SIZE     =>  _tr('Upload exceeds server side limit'),
+                    UPLOAD_ERR_FORM_SIZE    =>  _tr('Upload exceeds client side limit'),
+                    UPLOAD_ERR_PARTIAL      =>  _tr('Interrupted or partial upload'),
+                    UPLOAD_ERR_NO_FILE      =>  _tr('No file uploaded'),
+                    UPLOAD_ERR_NO_TMP_DIR   =>  _tr('No temp dir configured'),
+                    UPLOAD_ERR_CANT_WRITE   =>  _tr('Failed to write upload to temp dir'),
+                    UPLOAD_ERR_EXTENSION    =>  _tr('Upload terminated by extension'),
+                );
+                $msg = isset($msgmap[$uperr]) ? $msgmap[$uperr] : _tr('Unknown error');
+                $mb = array(
+                    'mb_title'      =>  _tr('Error'),
+                    'mb_message'    =>  _tr('Error when is loading file').': '.$msg,
+                );
+            } else {
+                ini_set('max_execution_time', 3600);    // Máximo de 1 hora para carga
+                $loadReport = $oDataForm->cargarArchivo($_FILES['file_number']['tmp_name']);
+                if (!is_array($loadReport)) {
+                    $mb = array(
+                        'mb_title'      =>  _tr('Error'),
+                        'mb_message'    =>  _tr('Error when is loading file').': '.$oDataForm->errMsg,
+                    );
+                } else {
+                    $mb = array(
+                        'mb_title'      =>  _tr('Result'),
+                        'mb_message'    =>  sprintf(_tr('Total records: %d Inserted: %d Rejected %d'),
+                            $loadReport['total'], $loadReport['inserted'], $loadReport['rejected']),
+                    );
+                }
+            }
+        }
+        if (!is_null($mb)) $smarty->assign($mb);
+    }
+    
+    if (!isset($_POST['new_accion'])) $_POST['new_accion'] = 'file';
+    $smarty->assign(array(
+        'icon'                  =>  'images/list.png',
+        'CANCEL'                =>  _tr('Cancel'),
+        'SAVE'                  =>  _tr('Save'),
+        'LABEL_MAX_FILESIZE'    =>  sprintf(_tr('Maximum upload size: %d Mb'), calcularMaxSubida() / 1048576),
+    ));
+    return $oForm->fetchForm("$local_templates_dir/new.tpl", _tr('Add Number'), $_POST);    
 }
 
+function calcularMaxSubida()
+{
+    $max_upload = NULL;
+    
+    foreach (array('upload_max_filesize', 'post_max_size') as $k) {
+        $v = strtolower(trim(ini_get($k)));
+        switch ($v[strlen($v) - 1]) {
+        case 'g': $v *= 1024;
+        case 'm': $v *= 1024;
+        case 'k': $v *= 1024;
+        }
+        if (is_null($max_upload) || $max_upload > $v)
+            $max_upload = $v;
+    }
+    return $max_upload;
+}
 ?>

@@ -37,6 +37,7 @@ chmod +x $RPM_BUILD_ROOT/etc/rc.d/init.d/elastixdialer
 rmdir setup/dialer_process
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d/
 mv setup/elastixdialer.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/elastixdialer
+mv setup/usr $RPM_BUILD_ROOT/usr
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -90,6 +91,7 @@ fi
 %defattr(-, asterisk, asterisk)
 /opt/elastix/dialer
 %defattr(-, root, root)
+%{_bindir}/elastix-callcenter-load-dnc
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /opt/elastix/dialer/*
@@ -98,6 +100,13 @@ fi
 
 %changelog
 * Wed Sep 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Do Not Call List: complete rewrite. This rewrite uses ordinary grid
+  pagination instead of loading the entire recordset in memory, and simplifies
+  the support libraries. Additionally a new index is added to the dont_call
+  table to speed up lookup by caller_id. Finally, a small utility is now 
+  provided to load a CSV file to the DNC list from the command line. Fixes 
+  Elastix bug #1984.
+  SVN Rev[6734]
 - CHANGED: Form Designer: tweak error message handling to integrate it better
   into current Elastix theme.
   SVN Rev[6733]

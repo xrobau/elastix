@@ -50,6 +50,8 @@ $arrLangModule=array(
 "Inactive" => "Inactive",
 "Desactivate"=>"Deactivate",
 "Activate"=>"Activate",
+'Maximum upload size: %d Mb' => 'Maximum upload size: %d Mb',
+'Are you sure to remove selected DNC?' => 'Are you sure to remove selected DNC?',
 );
 
 

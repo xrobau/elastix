@@ -100,6 +100,11 @@ fi
 
 %changelog
 * Thu Sep 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): create new request getmultipleagentstatus. This 
+  request allows for a report of agent status for a group of agents at once.
+  This cuts down again on the number of ECCP requests required for the Agent
+  Monitoring report. Part of the fix for Elastix bug #1820.
+  SVN Rev[6739] 
 - CHANGED: Dialer (ECCP): create new request getmultipleagentqueues. This
   request allows for a report of agents subscribed on queues for a group of
   agents at once. This cuts down on the number of ECCP requests required for

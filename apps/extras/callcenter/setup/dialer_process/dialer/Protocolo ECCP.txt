@@ -1114,6 +1114,29 @@ En caso de que no exista el agente:
     </getagentstatus_response>
 </response>
 
+
+Requerimiento "getmultipleagentstatus"
+
+Este requerimiento es una optimización del requerimiento "getagentstatus". La
+diferencia principal es que el requerimiento "getmultipleagentstatus" permite
+interrogar el estado de muchos agentes a la vez. De esta manera se reducen la
+cantidad de llamadas ECCP necesarias para implementar monitoreos.
+
+Atributos o argumentos:
+* agents: Lista de agentes para los que se requiere el reporte de estado de los
+  agentes. Este elemento contiene múltiples elementos 'agent_number', cada
+  uno de los cuales identifica al agente, en formato Agent/9000.
+
+Respuesta:
+* agents: Lista de agentes para los que se reporta el estado actual.
+  Este elemento contiene múltiples elementos 'agent', los cuales contienen los
+  mismos campos que el elemento getagentstatus_response del requerimiento
+  "getagentstatus", a excepción de pauseinfo. Además, cada elemento 'agent'  
+  contiene los siguientes campos:
+  * agent_number: Agente identificado por el elemento
+
+Véase getagentstatus para los detalles de los campos.
+
 Requerimiento "loginagent"
 
 Este requerimiento inicia la conexión de una extensión, bajo la identidad de un

@@ -915,9 +915,19 @@ LISTA_EXTENSIONES;
                 $agenteColas[(string)$xml_queue->agent_number] = $colas;
             }
             
+            // Listar el estado de todos los agentes
+            $estadosAgentes = $oECCP->getmultipleagentstatus($agentlist);
+            $agenteEstado = array();
+            foreach ($agentlist as $sAgente) $agenteEstado[$sAgente] = array();  // array_fill_keys
+            foreach ($estadosAgentes->agents->agent as $xml_agent) {
+                $agenteEstado[(string)$xml_agent->agent_number] = $xml_agent;
+            }
+            
+            
             foreach ($respuestaResumen->agents->agent as $xml_agent) {
             	// Averiguar el estado del agente
-                $estadoAgente = $oECCP->getagentstatus((string)$xml_agent->agentchannel);
+                //$estadoAgente = $oECCP->getagentstatus((string)$xml_agent->agentchannel);
+                $estadoAgente = $agenteEstado[(string)$xml_agent->agentchannel];
 
                 // Llenar plantilla con toda la información excepto el número de llamadas por cola
                 $linkstart = isset($estadoAgente->callinfo->linkstart) ? (string)$estadoAgente->callinfo->linkstart : NULL;

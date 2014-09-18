@@ -235,8 +235,17 @@ class AMIEventProcess extends TuberiaProcess
     
     private function _infoSeguimientoAgente($sAgente)
     {
-    	$a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        return (is_null($a)) ? NULL : $a->resumenSeguimiento();
+        if (is_array($sAgente)) {
+            $is = array();
+            foreach ($sAgente as $s) {
+                $a = $this->_listaAgentes->buscar('agentchannel', $s);
+                $is[$s] = (is_null($a)) ? NULL : $a->resumenSeguimiento();
+            }
+            return $is;
+        } else {
+            $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+            return (is_null($a)) ? NULL : $a->resumenSeguimiento();
+        }
     }
     
     private function _agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout)
@@ -327,9 +336,20 @@ class AMIEventProcess extends TuberiaProcess
 
     private function _reportarInfoLlamadaAtendida($sAgente)
     {
-        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (is_null($a) || is_null($a->llamada)) return NULL;
-        return $a->llamada->resumenLlamada();
+        if (is_array($sAgente)) {
+            $il = array();
+            foreach ($sAgente as $s) {
+                $a = $this->_listaAgentes->buscar('agentchannel', $s);
+                $il[$s] = (is_null($a) || is_null($a->llamada)) 
+                    ? NULL
+                    : $a->llamada->resumenLlamada();
+            }
+            return $il;
+        } else {
+            $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+            if (is_null($a) || is_null($a->llamada)) return NULL;
+            return $a->llamada->resumenLlamada();
+        }
     }
 
     /**

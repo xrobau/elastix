@@ -1677,6 +1677,29 @@ LISTA_EXTENSIONES;
         }
         return $arrColas;
     }
+    
+    private function _getQueuesFromDynamicList(&$agentlist)
+    {
+        $arrColas = array();
+        $arrExt = array();
+        foreach ($agentlist as $sAgente => $agentFields) {
+            $extension = $agentFields['type']{0} . $agentFields['number'];
+            $arrExt[$extension] = $sAgente;
+            $arrColas[$sAgente] = array();
+        }
+        
+        $db_output = $this->_ami->database_show();
+        foreach (array_keys($db_output) as $k) {
+            $regs = NULL;
+            if (preg_match('|^/QPENALTY/(\d+)/agents/(\S+)$|', $k, $regs)) {
+                if (isset($arrExt[$regs[2]])) {
+                    $arrColas[$arrExt[$regs[2]]][] = $regs[1];
+                }
+            }
+        } 
+        
+        return $arrColas;
+    }
 
     /**
      * Procedimiento que implementa el logoff de un agente estático al estilo
@@ -1993,6 +2016,8 @@ LISTA_EXTENSIONES;
         }
         if (!is_null($sAgentStatus)) {
             $xml_getAgentStatusResponse->addChild('status', $sAgentStatus);
+            if (!is_null($sCanalExt)) $xml_getAgentStatusResponse->addChild('channel', str_replace('&', '&amp;', $sCanalExt));
+            if (!is_null($sExtension)) $xml_getAgentStatusResponse->addChild('extension', $sExtension);
         }
 
         // Reportar el canal remoto al cual está conectado el agente
@@ -2000,12 +2025,14 @@ LISTA_EXTENSIONES;
             $xml_getAgentStatusResponse->addChild('remote_channel', $infoSeguimiento['clientchannel']);
         }
 
-        // Reportar los estados de break y hold, si aplican
+        // Reportar el estado de hold, si aplica
+        if ($infoSeguimiento['estado_consola'] == 'logged-in')
+            $xml_getAgentStatusResponse->addChild('onhold', is_null($infoSeguimiento['id_hold']) ? 0 : 1);
+        
+        // Reportar los estados de break, si aplica
         if (!is_null($infoSeguimiento['id_break'])) {
             $xml_pauseInfo = $xml_getAgentStatusResponse->addChild('pauseinfo');
             $xml_pauseInfo->addChild('pauseid', $infoSeguimiento['id_break']);
-            
-            // Leer fecha de inicio y nombre del break
             $recordset = $this->_db->prepare(
                 'SELECT audit.datetime_init, break.name FROM audit, break '.
                 'WHERE audit.id = ? AND audit.id_break = break.id');
@@ -2015,31 +2042,14 @@ LISTA_EXTENSIONES;
             $xml_pauseInfo->addChild('pausename', str_replace('&', '&amp;', $tupla['name']));
             $xml_pauseInfo->addChild('pausestart', str_replace(date('Y-m-d '), '', $tupla['datetime_init']));
         }
-        if ($infoSeguimiento['estado_consola'] == 'logged-in')
-            $xml_getAgentStatusResponse->addChild('onhold', is_null($infoSeguimiento['id_hold']) ? 0 : 1);
 
         // Reportar los estado de llamadas saliente y entrante
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
         if (!is_null($infoLlamada)) {
-            $xml_callInfo = $xml_getAgentStatusResponse->addChild('callinfo');
-            $xml_callInfo->addChild('calltype', $infoLlamada['calltype']);
-            $xml_callInfo->addChild('callid', $infoLlamada['callid']);
-            if (!is_null($infoLlamada['campaign_id']))
-                $xml_callInfo->addChild('campaign_id', $infoLlamada['campaign_id']);
-            $xml_callInfo->addChild('callnumber', $infoLlamada['dialnumber']);
-            if (isset($infoLlamada['datetime_dialstart']))
-                $xml_callInfo->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialstart']));
-            if (isset($infoLlamada['datetime_dialend']))
-                $xml_callInfo->addChild('dialend', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialend']));
-            $xml_callInfo->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_enterqueue']));
-            $xml_callInfo->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_linkstart']));
-            if (!is_null($infoLlamada['queuenumber']))
-                $xml_callInfo->addChild('queuenumber', $infoLlamada['queuenumber']);
+            $this->_agregarCallInfo($xml_getAgentStatusResponse, $infoLlamada);
         }
 
         if (!is_null($sAgentStatus)) {
-            if (!is_null($sCanalExt)) $xml_getAgentStatusResponse->addChild('channel', str_replace('&', '&amp;', $sCanalExt));
-            if (!is_null($sExtension)) $xml_getAgentStatusResponse->addChild('extension', $sExtension);
             if ($sAgentStatus != 'offline' && is_null($sExtension)) {
                 $this->_log->output("ERR: (internal) estado inconsistente (status=$sAgentStatus extension=null) para agente $sAgente\n".
                     "\tinfoSeguimiento => ".print_r($infoSeguimiento, TRUE).
@@ -2053,6 +2063,134 @@ LISTA_EXTENSIONES;
         return $xml_response;
     }
 
+    private function Request_eccpauth_getmultipleagentstatus($comando)
+    {
+        if (is_null($this->_ami))
+            return $this->_generarRespuestaFallo(500, 'No AMI connection');
+    
+        // Verificar que agente está presente
+        if (!isset($comando->agents))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+    
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_getAgentStatusResponse = $xml_response->addChild('getmultipleagentstatus_response');
+    
+        $agentlist = array();
+        foreach ($comando->agents->agent_number as $agent_number) {
+            $sAgente = (string)$agent_number;
+    
+            // El siguiente código asume formato Agent/9000
+            if (is_null($this->_parseAgent($sAgente))) {
+                $this->_agregarRespuestaFallo($xml_getAgentStatusResponse, 417, 'Invalid agent number');
+                return $xml_response;
+            }
+    
+            $agentlist[] = $sAgente;
+        }
+    
+        // Verificar que todos los agentes existen en el sistema
+        $listaAgentes = $this->_listarAgentes();
+        $agentesExtras = array_diff($agentlist, array_keys($listaAgentes));
+        if (count($agentesExtras) > 0) {
+            $this->_agregarRespuestaFallo($xml_getAgentStatusResponse, 404, 'Specified agent not found');
+            return $xml_response;
+        }
+    
+        $is = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($agentlist);
+        foreach ($is as $sAgente => $infoSeguimiento) {
+            if (is_null($infoSeguimiento)) {
+                $xml_getAgentStatusResponse->addChild('status', 'offline');
+                $this->_agregarRespuestaFallo($xml_getAgentStatusResponse, 404, 'Invalid agent number');
+                return $xml_response;
+            }
+        }
+        $il = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($agentlist);
+        
+        // Conversión a XML
+        $xml_agents = $xml_getAgentStatusResponse->addChild('agents');
+        foreach ($agentlist as $sAgente) {
+            $xml_agent = $xml_agents->addChild('agent');
+            $xml_agent->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
+            
+            $infoSeguimiento = $is[$sAgente];
+
+            // Canal que hizo el logoneo hacia la cola
+            $sExtension = NULL;
+            $sCanalExt = $infoSeguimiento['login_channel'];
+            if (is_null($sCanalExt)) $sCanalExt = $infoSeguimiento['extension'];
+            if (!is_null($sCanalExt)) {
+                // Hay un canal de login. Se separa la extensión que hizo el login
+                $sRegexp = "|^\w+/(\\d+)-?|"; $regs = NULL;
+                if (preg_match($sRegexp, $sCanalExt, $regs)) {
+                    $sExtension = $regs[1];
+                }
+            }
+            
+            // Reportar los estados conocidos
+            $sAgentStatus = NULL;
+            if ($infoSeguimiento['num_pausas'] > 0) {
+                $sAgentStatus = 'paused';
+            } elseif ($infoSeguimiento['oncall']) {
+                $sAgentStatus = 'oncall';
+            } elseif ($infoSeguimiento['estado_consola'] == 'logged-in') {
+                $sAgentStatus = 'online';
+            } else {
+                $sAgentStatus = 'offline';
+            }
+            if (!is_null($sAgentStatus)) {
+                $xml_agent->addChild('status', $sAgentStatus);
+                if (!is_null($sCanalExt)) $xml_agent->addChild('channel', str_replace('&', '&amp;', $sCanalExt));
+                if (!is_null($sExtension)) $xml_agent->addChild('extension', $sExtension);
+            }
+            
+            // Reportar el canal remoto al cual está conectado el agente
+            if (!is_null($infoSeguimiento['clientchannel'])) {
+                $xml_agent->addChild('remote_channel', $infoSeguimiento['clientchannel']);
+            }
+            
+            // Reportar el estado de hold, si aplica
+            if ($infoSeguimiento['estado_consola'] == 'logged-in')
+                $xml_agent->addChild('onhold', is_null($infoSeguimiento['id_hold']) ? 0 : 1);
+            
+            // Por ahora no se reporta el estado de break
+            
+            $infoLlamada = $il[$sAgente];
+            if (!is_null($infoLlamada)) {
+                $this->_agregarCallInfo($xml_agent, $infoLlamada);
+            }
+            
+            if (!is_null($sAgentStatus)) {
+                if ($sAgentStatus != 'offline' && is_null($sExtension)) {
+                    $this->_log->output("ERR: (internal) estado inconsistente (status=$sAgentStatus extension=null) para agente $sAgente\n".
+                        "\tinfoSeguimiento => ".print_r($infoSeguimiento, TRUE).
+                        "\tinfoLlamada => ".print_r($infoLlamada, TRUE));
+                }
+            } else {
+                $xml_agent->addChild('status', 'offline');
+            }
+        }
+
+        return $xml_response;
+    }
+    
+    private function _agregarCallInfo($xml_getAgentStatusResponse, &$infoLlamada)
+    {
+        $xml_callInfo = $xml_getAgentStatusResponse->addChild('callinfo');
+        $xml_callInfo->addChild('calltype', $infoLlamada['calltype']);
+        $xml_callInfo->addChild('callid', $infoLlamada['callid']);
+        if (!is_null($infoLlamada['campaign_id']))
+            $xml_callInfo->addChild('campaign_id', $infoLlamada['campaign_id']);
+        $xml_callInfo->addChild('callnumber', $infoLlamada['dialnumber']);
+        if (isset($infoLlamada['datetime_dialstart']))
+            $xml_callInfo->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialstart']));
+        if (isset($infoLlamada['datetime_dialend']))
+            $xml_callInfo->addChild('dialend', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialend']));
+        $xml_callInfo->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_enterqueue']));
+        $xml_callInfo->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_linkstart']));
+        if (!is_null($infoLlamada['queuenumber']))
+            $xml_callInfo->addChild('queuenumber', $infoLlamada['queuenumber']);
+    }
+    
     private function Request_agentauth_hangup($comando)
     {
         if (is_null($this->_ami))
@@ -3241,14 +3379,10 @@ Privilege: Command
         unset($listaColas);
         
         // Acumular colas dinámicas para cada agente
-        foreach (array_keys($agentlist) as $sAgente) {
-            // Agregar además las colas a las cuales va a suscribirse el agente dinámico
-            // TODO: O(N) llamadas a AMI por número de agentes consultados
-            $listaColasDyn = $this->_getQueuesGivenDynamicMember($agentlist[$sAgente]['type'], $agentlist[$sAgente]['number']);
-            if (is_array($listaColasDyn)) foreach ($listaColasDyn as $sCola) {
-                if (!(in_array($sCola, $agentlist[$sAgente]['queues'])))
-                    $agentlist[$sAgente]['queues'][] = $sCola;
-            }
+        $listaColasDyn = $this->_getQueuesFromDynamicList($agentlist);
+        foreach (array_keys($listaColasDyn) as $sAgente) {
+            $agentlist[$sAgente]['queues'] = array_unique(array_merge(
+                $agentlist[$sAgente]['queues'], $listaColasDyn[$sAgente]));
         }
         
         // Conversión de resultado a XML

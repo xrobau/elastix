@@ -3180,25 +3180,92 @@ Privilege: Command
             return $xml_response;
         }
         
-        $listaColas = $this->_listarColasAgente($sAgente);
+        $listaColas = $this->_listarColasAgente(array($sAgente));
         $xml_agentQueues = $xml_getagentqueuesResponse->addChild('queues');
 
         // Reportar también las colas a las que está suscrito el agente
-        if (is_array($listaColas)) foreach ($listaColas as $sCola) {
+        if (is_array($listaColas) && isset($listaColas[$sAgente])) foreach ($listaColas[$sAgente] as $sCola) {
             $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
         }
 
         // Agregar además las colas a las cuales va a suscribirse el agente dinámico
         $listaColasDyn = $this->_getQueuesGivenDynamicMember($agentFields['type'], $agentFields['number']);
         if (is_array($listaColasDyn)) foreach ($listaColasDyn as $sCola) {
-            if (!in_array($sCola, $listaColas))
+            if (!(isset($listaColas[$sAgente]) && in_array($sCola, $listaColas[$sAgente])))
                 $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
         }
 
         return $xml_response;
     }
 
-    private function _listarColasAgente($sAgente)
+    private function Request_eccpauth_getmultipleagentqueues($comando)
+    {
+        if (is_null($this->_ami))
+            return $this->_generarRespuestaFallo(500, 'No AMI connection');
+        
+        // Verificar que agente está presente
+        if (!isset($comando->agents))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_getagentqueuesResponse = $xml_response->addChild('getmultipleagentqueues_response');
+        
+        $agentlist = array();
+        foreach ($comando->agents->agent_number as $agent_number) {
+            $sAgente = (string)$agent_number;
+            
+            // El siguiente código asume formato Agent/9000
+            $agentFields = $this->_parseAgent($sAgente);
+            if (is_null($agentFields)) {
+                $this->_agregarRespuestaFallo($xml_getagentqueuesResponse, 417, 'Invalid agent number');
+                return $xml_response;
+            }
+            $agentFields['queues'] = array();
+            
+            $agentlist[$sAgente] = $agentFields;
+        }
+
+        // Verificar que todos los agentes existen en el sistema
+        $listaAgentes = $this->_listarAgentes();
+        $agentesExtras = array_diff(array_keys($agentlist), array_keys($listaAgentes));
+        if (count($agentesExtras) > 0) {
+            $this->_agregarRespuestaFallo($xml_getagentqueuesResponse, 404, 'Specified agent not found');
+            return $xml_response;
+        }
+        
+        // Acumular las colas para cada agente
+        $listaColas = $this->_listarColasAgente(array_keys($agentlist));
+        foreach ($listaColas as $sAgente => $queuelist) {
+            if (isset($agentlist[$sAgente])) $agentlist[$sAgente]['queues'] = $queuelist;
+        }
+        unset($listaColas);
+        
+        // Acumular colas dinámicas para cada agente
+        foreach (array_keys($agentlist) as $sAgente) {
+            // Agregar además las colas a las cuales va a suscribirse el agente dinámico
+            // TODO: O(N) llamadas a AMI por número de agentes consultados
+            $listaColasDyn = $this->_getQueuesGivenDynamicMember($agentlist[$sAgente]['type'], $agentlist[$sAgente]['number']);
+            if (is_array($listaColasDyn)) foreach ($listaColasDyn as $sCola) {
+                if (!(in_array($sCola, $agentlist[$sAgente]['queues'])))
+                    $agentlist[$sAgente]['queues'][] = $sCola;
+            }
+        }
+        
+        // Conversión de resultado a XML
+        $xml_agents = $xml_getagentqueuesResponse->addChild('agents');
+        foreach (array_keys($agentlist) as $sAgente) {
+            $xml_agent = $xml_agents->addChild('agent');
+            $xml_agent->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
+            $xml_agentQueues = $xml_agent->addChild('queues');
+            foreach ($agentlist[$sAgente]['queues'] as $sCola) {
+                $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
+            }
+        }
+        
+        return $xml_response;
+    }
+    
+    private function _listarColasAgente($agentlist)
     {
         /* Por ahora se asume que $sAgente es de la forma Agent/9000 y que 
          * aparece de esta misma manera en el reporte de "queue show" 
@@ -3228,9 +3295,9 @@ Privilege: Command
                    // Se ha encontrado el inicio de una descripción de cola
                     $sColaActual = $regs[1];
                 } elseif (preg_match('|^\s+(\w+/\d+)|', $sLinea, $regs)) {
-                    if (!is_null($sColaActual) && $sAgente == $regs[1]) {
+                    if (!is_null($sColaActual) && in_array($regs[1], $agentlist)) {
                         // Se ha encontrado el agente en una cola en particular
-                        $listaColas[] = $sColaActual;
+                        $listaColas[$regs[1]][] = $sColaActual;
                     }
                 }
             }

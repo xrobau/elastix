@@ -2696,6 +2696,64 @@ En caso de que no exista el agente:
 </response>
 
 
+Requerimiento "getmultipleagentqueues"
+
+Este requerimiento cumple una función parecida a la del requerimiento 
+getagentqueues. La diferencia principal es que el requerimiento
+getmultipleagentqueues permite preguntar la información de una cantidad
+arbitraria de agentes simultáneamente. El uso de este requerimiento se recomienda
+en lugar de una secuencia de llamadas a getagentqueues cuando se requiere la
+información de colas de múltiples agentes.
+
+Atributos o argumentos:
+* agents: Lista de agentes para los que se requiere el reporte de pertenencia a
+  las colas. Este elemento contiene múltiples elementos 'agent_number', cada
+  uno de los cuales identifica al agente, en formato Agent/9000.
+
+Respuesta:
+* agents: Lista de agentes para los que se reporta la pertenencia a las colas.
+  Este elemento contiene múltiples elementos 'agent', los cuales contienen los
+  siguientes campos:
+  * agent_number: Agente identificado por el elemento
+  * queues: Lista de colas a las cuales pertenece el agente. Este elemento 
+    contiene múltiples elementos 'queue', los cuales contienen el identificador
+    de la cola.
+
+Ejemplo:
+<request id="4">
+    <getmultipleagentqueues>
+        <agents>
+            <agent_number>Agent/9000</agent_number>
+            <agent_number>Agent/9001</agent_number>
+        <agents>    
+    </getmultipleagentqueues>
+</request>
+
+Respuesta:
+Para caso de éxito:
+
+<response id="4">
+    <getmultipleagentqueues_response>
+        <agents>
+            <agent>
+                <agent_number>Agent/9000</agent_number>
+                <queues>
+                    <queue>8001</queue>
+                    <queue>8000</queue>
+                </queues>
+            </agent>
+            <agent>
+                <agent_number>Agent/9001</agent_number>
+                <queues>
+                    <queue>8000</queue>
+                </queues>
+            </agent>
+        <agents>
+    </getmultipleagentqueues_response>
+</response>
+
+
+
 Requerimiento "getagentactivitysummary"
 
 Este requerimiento lista, para un rango de fechas, un reporte de actividad de

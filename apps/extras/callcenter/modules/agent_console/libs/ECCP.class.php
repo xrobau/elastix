@@ -549,6 +549,16 @@ class ECCP
         return $xml_response->getagentqueues_response;
     }
     
+    public function getmultipleagentqueues($agentlist)
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('getmultipleagentqueues');
+        $xml_agents = $xml_cmdRequest->addChild('agents');
+        foreach ($agentlist as $sAgentNumber) $xml_agents->addChild('agent_number', $sAgentNumber);
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->getmultipleagentqueues_response;
+    }
+    
     public function getagentactivitysummary($datetime_start = NULL, $datetime_end = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");

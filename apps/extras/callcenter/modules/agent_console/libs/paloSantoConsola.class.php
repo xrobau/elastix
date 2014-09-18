@@ -897,6 +897,24 @@ LISTA_EXTENSIONES;
             $respuestaResumen = $oECCP->getagentactivitysummary();
             $resumenColas = array();
 
+            // Reunir los agentes involucrados
+            $agentlist = array();
+            foreach ($respuestaResumen->agents->agent as $xml_agent) {
+                $agentlist[] = (string)$xml_agent->agentchannel;
+            }
+            
+            // Listar las colas a la que pertenecen todos los agentes
+            $pertenenciaColas = $oECCP->getmultipleagentqueues($agentlist);
+            $agenteColas = array();
+            foreach ($agentlist as $sAgente) $agenteColas[$sAgente] = array();  // array_fill_keys
+            foreach ($pertenenciaColas->agents->agent as $xml_queue) {
+                $colas = array();
+                foreach ($xml_queue->queues->queue as $xml_q) {
+                    $colas[] = (string)$xml_q;
+                }
+                $agenteColas[(string)$xml_queue->agent_number] = $colas;
+            }
+            
             foreach ($respuestaResumen->agents->agent as $xml_agent) {
             	// Averiguar el estado del agente
                 $estadoAgente = $oECCP->getagentstatus((string)$xml_agent->agentchannel);
@@ -921,8 +939,7 @@ LISTA_EXTENSIONES;
                 );
                 
                 // Averiguar a qué colas pertenece el agente
-                $agenteColas = $oECCP->getagentqueues((string)$xml_agent->agentchannel);
-                foreach ($agenteColas->queues->queue as $xml_queue) {
+                foreach ($agenteColas[(string)$xml_agent->agentchannel] as $xml_queue) {
                 	$infoAgenteCola = $infoAgente;
                     if (isset($xml_agent->callsummary->incoming->queue)) {
                     	foreach ($xml_agent->callsummary->incoming->queue as $xml_queuestat) {

@@ -249,6 +249,7 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
     $estadoHash = generarEstadoHash($module_name, $estadoCliente);
 
     $oGrid  = new paloSantoGrid($smarty);
+    $oGrid->pagingShow(FALSE);
     $json = new Services_JSON();
     $INITIAL_CLIENT_STATE = $json->encode($jsonData);
     $sJsonInitialize = <<<JSON_INITIALIZE

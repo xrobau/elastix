@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 16
+Release: 17
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -248,6 +248,21 @@ fi
 # Para q se actualice smarty (tpl updates)
 rm -rf /var/www/html/var/templates_c/*
 
+# Patch elastix.ini, relocate session files to the new path.
+/bin/grep -r "/tmp" /etc/php.d/elastix.ini >> /dev/null 2>&1
+if [ "$?" == "0" ]; then
+  for file_sess in `ls /tmp/sess_*`
+  do
+    file_name=`basename $file_sess`
+    if [ -f /var/lib/php/session-asterisk/$file_name ]; then
+        rm -rf /var/lib/php/session-asterisk/$file_name
+    fi
+
+    echo "Copying file /tmp/$file_name to /var/lib/php/session-asterisk/$file_name."
+    cp -p /tmp/$file_name /var/lib/php/session-asterisk/
+  done
+fi
+
 # Patch elastix.ini to work around %config(noreplace) in previous versions 
 sed --in-place "s,/tmp,/var/lib/php/session-asterisk,g" /etc/php.d/elastix.ini 
 if [ $1 -eq 1 ]; then #install
@@ -329,12 +344,20 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Sep 18 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-17
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu Sep 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: the request() helper function uses an incorrect URL encoding
   method that fails to escape special characters in string parameters. Fixed by
   relying instead on the well-tested jQuery handling of hash parameters in
   AJAX requests.
   SVN Rev[6735]
+
+* Tue Sep 16 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: framework registration module, translations was updated.
+  SVN Rev[6729]
 
 * Mon Sep 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-16
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest

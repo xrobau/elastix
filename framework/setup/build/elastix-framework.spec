@@ -402,6 +402,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Sep 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: the request() helper function uses an incorrect URL encoding
+  method that fails to escape special characters in string parameters. Fixed by
+  relying instead on the well-tested jQuery handling of hash parameters in
+  AJAX requests.
+  SVN Rev[6735]
+
 * Fri Aug 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: refactor all methods concerning the profile update to a
   separate file which is loaded on demand.

@@ -111,9 +111,19 @@ function request(url,arrParams, recursive, callback)
     callback           = callback  || null;
     recursive          = recursive || null;
 
-     // Comienza petición por ajax
+    /* Por Alex: muchos usuarios de la funcion request() crean un objeto de tipo
+     * Array, y asignan propiedades para que sean usadas como parámetros en la
+     * petición. Sin embargo, $.post() no acepta un Array, sino un objeto hash
+     * ordinario. No se puede pasar el parámetro arrParams directamente a 
+     * $.post(), porque resulta en la ausencia de parámetros en la petición.
+     * Por lo tanto, se tiene que iterar por las claves asignadas, y recolectar
+     * el valor correspondiente en un hash ordinario. */
+    var params = {};
+    for (var k in arrParams) { params[k] = arrParams[k]; }
+
+    // Comienza petición por ajax
     $.post(url,
-        queryString,
+    	params,
         function(dataResponse){
             var message        = dataResponse.message;
             var statusResponse = dataResponse.statusResponse;
@@ -153,24 +163,6 @@ function existsRequestRecursive()
 function clearResquestRecursive()
 {
     clearTimeout(current_setTimeout);
-}
-
-function array2QueryString(arrayParams)//formato: arr["action"]="iniciar";arr["param1"]="mensaje1"
-{
-    var queryString="";
-    var tamanio=0;
-    var i=0;
-    for(var key in arrayParams){
-                tamanio++;
-    }
-    for(var key in arrayParams){
-        if(i==tamanio-1)
-            queryString+=key+"="+arrayParams[key];
-        else
-            queryString+=key+"="+arrayParams[key]+"&";
-        i++;
-    }
-    return queryString;
 }
 
 function hide_message_error(){

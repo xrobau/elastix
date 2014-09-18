@@ -329,6 +329,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Sep 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: the request() helper function uses an incorrect URL encoding
+  method that fails to escape special characters in string parameters. Fixed by
+  relying instead on the well-tested jQuery handling of hash parameters in
+  AJAX requests.
+  SVN Rev[6735]
+
 * Mon Sep 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-16
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

@@ -130,7 +130,7 @@ function request(url,arrParams, recursive, callback)
     	 * Para una propiedad que se asigna para request pero no está presente
     	 * en el mixin, typeof empty_array[k] debería evaluarse a "undefined".
     	 */
-    	if (typeof arrParams[k] != typeof empty_array[k])
+    	if (!(Array.prototype.isPrototypeOf(arrParams) && typeof arrParams[k] == typeof empty_array[k]))
     		params[k] = arrParams[k];
     }
 

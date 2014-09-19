@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: refine previous commit by checking whether arrParams is
+  an actual Array.
+  SVN Rev[6742]
 - FIXED: Framework: filter out properties inserted through Array mixins when
   building an AJAX request. Fixes breakage of Ember.js after SVN commit #6735.
   SVN Rev[6741]

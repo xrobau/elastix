@@ -1,3 +1,39 @@
+2.2.0-7 (SVN revision 6740)
+* CHANGED: Dialer (ECCP): create new request getmultipleagentstatus. This 
+  request allows for a report of agent status for a group of agents at once.
+  This cuts down again on the number of ECCP requests required for the Agent
+  Monitoring report. Part of the fix for Elastix bug #1820.
+* CHANGED: Dialer (ECCP): create new request getmultipleagentqueues. This
+  request allows for a report of agents subscribed on queues for a group of
+  agents at once. This cuts down on the number of ECCP requests required for
+  the Agent Monitoring report. Part of the fix for Elastix bug #1820.
+* CHANGED: Do Not Call List: complete rewrite. This rewrite uses ordinary grid
+  pagination instead of loading the entire recordset in memory, and simplifies
+  the support libraries. Additionally a new index is added to the dont_call
+  table to speed up lookup by caller_id. Finally, a small utility is now 
+  provided to load a CSV file to the DNC list from the command line. Fixes 
+  Elastix bug #1984.
+* CHANGED: Form Designer: complete rewrite. This rewrite removes the use of
+  xajax, fixes a few potential SQL injection scenarios, streamlines the form
+  creation interface, and updates the report grid to the latest support.
+* CHANGED: Dialer (ECCP): add debugging information to getagentstatus request to
+  catch inconsistent state being returned to the client.
+* CHANGED: Incoming Calls Monitoring: complete rewrite. This rewrite removes the
+  use of xajax and periodic database reads, and replaces it with an ECCP client
+  that uses Server Sent Events if available, just like the Agent Console. This
+  also fixes a serious scenario where a query that takes more than 5 seconds
+  would cause the server to accumulate unfinished SQL queries.
+* FIXED: Calls per Agent: replace ambiguous filtering system with a cleaner
+  filter that properly validates that agent and queue are both numeric. Also
+  fix Elastix bug #1976.
+* FIXED: Dialer (ECCP): optimize the getagentactivitysummary request by inserting
+  keys and restructuring queries to only run once per request, instead of once
+  per agent.
+* CHANGED: Campaign Monitoring: update Ember.js to 1.5.1, Handlebars to 1.3.0.
+* CHANGED: Dialer: disable PDO::ATTR_EMULATE_PREPARES on all MySQL PDO connections
+  in order to use native prepared statements instead of the default PHP emulation.
+  Workaround for PHP bug #44639. Might fix Elastix bug #1844.
+
 2.2.0-6 (SVN revision 6485)
 * CHANGED: Agent Console, Campaign Monitoring, Agent Monitoring: the Elastix 
   framework sends an error in a JSON response if a rawmode request is made with 

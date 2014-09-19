@@ -344,6 +344,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: filter out properties inserted through Array mixins when
+  building an AJAX request. Fixes breakage of Ember.js after SVN commit #6735.
+  SVN Rev[6741]
+
 * Thu Sep 18 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-17
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

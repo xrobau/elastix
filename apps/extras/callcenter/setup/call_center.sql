@@ -832,7 +832,7 @@ CREATE PROCEDURE temp_indice_agent_calls_2014_09_08 ()
     READS SQL DATA
     MODIFIES SQL DATA
 BEGIN
-    DECLARE l_existe_columna tinyint(1);
+    DECLARE l_existe_indice tinyint(1);
     
     SET l_existe_indice = 0;
 
@@ -865,7 +865,7 @@ CREATE PROCEDURE temp_indice_dont_call_2014_09_16 ()
     READS SQL DATA
     MODIFIES SQL DATA
 BEGIN
-    DECLARE l_existe_columna tinyint(1);
+    DECLARE l_existe_indice tinyint(1);
     
     SET l_existe_indice = 0;
 

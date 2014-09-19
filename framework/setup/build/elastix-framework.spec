@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 17
+Release: 18
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -168,11 +168,6 @@ fi
 #(echo asterisk2007; sleep 2; echo asterisk2007) | passwd ftpuser
 
 %post
-######### Administration Menus and permission ###############
-#. /usr/share/elastix/menusAdminElx `cat /usr/share/elastix/pre_elastix_version.info`
-################## End Administration Menus and permission ##########################
-
-
 
 # TODO: tarea de post-instalación.
 # Habilito inicio automático de servicios necesarios
@@ -248,21 +243,6 @@ fi
 # Para q se actualice smarty (tpl updates)
 rm -rf /var/www/html/var/templates_c/*
 
-# Patch elastix.ini, relocate session files to the new path.
-/bin/grep -r "/tmp" /etc/php.d/elastix.ini >> /dev/null 2>&1
-if [ "$?" == "0" ]; then
-  for file_sess in `ls /tmp/sess_*`
-  do
-    file_name=`basename $file_sess`
-    if [ -f /var/lib/php/session-asterisk/$file_name ]; then
-        rm -rf /var/lib/php/session-asterisk/$file_name
-    fi
-
-    echo "Copying file /tmp/$file_name to /var/lib/php/session-asterisk/$file_name."
-    cp -p /tmp/$file_name /var/lib/php/session-asterisk/
-  done
-fi
-
 # Patch elastix.ini to work around %config(noreplace) in previous versions 
 sed --in-place "s,/tmp,/var/lib/php/session-asterisk,g" /etc/php.d/elastix.ini 
 if [ $1 -eq 1 ]; then #install
@@ -275,8 +255,22 @@ elif [ $1 -eq 2 ]; then #update
     /sbin/service httpd status > /dev/null 2>&1
     if [ "$?" == "0" ]; then
         # Para versiones menores a 2.4.0-11 se debe reiniciar el apache debido a cambios en elastix.ini
+        # respecto a los archivos de sessiones, por ello tambien hay que reubicarlos
         compareVersion "$preversion" "2.4.0-11"
         if [ "$?" == "9" ]; then
+             # Patch elastix.ini, relocate session files to the new path.
+            echo "Session files in the old directory. Starting relocation process..."
+            for file_sess in `ls /tmp/sess_*`
+            do
+              file_name=`basename $file_sess`
+              if [ -f /var/lib/php/session-asterisk/$file_name ]; then
+                rm -rf /var/lib/php/session-asterisk/$file_name
+              fi
+
+              echo "Copying file /tmp/$file_name to /var/lib/php/session-asterisk/$file_name."
+              cp -p /tmp/$file_name /var/lib/php/session-asterisk/
+            done
+
             echo "Restarting apache..."
             /sbin/service httpd restart > /dev/null 2>&1
         fi
@@ -344,6 +338,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Sep 19 2014 Bruno Macias Velasco <bmacias@palosanto.com>
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: refine previous commit by checking whether arrParams is
   an actual Array.

@@ -119,7 +119,20 @@ function request(url,arrParams, recursive, callback)
      * Por lo tanto, se tiene que iterar por las claves asignadas, y recolectar
      * el valor correspondiente en un hash ordinario. */
     var params = {};
-    for (var k in arrParams) { params[k] = arrParams[k]; }
+    var empty_array = new Array();
+    for (var k in arrParams) {
+    	/* Por Alex: algunas bibliotecas Javascript (en particular Ember.js)
+    	 * agregan mixin al Array, el cual a su vez agrega propiedades a todas
+    	 * las instancias de Array. Estas propiedades deben ser excluidas de
+    	 * las peticiones AJAX, o se presentan errores fatales de Javascript.
+    	 * El filtro de abajo podría todavía fallar si la propiedad asignada
+    	 * corresponde al mismo tipo de dato que una propiedad del mixin.
+    	 * Para una propiedad que se asigna para request pero no está presente
+    	 * en el mixin, typeof empty_array[k] debería evaluarse a "undefined".
+    	 */
+    	if (typeof arrParams[k] != typeof empty_array[k])
+    		params[k] = arrParams[k];
+    }
 
     // Comienza petición por ajax
     $.post(url,

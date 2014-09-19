@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: filter out properties inserted through Array mixins when
+  building an AJAX request. Fixes breakage of Ember.js after SVN commit #6735.
+  SVN Rev[6741]
+
 * Thu Sep 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: the request() helper function uses an incorrect URL encoding
   method that fails to escape special characters in string parameters. Fixed by

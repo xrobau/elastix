@@ -91,12 +91,13 @@ fi
 %defattr(-, asterisk, asterisk)
 /opt/elastix/dialer
 %defattr(-, root, root)
-%{_bindir}/elastix-callcenter-load-dnc
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /opt/elastix/dialer/*
 /etc/rc.d/init.d/elastixdialer
 /etc/logrotate.d/elastixdialer
+%defattr(0775, root, root)
+%{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
 * Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-7

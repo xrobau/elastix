@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Wed Sep 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Callback Extensions: update paloSantoGrid API usage to latest 
+  Elastix 2.4.
+  SVN Rev[6749]
 - CHANGED: Agents: update paloSantoGrid API usage to latest Elastix 2.4.
   SVN Rev[6748]
 

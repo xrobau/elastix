@@ -145,67 +145,42 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     foreach ($listaAgentes as $tuplaAgente) {
         $tuplaData = array(
             "<input class=\"button\" type=\"radio\" name=\"agent_number\" value=\"{$tuplaAgente["number"]}\" />",
-            //NULL,
             htmlentities($tuplaAgente['number'], ENT_COMPAT, 'UTF-8'),
             htmlentities($tuplaAgente['name'], ENT_COMPAT, 'UTF-8'),
             ($tuplaAgente['online'] ? _tr("Online") : _tr("Offline")),
             "<a href='?menu=$module_name&amp;action=edit_agent&amp;id_agent=" . $tuplaAgente["number"] . "'>["._tr("Edit")."]</a>",
         );
-/*
-        switch ($tuplaAgente['sync']) {
-        case 'OK':
-            $tuplaData[1] = $sImgVisto;
-            break;
-
-        }
-*/
         $arrData[] = $tuplaData;
     }
 
     $url = construirURL(array('menu' => $module_name, 'cbo_estado' => $sEstadoAgente), array('nav', 'start'));
 
+    $arrColumns = array('', _tr("Number"), _tr("Name"), _tr("Status"), _tr("Options"));    
     $oGrid = new paloSantoGrid($smarty);
+    $oGrid->pagingShow(true);
     $oGrid->setLimit(50);
-    if (is_array($arrData)) {
-        $oGrid->setTotal(count($arrData));
-        $offset = $oGrid->calculateOffset();
-        $arrData = array_slice($arrData, $offset, $oGrid->getLimit());
-    }
-
-    // Construir el reporte de los agentes activos
-    $arrGrid = array("title"    => _tr("Callback Extensions"),
-                     "url"      => $url,
-                     "icon"     => "images/user.png",
-                     "width"    => "99%",
-                     "columns"  => array(
-                                        0 => array("name"       => '&nbsp;',
-                                                    "property1" => ""),
-                                        1 => array("name"       => _tr("Number"),
-                                                    "property1" => ""),
-                                        2 => array("name"       => _tr("Name"),
-                                                    "property1" => ""),
-                                        3 => array("name"       => _tr("Status"),
-                                                    "property1" => ""),
-                                        4 => array("name"       => _tr("Options"),
-                                                    "property1" => ""),
-                                        )
-                    );
+    $oGrid->addNew("?menu=$module_name&action=new_agent", _tr('New callback extension'), TRUE);
+    $oGrid->deleteList('Are you sure you wish to continue?', 'delete', _tr('Delete'));
+    $oGrid->addSubmitAction('disconnect', _tr('Disconnect'));
+    $oGrid->setColumns($arrColumns);
+    $oGrid->setURL($url);
+    $oGrid->setTitle(_tr('Callback Extensions'));
+    $oGrid->setIcon('images/user.png');
+    
+    $_REQUEST['cbo_estado'] = $sEstadoAgente;
+    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." = ".$listaEstados[$sEstadoAgente], $_REQUEST, array("cbo_estado" =>'A'),true);
+    
+    $oGrid->setTotal(count($arrData));
+    $offset = $oGrid->calculateOffset();
+    $arrData = array_slice($arrData, $offset, $oGrid->getLimit());
+    $oGrid->setData($arrData);
     $smarty->assign(array(
         'LABEL_STATE'           =>  _tr('Status'),
-        'LABEL_CREATE_AGENT'    =>  _tr("New callback extension"),
         'estados'               =>  $listaEstados,
         'estado_sel'            =>  $sEstadoAgente,
-        'MODULE_NAME'           =>  $module_name,
-        'LABEL_WITH_SELECTION'  =>  _tr('With selection'),
-        'LABEL_DISCONNECT'      =>  _tr('Disconnect'),
-        'LABEL_DELETE'          =>  _tr('Delete'),
-        'MESSAGE_CONTINUE_DELETE' => _tr("Are you sure you wish to continue?"),
     ));
     $oGrid->showFilter($smarty->fetch("$local_templates_dir/filter-list-agents.tpl"));
-    $sContenido = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    if (strpos($sContenido, '<form') === FALSE)
-        $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
-    return $sContenido;
+    return $oGrid->fetchGrid();
 }
 
 function newAgent($pDB, $smarty, $module_name, $local_templates_dir)

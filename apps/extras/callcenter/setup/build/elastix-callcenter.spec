@@ -100,6 +100,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Sep 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agents: update paloSantoGrid API usage to latest Elastix 2.4.
+  SVN Rev[6748]
+
 * Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-7
 - Bump version for release.
 

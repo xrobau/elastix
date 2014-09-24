@@ -866,17 +866,4 @@ function getTemplatesDirModule($module_name)
     $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
     return "$base_dir/modules/$module_name/$templates_dir/{$arrConf['theme']}";
 }
-
-function isStrongPassword($password){
-    if(strlen($password)>=10){
-        if(preg_match("/[a-z]+/",$password)){
-            if(preg_match("/[A-Z]+/",$password)){
-                if(preg_match("/[0-9]+/",$password)){
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
 ?>

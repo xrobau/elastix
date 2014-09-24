@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.4.0
-Release: 18
+Release: 19
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -338,9 +338,19 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
-* Fri Sep 19 2014 Bruno Macias Velasco <bmacias@palosanto.com>
+* Wed Sep 24 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-19
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+
+* Wed Sep 24 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: framework file misc.lib.php, function isStrongPassword was removed.
+  This function conflits with function in addon callcenterPRO.
+  SVN Rev[6746]
+
+* Fri Sep 19 2014 Bruno Macias Velasco <bmacias@palosanto.com> 2.4.0-18
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[6745]
 
 * Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: refine previous commit by checking whether arrParams is
@@ -353,6 +363,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Sep 18 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-17
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6738]
 
 * Thu Sep 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: the request() helper function uses an incorrect URL encoding
@@ -368,6 +379,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Sep 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-16
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6723]
 
 * Fri Sep 12 2014 Bruno Macias <bmacias@palosanto.com> 
 - UPDATED: framework elastix, themes was updated because register

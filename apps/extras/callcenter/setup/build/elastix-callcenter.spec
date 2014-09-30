@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Sep 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Break Administrator: update paloSantoGrid API usage to latest
+  Elastix 2.4. Fix potential undefined variable reference on validation error.
+  SVN Rev[6750]
+
 * Wed Sep 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Callback Extensions: update paloSantoGrid API usage to latest 
   Elastix 2.4.

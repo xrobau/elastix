@@ -122,16 +122,31 @@ function listBreaks(&$smarty, $module_name, &$pDB, $local_templates_dir)
     }
 
     // Procesamiento de la visualización de breaks
-    $arrBreaks = $oBreaks->getBreaks(); // Todos los breaks en todos los estados
+    $oGrid = new paloSantoGrid($smarty);
+    $limit=30;
+    $total=$oBreaks->countBreaks();
+    if($total===false){
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message", _tr("Failed to fetch breaks")."<br/>".$pDB->errMsg);
+        $total=0;
+    }
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+    $oGrid->setTitle(_tr("Breaks List"));
+    $oGrid->setWidth("99%");
+    $oGrid->setIcon("images/list.png");
+    $oGrid->setURL(array('menu' => $module_name), array('nav', 'start'));
+    $oGrid->setColumns(array('', _tr("Name Break"), _tr("Description Break"), _tr("Status"), _tr("Options")));
+
+    //obtenemos los breaks
+    $arrBreaks = $oBreaks->getBreaks(null,'all',$limit,$offset); // Todos los breaks en todos los estados
     if (!is_array($arrBreaks)) {
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message", _tr("Failed to fetch breaks")."<br/>".$pDB->errMsg);
         $arrBreaks = array();
     }
-    $arrCols = array(
-        "<input type=\"submit\" class=\"button\" name=\"activate\" value=\""._tr('Activate')."\" /> ".
-        "<input type=\"submit\" class=\"button\" name=\"deactivate\" value=\""._tr('Desactivate')."\" />", 
-        _tr("Name Break"), _tr("Description Break"), _tr("Status"), _tr("Options"),);
+    
     function listBreaks_formatHTML($break, $param)
     {
         return array(
@@ -151,27 +166,12 @@ function listBreaks(&$smarty, $module_name, &$pDB, $local_templates_dir)
             array_fill(0, count($arrBreaks), array('module_name' => $module_name)));
 
     // Construcción de la rejilla de vista
-    function listBreaks_formatCols($x) { return array('name' => $x); }
-    global $arrLang;
-    $end = count($arrBreaks); $start = ($end == 0) ? 0 : 1;
-    $oGrid = new paloSantoGrid($smarty);
-    $oGrid->showFilter("<a href=\"?menu={$module_name}&amp;action=new\"><b>"._tr('Create New Break').'&nbsp;&raquo;</b></a>');
-    $url = construirURL(array('menu' => $module_name), array('nav', 'start'));
-    $sContenido = $oGrid->fetchGrid(
-        array(
-            "title"    => _tr("Breaks List"),
-            "url"      => $url,
-            "icon"     => "images/list.png",
-            "width"    => "99%",
-            "start"    => ($end==0) ? 0 : 1,
-            "end"      => $end,
-            "total"    => $end,
-            "columns"  => array_map('listBreaks_formatCols', $arrCols),
-        ), 
-        $arrData, $arrLang);
-    if (strpos($sContenido, '<form') === FALSE)
-        $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
-    return $sContenido;
+    $oGrid->addNew("?menu=$module_name&action=new", _tr("Create New Break"), TRUE);
+    
+    $oGrid->addSubmitAction("activate",_tr("Activate"));
+    $oGrid->addSubmitAction("deactivate",_tr("Desactivate"));
+    
+    return $oGrid->fetchGrid(array(), $arrData);    
 }
 
 function nuevoBreak(&$smarty, $module_name, $pDB, $local_templates_dir)
@@ -272,7 +272,7 @@ function mostrarFormularioModificarBreak(&$smarty, $module_name, $pDB, $local_te
                 header("Location: ?menu=$module_name");
             } else {
                 $smarty->assign("mb_title", _tr("Validation Error"));
-                $smarty->assign("mb_message", $oBreak->errMsg);
+                $smarty->assign("mb_message", $oBreaks->errMsg);
             } 
         }
     }

@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Tue Sep 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: CallCenter Config: reorganize form fields.
+  SVN Rev[6751]
 - CHANGED: Break Administrator: update paloSantoGrid API usage to latest
   Elastix 2.4. Fix potential undefined variable reference on validation error.
   SVN Rev[6750]

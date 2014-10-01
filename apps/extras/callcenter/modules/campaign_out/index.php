@@ -113,6 +113,7 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
         }
     }
 
+/*
     // Revisar si se debe activar una campaña elegida
     if (isset($_POST['activate']) && !is_null($id_campaign)) {
         if(!$oCampaign->activar_campaign($id_campaign, 'A')) {
@@ -128,7 +129,22 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
             $smarty->assign("mb_message", _tr("Error when desactivating the Campaign"));
         }
     }
-
+*/
+    // Activar o desactivar campañas elegidas
+    if (isset($_POST['change_status']) && !is_null($id_campaign)){
+        if($_POST['status_campaing_sel']=='activate'){
+            if(!$oCampaign->activar_campaign($id_campaign, 'A')) {
+                $smarty->assign("mb_title", _tr('Activate Error'));
+                $smarty->assign("mb_message", _tr('Error when Activating the Campaign').': '.$oCampaign->errMsg);
+            }
+        }elseif($_POST['status_campaing_sel']=='deactivate'){
+            if(!$oCampaign->activar_campaign($id_campaign, 'I')) {
+                $smarty->assign("mb_title", _tr('Desactivate Error'));
+                $smarty->assign("mb_message", _tr('Error when desactivating the Campaign').': '.$oCampaign->errMsg);
+            }
+        }
+    }
+            
     // Validar el filtro por estado de actividad de la campaña
     $estados = array(
         "all" => _tr("All"), 
@@ -186,6 +202,33 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
     }
 
     // Definición de la tabla de las campañas
+    $oGrid->setTitle(_tr("Campaigns List"));
+    $oGrid->setWidth("99%");
+    $oGrid->setIcon("images/list.png");
+    $oGrid->setURL($url);
+    $oGrid->setColumns(array('', _tr('Name Campaign'), _tr('Range Date'),
+        _tr('Schedule per Day'), _tr('Retries'), _tr('Trunk'), _tr('Queue'), 
+        _tr('Completed Calls'), _tr('Average Time'), _tr('Status'), _tr('Options')));
+    $_POST['cbo_estado']=$sEstado;
+    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." = ".$estados[$sEstado], $_POST, array("cbo_estado" =>'A'),true);
+    $smarty->assign(array(
+        'MODULE_NAME'                   =>  $module_name,
+        'LABEL_CAMPAIGN_STATE'          =>  _tr('Campaign state'),
+        'estados'                       =>  $estados,
+        'estado_sel'                    =>  $sEstado,
+    ));
+    
+    $oGrid->addNew("?menu=$module_name&action=new_campaign", _tr('Create New Campaign'), TRUE);
+    $oGrid->addComboAction('status_campaing_sel', _tr("Change Status"), array(
+        'activate'      =>  _tr('Activate'),
+        'deactivate'    =>  _tr('Desactivate'),
+    ), null, 'change_status');
+    $oGrid->deleteList('Are you sure you wish to delete campaign?', 'delete', _tr('Delete'));
+    $oGrid->setData($arrData);
+    $oGrid->showFilter($smarty->fetch("$local_templates_dir/filter-list-campaign.tpl"));
+    return $oGrid->fetchGrid();
+    
+/*
     $arrGrid = array(
         "title"    => _tr("Campaigns List"),
         "url"      => $url,
@@ -225,6 +268,7 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
     if (strpos($sContenido, '<form') === FALSE)
         $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
     return $sContenido;
+*/
 }
 
 function newCampaign($pDB, $smarty, $module_name, $local_templates_dir)

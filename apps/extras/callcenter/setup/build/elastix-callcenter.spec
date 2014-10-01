@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Wed Oct  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: update paloSantoGrid API usage to latest Elastix 2.4
+  SVN Rev[6753]
 - CHANGED: Campaign In: update paloSantoGrid API usage to latest Elastix 2.4
   SVN Rev[6752]
 

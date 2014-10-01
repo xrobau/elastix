@@ -164,5 +164,6 @@ $arrLangModule = array(
 'ArmSCII-8'     =>  'ArmSCII-8 - Armenio',
 
 'Call file not specified or failed to be uploaded' => 'Archivo de llamadas no especificado o falló la transferencia',
+'Change Status' => 'Cambiar Estado',
 );
 ?>

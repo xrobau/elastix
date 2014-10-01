@@ -165,5 +165,6 @@ $arrLangModule=array(
 'ArmSCII-8'     =>  'ArmSCII-8 - Armenian',
 
 'Call file not specified or failed to be uploaded' => 'Call file not specified or failed to be uploaded',
+'Change Status' => 'Change Status',
 );
 ?>

@@ -123,5 +123,6 @@ $arrLangModule=array(
 'Manage Forms'=>'Manage Forms',
 'External URLs' => 'External URLs',
 'Manage External URLs' => 'Manage External URLs',
+'Change Status' => 'Change Status',
 );
 ?>

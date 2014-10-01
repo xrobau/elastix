@@ -100,6 +100,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Oct  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign In: update paloSantoGrid API usage to latest Elastix 2.4
+  SVN Rev[6752]
+
 * Tue Sep 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: CallCenter Config: reorganize form fields.
   SVN Rev[6751]

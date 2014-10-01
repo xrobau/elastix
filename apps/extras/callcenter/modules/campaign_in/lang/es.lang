@@ -121,5 +121,6 @@ $arrLangModule = array(
 'Manage External URLs' => 'Administrar URLs Externos',
 "Deactivate" => "Desactivar",
 "Campaign Name" => "Nombre Campaña", 
+'Change Status' => 'Cambiar Estado',
 );
 ?>

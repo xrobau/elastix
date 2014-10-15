@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 16
+Release: 17
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -267,13 +267,24 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Oct 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-17
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Control Panel: update Ember.js to 1.5.1, Handlebars to 1.3.0.
   SVN Rev[6649]
 
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
+  packages were depreciated many functions, the equivalent functions are
+  updated in the files that use to have the menctioned functions.
+  SVN Rev[6638]
+
 * Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-16
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6580]
 
 * Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com> 
 - ADDED: pbx - pbxadmin: A suitable footnote was added in the bottom of the PBX

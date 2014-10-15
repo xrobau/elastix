@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -127,9 +127,24 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Wed Oct 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-9
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Jun 04 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- FIXED: fix typo in previous commit
+  SVN Rev[6643]
+
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
+  packages were depreciated many functions, the equivalent functions are
+  updated in the files that use to have the menctioned functions.
+  SVN Rev[6638]
+
 * Wed Jan 29 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6445]
 
 * Wed Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Advanced Settings: fix the setadminpwd privileged script to modify

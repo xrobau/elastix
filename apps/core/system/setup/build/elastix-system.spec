@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 13
+Release: 14
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -135,6 +135,16 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Oct 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-14
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
+  packages were depreciated many functions, the equivalent functions are
+  updated in the files that use to have the menctioned functions.
+  SVN Rev[6638]
+
 * Mon Feb 24 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: DHCP Server: fix redirect that assumes index.php is located at document
   root. This is a noop in Elastix 2 but fixes an invalid redirect after DHCP
@@ -157,6 +167,12 @@ fi
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-13
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[6379]
+
+* Wed Jan 08 2014 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Update to the changelog about the english and spanish help files in
+  the system modules.
+  SVN Rev[6339]
 
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Dashboard, Applet Admin, Network Parameters, DHCP Server, DHCP Client List, Assign IP Address to Host, Users, Shutdown, Hardware Detector, Repositories, Packages, Backup/Restore, Date/Time, Currency: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.

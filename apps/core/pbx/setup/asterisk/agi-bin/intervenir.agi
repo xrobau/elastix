@@ -109,22 +109,22 @@
 
           if($bLocal==false) {
               // Canal normal
-              if(preg_match("/^((SIP|Zap|IAX2)/$extension-[[:alnum:]]+)[[:space:]]/", $linea, $arrReg)) {
+              if(preg_match("/^((SIP|Zap|IAX2)\/$extension-[[:alnum:]]+)[[:space:]]/", $linea, $arrReg)) {
                   // ENCUENTRO EL CANAL 1
                   $resultado['canal1'] = $arrReg[1];
     
                   // ENCUENTRO EL CANAL 2  
                   // Si se quiere intervenir a la extension de la persona llamada
-                  if(preg_match("/Bridged Call\(((SIP|Zap|IAX2)/[[:digit:]]+\-[[:alnum:]]+)\)", $linea, $arrReg)) {
+                  if(preg_match("/Bridged Call\(((SIP|Zap|IAX2)\/[[:digit:]]+\-[[:alnum:]]+)\)", $linea, $arrReg)) {
                       if($debug) $agi->verbose("La extension $extension se encuentra puenteada con canal convencional");
                       $resultado['canal2'] = $arrReg[1];
                   // Si se quiere intervenir a la extension de la persona que llamo
-                  } else if(preg_match("/Dial\((SIP|Zap|IAX2)/([[:digit:]]+)/", $linea, $arrReg)) {
+                  } else if(preg_match("/Dial\((SIP|Zap|IAX2)\/([[:digit:]]+)/", $linea, $arrReg)) {
                       if($debug) $agi->verbose("La extension $extension marco a un canal convencional");
                       $arrCanal = obtenerCanal($arrReg[2], $arrCanales);
                       $resultado['canal2'] = $arrCanal['canal1'];
                   // Si es una llamada puenteada por un canal tipo "Local"
-                  } else if(preg_match("/Bridged Call\(Local/([[:digit:]]+)@/", $linea, $arrReg)) {
+                  } else if(preg_match("/Bridged Call\(Local\/([[:digit:]]+)@/", $linea, $arrReg)) {
                       if($debug) $agi->verbose("La extension $extension esta puenteada a un canal Local " . $arrReg[1]);
                       // Ahora busco ese canal local con quien esta bridged
                       $arrCanal = obtenerCanal($arrReg[1], $arrCanales, true);
@@ -139,7 +139,7 @@
               if($debug) $agi->verbose("Buscando canal Local para extension $extension");
 
               if(preg_match("#^Local/$extension#", $linea, $arrReg)) {
-                  if(preg_match("/Bridged Call\(((SIP|Zap|IAX2)/[[:digit:]]+\-[[:alnum:]]+)\)/", $linea, $arrReg)) {
+                  if(preg_match("/Bridged Call\(((SIP|Zap|IAX2)\/[[:digit:]]+\-[[:alnum:]]+)\)/", $linea, $arrReg)) {
                       $resultado['canal1'] = $arrReg[1];
                       if($debug) $agi->verbose("Canal Local encontrado: " . $arrReg[1]);
                   }
@@ -155,7 +155,7 @@
 
       $canal = trim($canal);
   
-      if(preg_match("/^(SIP|Zap|IAX2)/[[:digit:]]+\-[[:alnum:]]+$/", $canal)) {
+      if(preg_match("/^(SIP|Zap|IAX2)\/[[:digit:]]+\-[[:alnum:]]+$/", $canal)) {
           return true;
       } else {
           return false;

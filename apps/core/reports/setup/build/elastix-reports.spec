@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.4.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,10 +92,20 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-10
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Mon Sep  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: CDR Report: fix fallout resulting from commit 6638 breaking any regexp
   with unescaped embedded slash. Fixes Elastix bug #1975.
   SVN Rev[6711]
+
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
+  packages were depreciated many functions, the equivalent functions are
+  updated in the files that use to have the menctioned functions.
+  SVN Rev[6638]
 
 * Wed Feb 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk Logs: update log parsing for changed date format resulting 
@@ -105,6 +115,7 @@ fi
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6379]
 
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: CDR Report, Channels Usage, Rates, Billing Report, Destination 

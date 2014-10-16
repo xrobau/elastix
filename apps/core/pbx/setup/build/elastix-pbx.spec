@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.4.0
-Release: 17
+Release: 18
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -267,9 +267,23 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-18
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 
+- FIXED: preg_match function error, scape character "/" .
+  SVN Rev[6756]
+
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 
+- FIXED: app pbx, file setup/installer.php, endpoint.db file not exits
+  now is a mysql database.
+  SVN Rev[6755]
+
 * Wed Oct 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-17
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6754]
 
 * Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Control Panel: update Ember.js to 1.5.1, Handlebars to 1.3.0.

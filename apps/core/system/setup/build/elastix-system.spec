@@ -3,7 +3,7 @@
 Summary: Elastix Module System 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -156,6 +156,19 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Aug 28 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Revert commits 6705 through 6707. This needs to be done another way.
+  SVN Rev[6708]
+
+* Wed Aug 27 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Network Configuration: since rtpproxy is to be removed, do not
+  bother restarting it anymore.
+  SVN Rev[6706]
+
 * Fri Jun 20 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Network Configuration: ignore IP and mask fields when using DHCP.
   SVN Rev[6656]
@@ -165,6 +178,7 @@ fi
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[6650]
 
 * Mon May 05 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Network Configuration: reconfigure and restart kamailio/rtpproxy after

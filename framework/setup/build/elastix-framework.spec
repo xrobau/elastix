@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 3.0.0
-Release: 8
+Release: 9
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -402,6 +402,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-9
+- CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: refine previous commit by checking whether arrParams is
   an actual Array.
@@ -500,11 +504,28 @@ rm -rf $RPM_BUILD_ROOT
 - CHANGED: Update sip.js to version 0.6.2
   SVN Rev[6673]
 
+* Wed Jul 30 2014 Bruno Macias <bmacias@palosanto.com> 
+- ADDED: framework, new javascript file sip-0.5.0.js replace to jssip.
+  SVN Rev[6668]
+
+* Wed Jul 30 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: framework elastix, user interface now was updated
+  new js library sip.js.
+  SVN Rev[6666]
+
+* Wed Jun 18 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  Framework: remove unused copy of Easy Pie Chart
+  SVN Rev[6654]
+
 * Tue Jun 17 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
 - ADDED  : Framework - Themes/tenant: A new theme it was implemented to be accord 
   with this Elastix release.
+
+* Tue Jun 17 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: framework was updated theme tenant.
+  SVN Rev[6652]
 
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest

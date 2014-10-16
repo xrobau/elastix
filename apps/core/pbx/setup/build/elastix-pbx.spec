@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -377,9 +377,22 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-10
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Aug 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: restrict allowed protocols for SIP accounts to udp.
   SVN Rev[6709]
+
+* Thu Aug 28 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Revert commits 6705 through 6707. This needs to be done another way.
+  SVN Rev[6708]
+
+* Wed Aug 27 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: kamailio: remove use of rtpproxy, as it does not work correctly with
+  WebRTC.
+  SVN Rev[6705]
 
 * Wed Aug 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: sip.conf: rtpproxy does not work correctly for WebRTC, so it will be
@@ -453,6 +466,10 @@ fi
   for undefined ordering of queue members that messes up linear strategy.
   SVN Rev[6661]
 
+* Thu Jun 26 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: kamailio: WIP in MSRP routing
+  SVN Rev[6660]
+
 * Tue Jun 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: fix regression on contact alias for NAT.
 - CHANGED: now INVITEs with SDP of media=message are routed by Kamailio instead
@@ -471,9 +488,14 @@ fi
   IP realm, and use appropriate segments for domain mangling.
   SVN Rev[6657]
 
+* Mon Jun 16 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: module extesions, Updated sort.
+  SVN Rev[6651]
+
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-9
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6650]
 
 * Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: kamailio: use LOG_LOCAL6 for logging of messages in Kamailio 

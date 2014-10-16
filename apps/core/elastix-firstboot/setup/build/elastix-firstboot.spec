@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 3.0.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -99,6 +99,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+- CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
+  SVN history. Changed release in specfile.
+
+* Thu Aug 28 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Revert commits 6705 through 6707. This needs to be done another way.
+  SVN Rev[6708]
+
+* Wed Aug 27 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: removed rtpproxy dependency and associated logic. Simplify script.
+  SVN Rev[6707]
+
 * Tue Aug 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: in generated configuration, the Asterisk IP and port are now also
   defined as substdef, in order to be used by a kamailio.cfg patch.
@@ -107,6 +119,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[6642]
 
 * Tue May 27 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: rework generated Kamailio configuration so that separation between

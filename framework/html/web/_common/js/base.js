@@ -107,7 +107,6 @@
 var current_setTimeout = null;
 function request(url,arrParams, recursive, callback)
 {
-    var queryString    = array2QueryString(arrParams);
     callback           = callback  || null;
     recursive          = recursive || null;
 

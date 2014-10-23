@@ -135,6 +135,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Oct 23 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: filter backup name on restore. This is consistent 
+  with the filtering done elsewhere and cuts a number of XSS at once.
+  SVN Rev[6760]
+
 * Wed Oct 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-14
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

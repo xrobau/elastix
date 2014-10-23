@@ -314,6 +314,11 @@ function restore_form($smarty, $local_templates_dir, $path_backup, $module_name)
     }else $archivo_post = isset($_POST["backup_file"])?$_POST["backup_file"]:"";
     $archivo_post = basename($archivo_post);
 
+    if (!preg_match('/^elastixbackup-\d{14}-\w{2}\.tar$/', $archivo_post)) {
+        Header("Location: ?menu=$module_name");
+        return NULL;
+    }    
+    
     $output = $retval = NULL;
     exec('tar -xOf '.escapeshellarg("$path_backup/$archivo_post").' backup/a_options.xml',
         $output, $retval);

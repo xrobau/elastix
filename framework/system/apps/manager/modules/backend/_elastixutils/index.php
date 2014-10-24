@@ -241,7 +241,7 @@ function handleJSON_getSIPParameters($smarty, $module_name)
     /* Agregar los siguientes parámetros requeridos: 
      * elxuser_username display_name password  */
     $paramSIP += array(
-        'elxuser_username'  =>  $accountInfo['username'],
+        'elxuser_username'  =>  str_replace('IM_', 'IM@', $accountInfo['elxweb_device']),
         'display_name'      =>  $accountInfo['name'],
         'password'          =>  $_SESSION['elastix_pass2']
     );
@@ -279,6 +279,7 @@ function handleJSON_getSIPRoster($smarty, $module_name)
             'display_name'  =>  $tupla['name'],
             'uri'           =>  $tupla['elxweb_device'].'@'.$paramSIP['elastix_chat_server'],
             'username'      =>  $tupla['username'],
+            'extension'     =>  $tupla['extension'],
         );
     }
     $jsonObject->set_message($result);
@@ -499,6 +500,71 @@ function handleJSON_getPublishState($smarty, $module_name)
 	$jsonObject = new PaloSantoJSON();
 	$jsonObject->set_message($publishState);
 	return $jsonObject->createJSON();
+}
+
+function handleJSON_getVideoPoster($smarty, $module_name)
+{
+    global $arrConf;
+    
+    $dialstring = isset($_GET['dialstring']) ? trim($_GET['dialstring']) : '';
+    
+    //$w = 150; $h = 120;
+    $w = 200; $h = 150;
+    
+    Header('Content-Type: image/png');
+    $im = imagecreatetruecolor($w, $h) or die('Failed to create image');
+    $textcolor = imagecolorallocate($im, 192, 0, 0);
+    $bgcolor = imagecolorallocate($im, 0, 0, 0);
+    
+    // Fondo negro
+    imagefilledrectangle($im, 0, 0, $w, $h, $bgcolor);
+    
+    // Mostrar texto
+    $domainfont = 2;
+    $dialstringfont = 5;
+    $otherfont = 4;
+    
+    $domain = '';
+    if (strpos($dialstring, '@') !== FALSE) {
+        $t = explode('@', $dialstring);
+        $dialstring = $t[0];
+        $domain = $t[1];
+    }
+    if ($domain == '') {
+        $error = NULL;
+        $pDB = new paloDB($arrConf['elastix_dsn']["elastix"]);
+        $paramSIP = getChatClientConfig($pDB, $error);
+        $domain = $paramSIP['elastix_chat_server'];
+    }
+    
+    $textlayout = array(
+        array($domainfont, NULL, NULL, $domain),
+        array($domainfont, NULL, NULL, ''),
+        array($dialstringfont, NULL, NULL, $dialstring),
+        array($domainfont, NULL, NULL, ''),
+        array($otherfont, NULL, NULL, 'SOUND'),
+        array($otherfont, NULL, NULL, 'ONLY'),
+    );
+    
+    $totalheight = 0;
+    for ($i = 0; $i < count($textlayout); $i++) {
+        $textlayout[$i][2] = imagefontheight($textlayout[$i][0]);
+        $textlayout[$i][1] = imagefontwidth($textlayout[$i][0]) * strlen($textlayout[$i][3]);
+        
+        $totalheight += $textlayout[$i][2];
+    }
+    
+    // Línea central, inicio
+    $centery = ($h - $totalheight) / 2;
+    for ($i = 0; $i < count($textlayout); $i++) {
+        $leftx = ($w - $textlayout[$i][1]) / 2;
+        imagestring($im, $textlayout[$i][0], $leftx, $centery, $textlayout[$i][3], $textcolor);
+        $centery += $textlayout[$i][2];
+    }
+    
+    // Mostrar imagen;
+    imagepng($im);
+    imagedestroy($im);
 }
 
 function createProfileForm($langElastix)

@@ -402,6 +402,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Oct 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: WIP - implement basic "Sound Only" poster for web calls
+  without video. Report assigned extension for domain users.
+  SVN Rev[6761]
+
 * Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-9
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

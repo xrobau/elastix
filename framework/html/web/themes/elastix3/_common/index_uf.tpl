@@ -86,6 +86,19 @@
             <div id='elx_notify_min_chat'  class='elx_nodisplay'>
                 <div id='elx_list_min_chat' style='visibility:hidden'> 
                     <div>
+                        <!-- Dentro de este ul se encuentra la plantilla que define un chat minimizado -->
+			            <ul id="elx_template_min_chat_ul" style="display: none;">
+                            <li class="elx_list_min_chat_li">
+                                <span class="elx_min_span">
+                                    <div class='glyphicon glyphicon-remove elx_min_remove'></div>
+                                    <div class='elx_min_name'>
+                                        <span class='elx_min_chat_num' style='visibility:hidden'>*</span>
+                                        <span class='elx_min_chat_name'></span>
+                                    </div>
+                                </span>
+                            </li>
+			            </ul>
+			            <!-- El ul de abajo es la lista de chats minimizados reales -->
                         <ul class='elx_list_min_chat_ul'>
                         </ul>
                     </div>
@@ -113,8 +126,10 @@
                         </div>
 	                    <div class='elx_body_tab_chat'>
 	                        <div class='elx_header2_tab_chat'>
-                                <!--  <span class='glyphicon glyphicon-earphone elx_icon_chat elx_icon_chat2' alt='Call' data-tooltip='Call' aria-label='Call'></span> -->
                                 <span
+                                    class='glyphicon glyphicon-earphone elx_icon_chat elx_icon_chat2'
+                                    alt='Call' data-tooltip='Call' aria-label='Call'
+                                ></span><span
                                     class='glyphicon glyphicon-envelope elx_icon_chat elx_icon_chat2'
                                     alt='Send E-Mail' data-tooltip='Send E-Mail' aria-label='Send E-Mail'
                                 ></span><span 
@@ -130,6 +145,39 @@
                     </div>
                 </div>
             </div>            
+        </div>
+        <div id="elx_template_videocall" style="display: none">
+			<div class="modal-content">
+			    <div class="modal-header">
+			        <button type="button" class="close elx_close_popup_profile" data-dismiss="modal" aria-hidden="true">&times;</button>
+			        <h3 id="myModalLabel">Call Window</h3>
+			    </div>
+			    <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8"><input name="elx_videocall_dialstring" style="width: 100%;" /></div>
+                        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 elx_video_call_buttons">
+                            <button id="elx_videocall_dial" class="btn btn-primary" type="button">Dial</button>
+                            <button id="elx_videocall_accept" class="btn btn-primary" type="button">Accept</button>
+                            <button id="elx_videocall_reject" class="btn btn-danger" type="button">Reject</button>
+                            <button id="elx_videocall_cancel" class="btn btn-danger" type="button">Cancel</button>
+                            <button id="elx_videocall_hangup" class="btn btn-default" type="button">Hangup</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 elx_video_callstatus"></div>
+                    </div>
+                    <div class="row elx_video_row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <div style="position: relative; width: 512px; height: 384px;">
+                                <video width="512" height="384" id="elx_video_remote" style="position: absolute; top: 0; left: 0;"></video>
+                                <video width="128" height="96" id="elx_video_local" muted="muted" style="position: absolute; bottom: 0; right: 0;"></video>
+                            </div>
+                            <audio id="elx_audio_remote" autoplay="autoplay"></audio>
+                            <audio id="elx_audio_local" autoplay="autoplay"></audio>
+                        </div>
+                    </div>
+			    </div>
+			</div><!-- /.modal-content -->
         </div>
     </body>
 </html>

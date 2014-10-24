@@ -403,6 +403,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Oct 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: WIP - implement initial version of web calls. Reorganize
+  javascript code to take advantage of jQuery methods. Move implementations of
+  HTML templates from Javascript to templates.
+  SVN Rev[6762]
 - CHANGED: Framework: WIP - implement basic "Sound Only" poster for web calls
   without video. Report assigned extension for domain users.
   SVN Rev[6761]

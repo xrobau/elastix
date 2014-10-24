@@ -1,6 +1,6 @@
 $(document).ready(function(){
     $(this).on('click','.elx-msg-area-close',function(e){
-        $("#elx_msg_area").slideUp();  
+        $("#elx_msg_area").slideUp();
     });
                             
     $(window).resize(function(){
@@ -124,6 +124,11 @@ $(document).ready(function(){
     $('#elx-chk-show-offline-contacts').click(updateContactVisibility);
 
     setupSIPClient();
+	
+	// Hacer aparecer la ventana de marcado de llamadas
+    $('#icn_call').on('click', function(e) {
+    	showCallWindow(null, null, null);
+    });
 
     /* Instalar manejador que intenta apagar el cliente SIP antes de cambiar de 
      * página, para mitigar las sesiones inválidas. */
@@ -150,13 +155,8 @@ function setupChatWindowHandlers(doc)
         // Ahorrar espacio para caso de ventana estrecha
         if ($(window).width() < 500) $('#rightdiv').hide(10);
         
-        //var elx_tab_chat = 
-        startChatUser(
-            $(this).data('uri'),
-            $(this).data('name'),
-            $(this).data('alias'),
-            'sent').find('.elx_text_area_chat > textarea').focus();
-        //elx_tab_chat.find('.elx_text_area_chat > textarea').focus();
+        startChatUser($(this).data('uri'), 'sent')
+        	.find('.elx_text_area_chat > textarea').focus();
         $("#elx_chat_space").show(10);
     });
 
@@ -191,6 +191,16 @@ function setupChatWindowHandlers(doc)
 		// Envío de fax al usuario del chat
 		showSendFax($(this).parents('.elx_tab_chat').data('alias'));
 	});
+	$(doc).on('click', 'div.elx_header2_tab_chat > span.glyphicon-earphone', function() {
+		/* Llamada de voz al usuario del chat. Se timbra a extensión en lugar de
+		 * a cuenta directa para timbrar simultáneamente al teléfono tradicional
+		 * y a la cuenta IM, y que conteste la primera disponible. */
+		var contactInfo = lookupSIPRoster($(this).parents('.elx_tab_chat').data('uri'));
+		showCallWindow(
+			contactInfo.extension,
+			contactInfo.name,
+			null);
+	});
 	
 	//accion que controla cuando damos enter en el text-area de una de la pestañas del chat
 	$(doc).on("keydown",".elx_chat_input", function( event ) {
@@ -206,7 +216,7 @@ function setupChatWindowHandlers(doc)
             var elx_tab_chat=$(this).parents('.elx_tab_chat:first');
             
             $(this).val('');
-            sendMessage(elx_txt_chat, elx_tab_chat.attr('data-alias'));
+            sendMessage(elx_txt_chat, elx_tab_chat.data('uri'));
             // Ignore Enter when empty input.
         } else if (event.which == 13 && $(this).val() == "") {
             event.preventDefault();
@@ -247,23 +257,23 @@ function setupChatWindowHandlers(doc)
 	        $("#elx_list_min_chat").css('visibility','visible');
 	    }
 	});
-	$(doc).on('click','.elx_min_name',function(event){
+	$(doc).on('click', '.elx_min_name', function(event) {
 	    $(this).children(".elx_min_chat_num").css('visibility','hidden');
 	    //se deben ocultar la lista de las conversaciones minimizadas por falta de espacio
 	    $("#elx_notify_min_chat_box").removeClass('elx_notify_min_chat_box_act');
 	    $('#elx_hide_min_list').val('no');
 	    $("#elx_list_min_chat").css('visibility','hidden');
-	    var alias=$(this).parents('.elx_list_min_chat_li:first').attr('data-alias');
-	    var elx_tab_chat=startChatUser(alias,name,alias,'sent');
+	    var uri = $(this).parents('.elx_list_min_chat_li:first').data('uri');
+	    var elx_tab_chat = startChatUser(uri, 'sent');
 	    elx_tab_chat.find('.elx_text_area_chat > textarea').focus();
 	    elx_tab_chat.find('.elx_tab_tittle_icon > span:first').removeClass("glyphicon-resize-vertical elx_max_chat").addClass("glyphicon-minus elx_min_chat");
 	    elx_tab_chat.find('.elx_body_tab_chat').css('display','block');
 	});
 	$(doc).on('click','.elx_min_remove',function(event){
-	    var liIcon=$(this).parents('.elx_list_min_chat_li:first');
-	    var alias=liIcon.attr('data-alias');
+	    var liIcon = $(this).parents('.elx_list_min_chat_li:first');
+	    var uri = liIcon.data('uri');
 	    liIcon.remove();
-	    var tabChat=getTabElxChat(alias);
+	    var tabChat = getTabElxChat(uri);
 	    tabChat.removeClass('elx_chat_min').addClass('elx_chat_close');
 	    //disminuir la cuenta de las conversaciones minimizadas y en caso de no quedar niguna ocultar tab notificaciones
 	    removeElxUserNotifyChatMini(tabChat);
@@ -459,7 +469,8 @@ function setupSIPClient()
                 registerExpires:    response.message.register_expires,
                 usePreloadedRoute:  response.message.use_preloaded_route,
                 noAnswerTimeout:    response.message.no_answer_timeout,
-                traceSip:           response.message.trace_sip
+                traceSip:           response.message.trace_sip,
+                stunServers:        ["stun:null"]
             });
             ua.on('message', function (e) {
                 var remoteUri = e.remoteIdentity.uri.toString();
@@ -473,6 +484,9 @@ function setupSIPClient()
             	deferred_registerUA.resolve();
             }).on('registrationFailed', function(cause) {
                 deferred_registerUA.reject('Failed to register: ' + cause);
+            }).on('invite', function(in_sess) {
+            	console.log(in_sess.remoteIdentity.uri.user);
+            	showCallWindow(in_sess.remoteIdentity.uri.user, in_sess.remoteIdentity.displayName, in_sess);
             });
         }
     }).fail(function() {
@@ -494,7 +508,8 @@ function setupSIPClient()
                         response.message[i]['idUser'],
                         response.message[i]['display_name'],
                         response.message[i]['uri'],
-                        response.message[i]['username']));
+                        response.message[i]['username'],
+                        response.message[i]['extension']));
             }
             
             // La carga exitosa del roster es uno de los requisitos para subscripción
@@ -528,11 +543,12 @@ function shutdownSIPClient(callback)
 	if (ua != null && (ua.isConnected() || ua.isRegistered())) {
 		$('body').css('cursor', 'progress');
 		if (sp != null) sp.withdrawPresence();
-		ua.on('disconnected', callback);
+		if (callback != null)
+			ua.on('disconnected', callback);
 		ua.unregister();
 		ua.stop();
 	} else {
-		callback();
+		if (callback != null) callback();
 	}
 }
 
@@ -563,11 +579,13 @@ function updateContactVisibility()
  * 
  * @param idUser			ID del usuario representado
  * @param display_name		Nombre completo del usuario representado
- * @param uri				URI del contacto SIP IM para el usuario (ya no se usa?)
+ * @param uri				URI del contacto SIP IM para el usuario
  * @param alias				URI del contacto SIP telefónico para el usuario
- * @returns
+ * @param extension			Número de extensión asignado al usuario
+ * 
+ * @returns Objeto jQuery que representa el tag <li> sin insertar
  */
-function createDivContact(idUser, display_name, uri, alias)
+function createDivContact(idUser, display_name, uri, alias, extension)
 {
 	var liContact = $('#elx_template_contact_status > li').clone()
 		.addClass('elx_li_contact')
@@ -575,21 +593,60 @@ function createDivContact(idUser, display_name, uri, alias)
 		.attr('data-uri', uri)
 		.attr('data-alias', alias)
 		.attr('data-name', display_name)
-		.attr('data-idUser', idUser);
+		.attr('data-idUser', idUser)
+		.attr('data-extension', extension);
 	liContact.find('.box_status_contact').css('background-color', 'grey');
 	liContact.find('.elx_im_name_user').text(display_name);
 	liContact.find('.extension_status').text('(unknown)');
 	return liContact;
 }
 
+/**
+ * Esta función busca en la lista de contactos de roster, un contacto que tenga
+ * una propiedad con el valor indicado en keyval. Se devuelve toda la información
+ * almacenada sobre ese contacto, o información por omisión si no se encuentra.
+ * 
+ * @param keyval	Cadena que identifica de alguna manera el contacto SIP
+ * 
+ * @returns object
+ */
+function lookupSIPRoster(keyval)
+{
+	var contactInfo = {
+		status:		'offline',
+		uri:		null,
+		alias:		null,
+		name:		'(unknown)',
+		idUser:		null,
+		extension:	null
+	};
+	var dataKeys = ['uri', 'alias', 'extension', 'name'];
+	var liContact = null;
+	
+	for (var i = 0; i < dataKeys.length; i++) {
+		liContact = $('ul#elx_ul_list_contacts > li[data-' + dataKeys[i] + '="' + keyval + '"]');
+		if (liContact.length > 0) {
+			contactInfo.status = liContact.data('status');
+			contactInfo.uri = liContact.data('uri');
+			contactInfo.alias = liContact.data('alias');
+			contactInfo.name = liContact.data('name');
+			contactInfo.idUser = liContact.data('iduser');
+			contactInfo.extension = liContact.data('extension');
+			break;
+		}
+	}
+	
+	return contactInfo;
+}
+
 /******************************************************************
  * Funciones usadas para el crear el dispositivo sip del usuario
 *******************************************************************/
-function receiveMessage(alias, content_type, msg_txt)
+function receiveMessage(urioralias, content_type, msg_txt)
 {
     //verificamos si existe una conversacion abierta con el dispositivo
     //si no existe la creamos
-    var elx_tab_chat = startChatUser(alias, alias, alias, 'receive');
+    var elx_tab_chat = startChatUser(urioralias, 'receive');
     if (!elx_tab_chat.hasClass('elx_chat_min')){
         if (!elx_tab_chat.find('.elx_text_area_chat > textarea').is(':focus')){
             //añadimos clase que torna header anaranjado para indicar que llego nuevo mensaje
@@ -613,14 +670,14 @@ function receiveMessage(alias, content_type, msg_txt)
  * chat
  * 
  * @param msg_txt	Cadena de texto a enviar
- * @param alias		Contacto SIP al cual se envía mensaje
+ * @param uri		Contacto SIP al cual se envía mensaje
  */
-function sendMessage(msg_txt, alias)
+function sendMessage(msg_txt, uri)
 {    
-    var elx_tab_chat = getTabElxChat(alias);    
+    var elx_tab_chat = getTabElxChat(uri);    
     addMessageElxChatTab(elx_tab_chat, 'out', msg_txt);
 
-    ua.message(alias, msg_txt).on('failed', function (response, cause) {
+    ua.message(uri, msg_txt).on('failed', function (response, cause) {
         var error_msg = (response) 
             ? response.status_code.toString() + " " + response.reason_phrase 
             : cause;
@@ -635,46 +692,51 @@ function sendMessage(msg_txt, alias)
 }
 
 /**
- * Función para buscar el div de la conversación del usuario, dado su alias.
+ * Función para buscar el div de la conversación del usuario, dado su uri.
  * Se devuelve el div del chat, si se encuentra, o false si no existe.
  */
-function getTabElxChat(alias)
+function getTabElxChat(uri)
 {
-	var chatTab = $("#elx_chat_space_tabs > .elx_tab_chat[data-alias='" + alias + "'] :first");
+	var chatTab = $("#elx_chat_space_tabs > .elx_tab_chat[data-uri='" + uri + "'] :first");
 	return chatTab.length > 0 ? chatTab : false;
 }
 
 /**
- * Función que crea una nueva ventana de chat con el nombre, uri, y alias 
- * indicados. Si no existía previamente una ventana de chat para el usuario, se
+ * Función que crea una nueva ventana de chat para el contacto de uri o alias 
+ * indicado. Si no existía previamente una ventana de chat para el usuario, se
  * la crea. Si la ventana encontrada está minimizada, se intenta activarla, a
  * menos que no haya suficiente espacio. Si se está obteniendo un chat debido
  * a la recepción de un mensaje, y no se puede abrir la ventana, se agrega la
  * indicación de mensaje nuevo.
  * 
- * @param uri	URI SIP del usuario para el chat
- * @param name	Nombre completo del usuario de chat
- * @param alias URI alternativo para el usuario del chat
+ * @param urioralias	URI SIP (IM u ordinario) del usuario de chat
  * @param action 'send' o 'receive'
  * @returns jQuery
  */
-function startChatUser(uri, name, alias, action)
+function startChatUser(urioralias, action)
 {
     var can_add_chat = true;
-
+    var contactInfo;
+    
+    /* Se busca en el roster la información del contacto. Si no se encuentra,
+     * se asume que es un nuevo cliente SIP, y se usará el uri directamente. */
+    contactInfo = lookupSIPRoster(urioralias);
+    if (contactInfo.uri == null) {
+    	// El contacto no existe, se usa información temporal
+    	contactInfo.uri = urioralias;
+    	contactInfo.alias = urioralias;
+    	contactInfo.name = 'Unknown <sip:' + urioralias + '>';
+    }
+    
     // Se intenta reutilizar la ventana activa de un chat previo
-    var elx_tab_chat = getTabElxChat(alias);
+    var elx_tab_chat = getTabElxChat(contactInfo.uri);
 
     if (!elx_tab_chat) {
     	// Ventana para este usuario no existe, se debe de crear una nueva
-        if (action == 'receive') {
-        	name = $(".elx_li_contact[data-alias='" + name + "']").data('name');
-        }
         
         var content = $('#elx_template_tab_chat > .elx_tab_chat').clone()
-        	.attr('data-alias', alias)
-        	.attr('data-uri', uri);
-        content.find('.elx_tab_chat_name_span').text(name);
+        	.attr('data-uri', contactInfo.uri);
+        content.find('.elx_tab_chat_name_span').text(contactInfo.name);
     
         // Se agrega el nuevo chat a la lista de ventanas de chat
         $("#elx_chat_space_tabs").prepend(content);
@@ -685,7 +747,7 @@ function startChatUser(uri, name, alias, action)
     }
 
     if (!elx_tab_chat.hasClass('elx_chat_active')) {
-        /* La ventana solicitada esta minimizada o fue cerrada nateriormente. Se
+        /* La ventana solicitada esta minimizada o fue cerrada anteriormente. Se
          * procede a abrirla si se dispone de suficiente espacio. */
         can_add_chat = resizeElxChatTab($(window).width(), action);
         if (can_add_chat) {
@@ -702,84 +764,64 @@ function startChatUser(uri, name, alias, action)
         }
     }
     
-    
-    //se recibio un nuevo mensaje y la pestaña del chat del que envia el mensaje no puede
-    //ser abierta por falta de espacio
-    //debemos mostrar una notificacion del nuevo mensaje
-    if(action=='receive' && !can_add_chat){
+    /* Se ha recibido un nuevo mensaje, y la pestaña de chat correspondiente no
+     * puede ser abierta por falta de espacio. Se muestra una notificación de
+     * nuevo mensaje. */
+    if (action == 'receive' && !can_add_chat) {
         addElxUserNotifyChatMini(elx_tab_chat);
         elx_tab_chat.removeClass('elx_chat_close').addClass('elx_chat_min');
         $("#elx_notify_min_chat_box").addClass('elx_notify_min_chat_box_act');
-        //necesitamos subrayar dentro de la lista de los chats minimizados, el item que corresponde a quien mando el mensaje
-        $('#elx_list_min_chat > div > .elx_list_min_chat_ul > .elx_list_min_chat_li').each(function() {
-            if(alias == $(this).attr('data-alias')){
-                $(this).find(".elx_min_name > .elx_min_chat_num").css('visibility','inherit');
-            }
-        });
+        
+        // Hacer visible el asterisco al lado del item de chat minimizado que recibe el mensaje
+        $('#elx_list_min_chat > div > .elx_list_min_chat_ul > .elx_list_min_chat_li[data-uri="'
+        		+ contactInfo.uri + '"] .elx_min_name > .elx_min_chat_num')
+        	.css('visibility', 'inherit');
     }
 
     return elx_tab_chat;
 }
 
 /**
- * Esta funcion revisa el ancho de la pantalla y dependiendo del mismo determina cual es el maximo 
- * número de pestañas que pueden estar activas
- * recibe como parámetros el tamaño de la pantalla y la acción que hace que sea necesario empezar 
- * un nueva conversación
- * Las acciones pueden ser:  sent o receive
- *      sí la acción es 'sent' => 1) si ya se ha alcanzado el máximo número de pestañas activas
- *                                   se procede a minimizar una de las pestañas activas para hacer espacio
- *                                   para la nueva pestaña, retornamos true
- *                                 2) si no se ha alcanzado el máximo número de pestañas activas retornamos true
- *      sí la acción es 'receive' => 1) si se alcanzo el máxmimo número de pestañas activas retornamos false
- *                                   2) si no se ha alcanzo el máxmimo número de pestañas activas retornamos true 
- **/
-function resizeElxChatTab(elx_w,action){
-    var max_tab=getMaxNumTabChat(elx_w); 
+ * Esta función verifica si se puede acomodar una nueva pestaña de chat en el 
+ * ancho de pantalla indicado por elx_w. Si se alcanzó el máximo, en el caso de
+ * sent, es posible minimizar otra pestaña para acomodar la nueva.
+ * 
+ * @param	elx_w	Ancho en pixeles de la pantalla
+ * @param	action	Razón por la cual se requiere acomondar nueva pestaña.
+ * 					Puede ser 'sent' o 'receive'.
+ * 
+ * @returns	TRUE si hay (o se ha hecho) espacio para una pestaña más, o FALSE.
+ */
+function resizeElxChatTab(elx_w, action)
+{
+	var max_tab = getMaxNumTabChat(elx_w);
+    var num_act_chat = $("#elx_chat_space_tabs > .elx_chat_active").size();
     
-    //revisar el número de pestañas activas
-    var num_act_chat=$("#elx_chat_space_tabs > .elx_chat_active").size();
+    if (num_act_chat < max_tab) return true;	// No se ha alcanzado máximo
+    if (action != 'sent') return false;			// Recepción es async y no autoriza minimizado
     
-    //al número actual de chats abiertos le sumamos uno del nuevo chat que vamos a abrir
-    if((num_act_chat+1)>max_tab){
-        if(action=='sent'){
-            var elxTabChatToMin=$("#elx_chat_space_tabs > .elx_chat_active").first();
-            elxTabChatToMin.removeClass('elx_chat_active').addClass('elx_chat_min');
-            addElxUserNotifyChatMini(elxTabChatToMin);
-            return true;
-        }else{
-            return false;
-        }
-    }else{
-        return true;
-    }
+    // Para envío de mensaje, se puede minimizar un tab activo
+    var elxTabChatToMin = $("#elx_chat_space_tabs > .elx_chat_active").first();
+    elxTabChatToMin.removeClass('elx_chat_active').addClass('elx_chat_min');
+    addElxUserNotifyChatMini(elxTabChatToMin);
+    return true;
 }
-function getMaxNumTabChat(elx_w){
-    //esta la venta del chat abierta
-    var is_chat_open=!$("#rightdiv").is(':hidden');
-    var max_tab=1; 
-    //se definio que el máximo número de pestañas abiertas que podían haber sin importar 
-    //tamaño sería 4
-    if(is_chat_open){
-        if(elx_w>1200){
-            max_tab=4;
-        }else if(elx_w>=960 && elx_w<1200){
-            max_tab=3;
-        }else if( elx_w>=730 && elx_w<960){
-            max_tab=2;
-        }
-    }else{
-        if(elx_w>=1010){
-            max_tab=4;
-        }else if( elx_w>=780 && elx_w<1010){
-            max_tab=3;
-        }else if(elx_w>=550 && elx_w<780){
-            max_tab=2;
-        }
-    }
-    //para tamaños menores de pantalla el número máximo de pestañas es 1
-    
-    return max_tab;
+
+/**
+ * Función para determinar, a partir del ancho de pantalla disponible, cuántas
+ * ventanas de chat se pueden abrir simultáneamente.
+ * 
+ * @param elx_w		Ancho de pantalla para usar en cálculo
+ * @returns {Number}
+ */
+function getMaxNumTabChat(elx_w)
+{
+	// Restar del ancho disponible el ancho de la lista de chat
+	if (!$("#rightdiv").is(':hidden')) elx_w -= 180;
+
+	if (elx_w < 320) return 1;
+	if (elx_w >= 1240) return 4; // Más allá sólo se permitirán 4 pestañas abiertas
+	return Math.floor((elx_w - 90) / 230);	// Cada pestaña reserva 230px
 }
 function errorRegisterChatBar(error){
     alert(error);
@@ -840,57 +882,50 @@ function setComposingStateElxChatTab(chatTab, state)
 	}
 }
 
-function addElxUserNotifyChatMini(elxTabChatToMin){
-    var alias=elxTabChatToMin.attr('data-alias');
-    var exist=false;
-    var numMinchat=0;
-    //debemos comprabar si el nuevo tab que se quiere añadir ya se encuentra en la lista
-    //si se encuentra entonces no lo añadimos
-    $('#elx_list_min_chat > div > .elx_list_min_chat_ul > .elx_list_min_chat_li').each(function() {
-        if(alias == $(this).attr('data-alias')){
-            exist=true;
-        }else
-            numMinchat++;
-    });
-    
-    if(!exist){
-        var name=elxTabChatToMin.find('.elx_tab_chat_name > .elx_tab_chat_name_span').html();
-        var elx_chat_user = "<li class='elx_list_min_chat_li' data-alias='"+alias+"'>";
-        elx_chat_user +="<span class='elx_min_span'>";
-        elx_chat_user +="<div class='glyphicon glyphicon-remove elx_min_remove'></div>"; //imagen de x para cerrar
-        elx_chat_user +="<div class='elx_min_name'><span class='elx_min_chat_num' style='visibility:hidden'>*</span><span class='elx_min_chat_name'>"+name+"</span></div>";
-        elx_chat_user +="</span>";
-        elx_chat_user +="</li>";
-        
-        $('#elx_list_min_chat > div > .elx_list_min_chat_ul').prepend(elx_chat_user);
-    
-        //actualizamos el numero de chat minimizados
-        $("#elx_num_mim_chat").html(numMinchat+1);
-        
-        //si no se estaba mostrando el chat con las notificaciones lo mostramos
-        $("#elx_notify_min_chat").removeClass('elx_nodisplay');
-    }
+function addElxUserNotifyChatMini(elxTabChatToMin)
+{
+	var uri = elxTabChatToMin.data('uri');
+	var list_min_chat = $('#elx_list_min_chat > div > ul.elx_list_min_chat_ul');
+	if (list_min_chat.find('li.elx_list_min_chat_li[data-uri="' + uri + '"]').size() > 0)
+		return;
+	
+	var contactInfo = lookupSIPRoster(uri);
+	if (contactInfo.uri == null) {
+		contactInfo.name = elxTabChatToMin.find('.elx_tab_chat_name > .elx_tab_chat_name_span').html();
+	}
+	
+	// Clonar plantilla y asignar data-uri y nombre
+	var elx_chat_user = $('#elx_template_min_chat_ul > li.elx_list_min_chat_li')
+		.clone().attr('data-uri', uri);
+	elx_chat_user.find('span.elx_min_chat_name').text(contactInfo.name);
+	list_min_chat.prepend(elx_chat_user);
+	
+	// Actualizar número de chats minimizados
+	$("#elx_num_mim_chat").text(list_min_chat.find('li.elx_list_min_chat_li').size());
+	
+    // Si no se estaba mostrando el chat con las notificaciones lo mostramos
+    $("#elx_notify_min_chat").removeClass('elx_nodisplay');
 }
-function removeElxUserNotifyChatMini(elxTabChatToMin){
-    var alias=elxTabChatToMin.attr('data-alias');
-    var numMinchat=0
-    $('#elx_list_min_chat > div > .elx_list_min_chat_ul > .elx_list_min_chat_li').each(function() {
-        if(alias == $(this).attr('data-alias')){
-            $(this).remove();
-        }else
-            numMinchat++;
-    });
-    if(numMinchat==0){
+
+function removeElxUserNotifyChatMini(elxTabChatToMin)
+{
+    var uri = elxTabChatToMin.data('uri');
+    var list_min_chat = $('#elx_list_min_chat > div > ul.elx_list_min_chat_ul');
+    list_min_chat.find('li.elx_list_min_chat_li[data-uri="' + uri + '"]').remove();
+    var numMinchat = list_min_chat.find('li.elx_list_min_chat_li').size();
+
+    if (numMinchat == 0) {
         //ocultamos el div con las notificaciones
         $("#elx_notify_min_chat").addClass('elx_nodisplay');
         $("#elx_notify_min_chat_box").removeClass('elx_notify_min_chat_box_act');
         $('#elx_hide_min_list').val('no');
         $("#elx_list_min_chat").css('visibility','hidden');
-    }else{
+    } else {
         //actualizazamos la informacion del numero de chat abiertos minimizados
-        $("#elx_num_mim_chat").html(numMinchat);
+        $("#elx_num_mim_chat").text(numMinchat);
     }
 }
+
 function adjustTabChatToWindow(elxw){ 
     //contralamos el número de pestañas activas abiertas de acuerdo al tamamaño de la pantalla
     var max_tab=getMaxNumTabChat(elxw); 
@@ -1170,7 +1205,197 @@ $(window).resize(function(){
         ancho = ancho +"px"; 
         $('.ui-autocomplete').width(ancho);
 });
- 
+
+var sess = null;
+
+/**
+ * Procedimiento que muestra la ventana dedicada al GUI del videoteléfono. Hasta
+ * ahora hay 3 escenarios que hay que acomodar:
+ * 1) Clic en botón de llamar independiente, ventana aparece con recuadro de 
+ *    dial vacío, que hay que llenar antes de llamar.
+ * 2) Clic en botón de llamar de chat, ventana aparece con recuadro de dial
+ *    asignado a extensión de usuario chat, o cuenta IM si no hay extensión, y
+ *    marcado inicia inmediatamente.
+ * 3) Viene llamada desde el exterior, y no hay otro cuadro modal activo, 
+ *    ventana aparece con recuadro de dial asignado a cuenta/número entrante,
+ *    y con opciones de aceptar o rechazar la llamada. Por ahora, si el cuadro
+ *    modal está activo, la llamada se rechaza de inmediato.
+ * 
+ * @param dialstring		Cadena de marcado del chat, o null para ventana libre
+ * @param displayname		Texto de caller-id para llamadas entrantes
+ * @param incoming_sess		Sesión entrante para llamada entrante, null para saliente
+ */
+function showCallWindow(dialstring, displayname, incoming_sess)
+{
+	var divCall = $('#elx_template_videocall > div.modal-content').clone();	
+	$("#elx_popup_content").html(divCall);
+	divCall = $("#elx_popup_content > div.modal-content");
+
+	// TODO: manejar caso de que llamada entra habiendo una segunda llamada activa
+	
+	// Operaciones asignadas a cada uno de los los botones
+	divCall.find('#elx_videocall_dial').on('click', startOutgoingCall);
+	divCall.find('#elx_videocall_reject').on('click', function() {
+		if (sess != null) sess.reject();
+	});
+	divCall.find('#elx_videocall_cancel').on('click', function() {
+		if (sess != null) sess.cancel();
+	});
+	divCall.find('#elx_videocall_accept').on('click', function() {
+		if (sess != null) sess.accept(getVideoCallMedia(divCall));
+	});
+	divCall.find('#elx_videocall_hangup').on('click', function() {
+		if (sess != null) sess.bye();
+	});
+	
+	// Esconder todos los botones, y luego mostrar los requeridos
+	// TODO: manejar antes destrucción de sesión en caso de llamada entrante
+	transitionCall_DialReady(divCall);
+
+	$('#elx_general_popup').modal({show: true});
+	if (incoming_sess != null) {
+		divCall.find('div.elx_video_call_buttons > button').hide();
+		divCall.find('#elx_videocall_accept').show();
+		divCall.find('#elx_videocall_reject').show();
+		divCall.find('input[name="elx_videocall_dialstring"]').attr('disabled', true);
+		
+		divCall.find('input[name="elx_videocall_dialstring"]').val(dialstring);
+		sess = incoming_sess;
+		setupSessionHandlers(sess, divCall);
+		
+		showVideoCallStatus(divCall, 'alert-info', 'Incoming call from ' + 
+			displayname + ' at ' + dialstring);
+	} else if (dialstring != null) {
+		divCall.find('input[name="elx_videocall_dialstring"]').val(dialstring);
+		startOutgoingCall();
+	} else {
+		// Ventana vacía lista para marcar
+	}
+}
+
+function showVideoCallStatus(divCall, extraclass, msgtext, hide)
+{
+	divCall.find('div.elx_video_callstatus')
+		.attr('role', 'alert')
+		.removeClass('alert-success alert-info alert-warning alert-danger')
+		.addClass('alert')
+		.addClass(extraclass)
+		.text(msgtext).show();
+	if (hide) divCall.find('div.elx_video_callstatus').delay(5000).fadeOut(500);
+}
+
+/**
+ * Procedimiento que inicia la llamada saliente usando el dialstring del 
+ * recuadro de texto.
+ */
+function startOutgoingCall()
+{
+	var divCall = $("#elx_popup_content > div.modal-content");
+	var videoRow = divCall.find('.elx_video_row');
+	var dialInput = divCall.find('input[name="elx_videocall_dialstring"]');
+	var dialstring = dialInput.val();
+	
+	if (ua == null || !ua.isConnected()) {
+		alert('SIP Client not initialized!');
+		return;
+	}
+	
+	// Asignar poster de relleno para caso sin video
+	var videoPosterParams = {
+		menu: '_elastixutils',
+		action: 'getVideoPoster',
+		rawmode: 'yes',
+		dialstring: dialstring
+	};
+	divCall.find('#elx_video_remote').attr('poster', 'index.php?' + $.param(videoPosterParams));
+	videoPosterParams.dialstring = ua.configuration.authorizationUser;
+	divCall.find('#elx_video_local').attr('poster', 'index.php?' + $.param(videoPosterParams));
+	
+	// Desactivar el ingreso de dialstring mientras haya llamada en progreso
+	divCall.find('div.elx_video_call_buttons > button').hide();
+	divCall.find('#elx_videocall_cancel').show();
+	dialInput.attr('disabled', true);
+	
+	// Construir cadena de marcado completa con dominio
+	dialstring = dialstring.trim();	
+	if (dialstring.indexOf('@') == -1) {
+		dialstring += '@' + ua.configuration.hostportParams;
+	}
+	
+	sess = ua.invite(dialstring, getVideoCallMedia(divCall));
+	setupSessionHandlers(sess, divCall);
+
+	showVideoCallStatus(divCall, 'alert-info', 'Dialing to ' + dialstring);
+}
+
+function getVideoCallMedia(divCall)
+{
+	return {
+		media: {
+			constraints: {
+				audio: true,
+				video: true
+			},
+			render: {
+				remote: {
+					video: divCall.find('#elx_video_remote').get(0),
+					audio: divCall.find('#elx_audio_remote').get(0)
+				},
+				local: {
+					video: divCall.find('#elx_video_local').get(0)
+				}
+			}
+		}
+	};
+}
+
+function setupSessionHandlers(sess, divCall)
+{
+	sess.on('progress', function(response) {
+		//g_progress_response = response;
+		showVideoCallStatus(divCall, 'alert-info', response.status_code + ' ' + response.reason_phrase);
+	}).on('cancel', function() {
+		showVideoCallStatus(divCall, 'alert-success', 'Call cancelled', true);
+		transitionCall_DialReady(divCall);
+	}).on('accepted', function(data) {
+		//g_accepted_data = data;
+		showVideoCallStatus(divCall, 'alert-success', 'Call accepted', true);
+		transitionCall_Accepted(divCall);
+	}).on('failed', function(response, cause) {
+		//g_failed_response = response;
+		//g_failed_cause = cause;
+		showVideoCallStatus(divCall, 'alert-danger', cause + ((response != null && (typeof response != 'string')) ? (': ' + response.status_code + ' ' + response.reason_phrase) : ''), true);
+		transitionCall_DialReady(divCall);
+	}).on('bye', function(request) {
+		//g_bye_request = request;
+		showVideoCallStatus(divCall, 'alert-info', 'Call terminated', true);
+		transitionCall_DialReady(divCall);
+	});
+}
+
+function transitionCall_DialReady(divCall)
+{
+	var videoRow = divCall.find('.elx_video_row');
+	var dialInput = divCall.find('input[name="elx_videocall_dialstring"]');
+
+	videoRow.hide();
+	divCall.find('div.elx_video_call_buttons > button').hide();
+	divCall.find('#elx_videocall_dial').show();
+	dialInput.attr('disabled', false);
+	sess = null;
+}
+
+function transitionCall_Accepted(divCall)
+{
+	var videoRow = divCall.find('.elx_video_row');
+	var dialInput = divCall.find('input[name="elx_videocall_dialstring"]');
+
+	videoRow.show();
+	divCall.find('div.elx_video_call_buttons > button').hide();
+	divCall.find('#elx_videocall_hangup').show();
+	dialInput.attr('disabled', true);
+}
+
 /**
  * La clase Presentity es una clase que modela el documento XML que contiene la
  * información de presencia RPID. La presencia rica puede estar activa (propiedad
@@ -1391,7 +1616,7 @@ function SIPPresence(ua)
 		}
 		
 		$(".elx_li_contact").each(function(i, v) {
-			this.subscribeToRoster($(v).data('alias'));
+			this.subscribeToRoster($(v).data('uri'));
 		}.bind(this));
 	}
 	this._publishPresence = function() {
@@ -1579,7 +1804,7 @@ function SIPPresence(ua)
 	}
 	
 	this._updateContactStatus = function(contact, newColor, newNote) {
-		var liContact = $(".elx_li_contact[data-alias='" + contact + "']");
+		var liContact = $(".elx_li_contact[data-uri='" + contact + "']");
 		liContact.data('status', (newColor != 'grey') ? 'online' : 'offline');
 		liContact.find('.box_status_contact').css('background-color', newColor);
 		liContact.find('.extension_status').text(newNote);

@@ -25,6 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
+  | Some functions within this class or script that implements an	     | 	
+  | asterisk dialplan are based in FreePBX code.			             |
+  | FreePBX® is a Registered Trademark of Schmooze Com, Inc.   		     |
+  | http://www.freepbx.org - http://www.schmoozecom.com 		         |
+  +----------------------------------------------------------------------+
   $Id: paloSantoShortcutApps.class.php,v 1.1 2014-03-12 Bruno Macias bmacias@elastix.org Exp $ */
 
 class paloSantoShortcutApps extends paloAsteriskDB{

@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 10
+Release: 11
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -377,9 +377,19 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Oct 27 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-11
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Mon Oct 27 2014 Luis Abarca <labarca@palosanto.com> 
+- ADDED: trunk - core/pbx-libs_scripts: Making the proper statements about
+  creation of dialplans based on FreePBX code in the header of files.
+  SVN Rev[6763]
+
 * Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-10
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6757]
 
 * Fri Aug 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: restrict allowed protocols for SIP accounts to udp.

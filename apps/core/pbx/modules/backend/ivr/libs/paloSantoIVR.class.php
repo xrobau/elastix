@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 2.2.0-29                                               |
+  | Elastix version 2.2.0-29                                             |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,6 +24,11 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  | Some functions within this class or script that implements an	     | 	
+  | asterisk dialplan are based in FreePBX code.			             |
+  | FreePBX® is a Registered Trademark of Schmooze Com, Inc.   		     |
+  | http://www.freepbx.org - http://www.schmoozecom.com 		         |
   +----------------------------------------------------------------------+
   $Id: paloSantoIVR.class.php,v 1.1 2012-09-07 11:50:00 Germán Macas gmacas@palosanto.com Exp $ */
     include_once "libs/paloSantoACL.class.php";

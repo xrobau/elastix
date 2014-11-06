@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Nov  6 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: update cursor styles on draggable rows to indicate
+  draggable capability.
+  SVN Rev[6766]
+
 * Wed Oct  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: update paloSantoGrid API usage to latest Elastix 2.4
   SVN Rev[6753]

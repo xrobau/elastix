@@ -35,3 +35,10 @@ table.formfield_list > tbody > tr > td
 tr.formfield_new {
 	background-color: #ffeeee;
 }
+
+tbody.ui-sortable > tr.formfield_row {
+	cursor: move;
+}
+tbody.ui-sortable > tr.formfield_new {
+    cursor: auto;
+}

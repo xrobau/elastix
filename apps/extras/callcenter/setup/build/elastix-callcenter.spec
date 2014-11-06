@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Thu Nov  6 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: add placeholder content for new field name.
+  SVN Rev[6767]
 - CHANGED: Form Designer: update cursor styles on draggable rows to indicate
   draggable capability.
   SVN Rev[6766]

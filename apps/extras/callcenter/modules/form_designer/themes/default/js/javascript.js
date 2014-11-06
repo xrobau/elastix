@@ -18,6 +18,7 @@ $(document).ready(function() {
 		formfield.find('span.formfield_order').text(CAMPOS_FORM[i].orden);
 		formfield.find('input[name="formfield_id"]').val(CAMPOS_FORM[i].id);
 		formfield.find('input[name="formfield_name"]').val(CAMPOS_FORM[i].etiqueta);
+		formfield.find('input[name="formfield_name"]').attr('placeholder', '');
 		formfield.find('td.formfield_type > select').val(CAMPOS_FORM[i].tipo);
 		formfield.find('input[name="formfield_add"]').hide();
 		if (CAMPOS_FORM[i].tipo == 'LIST') {
@@ -115,6 +116,7 @@ $(document).ready(function() {
 		// OK, se agrega fila a listado
 		formfield.removeClass('formfield_new');
 		formfield.attr('title', template_formfield.attr('title'));
+		formfield.find('input[name="formfield_name"]').attr('placeholder', '');
 		formfield.find('input[name="formfield_add"]').hide();
 		formfield.find('input[name="formfield_del"]').show();
 		agregar_fila_nuevo_campo();

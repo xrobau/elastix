@@ -93,5 +93,6 @@ $arrLangModule = array(
 "All" => "Todos",
 'No Data Found'=>'No se encuentran datos',
 'Drag and drop to reorder fields'=>'Arrastre y suelte para reordenar los campos',
+'new field'=>'nuevo campo',
 );
 ?>

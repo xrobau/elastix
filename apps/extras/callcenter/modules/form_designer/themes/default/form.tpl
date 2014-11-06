@@ -38,7 +38,7 @@
 <tbody id="tbody_fieldlist">
 <tr title="{$TOOLTIP_DRAGDROP}">
     <td valign="top"><span class="formfield_order">?</span><input type="hidden" name="formfield_id" value="" /></td>
-    <td valign="top" class='formfield_name'><input type="text" name="formfield_name" value="(no name)" /></td>
+    <td valign="top" class='formfield_name'><input type="text" name="formfield_name" value="(no name)" placeholder="{$LABEL_NEWFIELD|escape:html}" /></td>
     <td valign="top" class='formfield_type'><select>{$CMB_TIPO}</select></td>
     <td valign="top" class='formfield_enumval'>
         <span class="formfield_enumval_wrap">

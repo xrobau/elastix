@@ -232,6 +232,7 @@ function modificarFormulario($pDB, $smarty, $module_name, $local_templates_dir)
         'LABEL_ENUMVAL'     =>  _tr('Values Field'),
         'LABEL_FFADD'       =>  '+',
         'LABEL_FFDEL'       =>  '-',
+        'LABEL_NEWFIELD'    =>  _tr('new field'),
         'CMB_TIPO'          =>  combo(array(
             'TEXT'      =>  _tr('Type Text'),
             'LIST'      =>  _tr('Type List'),

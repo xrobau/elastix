@@ -445,7 +445,7 @@ class paloSantoTrunk extends paloAsteriskDB{
         global $arrConf;
         $pDB2 = new paloDB($arrConf['elastix_dsn']['elastix']);
         $pORGZ = new paloSantoOrganization($pDB2);
-        $arrTmp=$pORGZ->getOrganization("","","","");
+        $arrTmp=$pORGZ->getOrganization(array());
         $arrOrgz=array();
         foreach($arrTmp as $value){
             if(!empty($value["domain"]))

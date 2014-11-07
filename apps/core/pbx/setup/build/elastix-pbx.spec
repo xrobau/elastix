@@ -377,6 +377,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Nov  7 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Trunks: fix incorrect API usage for method
+  paloSantoOrganization::getOrganization().
+  SVN Rev[6769]
+
 * Mon Oct 27 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-11
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

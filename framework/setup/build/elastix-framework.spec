@@ -402,6 +402,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Nov  7 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: User List: fix incorrect API usage for method
+  paloSantoOrganization::getOrganization() that resulted in fetching all domains
+  instead of just one as required, and ultimately resulting in the wrong domain
+  being marked for dialplan regeneration.
+  SVN Rev[6768]
+
 * Mon Oct 27 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-10
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

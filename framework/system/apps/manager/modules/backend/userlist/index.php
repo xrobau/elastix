@@ -615,7 +615,7 @@ function saveNewUser($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         $smarty->assign("mb_message",_tr("User has been created successfully")."</br>".$errorImg);
         //mostramos el mensaje para crear los archivos de ocnfiguracion
         $pAstConf=new paloSantoASteriskConfig($pDB);
-        $orgTmp2=$pORGZ->getOrganization("","","id",$idOrganization);
+        $orgTmp2 = $pORGZ->getOrganization(array("id" => $idOrganization));
         $pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
         $content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
     }else{
@@ -737,7 +737,7 @@ function saveEditUser($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
         if($reAsterisk){
             //mostramos el mensaje para crear los archivos de ocnfiguracion
             $pAstConf=new paloSantoASteriskConfig($pDB);
-            $orgTmp2=$pORGZ->getOrganization("","","id",$idOrgz);
+            $orgTmp2 = $pORGZ->getOrganization(array("id" => $idOrgz));
             $pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
         }
         $content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
@@ -783,7 +783,7 @@ function deleteUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
         $smarty->assign("mb_message",_tr("The user was deleted successfully"));
         //mostramos el mensaje para crear los archivos de ocnfiguracion
         $pAstConf=new paloSantoASteriskConfig($pDB);
-        $orgTmp2=$pORGZ->getOrganization("","","id",$idOrgReload);
+        $orgTmp2 = $pORGZ->getOrganization(array("id" => $idOrgReload));
         $pAstConf->setReloadDialplan($orgTmp2[0]["domain"],true);
         $content = reportUser($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrCredentiasls);
     }else{

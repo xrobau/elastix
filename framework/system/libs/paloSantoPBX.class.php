@@ -905,7 +905,7 @@ class paloSip extends paloAsteriskDB {
     //Valida en name del peer
     function validateName($deviceName)
     {
-        if(preg_match("/^[[:alnum:]_\.]+$/", $deviceName)){
+        if(preg_match("/^[[:alnum:]_\.-]+$/", $deviceName)){
             return true;
         }else{
             return false;

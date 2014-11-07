@@ -403,6 +403,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Nov  7 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework (PBX): allow hyphen as valid character for peer name, since
+  it is already allowed as part of the domain name. Fixes Elastix bug #2004.
+  SVN Rev[6771]
 - FIXED: Framework (Organization): add check on user update of password to 
   prevent new password of modified user from unconditionally overwriting the
   password of the user doing the change.

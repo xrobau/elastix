@@ -1674,7 +1674,7 @@ class paloSantoOrganization{
                             }
                         }
                         //debemos actualizar el password en las variable de session
-                        if($continuar){
+                        if($continuar && $_SESSION['elastix_user'] == $username){
                             $_SESSION['elastix_pass'] = $md5password;
                             $_SESSION['elastix_pass2'] = $password1;
                         }

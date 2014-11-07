@@ -403,6 +403,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Nov  7 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework (Organization): add check on user update of password to 
+  prevent new password of modified user from unconditionally overwriting the
+  password of the user doing the change.
+  SVN Rev[6770] 
 - FIXED: User List: fix incorrect API usage for method
   paloSantoOrganization::getOrganization() that resulted in fetching all domains
   instead of just one as required, and ultimately resulting in the wrong domain

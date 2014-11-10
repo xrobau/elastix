@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 3.0.0
-Release: 10
+Release: 11
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -402,6 +402,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Nov 10 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-11
+- CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Nov  7 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework (PBX): allow hyphen as valid character for peer name, since
   it is already allowed as part of the domain name. Fixes Elastix bug #2004.
@@ -419,6 +423,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Oct 27 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-10
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6765]
 
 * Mon Oct 27 2014 Luis Abarca <labarca@palosanto.com> 
 - ADDED: trunk - core/pbx-libs_scripts: Making the proper statements about

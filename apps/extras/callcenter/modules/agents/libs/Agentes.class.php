@@ -252,7 +252,7 @@ class Agentes
             $bModificado = FALSE;
             for ($i = 0; $i < count($contenido); $i++) {
                 $regs = NULL;
-                if (ereg('^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),', $contenido[$i], $regs) &&
+                if (preg_match('/^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),/', $contenido[$i], $regs) &&
                     $regs[1] == $agent[0]) {
                     // Se ha encontrado la línea del agente modificado
                     $contenido[$i] = $sLineaAgente;
@@ -285,7 +285,7 @@ class Agentes
 
     function deleteAgent($id_agent)
     {
-        if (!ereg('^[[:digit:]]+$', $id_agent)) {
+        if (!preg_match('/^[[:digit:]]+$/', $id_agent)) {
             $this->errMsg = '(internal) Invalid agent information';
             return FALSE;
         }
@@ -346,7 +346,7 @@ class Agentes
         while ($sLinea = fgets($open,$tamanio_linea))  // [0]
         {
             $regs = NULL;
-            if (ereg('^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),', $sLinea, $regs) &&
+            if (preg_match('/^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),/', $sLinea, $regs) &&
                 $regs[1] == $agent[0]) {
                 $this->errMsg = "Agent number already exists.";
                 fclose($open);
@@ -361,7 +361,7 @@ class Agentes
 
     function deleteAgentFile($id_agent)
     {
-        if (!ereg('^[[:digit:]]+$', $id_agent)) {
+        if (!preg_match('/^[[:digit:]]+$/', $id_agent)) {
             $this->errMsg = '(internal) Invalid agent ID';
             return FALSE;
         }
@@ -379,7 +379,7 @@ class Agentes
             // Filtrar las líneas, y setear bandera si se eliminó alguna
             foreach ($contenido as $sLinea) {
                 $regs = NULL;
-                if (ereg('^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),', $sLinea, $regs) &&
+                if (preg_match('/^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),/', $sLinea, $regs) &&
                     $regs[1] == $id_agent) {
                     // Se ha encontrado la línea del agente eliminado
                     $bModificado = TRUE;
@@ -412,7 +412,7 @@ class Agentes
         } else {
             $this->arrAgents = array();
             foreach ($contenido as $sLinea) {
-                if (ereg('^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),([[:digit:]]+),(.*)', trim($sLinea), $regs)) {
+                if (preg_match('/^[[:space:]]*agent[[:space:]]*=>[[:space:]]*([[:digit:]]+),([[:digit:]]+),(.*)/', trim($sLinea), $regs)) {
                     $this->arrAgents[$regs[1]] = array($regs[1], $regs[2], $regs[3]);
                 }
             }
@@ -462,7 +462,7 @@ class Agentes
                 // El primer número de la línea es el ID del agente a recuperar
                 $regs = NULL;
                 if (strpos($sLinea, 'agents online') === FALSE &&
-                    ereg('^([[:digit:]]+)[[:space:]]*', $sLinea, $regs)) {
+                    preg_match('/^([[:digit:]]+)[[:space:]]*/', $sLinea, $regs)) {
                     $listaAgentes[] = $regs[1];
                 }
             }

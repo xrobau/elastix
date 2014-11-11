@@ -613,7 +613,7 @@ class Llamada
                 is_null($this->campania) ? NULL : $this->campania->id, 
                 $this->id_llamada, $this->agente->channel, $sRemChannel, 
                 date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent'],
-                $this->trunk);
+                $this->trunk, $this->_queuenumber);
         } else {
         	/* En el caso de llamadas entrantes, puede ocurrir que el evento 
              * Link se reciba ANTES de haber recibido el ID de inserción en
@@ -716,6 +716,7 @@ class Llamada
         );
         $paramProgreso = array(
             'datetime_entry'    =>  date('Y-m-d H:i:s', $this->timestamp_hangup),
+            'queue'             =>  $this->_queuenumber,
         );
 
         /* Si la llamada nunca fue enlazada, entonces se actualiza el tiempo de

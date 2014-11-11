@@ -1,0 +1,40 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p>The module "Email List" allows creating list of mails using the software Mailman. You must have at least one domain created in your server.</p>
+	<p>When you click on this module initially it will show you all the current lists of mail created by us. Here you can create a new email list or delete an existing one. You can also use the filter to show the lists of a specific domain.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_list.png" border="0" />
+        <p>Figure 1</p></div>
+        <br />
+	<h2>Creating a New Email List</h2>
+	<p>To create a new list, click on "New Email List" button. If there isn't an existing Mailman Admin User, you'll have to configure it (you must have a Mailman admin created in order to run the mailman service). Enter an email and password for the administration of the Mailman. Then enter the New List Settings such as the domain (you should have at least one domain created in Elastix), the name of the list, the administrator and password. When finish click on "Save" button (The administrator will receive an email with the password of the list)</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_new_email_list1.png" border="0" />
+        <p>Figure 2</p></div>
+	<br />
+	<p><b>Note: </b>If there's an existing Mailman Admin already, you'll only need to enter the New List Settings.</p>
+	<h2>Removing an Email List</h2>	
+	<p>To remove a list, just select the list and click on "Delete" button. <i>(See Figure 1)</i></p>
+<h2>Adding members to the list</h2>	
+	<p>To add new members to an existing list, click on the link "Add members" <i>(See Figure 1)</i> belonging to the list. In the text area enter the emails you want to add to the list. The emails have to be entered one per line and you can use two different formats <i>(See Examples on Figure 3)</i>. You can also enter 2 names and 2 last names.
+	<p>When finish click on "Add" button.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_new_list_member.png" border="0" />
+        <p>Figure 3</p></div>
+        <br />
+	<h2>Removing members from the list</h2>
+	<p>To remove a member of the list, click on the link "Remove members" <i>(See Figure 1)</i> belonging to the list. In the text area enter the emails you want to remove one per line.</p>
+	<p>When finish click on "Remove" button.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_remove_list_member.png" border="0" />
+        <p>Figure 4</p></div>
+        <br />
+	<h2>Viewing members of the list</h2>
+	<p>To view the members of the list, click on the link "View Members" <i>(See Figure 1)</i> belonging to the list. It will show a list with all the current members. You can filter the list of members by name or domain.</p>
+	<p>Also here you can export the list of members by clicking on "Export Members" button. This will generate a txt file with all the members of the list.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_list_member.png" border="0" />
+        <p>Figure 5</p></div>
+        <br />
+    </body>
+</html>

@@ -1,0 +1,51 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.2.0-14                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.1 2012-01-17 11:01:49 Manuel Olvera molvera@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Setup" => "Configurar",
+"Status" => "Estado",
+"Running" => "Ejecutándose",
+"Inactive" => "Inactivo",
+"Not Installed" => "No instalado",
+"Start" => "Iniciar Servicio",
+"Stop" => "Parar Servicio",
+"Server key" => "Server key",
+"Installer error" => "Error de instalación",
+"Monitoring service was not detected" => 'Servicio de monitoreo no fue detectado',
+'Great' => 'En hora buena',
+'Last changes was done successfully' => 'Los últimos cambios se guardaron correctamente',
+'File could not found \'%s\'' => 'Archivo no encontrado \'%s\'',
+'File could not be readable \'%s\'' => 'El archivo \'%s\' no pudo ser leído',
+'Could not write on file \'%s\'' => 'No se pudo escribir el archivo \'%s\'',
+'Fail to \'%s\' service' => 'Falló al \'%s\' el servicio',
+'reload'=> 'recargar',
+'Start service' => 'Iniciar servicio',
+'Stop service' => 'Parar servicio',
+);
+?>

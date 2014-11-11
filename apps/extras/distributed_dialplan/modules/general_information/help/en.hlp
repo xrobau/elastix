@@ -1,0 +1,14 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify">In this module you can enter the general information about your server necessary to connect to other servers. This information allows you to identify yourself to other servers</p>
+	<br /><br />
+        <!-- Form to add images -->
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_general_inf.png" border="0" />
+	<p>Figure 1</p></div>
+    </body>
+</html>

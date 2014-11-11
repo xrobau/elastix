@@ -1,7 +1,0 @@
-/var/log/elastix/delete_spam.log {
-   missingok
-   rotate 5
-   weekly
-   create 0640 root root
-}
-

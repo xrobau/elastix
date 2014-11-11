@@ -1,0 +1,66 @@
+#calendar_newevent {
+	font-size: 14px;
+}
+
+#calendar_ical_links {
+    margin-top: 5px;
+}
+
+.title_size{
+    height:20px;
+    text-align:center;
+}
+
+.content_ical{
+    margin: 10px;
+}
+
+.content_ical a span{
+    padding: 2px 2px 2px 15px;
+}
+
+.content_ical a:hover{
+    color:#3366CC;
+}
+
+#colorSelector {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    background: url(../../../images/select2.png);
+}
+
+#colorSelector div {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 28px;
+    height: 28px;
+    background: url(../../../images/select2.png) center;
+}
+
+.calendar {
+	z-index: 2000;
+}
+
+.delete_email{
+    cursor:pointer;
+}
+#grilla tr td {
+    border-bottom:1px solid #DDDDDD;
+}
+#grilla tr {
+    padding:6px;
+    vertical-align:top;
+}
+
+.counter{
+    position: relative;
+    top: -4px;
+    right: 0px;
+}
+
+.countExceeded{
+    color:#e00;
+}
+

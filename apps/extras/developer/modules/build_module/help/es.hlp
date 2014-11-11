@@ -1,0 +1,92 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "Construir Módulo" permite crear módulos hasta de tercer nivel en Elastix. Al crear un módulo es posible ubicarlo en primer nivel o dentro de un nivel existente.</p>
+<p align="Justify">Este módulo tiene tres secciones:Información General, Localización, Descripción del Módulo (Ver Figura 1).</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_build_module_1.png" border="0" />
+<p>Figura 1</p></div>
+<h2>Información General</h2>
+<table class="inline">
+  <tr>
+    <th>Parámetro</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Nombre del Módulo</td><td>Este es el nombre del nuevo módulo. Escriba el nombre empezando con letra mayúscula.</td>
+  </tr>
+  <tr>
+    <td>Id del Módulo</td><td>Identificador del módulo</td>
+  </tr>
+  <tr>
+    <td>Tu nombre</td><td>Nombre del propietario del módulo.</td>
+  </tr>
+  <tr>
+    <td>Tu correo</td><td>Correo electrónico del propietario del módulo.</td>
+  </tr>
+  <tr>
+    <td>Permisos de Grupo</td><td>Aquí se asignan los permisos que tendrá el nuevo módulo.</td>
+  </tr>
+</table>
+<br>
+<h2>Localización</h2>
+<table class="inline">
+  <tr>
+    <th>Parámetro</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Nivel del Módulo</td><td>Aquí se define el nivel del nuevo módulo. <br />Si escoge nivel 2 deberá definir el módulo padre que está en el nivel 1 (Ver figura 2 y 3). <br />Si escoge nivel 3 deberá definir dos módulos padre que están en nivel 1 y 2 (Ver Figura 4 y 5). </td>
+  </tr>
+  <tr>
+    <td>Existe Padre Nivel 1?</td><td>Esta opción define el módulo padre del módulo que vamos a crear (Ver figuras abajo).<br/><strong>Sí:</strong> Tenemos que escoger el nombre del módulo padre existente.<br/><strong>No:</strong> Tenemos que ingresar el nombre del nuevo módulo padre.
+    </td>
+  </tr>
+  <tr>
+    <td>Nombre Padre Nivel 1</td><td>Si el módulo padre existe selecciónelo de la lista. Si no existe ingrese el nombre empezando con letra mayúscula.</td>
+  </tr>
+  <tr>
+    <td>Id Padre Nivel 1</td><td>Identificador del módulo padre.</td>
+  </tr>
+</table><br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_location_1.png" border="0" />
+<p>Figura 2</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_location_2.png" border="0" />
+<p>Figura 3</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_location_3.png" border="0" />
+<p>Figura 4</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_location_4.png" border="0" />
+<p>Figura 5</p></div>
+
+<h2>Descripción del Módulo</h2>
+<table class="inline">
+  <tr>
+    <th>Parámetro</th><th>Descripción</th>
+  </tr>
+  <tr>
+    <td>Tipo de módulo</td><td>Esta opción define el tipo de módulo que vamos a crear. Existen 3 tipos:<br/><strong>Formulario:</strong> Usado para ingresar datos (Ver figura 6).<br/>
+    <strong>Reporte:</strong> Usado para mostrar información como si de un reporte se tratase (Ver figura 7).<br /><strong>Enmarcado:</strong> Usado para embeber una aplicación externa (Ver figura 8).</td>
+  </tr>
+  <tr>
+    <td>Nombre del Campo</td><td>Define el nombre del campo a agregar</td>
+  </tr>
+  <tr>
+    <td>Tipo de Campo</td><td>Define el tipo de campo. Sólo para el tipo "Formulario".</td>
+  </tr>    
+  <tr>
+    <td>Url</td><td>Define el URL de la aplicación externa. Sólo para el tipo "Enmarcado".</td>
+  </tr>  
+</table>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_description_1.png" border="0" />
+<p>Figura 6</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_description_2.png" border="0" />
+<p>Figura 7</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_description_3.png" border="0" />
+<p>Figura 8</p></div>
+<p><strong>NOTA:</strong> Con los botones ">>" y "<<" podemos agregar o eliminar los campos en el módulo que estamos creando.</p>	
+<p>Para crear el nuevo módulo haga click en el botón "Guardar" y luego refresque la interfaz web para poder ver el nuevo módulo.</p><br />
+</body>
+</html>

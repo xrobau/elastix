@@ -1,0 +1,67 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Dannarz                                             |
+  | Email: sesshomarurin7@palosanto.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+global $arrLangModule;
+$arrLangModule=array(  
+"Host Name" => "Nom d'hôte",
+"Remote SMTP Delivery" => "SMTP Distant",
+"Remote SMTP Server" => "Serveur SMTP distant",
+"Port" => "Port",
+"Username" => "Utilisateur",
+"Password" => "Mot de passe",
+"Autentification" => "Authentication",
+"Enable" => "Activer",
+"Disable" => "Désactiver",
+"Enabled" => "Activé",
+"Disabled" => "Désactivé",
+"Save" => "Sauvegarder",
+"Status" => "Statut",
+"Invalid file extension.- It must be pem" => "Extension de fichier invalide.- Elle doit être en pem",
+"Result transaction" => "Résultat de la transaction.",
+"Configured successful" => "Configuré avec succès",
+"Message Remote SMTP Server" => "<p>Le paramètre 'Domaine' spécifie le serveur par défaut auquel envoyer les emails. Dans le cas d'un SMTP, indiquez un domaine, hôte, [hôte] ou [adresse ip]; le format [hôte] désactive les résolutions MX.<br /><br />
+            Domaine = [smtp.domaine.fr]<br />
+            Domaine = hôte uucp<br />
+            Domaine = [une.adr.esse.ip]</p>",
+"Message Remote Autentification" => "Cette option permet l'identification avec certificats.",
+"Message Remote SMTP Cert" => "Les champs requis doivent être renseignés pour l'activation de l'option de certificats",
+"OTHER" => "Autre",
+"SMTP Server" => "Serveur SMTP",
+"Domain" => "Domaine",
+"TLS Enable" => "Activer TLS",
+"Ex" => "Ex",
+"Failed to connect to server" => "Impossible de se connecter au serveur",
+"Failed to send hello command" => "Impossible d'envoyer la commande hello",
+"Failed to start TLS" => "Impossible de démarrer TLS",
+"Authenticate not accepted from server" => "Identification refusée par le serveur",
+"Authenticate Error, TLS must be activated" => "Erreur d'identification, TLS doit être activé",
+);
+?>

@@ -53,6 +53,43 @@ class PaloSantoBreaks
             }
         }
     }
+
+    /**
+     * Procedimiento para obtener la cantidad de los breaks existentes. Si
+     * se especifica id, el listado contendrá únicamente el break
+     * indicada por el valor. De otro modo, se listarán todas los breaks.
+     *
+     * @param int       $id_break    Si != NULL, indica el id del break a recoger
+     * @param string    $estatus    'I' para breaks inactivos, 'A' para activos,
+     *                              cualquier otra cosa para todos los breaks.
+     *
+     * @return array    Listado de breaks en el siguiente formato, o FALSE en
+     *                  caso de error:
+     *  array(
+     *      array(id,name,description),....,
+     *  )
+     */
+    function countBreaks($id_break = NULL, $estatus='all'){
+        // Validación
+        $this->errMsg = "";
+        if (!is_null($id_break) && !preg_match('/^\d+$/', $id_break)) {
+            $this->errMsg = _tr("Break ID is not valid");
+            return FALSE;
+        }
+        if (!in_array($estatus, array('I', 'A'))) $estatus = NULL;
+    
+        // Construcción de petición y sus parámetros
+        $sPeticionSQL = 'SELECT count(id) FROM break WHERE tipo = ?';
+        $paramSQL = array('B');
+        if (!is_null($id_break)) { $sPeticionSQL .= ' AND id = ?'; $paramSQL[] = $id_break; }
+        if (!is_null($estatus)) { $sPeticionSQL .= ' AND status = ?'; $paramSQL[] = $estatus; }
+        $recordset = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, $paramSQL);
+        if (!is_array($recordset)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return $recordset[0];
+    }
     
     /**
      * Procedimiento para obtener el listado de los breaks existentes. Si
@@ -69,7 +106,7 @@ class PaloSantoBreaks
      *      array(id,name,description),....,
      *  )
      */
-    function getBreaks($id_break = NULL, $estatus='all')
+    function getBreaks($id_break = NULL, $estatus='all', $limit=NULL, $offset=NULL)
     {
         // Validación
         $this->errMsg = "";
@@ -84,6 +121,16 @@ class PaloSantoBreaks
         $paramSQL = array('B');
         if (!is_null($id_break)) { $sPeticionSQL .= ' AND id = ?'; $paramSQL[] = $id_break; }
         if (!is_null($estatus)) { $sPeticionSQL .= ' AND status = ?'; $paramSQL[] = $estatus; }
+            
+        if(isset($limit)){
+            $sPeticionSQL .=" LIMIT ?";
+            $paramSQL[]=$limit;
+        }
+        
+        if(isset($offset)){
+            $sPeticionSQL .=" OFFSET ?";
+            $paramSQL[]=$offset;
+        }
         $recordset = $this->_DB->fetchTable($sPeticionSQL, TRUE, $paramSQL);
         if (!is_array($recordset)) {
             $this->errMsg = $this->_DB->errMsg;

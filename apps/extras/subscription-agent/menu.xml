@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+    <menulist>
+        <menuitem menuid="elxcloud" desc="ElxCloud" parent="" module="no" link="" order="20"></menuitem>
+        <menuitem menuid="setup_monitor" desc="Setup" parent="elxcloud" module="no" link="" order="1">
+            <permissions>
+                <group id="1" name="administrator" desc="total access"></group>
+            </permissions>
+        </menuitem>
+    </menulist>
+</module>

@@ -1,0 +1,55 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The option “New Virtual Fax” from the Menu “FAX” in Elastix lets us create a new virtual fax. You should have previously created an IAX extension in "PBX => PBX Configuration => Extensions => Generic IAX2 Device".</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_fax_virtual_new.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+
+<p>To create a new virtual fax, enter the name, e-mail, extension, secret code, country code and area code for the virtual fax (these are the mandatory fields). After this information is added, click on the “Save” button to save the virtual fax or “Cancel” to leave without saving.</p>
+
+<p>Note que este dispositivo virtual será usado para recibir faxes.</p>
+
+<p>A continuación una breve descripción de cada campo:</p>
+
+<table class="inline">
+	<tr>
+    		<th>Nombre</th><th>Descripción</th>
+  	</tr>	
+	<tr>
+		<td>Nombre de Fax Virtual</td><td>Nombre para identificar el fax virtual</td>
+	</tr>
+	<tr>
+
+		<td>Extensión de Fax (IAX)</td><td>Extensión que sera usada por el fax virtual. Esta extensión ya debe existir y tiene que ser de tipo IAX2.</td>
+	</tr>
+	<tr>
+		<td>Correo Asociado</td><td>Correo al cual serán enviadas las notificaciones con respecto a faxes recibidos y errores..</td>
+	</tr>
+	<tr>
+		<td>Secreto (IAX)</td><td>Debe ser la misma contraseña que la extensión IAX2 previamente creada.</td>
+
+	</tr>
+	<tr>
+		<td>Nombre Caller ID</td><td>El nombre de nuestro fax virtual que aparecerá cuando enviemos un fax. Este campo no es mandatorio.</td>
+	</tr>
+	<tr>
+		<td>Número Caller ID</td><td>El número de nuestro fax virtual que aparecerá cuando enviemos un fax. Este campo no es mandatorio.</td>
+	</tr>
+	<tr>
+		<td>Código País</td><td>Aquí se debe especificar el código de país. Este valor es requerido por Hylafax.</td>
+	</tr>
+	<tr>
+		<td>Código Área</td><td>Aquí se debe especificar el código de área. Este valor es requerido por Hylafax.</td>
+	</tr>
+</table>
+<br />
+<br />
+</body>
+</html>

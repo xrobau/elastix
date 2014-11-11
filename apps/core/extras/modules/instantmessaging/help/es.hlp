@@ -1,0 +1,17 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p>La opción "Mensajería Instantánea" permite descargar SPARK que es un cliente de mensajería instantánea optimizado para negocios y organizaciones. Proporciona soporte para chat en grupo, integración con telefonía y seguridad robusta. También proporciona una gran experiencia al usuario final con características como corrector ortográfico en tiempo real, marcadores para salas de chat grupal y conversaciones separadas por pestañas.</p>
+
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_instant_messaging.png" border="0" />
+        <p>Figura 1</p></div>
+        <br />
+
+        <p>Para descargar este cliente IM haga click en el enlace de descarga.</p>
+
+    </body>
+</html>

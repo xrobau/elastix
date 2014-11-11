@@ -1,0 +1,92 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+<p align="Justify">The option "Build Module" of the menu "Developer" lets us easily create modules up to third level in Elastix. We can create a module and place it in a new first level module, or include it in an existing one.</p>
+<p align="Justify">This module has three sections: General Information, Location and Module Description (See Figure 1).</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_build_module_1.png" border="0" />
+<p>Figure 1</p></div>
+<h2>General Information</h2>
+<table class="inline">
+  <tr>
+    <th>Parameter</th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Module Name</td><td>This is the name of the new module. Start the name with uppercase.</td>
+  </tr>
+  <tr>
+    <td>Module Id</td><td>This is the identifier of the module</td>
+  </tr>
+  <tr>
+    <td>Your Name</td><td>This is the name of the owner of the new module.</td>
+  </tr>
+  <tr>
+    <td>Your e-mail</td><td>This is the email of the owner of the module..</td>
+  </tr>
+  <tr>
+    <td>Group Permission</td><td>This is the type of access for the new module.</td>
+  </tr>
+</table>
+<br>
+<h2>Location</h2>
+<table class="inline">
+  <tr>
+    <th>Parameter</th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Module Level</td><td>Here we define the level of the new module. <br />If you choose level 2 you have to define a parent module which is level 1 (See Figure 2 and 3). <br />If you choose level 3 you have to define two parent modules which are level 1 and 2 (See Figure 4 and 5). </td>
+  </tr>
+  <tr>
+    <td>Level 1 Parent Exists</td><td>This option defines the parent of the module that we are creating (See Figures below).<br/><strong>Yes:</strong> We have to choose the name of the existing parent module.<br/><strong>No:</strong> We have to enter the name for the new parent module.
+    </td>
+  </tr>
+  <tr>
+    <td>Level 1 Parent Name</td><td>If the parent module exists select the name from the list. If the parent module doesn't exist, enter the name starting with uppercase.</td>
+  </tr>
+  <tr>
+    <td>Level 1 Parent Id</td><td>This is the identifier of the parent module.</td>
+  </tr>
+</table><br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_location_1.png" border="0" />
+<p>Figure 2</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_location_2.png" border="0" />
+<p>Figure 3</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_location_3.png" border="0" />
+<p>Figure 4</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_location_4.png" border="0" />
+<p>Figure 5</p></div>
+
+<h2>Module Description</h2>
+<table class="inline">
+  <tr>
+    <th>Parameter</th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Module Type</td><td>This option defines the type of module we will create. There are 3 types:<br/><strong>Form:</strong> It's a module used to enter data (See figure 6).<br/>
+    <strong>Grid:</strong> It's a module that shows information as a report (See figure 7).<br /><strong>Framed:</strong> It's a module used to embed an external application (See figure 8).</td>
+  </tr>
+  <tr>
+    <td>Field Name</td><td>Define the name of the field for the module</td>
+  </tr>
+  <tr>
+    <td>Field Type</td><td>Define the type of the field. Only for the type "Form".</td>
+  </tr>    
+  <tr>
+    <td>Url</td><td>Define the URL of the external application. Only for the type "Framed".</td>
+  </tr>  
+</table>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_description_1.png" border="0" />
+<p>Figure 6</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_description_2.png" border="0" />
+<p>Figure 7</p></div>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_description_3.png" border="0" />
+<p>Figure 8</p></div>
+<p><strong>NOTE:</strong> With the buttons ">>" and "<<" we can insert and delete the fields that we are creating for the new module.</p>	
+<p>To create the new module click on the button "Save" and refresh the web interface to see the new module in Elastix.</p><br />
+</body>
+</html>

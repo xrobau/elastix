@@ -1,9 +1,3 @@
-[endpoint]
-ignore_backup = no
-engine = sqlite3
-path   = /var/www/db
-deletable = yes
-
 [control_panel_design]
 ignore_backup = no
 engine = sqlite3
@@ -16,17 +10,8 @@ engine = sqlite3
 path   = /var/www/db
 deletable = yes
 
-[elxpbx]
-ignore_backup = yes
-engine = mysql
-path = /var/lib/mysql
-deletable = yes
-prefix = 2 
-
-[kamailio]
+[meetme]
 ignore_backup = no
 engine = mysql
-path = /var/lib/mysql
+path   = /var/lib/mysql
 deletable = yes
-prefix = 3
-

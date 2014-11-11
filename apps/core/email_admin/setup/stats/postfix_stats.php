@@ -1,17 +1,22 @@
-#!/usr/bin/php
 <?php
 
-$elxPath="/usr/share/elastix";
-ini_set('include_path',"$elxPath:".ini_get('include_path'));
-require_once "libs/paloSantoDB.class.php";
-require_once('libs/misc.lib.php');
+require_once "/var/www/html/libs/paloSantoDB.class.php";
 
-
-$arrDBConn=generarDSNSistema("asteriskuser","elxpbx");
-global $pDB;
-$pDB = new paloDB($arrDBConn); //coneccion a la base usada en el sistema
-if($pDB===false){
-    wlog(' DATABASE ERROR CONNECTION '.$pDB->errMsg);
+function load_default_timezone()
+{
+    $sDefaultTimezone = @date_default_timezone_get();
+    if ($sDefaultTimezone == 'UTC') {
+        $sDefaultTimezone = 'America/New_York';
+        if (file_exists('/etc/sysconfig/clock')) {
+            foreach (file('/etc/sysconfig/clock') as $s) {
+                $regs = NULL;
+                if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
+                    $sDefaultTimezone = $regs[1];
+                }
+            }
+        }
+    }
+    date_default_timezone_set($sDefaultTimezone);
 }
 
 // Para silenciar avisos de fecha/hora
@@ -153,16 +158,16 @@ if($storeMonth && isset($unix_time)){
 
 function deleteOldData($unix_time,$type)
 {
-    global $pDB;
-    $query = "delete from email_statistics where unix_time < ? and type=?";
+    $pDB = new paloDB("sqlite3:////var/www/db/email.db");
+    $query = "delete from statistics where unix_time < ? and type=?";
     $result = $pDB->genQuery($query,array($unix_time,$type));
     if($result==FALSE)
-        wlog($pDB->errMsg."\n");
+	wlog($pDB->errMsg."\n");
 }
 
 function getDataDaysBefore($unix_time)
 {
-    global $pDB;
+    $pDB = new paloDB("sqlite3:////var/www/db/email.db");
     $day = date('d',$unix_time);
     if($day=="28")
 	$time = $unix_time - 12*24*60*60;
@@ -172,7 +177,7 @@ function getDataDaysBefore($unix_time)
 	$time = $unix_time - 14*24*60*60;
     if($day=="31")
 	$time = $unix_time - 15*24*60*60;
-    $query = "select * from email_statistics where unix_time>=? and type=0 order by unix_time";
+    $query = "select * from statistics where unix_time>=? and type=0 order by unix_time";
     $result = $pDB->fetchTable($query,true,array($time));
     if($result===FALSE){
 	wlog($pDB->errMsg."\n");
@@ -183,9 +188,9 @@ function getDataDaysBefore($unix_time)
 
 function getData6HoursBefore($unix_time)
 {
-    global $pDB;
+    $pDB = new paloDB("sqlite3:////var/www/db/email.db");
     $time = $unix_time - 5*60*60; //A la hora actual se le resta 5 horas para obtener los otros 5 datos
-    $query = "select * from email_statistics where unix_time>=? and type=0 order by unix_time";
+    $query = "select * from statistics where unix_time>=? and type=0 order by unix_time";
     $result = $pDB->fetchTable($query,true,array($time));
     if($result===FALSE){
 	wlog($pDB->errMsg."\n");
@@ -196,9 +201,9 @@ function getData6HoursBefore($unix_time)
 
 function storeInDatabase($date,$unix_time,$total,$type)
 {
-    global $pDB;
+    $pDB = new paloDB("sqlite3:////var/www/db/email.db");
     $arrParam = array($date,$unix_time,$total,$type);
-    $query = "insert into email_statistics (date,unix_time,total,type) values (?,?,?,?)";
+    $query = "insert into statistics (date,unix_time,total,type) values (?,?,?,?)";
     $result = $pDB->genQuery($query,$arrParam);
     if($result==FALSE)
 	wlog($pDB->errMsg."\n");

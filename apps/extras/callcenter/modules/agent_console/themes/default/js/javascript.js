@@ -281,6 +281,16 @@ function apply_ui_styles(uidata)
     externalurl_title = uidata['external_url_tab'];
 }
 
+// Redireccionar la página entera en caso de que la sesión se haya perdido
+function verificar_error_session(respuesta)
+{
+	if (respuesta['statusResponse'] == 'ERROR_SESSION') {
+		if (respuesta['error'] != null && respuesta['error'] != '')
+			alert(respuesta['error']);
+		window.open('index.php', '_self');
+	}
+}
+
 // El siguiente código se ejecutará cuando se presione el botón de login del agente
 function do_login()
 {
@@ -295,6 +305,7 @@ function do_login()
         callback:	$('#input_callback').attr('checked')
 	},
 	function(respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['status']) {
             // Se inicia la espera del login del agente
             login_estado_espera(respuesta['message']);
@@ -303,7 +314,7 @@ function do_login()
             // Ha ocurrido un error
             login_estado_error(respuesta['message']);
         }
-	})
+	}, 'json')
 	.fail(function() {
 		login_estado_error('Failed to connect to server for agent login!');
 	});
@@ -319,6 +330,7 @@ function do_hangup()
 		action:		'hangup'
 	},
 	function (respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         	if (estadoCliente.campaign_id != null)
@@ -327,7 +339,7 @@ function do_hangup()
         
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
-	})
+	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
@@ -342,6 +354,7 @@ function do_checklogin()
 			action:		'checkLogin'
 		},
 		function (respuesta) {
+			verificar_error_session(respuesta);
 	        if (respuesta['action'] == 'error') {
 	            // El login ha concluido con un error
 	            login_estado_error(respuesta['message']);
@@ -354,7 +367,7 @@ function do_checklogin()
 	            // Login de agente ha tenido éxito, se refresca para mostrar formulario
 	            window.open('index.php?menu=' + module_name, "_self");
 	        }
-    	})
+    	}, 'json')
     	.fail(function() {
     		login_estado_error('Failed to connect to server to check for agent login!');
     	});
@@ -369,13 +382,14 @@ function do_logout()
 		action:		'agentLogout'
 	},
 	function (respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         }
 
         // Se asume que a pesar del error, el agente está deslogoneado
         window.open('index.php?menu=' + module_name, "_self");
-	})
+	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
@@ -417,6 +431,7 @@ function do_break()
 		breakid:	$('#break_select').val()
 	},
 	function (respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         }
@@ -424,7 +439,7 @@ function do_break()
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
         // TODO: definir evento agentbreakenter y agentbreakexit
-	})
+	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
@@ -439,6 +454,7 @@ function do_unbreak()
 		action:		'unbreak'
 	},
 	function (respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         }
@@ -446,7 +462,7 @@ function do_unbreak()
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
         // TODO: definir evento agentbreakenter y agentbreakexit
-	})
+	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
@@ -462,13 +478,14 @@ function do_transfer()
 		atxfer: 	$('#transfer_type_attended').attr('checked')
 	},
 	function (respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         }
         
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
-	})
+	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
@@ -483,13 +500,14 @@ function do_confirm_contact()
 		id_contact:	$('#llamada_entrante_contacto_id').val()
 	},
 	function (respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         } else {
         	mostrar_mensaje_info(respuesta['message']);
         }
         
-	})
+	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
@@ -525,13 +543,14 @@ function do_schedule()
 		}
 	},
 	function (respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         } else {
         	mostrar_mensaje_info(respuesta['message']);
         }
         
-	})
+	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
@@ -549,13 +568,14 @@ function do_save_forms()
 					}).get()
 	},
 	function (respuesta) {
+		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         } else {
         	mostrar_mensaje_info(respuesta['message']);
         }
         
-	})
+	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
 	});
@@ -581,11 +601,12 @@ function do_checkstatus()
 	} else {
 		$.post('index.php?menu=' + module_name + '&rawmode=yes', params,
 		function (respuesta) {
+			verificar_error_session(respuesta);
 			manejarRespuestaStatus(respuesta);
 			
 			// Lanzar el método de inmediato
 			setTimeout(do_checkstatus, 1);
-		}).fail(function() {
+		}, 'json').fail(function() {
 			mostrar_mensaje_error('Lost connection to server (Long-Polling), retrying...');
 			setTimeout(do_checkstatus, 5000);
 		});

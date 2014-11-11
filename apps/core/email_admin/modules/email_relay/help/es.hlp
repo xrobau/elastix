@@ -1,0 +1,17 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>Por defecto, el servidor no recibe correos a cuentas que no se encuentran en el dominio. EL propósito de esto es prevenir que el servidor sea usado para spam o correo basura y para evitar el uso innecesario de recursos. Pero en algunos casos es necesario activar esta opción para ciertas redes como por ejemplo la red interna de la compañía. De esta manera los usuarios pueden usar el servidor para enviar correos a destinos que se encuentran fuera del dominio configurado en el sistema. En la opción "Relay" están especificadas las redes en las que está permitido conectarse y usar el servidor para enviar correos electrónicos. Las redes deben ser ingresadas mediante el formato IP/Máscara. Por ejemplo: 192.168.1.0/24.</p>
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_relay.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+</body>
+</html>

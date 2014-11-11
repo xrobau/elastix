@@ -1,0 +1,45 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>La opción “Mi Extensión" permite habilitar y deshabilitar las opciones de llamada en espera, desvío de llamadas y monitoreo de llamadas para su extensión.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_myex_config.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+<p>Seleccione las opciones que desea habilitar o deshabilitar y luego haga click en el botón "Guardar Configuración". A continuación una breve descripción de cada opción:</p>
+<br />
+<table class="inline">
+    <tr>
+        <th>Nombre</th><th>Descripción</th>
+    </tr>
+    <tr>
+        <td>No Molestar</td><td>Esta opción impide la recepción de llamadas.</td>
+    </tr>
+    <tr>
+        <td>Llamada en Espera</td><td>Habilita la opción de llamada en espera.</td>
+    </tr>
+    <tr>
+        <td>Desviar Llamada</td><td>Redirecciona la llamada hacia otra extensión.</td>
+    </tr>
+    <tr>
+        <td>Desviar Llamada en caso de Indisponibilidad</td><td>Redirecciona la llamada hacia otra extensión si su extensión no está disponible.</td>
+    </tr>
+    <tr>
+        <td>Desviar Llamada en caso de Ocupado</td><td>Redirecciona la llamada hacia otra extensión si su extensión está ocupada.</td>
+    </tr>
+    <tr>
+        <td>Grabar Llamada Entrante</td><td>Selecciona el comportamiento de la grabación de llamadas entrantes.</td>
+    </tr>
+    <tr>
+        <td>Grabar Llamada Saliente</td><td>Selecciona el comportamiento de la grabación de llamadas salientes.</td>
+    </tr>
+</table>
+<br />
+</body>
+</html>
+

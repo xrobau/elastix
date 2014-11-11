@@ -1,0 +1,57 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p>La opción "Calendario" permite a los usuarios organizar su día, semana o mes creando eventos y recordatorios.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_calendar.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+<p>Para exportar el calendario usted debe hacer click en el link "Descargar calendario ical". <i>(Figura 2)</i></p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_export_ical.png" border="0" />
+<p>Figura 2</p></div>
+<br />
+<h2>Crear un nuevo evento</h2>
+<p>Para crear un nuevo evento usted debe hacer click en el botón "Crear Nuevo Evento" y llenar la información requerida. Cuando esté listo debe dar click en el botón "Guardar". <i>(Figura 3)</i></p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_newEvent.png" border="0" />
+<p>Figura 3</p></div>
+<br />
+<p>Aquí la descripción de cada campo:</p>
+<table class="inline">
+<tr><th>Nombre</th><th>Descripción</th></tr>
+<tr><td>Nombre</td><td>Nombre del evento</td></tr>
+<tr><td>Descripción</td><td>Una breve descripción del evento.</td></tr>
+<tr><td>Empieza</td><td>Fecha y hora en que empieza el evento</td></tr>
+<tr><td>Termina</td><td>Fecha y hora en que termina el evento</td></tr>
+<tr><td>Color</td><td>Selecciona un color para identificar al evento</td></tr>
+<tr><td>Llamar a</td><td>Cuando el evento empiece la extensión configurada aquí sonará.</td></tr>
+<tr><td>Recordar</td><td>Un recordatorio antes que el evento empiece.</td></tr>
+<tr><td>Texto a voz</td><td>Escriba el mensaje que desea escuchar cuando reciba la llamada a la extensión configurada anunciando el evento. Esta opción esta disponible si el servicio Festival está habilitado. Para habilitarlo vaya a "PBX -> Herramientas -> Festival".</td></tr>
+<tr><td>Notificar a invitados por correo</td><td>Elastix automáticamente enviará un correo a esta lista antes de que el evento empiece.</td></tr>
+</table>
+<br />
+<h2>Editar/Eliminar un evento existente</h2>
+<p>Para editar o eliminar un evento existente usted debe hacer click en el evento ya creado que se encuentra en el calendario, y luego en el botón "Editar" o "Eliminar" según la acción a realizar. <i>(Figura 4 y 5)</i></p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_newEvent2.png" border="0" />
+<p>Figura 4</p></div>
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_viewEvent.png" border="0" />
+<p>Figura 5</p></div>
+<br />
+<p>Otra forma de modificar un evento es haciendo click en el filo de un evento y arrastrarlo horizontal (si está viendo el evento por mes) o verticalmente (si está viendo el evento por semana o día). A continuación algunos ejemplos.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_monthEvent.png" border="0" />
+<p>Figura 6</p></div>
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_weekEvent.png" border="0" />
+<p>Figura 7</p></div>
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_dayEvent.png" border="0" />
+<p>Figura 8</p></div>
+<br />
+<br />
+</body>
+</html>
+

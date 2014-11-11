@@ -1,0 +1,173 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version: 2.0                                           |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by:Dannarz                                             |
+  | Email: sesshomarurin7@palosanto.com                                                       |
+  +----------------------------------------------------------------------+
+  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+global $arrLangModule;
+$arrLangModule=array(  
+"Calendar" => "Calendrier",
+"Monday" => "Lundi",
+"Tuesday" => "Mardi",
+"Wednesday" => "Mercredi",
+"Thursday" => "Jeudi",
+"Friday" => "Vendredi",
+"Saturday" => "Samedi",
+"Sunday" => "Dimanche",
+"Add Event" => "Ajouter un événement",
+"Search" => "Rechercher",
+"January" => "Janvier",
+"February" => "Février",
+"March" => "Mars",
+"April" => "Avril",
+"May_" => "Mai",
+"June" => "Juin",
+"July" => "Juillet",
+"August" => "Août",
+"September" => "Septembre",
+"October" => "Octobre",
+"November" => "Novembre",
+"December" => "Décembre",
+"Year" => "Anné",
+"Month" => "Mois",
+"Event" => "Événement",
+"Date" => "Date",
+"To" => "au",
+"It repeat" => "Répétition",
+"Description" => "Description",
+"Asterisk Call Me" => "Mon extension",
+"Phone_Call_Alert" => "Alerte par appel téléphonique",
+"Call to" => "Appeler le",
+"Recording" => "Enregistrement",
+"Hour" => "Heure",
+"Hour_ini" => "à",
+"Hour_end" => "à",
+"Here" => "Ici",
+"Day" => "Jour",
+"Week" => "Semaine",
+"Error get Data" => "Erreur pour obtenir les donné",
+"notification" => "Notifier",
+"notification_email" => "Emails &agrave notifier",
+"error_date" => "La valeur de la date initiale doit être plus grande que la dernière date",
+"error_eventName" => "Le nom du champ doit être rempli",
+"insert_successful" => "Le nouvel événement a été créé",
+"update_successful" => "L'événement a été actualisé",
+"delete_successful" => "L'événement a été effacé",
+"error_insert" => "L'événement n'a pas été créé. S'il vous plaît réessayez",
+"error_update" => "L'événement n'a pas été actualisé. S'il vous plaît réessayez",
+"error_delete" => "L'événement n'a pas été effacé. S'il vous plaît réessayez",
+"add_phone" => "Pour ajouter un n° de téléphone du carnet d'adresse, cliquer ",
+"error_ext" => "L'utilisateur n'a pas d'extension d'affecté. Créer une extension dans <a href='?menu=userlist'>Liste des utilisateurs</a>",
+"error_call_to" => "S'il vous plaît remplissez le champ <b><i>Appeler le</i></b>",
+"user_list" => "Lite des utilisateurs",
+"email_no_valid" => "Email non valide. \nEx: \"name\" <dd@example.com>, \"name2\" <ff@example.com>",
+"call_to_error" => "S'il vous plaît remplissez correctement le n° pour appeler",
+"error_notification_emails" => "S'il vous plaît remplissez les courriers électronique pour notifier l'événement",
+"error_description" => "S'il vous plaît remplissez la desciption de événement.",
+"error_title" => "Erreur d'extension",
+"No_Repeat" => "Aucune répétition",
+"Each_Week" => "Chaque semaine",
+"Each_Month" => "Chaque mois",
+"Delete" => "Effacer",
+"New_Event" => "Nouvel événement ",
+"Change_Event" => "événement Changé",
+"Delete_Event" => "événement Annulé",
+"time" => "Heure",
+"error_hour" => "L'heure de fin doit être plus grande que l'heure de début",
+"Start_date" => "Du",
+"End_date" => "Au",
+"new_recording" => "Pour créer un nouvel enregistrement cliquer <a href='?menu=recordings'>ici</a>",
+"Edit Event" => "Editer un événement ",
+"View Event" => "Voir un événement ",
+"Date_event" => "Date de l'événement ",
+"Hour_event" => "Heure de l'événement ",
+"Call_alert" => "Alerte par appel téléphonique",
+"repeat" => "Répéter chaque",
+"Su" => "Di",
+"Mo" => "Lu",
+"Tu" => "Ma",
+"We" => "Me",
+"Th" => "Je",
+"Fr" => "Ve",
+"Sa" => "Sa",
+"Months" => "Mois",
+"Weeks" => "Semaine(s)",
+"error_repeat" => "S'il vous plaît, choisissez le jour de la répétition",
+"Notification_Alert" => "Alerte de Notification",
+"Email" => "E-mail",
+"Contact" => "Contact",
+"Export_Calendar" => "Exporter le Calendrier",
+"error_recording" => "Veuillez ajouter la synthèse vocale",
+"Organizer" => "Organizer",
+"Confirm_event" => "Confirmer l'événement",
+"Confirm" => "Confirmer",
+"footer" => "",
+"May" => "Mai",
+"Can not create called file" => "Impossible de créer le fichier appelé",
+"share_calendar" => "Partager le calendrier",
+"other_calendar" => "Autres calendriers",
+"ical" => "(Format iCal)",
+"enter_emails" => "Entrez les adresses emails",
+"Send" => "Envoyer",
+"error_email" => "Certaines adresses emails sont incorrectes",
+"Sharing_Calendar" => "Partage du calendrier en cours",
+"User" => "Utilisateur",
+"Password" => "Mot de passe",
+"Description_share" => "souhaite partager son calendrier d'activité avec vous. Veuillez valider si vous souhaitez l'accepter.",
+"Accept" => "Valider",
+"message_send" => "La notification a été envoyée",
+"accept_calendar" => "Accepter le calendrier",
+"View_Event" => "Voir l'évènement",
+"logout" => "Déconnexion",
+"login" => "Connexion",
+"active_foneCall" => "Activer le rappel",
+"Name" => "Nom",
+"Download" => "Télécharger",
+"Here" => "Ici",
+"ReminderTime" => "Rappel",
+"lblbefore" => "min avant",
+"Loading" => "Chargement en cours",
+"error_Noevent" => "Cet évènement n'existe pas ou vous n'êtes pas autorisé à le consulter",
+"START_TYPE" => "Commencer à taper",
+"notification_event" => "Notification d'énèvement",
+"invitation_event" => "Vous avez été invité à participer à cet évènement",
+"noResponseNotification" => "Ceci est une information et n'invite à aucune réponse",
+"copyrightNotification" => "",
+"Color" => "Couleur",
+"Dear User" => "Cher utilisateur",
+"Create New Event" => "Ajouter un énèvement",
+"Text to Speech" => "Synthèse vocale",
+"Search in Address Book" => "Chercher dans le carnet d'adresse",
+"Listen" => "Ecouter",
+"Festival is not up" => "Festival n'est pas en fonctionnement",
+"Click here to listen" => "Cliquez ici pour écouter",
+"Deleting" => "Suppression en cours",
+"Sending Request" => "Envoi de la requête en cours",
+"Download ical calendar" => "Télécharger au format ical",
+);
+?>

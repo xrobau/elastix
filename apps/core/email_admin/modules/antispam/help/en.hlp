@@ -1,0 +1,68 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">The option "Antispam" from "Email" allows configuring the level of acceptation of emails that are not "Spam"</p>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_antispam.png" border="0" />
+<p>Figure 1</p></div>
+<br/>
+<br/>
+<p align="Justify">To activate Antispam is necessary the <i>"Spamassassin"</i> service is turned on. The option <i>"status"</i> allows turning on or turning off the service.</p>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_antispam1.png" border="0" />
+<p>Figure 2</p></div>
+<br/>
+<br/>
+<p>To mark the level of catch for Spams, just move the slider to the desired level.</p>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_antispam3.png" border="0" />
+<p>Figure 3</p></div>
+<br/>
+<br/>
+
+<p>The antispam politics to configure are:</p>
+<ul>
+    <li>
+        <span><b>Mark Subject:</b></span><br />
+        <ul>
+            <li>
+                Mark the Subject of email by the value of text Field. <i>(Figure 4)</i>
+            </li>
+        </ul>
+    </li>
+<br />
+    <li>
+
+        <span><b>Spam Capture:</b></span> 
+        <ul>
+            <li>
+                Activate <i>"Sieve"</i> service to send all Spam to the <i>"Spam folder"</i> per each email account.
+            </li>
+            <li>
+                Activate action to remove Spams per email account and remove older emails given a specific time. <i>(Figure 5)</i><br /> <br />The options are: <br /><br />
+                <ul>
+                    <li><b>Delete Spam for more than one week: </b>Allow remove all Spam from "Spam" folder which have been more than one week in that folder.</li>
+                    <li><b>Delete Spam for more than two week: </b>Allow remove all Spam from "Spam" folder which have been more than two weeks in that folder.</li>
+                    <li><b>Delete Spam for more than one month: </b>Allow remove all Spam from "Spam" folder which have been more than one month in that folder.</li>
+<br />
+                </ul>
+This process is done every day.
+            </li>
+        </ul>
+    </li>
+</ul>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_antispam4.png" border="0" />
+<p>Figure 4</p></div>
+<br/>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_antispam5.png" border="0" />
+<p>Figure 5</p></div>
+<br/>
+<br/>
+</body>
+</html>

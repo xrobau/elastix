@@ -1,0 +1,45 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The option “My Extension" of the Menu “PBX” let you enable and disable Call Waiting, Do Not Disturb, Call Forwarding and Call Monitor Settings features of your extension.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_myex_config.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+<p>Select the options you want to enable and then click on "Save Configuration" button. Below a description of each option:</p>
+<br />
+<table class="inline">
+    <tr>
+        <th>Name</th><th>Description</th>
+    </tr>
+    <tr>
+        <td>Do Not Disturb</td><td>This option avoids incoming calls.</td>
+    </tr>
+    <tr>
+        <td>Call Waiting</td><td>Enable the call waiting feature.</td>
+    </tr>
+    <tr>
+        <td>Call Forward</td><td>Redirect the call to other extension.</td>
+    </tr>
+    <tr>
+        <td>Call Forward on Unavailable</td><td>Redirect the call to other extension when your extension is unavailable.</td>
+    </tr>
+    <tr>
+        <td>Call Forward on Busy</td><td>Redirect the call to other extension when your extension is busy.</td>
+    </tr>
+    <tr>
+        <td>Record Incoming</td><td>Select the behavior of recording incoming calls.</td>
+    </tr>
+    <tr>
+        <td>Record Outgoing</td><td>Select the behavior of recording outgoing calls.</td>
+    </tr>
+</table>
+<br />
+</body>
+</html>
+

@@ -824,6 +824,67 @@ CALL temp_agente_tipo_2012_12_26();
 DROP PROCEDURE IF EXISTS temp_agente_tipo_2012_12_26;
 
 
+/* Procedimiento para agregar índices necesarios para acelerar getagentactivitysummary */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_indice_agent_calls_2014_09_08 ++
+CREATE PROCEDURE temp_indice_agent_calls_2014_09_08 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_indice tinyint(1);
+    
+    SET l_existe_indice = 0;
+
+    /* Verificar existencia de índices que deben agregarse */
+    SELECT COUNT(*) INTO l_existe_indice 
+    FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'audit'
+        AND INDEX_NAME = 'agent_break_datetime';
+    IF l_existe_indice = 0 THEN
+        ALTER TABLE audit ADD KEY agent_break_datetime (id_agent, id_break, datetime_init);
+        ALTER TABLE calls ADD KEY datetime_init (start_time);
+        ALTER TABLE calls ADD KEY datetime_entry_queue (datetime_entry_queue);
+        ALTER TABLE call_entry ADD KEY datetime_init (datetime_init);
+        ALTER TABLE call_entry ADD KEY datetime_entry_queue (datetime_entry_queue);
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_indice_agent_calls_2014_09_08();
+DROP PROCEDURE IF EXISTS temp_indice_agent_calls_2014_09_08;
+
+
+/* Procedimiento para agregar índices necesarios para acelerar dont_call */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_indice_dont_call_2014_09_16 ++
+CREATE PROCEDURE temp_indice_dont_call_2014_09_16 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_indice tinyint(1);
+    
+    SET l_existe_indice = 0;
+
+    /* Verificar existencia de índices que deben agregarse */
+    SELECT COUNT(*) INTO l_existe_indice 
+    FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'dont_call'
+        AND INDEX_NAME = 'callerid';
+    IF l_existe_indice = 0 THEN
+        ALTER TABLE dont_call ADD KEY callerid (caller_id);
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_indice_dont_call_2014_09_16();
+DROP PROCEDURE IF EXISTS temp_indice_dont_call_2014_09_16;
+
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

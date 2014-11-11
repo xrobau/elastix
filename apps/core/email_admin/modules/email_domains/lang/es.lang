@@ -1,0 +1,46 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Email" => "Email",
+"Domains" => "Dominios",
+"Domain" => "Dominio",
+"Domain name" => "Nombre del Dominio",
+"Domain List" => "Listado Dominios",
+"Number of Accounts" => "Número de cuentas",
+"Create Domain" => "Crear Dominio",
+"New Domain" => "Nuevo Dominio",
+"View Domain" => "Ver Dominio",
+"Edit Domain" => "Editar Dominio",
+"Domain has been deleted" => "Dominio ha sido eliminado",
+"Domain has been created" => "Dominio ha sido creado",
+"Please before to delete a domain delete all email lists asociated to " => "Por favor antes de eliminar un dominio elimine todas las listas de correo asociadas a ",
+"Please before to delete a domain delete all email accounts asociated to " => "Por favor antes de eliminar un dominio elimine todas las cuentas de correo asociadas a ",
+);
+?>

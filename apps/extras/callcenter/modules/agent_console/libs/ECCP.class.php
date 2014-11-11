@@ -291,6 +291,16 @@ class ECCP
         return $xml_response->getagentstatus_response;
     }
 
+    public function getmultipleagentstatus($agentlist)
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('getmultipleagentstatus');
+        $xml_agents = $xml_cmdRequest->addChild('agents');
+        foreach ($agentlist as $sAgentNumber) $xml_agents->addChild('agent_number', $sAgentNumber);
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->getmultipleagentstatus_response;
+    }
+    
     public function getcampaigninfo($campaign_type, $campaign_id)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -547,6 +557,16 @@ class ECCP
         $xml_cmdRequest->addChild('agent_number', is_null($sAgentNumber) ? $this->_agentNumber : $sAgentNumber);
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getagentqueues_response;
+    }
+    
+    public function getmultipleagentqueues($agentlist)
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('getmultipleagentqueues');
+        $xml_agents = $xml_cmdRequest->addChild('agents');
+        foreach ($agentlist as $sAgentNumber) $xml_agents->addChild('agent_number', $sAgentNumber);
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->getmultipleagentqueues_response;
     }
     
     public function getagentactivitysummary($datetime_start = NULL, $datetime_end = NULL)

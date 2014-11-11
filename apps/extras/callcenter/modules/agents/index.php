@@ -31,6 +31,7 @@ require_once("libs/paloSantoGrid.class.php");
 require_once("libs/Agentes.class.php");
 
 require_once "modules/agent_console/libs/elastix2.lib.php";
+require_once "modules/agent_console/libs/JSON.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -56,23 +57,21 @@ function _moduleContent(&$smarty, $module_name)
     $pDB = new paloDB($arrConf['cadena_dsn']);
 
     // Mostrar pantalla correspondiente
-    $contenidoModulo = '';
     $sAction = 'list_agents';
-    if (isset($_GET['action'])) $sAction = $_GET['action'];
+    if (isset($_REQUEST['action'])) $sAction = $_REQUEST['action'];
     switch ($sAction) {
     case 'new_agent':
-        $contenidoModulo = newAgent($pDB, $smarty, $module_name, $local_templates_dir);
-        break;
+        return newAgent($pDB, $smarty, $module_name, $local_templates_dir);
     case 'edit_agent':
-        $contenidoModulo = editAgent($pDB, $smarty, $module_name, $local_templates_dir);
-        break;
+        return editAgent($pDB, $smarty, $module_name, $local_templates_dir);
+    case 'reparar_file':
+        return repararAgente_file($pDB, $smarty, $module_name, $local_templates_dir);
+    case 'reparar_db':
+        return repararAgente_db($pDB, $smarty, $module_name, $local_templates_dir);
     case 'list_agents':
     default:
-        $contenidoModulo = listAgent($pDB, $smarty, $module_name, $local_templates_dir);
-        break;
+        return listAgent($pDB, $smarty, $module_name, $local_templates_dir);
     }
-
-    return $contenidoModulo;
 }
 
 function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
@@ -82,35 +81,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     $oAgentes = new Agentes($pDB);
 
     // Operaciones de manipulación de agentes
-    if (isset($_POST['reparar_db']) && ereg('^[[:digit:]]+$', $_POST['reparar_db'])) {
-        // Hay que agregar el agente al archivo de configuración de Asterisk
-        $infoAgente = $oAgentes->getAgents($_POST['reparar_db']);
-        if (!is_array($infoAgente)) {
-            $smarty->assign(array(
-                'mb_title'      =>  'DB Error',
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        } elseif (count($infoAgente) == 0) {
-            // Agente no existe en DB, no se hace nada
-        } elseif (!$oAgentes->addAgentFile(array(
-            $infoAgente['number'],
-            $infoAgente['password'],
-            $infoAgente['name'],
-            ))) {
-            $smarty->assign(array(
-                'mb_title'      =>  _tr("Error saving agent in file"),
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        }
-    } elseif (isset($_POST['reparar_file']) && ereg('^[[:digit:]]+$', $_POST['reparar_file'])) {
-        // Hay que remover el agente del archivo de configuración de Asterisk
-        if (!$oAgentes->deleteAgentFile($_POST['reparar_file'])) {
-            $smarty->assign(array(
-                'mb_title'      =>  _tr("Error when deleting agent in file"),
-                'mb_message'    =>  $oAgentes->errMsg,
-            ));
-        }
-    } elseif (isset($_POST['delete']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
+    if (isset($_POST['delete']) && isset($_POST['agent_number']) && preg_match('/^[[:digit:]]+$/', $_POST['agent_number'])) {
         // Borrar el agente indicado de la base de datos, y del archivo
         if (!$oAgentes->deleteAgent($_POST['agent_number'])) {
             $smarty->assign(array(
@@ -118,7 +89,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
                 'mb_message'    =>  $oAgentes->errMsg,
             ));
         }
-    } elseif (isset($_POST['disconnect']) && isset($_POST['agent_number']) && ereg('^[[:digit:]]+$', $_POST['agent_number'])) {
+    } elseif (isset($_POST['disconnect']) && isset($_POST['agent_number']) && preg_match('/^[[:digit:]]+$/', $_POST['agent_number'])) {
         // Desconectar agentes. El código en Agentes.class.php puede desconectar
         // varios agentes a la vez, pero aquí sólo se desconecta uno.
         $arrAgentes = array($_POST['agent_number']);
@@ -219,17 +190,11 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
             $tuplaData[1] = $sImgVisto;
             break;
         case 'ASTERISK':
-            $tuplaData[1] = $sImgErrorAst.
-                "&nbsp;<a href='javascript:preguntar_por_reparacion(\"".
-                $tuplaAgente['number'].
-                "\",\"reparar_file\", pregunta_borrar_agente_conf)'>"._tr('Repair')."</a>";
+            $tuplaData[1] = $sImgErrorAst.'&nbsp;<a href="#" class="reparar_file">'._tr('Repair').'</a>';
             $tuplaData[5] = '&nbsp;';   // No mostrar opción de editar agente que no está en DB
             break;
         case 'CC':
-            $tuplaData[1] = $sImgErrorCC.
-                "&nbsp;<a href='javascript:preguntar_por_reparacion(\"".
-                $tuplaAgente['number'].
-                "\",\"reparar_db\", pregunta_agregar_agente_conf)'>"._tr('Repair')."</a>";
+            $tuplaData[1] = $sImgErrorCC.'&nbsp;<a href="#" class="reparar_db">'._tr('Repair').'</a>';
             break;
         }
         $arrData[] = $tuplaData;
@@ -237,50 +202,100 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
 
     $url = construirURL(array('menu' => $module_name, 'cbo_estado' => $sEstadoAgente), array('nav', 'start'));
 
+    $arrColumns = array('', _tr("Configure"), _tr("Number"), _tr("Name"), _tr("Status"), _tr("Options"));    
     $oGrid = new paloSantoGrid($smarty);
+    $oGrid->pagingShow(true);
     $oGrid->setLimit(50);
-    if (is_array($arrData)) {
-        $oGrid->setTotal(count($arrData));
-        $offset = $oGrid->calculateOffset();
-        $arrData = array_slice($arrData, $offset, $oGrid->getLimit());
-    }
-
-    // Construir el reporte de los agentes activos
-    $arrGrid = array("title"    => _tr("Agent List"),
-                     "url"      => $url,
-                     "icon"     => "images/user.png",
-                     "width"    => "99%",
-                     "columns"  => array(
-                                        0 => array("name"       => '&nbsp;',
-                                                    "property1" => ""),
-                                        1 => array("name"       => _tr("Configure"),
-                                                    "property1" => ""),
-                                        2 => array("name"       => _tr("Number"),
-                                                    "property1" => ""),
-                                        3 => array("name"       => _tr("Name"),
-                                                    "property1" => ""),
-                                        4 => array("name"       => _tr("Status"),
-                                                    "property1" => ""),
-                                        5 => array("name"       => _tr("Options"),
-                                                    "property1" => ""),
-                                        )
-                    );
+    $oGrid->addNew("?menu=$module_name&action=new_agent", _tr('New agent'), TRUE);
+    $oGrid->deleteList('Are you sure you wish to continue?', 'delete', _tr('Delete'));
+    $oGrid->addSubmitAction('disconnect', _tr('Disconnect'));
+    $oGrid->setColumns($arrColumns);
+    $oGrid->setURL($url);
+    $oGrid->setTitle(_tr('Agent List'));
+    $oGrid->setIcon('images/user.png');
+    
+    $_REQUEST['cbo_estado'] = $sEstadoAgente;
+    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." = ".$listaEstados[$sEstadoAgente], $_REQUEST, array("cbo_estado" =>'A'),true);
+    
+    $oGrid->setTotal(count($arrData));
+    $offset = $oGrid->calculateOffset();
+    $arrData = array_slice($arrData, $offset, $oGrid->getLimit());
+    $oGrid->setData($arrData);
     $smarty->assign(array(
         'LABEL_STATE'           =>  _tr('Status'),
-        'LABEL_CREATE_AGENT'    =>  _tr("New agent"),
         'estados'               =>  $listaEstados,
         'estado_sel'            =>  $sEstadoAgente,
-        'MODULE_NAME'           =>  $module_name,
-        'LABEL_WITH_SELECTION'  =>  _tr('With selection'),
-        'LABEL_DISCONNECT'      =>  _tr('Disconnect'),
-        'LABEL_DELETE'          =>  _tr('Delete'),
-        'MESSAGE_CONTINUE_DELETE' => _tr("Are you sure you wish to continue?"),
     ));
     $oGrid->showFilter($smarty->fetch("$local_templates_dir/filter-list-agents.tpl"));
-    $sContenido = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    if (strpos($sContenido, '<form') === FALSE)
-        $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
-    return $sContenido;
+    return $oGrid->fetchGrid();
+}
+
+function repararAgente_file($pDB, $smarty, $module_name, $local_templates_dir)
+{
+    $respuesta = array(
+        'status'    =>  'success',
+        'message'   =>  '(no message)',
+    );
+    
+    if (!isset($_REQUEST['id_agent']) || !ctype_digit($_REQUEST['id_agent'])) {
+        $respuesta = array(
+            'status'    =>  'error',
+            'message'   =>  'Invalid agent ID',
+        );
+    } else {
+        $oAgentes = new Agentes($pDB);
+        if (!$oAgentes->deleteAgentFile($_REQUEST['id_agent'])) {
+            $respuesta = array(
+                'status'    =>  'error',
+                'message'   =>  _tr("Error when deleting agent in file").' - '.$oAgentes->errMsg,
+            );
+        }
+    }
+
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode($respuesta);
+}
+
+function repararAgente_db($pDB, $smarty, $module_name, $local_templates_dir)
+{
+    $respuesta = array(
+        'status'    =>  'success',
+        'message'   =>  '(no message)',
+    );
+    
+    if (!isset($_REQUEST['id_agent']) || !ctype_digit($_REQUEST['id_agent'])) {
+        $respuesta = array(
+            'status'    =>  'error',
+            'message'   =>  'Invalid agent ID',
+        );
+    } else {
+        $oAgentes = new Agentes($pDB);
+
+        // Hay que agregar el agente al archivo de configuración de Asterisk
+        $infoAgente = $oAgentes->getAgents($_REQUEST['id_agent']);
+        if (!is_array($infoAgente)) {
+            $respuesta = array(
+                'status'    =>  'error',
+                'message'   =>  'DB Error - '.$oAgentes->errMsg,
+            );
+        } elseif (count($infoAgente) == 0) {
+            // Agente no existe en DB, no se hace nada
+        } elseif (!$oAgentes->addAgentFile(array(
+            $infoAgente['number'],
+            $infoAgente['password'],
+            $infoAgente['name'],
+            ))) {
+            $respuesta = array(
+                'status'    =>  'error',
+                'message'   =>  _tr('Error saving agent in file').' - '.$oAgentes->errMsg,
+            );
+        }
+    }
+
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode($respuesta);
 }
 
 function newAgent($pDB, $smarty, $module_name, $local_templates_dir)
@@ -291,9 +306,9 @@ function newAgent($pDB, $smarty, $module_name, $local_templates_dir)
 function editAgent($pDB, $smarty, $module_name, $local_templates_dir)
 {
     $id_agent = NULL;
-    if (isset($_GET['id_agent']) && ereg('^[[:digit:]]+$', $_GET['id_agent']))
+    if (isset($_GET['id_agent']) && preg_match('/^[[:digit:]]+$/', $_GET['id_agent']))
         $id_agent = $_GET['id_agent'];
-    if (isset($_POST['id_campaign']) && ereg('^[[:digit:]]+$', $_POST['id_agent']))
+    if (isset($_POST['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_POST['id_agent']))
         $id_agent = $_POST['id_agent'];
     if (is_null($id_agent)) {
         Header("Location: ?menu=$module_name");
@@ -378,10 +393,10 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
             } elseif ($_POST['eccpwd1'] != $_POST['eccpwd2']) {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("ECCP passwords don't match"));
-            } elseif (!ereg('^[[:digit:]]+$', $_POST['password1'])) {
+            } elseif (!preg_match('/^[[:digit:]]+$/', $_POST['password1'])) {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("The passwords aren't numeric values"));
-            } elseif (!ereg('^[[:digit:]]+$', $_POST['extension'])) {
+            } elseif (!preg_match('/^[[:digit:]]+$/', $_POST['extension'])) {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("Error Agent Number"));
             } else {

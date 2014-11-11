@@ -1,0 +1,76 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify">El addon "Distributed DialPlan" permite compartir el plan de marcado con otros servidores a través de Internet o una red de área local. La opción "Servidores Remotos" muestra una lista de servidores a los que estamos solicitando conexión para compartir el plan de marcado. De igual manera aquí podemos aceptar una petición de conexión proviente de otro servidor. Para crear una nueva conexión primero se debe llenar el formulario de información que está en el módulo "Informacion de la Compañía" de este mismo addon. Vea el mensaje de alerta en la Figura 1.</p>
+	<br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_remote_1.png" border="0" />
+	<p>Figura 1</p></div>
+	<br/><br/>
+<p align="Justify">Una vez que haya ingresado la información general usted estará habilitado para solicitar conexiones a servidores remotos. (Ver figura 2).</p>
+	<br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_main.png" border="0" />
+	<p>Figura 2</p></div>
+	<br/><br/>
+
+	<b style="font-size: 20px;">Nueva Conexión</b>
+
+	<p align="Justify">Para crear una conexión haga click en el botón "Nueva Conexión" y llene el formulario correspondiente (Ver Figura 3)</p>
+	<br />
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_request.png" border="0" />
+	<p>Figura 3</p></div>
+	<br/><br/>
+	<div>
+	Donde:
+	  <ul>
+	      <li><b style="font-style: italic;">Servidor Remoto:</b> La dirección IP del servidor remoto al que solicita conexión.</li>
+	      <li><b style="font-style: italic;">Clave secreta del Host Remoto</b> Esta es la clave secreta del servidor al que solicitamos conexión y puede ser obtenida a través del módulo "Clave del Servidor" en el servidor remoto. Esta clave también puede ser enviada por correo electrónico.</li>
+	      <li><b style="font-style: italic;">Comentario:</b> Comentarios sobre la nueva solicitud.</li>
+	  </ul>
+	</div>
+
+<p align="Justify">Una vez haya solicitado conexión, usted verá el estado <b><i>Esperando Respuesta...</i></b> en la lista de servidores remotos como se muestra en la figura 4. De esta manera quedamos a la espera de que el servidor remoto acepte la solicitud.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_remote_2.png" border="0" />
+	<p>Figura 4</p></div>
+	<br/><br/>
+<p align="Justify">Si el servidor remoto acepta la solicitud el estado cambiará a <b><i>Conectado</b></i> en ambos servidores (Ver Figura 5). Ahora podrá realizar algunas acciones como "Ver" los detalles de la conexión (Ver Figura 6) y "Desconectar".</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_status_1.png" border="0" />
+	<p>Figura 5</p></div>
+	<br/><br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_view_1.png" border="0" />
+	<p>Figura 6</p></div>
+	<br/><br/>
+<p align="Justify">Si el servidor remoto rechaza la solicitud, el estado se mostrá como <b><i>Rechazada</b></i> (Ver Figura 7).</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_status_2.png" border="0" />
+	<p>Figura 7</p></div>
+	<br/><br/>
+	<b style="font-size: 20px;">Recepción de solicitud en el servidor remoto</b>
+
+	<p align="Justify">Cuando un servidor remoto nos envía una solicitud para establecer conexión con nuestro servidor local tenemos la opción de Aceptarla o Rechazarla. La figura 8 muestra una solicitud de un servidor remoto.</p>
+	<br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_request_2.png" border="0" />
+	<p>Figura 8</p></div>
+	<br/><br/>
+	<div>
+	Donde:
+	  <ul style="list-style-type: none;">
+	      <li><b>Servidor Remoto:</b> Este es el servidor que está enviando la solicitud de conexión a nuestro servidor local. </li>
+	      <li><b>Estado de Conexión:</b> Este campo informa que hay una solicitud de conexión esperando por nuestra autorización. Para ver detalles del servidor remoto haga click en el link "Nueva Solicitud de conexión" (Ver figura 9).</li>
+	      <li><b>Acciones:</b> Tenemos la opción de Aceptar o Rechazar la solicitud.</li>
+	  </ul>
+	</div>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_view_2.png" border="0" />
+	<p>Figura 9</p></div>
+	<br/><br/>
+	<br/>
+	<b style="font-size: 20px;">Eliminar conexión</b>
+
+	<p align="Justify">Para eliminar una solicitud de conexión sólo seleccione la solicitud de la lista y haga click en el botón "Eliminar Seleccionado" (Ver Figura 10).</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_delete.png" border="0" />
+	<p>Figura 10</p></div>
+	<br/><br/>
+    </body>
+</html>

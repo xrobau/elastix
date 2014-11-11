@@ -74,5 +74,10 @@ fi
 %{_datadir}/elastix/module_installer/*
 
 %changelog
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Providers Accounts: For each module listed here the english help file 
+  was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6360]
+
 * Fri Aug 03 2012 Alberto Santos <asantos@palosanto.com> 2.3.0-1
 - Initial version.

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <menulist>
+    <menuitem menuid="developer"      desc="Developer"      parent=""          module="no"  link="" order="10"></menuitem>
+    <menuitem menuid="build_module"   desc="Build Module"   parent="developer" module="yes" link="" order="1"></menuitem>
+    <menuitem menuid="delete_module"  desc="Delete Module"  parent="developer" module="yes" link="" order="2"></menuitem>
+    <menuitem menuid="language_admin" desc="Language Admin" parent="developer" module="yes" link="" order="3"></menuitem>
+  </menulist>
+</module>

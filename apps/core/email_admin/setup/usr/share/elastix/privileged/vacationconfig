@@ -50,7 +50,7 @@ function create_cron()
 {
     $file = "/etc/cron.d/vacations";
     $status = touch("/etc/cron.d/vacations");
-    $content = "59 00 * * *  root /usr/bin/php -q /var/www/elastixdir/scripts/disable_vacations.php\n";
+    $content = "59 00 * * *  root /usr/bin/php -q /var/www/disable_vacations.php\n";
     if($status)
 	$status = file_put_contents($file, $content);
     if(!$status)

@@ -1,0 +1,123 @@
+#!/usr/bin/php
+<?php
+
+require_once 'Console/Getopt.php';
+
+$opt = Console_Getopt::getopt($argv, '', array(
+    'start',    // Start collectd service
+    //'reload',   // Stop and start collectd service
+    'stop',     // Stop collectd service
+    'restart',  // Restart collectd service
+    'config',   // Configure collectd options
+    'savesk=',   // Save server key on file
+    'getsk',    // Get server key from file
+));
+
+if (PEAR::isError($opt)) error_exit($opt->getMessage()."\n");
+validateOptions($opt);
+foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--start':
+        exit(action_start($opt) ? 0 : 1);
+    case '--reload':
+        exit(action_reload($opt) ? 0 : 1);
+    case '--stop':
+        exit(action_stop($opt) ? 0 : 1);
+    case '--getsk':
+        exit(action_get_server_key($opt));
+    case '--savesk':
+         exit(action_set_server_key($opt) ? 0 : 1);
+}
+error_exit("No action specified (--start or --stop or --reload)\n");
+
+function error_exit($sMsg, $errorcode = 1){
+    fwrite(STDERR, $sMsg);
+    exit($errorcode);
+}
+
+// Parse and validate known command-line options
+function validateOptions($opt){
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--savesk':
+        $regs = NULL;
+        if (!preg_match('@^[0-9A-z\.#\$\w]+$@', $option[1], $regs)){
+            error_exit('Option '.$option[0].": Invalid Server Key '".$option[1]."'\n");
+        }
+        break;
+    }
+}
+
+// Starts collect and marks it for autostart. Returns TRUE on success.
+function action_start($opt){
+    $output = $ret = NULL;
+    if (!file_exists('/var/run/collectdmon.pid')) {
+        exec('/sbin/service collectd start', $output, $ret);
+        if ($ret != 0) return FALSE;
+    }
+    exec('/sbin/chkconfig --level 235 collectd on', $output, $ret);
+    return ($ret == 0);
+}
+// Stops collect and removes it from autostart. Returns TRUE on success
+function action_stop($opt){
+    $output = $ret = NULL;
+    if (file_exists('/var/run/collectdmon.pid')) {
+        exec('/sbin/service collectd stop', $output, $ret);
+        if ($ret != 0) return FALSE;
+    }
+    exec('/sbin/chkconfig --level 235 collectd off', $output, $ret);
+    return ($ret == 0);
+}
+
+// Starts collect and marks it for autostart. Returns TRUE on success.
+function action_reload($opt){
+    $output = $ret = NULL;
+    if (!file_exists('/var/run/collectdmon.pid')) {
+        exec('/sbin/service collectd reload', $output, $ret);
+        if ($ret != 0) return FALSE;
+    }
+    return TRUE;
+}
+
+// Read server key on file configuration. Return string
+function action_get_server_key($opt){
+    require_once '/var/www/html/modules/setup_monitor/libs/parseFile.class.php';
+    $conf_path_file = '/etc/collectd.conf';
+
+    $opReadFile = parseFile::NO_DEFAULT | parseFile::SECTIONS | parseFile::COLLECT_REPEATED;
+    $oFile = new parseFile($conf_path_file, $opReadFile, array(
+        'headers' => array(
+            'start' =>'^\s*<(.+\s.+)>\s*$',
+            'end'   =>'^#?\s*</.+\s*>\s*$',
+        ),
+    ));
+    //Si encuentra que la clave del servidor elastix no coincide forza la bandera para hacer el cambio en el archivo.
+    $k_write_http = '';
+    if($oFile->offsetExists('Plugin write_http'))       $k_write_http = 'Plugin write_http';
+    elseif($oFile->offsetExists('Plugin "write_http"')) $k_write_http = 'Plugin "write_http"';
+    $arr_data = $oFile[$k_write_http];
+    if('' != $k_write_http && preg_match('@https?:\/\/(cloud\.elastix\.org|107\.21\.106\.155)/mon\.php\?sk=(.+)"@',key($arr_data),$m))
+        return trim($m[2]);
+    return '';
+}
+
+// Write server key on file configuration. Return TRUE on success
+function action_set_server_key($opt){
+    $conf_path_file = '/etc/collectd.conf';
+
+    foreach ($opt[0] as $option) switch ($option[0]) {
+    case '--savesk':
+        $file = file_get_contents($conf_path_file);
+        $newData = preg_replace('@(<URL "http)s?(:\/\/)(cloud\.elastix\.org|107\.21\.106\.155)(/mon\.php\?sk=).*(">)@','${1}s${2}cloud.elastix.org${4}'.$option[1].'$5',$file);
+
+        if(preg_match('@^x86_64$@',php_uname('m')))
+            $newData = preg_replace('@(Exec ".+" "/usr/)lib(/collectd/plugins/elastixcalls.pl")@','${1}lib64${2}',$newData);
+
+        $fp = fopen($conf_path_file, 'w+'); //Overwrite config file
+        if ($fp) {
+            fwrite($fp,$newData);
+            fclose($fp);
+            return TRUE;
+        }
+        break;
+    }
+    return FALSE;
+}

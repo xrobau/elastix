@@ -58,11 +58,11 @@ class paloSantoReportsBreak
      */
     function getReportesBreak($fecha_init,$fecha_end)
     {
-        if (!ereg('^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$', $fecha_init)) {
+        if (!preg_match('/^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$/', $fecha_init)) {
             $this->errMsg = '(internal) Invalid start date, expected yyyy-mm-dd';
             return NULL;
         }
-        if (!ereg('^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$', $fecha_end)) {
+        if (!preg_match('/^[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}$/', $fecha_end)) {
             $this->errMsg = '(internal) Invalid end date, expected yyyy-mm-dd';
             return NULL;
         }

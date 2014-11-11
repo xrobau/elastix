@@ -1,0 +1,13 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "Eliminar Módulo" permite eliminar cualquier módulo en Elastix. Tenga en cuenta que si desea eliminar un módulo primero debe eliminar los submódulos en caso de tener, para que sea borrado completamente.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_delete_module.png" border="0" />
+<p>Figura 1</p><br/>
+
+</body>
+</html>

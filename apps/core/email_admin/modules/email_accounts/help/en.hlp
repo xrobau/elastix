@@ -1,0 +1,54 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>The option “Accounts” of the Menu “Email” in Elastix lets us view and configure the email accounts for each of the domains specified in the server. Select a domain to see the existing accounts.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_accounts_list.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+
+<h3>View, Edit and Delete</h3>
+
+<p>Clicking on the name of the account will bring us to a screen that shows the data of the account.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_account_view.png" border="0" />
+<p>Figure 2</p></div>
+<br />
+
+<p>Here you can Edit or Delete the account. The name of the account can not be modified.</p>
+
+<h3>Create an Account</h3>
+
+<p>To add a new account, select the domain under which it will be created and click on the “Create Account” button. A form will appear in which you will input the information for the following fields:</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_account_new.png" border="0" />
+<p>Figure 3</p></div>
+<br />
+
+<table class="inline">
+  <tr><th>Name</th><th>Description</th>
+  </tr>	  
+  <tr>
+    <td>Email Address</td><td>This is the text that comes before the @ symbol</td>
+  </tr>
+  <tr>
+    <td>Quota</td><td>The maximum space that this email account can use for the storage of emails on the server. The space is measured in kilobytes, so please be aware of this when the quota amounts are assigned for each user.</td>
+  </tr>
+  <tr>
+    <td>Password</td><td>The password of the email account</td>
+  </tr>
+  <tr>
+    <td>Retype password</td><td>Confirmation of the password of the email account</td>
+  </tr>
+
+</table>
+<br />
+<br />
+</body>
+</html>

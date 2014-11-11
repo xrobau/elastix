@@ -27,15 +27,10 @@
   +----------------------------------------------------------------------+
   $Id: sampler.php,v 1.2 2007/07/07 22:50:40 admin Exp $ */
 
-$elxPath="/usr/share/elastix";
-// /usr/share/elastix/ directorio que contiene las librerias del sistema
-//
-ini_set('include_path',dirname($_SERVER['SCRIPT_FILENAME']).":$elxPath:".ini_get('include_path'));
-
-require_once("libs/misc.lib.php");
-require_once("configs/default.conf.php");
-require_once("libs/paloSantoSampler.class.php");
-require_once("libs/paloSantoDB.class.php");
+require_once("/var/www/html/libs/misc.lib.php");
+require_once("/var/www/html/configs/default.conf.php");
+require_once("/var/www/html/libs/paloSantoSampler.class.php");
+require_once("/var/www/html/libs/paloSantoDB.class.php");
 
 $oSampler = new paloSampler();
 
@@ -51,15 +46,15 @@ $counter_channels_h323 = 0;
 $counter_channels_local = 0;
 
 foreach($arrSalida as $linea) {
-    if(eregi("^DAHDI/", $linea)) {
+    if(preg_match("#^DAHDI/#i", $linea)) {
         $counter_channels_dahdi++;
-    } else if(eregi("SIP", $linea)) {
+    } else if(preg_match("/SIP/i", $linea)) {
         $counter_channels_sip++;
-    } else if(eregi("IAX2", $linea)) {
+    } else if(preg_match("/IAX2/i", $linea)) {
         $counter_channels_iax++;
-    } else if(eregi("h323", $linea)) {
+    } else if(preg_match("/h323/i", $linea)) {
         $counter_channels_h323++;
-    } else if(eregi("Local", $linea)) {
+    } else if(preg_match("/Local/i", $linea)) {
         $counter_channels_local++;
     } else if(preg_match("/^([[:digit:]]+)[[:space:]]+active calls?/", $linea, $arrReg)) {
         $simCalls = $arrReg[1];

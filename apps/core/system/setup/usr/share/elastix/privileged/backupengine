@@ -163,9 +163,15 @@ $BACKUP_PLAN = array(
                 ),
             ),
         ),
-        'as_moh'            =>  array(
+        'as_mohmp3'         =>  array(
             'desc'          =>  'MOH',
             'components'    =>  array(
+                array(
+                    'type'          =>  'dir',
+                    'parentdir'     =>  '/var/lib/asterisk',
+                    'dirname'       =>  'mohmp3',
+                    'backupfile'    =>  'var.lib.asterisk.mohmp3.tgz',
+                ),
                 array(
                     'type'          =>  'dir',
                     'parentdir'     =>  '/var/lib/asterisk',
@@ -272,9 +278,17 @@ $BACKUP_PLAN = array(
         'ep_db'             =>  array(
             'desc'          =>  'Database',
             'components'    =>  array(
+                // The database endpoint.db is now obsolete
+                /*
                 array(
                     'type'          =>  'sqlitedb',
                     'path'          =>  '/var/www/db/endpoint.db',
+                ),
+                */
+                array(
+                    'type'      =>  'mysqldb',
+                    'database'  =>  'endpointconfig',
+                    'backupfile'=>  'endpointconfig_mysql.tgz',
                 ),
             ),
         ),

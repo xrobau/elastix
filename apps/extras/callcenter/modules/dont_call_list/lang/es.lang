@@ -42,7 +42,7 @@ $arrLangModule=array(
 "Result"=>"Resultado",
 "Load File"=>"Cargar Archivo",
 "Please select any file"=>"Por favor, elija un archivo",
-"Please enter a number phone"=>"Por favor, ingrese un número telefónico",
+"Please enter a number phone"=>"Por favor, ingrese un numero telefónico",
 "Number phone is not numeric value"=>"El número de teléfono no es un valor numérico válido",
 "Add Number"=>"Agregar Número",
 "the number already exists"=>"El número de teléfono ya existe",
@@ -50,6 +50,8 @@ $arrLangModule=array(
 "Inactive" => "Inactivo",
 "Desactivate"=>"Desactivar",
 "Activate"=>"Activar",
+'Maximum upload size: %d Mb' => 'Longitud máxima de archivo: %d Mb',
+'Are you sure to remove selected DNC?' => '¿Está seguro de remover los DNC seleccionados?',
 );
 
 

@@ -121,13 +121,13 @@ class paloSantoFoneBridge {
             $arrValores['existe_file_redfone'] = true;
             while ($tupla = fgets($hArchivo, 4096))
             {
-                if(ereg("fb[ |=]*(.*)", $tupla, $regs))
+                if(preg_match("/fb[ |=]*(.*)/", $tupla, $regs))
                     $arrValores['phone_bridge_ip'] = $regs[1];
-                else if(ereg("port[ |=]*(.*)", $tupla, $regs))
+                else if(preg_match("/port[ |=]*(.*)/", $tupla, $regs))
                     $arrValores['port_for_TDMoE'] = $regs[1];
-                else if(ereg("server[ |=]*(.*)", $tupla, $regs))
+                else if(preg_match("/server[ |=]*(.*)/", $tupla, $regs))
                     $arrValores['server_mac'] = $regs[1];
-                else if(ereg("^[[:space:]]*priorities[ |=]*(.*)", $tupla, $regs)){
+                else if(preg_match("/^[[:space:]]*priorities[ |=]*(.*)/", $tupla, $regs)){
                     $arrPriorities = explode(",",$regs[1]);
                     $arrValores['priority1'] = $arrPriorities[0];
                     $arrValores['priority2'] = $arrPriorities[1];
@@ -140,28 +140,28 @@ class paloSantoFoneBridge {
                         $arrValores['timing_priority'] = "by_spans";
                 }
 
-                else if(ereg("#SPAN ([[:digit:]]) ([E|T]1)", $tupla, $regs)){
+                else if(preg_match("/#SPAN ([[:digit:]]) ([E|T]1)/", $tupla, $regs)){
                     $contSpan = $regs[1];
                     $indice = "span". $contSpan ."_type";
                     $arrValores[$indice] = $regs[2];
                 }
-                else if(ereg("framing[ |=]*(.*)", $tupla, $regs)){
+                else if(preg_match("/framing[ |=]*(.*)/", $tupla, $regs)){
                     $indice = "span". $contSpan ."_framing";
                     $arrValores[$indice] = $regs[1];
                 }
-                else if(ereg("encoding[ |=]*(.*)", $tupla, $regs)){
+                else if(preg_match("/encoding[ |=]*(.*)/", $tupla, $regs)){
                     $indice = "span". $contSpan ."_encoding";
                     $arrValores[$indice] = $regs[1];
                 }
-                else if(ereg("(crc4)", $tupla, $regs)){
+                else if(preg_match("/(crc4)/", $tupla, $regs)){
                     $indice = "span". $contSpan ."_extra";
                     $arrValores[$indice] = $regs[1];
                 }
-                else if(ereg("(loopback)", $tupla, $regs)){
+                else if(preg_match("/(loopback)/", $tupla, $regs)){
                     $indice = "span". $contSpan ."_extra";
                     $arrValores[$indice] = $regs[1];
                 }
-                else if(ereg("(rbs)", $tupla, $regs)){
+                else if(preg_match("/(rbs)/", $tupla, $regs)){
                     $indice = "span". $contSpan ."_extra";
                     $arrValores[$indice] = $regs[1];
                 }
@@ -203,15 +203,15 @@ class paloSantoFoneBridge {
             $tmpError['head'] = $arrLang['ERROR'];
             $tmpError['body'] = $arrLangModule['In command fonulator']." \"$fonulatorCommand $path\"";
 
-            if(ereg("Bad token in configuration file on line ([[:digit:]]+)",$arrConsole[0],$arrToken)){
+            if(preg_match("/Bad token in configuration file on line ([[:digit:]]+)/",$arrConsole[0],$arrToken)){
                 $tmpError['head'] = $arrLangModule['Bad token in configuration file on line']." {$arrToken[1]}";
                 $tmpError['body'] = $arrLangModule['treeParser: Bad or Unknown Configuration Token'];
             }
-            else if(ereg("Error opening configuration file.",$arrConsole[0],$arrToken)){
+            else if(preg_match("/Error opening configuration file./",$arrConsole[0],$arrToken)){
                 $tmpError['head'] = $arrLangModule['Error opening configuration file.'];
                 $tmpError['body'] = $arrLangModule['fopen: No such file or directory']." $path";
             }
-             else if(ereg("statusInitalize: Internal foneBRIDGE library error",$arrConsole[1],$arrToken)){
+             else if(preg_match("/statusInitalize: Internal foneBRIDGE library error/",$arrConsole[1],$arrToken)){
                 $tmpError['head'] = $arrLangModule['Connection Error'];
                 $tmpError['body'] = $arrLangModule['Connection to device timed out! Check network or device power.'];
             }

@@ -122,6 +122,5 @@ $arrLangModule=array(
 "Manage Trunks" => "Gérer les trunks",
 "Manage Queues" => "Gérer les files d'attente",
 "Manage Forms" => "Gérer les formulaires",
-
 );
 ?>

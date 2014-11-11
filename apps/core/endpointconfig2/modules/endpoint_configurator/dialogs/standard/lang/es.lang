@@ -1,0 +1,107 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Information" => "Información",
+    "Custom credentials" => "Accesos personalizados",
+    "Custom endpoint properties" => "Propiedades adicionales de endpoint",
+    "Static configuration requires the following network parameter" => "Se requiere el siguiente parámetro para configuración estática",
+    "The following network parameter is not a valid IPv4 address" => "El siguiente parámetro de red no es una dirección IPv4 válida",
+    "Custom endpoint property collides with the following read-only property" => "Una propiedad personalizada de endpoint colisiona con la siguiente propiedad inmutable",
+    "Custom endpoint property collides with the following read-write property" => "Una propiedad personalizada de endpoint colisiona con la siguiente propiedad mutable",
+    "Malformed request" => "Petición mal formada",
+    "Account is missing required property" => "Falta un parámetro requerido para cuenta",
+    "Unsupported tech" => "Tecnología no soportada",
+    "Duplicate account" => "Cuenta duplicada",
+    "(internal) Failed to check model" => "(internal) Fallo al revisar modelo",
+    "Endpoint not found" => "No se encuentra endpoint",
+    "Model not set for endpoint" => "Modelo no asignado para endpoint",
+    "(internal) Failed to check account limit" => "(internal) Fallo al revisar límite de cuentas",
+    "Maximum number of accounts exceeded" => "Se excede número máximo de cuentas",
+    "Endpoint does not support static IP address" => "Endpoint no soporta dirección IP estática",
+    "Endpoint does not support dynamic IP address" => "Endpoint no soporta dirección IP dinámica",
+    "(internal) Failed to load model properties" => "(internal) Fallo al cargar propiedades de modelo",
+    "Maximum number of accounts exceeded for tech" => "Se excede número máximo de cuentas por tecnología",
+    "(internal) Failed to remove old properties" => "(internal) Fallo al quitar propiedades anteriores",
+    "(internal) Failed to insert new property" => "(internal) Fallo al insertar propiedad nueva",
+    "(internal) Failed to read available accounts" => "(internal) Fallo al leer cuentas disponibles",
+    "Account not found" => "No se encuentra cuenta",
+    "Account claimed by another endpoint" => "Cuenta asignada a otro endpoint",
+    "(internal) Failed to remove old account associations" => "(internal) Fallo al quitar asociación anterior de cuenta",
+    "(internal) Failed to insert account association" => "(internal) Fallo al insertar nueva asociación de cuenta",
+    "(internal) Failed to insert account property" => "(internal) Fallo al insertar propiedad de cuenta",
+    "(internal) Failed to update modification time" => "(internal) Fallo al actualizar fecha de modificación",
+    "(unknown)" => "(desconocido)",
+    "Yes" => "Sí",
+    "No" => "No",
+    "(unknown/not detected)" => "(desconocido/no detectado)",
+    "Maximum number of SIP accounts" => "Número máximo de cuentas SIP",
+    "Maximum number of IAX2 accounts" => "Número máximo de cuentas IAX2",
+    "MAC" => "MAC",
+    "This flag is set if phone can get an IP address via DHCP" => "Esta bandera indica si el teléfono puede obtener su dirección IP vía DHCP",
+    "Dynamic IP supported" => "IP dinámica soportada",
+    "This flag is set if phone can be configured to use a static IP address" => "Esta bandera indica si el teléfono puede ser configurado con una dirección IP estática",
+    "Static IP supported" => "IP estática soportada",
+    "This flag is set if phone supports QoS with VLAN" => "Esta bandera indica si el teléfono soporta QoS con VLAN",
+    "VLAN supported" => "Soporte de VLAN",
+    "This flag is set if phone can query its configuration without cooperation of DHCP" => "Esta bandera indica si el teléfono puede obtener su configuración sin cooperación de DHCP",
+    "Static provisioning supported" => "Soporte de provisionamiento estático",
+    "Unassigned accounts" => "Cuentas sin asignar",
+    "Assigned accounts" => "Cuentas asignadas",
+    "Properties for" => "Propiedades para",
+    "No account selected." => "No hay cuenta elegida.",
+    "Dynamic IP (DHCP)" => "IP dinámica (DHCP)",
+    "Static IP" => "IP estática",
+    "Static network attributes" => "Atributos de red estática",
+    "IP" => "IP",
+    "Network mask" => "Máscara de red",
+    "Gateway" => "Pasarela",
+    "Primary DNS" => "DNS primario",
+    "Secondary DNS" => "DNS secundario",
+    "Telnet username" => "Usuario para Telnet",
+    "Telnet password" => "Contraseña para Telnet",
+    "HTTP username" => "Usuario para HTTP",
+    "HTTP password" => "Contraseña para HTTP",
+    "SSH username" => "Usuario para SSH",
+    "SSH password" => "Contraseña para SSH",
+    "DIALOG_STANDARD_PROPERTIES_MESSAGE" =>
+        "Cualquier configuración adicional requerida para la configuración adecuada ".
+        "del endpoint que no sea cubierta por otros formularios debe ingresarse ".
+        "aquí. Tenga presente que no todas las implementaciones de los fabricantes ".
+        "soportan todas las propiedades posibles. Cualquier propiedad no reconocida ".
+        "será ignorada. Sin embargo, propiedades conocidas con valores mal formados ".
+        "pueden impedir la configuración adecuada del endpoint. Todas las propiedades ".
+        "y valores son sensibles a mayúsculas.",
+    "Property" => "Propiedad",
+    "Value" => "Valor",
+    "Invalid endpoint ID" => "ID de endpoint inválido",
+    'Registered at' => 'Registrado en',
+    'This account is in use by an unsupported/unscanned host' => 'Esta cuenta está en uso por un host no soportado/escaneado',
+);
+?>

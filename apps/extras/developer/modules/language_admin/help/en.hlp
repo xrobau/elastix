@@ -1,0 +1,22 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">The option "Language Admin" of the module "Developer" lets us manage the languages in the modules of Elastix. Here we can see all the languages defined for each module and a list of words with their translation in the desired language. You can add a new language for the module and also modify the translation of an existing one. Use the filter to select the module and the language to modify and save any change using the button "Save All" (See Figure 1).</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_language.png" border="0" />
+<p>Figure 1</p></div>
+<h2>Add</h2>
+<p align="Justify">The option "New Language" lets us add a new language for the modules according to the format shown in Figure 2.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_language_new.png" border="0" />
+<p>Figure 2</p></div>
+<p align="Justify">The option "New Translate" lets us translate a module word by word as you can see in the Figure 3. First you have to select the module and the language. Then enter the word in English and its translation and click on the button "Save".</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_language_translate.png" border="0" />
+<p>Figure 3</p></div>
+
+
+
+</body>
+</html>

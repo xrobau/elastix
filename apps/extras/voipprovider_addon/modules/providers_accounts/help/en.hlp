@@ -1,0 +1,24 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify"></p>
+
+        <!-- Form to add images -->
+
+<p align="Justify">The module "Providers Account" from tab menu "VoIP Provider" of Elastix allows creating trunks with any provider using SIP or IAX depending on the provider. The figure 1 shows a list of all the existing accounts. Here you can enable, disable and edit an account, as well as create and delete accounts. Use the filter to look for a specific account (See Figure 1).</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_voip_provider2.png" border="0" />
+        <p>Figure 1</p></div>
+<p align="Justify">To <b>Edit</b> an account click on the link "Edit" located under the column Edit from the list. You can also <b>Enable</b> or <b>Disable</b> an account by clicking on the link under the column "Status". To <b>Delete</b> an account, select the checkbox of the account from the list and click on "Delete".</p>
+<p align="Justify">You can download the list of accounts in different formats such as CSV, XLS and PDF.</p>
+        <h2>Create a new Account</h2>
+<p align="Justify">The parameters to configure are divided in 2 categories: "General Setting" and "PEER Setting".</p>
+<p align="Justify">Choose the VoIP Provider from the list in General Settings and fill out the parameters with the information of your account given by your provider. The PEER Settings are already configured but you can check it by clicking on "Advance" checkbox. If your VoIP provider is not in the list, select the option "Custom" (See Figure 2).</p>
+<p align="Justify">Remember that your VoIP Provider must give you all this information in order to add the account correctly in this module.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_voip_provider.png" border="0" />
+	    <p>Figure 2</p></div>
+    </body>
+</html>

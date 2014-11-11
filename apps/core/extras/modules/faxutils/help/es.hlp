@@ -1,0 +1,17 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p>La opción "Utilidades de Fax" nos permite descargar JHylaFax o Winprint Hylafax, que son herramientas que permiten enviar y recibir faxes de una manera fácil y rápida.</p>
+
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_faxutilities.png" border="0" />
+        <p>Figura 1</p></div>
+        <br />
+
+        <p>Para descargar cualquiera de estas utilidades haga click en el link correspondiente a cada uno.</p>
+
+    </body>
+</html>

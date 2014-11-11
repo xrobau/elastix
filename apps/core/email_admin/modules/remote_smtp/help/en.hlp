@@ -1,0 +1,27 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The Module Remote SMTP allows adding a SMTP Server generally used to send messages from a mail client of a different mail server.</p>
+<p>The fields to configure a Remote SMTP Server are:</p>
+<ul>
+    <li><b>Status: </b> Status of connection SMTP Server.</li>
+    <li><b>SMTP Server: </b> Remote email server.</li>
+    <li><b>Domain: </b> Domain of SMTP Server.</li>
+    <li><b>Port: </b> Port to establish the connection with SMTP Server.</li>
+    <li><b>User: </b>Username of email account from SMTP Server.</li>
+    <li><b>Password: </b>Password of email account from SMTP Server</li>
+    <li><b>TLS Enable: </b>To enable certificates of TLS (Transport Layer Security). Some SMTP servers like Gmail requires these certificates.</li>
+</ul>
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_remote-smtp.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+
+</body>
+</html>
+

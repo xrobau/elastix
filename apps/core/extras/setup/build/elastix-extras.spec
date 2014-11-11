@@ -2,16 +2,15 @@
 
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 2
+Version: 2.5.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_2.0.4-4.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
-Requires: yum
+Prereq: elastix-framework >= 2.2.0-18
 
 %description
 Elastix EXTRA 
@@ -23,45 +22,12 @@ Elastix EXTRA
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
-bdir=%{_builddir}/%{modname}
-for FOLDER0 in $(ls -A modules/)
-do
-		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
-		do
-				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
-				do
-					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/$FOLFI
-						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/$FOLFI/
-						fi
-					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-					fi
-				done
-				case "$FOLDER0" in 
-					frontend)
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
-							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						fi
-					;;
-					backend)
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
-							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-						fi	
-					;;
-				esac
-		done
-done
+mkdir -p                   $RPM_BUILD_ROOT/var/www/html/
+mv modules/                $RPM_BUILD_ROOT/var/www/html/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p                   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mv -f setup/xmlservices/   $RPM_BUILD_ROOT/var/www/html/
 mv setup/                  $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml                $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -85,45 +51,87 @@ rm -rf $RPM_BUILD_ROOT
 %preun
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete Extras menus"
-  elastix-menuremove $pathModule/setup/infomodules
+  elastix-menuremove "%{modname}"
 fi
 
 %files
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-/usr/share/elastix/apps/*
 
 %changelog
-* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
-- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
-  SVN history. Bump release in specfile.
+* Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Bumped version and release in specfile.
 
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- ADDED: extras - setup/infomodules.xml/: Within this folder are placed the new
-  xml files that will be in charge of creating the menus for each module.
-  SVN Rev[5857]
+* Mon May 26 2014 Bruno Macias <bmacias@palosanto.com> 2.4.0-5
+- DELETED: extras - framed menu, vtigerCRM was deleted. Now VtigerCRM is a
+  Addons.
 
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: extras - modules: The modules were relocated under the new scheme
-  that differentiates administrator modules and end user modules .
-  SVN Rev[5856]
+* Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Bumped release in specfile.
+
+* Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com> 
+- REMOVED: extras - elastix-extras.spec: Due to SVN commit 5723, the static
+  folder is not part of this module anymore, making unnecessary the creation
+  and its corresponding directory change in the spec file. Uncommenting the
+  source0 %{modname}_%{version}-%{release}.tgz.
+  SVN Rev[6569]
+
+* Wed Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: xmlservices: Remove unused xmlservices directory. This code is Cisco
+  specific, has a very poor implementation and exposes the external addressbook
+  without authentication. This functionality is now better implemented in the
+  new Endpoint Configurator.
+- CHANGED: remove unexplained yum dependency.
+  SVN Rev[6448]
+
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Bumped release in specfile.
+  SVN Rev[6379]
+
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Softphones, Fax Utilities, Instant Messaging: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6350]
 
 * Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Instant Messaging: fix references to uninitialized variables.
   SVN Rev[5811]
 
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Bumped release in specfile.
+  SVN Rev[5786]
+
 * Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
 - REMOVED: Module Downloads, Help files with wrong names were deleted
-  SVN Rev[5730]
+  SVN Rev[5729]
 
 * Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
 - UPDATED: The names of the Downloads module's help files were changed.
-  SVN Rev[5727]
+  SVN Rev[5725]
 
 * Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
 - ADDED: extras modules, Static pages on Donwloads menu, were added as modules.
-  SVN Rev[5724]
+  SVN Rev[5723]
+
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- ADDED: extras modules, Static pages on Donwloads menu, were added as modules.
+  SVN Rev[5722]
+
+* Mon Aug 12 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the description.
+  SVN Rev[5719]
+
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: extras - Build/elastix-extras.spec: Changed Version and Release in 
+  specfile according to the current branch.
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-1
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+  SVN history. Changed release in specfile.
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -138,15 +146,9 @@ fi
   because all of their files get moved to other places.
   SVN Rev[4347]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: In spec file changed Prereq elastix to
-  elastix-framework >= 3.0.0-1
-  SVN Rev[4225]
-
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-1
 - CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-18
-  SVN Rev[3832]
 
 * Mon Jun 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
 - CHANGED: The split function of these modules was replaced by 

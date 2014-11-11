@@ -87,14 +87,14 @@ if ($argc < 2){
    die("Please specify the action and folder path files sqls.\n Usage: {$_SERVER['argv'][0]} install /usr/share/elastix/.../db/  version sql_export\n");
 }
 
-$elxPath="/usr/share/elastix";
-require_once("$elxPath/libs/misc.lib.php");
-require_once("$elxPath/configs/default.conf.php");
+$documentRoot="/var/www/html";
+require_once("$documentRoot/libs/misc.lib.php");
+require_once("$documentRoot/configs/default.conf.php");
 load_default_timezone();
 
 //global variables framework
 global $arrConf;
-require_once("$elxPath/libs/paloSantoConfig.class.php");
+require_once("$arrConf[basePath]/libs/paloSantoConfig.class.php");
 
 $arrActions = array("install","update","delete");
 if(isset($_SERVER['argv'][1]) && in_array($_SERVER['argv'][1],$arrActions)){
@@ -112,8 +112,7 @@ if(isset($_SERVER['argv'][1]) && in_array($_SERVER['argv'][1],$arrActions)){
 
         //Doing the action for each database according to the file db.info
         foreach($data as $key => $db){
-            $prefix=(isset($db['prefix']))?$db['prefix']:"";
-            deleteFileinFirstBoot($key,$action,$prefix);
+            deleteFileinFirstBoot($key,$action);
             if($db["engine"] != "mysql" && $db["engine"] != "sqlite3")
                 echo "Engine $db[engine] is not supported. Aborting action $action in database $key\n";
             else{
@@ -125,9 +124,8 @@ if(isset($_SERVER['argv'][1]) && in_array($_SERVER['argv'][1],$arrActions)){
                 if($success)
                    $result = executeSQL($db,$path_folder,$sql_export,$key,$action,$password);
                 //If any error occur the SQL file will be copy to the path of FirstBoot
-                if(!$success || !$result){
-                    $result = copyToFirstBoot($path_folder,$key,$action,$prefix);
-                }
+                if(!$success || !$result)
+                    $result = copyToFirstBoot($path_folder,$key,$action);
             }
         }
         if($result)
@@ -157,7 +155,6 @@ return 1;
  * @param  string   $version        Version for action update
  * @param  string   $ignore_backup  if its boolean value is True the database is not renamed, if False it is renamed
  * @return bool     True if everything was OK, False if an error occurs
- * 
  */
 function createSQLFile($action, $path_folder, $dbName, $engine, $sql_export, $password, $version, $ignore_backup)
 {
@@ -165,7 +162,6 @@ function createSQLFile($action, $path_folder, $dbName, $engine, $sql_export, $pa
     $successfull = true;
     if(databaseExists($engine,$dbName) && $action == "install" && $sql_export == false && !(bool)$ignore_backup)
         $successfull = renameDatabase($engine,$dbName,$password,$path_folder);
-
     switch($action){
         case "install":
         case "delete":
@@ -289,7 +285,6 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
 {
     if($sql_export==false){
         if(file_get_contents("$path_folder/1_sqlFile.sql") == ""){
-	$overwritten=(isset($data['overwritten']))?$data['overwritten']:'yes';
             echo "Nothing to be done in database $dbName.\n";
             unlink("$path_folder/1_sqlFile.sql");
             return true;
@@ -305,7 +300,7 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
 		   $db = "";
                 $command = "mysql -uroot \"-p$password\" $db < $path_folder/1_sqlFile.sql";
 	    }
-            echo "Executing database 1_sqlFile.sql for database $dbName ... \n";
+            echo "Executing $command ... \n";
             exec($command,$arrConsole,$status);
             echo "RETURN $status\n";
             if($status != 0){
@@ -343,15 +338,10 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
  * @param  string   $action         Can be 'install' 'update' or 'delete'
  * @return bool     True if the SQL file was successfully copied, False if an error occurs
  */
-function copyToFirstBoot($path_folder, $dbName, $action, $prefix)
+function copyToFirstBoot($path_folder, $dbName, $action)
 {
-    if($prefix!=''){
-        $file="/var/spool/elastix-mysqldbscripts/$prefix"."_$dbName"."_$action.sql";
-    }else{
-        $file="/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql";
-    }
-    echo "Copying $path_folder/1_sqlFile.sql to $file\n";
-    exec("cp $path_folder/1_sqlFile.sql $file",$arrConsole,$status);
+    echo "Copying $path_folder/1_sqlFile.sql to /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql\n";
+    exec("cp $path_folder/1_sqlFile.sql /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql",$arrConsole,$status);
     echo "RETURN $status.\n";
     if($status != 0){
         echo "Error, Could not copy the file $path_folder/1_sqlFile.sql to FirstBoot.\n";
@@ -367,16 +357,11 @@ function copyToFirstBoot($path_folder, $dbName, $action, $prefix)
  * @param  string   $dbName         Name of the Database
  * @param  string   $action         Can be 'install' 'update' or 'delete'
  */
-function deleteFileinFirstBoot($dbName,$action,$prefix)
+function deleteFileinFirstBoot($dbName,$action)
 {
-    if($prefix!=''){
-        $file="/var/spool/elastix-mysqldbscripts/$prefix"."_$dbName"."_$action.sql";
-    }else{
-        $file="/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql";
-    }
-    if(file_exists($file)){
-        echo "Removing file $file\n";
-        unlink($file);
+    if(file_exists("/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql")){
+        echo "Removing file /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql\n";
+        unlink("/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql");
     }
 }
 

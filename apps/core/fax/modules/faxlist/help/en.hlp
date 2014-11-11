@@ -1,0 +1,25 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>The option “Virtual Fax List” of the Menu “FAX” in Elastix lets us verify the list of all the virtual faxes, including the status of each one.</p>
+
+<div class="hlp_figureS"><img src="../modules/{$node_id}/images/hlp_fax_virtual_list.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+
+<p>Also, clicking on the virtual fax's name displays its information:</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_fax_virtual_view.png" border="0" />
+<p>Figure 2</p></div>
+<br />
+
+<p>Here you can Edit and Delete the Virtual Fax.</p>
+
+</body>
+</html>

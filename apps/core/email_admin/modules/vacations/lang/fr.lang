@@ -1,0 +1,72 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.4-23                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.1 2011-06-07 12:06:29 Eduardo Cueva ecueva@palosanto.com Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Vacations" => "Absences",
+"Email Address" => "Adresse email",
+"Subject" => "Sujet",
+"Body" => "Corps",
+"Operation cannot be done. Please try Again." => "L'opération ne peut être effectuée. Veuillez réessayer.",
+"Operation have been succesful." => "L'opération a bien été effectuée.",
+"Succesful" => "Succès",
+"Error" => "Erreur",
+"Disable Message Vacations" => "Désactiver les messages d'absence",
+"Enable Message Vacations" => "Activer les messages d'absence",
+"Alert" => "Alerte",
+"Cyrus Imap is down" => "Cyrus Imap est inactif",
+"Cyrus Imap is up" => "Cyrus Imap est actif",
+"Error: Impossible remove " => "Erreur: Suppression impossible ",
+"Error: Impossible upload " => "Erreur: Chargement impossible ",
+"Error: Impossible activate " => "Erreur: Activation impossible ",
+"Email's Vacations have been enabled" => "Les messages d'absence ont été activés",
+"Email's Vacations have been disabled" => "Les messages d'absence ont été désactivés",
+"Choose other email account" => "Choisir un autre compte mail",
+"user isn't allowed to view this content." => "L'utilisateur n'est pas autorisé à visualiser ce contenu.",
+"Account" => "Compte",
+"Status" => "Statut",
+"Email is not correct. Please write the email assigned to your elastix account." => "L'email est invalide. Veuillez indiquer l'adresse email associée à votre compte Elastix.",
+"Emails Account" => "Comptes emails",
+"Vacations Activated" => "Absences activées",
+"Auto-Reply: Out of the office" => "Réponse automatique : Absence du bureau",
+"I will be out of the office until {END_DATE}.\n\n----\nBest Regards." => "Je serai absent du bureau jusqu'au {END_DATE}.\n\n----\nCordialement.",
+"yes" => "oui",
+"no" => "non",
+"Please contact your administrator if your user does not have an email account otherwise add it to System->User management->Users" => "Veuillez contacter l'administrateur si votre utilisateur ne possède pas de compte mail ou ajoutez-le dans <a href='?menu=userlist'>Système->Utilisateurs->Utilisateurs</a>",
+"Email is empty or is not correct. Please write the email account." => "L'adresse email est vide ou incorrecte. Veuillez indiquer un compte email.",
+"Initial Date" => "Date de début",
+"End Date" => "Date de fin",
+"TO" => "au",
+"FROM" => "Du",
+"Date" => "Date",
+"End date should be greater than the initial date" => "La date de fin doit être ultérieure à la date de début",
+"day(s)" => "jour(s)",
+"Period" => "Période",
+);
+?>
+

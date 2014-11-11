@@ -1,0 +1,15 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>La opción "Cola de Fax" en Elastix muestra una lista de trabajos pendientes para enviar. Todos los trabajos cuentan con un ID y un estado de esta manera se los puede monitorear. Si desea cancelar un trabajo sólo selecciónelo y haga click en el botón "Cancelar trabajo".</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_faxqueue.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+<br />
+</body>
+</html>

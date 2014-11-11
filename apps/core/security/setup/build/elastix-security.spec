@@ -2,15 +2,16 @@
 
 Summary: Elastix Security 
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 4
+Version: 2.5.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-6.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.3.0-5
+Prereq: freePBX >= 2.8.1-2
 Prereq: iptables
 Requires: elastix-system
 Requires: php-mcrypt
@@ -26,38 +27,13 @@ Elastix Security
 rm -rf $RPM_BUILD_ROOT
 
 # Files provided by all Elastix modules
-#mkdir -p    $RPM_BUILD_ROOT%{_localstatedir}/www/html/
+mkdir -p    $RPM_BUILD_ROOT%{_localstatedir}/www/html/
 mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
-#mv modules/ $RPM_BUILD_ROOT%{_localstatedir}/www/html/
+mv modules/ $RPM_BUILD_ROOT%{_localstatedir}/www/html/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT%{_datadir}/elastix/privileged
 rmdir setup/usr/share/elastix/privileged
 
 chmod +x setup/updateDatabase
-
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
-bdir=%{_builddir}/%{modname}
-for FOLDER0 in $(ls -A modules/)
-do
-		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
-		do
-			case "$FOLDER0" in 
-				frontend)
-					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-					fi
-				;;
-				backend)
-					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-						mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-					fi	
-				;;
-			esac
-			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-			mv $bdir/modules/$FOLDER0/$FOLDER1/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-		done
-done
 
 # Crontab for portknock authorization cleanup
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/cron.d/
@@ -81,6 +57,7 @@ rmdir setup/usr/share/elastix setup/usr/share setup/usr
 # that cannot be handled by RPM.
 mkdir -p    $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/   $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
+mv menu.xml $RPM_BUILD_ROOT%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
 
 %pre
 mkdir -p %{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -93,21 +70,7 @@ fi
 pathModule="%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}"
 
 # Run installer script to fix up ACLs and add module to Elastix menus.
-#elastix-menumerge $pathModule/setup/infomodules
-
-service mysqld status &>/dev/null
-res=$?
-if [ $res -eq 0 ]; then
-	#service is up
-	elastix-menumerge $pathModule/setup/infomodules	
-else
-	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
-		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
-		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
-	fi
-fi
-
+elastix-menumerge $pathModule/menu.xml
 pathSQLiteDB="%{_localstatedir}/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
@@ -131,6 +94,8 @@ chown -R asterisk.asterisk /tmp/new_module/%{modname}
 php /tmp/new_module/%{modname}/setup/installer.php
 rm -rf /tmp/new_module
 
+%{_datadir}/elastix/privileged/anonymoussip --conddisable
+
 # Install elastix-portknock as a service
 chkconfig --add elastix-portknock
 chkconfig --level 2345 elastix-portknock on
@@ -143,17 +108,15 @@ pathModule="%{_datadir}/elastix/module_installer/%{name}-%{version}-%{release}"
 
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete Security menus"
-  elastix-menuremove $pathModule/setup/infomodules
+  elastix-menuremove "%{modname}"
 
   echo "Dump and delete %{name} databases"
   elastix-dbprocess "delete" "$pathModule/setup/db"
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
-%{_datadir}/elastix/apps/*
-%{_localstatedir}/www/html/*
 %defattr(-, root, root)
+%{_localstatedir}/www/html/*
 %{_datadir}/elastix/module_installer/*
 %defattr(644, root, root)
 %{_sysconfdir}/cron.d/elastix-portknock.cron
@@ -164,193 +127,205 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
-* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+* Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
+* Wed Oct 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 
-* Thu Nov 28 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Apps/Security: translation in Audit module (spanish)
-  SVN Rev[6203]
+* Wed Jun 04 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- FIXED: fix typo in previous commit
+  SVN Rev[6643]
 
-* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: build - *.spec: An error in the logic of the code was unintentionally
-  placed when saving the elastix's spec files.
-  SVN Rev[6125]
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
+  packages were depreciated many functions, the equivalent functions are
+  updated in the files that use to have the menctioned functions.
+  SVN Rev[6638]
 
-* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: build - *.spec: An extra character was unintentionally placed when
-  saving the elastix's spec files.
-  SVN Rev[6116]
-
-* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfiles with the new form of use
-  elastix-menumerge for each elastix module.
-  SVN Rev[6105]
-
-* Fri Nov 15 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Apps/Security: language help add in sec_ports (spanish -
-  english)
-  SVN Rev[6099]
-
-* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfile with some corrections correspondig
-  to the way of remove tabs in the framework for each elastix module.
-  SVN Rev[5994]
-
-* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
-- DELETED: Tunk - Apps/Security: Was deleted file menu.xml. This file was
-  divided in a set of files that are stored in setup/infomodules
-- ADDED: Tunk - Apps/Security: Was added directory infomodules. This directory
-  store a xml files that are used to create elastix resources
-  SVN Rev[5961]
-
-* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfile with some corrections correspondig
-  to the way of identify and distribute folders to the '/usr/share/elastix/'
-  path and '/var/www/html/' path.
-  SVN Rev[5945]
-
-* Fri Sep 20 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - APPS/PBX: Was made changes in module extensions, trunk,
-  general_settings, general_settings_admin to update parameters that can be
-  configured in sip and iax device
-TRUNK - FRAMEWORK: Was made changes in theme elastixneo to fis somes minors
-  bugs. In addition was made changes in elxpbx schema to create a new menu
-  named manager. This menu is the paren menu of sysdash, organization_manager
-  and user_manager
-TRUNK - APPS/Reports: Was made changes in module CDR report. The funstion of
-  deleted rescord register now can only be performed by superadmin. The filters
-  param was explode in order to permit do more detailed searches.
-TRUNK - APPS: Search can be done using asterisk filter patterns in modules
-  where the filter accept any text
-  SVN Rev[5922]
-
-* Mon Sep 16 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: security - Build/elastix-security.spec: Correction in the current
-  version of this module.
-  SVN Rev[5888]
-
-* Mon Sep 16 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: security - Build/elastix-security.spec: Update specfile with latest
+* Wed Jan 29 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
-  SVN Rev[5887]
+  SVN Rev[6445]
 
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- ADDED: security - setup/infomodules.xml/: Within this folder are placed the
-  new xml files that will be in charge of creating the menus for each module.
-  SVN Rev[5869]
+* Wed Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Advanced Settings: fix the setadminpwd privileged script to modify
+  /etc/freepbx.conf in addition to other known FreePBX files, if it exists.
+  Fixes item 6 of Elastix bug #1831.
+  SVN Rev[6439]
 
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: security - modules: The modules were relocated under the new scheme
-  that differentiates administrator modules and end user modules .
-  SVN Rev[5868]
+* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: sec_advanced_settings module, Message copy right FreePBX was
+  changed.
+  SVN Rev[6423]
 
-* Wed Aug 07 2013 Washington Reyes <wreyes@palosanto.com> 
-- CHANGED: APPS - Core/Security/Modules/sec_weak_keys: code upgrade
-  SVN Rev[5588]
-- CHANGED: APPS - Core/Security/Modules/sec_rules: code upgrade
-  SVN Rev[5587] 
-- CHANGED: APPS - Core/Security/Modules/sec_ports: code upgrade
-  SVN Rev[5586]
-- CHANGED: APPS - Core/Security/Modules/sec_portknock_users: code upgrade
-  SVN Rev[5585]
-- CHANGED: APPS - Core/Security/Modules/sec_portknock_if: code upgrade
-  SVN Rev[5584]
-- CHANGED: APPS - Core/Security/Modules/sec_accessaudit: code upgrade
-  SVN Rev[5583]
-- CHANGED: APPS - Core/Security/Modules/sec_advanced_settings: code upgrade
-  SVN Rev[5582]
+* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com> 
+- UPDATED: sec_advanced_settings module, Message copy right FreePBX was
+  changed.
+  SVN Rev[6422]
 
-* Fri Aug  2 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: security - sec_advanced_settings-index.html,en.lang,es.lang: A
+  correction in the use of trademark FreePBX has made it within the code of
+  this module.
+  SVN Rev[6417]
+
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[6379]
+
+* Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Update to the changelog about the english and spanish help files in
+  the security modules.
+  SVN Rev[6365]
+
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Firewall Rules, Define Ports, Port Knocking Interfaces,
+  Port Knocking Users, Audit, Weak Keys, Advanced Settings: For each module
+  listed here the english help file was renamed to en.hlp and a spanish help
+  file called es.hlp was ADDED. Some help related unnecessary files were deleted.
+  SVN Rev[6364]
+
+* Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Advanced Settings: update jquery.ibutton.js to 1.0.03, fix 
+  potential incompatibilities with jQuery 1.9+
+  SVN Rev[6329]
+
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[5790]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5645]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file fr.lang.
+  SVN Rev[5644]
+
+* Wed Aug 07 2013 Jose Briones <jbriones@palosanto.com> 
+  ADD: Added the translation file es.lang.
+  SVN Rev[5573]
+
+* Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[5561]
+
+* Fri Aug 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Firewall Rules: add new rule for DHCP. Fixes Elastix bug #1645.
   SVN Rev[5504]
 
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - sec_weak_keys/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5282]
-- CHANGED: trunk - sec_rules/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5281]
-- CHANGED: trunk - sec_ports/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5280]
-- CHANGED: trunk - sec_portknock_users/: It was corrected a configuration in
-  the web folder.
-  SVN Rev[5279]
-- CHANGED: trunk - sec_portknock_if/: It was corrected a configuration in the
-  web folder.
-  SVN Rev[5278]
-- CHANGED: trunk - sec_advanced_settings/: It was corrected a configuration in
-  the web folder.
-  SVN Rev[5277]
-- CHANGED: trunk - sec_accessaudit/: It was corrected a configuration in the
-  web folder.
-  SVN Rev[5276]
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_weak_keys. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5469]
 
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - sec_weak_keys/: The svn repository for module sec_weak_keys
-  in trunk (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5195]
-- CHANGED: trunk - sec_rules/: The svn repository for module sec_rules in trunk
-  (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5194]
-- CHANGED: trunk - sec_ports/: The svn repository for module sec_ports in trunk
-  (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5193]
-- CHANGED: trunk - sec_portknock_users/: The svn repository for module
-  sec_portknock_users in trunk (Elx 3) was restructured in order to accomplish
-  a new schema.
-  SVN Rev[5192]
-- CHANGED: trunk - sec_portknock_if/: The svn repository for module
-  sec_portknock_if in trunk (Elx 3) was restructured in order to accomplish a
-  new schema.
-  SVN Rev[5191]
-- CHANGED: trunk - sec_advanced_settings/: The svn repository for module
-  sec_advanced_settings in trunk (Elx 3) was restructured in order to
-  accomplish a new schema.
-  SVN Rev[5190]
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_rules. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5468]
 
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - sec_accessaudit/: The svn repository for module
-  sec_accessaudit in trunk (Elx 3) was restructured in order to accomplish a
-  new schema.
-  SVN Rev[5189]
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_portknock_if. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5467]
 
-* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_advanced_settings. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5466]
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sec_rules. Correction of a mistake in the english translation
+  file
+  SVN Rev[5320]
+
+* Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
-  SVN Rev[5031]
+  SVN Rev[5084]
+
+* Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- UPDATE: Module sec_rules, Security. The help section was updated.
+  SVN Rev[5054]
+
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[5017]
 
 * Tue May 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Weak Keys: expose database errors for later debugging.
   SVN Rev[4882]
-- CHANGED: Weak Keys: hardcode /etc instead of using missing ASTETCDIR.
-  SVN Rev[4881]
-- CHANGED: Advanced Settings: remove bogus attempt to read nonexistent FreePBX
-  blocking status.
-  SVN Rev[4880]
 
-* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
-- CHANGED: security - Build/elastix-security.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-  SVN Rev[4816]
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4841]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_sec_advanced_settings module, help section was updated.
+  SVN Rev[4791]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_weak_keys module, help section was updated.
+  SVN Rev[4790]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_accessaudit module, help section was updated.
+  SVN Rev[4789]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_accessaudit module, help section was updated.
+  SVN Rev[4788]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_ports module, help section was updated.
+  SVN Rev[4787]
+
+* Wed Apr 03 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sec_rules module, help section was updated.
+  SVN Rev[4786]
 
 * Mon Feb 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Firewall Rules: change layout on New Rule form to be more compatible
   across browsers. Fixes Elastix bug #1481.
   SVN Rev[4683]
 
-* Tue Dec 04 2012 German Macas <gmacas@palosanto.com>
- CHANGED: modules - file_editor - sec_weak_keys: Fixed item 4 and 5 from bug
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: security - Build/elastix-security.spec: Changed Version and Release in 
+  specfile according to the current branch.
+  SVN Rev[4644]
+
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4629]
+
+* Thu Dec 04 2012 German Macas <gmacas@palosanto.com>
+- CHANGED: modules - file_editor - sec_weak_keys: Fixed item 4 and 5 from bug
   1416, keep search filter in file_editor and change Reason for Status in
   sec_weak_keys
   SVN Rev[4503]
 
 * Thu Oct 18 2012 Luis Abarca <labarca@palosanto.com>
 - FIXED: security - Build/elastix-security.spec: Corrected the copy of files,
-  now we move them for later erase de dir container.
-  SVN Rev[4372]
+  now we move them in order to erase the dir container.
+  SVN Rev[4368]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com>
+- FIXED: security - Build/elastix-security.spec: Directory its not empty so, we
+  cannot use rmdir, instead we use rm -rf
+  SVN Rev[4366]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -363,37 +338,21 @@ TRUNK - APPS: Search can be done using asterisk filter patterns in modules
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
-- Endpoint Configurator: install new configurator properly instead of leaving
-  it at module_installer/MODULE/setup
   SVN Rev[4347]
 
-* Tue Sep 25 2012 Bruno Macias <bmacias@palosanto.com>
-- UPDATED: module sec_advanced_settings, freepbx configuration its not
-  necessary.
-  SVN Rev[4295]
-
-* Mon Sep 24 2012 Luis Abarca <labarca@palosanto.com>
-- FIXED: anonymoussip privileged file, was fixed error whe file
-  /etc/asterisk/sip_general_custom.conf not exists, validation was added for
-  it.
-  SVN Rev[4265]
-
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: security - Build/elastix-security.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-- CHANGED: In spec file changed Prereq elastix-framework to
-  elastix-framework >= 3.0.0-1
-  SVN Rev[4231]
+* Fri Aug 24 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
 * Thu Aug 09 2012 German Macas <gmacas@palosanto.com>
 - FIXED: modules - antispam - festival - sec_advanced_setting - remote_smtp:
-  Fixed graphic bug in ON/OFF Button
-  SVN Rev[4102]
+  Fixed graphic bug in ON/OFF Button.
+  SVN Rev[4101]
 
 * Wed Aug 08 2012 German Macas <gmacas@palosanto.com>
 - sec_rules - Fixed graphic bug in edition of New Rule of Firewall and improve
   design
-  SVN Rev[4099]
+  SVN Rev[4098]
 
 * Fri Jul 27 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Port Knocking: trim padding of null bytes from end of plaintext.
@@ -407,6 +366,11 @@ TRUNK - APPS: Search can be done using asterisk filter patterns in modules
   - New crontab job for authorization cleanup
   SVN Rev[4031]
 
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4027]
+
 * Mon Jun 25 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Define Ports, Audit, Weak Keys: Remove XSS vulnerability.
   SVN Rev[4010]
@@ -416,6 +380,7 @@ TRUNK - APPS: Search can be done using asterisk filter patterns in modules
   reference the source directly. This allows the module to work properly with
   the fixes made for Fedora 17. Also, remove an unneeded reference to 
   paloSantoConfig. 
+  SVN Rev[3996]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-5
 - CHANGED: Security - Build/elastix-security.spec: update specfile with latest

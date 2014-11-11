@@ -1,5 +1,0 @@
-SENDTO=root;
-FILETYPE=pdf;
-
-case "$DEVICE" in
-esac

@@ -1,0 +1,27 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>El módulo "SMTP Remoto" permite configurar un servidor SMTP generalmente usado para enviar correos desde un cliente de un servidor de correo diferente.</p>
+<p>Los campos necesarios para configurar un servidor SMTP remoto son:</p>
+<ul>
+    <li><b>Estado: </b> Estado de conexión del servidor SMTP.</li>
+    <li><b>Servidor SMTP: </b> Servidor de correo remoto.</li>
+    <li><b>Dominio: </b> Dominio del servidor SMTP.</li>
+    <li><b>Puerto: </b> Puerto para establecer la conexión al servidor SMTP.</li>
+    <li><b>Usuario: </b>Nombre de usuario de la cuenta de correo del servidor SMTP.</li>
+    <li><b>Contraseña: </b>Contraseña de la cuenta de correo del servidor SMTP.</li>
+    <li><b>Habilitar TLS: </b>Habilita el uso de certificados TLS para autenticación. Algunos servidores SMTP como Gmail requieren este tipo de certificados.</li>
+</ul>
+<br />
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_remote-smtp.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+</body>
+</html>
+

@@ -1,0 +1,41 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>The option "Email Template" of the menu "Fax" allows editing the configuration parameters of the sending of faxes to the email.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_template_email.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+
+<p>To edit the parameters, click on "Edit Parameters" button. Below an explanation of the editable fields:</p>
+
+<table class="inline">
+    <tr>
+        <th>Field</th><th>Description</th>
+    </tr>    
+    <tr>
+        <td>From (Email Address)</td><td>The email of the sender of the fax</td>
+    </tr>
+    <tr>
+
+        <td>From (Name)</td><td>The name of the sender of the fax</td>
+    </tr>
+    <tr>
+        <td>Subject</td><td>Write here the title of the email. By default it is specified the name of the PDF file.<br />
+"NAME_PDF": This identifier will be replaced by the name of the fax created with extension pdf.</td>
+
+    </tr>
+    <tr>
+        <td>Body</td><td>Here you can write a description of the email. By default it is specified the Company Name, Company Number and Name PDF. <br />
+"COMPANY_NAME_FROM": This identifier will be replaced by the name of the company which sends the fax.<br />
+"COMPANY_NUMBER_FROM": This identifier will be replaced by the telephone number of the company which sends the fax.<br />
+"NAME_PDF": This identifier will be replaced by the name of the fax created with extension pdf.<br />
+"JOB_STATUS": This identifier will be replaced by the status of the process that sends the fax.<br />
+    </tr>
+</table>
+</body>
+</html>

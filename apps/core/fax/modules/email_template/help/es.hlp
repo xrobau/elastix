@@ -1,0 +1,41 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+
+<p>La opción "Plantilla de Correo" permite configurar el formato que tendrá el correo electrónico que se recibe notificando el envío de un fax.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_template_email.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+<p>Para modificar el formato haga click en el botón "Editar parámetros". A continuación se presenta una breve descripción de cada campo:</p>
+
+<table class="inline">
+    <tr>
+        <th>Campo</th><th>Descripción</th>
+    </tr>    
+    <tr>
+        <td>Remitente (Dirección de Correo)</td><td>La dirección de correo del remitente del fax.</td>
+    </tr>
+    <tr>
+
+        <td>Remitente (Nombre)</td><td>El nombre del remitente del fax.</td>
+    </tr>
+    <tr>
+        <td>Asunto</td><td>Aquí debe escribir el asunto del correo. Por defecto está configurado el nombre del archivo PDF.<br />
+"NAME_PDF": Esta variable representa el nombre del archivo pdf.</td>
+
+    </tr>
+    <tr>
+        <td>Cuerpo</td><td>Aquí debe escribir el contenido del correo electrónico. Por defecto se especifica el nombre de la compañía, el número de la compañía y el nombre del fax en formato PDF.<br />
+"COMPANY_NAME_FROM": Esta variable representa el nombre de la compañía que envía el fax.<br />
+"COMPANY_NUMBER_FROM": Esta variable representa el número de teléfono de la compañía que envía el fax.<br />
+"NAME_PDF": Esta variable representa el nombre del fax en formato PDF.<br />
+"JOB_STATUS": Esta variable representa el estado del proceso de envío del fax.<br />
+    </tr>
+</table>
+</body>
+</html>

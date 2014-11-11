@@ -2,15 +2,15 @@
 
 Summary: Elastix Module Reports 
 Name:    elastix-reports
-Version: 3.0.0
-Release: 8
+Version: 2.5.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.3.0-5
 Prereq: asterisk
 
 %description
@@ -22,44 +22,9 @@ Elastix Module Reports
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
-
 # Files provided by all Elastix modules
-#mkdir -p    $RPM_BUILD_ROOT/var/www/html/
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/
-bdir=%{_builddir}/%{modname}
-for FOLDER0 in $(ls -A modules/)
-do
-		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
-		do
-				mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-				for FOLFI in $(ls -I "web" $bdir/modules/$FOLDER0/$FOLDER1/)
-				do
-					if [ -d $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-						mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/$FOLFI
-						if [ "$(ls -A $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI)" != "" ]; then
-							mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI/ $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-						fi
-					elif [ -f $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI ]; then
-							mv $bdir/modules/$FOLDER0/$FOLDER1/$FOLFI $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-					fi
-				done
-				case "$FOLDER0" in 
-					frontend)
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
-							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-						fi
-					;;
-					backend)
-						mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-						if [ -d $bdir/modules/$FOLDER0/$FOLDER1/web/ ]; then
-							mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-						fi	
-					;;
-				esac
-		done
-done
+mkdir -p    $RPM_BUILD_ROOT/var/www/html/
+mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # Additional (module-specific) files that can be handled by RPM
 #mkdir -p $RPM_BUILD_ROOT/opt/elastix/
@@ -68,12 +33,13 @@ done
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p                             $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-mkdir -p                             $RPM_BUILD_ROOT/usr/share/elastix/libs/
-mv setup/paloSantoCDR.class.php      $RPM_BUILD_ROOT/usr/share/elastix/libs/
-mv setup/paloSantoTrunk.class.php    $RPM_BUILD_ROOT/usr/share/elastix/libs/
-mv setup/paloSantoRate.class.php     $RPM_BUILD_ROOT/usr/share/elastix/libs/
-mv setup/paloSantoQueue.class.php    $RPM_BUILD_ROOT/usr/share/elastix/libs/
+mkdir -p                             $RPM_BUILD_ROOT/var/www/html/libs/
+mv setup/paloSantoCDR.class.php      $RPM_BUILD_ROOT/var/www/html/libs/
+mv setup/paloSantoTrunk.class.php    $RPM_BUILD_ROOT/var/www/html/libs/
+mv setup/paloSantoRate.class.php     $RPM_BUILD_ROOT/var/www/html/libs/
+mv setup/paloSantoQueue.class.php    $RPM_BUILD_ROOT/var/www/html/libs/
 mv setup/                            $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+mv menu.xml                          $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 %pre
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -85,19 +51,7 @@ fi
 %post
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 # Run installer script to fix up ACLs and add module to Elastix menus.
-#elastix-menumerge $pathModule/setup/infomodules
-service mysqld status &>/dev/null
-res=$?
-if [ $res -eq 0 ]; then
-	#service is up
-	elastix-menumerge $pathModule/setup/infomodules	
-else
-	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
-		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
-		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
-	fi
-fi
+elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
 
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
@@ -126,235 +80,185 @@ rm -rf $RPM_BUILD_ROOT
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete Reports menus"
-  elastix-menuremove $pathModule/setup/infomodules
+  elastix-menuremove "%{modname}"
 
   echo "Dump and delete %{name} databases"
   elastix-dbprocess "delete" "$pathModule/setup/db"
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
-%{_localstatedir}/www/html/*
-/usr/share/elastix/apps/*
-%defattr(644, asterisk, asterisk)
-/usr/share/elastix/libs/*
 %defattr(-, root, root)
+%{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 
 %changelog
-* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
+* Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
-  SVN history. Bump Release in specfile.
+  SVN history. Bump version and release in specfile.
 
-* Mon Apr 28 2014 Bruno Macias <bmacias@palosanto.com> 
-- FIXED: module reports, database asteriskcdrdv wasn't creating. SQLs files
-  names were changed in folder db/install/asteriskcdrdb
-  SVN Rev[6609]
-
-* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
+* Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-10
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
-  SVN history. Bump Release in specfile.
-  SVN Rev[6600]
+  SVN history. Bump release in specfile.
 
-* Wed Mar 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Added definition for asteriskcdrdb.queue_log table for realtime
-  queue logging.
-  SVN Rev[6521]
-- CHANGED: SQL definitions for asteriskcdrdb were moved from elastix-firstboot
-  to elastix-reports.
-  SVN Rev[6520]
+* Mon Sep  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: CDR Report: fix fallout resulting from commit 6638 breaking any regexp
+  with unescaped embedded slash. Fixes Elastix bug #1975.
+  SVN Rev[6711]
+
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
+  packages were depreciated many functions, the equivalent functions are
+  updated in the files that use to have the menctioned functions.
+  SVN Rev[6638]
 
 * Wed Feb 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk Logs: update log parsing for changed date format resulting 
   from update to FreePBX 2.11.
   SVN Rev[6487]
 
-* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
-  SVN history. Bump Release in specfile.
-  SVN Rev[6392]
+  SVN history. Bump release in specfile.
+  SVN Rev[6379]
 
-* Tue Dec 03 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Reports/Apps: translation in CDR Report-> filter (spanish)
-  SVN Rev[6244]
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: CDR Report, Channels Usage, Rates, Billing Report, Destination 
+  Distribution, Billing Setup, Asterisk Logs, Graphic Report, Summary,
+  Missed Calls: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6348]
 
-* Tue Dec 03 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Reports/Apps: translation in CDR Report (spanish)
-  SVN Rev[6243]
-
-* Thu Nov 28 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Apps/Reports: translation in CDRs Reports label (spanish)
-  SVN Rev[6202]
-
-* Fri Nov 22 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Reports/Apps: language help add in Asterisk Log (english -
-  spanish)
-  SVN Rev[6149]
-
-* Fri Nov 22 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Reports/Apps: language help add in cdr report (english -
-  spanish)
-  SVN Rev[6148]
-
-* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: build - *.spec: An error in the logic of the code was unintentionally
-  placed when saving the elastix's spec files.
-  SVN Rev[6125]
-
-* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: build - *.spec: An extra character was unintentionally placed when
-  saving the elastix's spec files.
-  SVN Rev[6116]
-
-* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfiles with the new form of use
-  elastix-menumerge for each elastix module.
-  SVN Rev[6105]
-
-* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfile with some corrections correspondig
-  to the way of remove tabs in the framework for each elastix module.
-  SVN Rev[5994]
-
-* Tue Oct 01 2013 Rocio Mera <rmera@palosanto.com> 
-- DELETED: Tunk - Apps/reports: Was deleted file menu.xml. This file was
-  divided in a set of files that are stored in setup/infomodules
-- ADDED: Tunk - Apps/reports: Was added directory infomodules. This directory
-  store xml files that are used to create elastix resources
-  SVN Rev[5963]
-
-* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfile with some corrections correspondig
-  to the way of identify and distribute folders to the '/usr/share/elastix/'
-  path and '/var/www/html/' path.
-  SVN Rev[5945]
-
-* Tue Sep 24 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - Apps: Was made changes im module trunk, extension,
-  time_group in order to solve some minors bugs
-- CHANGED: Trunk - APPS: Was made change in lib paloSantoCDR in order to
-  resolve bug related with filter param
-  SVN Rev[5941]
-
-* Fri Sep 20 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - APPS/PBX: Was made changes in module extensions, trunk,
-  general_settings, general_settings_admin to update parameters that can be
-  configured in sip and iax device
-TRUNK - FRAMEWORK: Was made changes in theme elastixneo to fis somes minors
-  bugs. In addition was made changes in elxpbx schema to create a new menu
-  named manager. This menu is the paren menu of sysdash, organization_manager
-  and user_manager
-TRUNK - APPS/Reports: Was made changes in module CDR report. The funstion of
-  deleted rescord register now can only be performed by superadmin. The filters
-  param was explode in order to permit do more detailed searches.
-TRUNK - APPS: Search can be done using asterisk filter patterns in modules
-  where the filter accept any text
-  SVN Rev[5922]
+* Tue Oct 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: CDR Report: make empty-parameter check more strict to prevent removing
+  a single zero from filter parameters.
+  SVN Rev[5997]
 
 * Fri Sep 20 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: reports - Build/elastix-reports.spec: Fixed bad positioning of code
-  that interfered with the proper installation of the package.
-  SVN Rev[5921]
+- FIXED: An update line in the CDR table its corrected.
+  SVN Rev[5920]
 
-* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
-  SVN history. Bump Release in specfile.
-  SVN Rev[5886]
+  SVN history. Bump release in specfile.
+  SVN Rev[5913]
 
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- ADDED: reports - setup/infomodules.xml/: Within this folder are placed the
-  new xml files that will be in charge of creating the menus for each module.
-  SVN Rev[5867]
+* Wed Sep 18 2013 Luis Abarca <labarca@palosanto.com> 
+- ADDED: Some new fields has been added to the CDR table.
+  SVN Rev[5898]
 
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: reports - modules: The modules were relocated under the new scheme
-  that differentiates administrator modules and end user modules .
-  SVN Rev[5866]
-
-* Mon Sep 09 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Billing Report: move filter widgets to separate row in order to avoid
   misplacement. Fixes Elastix bug #1637.
-  SVN Rev[5844]
+  SVN Rev[5844] 
+
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+  SVN Rev[5789]
 
 * Tue Aug 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: CDR Report: update code to use new filesystem layout.
-  SVN Rev[5761]
-- CHANGED: Channel Usage: update code to use new filesystem layout.
-  SVN Rev[5757]
 - CHANGED: Channel Usage: convert uses of arrLang to _tr. Sync with trunk.
   SVN Rev[5756]
-- CHANGED: Asterisk Logs: update code to use new filesystem layout.
-  SVN Rev[5755]
 - CHANGED: Asterisk Logs: convert uses of arrLang to _tr. Sync with trunk.
   SVN Rev[5725]
 
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - summary_by_extension/: It was corrected a configuration in
-  the web folder.
-  SVN Rev[5275]
-- CHANGED: trunk - missed_calls/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5274]
-- CHANGED: trunk - graphic_report/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5273]
-- CHANGED: trunk - dest_distribution/: It was corrected a configuration in the
-  web folder.
-  SVN Rev[5272]
-- CHANGED: trunk - channelusage/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5271]
-- CHANGED: trunk - cdrreport/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5270]
-- CHANGED: trunk - billing_setup/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5269]
-- CHANGED: trunk - billing_report/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5268]
-- CHANGED: trunk - billing_rates/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5267]
-- CHANGED: trunk - asterisk_log/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5266]
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5642]
 
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - summary_by_extension/: The svn repository for module
-  summary_by_extension in trunk (Elx 3) was restructured in order to accomplish
-  a new schema.
-  SVN Rev[5188]
-- CHANGED: trunk - missed_calls/: The svn repository for module missed_calls in
-  trunk (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5187]
-- CHANGED: trunk - graphic_report/: The svn repository for module
-  graphic_report in trunk (Elx 3) was restructured in order to accomplish a new
-  schema.
-  SVN Rev[5186]
-- CHANGED: trunk - dest_distribution/: The svn repository for module
-  dest_distribution in trunk (Elx 3) was restructured in order to accomplish a
-  new schema.
-  SVN Rev[5185]
-- CHANGED: trunk - channelusage/: The svn repository for module channelusage in
-  trunk (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5184]
-- CHANGED: trunk - cdrreport/: The svn repository for module cdrreport in trunk
-  (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5183]
-- CHANGED: trunk - billing_setup/: The svn repository for module billing_setup
-  in trunk (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5182]
-- CHANGED: trunk - billing_report/: The svn repository for module
-  billing_report in trunk (Elx 3) was restructured in order to accomplish a new
-  schema.
-  SVN Rev[5181]
-- CHANGED: trunk - billing_rates/: The svn repository for module billing_rates
-  in trunk (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5180]
-- CHANGED: trunk - asterisk_log/: The svn repository for module asterisk_log in
-  trunk (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5179]
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5641]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5639]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5638]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5637]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5636]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5635]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5634]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5510]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5509]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5508]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module file_editor. Correction of some mistakes in the translation
+  file es.lang.
+  SVN Rev[5507]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module file_editor. Correction of some mistakes in the translation
+  file es.lang.
+  SVN Rev[5506]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module summary_by_extension. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5471]
+
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module missed_calls. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5435]
+
+* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module graphic_report. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5420]
+
+* Fri Jul 19 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module cdrreport. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5384]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module billing_report. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5358]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module billing_rates. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5357]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module asterisk_log. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5355]
+
+* Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+  SVN Rev[5353]
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module graphic_report. Correction of a mistake in the english
+  translation file
+  SVN Rev[5319]
 
 * Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Summary By Extension: tweak SQL query used to report summary, 
@@ -371,11 +275,21 @@ TRUNK - APPS: Search can be done using asterisk filter patterns in modules
   dead code and use standard translator function for date handling.
   SVN Rev[5122] 
 
+* Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+  SVN Rev[5104]
+
 * Thu Jun 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk Logs: fix date parsing to avoid interpreting plain PIDs as
   dates. Extract date from a new type of message line on asterisk boot. Remove
   unnecessary database connection parameter.
   SVN Rev[5097] 
+
+* Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[5082]
 
 * Fri Jun 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Graphic Report: convert entirely from arrLang to use of _tr().
@@ -390,10 +304,10 @@ TRUNK - APPS: Search can be done using asterisk filter patterns in modules
   getParameter() that gets confused by Fortify as the one used by the framework.
   SVN Rev[5058]
 
-* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
-  SVN history. Bump Release in specfile.
-  SVN Rev[5030]
+  SVN history. Changed release in specfile.
+  SVN Rev[5016]
 
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Billing Rates: remove unnecessary and risky copy of uploaded file, and
@@ -416,46 +330,80 @@ TRUNK - APPS: Search can be done using asterisk filter patterns in modules
   also fix Elastix bugs #567, #707, #1322.
   SVN Rev[4907]
 
-* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
-- CHANGED: reports - Build/elastix-reports.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-  SVN Rev[4815]
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4840]
+
+* Thu Mar 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: missed_calls module, help section was updated.
+  SVN Rev[4770]
+
+* Thu Mar 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: summary_by_extension module, help section was updated.
+  SVN Rev[4769]
+
+* Thu Mar 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: graphic_report module, help section was updated.
+  SVN Rev[4768]
+
+* Mon Mar 18 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: asterisk_log module, help section was updated.
+  SVN Rev[4758]
+
+* Fri Mar 15 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: billing_setup module, help section was updated.
+  SVN Rev[4757]
+
+* Fri Mar 15 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: dest_distribution module, help section was updated.
+  SVN Rev[4756]
+
+* Tue Mar 05 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: billing_report module, help section was updated.
+  SVN Rev[4752]
+
+* Tue Mar 05 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: billing_rates module, help section was updated.
+  SVN Rev[4751]
+
+* Thu Feb 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: channelusage module, help section was updated.
+  SVN Rev[4749]
+
+* Thu Feb 28 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: cdrreport module, help section was updated.
+  SVN Rev[4748]
+
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: reports - Build/elastix-reports.spec: Changed Version and Release in 
+  specfile according to the current branch.
+  SVN Rev[4643]
+
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4628]
 
 * Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
 - FIXED: Its no more necesary to resize the popups in certain windows of
   elastix environment. Fixes Elastix BUG #1445 - item 8
   SVN Rev[4587]
 
-* Wed Jan 02 2013 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Apps - Reports: Was made changes in libs paloSantoCDR.class.php to
-  add support to multitenant architecture
-  SVN Rev[4539]
-
-* Wed Jan 02 2013 Rocio Mera <rmera@palosanto.com>
-- DELETED: Apps - Reports/asteriskcdrdb: was removed sql file
-  2.0.4-15.sql-3.0.0-0.sql added in commit 4537
-  SVN Rev[4538]
-
-* Wed Jan 02 2013 Rocio Mera <rmera@palosanto.com>
-- ADD: Apps - Reports: Was add file 2_2.0.4-15_3.0.0-0.sql. This file add
-  columns orgation_domain toout fromout to  cdr table
-  SVN Rev[4537]
-
-* Fri Dec 28 2012 Rocio Mera <rmera@palosanto.com>
-- ADDED: Apps - Reports: Was added new implementation of cdrreports module.
-  This module implement support to query the cdr for calltype and organization.
-  Was remove support to soap until new implementations
-  SVN Rev[4535]
-
-* Fri Dec 28 2012 Rocio Mera <rmera@palosanto.com>
-- DELETE: Apps - Reports: Was delete ,module cdrreport. This module will be
-  replace with a new implementation
-  SVN Rev[4534]
+* Tue Dec 04 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4495]
 
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Summary by Extension: do not use or add number of calls on URL. Read
   this number from the database instead. Fixes part 2 of Elastix bug #1416.
   SVN Rev[4482]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4362]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -468,33 +416,28 @@ TRUNK - APPS: Search can be done using asterisk filter patterns in modules
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
-  SVN Rev[4347]
+- Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
+  SVN Rev[4354]
 
-* Tue Sep 25 2012 Rocio Mera <rmera@palosanto.com>
-- FIXED: module cdrreport, querys to asterisk database, ringgroups now are
-  solved
-  SVN Rev[4294]
-
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: reports - Build/elastix-reports.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-- CHANGED: In spec file changed Prereq elastix-framework to
-  elastix-framework >= 3.0.0-1
-  SVN Rev[4230]
+* Mon Sep 03 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4178]
 
 * Fri Aug 31 2012 German Macas <gmacas@palosanto.com>
-- CHANGED: module - billing_rates: Change text information when edit a rate
+- CHANGED: module - billing_rates: Change text information when edit a rate.
   SVN Rev[4163]
 
-* Tue Jun 12 2012 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: elastix - /: The svn repository was reconstructed for better use and
-  management.
-  SVN Rev[3997]
+* Thu Jun 28 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-5
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4026]
 
 * Mon May 07 2012 German Macas <gmacas@palosanto.com>
-- NEW: Missed Calls Module
-  SVN Rev[3932]
 - CHANGED: Reports - Missed Calls: change application form Filter and spanish words in lang
+  SVN Rev[3932]
+- NEW: Missed Calls Module
   SVN Rev[3931]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-4

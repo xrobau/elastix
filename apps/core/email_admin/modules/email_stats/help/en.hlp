@@ -1,0 +1,17 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+	<p>The module "Email Stats" shows statistic graphics of the quantity of incoming emails.</p>
+	<p>The first graphic shows the amount of incoming emails of the last 26 hours and it is updated every hour. You will see this graphic from 3 hours later of installing this module.</p>
+	<p>The second graphic shows the amount of incoming emails of the last 7 days and it is updated every 6 hours. You will see this graphic from 13 hours later of installing this module.</p>
+	<p>The third graphic shows the amount of incoming emails of the last 12 months and it is updated every 15 days. You will see this graphic from 1 month later of installing this module.</p>
+	<p>The message "Nothing to show yet" means that Elastix doesn't have the enough information to show these statistics.</p>
+	<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_stats.png" border="0" />
+        <p>Figure 1</p></div>
+	<br />
+    </body>
+</html>

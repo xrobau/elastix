@@ -454,7 +454,7 @@ LISTA_EXTENSIONES;
             } elseif ($estado['extension'] != $sExtension && preg_match('|^Agent/(\d+)$|', $this->_agent, $regs)) {
                 $estado['estadofinal'] = 'mismatch';
                 $this->errMsg = _tr('Specified agent already connected to extension').
-                    ': '.(string)$connStatus->extension;
+                    ' '.(string)$connStatus->extension.' status '.$estado['status'];
             }
             return $estado;
         } catch (Exception $e) {
@@ -838,7 +838,6 @@ LISTA_EXTENSIONES;
                     $evento['uniqueid'] = (string)$evt->uniqueid;
                     $evento['datetime_join'] = (string)$evt->datetime_join;
                     $evento['datetime_linkstart'] = (string)$evt->datetime_linkstart;
-                    $evento['queue'] = isset($evt->queue) ? (string)$evt->queue : NULL;
                     $evento['trunk'] = isset($evt->trunk) ? (string)$evt->trunk : NULL;
                     $evento['retries'] = isset($evt->retries) ? (int)$evt->retries : NULL;
                     $evento['datetime_originateresponse'] = isset($evt->datetime_originateresponse) ? (string)$evt->datetime_originateresponse : NULL;                    
@@ -851,6 +850,7 @@ LISTA_EXTENSIONES;
                     if (isset($evt->datetime_linkend)) $evento['datetime_linkend'] = (string)$evt->datetime_linkend;
                     if (isset($evt->duration)) $evento['duration'] = (int)$evt->duration;
                     if (isset($evt->shortcall)) $evento['shortcall'] = ((int)$evt->shortcall != 0);
+                    $evento['queue'] = isset($evt->queue) ? (string)$evt->queue : NULL;
                     $evento['call_type'] = (string)$evt->calltype;
                     $evento['campaign_id'] = isset($evt->campaign_id) ? (int)$evt->campaign_id : NULL;
                     $evento['call_id'] = (int)$evt->call_id;
@@ -897,9 +897,37 @@ LISTA_EXTENSIONES;
             $respuestaResumen = $oECCP->getagentactivitysummary();
             $resumenColas = array();
 
+            // Reunir los agentes involucrados
+            $agentlist = array();
+            foreach ($respuestaResumen->agents->agent as $xml_agent) {
+                $agentlist[] = (string)$xml_agent->agentchannel;
+            }
+            
+            // Listar las colas a la que pertenecen todos los agentes
+            $pertenenciaColas = $oECCP->getmultipleagentqueues($agentlist);
+            $agenteColas = array();
+            foreach ($agentlist as $sAgente) $agenteColas[$sAgente] = array();  // array_fill_keys
+            foreach ($pertenenciaColas->agents->agent as $xml_queue) {
+                $colas = array();
+                foreach ($xml_queue->queues->queue as $xml_q) {
+                    $colas[] = (string)$xml_q;
+                }
+                $agenteColas[(string)$xml_queue->agent_number] = $colas;
+            }
+            
+            // Listar el estado de todos los agentes
+            $estadosAgentes = $oECCP->getmultipleagentstatus($agentlist);
+            $agenteEstado = array();
+            foreach ($agentlist as $sAgente) $agenteEstado[$sAgente] = array();  // array_fill_keys
+            foreach ($estadosAgentes->agents->agent as $xml_agent) {
+                $agenteEstado[(string)$xml_agent->agent_number] = $xml_agent;
+            }
+            
+            
             foreach ($respuestaResumen->agents->agent as $xml_agent) {
             	// Averiguar el estado del agente
-                $estadoAgente = $oECCP->getagentstatus((string)$xml_agent->agentchannel);
+                //$estadoAgente = $oECCP->getagentstatus((string)$xml_agent->agentchannel);
+                $estadoAgente = $agenteEstado[(string)$xml_agent->agentchannel];
 
                 // Llenar plantilla con toda la información excepto el número de llamadas por cola
                 $linkstart = isset($estadoAgente->callinfo->linkstart) ? (string)$estadoAgente->callinfo->linkstart : NULL;
@@ -921,8 +949,7 @@ LISTA_EXTENSIONES;
                 );
                 
                 // Averiguar a qué colas pertenece el agente
-                $agenteColas = $oECCP->getagentqueues((string)$xml_agent->agentchannel);
-                foreach ($agenteColas->queues->queue as $xml_queue) {
+                foreach ($agenteColas[(string)$xml_agent->agentchannel] as $xml_queue) {
                 	$infoAgenteCola = $infoAgente;
                     if (isset($xml_agent->callsummary->incoming->queue)) {
                     	foreach ($xml_agent->callsummary->incoming->queue as $xml_queuestat) {

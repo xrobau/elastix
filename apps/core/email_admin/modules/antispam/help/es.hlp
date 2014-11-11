@@ -1,0 +1,59 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+<h1>{$node_name}</h1>
+<p align="Justify">La opción "Antispam" del menú "Correo Electrónico" permite configurar el nivel de aceptación de correos con el fin de evitar en lo posible el Spam.</p>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_antispam.png" border="0" />
+<p>Figura 1</p></div>
+<br/>
+<br/>
+<p align="Justify">Para activar el Antispam es necesario tener activo el servicio "Spamassasin". La opción "Estado" permite habilitar o deshabilitar este servicio.</p>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_antispam1.png" border="0" />
+<p>Figura 2</p></div>
+<br/>
+<br/>
+<p>Para marcar el nivel de detección de Spam desplace con el ratón al nivel deseado.</p>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_antispam3.png" border="0" />
+<p>Figura 3</p></div>
+<br/>
+<br/>
+
+<p>Las políticas de Antispam a configurar son:</p>
+<ul>
+    <li>
+        <span><b>Marcar Asunto:</b></span><br />
+        <ul>
+            <li>
+                Marca el asunto del correo por el valor del campo Texto. <i>(Figura 4)</i>
+            </li>
+        </ul>
+    </li>
+<br />
+    <li>
+
+        <span><b>Capturar Spam:</b></span> 
+                <ul>
+                    <li><b>Eliminar el Spam anterior a una semana: </b>Permite remover todo el Spam de la carpeta de Spam que se encuentra alojado por más de una semana.</li>
+                    <li><b>Eliminar el Spam anterior a dos semanas: </b>Permite remover todo el Spam de la carpeta Spam que se encuentra alojado por más de dos semanas.Allow remove all Spam from "Spam" folder which have been more than two weeks in that folder.</li>
+                    <li><b>Eliminar el Spam anterior a un mes: </b>Permite remover todo el Spam de la carpeta Spam que se encuentra alojado por más de un mes.</li>
+<br />
+                </ul>
+Este proceso es realizado todos los días.
+</ul>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_antispam4.png" border="0" />
+<p>Figura 4</p></div>
+<br/>
+<br/>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_antispam5.png" border="0" />
+<p>Figura 5</p></div>
+<br/>
+<br/>
+</body>
+</html>

@@ -426,7 +426,7 @@ class paloSantoVoIPProvider {
         $found = false;
         while($line = fgets($fp, filesize($FILE)))
         {
-            if(ereg($includeLine, $line)){
+            if(preg_match("/".$includeLine."/", $line)){
                 $found = true;
             }
         }

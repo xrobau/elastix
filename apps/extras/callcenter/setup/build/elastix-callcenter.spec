@@ -3,13 +3,13 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 5
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.2.0-18
+Prereq: elastix-framework >= 2.3.0-12
 Requires: asterisk
 Requires: freePBX
 Requires: php-mbstring
@@ -37,6 +37,7 @@ chmod +x $RPM_BUILD_ROOT/etc/rc.d/init.d/elastixdialer
 rmdir setup/dialer_process
 mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d/
 mv setup/elastixdialer.logrotate $RPM_BUILD_ROOT/etc/logrotate.d/elastixdialer
+mv setup/usr $RPM_BUILD_ROOT/usr
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
@@ -95,8 +96,160 @@ fi
 /opt/elastix/dialer/*
 /etc/rc.d/init.d/elastixdialer
 /etc/logrotate.d/elastixdialer
+%defattr(0775, root, root)
+%{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Nov  6 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: add placeholder content for new field name.
+  SVN Rev[6767]
+- CHANGED: Form Designer: update cursor styles on draggable rows to indicate
+  draggable capability.
+  SVN Rev[6766]
+
+* Wed Oct  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: update paloSantoGrid API usage to latest Elastix 2.4
+  SVN Rev[6753]
+- CHANGED: Campaign In: update paloSantoGrid API usage to latest Elastix 2.4
+  SVN Rev[6752]
+
+* Tue Sep 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: CallCenter Config: reorganize form fields.
+  SVN Rev[6751]
+- CHANGED: Break Administrator: update paloSantoGrid API usage to latest
+  Elastix 2.4. Fix potential undefined variable reference on validation error.
+  SVN Rev[6750]
+
+* Wed Sep 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Callback Extensions: update paloSantoGrid API usage to latest 
+  Elastix 2.4.
+  SVN Rev[6749]
+- CHANGED: Agents: update paloSantoGrid API usage to latest Elastix 2.4.
+  SVN Rev[6748]
+
+* Fri Sep 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-7
+- Bump version for release.
+
+* Thu Sep 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): create new request getmultipleagentstatus. This 
+  request allows for a report of agent status for a group of agents at once.
+  This cuts down again on the number of ECCP requests required for the Agent
+  Monitoring report. Part of the fix for Elastix bug #1820.
+  SVN Rev[6739] 
+- CHANGED: Dialer (ECCP): create new request getmultipleagentqueues. This
+  request allows for a report of agents subscribed on queues for a group of
+  agents at once. This cuts down on the number of ECCP requests required for
+  the Agent Monitoring report. Part of the fix for Elastix bug #1820.
+  SVN Rev[6737]
+
+* Wed Sep 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Do Not Call List: complete rewrite. This rewrite uses ordinary grid
+  pagination instead of loading the entire recordset in memory, and simplifies
+  the support libraries. Additionally a new index is added to the dont_call
+  table to speed up lookup by caller_id. Finally, a small utility is now 
+  provided to load a CSV file to the DNC list from the command line. Fixes 
+  Elastix bug #1984.
+  SVN Rev[6734]
+- CHANGED: Form Designer: tweak error message handling to integrate it better
+  into current Elastix theme.
+  SVN Rev[6733]
+- FIXED: Form Designer: only field removal should be blocked if a form is used
+  by a campaign. Other operations must be allowed.
+  SVN Rev[6732]
+
+* Tue Sep 16 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: clean up grid used for form field manipulation.
+  SVN Rev[6728]
+- FIXED: Form Designer: re-add method that is used by both Outgoing Campaign and
+  Incoming Campaign modules, as a compatibility stub.
+  SVN Rev[6727]
+
+* Mon Sep 15 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: complete rewrite. This rewrite removes the use of
+  xajax, fixes a few potential SQL injection scenarios, streamlines the form
+  creation interface, and updates the report grid to the latest support.
+  SVN Rev[6726]
+
+* Fri Sep 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): add debugging information to getagentstatus request to
+  catch inconsistent state being returned to the client.
+  SVN Rev[6720]
+
+* Wed Sep 10 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dont Call List: remove unused xajax reference
+  SVN Rev[6718]
+- CHANGED: Incoming Calls Monitoring: complete rewrite. This rewrite removes the
+  use of xajax and periodic database reads, and replaces it with an ECCP client
+  that uses Server Sent Events if available, just like the Agent Console. This
+  also fixes a serious scenario where a query that takes more than 5 seconds
+  would cause the server to accumulate unfinished SQL queries.
+  SVN Rev[6717]
+- CHANGED: Dialer (ECCP): emit queue number (if available) when linking and 
+  unlinking a call, to save the client the trouble of asking for it. Required
+  for next commit.
+  SVN Rev[6716]
+- FIXED: Dialer (ECCP): fix copy/paste error in previous commit to SQL files.
+  Add additional indexes for calls.
+  SVN Rev[6715]
+
+* Tue Sep 09 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calls per Agent: replace ambiguous filtering system with a cleaner
+  filter that properly validates that agent and queue are both numeric. Also
+  fix Elastix bug #1976.
+  SVN Rev[6714]
+
+* Mon Sep 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): optimize the getagentactivitysummary request by inserting
+  keys and restructuring queries to only run once per request, instead of once
+  per agent.
+  SVN Rev[6710]
+
+* Thu Jun 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: update Ember.js to 1.5.1, Handlebars to 1.3.0.
+  SVN Rev[6648]
+
+* Fri Feb 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: disable PDO::ATTR_EMULATE_PREPARES on all MySQL PDO connections
+  in order to use native prepared statements instead of the default PHP emulation.
+  Workaround for PHP bug #44639. Might fix Elastix bug #1844.
+  SVN Rev[6489] 
+
+* Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-6
+- Bump version for release.
+- CHANGED: Agent Console, Campaign Monitoring, Agent Monitoring: the Elastix 
+  framework sends an error in a JSON response if a rawmode request is made with 
+  an invalid/expired session. Check for this response and alert/redirect to 
+  Elastix login page if received.
+  SVN Rev[6483]
+
+* Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Hold Time: fix construction of SQL query from previous rewrite. Fixes
+  Elastix bug #1858.
+  SVN Rev[6480]
+
+* Sat Feb 08 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: update Ember.js to 1.3.2
+
+* Thu Jan 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: update Ember.js to 1.3.1, Handlebars to 1.2.1.
+  SVN Rev[6453]
+
+* Tue Jan 21 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent List: small rewrite of repair action handling to unbreak previous
+  commit. Now takes advantage of jQuery.
+  SVN Rev[6397]
+
+* Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Agent Console, Campaigns, Do not Call List, External URLs, Queues,
+  Clients, Ingoing Campaigns, Agents, ECCP Users, Callback Extensions, Breaks,
+  Form Designer, Form Preview, Reports Break, Calls Detail, Calls per hour, 
+  Calls per Agent, Hold time, Login Logout, Ingoing Calls Success, Graphic Calls 
+  per hour, Agent Information, Agents Monitoring, Trunks used per hour, 
+  Incoming calls monitoring, Campaign monitoring, Configuration: For each module 
+  listed here the english help file was renamed to en.hlp and a spanish help file 
+  called es.hlp was ADDED.
+  SVN Rev[6354]
+
 * Thu Dec 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: fix corner case in which an incorrect JSON encoding in
   non-SSE mode of the logged-out event right at the start of status checking

@@ -38,6 +38,7 @@ global $arrLangModule;
 'all'             => "Todas",
 'active'          => "Activas",
 'inactive'        => "Inactivas",
-'Deactivate'      => "Desactivar",
+'Deactivate'          => "Desactivar",
+
 );
 ?>

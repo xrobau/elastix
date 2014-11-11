@@ -29,10 +29,8 @@
     global $arrConf;
     global $arrConfModule;
 
-    $arrConfModule['module_name']       = 'incoming:calls_monitoring';
+    $arrConfModule['module_name']       = 'rep_incoming_calls_monitoring';
     $arrConfModule['templates_dir']     = 'themes';
-    //ex1: $arrConfModule['dsn_conn_database'] = "sqlite3:///$arrConf[elastix_dbdir]/base_name.db";
-    //ex2: $arrConfModule['dsn_conn_database'] = "mysql://user:password@ip_host_sever_mysql/base_name";
     $arrConf['dsn_conn_database'] = 'mysql://asterisk:asterisk@localhost/call_center';
 
 ?>

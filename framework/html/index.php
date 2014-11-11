@@ -42,26 +42,18 @@ function spl_elastix_class_autoload($sNombreClase)
 spl_autoload_register('spl_elastix_class_autoload');
 
 // Agregar directorio libs de script a la lista de rutas a buscar para require()
-$elxPath="/usr/share/elastix";
-// /usr/share/elastix/ directorio que contiene las librerias del sistema
-//
-ini_set('include_path',dirname($_SERVER['SCRIPT_FILENAME']).":$elxPath:".ini_get('include_path'));
+ini_set('include_path', dirname($_SERVER['SCRIPT_FILENAME'])."/libs:".ini_get('include_path'));
 
-include_once "libs/misc.lib.php";
+include_once("libs/misc.lib.php");
 include_once "configs/default.conf.php";
 include_once "libs/paloSantoDB.class.php";
-include_once "libs/paloSantoACL.class.php";
 include_once "libs/paloSantoMenu.class.php";
-include_once "libs/paloSantoNavigation.class.php";
-
-$arrConf['basePath']=$arrConf['basePath']; //se cambia la ubicacion del modulo
+include_once("libs/paloSantoACL.class.php");// Don activate unless you know what you are doing. Too risky!
 
 load_default_timezone();
 
 session_name("elastixSession");
 session_start();
-
-$arrConf['mainTheme'] = load_theme_fui();
 
 if(isset($_GET['logout']) && $_GET['logout']=='yes') {
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"unknown";
@@ -72,6 +64,7 @@ if(isset($_GET['logout']) && $_GET['logout']=='yes') {
     header("Location: index.php");
     exit;
 }
+
 //cargar el archivo de idioma
 load_language();
 $lang = get_language();
@@ -82,8 +75,9 @@ if(file_exists("langmenus/$lang.lang")){
     $arrLang = array_merge($arrLang,$arrLangMenu);
 }
 
-$pdbACL = new paloDB($arrConf['elastix_dsn']['elastix']);
+$pdbACL = new paloDB($arrConf['elastix_dsn']['acl']);
 $pACL = new paloACL($pdbACL);
+
 if(!empty($pACL->errMsg)) {
     echo "ERROR DE DB: $pACL->errMsg <br>";
 }
@@ -93,18 +87,16 @@ $smarty = getSmarty($arrConf['mainTheme']);
 
 //- 1) SUBMIT. Si se hizo submit en el formulario de ingreso
 //-            autentico al usuario y lo ingreso a la sesion
+
 if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
-    $pass_md5 = md5(trim($_POST['input_pass']));
-    
+    $pass_md5 = md5($_POST['input_pass']);
     if($pACL->authenticateUser($_POST['input_user'], $pass_md5)) {
         session_regenerate_id(TRUE);
 
-        $_SESSION['elastix_user'] = trim($_POST['input_user']);
-        $_SESSION['elastix_pass'] = $pass_md5;      
-        $_SESSION['elastix_pass2'] = $_POST['input_pass'];
+        $_SESSION['elastix_user'] = $_POST['input_user'];
+        $_SESSION['elastix_pass'] = $pass_md5;
         header("Location: index.php");
         writeLOG("audit.log", "LOGIN $_POST[input_user]: Web Interface login successful. Accepted password for $_POST[input_user] from $_SERVER[REMOTE_ADDR].");
-        update_theme();
         exit;
     } else {
         $user = urlencode(substr($_POST['input_user'],0,20));
@@ -120,134 +112,121 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
 if (isset($_SESSION['elastix_user']) && 
     isset($_SESSION['elastix_pass']) && 
     $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass'])) {
-
-    if($pACL->isUserSuperAdmin($_SESSION['elastix_user'])){
-        header("Location: admin/index.php");
-    }
-
-
+    
     $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
-    $pMenu = new paloMenu($arrConf['elastix_dsn']['elastix']);
-    
-    $arrUser = $pACL->getUsers($idUser);
-    foreach($arrUser as $value){
-        $arrFill["username"]=$value[1];
-        $arrFill["name"]=$value[2];
-	$arrFill["extension"]=$value[5];
-    }
-    $smarty->assign("ID_ELX_USER",$idUser);
-    $smarty->assign("USER_NAME", $arrFill["name"]);
-    $smarty->assign("USER_ESTENSION", $arrFill["extension"]);
-    
-    //obtenemos los menu a los que el usuario tiene acceso
+    $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
     $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser);
-    
-    $id_organization = $pACL->getIdOrganizationUser($idUser);
-    $_SESSION['elastix_organization'] = $id_organization;
 
-    if(!is_array($arrMenuFiltered))
-        $arrMenuFiltered=array();
-    
+    verifyTemplate_vm_email(); // para cambiar el template del email ue se envia al recibir un voicemail
+
     //traducir el menu al idioma correspondiente
     foreach($arrMenuFiltered as $idMenu=>$arrMenuItem) {
-        $arrMenuFiltered[$idMenu]['description'] = _tr($arrMenuItem['description']);
+        $arrMenuFiltered[$idMenu]['Name'] = _tr($arrMenuItem['Name']);
     }
-    
-    //variables de smarty usadas en los templates
+
     $smarty->assign("THEMENAME", $arrConf['mainTheme']);
-    $smarty->assign("WEBPATH", "web/");
-    $smarty->assign("WEBCOMMON", $arrConf['webCommon']."/");
+
+    /*agregado para register*/
     
-    
+    $smarty->assign("Register", _tr("Register"));
+    $smarty->assign("lblRegisterCm", _tr("Register"));
+    $smarty->assign("lblRegisteredCm", _tr("Registered"));
+    if(!is_file("/etc/elastix.key")){
+        $smarty->assign("Registered", _tr("Register"));
+    	$smarty->assign("ColorRegister", "#FF0000"); 
+    } else {
+        $smarty->assign("Registered", _tr("Registered"));
+    	$smarty->assign("ColorRegister", "#008800");
+    }
+
     $smarty->assign("md_message_title", _tr('md_message_title'));
     $sCurYear = date('Y');
     if ($sCurYear < '2013') $sCurYear = '2013';
     $smarty->assign("currentyear", $sCurYear);
     $smarty->assign("ABOUT_ELASTIX_CONTENT", _tr('About Elastix Content'));
     $smarty->assign("ABOUT_CLOSED", _tr('About Elastix Closed'));
-    $smarty->assign("Profile_l", _tr('Profile'));
     $smarty->assign("LOGOUT", _tr('Logout'));
-    $smarty->assign("textMode", _tr('textMode'));
+    $smarty->assign("VersionDetails", _tr('VersionDetails'));
+    $smarty->assign("VersionPackage", _tr('VersionPackage'));
+	$smarty->assign("textMode", _tr('textMode'));
     $smarty->assign("htmlMode", _tr('htmlMode'));
-    $smarty->assign("INT_SESSION", _tr('Starting Session'));
+	$smarty->assign("AMOUNT_CHARACTERS", _tr("characters left"));
+	$smarty->assign("SAVE_NOTE", _tr("Save Note"));
+	$smarty->assign("MSG_SAVE_NOTE", _tr("Saving Note"));
+	$smarty->assign("MSG_GET_NOTE", _tr("Loading Note"));
+	$smarty->assign("LBL_NO_STICKY", _tr("Click here to leave a note."));
     $smarty->assign("ABOUT_ELASTIX", _tr('About Elastix')." ".$arrConf['elastix_version']);
+
     $selectedMenu = getParameter('menu');
+
     /* El módulo _elastixutils sirve para contener las utilidades json que
      * atienden requerimientos de varios widgets de la interfaz Elastix. Todo
      * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
     // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
     if (!is_null($selectedMenu) && $selectedMenu == '_elastixutils' && 
-        file_exists("$elxPath/apps/_elastixutils/index.php")) {
+        file_exists('modules/_elastixutils/index.php')) {
         
         // Cargar las configuraciones para el módulo elegido
-        if (file_exists("$elxPath/apps/_elastixutils/configs/default.conf.php")) {
-            require_once "apps/_elastixutils/configs/default.conf.php";
+        if (file_exists('modules/_elastixutils/configs/default.conf.php')) {
+            require_once 'modules/_elastixutils/configs/default.conf.php';
 
             global $arrConf;
             global $arrConfModule;
-            if(is_array($arrConfModule))
-                $arrConf = array_merge($arrConf, $arrConfModule);
+            $arrConf = array_merge($arrConf, $arrConfModule);
         }
         
         // Cargar las traducciones para el módulo elegido
         load_language_module($selectedMenu);
         
-        require_once "apps/_elastixutils/index.php";
+        require_once 'modules/_elastixutils/index.php';
         echo _moduleContent($smarty, $selectedMenu);
         return;
     }
 
+    /* El módulo pbxadmin que integra a FreePBX no construye enlaces con 
+     * parámetros menu, ni con config.php en todos los casos. Por lo tanto, los
+     * usos sucesivos de enlaces en FreePBX embebido requiren recordar que se
+     * sirven a través de pbxadmin. */
+    if (empty($selectedMenu) && !empty($_SESSION['menu']))
+        $selectedMenu = $_SESSION['menu'];
+
     // Inicializa el objeto palosanto navigation
     $oPn = new paloSantoNavigation($arrMenuFiltered, $smarty, $selectedMenu);
     $selectedMenu = $oPn->getSelectedModule();
+    $_SESSION['menu'] = $selectedMenu;
+
+    // Guardar historial de la navegación
+    // TODO: también para rawmode=yes ?
+    putMenuAsHistory($pdbACL, $pACL, $idUser, $selectedMenu);
+
     // Obtener contenido del módulo, si usuario está autorizado a él
-    $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, $selectedMenu);
-    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : array('data'=>'');    
+    $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, "access", $selectedMenu);
+    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : '';    
+    
     // rawmode es un modo de operacion que pasa directamente a la pantalla la salida
     // del modulo. Esto es util en ciertos casos.
     $rawmode = getParameter("rawmode");
     if(isset($rawmode) && $rawmode=='yes') {
-        $changeModule = getParameter("changeModule");
-        if(isset($changeModule) && $changeModule=='yes'){
-            require_once "libs/paloSantoJSON.class.php";
-            $jsonObject = new PaloSantoJSON();
-            if ($bModuleAuthorized) {
-                $jsonObject->set_message($sModuleContent);
-            }else{
-                $jsonObject->set_error("Module is invalid");
-            }
-            echo $jsonObject->createJSON();
-            return;
-        }else{
-            echo $sModuleContent['data'];
-            return;
-        }
+        echo $sModuleContent;
     } else {
         $oPn->renderMenuTemplates();
 
-        if (file_exists($arrConf['basePath'].'/web/themes/'.$arrConf['mainTheme'].'/themesetup.php')) {
-        	require_once($arrConf['basePath'].'/web/themes/'.$arrConf['mainTheme'].'/themesetup.php');
+        if (file_exists('themes/'.$arrConf['mainTheme'].'/themesetup.php')) {
+        	require_once('themes/'.$arrConf['mainTheme'].'/themesetup.php');
             themeSetup($smarty, $selectedMenu, $pdbACL, $pACL, $idUser);
         }
 
         // Autorizacion
         if ($bModuleAuthorized) {
-            if(isset($sModuleContent['JS_CSS_HEAD'])){
-                //es necesario cargar los css y js que el modulo pone
-                //$smarty->assign("HEADER_MODULES",$sModuleContent['JS_CSS_HEAD']);
-                $smarty->assign("CONTENT", $sModuleContent['JS_CSS_HEAD']."<div id='module_content_framework_data'>".$sModuleContent['data']."</div>");
-            }else{
-                $smarty->assign("CONTENT", "<div id='module_content_framework_data'>".$sModuleContent['data']."<div>");
-            }
-            
+            $smarty->assign("CONTENT", $sModuleContent);
             $smarty->assign('MENU', (count($arrMenuFiltered) > 0) 
-                ? $smarty->fetch("_common/_menu_uf.tpl") 
+                ? $smarty->fetch("_common/_menu.tpl") 
                 : _tr('No modules'));
         }
-        $smarty->display("_common/index_uf.tpl");
+        $smarty->display("_common/index.tpl");
     }
 } else {
-    $rawmode = getParameter("rawmode");
+	$rawmode = getParameter("rawmode");
     if(isset($rawmode) && $rawmode=='yes'){
         include_once "libs/paloSantoJSON.class.php";
         $jsonObject = new PaloSantoJSON();
@@ -256,22 +235,20 @@ if (isset($_SESSION['elastix_user']) &&
         $jsonObject->set_message(null);
         Header('Content-Type: application/json');
         echo $jsonObject->createJSON();
-    }else{
-        $oPn = new paloSantoNavigation(array(), $smarty);
-        $oPn->putHEAD_JQUERY_HTML();
-        $smarty->assign("THEMENAME", $arrConf['mainTheme']);
-        $smarty->assign("WEBPATH", "web/");
-        $smarty->assign("WEBCOMMON", $arrConf['webCommon']."/");      
-        $smarty->assign("currentyear",date("Y"));
-        $smarty->assign("PAGE_NAME", _tr('Login page'));
-        $smarty->assign("WELCOME", _tr('Welcome to Elastix'));
-        $smarty->assign("ENTER_USER_PASSWORD", _tr('Please enter your username and password'));
-        $smarty->assign("USERNAME", _tr('Usernam'));
-        $smarty->assign("PASSWORD", _tr('Password'));
-        $smarty->assign("SUBMIT", _tr('Submit'));
-        
-        $smarty->display("_common/login_uf.tpl");
-
     }
+    else{
+        $oPn = new paloSantoNavigation(array(), $smarty);
+		$oPn->putHEAD_JQUERY_HTML();
+		$smarty->assign("THEMENAME", $arrConf['mainTheme']);
+		$smarty->assign("currentyear",date("Y"));
+		$smarty->assign("PAGE_NAME", _tr('Login page'));
+		$smarty->assign("WELCOME", _tr('Welcome to Elastix'));
+		$smarty->assign("ENTER_USER_PASSWORD", _tr('Please enter your username and password'));
+		$smarty->assign("USERNAME", _tr('Username'));
+		$smarty->assign("PASSWORD", _tr('Password'));
+		$smarty->assign("SUBMIT", _tr('Submit'));
+
+		$smarty->display("_common/login.tpl");
+	}
 }
 ?>

@@ -1,0 +1,76 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify"> The Distributed DialPlan allows sharing the DialPlan with other servers through Internet or LAN. The module "Remote Server" shows the list of remote servers that we are requesting connection and also creates new request. In order to create a new request, first you have to enter the "General Information" of your Elastix Server from the module "Company Information". See the alert message in Figure 1.</p>
+	<br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_remote_1.png" border="0" />
+	<p>Figure 1</p></div>
+	<br/><br/>
+<p align="Justify">If you have entered the General Information of your Elastix server, you will be able to make a request and delete connections (See figure 2).</p>
+	<br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_main.png" border="0" />
+	<p>Figure 2</p></div>
+	<br/><br/>
+
+	<b style="font-size: 20px;">New Request</b>
+
+	<p align="Justify">To create a connection, click on the button "New Request" and fill the form (See Figure 3)</p>
+	<br />
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_request.png" border="0" />
+	<p>Figure 3</p></div>
+	<br/><br/>
+	<div>
+	Where:
+	  <ul>
+	      <li><b style="font-style: italic;">Remote Server:</b> The IP of the remote server where the request will be sent.</li>
+	      <li><b style="font-style: italic;">Remote Server's Key:</b> This is the secret key of the server we are going to connect to and it can be obtained from the module "Server Key" in the remote server. This key can be sent via email.</li>
+	      <li><b style="font-style: italic;">Comment:</b> Some comments about the request.</li>
+	  </ul>
+	</div>
+
+<p align="Justify">Once you have requested the connection, you will see the status <b><i>Waiting Response...</i></b> in the list of remote servers as shown in Figure 4. This means that we are waiting for the remote server to accept the connection request.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_remote_2.png" border="0" />
+	<p>Figure 4</p></div>
+	<br/><br/>
+<p align="Justify">If the remote server accepts the request, the status will be <b><i>Connected</b></i> in both servers (See Figure 5). Here you can do some actions as "View" the details of connection (See Figure 6) and "Disconnect".</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_status_1.png" border="0" />
+	<p>Figure 5</p></div>
+	<br/><br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_view_1.png" border="0" />
+	<p>Figure 6</p></div>
+	<br/><br/>
+<p align="Justify">If the remote server rejects the request, the status will be <b><i>Rejected</b></i> (See Figure 7).</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_status_2.png" border="0" />
+	<p>Figure 7</p></div>
+	<br/><br/>
+	<b style="font-size: 20px;">Reception of petition from a Remote Server</b>
+
+	<p align="Justify">When a remote server sends us a request to establish a connection to our local server, we can accept it or reject it. The Figure 8 shows the request from a remote server to our server.</p>
+	<br/>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_request_2.png" border="0" />
+	<p>Figure 8</p></div>
+	<br/><br/>
+	<div>
+	Where:
+	  <ul style="list-style-type: none;">
+	      <li><b>Remote Server:</b> This is the server that is sending the request of connection to our local server.</li>
+	      <li><b>Connection Status:</b> This field informs that we have a new request waiting for our response. Click on "New Connection Request" to see the details of the server that wants to connect to us (See figure 9).</li>
+	      <li><b>Actions:</b> Here we can Accept or Reject the request.</li>
+	  </ul>
+	</div>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_view_2.png" border="0" />
+	<p>Figure 9</p></div>
+	<br/><br/>
+	<br/>
+	<b style="font-size: 20px;">Deleting a request</b>
+
+	<p align="Justify">To remove a request from the remote server list, click on the checkbox of the request you want to delete from the list, click on the button "Delete" and accept the confirmation message (See Figure 10).</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_delete.png" border="0" />
+	<p>Figure 10</p></div>
+	<br/><br/>
+    </body>
+</html>

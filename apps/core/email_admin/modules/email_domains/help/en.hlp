@@ -1,0 +1,33 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>The option “Domains” of the Menu “Email” in Elastix lets us view and create domains in the email server.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_domains.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+<h3>Create Domain</h3>
+
+<p>To add a domain, click on the “Create Domain” button. A form will be shown where you will input the name of the new domain.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_domains_create.png" border="0" />
+<p>Figure 2</p></div>
+<br />
+<h3>Delete a Domain</h3>
+
+<p>Clicking on the name of a domain will bring us to a screen that shows a "Delete" button.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email_domains_view_del.png" border="0" />
+<p>Figure 3</p></div>
+<br />
+
+
+
+</body>
+</html>

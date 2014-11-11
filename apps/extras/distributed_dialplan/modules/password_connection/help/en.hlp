@@ -1,0 +1,25 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify">This module generates and sends by email a key that is necessary for other servers to establish a connection to this server (See Figure 1). Below a description of each field:</p>
+
+<ul style="list-style-type: none;">
+	      <li><b>Key:</b> Click on the button <i>"Generate a Key"</i> to generate a key that will be used to authenticate the remote servers that want to connect to this server.</li>
+	      <li><b>Emails:</b> The generated key will be sent to these email accounts.</li>
+	      <li><b>Message:</b> The message in the email.</li>
+	  </ul>
+        <!-- Form to add images -->
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_serverkey.png" border="0" />
+	<p>Figure 1</p></div>
+	<br/><br/>
+	<div><b>Email Sent:</b></div><br/>
+	<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_email.png" border="0" />
+	<p>Figure 2</p></div>
+<br />
+<br />
+    </body>
+</html>

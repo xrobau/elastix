@@ -268,10 +268,19 @@ function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL,
         $sMacClass = '';
         $sMacAllow = '';
         if ($bExito && $bPhonesOnly) {
+            $sMysqlRootPass = 'eLaStIx.2oo7';
+            foreach (file('/etc/elastix.conf') as $s) {
+                $regs = NULL;
+                if (preg_match('/^mysqlrootpwd\s*=\s*(.+)$/', trim($s), $regs)) {
+                    $sMysqlRootPass = $regs[1];
+                    break;
+                }
+            }
+
             try {
-                $conn = new PDO('sqlite:/var/www/db/endpoint.db');
+                $conn = new PDO('mysql:host=localhost;dbname=endpointconfig', 'root', $sMysqlRootPass);
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $sth = $conn->query('SELECT mac.value FROM mac ORDER BY mac.value');
+                $sth = $conn->query('SELECT mac_prefix FROM mac_prefix ORDER BY mac_prefix');
                 $macs = $sth->fetchAll(PDO::FETCH_COLUMN);
                 if (count($macs) > 0) {
                     $sMacAllow = 'allow members of "elastix-known-phones";';

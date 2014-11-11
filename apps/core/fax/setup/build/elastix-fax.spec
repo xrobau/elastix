@@ -2,15 +2,15 @@
 
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 7
+Version: 2.5.0
+Release: 1
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: elastix-framework >= 2.3.0-2
 Prereq: iaxmodem, hylafax
 # ghostscript supplies eps2eps, ps2pdfwr, gs
 Requires: ghostscript
@@ -26,82 +26,52 @@ Elastix Module Fax
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/faxdocs
-mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/tmpfaxdocs
-
 # Files provided by all Elastix modules
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
-bdir=%{_builddir}/%{modname}
-for FOLDER0 in $(ls -A modules/)
-do
-		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
-		do
-			case "$FOLDER0" in 
-				frontend)
-					mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-				;;
-				backend)
-					mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
-				;;
-			esac
-			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-			mv $bdir/modules/$FOLDER0/$FOLDER1/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-		done
-done
+mkdir -p    $RPM_BUILD_ROOT/var/www/html/
+mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # Files personalities for hylafax
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/privileged
-mkdir -p $RPM_BUILD_ROOT/etc/init
-mkdir -p $RPM_BUILD_ROOT/etc/logrotate.d
-mkdir -p $RPM_BUILD_ROOT/etc/cron.daily
-
-#mv setup/hylafax/bin/includes                 $RPM_BUILD_ROOT/var/spool/hylafax/bin/
-mv setup/hylafax/bin/elastix-faxevent	      $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/faxrcvd-elastix.php      $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/faxrcvd.php              $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/notify-elastix.php       $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/bin/notify.php               $RPM_BUILD_ROOT/var/spool/hylafax/bin/
+mv setup/hylafax/bin/elastix-faxevent         $RPM_BUILD_ROOT/var/spool/hylafax/bin/
 mv setup/hylafax/etc/FaxDictionary            $RPM_BUILD_ROOT/var/spool/hylafax/etc/
-mv setup/hylafax/etc/FaxDispatch              $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/hylafax/etc/config                   $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/hylafax/etc/setup.cache              $RPM_BUILD_ROOT/var/spool/hylafax/etc/
 mv setup/usr/share/elastix/privileged/*       $RPM_BUILD_ROOT/usr/share/elastix/privileged
-mv setup/etc/init/faxgetty.conf               $RPM_BUILD_ROOT/etc/init/
-mv setup/etc/logrotate.d/elastixfax	      $RPM_BUILD_ROOT/etc/logrotate.d/
-mv setup/etc/cron.daily/elastix_tmpfax_cleanup		$RPM_BUILD_ROOT/etc/cron.daily/
-rm -rf setup/hylafax
+rmdir setup/hylafax/bin setup/hylafax/etc/ setup/hylafax
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share setup/usr
-rmdir setup/etc/init setup/etc/logrotate.d setup/etc/cron.daily
 
-chmod	 755 $RPM_BUILD_ROOT/etc/cron.daily/elastix_tmpfax_cleanup
-
-#chmod -R 755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/includes
-chmod	 755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/elastix-faxevent
 chmod    755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/faxrcvd.php
 chmod    755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/faxrcvd-elastix.php
 chmod    755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/notify.php
 chmod    755 $RPM_BUILD_ROOT/var/spool/hylafax/bin/notify-elastix.php
 
 # move main library of FAX. 
-mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/libs
-mv setup/paloSantoFax.class.php               $RPM_BUILD_ROOT/usr/share/elastix/libs/
+mkdir -p    $RPM_BUILD_ROOT/var/www/html/libs
+mv setup/paloSantoFax.class.php               $RPM_BUILD_ROOT/var/www/html/libs/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 # new for fax
 mkdir -p $RPM_BUILD_ROOT/var/log/iaxmodem
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/bin
 mkdir -p $RPM_BUILD_ROOT/var/spool/hylafax/etc
+mkdir -p $RPM_BUILD_ROOT/var/www/faxes
 mkdir -p $RPM_BUILD_ROOT/var/www/faxes/recvd
 mkdir -p $RPM_BUILD_ROOT/var/www/faxes/sent
 
+# ** Fax Visor additional config ** #
+chmod 755 $RPM_BUILD_ROOT/var/www/faxes
+chmod 775 $RPM_BUILD_ROOT/var/www/faxes/recvd $RPM_BUILD_ROOT/var/www/faxes/sent
 
 %pre
 mkdir -p /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -141,35 +111,38 @@ for i in `ls /var/spool/hylafax/etc/config.* 2>/dev/null`; do
   fi
 done
 
-pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
-# Run installer script to fix up ACLs and add module to Elastix menus.
-#elastix-menumerge $pathModule/setup/infomodules
-service mysqld status &>/dev/null
-res=$?
-if [ $res -eq 0 ]; then
-	#service is up
-	elastix-menumerge $pathModule/setup/infomodules	
-else
-	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
-		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
-		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
-	fi
+# Cambio de nombre de carpetas de faxes, esto es desde elastix 1.4
+if [ -d "/var/www/html/faxes/recvq" ]; then
+        mv /var/www/html/faxes/recvq/* /var/www/faxes/recvd
+        rm -rf /var/www/html/faxes/recvq
 fi
 
+if [ -d "/var/www/html/faxes/sendq" ]; then
+        mv /var/www/html/faxes/sendq/* /var/www/faxes/sent
+        rm -rf /var/www/html/faxes/sendq
+fi
+
+if [ -d "/var/www/html/faxes" ]; then
+        mv /var/www/html/faxes/* /var/www/faxes
+fi
+
+# Fix ownership and permission for sudo-less notification scripts
+if [ $1 -eq 2 ]; then
+	chmod 775 /var/www/faxes/recvd /var/www/faxes/sent
+	chown asterisk.uucp /var/www/faxes/recvd /var/www/faxes/sent
+fi
+
+pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
+# Run installer script to fix up ACLs and add module to Elastix menus.
+elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
+
+pathSQLiteDB="/var/www/db"
+mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
 rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
-# en caso de instalacion movemos el archivo FaxDispatch
-    if [ -f /var/spool/hylafax/etc/FaxDispatch ]; then
-        fecha=$(date +%F.%T) 
-        mv /var/spool/hylafax/etc/FaxDispatch /var/spool/hylafax/etc/FaxDispatch_$fecha
-    fi
-    mv $pathModule/FaxDispatch /var/spool/hylafax/etc/FaxDispatch
-    chmod 644 /var/spool/hylafax/etc/FaxDispatch
-    chown uucp.uucp /var/spool/hylafax/etc/FaxDispatch
-# The installer database
+  # The installer database
     elastix-dbprocess "install" "$pathModule/setup/db"
 elif [ $1 -eq 2 ]; then #update
     elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
@@ -185,7 +158,7 @@ php /tmp/new_module/%{modname}/setup/installer.php
 
 rm -rf /tmp/new_module
 
-#chmod 666 /var/www/db/fax.db
+chmod 666 /var/www/db/fax.db
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -194,422 +167,222 @@ rm -rf $RPM_BUILD_ROOT
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete Fax menus"
-  elastix-menuremove $pathModule/setup/infomodules
+  elastix-menuremove "%{modname}"
 
   echo "Dump and delete %{name} databases"
   elastix-dbprocess "delete" "$pathModule/setup/db"
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
-/usr/share/elastix/apps/*
-%{_localstatedir}/www/html/*
-/var/www/elastixdir/*
-%defattr(644, asterisk, asterisk)
-/usr/share/elastix/libs/*
 %defattr(-, root, root)
+%{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
 /var/spool/hylafax/bin/*
 /var/spool/hylafax/etc/setup.cache
-/etc/logrotate.d/elastixfax
 %defattr(755, root, root)
 /usr/share/elastix/privileged/*
-/etc/cron.daily/elastix_tmpfax_cleanup
-%defattr(644, root, root)
-/etc/init/faxgetty.conf
 %defattr(775, asterisk, uucp)
 /var/www/faxes/recvd
 /var/www/faxes/sent
+
 %dir
 /var/log/iaxmodem
-%defattr(755, asterisk, uucp)
-/var/www/elastixdir/tmpfaxdocs
 %defattr(-, uucp, uucp)
 %config(noreplace) /var/spool/hylafax/etc/FaxDictionary
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
-* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
-- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
-  SVN history. Bump Release in specfile.
-
-* Mon May 05 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: fax: fix incorrect shell syntax in postinstall scriptlet.
-  SVN Rev[6622]
-
-* Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
-- UPDATED: languages modules were updated.
-  SVN Rev[6619]
-
-* Mon Apr 28 2014 Bruno Macias <bmacias@palosanto.com> 
-- FIXED: apps pbx, kamailio database now is created/
-  SVN Rev[6610]
-
-* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
-- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
-  SVN history. Bump Release in specfile.
-  SVN Rev[6601]
-
-* Mon Mar 10 2014 Bruno Macias <bmacias@palosanto.com> 
-- CHANGED: code of the organization is the same as the domain.
-  SVN Rev[6513]
-
-* Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
-- FIXED: TRUNK - APPS/Fax: Was fixed function editFax. Was added missing
-  argument idUser at moment to call paloFax function editFaxToUser
-  SVN Rev[6436]
-
-* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - APPS/Fax: The function "showSendFax" was modified to send
-  fax from the chat window.
-  SVN Rev[6427]
-
-* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
-- ADDED : TRUNK - APPS/Fax: Was added scroll option in .css file. Was added to
-  the "send fax" option and was created a "cron" that delete the temporal files
-  of the upload fax.
-  SVN Rev[6403]
-
-* Thu Jan 23 2014 Luis Abarca <labarca@palosanto.com> 
-- ADDED: fax - Build/elastix-fax.spec: A new dir that contains the temporal
-  messages of fax that will be sent, it has been created.
-  SVN Rev[6402]
-
-* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
-- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
-  SVN history. Bump Release in specfile.
-  SVN Rev[6390]
-
-* Tue Jan 07 2014 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - APPS/Fax: Were moved all the attributes of the "tooltip" to
-  the .css general file.
-  SVN Rev[6336]
-
-* Wed Dec 18 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Frameworks/Apps: translations fax options (spanish)
-  SVN Rev[6305]
-
-* Fri Dec 13 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - APPS/Fax: The error manager was moved to general folder.
-  SVN Rev[6283]
-
-* Tue Dec 10 2013 Rocio Mera <rmera@palosanto.com> 
-- FIXED: TRUNK - APPS/Fax: Was fixed bug in function deletefaxbyuser. This
-  function delete the fax of a user identified bu his id
-  SVN Rev[6266]
-
-* Wed Nov 27 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Apps/Email: translation in Fax Viewer labels filters
-  (spanish)
-  SVN Rev[6177]
-
-* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: build - *.spec: An error in the logic of the code was unintentionally
-  placed when saving the elastix's spec files.
-  SVN Rev[6125]
-
-* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: build - *.spec: An extra character was unintentionally placed when
-  saving the elastix's spec files.
-  SVN Rev[6116]
-
-* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfiles with the new form of use
-  elastix-menumerge for each elastix module.
-  SVN Rev[6104]
-
-* Mon Nov 11 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: fax - Build/elastix-fax.spec: The absence of two directories creation
-  was a impediment for correct functionality of spec file. (recvd and sent)
-  SVN Rev[6077]
-
-* Tue Nov 05 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Apps/FAX: Was modified module my_fax in order to manage
-  errors in the fields forms, to display error in field form is used tooltip
-  bootstrap plugin.
-  SVN Rev[6064]
-
-* Mon Nov 04 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - APPS/Fax: Was changed the fax table structure. Was added
-  field area_code,country_code,dev_id,port,fax_content,fax_subject also was
-  renamed fields 'callerid_name' to 'clid_name' and 'callerid_number' to
-  'clid_number'. This changes was done to permit the creation of fax that not
-  belong to any user. Also was made changes in lib paloSantoFax and privileged
-  script faxconfig
-  SVN Rev[6055]
-
-* Thu Oct 31 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Apps/FAX: Were modified variables of error message to global
-  variables for to use in others modules.
-  SVN Rev[6047]
-
-* Thu Oct 24 2013 Rocio Mera <rmera@palosanto.com> 
-- ADDED: TRUNK - Apps/FAX: Was added module my_fax to /fax/apps/frontend. this
-  module display configuration the user's fax extension and allow modified
-  SVN Rev[6035]
-
-* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfile with some corrections correspondig
-  to the way of remove tabs in the framework for each elastix module.
-  SVN Rev[5994]
-
-* Mon Oct 07 2013 Rocio Mera <rmera@palosanto.com> 
-- ADDED: Trunk - Framework,Apps: Was added to framework/setup/infomodules xml
-  files mysettings.xml and home.xml. This files create menu to frontend
-  interface. Was also added xml menu files to apps/core/pbx,
-  apps/core/email_admin, apps/core/fax, this files create menu to frontend
-  interface
-  SVN Rev[5992]
-
-* Tue Oct 01 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - Apps/fax: Was added file fax_email_template.xml to
-  infomodules
-  SVN Rev[5964]
-
-* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - Apps: Was renamed directory infomudules to infomodules
-  SVN Rev[5960]
-
-* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
-- DELETED: Tunk - Apps/Fax: Was deleted file menu.xml. This file was divided in
-  a set of files that are stored in setup/infomodules
-- ADDED: Tunk - Apps/Fax: Was added directory infomodules. This directory store
-  a xml files that are used to create elastix resources
-  SVN Rev[5958]
-
-* Mon Sep 30 2013 Rocio Mera <rmera@palosanto.com> 
-- DELETED: Tunk - Apps/Fax: Was deleted file menu.xml. This file was divided in
-  a set of files that are stored in setup/infomodules
-- ADDED: Tunk - Apps/Fax: Was added directory infomodules. This directory store
-  a xml files that are used to create elastix resources
-  SVN Rev[5957]
-
-* Wed Sep 25 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - Framework: Was made change in file db.info in database
-  elxpbx. Was added attribute prefix
-- CHANGED: Trunk - Apps: Was made change in file db.info to elxpbx in module
-  pbx, fax and email_admin
-  SVN Rev[5950]
-
-* Wed Sep 25 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - Additional: Was made change in script elastix-dbprocess. If
-  dbprocess fail it save the sql script that fail is saved with the name
-  prefix_dbname_action in case that prefix attribute is set in db.info file. If
-  prefix attribute is not set the name will be dbname_action. It changes was
-  done to prevent rewrite script files when differents script take actions over
-  a database.
-- CHANGED: Trunk - Framework: Was made change in file db.info in database
-  elxpbx. Was added attribute prefix
-- CHANGED: Trunk - Apps: Was made change in file db.info to elxpbx in module
-  pbx, fax and email_admin
-  SVN Rev[5949]
-
-* Wed Sep 25 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - Apps: Was made change in module faxviewer to solve bug when
-  there is not fax to show. Was made change in module trunk, general_settings
-  and extensions to solve minor bugs
-  SVN Rev[5948]
-
-* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfile with some corrections correspondig
-  to the way of identify and distribute folders to the '/usr/share/elastix/'
-  path and '/var/www/html/' path.
-  SVN Rev[5945]
-
-* Tue Sep 24 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - APPS/FAX: Was made changes in module fax_email_template,
-  faxviewer to rename field COMPANY_NAME and COMPANY_NUMBER for FAX_CID_NAME
-  and FAX_CID_NUMBER. The script elastix-faxevent was also change
-  SVN Rev[5939]
-
-* Mon Sep 23 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - Apps: Was made changes in db.info in apps pbx, email_admin
-  and fax. Was setting to elxpbx databases the param ingore_backup=yes in order
-  to the elastix-dbprocess does not made a backup of this database and delete
-  the database elxpbx. The framework create elxpbx database
-  SVN Rev[5926]
-
-* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: fax - Build/elastix-fax.spec: The path of module libraries were
-  moved to /usr/share/elastix/libs/ .
-  SVN Rev[5916]
-
-* Thu Sep 19 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: fax - Build/elastix-fax.spec: Creating faxdocs folder is handled now
-  by the spec file of this module
-  SVN Rev[5904]
-
-* Thu Sep 12 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
-- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
-  SVN history. Bump Release in specfile.
-  SVN Rev[5873]
-
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- ADDED: fax - setup/infomodules.xml/: Within this folder are placed the new
-  xml files that will be in charge of creating the menus for each module.
-  SVN Rev[5859]
-
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: fax - modules: The modules were relocated under the new scheme that
-  differentiates administrator modules and end user modules .
-  SVN Rev[5858]
-
-* Thu Sep 05 2013 Rocio Mera <rmera@palosanto.com> 
-- ADDED: Trunk - Apps/Fax: Was added module faxqueue. This module permit cancel
-  fax jobs. By the moment this module is just for superadmin in future release
-  must be modified to permit organizations can access this module.
-- DELETED: Trunk - Apps/Fax: Was deleted module faxlist.
-- MOVED: Trunk - Apps/Fax: Was rename module email_template to
-  fax_email_template. This module permit set the default email template used by
-  organization to sent the notification_email that exist at the moment to sent
-  a fax
-- CHANGED: Trunk - Apps/Fax: Was made changed in modules faxviewer,
-  faxmaster,faxclients, sendfax. This changes incorpore the new permissions
-  schemas and the multitenant architecture
-- CHANGED: Trunk - Apps/Fax: Was made changes in lib paloSantoFax. Was added
-  functions to set fax_email_template by org. Was made change in function
-  faxstatus
-  SVN Rev[5839]
-
-* Thu Sep 05 2013 Rocio Mera <rmera@palosanto.com> 
-- ADDED: Trunk - Apps/Fax: Was added module faxqueue. This module permit cancel
-  fax jobs. By the moment this module is just for superadmin in future release
-  must be modified to permit organizations can access this module.
-- DELETED: Trunk - Apps/Fax: Was deleted module faxlist.
-- MOVED: Trunk - Apps/Fax: Was rename module email_template to
-  fax_email_template. This module permit set the default email template used by
-  organization to sent the notification_email that exist at the moment to sent
-  a fax
-- CHANGED: Trunk - Apps/Fax: Was made changed in modules faxviewer,
-  faxmaster,faxclients, sendfax. This changes incorpore the new permissions
-  schemas and the multitenant architecture
-- CHANGED: Trunk - Apps/Fax: Was made changes in lib paloSantoFax. Was added
-  functions to set fax_email_template by org. Was made change in function
-  faxstatus
-  SVN Rev[5838]
-
-* Thu Sep 05 2013 Rocio Mera <rmera@palosanto.com> 
-- ADDED: Trunk - Apps/Fax: Was added script elastix-faxevent to hylafx
-  notifications scripts. This script replace to scripts that were in
-  bin/include. This script sent email_notifications and insert a register when
-  a email is sent or is received
-  SVN Rev[5837]
-
-* Wed Jul 10 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: APPS - FAX: Was made changes in libs paloSantoFax.lass.php to change
-  the path that made include to elastix libs
-  SVN Rev[5306]
-
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - sendfax/: The It was corrected a configuration in the web
-  folder.
-  SVN Rev[5238]
-
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - faxviewer/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5237]
-
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - faxmaster/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5236]
-
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - faxlist/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5235]
-
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - faxclients/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5234]
-
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - email_template/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5233]
-
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - sendfax/: The svn repository for module sendfax in trunk
-  (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5151]
-
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - faxviewer/: The svn repository for module faxviewer in trunk
-  (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5150]
-
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - faxmaster/: The svn repository for module faxmaster in trunk
-  (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5149]
-
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - faxlist/: The svn repository for module faxlist in trunk
-  (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5148]
-
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - faxclients/: The svn repository for module faxclients in
-  trunk (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5147]
-
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - email_template/: The svn repository for module
-  email_template in trunk (Elx 3) was restructured in order to accomplish a new
-  schema.
-  SVN Rev[5146]
-
-* Thu Jun 20 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: Trunk - Apps: Was made chanes in elxpbx databse schema. This
-  database contain data from pbx and now is integrated with framework database.
-- CHANGED: Trunk - Apps: Was made change in privileged script asteriskconfig,
-  email_account and faxconfig. This changes was made to incorpora the elastix
-  framework database changes from sqlite to mysql
-- CHANGED: Trunk - Apss: Was made change in some module of pbx. This changes
-  are part of  elastix framework database changes from sqlite to mysql
-  SVN Rev[5114]
-
-
-* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
-- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
-  SVN history. Bump Release in specfile.
-  SVN Rev[5026]
-
-* Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: remove several instances of command injection vulnerabilities in 
-  paloSantoFax and in privileged script. Use SQL parameters in privileged 
-  script. Pointed out by Fortify report.
-  SVN Rev[4962]
-
-* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
-- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-  SVN Rev[4813]
-
-* Fri Jan 18 2013 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Apps - Modules/Fax: Was made changing in lib paloSantoFax.class.php
-  to add new funtions use at the moment to delete a organization
-  SVN Rev[4602]
-
-* Thu Nov 29 2012 Rocio Mera <rmera@palosanto.com>
-- FIXED: Apps - Fax/SendFax: Was fixed bug introduce in commit 4477. Was
-  removed a print_r() function
-  SVN Rev[4480]
-
-* Thu Nov 29 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Apps - PBX: Was made changed in module ivr to add support to
-  reproduce the recordings in the dialplan
-  SVN Rev[4477]
+* Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
+- CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
+  history. Changed Version and Release in specfile.
+
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
+- CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
+  history. Changed Release in specfile.
+
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Virtual Fax List, New Virtual Fax, Send Fax, Fax Queue, Fax Master, 
+  Fax Clients, Fax Viewer, Email Template: For each module listed here the english 
+  help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6344]
+
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
+  history. Changed Release in specfile.
+  SVN Rev[4838]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5624]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5623]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5622]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5621]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5620]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5619]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5618]
+
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5617]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction in a sql file to modify a registry in faxviewer.
+  SVN Rev[5499]
+
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxviewer. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5498]
+
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module sendfax. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5470]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxviewer. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5409]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxlist. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5408]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxnew. Correction of some mistakes in the translation files.
+  SVN Rev[5407]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxmaster. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5406]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxlist. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5405]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module faxclients. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5404]
+
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module  email_template. Correction of some mistakes in the
+  translation files.
+  SVN Rev[5398]
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Fax: The whole notification script was changed to english language.
+  SVN Rev[5336]
+
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: Fax - Build/elastix-fax.spec: Changed Version and Release in 
+  specfile according to the current branch.
+  SVN Rev[4838]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: email_template module, help section was updated.
+  SVN Rev[4725]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxviewer module, help section was updated.
+  SVN Rev[4723]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxclients module, help section was updated.
+  SVN Rev[4722]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: master module, help section was updated.
+  SVN Rev[4721]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxqueue module, help section was updated.
+  SVN Rev[4720]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxqueue module, help section was updated.
+  SVN Rev[4719]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: sendfax module, help section was updated.
+  SVN Rev[4718]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxnew module, help section was updated.
+  SVN Rev[4717]
+
+* Wed Feb 20 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: faxlist module, help section was updated.
+  SVN Rev[4716]
+
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: Fax - Build/elastix-fax.spec: Changed Version and Release in 
+  specfile according to the current branch. 
+
+* Mon Nov 19 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-7
+- CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4442]  
 
 * Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Fax: pick up notification email from submitted fax job in addition to
+  notification email for outgoing fax device. Fixes Elastix bug #1300.
+  SVN Rev[4424]
+- CHANGED: Fax Viewer: use LEFT JOIN instead of simple join for fax table. This
+  prepares the report for sent notifications where fax device is 'any', as 
+  placed by WinHylafax.
+  SVN Rev[4423]
+- CHANGED: Fax: Add support in notification scripts for new placeholder 
+  {JOB_STATUS} which will be replaced with the final status of the fax job.
+  Update default email notification to make use of {JOB STATUS}. Final part of
+  fix for Elastix bug #1299.
+  SVN Rev[4422]
+- CHANGED: Fax Viewer: now that the notification scripts populate the status
+  field in the fax database, we can show the information to the user. This 
+  provides a much-needed feedback on the final status of the fax job. Part of
+  fix for Elastix bug #1299.
+  SVN Rev[4421]
 - FIXED: Send Fax: check whether text to send as fax is entirely ASCII, and 
   attempt to convert to ISO-8859-15 if not, before converting to PostScript
   directly. Fixes Elastix bug #446.
   SVN Rev[4419]
 
+* Wed Nov  7 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Send Fax: properly track status of submitted fax job by ID instead of 
+  assuming that an idle modem means the fax was sent successfully. Part of fix
+  for Elastix bug #1299.
+  SVN Rev[4416] 
+
 * Tue Nov  6 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax Queue: reimplement fax job listing on top of getFaxStatus
+  SVN Rev[4415]
+- CHANGED: Fax: rework getFaxStatus method to provide more information about the
+  fax queue, in addition to the modems.
+  SVN Rev[4414]
+- ADDED: Fax: new module Fax Queue to monitor status of outgoing faxes that
+  cannot be immediately dispatched.
+  SVN Rev[4413]
 - CHANGED: Send Fax: partial cleanup:
   Do not silently ignore failure to submit a fax job, and display error instead.
   Remove useless code that could potentially error out the module.
@@ -619,6 +392,17 @@ fi
   prevents legitimate text files from being uploaded, and sendfax already has
   to figure out file type in order to apply conversion.
   SVN Rev[4412]
+- CHANGED: Fax Queue: implement fax job cancelation. Fix regexp to show running
+  jobs, not just stalled ones. Remove stray debugging messages.
+  SVN Rev[4410]
+
+* Mon Nov  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Fax: new module Fax Queue to monitor status of outgoing faxes that 
+  cannot be immediately dispatched.
+  SVN Rev[4408]
+- FIXED: Fax: fix regression in which mail notification placeholders were not
+  replaced with the intended values.
+  SVN Rev[4402]
 
 * Fri Oct 26 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Fax Viewer: at check status routine, session variable might be 
@@ -626,10 +410,47 @@ fi
   session variable only after checking it is too an array.
   SVN Rev[4384]
 
+* Mon Oct 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax: rewrite fax notification scripts. This achieves the following:
+  Improved readability and documentation of the code.
+  Unification of notification for sent and received faxes as a single method.
+  Removal of unnecessary uses of external commands (grep, sqlite3).
+  Use of SQL parameters in database manipulation.
+  Removal of some cases where the invocation of an external command could fail
+  silently and lead to a missing fax file.
+  Reduction of code size, even after including documentation.
+  Notification script now logs success/failure messages in preparation for GUI.
+  Fixes Elastix bug #1387.
+  SVN Rev[4379]
+
 * Thu Oct 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Fax: extend faxconfig helper script to detect a systemd environment
+  and adapt fax tty initialization to it. Required to set up virtual faxes 
+  correctly in Raspberry Pi.
+  SVN Rev[4375]
 - CHANGED: Fax: add Requires: ghostscript, /usr/bin/tiff2pdf to specfile. This
   fixes inability to display received fax in Fedora 17 for Raspberry Pi.
   SVN Rev[4369]
+
+* Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+ - Framework,Modules: remove temporary file preversion_MODULE.info under
+  /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on RPM
+  update. Part of the fix for Elastix bug #1398.
+  - Framework,Modules: switch as many files and directories as possible under
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
+  Elastix bug #1399.
+  - Framework,Modules: clean up specfiles by removing directories under
+  /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
+  because all of their files get moved to other places.
+  - Endpoint Configurator: install new configurator properly instead of leaving
+  it at module_installer/MODULE/setup
+  SVN Rev[4354]
+
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-6
+- CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4348]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -642,89 +463,28 @@ fi
 - Framework,Modules: clean up specfiles by removing directories under 
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
-- Endpoint Configurator: install new configurator properly instead of leaving
-  it at module_installer/MODULE/setup
   SVN Rev[4347]
 
-* Wed Sep 26 2012 Rocio Mera <rmera@palosanto.com>
-- FIXED: Conflicts between files provided by hylafax and elastix-fax rpm.
-  SVN Rev[4311]
+* Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: faxconfig: change the encoding used to identify the
+  virtual fax ttys written to /etc/inittab. This raises the maximum number of
+  virtual faxes from 255 to 46655.
+- CHANGED: faxconfig: update help text to mention new supported actions.
+  SVN Rev[4198]
 
-* Wed Sep 26 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Apps - Fax: Spec fiel was modified to solve conflicts FaxDispatch
-  file with hylafax
-  SVN Rev[4310]
-
-* Wed Sep 26 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Apps - Fax/elastix-fax.spec: Was necesary modified spec file to move
-  file faxgetty.conf to /etc/init directory
-  SVN Rev[4308]
-
-* Wed Sep 26 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Apps - Fax: Was modified file hylifax/bin/includes/functions.php.
-  This file use a privileged script to insert recived fax in table fax_docs
-  SVN Rev[4303]
-
-* Thu Sep 25 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: fax - Build/elastix-fax.spec: Was added in spec 
-  FaxDispatch file. It necesary is file be moved to 
-  /var/spool/hylafax/etc
-  SVN Rev[4298]
-  
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-- CHANGED: In spec file changed Prereq elastix-framework to
-  elastix-framework >= 3.0.0-1
-  SVN Rev[4226]
-
-* Thu Aug 30 2012 German Macas <gmacas@palosanto.com>
-- CHANGED: modules - faxlist: Fixed process to check Fax status
-  SVN Rev[4159]
-
-* Wed Aug 29 2012 German Macas <gmacas@palosanto.com>
-- CHANGED : modules - faxlist - sendfax - faxviewer: Add option to check faxes
-  status in faxlist, fixed messagges when send a fax, show status failed or OK
-  of sent faxes in faxviewer
-  SVN Rev[4156]
-
-* Fri Jul 27 2012 Rocio Mera <rmera@palosanto.com>
-- FIXED: Apps - Fax/Modules: Was fixed a bug in module faxviewer introduced in
-  commit 4068
-  SVN Rev[4080]
-
-* Wed Jul 18 2012 Rocio Mera <rmera@palosanto.com>
-- ADDED: Apps - Fax/Faxlist: Was added file filter.tpl. this file it is
-  necesary to commit 4068
-  SVN Rev[4069]
-
-* Wed Jul 18 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Apps - Fax: Was modified modules faxlist, sendfax and faxviewer to
-  made compatible con multitenant model. Lib paloSantoFax.class.php and script
-  to send and recive fax inside Setup/Hylafax was changed too
-  SVN Rev[4068]
-
-* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Apps - Fax/faxconfig: Script faxconfig was changed to support
-  multitenant
-  SVN Rev[4052]
-
-* Fri Jul 6 2012 Rocio Mera <rmera@palosanto.com>
-- CHANGED: Fax - Setup/paloSantoFax.class.php: Where changed lib
-  paloSantoFax.class.php to support multitenant
-  SVN Rev[4044]
-
-* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Remove stray print_r.
-  SVN Rev[4017]
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-5
+- CHANGED: Fax - Build/elastix-fax.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
 * Wed May 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Modules - Fax Viewer: relax unnecessarily-restrictive validation type
   on "Company Fax" filter option. Fixes Elastix bug #1281. SVN Rev[3946]
+  SVN Rev[3946]
 
 * Mon May 28 2012 German Macas <gmacas@palosanto.com> 2.3.0-4
 - CHANGED: modules - sendfax: Add messages of sending fax process with ajax 
-  on Send Fax application form. SVN Rev[3937]
+  on Send Fax application form.
+  SVN Rev[3937]
 
 * Wed May 02 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-3
 - FIXED: Modules - faxlist: Duplicate name column "Name Caller ID" was fixed.

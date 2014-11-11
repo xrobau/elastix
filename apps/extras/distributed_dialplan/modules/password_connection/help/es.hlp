@@ -1,0 +1,25 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify">Este módulo genera las claves necesarias para la autenticación de servidores remotos que desean establecer una conexión con este servidor (Ver Figura 1). A continuación una breve descripción de cada campo:</p>
+
+<ul style="list-style-type: none;">
+	      <li><b>Clave:</b> Puede generar una nueva clave haciendo click en el botón "Generar una Clave". El servidor remoto que desee conectarse a nosotros necesitará esta clave.</li>
+	      <li><b>Correo:</b> La clave generada puede ser enviada a los correos electrónicos especificados en este campo.</li>
+	      <li><b>Mensaje:</b> Mensaje que irá dentro del correo electrónico.</li>
+	  </ul>
+        <!-- Form to add images -->
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_serverkey.png" border="0" />
+	<p>Figura 1</p></div>
+	<br/><br/>
+	<div><b>Correo Electrónico enviado:</b></div><br/>
+	<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email.png" border="0" />
+	<p>Figura 2</p></div>
+<br />
+<br />
+    </body>
+</html>

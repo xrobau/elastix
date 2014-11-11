@@ -1,0 +1,24 @@
+<html>
+    <header>
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+    </header>
+    <body>
+        <h1>{$node_name}</h1>
+        <p align="Justify"></p>
+
+        <!-- Form to add images -->
+
+<p align="Justify">El módulo "Proveedor VoIP" permite configurar troncales SIP para cualquier proveedor SIP o IAX de los mostrados en la figura 1. Aquí usted puede habilitar, deshabilitar o eliminar cuentas. Use el filtro para configurar una cuenta con un proveedor determinado (Ver Figura 1).</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_voip_provider2.png" border="0" />
+        <p>Figura 1</p></div>
+<p align="Justify">Para <b>Editar</b> una cuenta existente haga click en el enlace azul "Editar" ubicado a la derecha de cada cuenta en la columna Editar. También puede "Habilitar" o "Deshabilitar" las cuentas en la columna "Estado". Para eliminar una cuenta selecciónela y haga click en el botón "Eliminar".</p>
+<p align="Justify">Puede descargar la lista de cuentas en diferentes formatos como CSV, XLS y PDF haciendo click en el botón "Descargar".</p>
+        <h2>Crear una nueva cuenta</h2>
+<p align="Justify">Los parámetros a configurar están divididos en dos secciones: "General Setting" y "PEER Setting".</p>
+<p align="Justify">Escoja el Proveedor VoIP de la lista y llene los parámetros con la información adecuada de su cuenta dada por su proveedor. Para ver la sección PEER Setting haga click en Avanzado. En la sección PEER Setting están configurados los parámetros predeterminados para un proveedor escogido, pero estos pueden ser modificados. Si su proveedor no se encuentra en la lista escoja la opción "Custom" de la lista (Ver Figura 2).</p>
+<p align="Justify">Recuerde que su proveedor VoIP debe proporcionarle toda esta información para que la cuenta pueda ser configurada correctamente.</p>
+        <div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_voip_provider.png" border="0" />
+	    <p>Figura 2</p></div>
+    </body>
+</html>

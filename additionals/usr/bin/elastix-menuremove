@@ -35,63 +35,45 @@ This script delete menus and resources elastix.
 
 if ($argc < 2) die("Please specify the name of parent id menu.\n");
 
-$elxPath="/usr/share/elastix";
-require_once("$elxPath/libs/misc.lib.php");
-require_once("$elxPath/configs/default.conf.php");
+$documentRoot="/var/www/html";
+require_once("$documentRoot/libs/misc.lib.php");
+require_once("$documentRoot/configs/default.conf.php");
 
 //global variables framework
 global $arrConf;
 global $arrLang;
-require_once("$elxPath/libs/paloSantoDB.class.php");
-require_once("$elxPath/libs/paloSantoACL.class.php");
-require_once("$elxPath/libs/paloSantoModuloXML.class.php");
+require_once("$arrConf[basePath]/libs/paloSantoDB.class.php");
+require_once("$arrConf[basePath]/libs/paloSantoMenu.class.php");
+require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
 
-$pDBACL = new paloDB($arrConf['elastix_dsn']["elastix"]);
+$pDB = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/menu.db");
+$pDBACL = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/acl.db");
 
+if(!empty($pDB->errMsg)) echo "ERROR DE DB: {$pDB->errMsg}\n";
 if(!empty($pDBACL->errMsg)) echo "ERROR DE DB: {$pDBACL->errMsg}\n";
 
-$pACL = new paloACL($pDBACL);
-if(isset($_SERVER['argv'][1])){
-    if(!is_dir($_SERVER['argv'][1])){
-        echo "{$_SERVER['argv'][1]} is not a directory\n";
-        return 1;
-    }
-    
-    $dir=$_SERVER['argv'][1];
-    
-    //obtenmos los nombres de los archivos xml que reprensantan recursos o menus dentro de elastix
-    $arrXMLs=obtainFiles($dir,"xml");
-    if($arrXMLs==false)
-        return 0; //no existen archivos dentro dle directorio
-    
-    foreach($arrXMLs as $file_xml){
-        //leemos el modulo xml
-        $oModuloXML= new ModuloXML($dir."/".$file_xml);
-        if($oModuloXML){
-            $resource=$oModuloXML->getArbolResource();
-            $pACL->_DB->beginTransaction();
-            if($pACL->deleteResource($resource['id'])){
-                $pACL->_DB->commit();
-                echo "Resource for file $file_xml was removed successfully.\n";
-            }else{
-                $pACL->_DB->rollBack();
-                echo "Resource for file $file_xml can not be removed. ".$pACL->errMsg."\n";
-            }
-        }else{
-            echo "$file_xml is bad former, can not be readen\n";
-        }
-    }
-}else{
-    echo "Error: Directory that contains xml files is not defined. Usage: {$_SERVER['argv'][0]} menu.xml\n";
-    return 1;
-}
+$oMenu = new paloMenu($pDB);
+$oACL = new paloACL($pDBACL);
 
-function obtainFiles($dir,$type){
-    $files =  glob($dir."/{*.$type}",GLOB_BRACE);
-    $names ="";
-    foreach ($files as $ima)
-        $names[]=array_pop(explode("/",$ima));
-    if(!$names) return false;
-    return $names;
+if(isset($_SERVER['argv'][1])){
+    $idmenu = $_SERVER['argv'][1];
+    
+    $oMenu->_DB->beginTransaction();
+    $oACL->_DB->beginTransaction();
+ 
+    if($oMenu->deleteFather($idmenu, $oACL)){
+        $oMenu->_DB->commit();
+        $oACL->_DB->commit();
+	echo "The menus have been removed\n";
+    }
+    else{
+        $oMenu->_DB->rollBack();
+        $oACL->_DB->rollBack();	
+	echo "Error: The menus haven't been removed\n";
+    }
+}
+else{
+    echo "Error: arg not defined. Usage: {$_SERVER['argv'][0]} system\n";
+    return 1;
 }
 ?>

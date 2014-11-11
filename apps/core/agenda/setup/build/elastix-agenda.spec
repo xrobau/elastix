@@ -2,17 +2,16 @@
 
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
-Version: 3.0.0
-Release: 6
+Version: 2.5.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
-#Source0: %{modname}_%{version}-6.tgz
-Source1: calendarEvent.gsm
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: asterisk
-Prereq: elastix-framework >= 3.0.0-1
+Prereq: freePBX >= 2.8.1-1
+Prereq: elastix-framework >= 2.4.0-14
 
 %description
 Elastix Module Agenda
@@ -23,48 +22,15 @@ Elastix Module Agenda
 %install
 rm -rf $RPM_BUILD_ROOT
 
-#Files provided by all Elastix modules
-mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/%{name}/
-bdir=%{_builddir}/%{modname}
-for FOLDER0 in $(ls -A modules/)
-do
-		for FOLDER1 in $(ls -A $bdir/modules/$FOLDER0/)
-		do
-			case "$FOLDER0" in 
-				frontend)
-					mkdir -p $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/web/apps/$FOLDER1/
-				;;
-				backend)
-					mkdir -p $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/
-					mv $bdir/modules/$FOLDER0/$FOLDER1/web/* $RPM_BUILD_ROOT/var/www/html/admin/web/apps/$FOLDER1/	
-				;;
-			esac
-			mkdir -p $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-			mv $bdir/modules/$FOLDER0/$FOLDER1/* $RPM_BUILD_ROOT/usr/share/elastix/apps/$FOLDER1/
-		done
-done
-
-# Additional (module-specific) files that can be handled by RPM
-
-#mkdir -p $RPM_BUILD_ROOT/opt/elastix/
-#mv setup/dialer
-
-mkdir -p $RPM_BUILD_ROOT/etc/cron.daily/
-mv setup/etc/cron.daily/elastix_contacs_cleanup $RPM_BUILD_ROOT/etc/cron.daily/
-
-mkdir -p $RPM_BUILD_ROOT/var/www/elastixdir/contacts_images
+# Files provided by all Elastix modules
+mkdir -p    $RPM_BUILD_ROOT/var/www/html/
+mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # The following folder should contain all the data that is required by the installer,
 # that cannot be handled by RPM.
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
-
-# Copy required sound file
-mkdir -p $RPM_BUILD_ROOT/var/lib/asterisk/sounds/custom/
-#chown -R asterisk.asterisk /var/lib/asterisk/sounds/custom
-cp %{SOURCE1} $RPM_BUILD_ROOT/var/lib/asterisk/sounds/custom/
 
 %pre
 #se crea el directorio address_book_images para contener imagenes de contactos
@@ -87,32 +53,18 @@ fi
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 
 # Run installer script to fix up ACLs and add module to Elastix menus.
-#elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
-service mysqld status &>/dev/null
-res=$?
-if [ $res -eq 0 ]; then
-	#service is up
-	elastix-menumerge $pathModule/setup/infomodules	
-else
-	#copio el contenido de infomodules a una carpeta para su posterior ejecucion		
-	if [ "$(ls -A $pathModule/setup/infomodules)" != "" ]; then
-		mkdir -p /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules		
-		mv $pathModule/setup/infomodules/* /var/spool/elastix-infomodulesxml/%{name}-%{version}-%{release}/infomodules
-	fi
-
-fi
+elastix-menumerge /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/menu.xml
 
 pathSQLiteDB="/var/www/db"
 mkdir -p $pathSQLiteDB
 preversion=`cat $pathModule/preversion_%{modname}.info`
+rm -f $pathModule/preversion_%{modname}.info
 
 if [ $1 -eq 1 ]; then #install
   # The installer database
     elastix-dbprocess "install" "$pathModule/setup/db"
 elif [ $1 -eq 2 ]; then #update
     elastix-dbprocess "update"  "$pathModule/setup/db" "$preversion"
-    # restart daemon
-    #/sbin/service elastix-synchronizerd restart
 fi
 
 # The installer script expects to be in /tmp/new_module
@@ -123,9 +75,6 @@ chown -R asterisk.asterisk /tmp/new_module/%{modname}
 php /tmp/new_module/%{modname}/setup/installer.php
 rm -rf /tmp/new_module
 
-#chkconfig --add elastix-synchronizerd
-#chkconfig --level 2345 elastix-synchronizerd on
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -133,32 +82,30 @@ rm -rf $RPM_BUILD_ROOT
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
   echo "Delete Agenda menus"
-  elastix-menuremove $pathModule/setup/infomodules
+  elastix-menuremove "%{modname}"
 
   echo "Dump and delete %{name} databases"
   elastix-dbprocess "delete" "$pathModule/setup/db"
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
-/usr/share/elastix/apps/*
-%{_localstatedir}/www/html/*
 %defattr(-, root, root)
+%{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-/etc/cron.daily/elastix_contacs_cleanup
-%defattr(-, asterisk, asterisk)
-/var/lib/asterisk/sounds/custom
-/var/lib/asterisk/sounds/custom/calendarEvent.gsm
-/var/lib/asterisk/sounds/custom/*
-/var/www/elastixdir/contacts_images
-#/opt/elastix/elastix-synchronizer
-#/opt/elastix/elastix-synchronizer/*
-#/etc/init.d/elastix-synchronizerd
 
 %changelog
-* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
+* Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump version and release in specfile.
+
+* Thu Jul 29 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-14
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: trunk - core/specs: Update specfile with latest SVN history. Bump
+  Release in specfile.
+  SVN Rev[6650]
 
 * Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
 - UPDATED: languages modules were updated.
@@ -168,152 +115,132 @@ fi
 - CHANGED: apps - Build/spec's: Commented some code that actually its not used.
   SVN Rev[6608]
 
-* Wed Apr 23 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+* Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-13
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
   SVN Rev[6600]
 
-* Wed Jan 29 2014 Rocio Mera <rmera@palosanto.com> 
-- FIXED: TRUNK - APPS/Agenda: Was modified resposive style.
-  SVN Rev[6441]
+* Wed Mar 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar - restore old behavior of allowing empty event descriptions.
+  Previously this was allowed through the GUI but not through REST/SOAP.
+  SVN Rev[6563]
+- FIXED: Calendar - in PHP, ('true' == 0) evaluates to TRUE, so callfiles are
+  never saved or created. Fixed.
+  SVN Rev[6562]
+- CHANGED: Calendar - reproduce old behavior of initializing the calendar with
+  the server date, instead of using the default of the browser date.
+  SVN Rev[6561]
 
-* Wed Jan 29 2014 Luis Abarca <labarca@palosanto.com> 
-- ADDED: agenda - Build/elastix-agenda.spec: A folder where the images of all
-  contacts separated by organization 'contacts_images' has been made it.
-  SVN Rev[6437]
+* Tue Mar 25 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- DELETED: Calendar - remove calendarEvent.gsm. This file is no longer used in
+  any scenario.
+  SVN Rev[6558]
+- FIXED: Calendar - do not create callfiles with timestamps in the past. Fixes
+  Elastix bug #784.
+  SVN Rev[6557]
 
-* Tue Jan 28 2014 Rocio Mera <rmera@palosanto.com> 
-ADDED : TRUNK - APPS/Agenda: Was added "agenda.xml" file.
-  SVN Rev[6429]
+* Mon Mar 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar - complete rewrite. The Calendar module has been rewritten,
+  starting with the definition of classes paloSantoCalendar and 
+  paloSantoCalendarEvent as the single implementation of the Calendar code. The
+  core.class.php file now directly delegates to this implementation instead of
+  partially implementing functionality duplicated in the old index.php. The new
+  core.class.php now has a method for updating an event, which is now exposed
+  via SOAP and REST. The Calendar GUI has been rewritten to make exclusive use
+  of REST to load and save calendar information. Also, the javascript 
+  implementation has been restructured to take full advantage of utilities
+  provided by jQuery and jQueryUI. All of this adds up to remove almost all the
+  implementation code from index.php, which now forwards requests not directly
+  related to loading and updating the calendar.
+  SVN Rev[6555]
 
-* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
-ADDED : TRUNK - APPS/Agenda: Was added the "contacts" table.
-  SVN Rev[6412]
+* Sun Feb 16 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Calendar: mark some library functions as private
+  SVN Rev[6477]
 
-* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
-- DELETED: Was deleted from agenda appsxml menu agenda.
-  SVN Rev[6410]
-
-* Thu Jan 23 2014 Rocio Mera <rmera@palosanto.com> 
-CHANGED : TRUNK - APPS/Agenda: Was added scroll option in .css file.
-  SVN Rev[6405]
-
-* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: agenda - Build/elastix-agenda.spec: Update specfile with latest SVN
-  history. Bump Release in specfile.
-  SVN Rev[6386]
-
-* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: agenda - Build/elastix-agenda.spec: Update specfile with latest SVN
-  history. Bump Release in specfile.
-  SVN Rev[6385]
-
-* Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+* Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-12
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6379]
 
-* Tue Jan 07 2014 Rocio Mera <rmera@palosanto.com> 
-- DELETED: TRUNK - APPS/Agenda: Was moved file "jquery.liteuploader.js" to
-  common folder.
-  SVN Rev[6334]
+* Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
+- CHANGED: Calendar, Address Book: For each module listed here the english help
+  file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+  SVN Rev[6340]
 
-* Thu Dec 26 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Apps/Agenda: translations columns and alert options in
-  contact list (spanish)
-  SVN Rev[6322]
+* Mon Oct 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: the agenda record field expansion renamed phone to work_phone,
+  which breaks the SOAP API. Copy the field back to its old name to keep the
+  SOAP compatibility. Fixes Elastix bug #1730.
+  SVN Rev[6009]
 
-* Thu Dec 19 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - APPS/Agenda: Was add functions of calls and transfers in
-  contacts.
-  SVN Rev[6313]
+* Fri Sep 13 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: when fetching the internal contact list, an empty recordset (as
+  returned from a non-matching search) is a valid scenario and therefore not an
+  error.
+  SVN Rev[5880]
 
-* Wed Dec 18 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Frameworks/Apps: translations contacts fliter options
-  (spanish)
-  SVN Rev[6310]
-
-* Wed Dec 18 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - Frameworks/Apps: translations contacts options (spanish)
-  SVN Rev[6309]
-
-* Mon Dec 16 2013 Rocio Mera <rmera@palosanto.com> 
-- ADDED: TRUNK - APPS/agenda: Was added script that deletes the temporary
-  images of contacts.
-  SVN Rev[6297]
-
-* Mon Dec 16 2013 Rocio Mera <rmera@palosanto.com> 
-- CHANGED: TRUNK - APPS/Agenda: WAs added the feature: show preview of the
-  picture (new and edit contact)
-  SVN Rev[6296]
-
-* Fri Dec 13 2013 Rocio Mera <rmera@palosanto.com> 
-- DELETED: TRUNK - APPS/Agenda: Was deleted report.tpl because it was moved to
-  general folder.
-  SVN Rev[6281]
-
-* Fri Dec 13 2013 Rocio Mera <rmera@palosanto.com> 
-- ADDED: TRUNK - APPS/Agenda: Was added the contacts module, in this module the
-  user can to add external contacts.
-  SVN Rev[6280]
-
-* Tue Nov 19 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: build - *.spec: An error in the logic of the code was unintentionally
-  placed when saving the elastix's spec files.
-  SVN Rev[6125]
-
-* Mon Nov 18 2013 Luis Abarca <labarca@palosanto.com> 
-- FIXED: build - *.spec: An extra character was unintentionally placed when
-  saving the elastix's spec files.
-  SVN Rev[6116]
-
-* Fri Nov 15 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfiles with the new form of use
-  elastix-menumerge for each elastix module.
-  SVN Rev[6105]
-
-* Mon Nov 11 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: addons, agenda, extras: According to actual svn model, it was
-  renamed the folder 'infomodules.xml' to continue a same model of
-  'infomodules' folders that exists in other elastix's modules folders.
-  SVN Rev[6076]
-
-* Mon Nov 11 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: According to actual svn model, it was renamed the folder
-  'infomodules.xml' to continue a same model of 'infomodules' folders that
-  exists in other elastix's modules folders.
-  SVN Rev[6075]
-
-* Mon Oct 07 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfile with some corrections correspondig
-  to the way of remove tabs in the framework for each elastix module.
-  SVN Rev[5994]
-
-* Wed Sep 25 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: build - *.spec: Update specfile with some corrections correspondig
-  to the way of identify and distribute folders to the '/usr/share/elastix/'
-  path and '/var/www/html/' path.
-  SVN Rev[5945]
-
-
-* Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-4
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-11
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
-  SVN Rev[5883]
+  SVN Rev[5783]
 
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- ADDED: agenda - setup/infomodules.xml/: Within this folder are placed the new
-  xml files that will be in charge of creating the menus for each module.
-  SVN Rev[5855]
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATE: Correction of some mistakes in the translation file es.lang.
+  SVN Rev[5733]
 
-* Wed Sep 11 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: agenda - modules: The modules were relocated under the new scheme
-  that differentiates administrator modules and end user modules .
-  SVN Rev[5854]
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5609]
 
-* Thu Aug  1 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Correction of some mistakes in the translation file fr.lang.
+  SVN Rev[5608]
+
+* Mon Aug 05 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-10
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+  SVN Rev[5558]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module address_book. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5494]
+
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module calendar. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5493]
+
+* Thu Aug 01 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: The "Download iCal" option dissapeared because the switch to
   generic jQueryUI rendered one of its styles invisible. Fixed.
   SVN Rev[5492]
+
+* Thu Jul 18 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-9
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+  SVN Rev[5351]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module address_book. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5348]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module calendar. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5347]
+
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module calendar. Correction of some mistakes in the translation
+  files.
+  SVN Rev[5346]
+
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+- UPDATED: Module address_book. Correction of some mistakes in the english
+  translation file
+  SVN Rev[5327]
 
 * Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: FIXED: Calendar: remove *second* bogus compare of translated 
@@ -323,40 +250,30 @@ CHANGED : TRUNK - APPS/Agenda: Was added scroll option in .css file.
 - FIXED: Calendar: remove reference to uninitialized variable.
   SVN Rev[5312]
 
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - calendar/: It was corrected a configuration in the web
-  folder.
-  SVN Rev[5225]
-
-* Thu Jul 04 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - address_book/web/: It was corrected a configuration in the
-  web folder.
-  SVN Rev[5211]
-
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - calendar/: The svn repository for module calendar in trunk
-  (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5138]
-
-* Tue Jul 02 2013 Luis Abarca <labarca@palosanto.com> 
-- CHANGED: trunk - address_book/: The svn repository for module address_book in
-  trunk (Elx 3) was restructured in order to accomplish a new schema.
-  SVN Rev[5137]
-
 * Tue Jun 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: remove custom jQueryUI CSS theme. The calendar will now use
   whatever the Elastix Framework chooses as the default jQueryUI theme.
   SVN Rev[5130]
+
+* Mon Jun 24 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-8
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+  SVN Rev[5127]
 
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Address Book, Calendar: specify Context for AMI Originate instead of
   a blank field. Fixes Elastix bug #1605.
   SVN Rev[5120]
 
+* Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+  SVN Rev[5083]
+
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Calendar,Address Book: hardcode base URL for REST service because 
-  PHP_SELF is insecure. Pointed out by Fortify report.
-  SVN Rev[5076]
+- CHANGED: Address Book: hardcode base URL for REST service because PHP_SELF is 
+  insecure. Pointed out by Fortify report.
+  SVN Rev[5077]
 - CHANGED: Calendar: hardcode base URL for REST service because PHP_SELF is 
   insecure. Pointed out by Fortify report.
   SVN Rev[5075]
@@ -375,20 +292,60 @@ CHANGED : TRUNK - APPS/Agenda: Was added scroll option in .css file.
   the Festival TTS service is up.
   SVN Rev[5050]
 
-* Mon May 27 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+* Thu May 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
-  SVN Rev[5024]
+  SVN Rev[5009]
+
+* Thu May 23 2013 Bruno Macias <bmacias@palosanto.com>
+- FIXED: module address book, validation field picture on rest webservice was
+  improved, because dont validation when this was empty
+  SVN Rev[5007]
+
+* Thu May 23 2013 Luis Abarca <labarca@palosanto.com>
+- CHANGED: agenda - Build/elastix-agenda.spec: It was corrected in changelog a
+  date corresponding to release 2.4.0-5
+  SVN Rev[5005]
+
+* Thu May 23 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+  SVN Rev[5004]
+
+* Wed May 22 2013 Bruno Macias <bmacias@palosanto.com>
+- UPDATED: module address book, new fields on webservice-rest.
+  SVN Rev[5000]
 
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agenda: remove unnecessary and risky copy of uploaded file. Pointed out
   by Fortify report.
   SVN Rev[4998] 
 
+* Wed May 22 2013 Bruno Macias <bmacias@palosanto.com>
+- ADDED: module address book, new fields for internal contacts, fields are im
+  and department.
+  SVN Rev[4996]
+
+* Wed May 22 2013 Bruno Macias <bmacias@palosanto.com>
+- UPDATED: module address book, webervice rest was updated for supported new
+  fields.
+  SVN Rev[4994]
+
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: check that event ID is numeric before saving it. Pointed
   out by Fortify report.
   SVN Rev[4975]
+
+* Tue May 14 2013 Bruno Macias <bmacias@palosanto.com> 2.4.0-4
+- ADDED: Module address book, New feature, new fields were added to contacts.
+  Now both internal and external contacts have the ability to have the same
+  group of fields.
+  Rest Web Services were updated.
+  SVN Rev[4932]
+
+* Mon May 13 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
 * Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: check that notification phone is numeric, and disallow 
@@ -404,27 +361,56 @@ CHANGED : TRUNK - APPS/Agenda: Was added scroll option in .css file.
   breaks loading of event data in languages other than English.
   SVN Rev[4884]
 
-* Tue Apr 09 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
-- CHANGED: Agenda - Build/elastix-agenda.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-  SVN Rev[4810]
+* Wed Apr 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: fix broken user filtering in main listing of contacts that
+  resulted in private contacts from other users being visible. Fixes Elastix 
+  bug #1529.
+  SVN Rev[4847]
+
+* Mon Apr 15 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4835]
+
+* Wed Feb 27 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: calendar module, help section was updated.
+  SVN Rev[4741]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: address_book module, help section was updated.
+  SVN Rev[4706]
+
+* Tue Feb 19 2013 Jose Briones <jbriones@palosanto.com>
+- UPDATED: calendar module, help section was updated.
+  SVN Rev[4704]
+
+* Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
+- CHANGED: Agenda - Build/elastix-agenda.spec: Changed Version and Release in 
+  specfile according to the current branch.
+  SVN Rev[4635]
+
+* Mon Jan 28 2013 Luis Abarca <labarca@palosanto.com> 2.3.0-10
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+  SVN Rev[4624]
 
 * Wed Jan 23 2013 German Macas <gmacas@palosanto.com>
 - FIXED: modules: calendar: Fixed CallerId in calendar event and resize of
   calendar
   SVN Rev[4611]
 
+* Tue Jan 15 2013 Luis Abarca <labarca@palosanto.com>
+- FIXED: Its no more necesary to resize the popups in certain windows of
+  elastix environment. Fixes Elastix BUG #1445 - item 8
+  SVN Rev[4587]
+
 * Sat Jan 05 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar (trivial): fix javascript warnings in IE6.
   SVN Rev[4550]
 
-#Se debe poner como prerequisito la version del framework nueva que se genere
-* Tue Dec 04 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: In spec file, added asterisk user as owner of folder
-  /opt/elastix/elastix-synchronizer
-- CHANGED: added function daemon_load_default_timezone to avoid php date/time
-  warnings. Also replaced the deprecated ereg function to preg_match
-  SVN Rev[4501]
+* Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
+- CHANGED: Agenda - Build/elastix-agenda.spec: Changed release in specfile.
+  SVN Rev[4373]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - Framework,Modules: remove temporary file preversion_MODULE.info under 
@@ -439,46 +425,33 @@ CHANGED : TRUNK - APPS/Agenda: Was added scroll option in .css file.
   because all of their files get moved to other places.
   SVN Rev[4347]
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com>
-- CHANGED: Agenda - Build/elastix-agenda.spec: The prereq freepbx were deleted.
-  SVN Rev[4235]
+* Wed Jun 27 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-8
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Changed release in specfile.
 
-* Thu Sep 20 2012 Luis Abarca <labarca@palosanto.com> 3.0.0-1
-- CHANGED: Agenda - Build/elastix-agenda.spec: Update specfile with latest
-  SVN history. Changed version and release in specfile.
-  SVN Rev[4222]
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- CHANGED: Agenda - build/elastix-agenda.spec: Changed specfile, updated with 
+  the latest information.
+  SVN Rev[3981]
 
-* Wed Jul 11 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: daemon elastix-synchronizer, added a default color for events on a
-  synchronization
-  SVN Rev[4059]
-
-* Tue Jul 10 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: module calendar, added a new field called "new" to indicate if an
-  eventis new or not in a synchronization
-  SVN Rev[4058]
-
-* Tue Jul 10 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: module address_book, added a new field called "new" to indicate if a
-  contact is new or not in a synchronization
-  SVN Rev[4057]
-
-* Thu Jun 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Remove stray print_r()
-  SVN Rev[4016]
-
-* Fri Jun 08 2012 Alberto Santos <asantos@palosanto.com>
-- CHANGED: modules agenda, the daemon elastix-synchronizerd
-  does not need root privileges. Changing to asterisk user privileges
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- CHANGED: modules agenda, the daemon elastix-synchronizerd does not need root
+  privileges. Changing to asterisk user privileges.
   SVN Rev[3976]
-- ADDED: module agenda, added a new daemon called elastix-synchronizerd
-  which handle the contacts and events synchronization
+
+* Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: module agenda, added a new daemon called elastix-synchronizerd which
+  handle the contacts and events synchronization.
   SVN Rev[3975]
-- ADDED: module calendar, added new rest resources for events
-  synchronization and data integrity verification
+
+* Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: module calendar, added new rest resources for events synchronization 
+  and data integrity verification.
   SVN Rev[3973]
-- ADDED: modules address_book, added new rest resources for 
-  synchronitation and data verification integrity
+
+* Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
+- ADDED: modules address_book, added new rest resources for synchronitation 
+  and data verification integrity.
   SVN Rev[3972]
 
 * Mon May 28 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-7

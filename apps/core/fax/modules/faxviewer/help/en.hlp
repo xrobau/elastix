@@ -1,0 +1,21 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>The option "Fax Viewer" of the Menu "Fax" shows a list with all the faxes that have been sent and received in the virtual Faxes. You can download the faxes if you click on the name of the file.</p>
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_fax_viewer.png" border="0" />
+<p>Figure 1</p></div>
+<br />
+
+<p>By the default all the files are shown, but you can filter according to company name, company fax, fax date or type fax.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/hlp_fax_viewer_filter.png" border="0" />
+<p>Figure 2</p></div>
+<br />
+</body>
+</html>

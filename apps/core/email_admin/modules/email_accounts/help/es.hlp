@@ -1,0 +1,54 @@
+<html>
+<header>
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/styles.css">
+  <link rel="stylesheet" href="/themes/{$THEMENAME}/help.css">
+</header>
+<body>
+
+<h1>{$node_name}</h1>
+
+<p>La opción "Cuentas" del menú "Correo Electrónico" en Elastix permite crear y configurar las cuentas de correo para cada uno de los dominios en el servidor. Seleccione un dominio de para ver la lista de cuentas existentes.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_accounts_list.png" border="0" />
+<p>Figura 1</p></div>
+<br />
+
+<h3>Ver, Modificar y Eliminar cuentas</h3>
+
+<p>Al hacer click en el nombre de la cuenta aparecerá una ventana con el los datos de la misma.</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_account_view.png" border="0" />
+<p>Figura 2</p></div>
+<br />
+
+<p>Aquí usted puede modificar o eliminar la cuenta. El nombre de la cuenta no puede ser modificado.</p>
+
+<h3>Crear una cuenta</h3>
+
+<p>Para agregar una nueva cuenta, seleccione el dominio en donde será creado y haga click en el botón "Crear una nueva cuenta". Aparecerá un formulario donde deberá llenar los siguientes campos:</p>
+
+<div class="hlp_figures"><img src="../modules/{$node_id}/images/es_hlp_email_account_new.png" border="0" />
+<p>Figura 3</p></div>
+<br />
+
+<table class="inline">
+  <tr><th>Nombre</th><th>Descripción</th>
+  </tr>	  
+  <tr>
+    <td>Dirección de correo electrónico</td><td>Aquí va el nombre de la cuenta hasta antes del símbolo @</td>
+  </tr>
+  <tr>
+    <td>Cuota</td><td>El espacio máximo que esta cuenta tiene disponible para almacenar los correos en el servidor. Este espacio es medido en KB</td>
+  </tr>
+  <tr>
+    <td>Contraseña</td><td>La contraseña de acceso a la cuenta de correo</td>
+  </tr>
+  <tr>
+    <td>Reescribir Contraseña</td><td>Confirmación de contraseña para la cuenta</td>
+  </tr>
+
+</table>
+<br />
+<br />
+</body>
+</html>

@@ -32,6 +32,8 @@ mkdir -p    $RPM_BUILD_ROOT/var/www/html/
 mkdir -p    $RPM_BUILD_ROOT/var/www/html/libs/
 mkdir -p    $RPM_BUILD_ROOT/var/www/backup
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
+mkdir -p    $RPM_BUILD_ROOT/var/www/db/
+mkdir -p    $RPM_BUILD_ROOT/usr/bin/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 mv setup/paloSantoNetwork.class.php      $RPM_BUILD_ROOT/var/www/html/libs/

@@ -29,6 +29,9 @@
   $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp $
 */
 
+require_once "libs/misc.lib.php";
+require_once "libs/paloSantoGrid.class.php";
+
 global $keylist;
 $keylist = array('total', 'finished', 'abandoned', 'onqueue', 'losttrack');
 

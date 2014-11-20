@@ -9,7 +9,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-12
+Prereq: elastix-framework >= 2.4.0-7
 Requires: asterisk
 Requires: freePBX
 Requires: php-mbstring
@@ -100,6 +100,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Nov 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Incoming Calls Monitoring: explictly require paloSantoGrid class which
+  has been previously included via spl_elastix_class_autoload and therefore
+  fails to load in elastix-framework earlier than 2.4.0-7.
+- CHANGED: Update minimum elastix-framework to 2.4.0-7 or later.
+  SVN Rev[6776]
+
 * Thu Nov  6 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Form Designer: add placeholder content for new field name.
   SVN Rev[6767]

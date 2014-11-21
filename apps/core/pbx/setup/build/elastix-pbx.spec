@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 12
+Release: 13
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -377,9 +377,14 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-13
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon Nov 10 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-12
 - CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6772]
 
 * Fri Nov  7 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Trunks: fix incorrect API usage for method

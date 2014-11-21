@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 6
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -156,9 +156,14 @@ fi
 #/etc/init.d/elastix-synchronizerd
 
 %changelog
+* Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6650]
 
 * Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
 - UPDATED: languages modules were updated.

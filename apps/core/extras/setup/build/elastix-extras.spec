@@ -3,7 +3,7 @@
 Summary: Elastix Extras 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -95,6 +95,10 @@ fi
 /usr/share/elastix/apps/*
 
 %changelog
+* Fri Nov 21 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-3
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Fri Sep 13 2013 Luis Abarca <labarca@palosanto.com> 3.0.0-2
 - CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
   SVN history. Bump release in specfile.

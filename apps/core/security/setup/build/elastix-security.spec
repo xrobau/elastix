@@ -3,7 +3,7 @@
 Summary: Elastix Security 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -164,9 +164,14 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Sat Jan 18 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-4
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6393]
 
 * Thu Nov 28 2013 Rocio Mera <rmera@palosanto.com> 
 - CHANGED: TRUNK - Apps/Security: translation in Audit module (spanish)

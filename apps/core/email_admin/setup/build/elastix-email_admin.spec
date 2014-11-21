@@ -233,6 +233,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-7
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.

@@ -156,9 +156,14 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-9
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[6757]
 
 * Thu Aug 28 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
 - CHANGED: Revert commits 6705 through 6707. This needs to be done another way.

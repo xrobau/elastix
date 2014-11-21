@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 4
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -125,6 +125,16 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: addons - elastix-addons.spec: It has been made a proper correction
+  in the date of an entry in the changelog that interferes with the creation of
+  this module as an rpm.
+  SVN Rev[6575]
+
 * Mon Feb 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: disable xdebug before creating a SoapClient in order to
   work around xdebug generating fatal errors for SOAP exceptions on creation.

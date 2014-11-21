@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 3.0.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -99,9 +99,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/elastix-setup-kamailio-rtpproxy
 
 %changelog
+* Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
+- CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: firstboot - Build/elastix-firstboot.spec: Update specfile with latest
   SVN history. Changed release in specfile.
+  SVN Rev[6757]
 
 * Thu Aug 28 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
 - CHANGED: Revert commits 6705 through 6707. This needs to be done another way.

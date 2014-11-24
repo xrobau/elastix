@@ -83,10 +83,10 @@ function action_enableremotesmtp($opt)
             $bTLS = TRUE;
             break;
     }
-    if (!$bEnableRemote) {
+    /*if (!$bEnableRemote) {
         $sUser = $sPass = NULL;
         $iPort =  25;
-    }
+    }*/
     if ($bEnableRemote) {
     	if (is_null($sRelay)) error_exit("ERR: --enableremote requires --relay\n");
         if (!ctype_digit("$iPort")) error_exit("ERR: --enableremote requires numeric --port\n");

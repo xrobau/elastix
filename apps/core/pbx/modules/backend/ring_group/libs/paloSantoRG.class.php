@@ -207,21 +207,14 @@ class paloSantoRG extends paloAsteriskDB{
             $arrOpt[count($arrOpt)]=$arrProp["rg_number"];
         }
         
-        $extensions="";
-        //el conjunto de extensiones que pertence al grupo de marcado
-        $arrExtens=explode("\n",$arrProp["rg_extensions"]);
-        foreach($arrExtens as $value){
-            if(preg_match("/^([0-9]+)(#){0,1}$/",trim($value),$match)){
-                $extensions .=$value."-";
-            }
-        }
+        $extensions = $this->_createExtensionHyphenList($arrProp["rg_extensions"]);
         
         if($extensions==""){
             $this->errMsg=_tr("Field 'Extensions List' can't be empty");
             return false;
         }else{
             $query .="rg_extensions,";
-            $arrOpt[count($arrOpt)]=substr(trim($extensions),0,-1);
+            $arrOpt[] = $extensions;
         }
         
         if(isset($arrProp["rg_strategy"])){
@@ -350,20 +343,14 @@ class paloSantoRG extends paloAsteriskDB{
         
         //no se puede actualizar el numero del ringroup
         
-        $extensions="";
-        $arrExtens=explode("\n",$arrProp["rg_extensions"]);
-        foreach($arrExtens as $value){
-            if(preg_match("/^([0-9]+)(#){0,1}$/",trim($value),$match)){
-                $extensions .=$value."-";
-            }
-        }
+        $extensions = $this->_createExtensionHyphenList($arrProp["rg_extensions"]);
         
         if($extensions==""){
             $this->errMsg=_tr("Field 'Extensions List' can't be empty");
             return false;
         }else{
             $query .="rg_extensions=?,";
-            $arrOpt[count($arrOpt)]=substr(trim($extensions),0,-1);
+            $arrOpt[] = $extensions;
         }
         
         if(isset($arrProp["rg_strategy"])){
@@ -465,6 +452,17 @@ class paloSantoRG extends paloAsteriskDB{
          
     }
 
+    private function _createExtensionHyphenList($ext_text)
+    {
+        /* El textarea alimenta líneas con \r\n o \n. Arreglo para Elastix bug #1875. */
+        $extlist = array_map('trim', explode("\n", $ext_text));
+        $arr_ext = array();
+        foreach ($extlist as $ext) {
+            if (preg_match('/^([0-9]+)(#){0,1}$/', $ext)) $arr_ext[] = $ext;
+        }
+        sort($arr_ext);
+        return implode('-', $arr_ext);
+    }
 
     function deleteRG($rg_id){
         $result=$this->getRGById($rg_id);

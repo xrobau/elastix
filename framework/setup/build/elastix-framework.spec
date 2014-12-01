@@ -402,6 +402,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Dec  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework (PBX): allow hyphen as valid character for peer name, since
+  it is already allowed as part of the domain name. This extends incomplete
+  fix in SVN Rev[6771]. Fixes Elastix bug #2004.
+  SVN Rev[6778]
+
 * Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-12
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

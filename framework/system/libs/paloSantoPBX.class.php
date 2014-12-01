@@ -1482,7 +1482,7 @@ class paloIax extends paloAsteriskDB {
 	//esto es para los numeros de extensiones internas
 	function validateName($deviceName)
 	{
-		if(preg_match("/^[[:alnum:]_\.]+$/", $deviceName)){
+		if(preg_match("/^[[:alnum:]_\.-]+$/", $deviceName)){
 			return true;
 		}else{
 			return false;
@@ -2055,7 +2055,7 @@ class paloDevice{
         if($this->insertDeviceASTDB($arrProp))
             return true;
         else{
-            $this->errMsg="Extension couldn't be created .".$this->errMsg;
+            $this->errMsg="Extension couldn't be created. ".$this->errMsg;
             return false;
         }
     }
@@ -2086,7 +2086,7 @@ class paloDevice{
         if(!$this->validatePaloDevice())
             return false;
         
-        if(!preg_match("/^[[:alnum:]_\.]+$/", $this->code)){
+        if(!preg_match("/^[[:alnum:]_\.-]+$/", $this->code)){
             $this->errMsg="Invalid code format";
             return false;
         }

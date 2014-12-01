@@ -403,6 +403,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Dec  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework (PBX): do not set empty secret for existing extensions. 
+  Instead, skip over secret modification unless secret is nonempty. Fixes
+  Elastix bug #2029.
+  SVN Rev[6781]
 - FIXED: Framework (PBX): allow hyphen as valid character for peer name, since
   it is already allowed as part of the domain name. This extends incomplete
   fix in SVN Rev[6771]. Fixes Elastix bug #2004.

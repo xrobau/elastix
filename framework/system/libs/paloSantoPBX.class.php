@@ -1013,6 +1013,9 @@ class paloSip extends paloAsteriskDB {
         }
         $code=$result["code"];
         if($this->existPeer($arrProp["name"])){
+            // No actualizar secret a menos que sea clave no vacía
+            if (trim($arrProp['secret']) == '') unset($arrProp['secret']);
+            
             $sqlFields = $this->_getFieldValuesSQL($arrProp, $code);
             unset($sqlFields['name']);
             unset($sqlFields['organization_domain']);
@@ -1324,6 +1327,9 @@ class paloIax extends paloAsteriskDB {
         }
         $code=$result["code"];
         if($this->existPeer($arrProp["name"])){
+            // No actualizar secret a menos que sea clave no vacía
+            if (trim($arrProp['secret']) == '') unset($arrProp['secret']);
+            
             $sqlFields = $this->_getFieldValuesSQL($arrProp, $code);
             unset($sqlFields['name']);
             unset($sqlFields['organization_domain']);

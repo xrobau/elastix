@@ -202,12 +202,10 @@ fi
 
 %files
 %defattr(-, asterisk, asterisk)
+/var/www/elastixdir/*
+%defattr(-, root, root)
 /usr/share/elastix/apps/*
 %{_localstatedir}/www/html/*
-/var/www/elastixdir/*
-%defattr(644, asterisk, asterisk)
-/usr/share/elastix/libs/*
-%defattr(-, root, root)
 /usr/share/elastix/module_installer/*
 /var/spool/hylafax/bin/*
 /var/spool/hylafax/etc/setup.cache
@@ -216,6 +214,7 @@ fi
 /usr/share/elastix/privileged/*
 /etc/cron.daily/elastix_tmpfax_cleanup
 %defattr(644, root, root)
+/usr/share/elastix/libs/*
 /etc/init/faxgetty.conf
 %defattr(775, asterisk, uucp)
 /var/www/faxes/recvd
@@ -229,6 +228,11 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Fax: change file and directory ownership in package to root
+  instead of asterisk. Part of fix for Elastix bug #2062.
+  SVN Rev[6789]
+
 * Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
 - CHANGED: fax - Build/elastix-fax.spec: Update specfile with latest
   SVN history. Bump Release in specfile.

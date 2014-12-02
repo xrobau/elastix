@@ -359,16 +359,15 @@ fi
 /var/lib/asterisk/sounds/conf-has-not-started.wav
 /var/lib/asterisk/sounds/conf-will-end-in.wav
 #/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/extensions_override_elastix.conf
-%{_localstatedir}/www/html/*
-/usr/share/elastix/apps/*
-%defattr(644, asterisk, asterisk)
-/usr/share/elastix/libs/*
 %defattr(-, root, root)
 /usr/share/elastix/module_installer/*
 /tftpboot/*
 /usr/share/elastix/tftp
+%{_localstatedir}/www/html/*
+/usr/share/elastix/apps/*
 %defattr(644, root, root)
 /etc/kamailio.elastix/*
+/usr/share/elastix/libs/*
 %defattr(755, root, root)
 /etc/init.d/festival
 /bin/asterisk.reload
@@ -377,6 +376,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: PBX: change file and directory ownership in package to root
+  instead of asterisk. Part of fix for Elastix bug #2062.
+  SVN Rev[6790]
+
 * Mon Dec  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: RingGroup: filter out remainders of DOS-type newlines in textareas that
   get written into the dialplan. Fixes Elastix bug #1875.

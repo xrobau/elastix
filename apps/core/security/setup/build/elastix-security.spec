@@ -150,10 +150,9 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_datadir}/elastix/apps/*
 %{_localstatedir}/www/html/*
-%defattr(-, root, root)
 %{_datadir}/elastix/module_installer/*
 %defattr(644, root, root)
 %{_sysconfdir}/cron.d/elastix-portknock.cron
@@ -164,6 +163,11 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Security: change file and directory ownership in package to root
+  instead of asterisk. Part of fix for Elastix bug #2062.
+  SVN Rev[6792]
+
 * Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-5
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.

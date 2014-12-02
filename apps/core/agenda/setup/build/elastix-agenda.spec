@@ -140,10 +140,9 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 /usr/share/elastix/apps/*
 %{_localstatedir}/www/html/*
-%defattr(-, root, root)
 /usr/share/elastix/module_installer/*
 /etc/cron.daily/elastix_contacs_cleanup
 %defattr(-, asterisk, asterisk)
@@ -156,6 +155,11 @@ fi
 #/etc/init.d/elastix-synchronizerd
 
 %changelog
+* Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agenda: change file and directory ownership in package to root
+  instead of asterisk. Part of fix for Elastix bug #2062.
+  SVN Rev[6786]
+
 * Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-8
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.

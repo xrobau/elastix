@@ -133,15 +133,19 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
-%{_localstatedir}/www/html/*
-/usr/share/elastix/apps/*
-%defattr(644, asterisk, asterisk)
+%defattr(644, root, root)
 /usr/share/elastix/libs/*
 %defattr(-, root, root)
+%{_localstatedir}/www/html/*
+/usr/share/elastix/apps/*
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Reports: change file and directory ownership in package to root
+  instead of asterisk. Part of fix for Elastix bug #2062.
+  SVN Rev[6791]
+
 * Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-9
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump Release in specfile.

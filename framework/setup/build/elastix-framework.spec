@@ -357,23 +357,22 @@ rm -rf $RPM_BUILD_ROOT
 # basic contains some reasonable sane basic tiles
 %files
 %defattr(-, asterisk, asterisk)
-#/var/www/html/
 /var/www/db
 /var/www/backup
 /var/log/elastix
 /var/log/elastix/*
-/var/www/html/favicon.ico
-/var/www/html/admin
 /var/www/html/tmp
-/var/www/html/web
-/var/www/html/*.php
-/var/www/html/robots.txt
-/usr/share/elastix/apps/*
 /var/www/elastixdir/uploadAttachs
 %defattr(644, asterisk, asterisk)
 /usr/share/elastix/libs/*
 # %config(noreplace) /var/www/db/
+%defattr(644, root, root)
+/var/www/html/favicon.ico
+/var/www/html/*.php
+/var/www/html/robots.txt
 %defattr(-, root, root)
+/var/www/html/admin
+/var/www/html/web
 /usr/share/elastix/*
 /usr/share/pear/DB/sqlite3.php
 /usr/local/elastix/sampler.php
@@ -402,6 +401,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: change file and directory ownership in package to root
+  instead of asterisk. Part of fix for Elastix bug #2062.
+  SVN Rev[6782]
+
 * Mon Dec  1 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework (PBX): do not set empty secret for existing extensions. 
   Instead, skip over secret modification unless secret is nonempty. Fixes

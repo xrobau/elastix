@@ -142,12 +142,11 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
-%{_localstatedir}/www/html/*
-/usr/share/elastix/apps/*
-%defattr(644, asterisk, asterisk)
+%defattr(644, root, root)
 /usr/share/elastix/libs/*
 %defattr(-, root, root)
+%{_localstatedir}/www/html/*
+/usr/share/elastix/apps/*
 /usr/share/elastix/module_installer/*
 /var/www/backup/automatic_backup.php
 %defattr(755, root, root)
@@ -156,6 +155,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: System: change file and directory ownership in package to root
+  instead of asterisk. Part of fix for Elastix bug #2062.
+  SVN Rev[6793]
+
 * Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-9
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

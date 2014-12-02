@@ -115,16 +115,20 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
+%defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
-%defattr(-, root, root)
 /etc/init.d/elastix-updaterd
 /opt/elastix/elastix-updater
 /etc/pki/rpm-gpg/*
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: change file and directory ownership in package to root
+  instead of asterisk. Part of fix for Elastix bug #2062.
+  SVN Rev[6784]
+
 * Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-6
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.

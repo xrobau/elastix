@@ -364,9 +364,7 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/tmp
 /var/www/elastixdir/uploadAttachs
 %defattr(644, asterisk, asterisk)
-/usr/share/elastix/libs/*
 # %config(noreplace) /var/www/db/
-%defattr(644, root, root)
 /var/www/html/favicon.ico
 /var/www/html/*.php
 /var/www/html/robots.txt

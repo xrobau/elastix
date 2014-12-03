@@ -340,6 +340,7 @@ function saveNewAnnouncement($smarty, $module_name, $local_templates_dir, &$pDB,
     $arrFormOrgz = createFieldForm(array(),array(),$pDB,$domain);
     $oForm = new paloForm($smarty,$arrFormOrgz);
 
+    $description = trim(getParameter('description'));
     if(!$oForm->validateForm($_POST)){
         // Validation basic, not empty and VALIDATION_TYPE
         $smarty->assign("mb_title", _tr("Validation Error"));
@@ -351,8 +352,11 @@ function saveNewAnnouncement($smarty, $module_name, $local_templates_dir, &$pDB,
         }
         $smarty->assign("mb_message", $strErrorMsg);
         return viewFormAnnouncement($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
-    }
-    else{
+    } elseif (count(explode("\n", $description)) > 1) {
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid description text"));
+        return viewFormAnnouncement($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    } else{
         if($pAnnouncement->validateDestine($domain,getParameter("destination"))==false){
             $error=_tr("You must select a default destination.");
             $continue=false;
@@ -361,7 +365,7 @@ function saveNewAnnouncement($smarty, $module_name, $local_templates_dir, &$pDB,
         if($continue){
             //seteamos un arreglo con los parametros configurados
             $arrProp=array();
-            $arrProp["description"]  = getParameter("description");
+            $arrProp["description"]  = $description;
             $arrProp["recording_id"] = getParameter("recording_id");
             $arrProp["allow_skip"]   = getParameter("allow_skip");
             $arrProp["return_ivr"]   = getParameter("return_ivr");
@@ -415,16 +419,22 @@ function saveEditAnnouncement($smarty, $module_name, $local_templates_dir, $pDB,
         $domain=$credentials['domain'];
     }
     
+    $description = trim(getParameter('description'));
+    
     $pAnnouncement = new paloSantoAnnouncement($pDB,$domain);
     $arrAnnouncement = $pAnnouncement->getAnnouncementById($idAnnouncement);
     if($arrAnnouncement===false){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr($pAnnouncement->errMsg));
         return reportAnnouncement($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
-    }else if(count($arrAnnouncement)==0){
+    }elseif(count($arrAnnouncement)==0){
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("Announcement doesn't exist"));
         return reportAnnouncement($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
+    } elseif (count(explode("\n", $description)) > 1) {
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid description text"));
+        return viewFormAnnouncement($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }else{
         if($pAnnouncement->validateDestine($domain,getParameter("destination"))==false){
             $error=_tr("You must select a default destination.");
@@ -435,7 +445,7 @@ function saveEditAnnouncement($smarty, $module_name, $local_templates_dir, $pDB,
             //seteamos un arreglo con los parametros configurados
             $arrProp=array();
             $arrProp["id"]           = $idAnnouncement;
-            $arrProp["description"]  = getParameter("description");
+            $arrProp["description"]  = $description;
             $arrProp["recording_id"] = getParameter("recording_id");
             $arrProp["allow_skip"]   = getParameter("allow_skip");
             $arrProp["return_ivr"]   = getParameter("return_ivr");

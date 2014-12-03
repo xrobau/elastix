@@ -377,6 +377,9 @@ fi
 
 %changelog
 * Wed Dec  3 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Announcement: disallow newlines as part of description text. Part of
+  fix for Elastix bug #2063.
+  SVN Rev[6795]
 - CHANGED: Announcement: reimplement dialplan creation function.
   SVN Rev[6794]
 

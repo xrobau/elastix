@@ -319,98 +319,117 @@ class paloSantoAnnouncement extends paloAsteriskDB{
         } 
     }
     
-    function createDialplanAnnouncement(&$arrFromInt){
-        if(is_null($this->code) || is_null($this->domain))
-            return false;
+    function createDialplanAnnouncement(&$arrFromInt)
+    {
+        if (is_null($this->code) || is_null($this->domain)) return false;
             
         $arrAnnouncement = $this->getAnnouncement($this->domain);
-        if($arrAnnouncement===false){
-            $this->errMsg=_tr("Error creating dialplan for Announcement. ").$this->errMsg; 
+        if ($arrAnnouncement === false) {
+            $this->errMsg = _tr("Error creating dialplan for Announcement. ").$this->errMsg; 
             return false;
         }
-        else{
-            $arrContext = array();
-            
-            foreach($arrAnnouncement as $value){
-                $recording_file = $this->getFileRecordings($this->domain,$value["recording_id"]);
-                $repeat_msg     = ($value['repeat_msg']=="no") || ($value['repeat_msg']==0)?false:$value['repeat_msg'];
-                $allow_skip     = ($value['allow_skip']=="no")?false:$value['allow_skip'];
-                $return_ivr     = ($value['return_ivr']=="no")?false:$value['return_ivr'];
-                $noanswer       = ($value['noanswer']=="no")?false:$value['noanswer'];
-                $exten          = "s";
-                
-                if(isset($value["destination"])){
-                    $goto = $this->getGotoDestine($this->domain,$value["destination"]);
-                    if($goto==false)
-                        $goto = "h,1";
-                }
-                    
-                if(!$noanswer){
-                    $arrExt[]=new paloExtensions($exten, new ext_gotoif('$["${CDR(disposition)}" = "ANSWERED"]','begin'),1);
-                    $arrExt[]=new paloExtensions($exten, new ext_answer(''));
-                    $arrExt[]=new paloExtensions($exten, new ext_wait('1'));
-                }
-                $arrExt[]=new paloExtensions($exten, new ext_noop('Playing announcement '.$value['description']),($noanswer)?"1":"n","begin");
-            
-                if(!($allow_skip || $repeat_msg))
-                    $arrExt[]=new paloExtensions($exten, new ext_playback($recording_file.',noanswer'));
-                
-                if($repeat_msg)
-                    $arrExt[]=new paloExtensions($exten, new ext_responsetimeout(1));
-                
-                if($allow_skip || $repeat_msg)
-                    $arrExt[]=new paloExtensions($exten, new ext_background($recording_file.',nm'),"n","play");
-                
-                if($repeat_msg)
-                    $arrExt[]=new paloExtensions($exten, new ext_waitexten(''));
-                
-                if($return_ivr){
-                    if(!$repeat_msg)
-                        $arrExt[]=new paloExtensions($exten, new ext_gotoif('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1'));
-                } 
-                else{
-                    if(!$repeat_msg)
-                        $arrExt[]=new paloExtensions($exten, new extension("Goto(".$goto.")"));
-                }
-                
-                if($allow_skip){
-                    $arrExt[]=new paloExtensions("_X", new ext_noop('User skipped announcement'),"1");
-                    if ($return_ivr)
-                        $arrExt[]=new paloExtensions("_X", new ext_gotoif('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1'));
-                    else 
-                        $arrExt[]=new paloExtensions("_X", new extension("Goto(".$goto.")"));
-                }
-                
-                if($repeat_msg)
-                    $arrExt[]=new paloExtensions($repeat_msg,new ext_goto('s,play'),"1");
-                
-                // if repeat_msg enabled then set exten to t to allow for the key to be pressed, otherwise play message and go
-                if($return_ivr){
-                    if($repeat_msg)
-                        $arrExt[]=new paloExtensions("t", new ext_gotoif('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1'),"1");
-                    if($allow_skip || $repeat_msg)
-                        $arrExt[]=new paloExtensions('i', new ext_gotoif('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1'),"1");
-                } 
-                else{
-                    if($repeat_msg)
-                        $arrExt[]=new paloExtensions("t", new extension("Goto(".$goto.")"),"1");
-                    if($allow_skip || $repeat_msg)
-                        $arrExt[]=new paloExtensions('i', new extension("Goto(".$goto.")"),"1");
-                }
-            
-                //creamos context app-announcement
-                $context = new paloContexto($this->code,"app-announcement-{$value['id']}");
-                if($context === false)
-                    $context->errMsg = "ext-announcement. Error: ".$context->errMsg;
-                else{
-                    $context->arrExtensions = $arrExt;
-                    $arrContext[]           = $context;
-                    $arrExt                 = array();
-                }
-            }
+
+        $arrContext = array();
         
-            return $arrContext;
+        foreach ($arrAnnouncement as $value) {
+            $arrExt = array();
+            
+            /* Archivo para reproducir como Playback sin interrupción, o como 
+             * Background mientras se espera una tecla */
+            $recording_file = $this->getFileRecordings($this->domain, $value["recording_id"]);
+            
+            /* Tecla de teclado teléfono a presionar para repetir mensaje, o 
+             * FALSE si la característica está desactivada. */
+            $keypress_for_repeat = ($value['repeat_msg'] == 'no') ? FALSE : $value['repeat_msg'];
+            
+            /* Bandera para permitir que presionar una tecla corte la 
+             * reproducción del audio indicado. */
+            $allow_skip = ($value['allow_skip'] != 'no');
+            
+            /* Bandera para regresar al IVR que envió llamada a este anuncio.
+             * Esto requiere que el IVR setee la variable de contexto 
+             * IVR_CONTEXT. Si ningún contexto anterior seteó esta bandera, se
+             * salta al destino seleccionado en lugar de a un IVR de vuelta. */
+            $return_ivr = ($value['return_ivr'] != 'no');
+            
+            /* Bandera para dejar sin contestar la llamada que pasa por el anuncio */
+            $noanswer       = ($value['noanswer'] != 'no');
+            
+            /* Cargar [[contexto,]extensión,]prioridad a saltar luego de 
+             * terminar de reproducir el anuncio */
+            if (isset($value["destination"])) {
+                $goto = $this->getGotoDestine($this->domain, $value["destination"]);
+                
+                // Si el tipo de destino es desconocido, se cuelga la llamada
+                if (!$goto) $goto = 'h,1';
+            }
+            
+            /* Tipo de salto a hacer según si regresar o no a IVR. Según la 
+             * bandera, se instancia un ext_gotoif o un extension. */
+            $rfl = new ReflectionClass($return_ivr ? 'ext_gotoif' : 'extension');
+            $rflargs = $return_ivr
+                ? array('$["x${IVR_CONTEXT}" = "x"]', $goto.':${IVR_CONTEXT},return,1') 
+                : array("Goto(".$goto.")");
+            
+            if (!$noanswer) {
+                // Contestar la llamada si no ha sido contestada previamente
+                $arrExt[] = new paloExtensions('s', new ext_gotoif('$["${CDR(disposition)}" = "ANSWERED"]','begin'),1);
+                $arrExt[] = new paloExtensions('s', new ext_answer(''));
+                $arrExt[] = new paloExtensions('s', new ext_wait('1'));
+            }
+            $arrExt[] = new paloExtensions('s', new ext_noop('Playing announcement '.$value['description']),($noanswer)?"1":"n","begin");
+        
+            if ($allow_skip || $keypress_for_repeat) {
+                /* Se permite interacción de teclado. Si la interacción es para 
+                 * repetir mensaje, se espera 1 segundo para introducir 
+                 * extensión de repetir luego de reproducir audio de anuncio.
+                 * La reproducción de audio explícitamente no contesta la 
+                 * llamada, y puede ser interrumpido por un dígito. */
+                if ($keypress_for_repeat)
+                    $arrExt[] = new paloExtensions('s', new ext_responsetimeout(1));
+                $arrExt[] = new paloExtensions('s', new ext_background($recording_file.',nm'),"n","play");
+                if ($keypress_for_repeat)
+                    $arrExt[]=new paloExtensions('s', new ext_waitexten(''));
+            } else {
+                // No se permite interacción de teclado
+                $arrExt[] = new paloExtensions('s', new ext_playback($recording_file.',noanswer'));
+            }
+            if (!$keypress_for_repeat) {
+                // Si no hay tecla para repetir anuncio, se sale de contexto ahora
+                $arrExt[] = new paloExtensions('s', $rfl->newInstanceArgs($rflargs));
+            }
+            if ($allow_skip) {
+                /* Si usuario presiona tecla para saltarse anuncio, se sale de 
+                 * contexto ahora. Pero si se presionó la tecla asignada para
+                 * repetir, esta tecla tomará prioridad (véase abajo) */
+                $arrExt[] = new paloExtensions('_X', new ext_noop('Announcement skipped'),"1");
+                $arrExt[] = new paloExtensions('_X', $rfl->newInstanceArgs($rflargs));
+            }
+            
+            // Se salta a etiqueta de reproducción en caso de tecla para repetir
+            if ($keypress_for_repeat)
+                $arrExt[] = new paloExtensions($keypress_for_repeat, new ext_goto('s,play'),"1");
+            
+            /* Si se permite interacción, se sale del contexto en caso de tecla 
+             * inválida. En caso de repetición activada, además se sale de 
+             * contexto en caso de timeout. */
+            if ($keypress_for_repeat)
+                $arrExt[] = new paloExtensions("t", $rfl->newInstanceArgs($rflargs), "1");
+            if ($allow_skip || $keypress_for_repeat)
+                $arrExt[] = new paloExtensions('i', $rfl->newInstanceArgs($rflargs), "1");
+            
+            //creamos context app-announcement
+            $context = new paloContexto($this->code,"app-announcement-{$value['id']}");
+            // TODO: esta condición no es posible porque el objeto no es el error, new no devuelve bool
+            if ($context === false)
+                $context->errMsg = "ext-announcement. Error: ".$context->errMsg;
+            else{
+                $context->arrExtensions = $arrExt;
+                $arrContext[]           = $context;
+            }
         }
+    
+        return $arrContext;
     }
 }
 ?>

@@ -376,6 +376,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Dec  3 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Announcement: reimplement dialplan creation function.
+  SVN Rev[6794]
+
 * Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: PBX: change file and directory ownership in package to root
   instead of asterisk. Part of fix for Elastix bug #2062.

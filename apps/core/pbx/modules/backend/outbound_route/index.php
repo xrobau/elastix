@@ -514,10 +514,17 @@ function saveNewOutbound($smarty, $module_name, $local_templates_dir, &$pDB, $ar
         }
         $smarty->assign("mb_message", $strErrorMsg);
         return viewFormOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials,$tmp_dial);
+    } elseif (count(explode("\n", $routename)) > 1) {
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message",_tr("Invalid route name"));
+        return viewFormOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }else{
         $routename = getParameter("routename");
         if($routename==""){
             $error=_tr("Route Name can not be empty.");
+            $continue=false;
+        } elseif (count(explode("\n", $routename)) > 1) {
+            $error=_tr("Invalid route name");
             $continue=false;
         }
             
@@ -573,6 +580,8 @@ function saveEditOutbound($smarty, $module_name, $local_templates_dir, $pDB, $ar
         $domain=$credentials['domain'];
     }
 
+    $routename = trim(getParameter('routename'));
+    
     //obtenemos la informacion de la ruta por el id dado, sino existe la ruta mostramos un mensaje de error
     if(!isset($idOutbound)){
         $smarty->assign("mb_title", _tr("ERROR"));
@@ -591,10 +600,15 @@ function saveEditOutbound($smarty, $module_name, $local_templates_dir, $pDB, $ar
         $smarty->assign("mb_message",_tr("Outbound doesn't exist"));
         return reportOutbound($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }else{
+        if (count(explode("\n", $routename)) > 1) {
+            $error = _tr("Invalid route name");
+            $continue = false;
+        }
+        
         if($continue){
             //seteamos un arreglo con los parametros configurados
             $arrProp=array();
-            $arrProp["routename"]=getParameter("routename");
+            $arrProp["routename"]=$routename;
             $arrProp['outcid']=getParameter("outcid");
             $arrProp['routepass']=getParameter("routepass");
             $arrProp['mohsilence']=getParameter("mohsilence");

@@ -337,18 +337,27 @@ function saveNewOtherDestinations($smarty, $module_name, $local_templates_dir, &
         return viewFormOtherDestinations($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }
     else{
-        //seteamos un arreglo con los parametros configurados
-        $arrProp=array();
-        $arrProp["description"]  = getParameter("description");
-        $arrProp["destdial"]     = getParameter("destdial");
-
-        $pDB->beginTransaction();
-        $success=$pOtherDestinations->createNewOtherDestinations($arrProp);
-        if($success)
-            $pDB->commit();
-        else
-            $pDB->rollBack();
-        $error .=$pOtherDestinations->errMsg;
+        $description = trim(getParameter("description"));
+        if (count(explode("\n", $description)) > 1) {
+            $error = _tr("Invalid description");
+            $continue = false;
+        } elseif (!preg_match('/^[[:digit:]\*#]+$/', getParameter("destdial"))) {
+            $error = _tr("Invalid dial destination");
+            $continue = false;
+        } else {
+            //seteamos un arreglo con los parametros configurados
+            $arrProp=array();
+            $arrProp["description"]  = $description;
+            $arrProp["destdial"]     = getParameter("destdial");
+    
+            $pDB->beginTransaction();
+            $success=$pOtherDestinations->createNewOtherDestinations($arrProp);
+            if($success)
+                $pDB->commit();
+            else
+                $pDB->rollBack();
+            $error .=$pOtherDestinations->errMsg;
+        }
     }
 
     if($success){
@@ -394,20 +403,29 @@ function saveEditOtherDestinations($smarty, $module_name, $local_templates_dir, 
         $smarty->assign("mb_message",_tr("Other Destination doesn't exist"));
         return reportOtherDestinations($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }else{
-        //seteamos un arreglo con los parametros configurados
-        $arrProp=array();
-        $arrProp["id"]           = $idOtherDestinations;
-        $arrProp["description"]  = getParameter("description");
-        $arrProp["destdial"]     = getParameter("destdial");                        
-
-        $pDB->beginTransaction();
-        $success=$pOtherDestinations->updateOtherDestinationsPBX($arrProp);
-
-        if($success)
-            $pDB->commit();
-        else
-            $pDB->rollBack();
-        $error .=$pOtherDestinations->errMsg;
+        $description = trim(getParameter("description"));
+        if (count(explode("\n", $description)) > 1) {
+            $error = _tr("Invalid description");
+            $continue = false;
+        } elseif (!preg_match('/^[[:digit:]\*#]+$/', getParameter("destdial"))) {
+            $error = _tr("Invalid dial destination");
+            $continue = false;
+        } else {
+            //seteamos un arreglo con los parametros configurados
+            $arrProp=array();
+            $arrProp["id"]           = $idOtherDestinations;
+            $arrProp["description"]  = $description;
+            $arrProp["destdial"]     = getParameter("destdial");                        
+    
+            $pDB->beginTransaction();
+            $success=$pOtherDestinations->updateOtherDestinationsPBX($arrProp);
+    
+            if($success)
+                $pDB->commit();
+            else
+                $pDB->rollBack();
+            $error .=$pOtherDestinations->errMsg;
+        }
     }
 
     $smarty->assign("id", $idOtherDestinations);

@@ -377,6 +377,9 @@ fi
 
 %changelog
 * Thu Dec  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Other Destinations: disallow newlines as part of description OR 
+  extension. Part of fix for Elastix bug #2063.
+  SVN Rev[6798]
 - FIXED: Shortcut Apps: disallow newlines as part of app name OR extension. Part
   of fix for Elastix bug #2063.
   SVN Rev[6797]

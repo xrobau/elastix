@@ -341,15 +341,22 @@ function saveNewShortcutApps($smarty, $module_name, $local_templates_dir, &$pDB,
         return viewFormShortcutApps($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }
     else{
+        $description = trim(getParameter("description"));
         if($pShortcutApps->validateDestine($domain,getParameter("destination"))==false){
             $error=_tr("You must select a default destination.");
             $continue=false;
+        } elseif (count(explode("\n", $description)) > 1) {
+            $error = _tr("Invalid description");
+            $continue = false;
+        } elseif (!preg_match('/^[[:digit:]\*#]+$/', getParameter("exten"))) {
+            $error = _tr("Invalid extension");
+            $continue = false;
         }
             
         if($continue){
             //seteamos un arreglo con los parametros configurados
             $arrProp=array();
-            $arrProp["description"]  = getParameter("description");
+            $arrProp["description"]  = $description;
             $arrProp["exten"]        = getParameter("exten");
             $arrProp["goto"]         = getParameter("goto");
             $arrProp['destination']  = getParameter("destination");
@@ -410,16 +417,23 @@ function saveEditShortcutApps($smarty, $module_name, $local_templates_dir, $pDB,
         $smarty->assign("mb_message",_tr("ShortcutApps doesn't exist"));
         return reportShortcutApps($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $credentials);
     }else{
+        $description = trim(getParameter("description"));
         if($pShortcutApps->validateDestine($domain,getParameter("destination"))==false){
             $error=_tr("You must select a default destination.");
             $continue=false;
+        } elseif (count(explode("\n", $description)) > 1) {
+            $error = _tr("Invalid description");
+            $continue = false;
+        } elseif (!preg_match('/^[[:digit:]\*#]+$/', getParameter("exten"))) {
+            $error = _tr("Invalid extension");
+            $continue = false;
         }
         
         if($continue){
             //seteamos un arreglo con los parametros configurados
             $arrProp=array();
             $arrProp["id"]           = $idShortcutApps;
-            $arrProp["description"]  = getParameter("description");
+            $arrProp["description"]  = $description;
             $arrProp["exten"]        = getParameter("exten");            
             $arrProp["goto"]         = getParameter("goto");
             $arrProp['destination']  = getParameter("destination");

@@ -376,6 +376,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Dec  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Shortcut Apps: disallow newlines as part of app name OR extension. Part
+  of fix for Elastix bug #2063.
+  SVN Rev[6797]
 * Wed Dec  3 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Outbound Route: disallow newlines as part of route name. Part of
   fix for Elastix bug #2063.

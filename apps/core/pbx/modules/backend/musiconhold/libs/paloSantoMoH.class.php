@@ -121,7 +121,7 @@ class paloSantoMoH extends paloAsteriskDB{
         $where="";
         $arrParam=array($class);
        
-        if (!preg_match('/^([[:alnum:]]|-|_)+$/', "$class")) {
+        if (!preg_match('/^([[:alnum:]-_\.])+$/', "$class")) {
             $this->errMsg = _tr("Invalid MoH Class");
             return false;
         }
@@ -188,7 +188,7 @@ class paloSantoMoH extends paloAsteriskDB{
         }
 
         //debe haberse seteado un nombre
-        if (!preg_match('/^([[:alnum:]]|-|_)+$/', "$class")) {
+        if (!preg_match('/^([[:alnum:]-_\.])+$/', "$class")) {
             $this->errMsg = _tr("Invalid MoH Class");
             return false;
         }
@@ -252,7 +252,7 @@ class paloSantoMoH extends paloAsteriskDB{
         $where=$error="";
         $param=array($name,"files");
         
-        if (!preg_match('/^([[:alnum:]]|-|_)+$/', "$name")) {
+        if (!preg_match('/^([[:alnum:]-_\.])+$/', "$name")) {
             $this->errMsg = _tr("Files can't be uploaded. ")._tr("Invalid MoH Class");
             return false;
         }

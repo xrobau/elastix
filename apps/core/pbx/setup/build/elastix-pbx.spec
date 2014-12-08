@@ -376,6 +376,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Dec  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Music On Hold: allow dot in full MoH class name, which necessarily
+  includes a domain name as prefix.
+  SVN Rev[6799]
+
 * Thu Dec  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Other Destinations: disallow newlines as part of description OR 
   extension. Part of fix for Elastix bug #2063.

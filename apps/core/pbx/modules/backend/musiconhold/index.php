@@ -244,7 +244,7 @@ function viewFormMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrCon
         $arrMoH=$_POST; 
     }
 
-    $arrForm = createFieldForm($pMoH->getAudioFormatAsterisk());
+    $arrForm = createFieldForm($pMoH->getAudioFormatAsterisk(), ($credentials['userlevel']=='superadmin'));
     $oForm = new paloForm($smarty,$arrForm);
 
     if($action=="view"){
@@ -295,7 +295,7 @@ function saveNewMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         $pMoH = new paloSantoMoH($pDB,$domain);
     }
 
-    $arrFormOrgz = createFieldForm(array());
+    $arrFormOrgz = createFieldForm(array(), ($credentials['userlevel']=='superadmin'));
     $oForm = new paloForm($smarty,$arrFormOrgz);
 
     if(!$oForm->validateForm($_POST)){
@@ -314,8 +314,10 @@ function saveNewMoH($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
         if($name==""){
             $error=_tr("Field 'Name' can't be empty.");
             $continue=false;
+        } elseif (getParameter("mode_moh") == 'custom' && $credentials['userlevel'] != 'superadmin') {
+            $error = _tr('Creation of custom MOH restricted to superadmin');
+            $continue = FALSE;
         }
-        
         if($continue){
             //seteamos un arreglo con los parametros configurados
             $arrProp=array();
@@ -380,7 +382,10 @@ function saveEditMoH($smarty, $module_name, $local_templates_dir, $pDB, $arrConf
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message",_tr("MoH doesn't exist"));
         return reportMoH($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,$credentials);
-    }else{
+    } elseif ($arrMoH["mode_moh"] == 'custom' && $credentials['userlevel'] != 'superadmin') {
+        $success = FALSE;
+        $error = _tr('Update of custom MOH restricted to superadmin.');
+    } else {
         $arrProp=array();
         $arrProp["class"]=$arrMoH["class"];
         $arrProp["application"]=getParameter("application");
@@ -456,11 +461,13 @@ function deleteMoH($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, 
 }
 
 
-function createFieldForm($arrFormats)
+function createFieldForm($arrFormats, $bEnableCustom)
 {
     if(!is_array($arrFormats)){
         $arrFormats=array("WAV"=>"WAV","wav"=>"wav","ulaw"=>"ulaw","alaw"=>"alaw","sln"=>"sln","gsm"=>"gsm","g729"=>"g729");
     }
+    $mohmodes = array("files"=>_tr("files"), "custom"=>_tr("custom"));
+    if (!$bEnableCustom) unset($mohmodes['custom']);
     $arrFormElements = array("name"     => array("LABEL"             => _tr('Class Name'),
                                                     "DESCRIPTION"            => _tr("MOH_classname"),
                                                     "REQUIRED"               => "yes",
@@ -472,7 +479,7 @@ function createFieldForm($arrFormats)
                                                     "DESCRIPTION"            => _tr("MOH_type"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "SELECT",
-                                                    "INPUT_EXTRA_PARAM"      => array("files"=>_tr("files"), "custom"=>_tr("custom")),
+                                                    "INPUT_EXTRA_PARAM"      => $mohmodes,
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
                              "application" 	=> array("LABEL"             => _tr("Application"),

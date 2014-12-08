@@ -377,6 +377,9 @@ fi
 
 %changelog
 * Mon Dec  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Music On Hold: organization admins are not allowed to create custom
+  MoH classes. Fixes Elastix bug #2069.
+  SVN Rev[6800]
 - FIXED: Music On Hold: allow dot in full MoH class name, which necessarily
   includes a domain name as prefix.
   SVN Rev[6799]

@@ -377,6 +377,9 @@ fi
 
 %changelog
 * Mon Dec  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Extensions: fix use of uninitialized variable for CID in extension
+  creation.
+  SVN Rev[6802]
 - CHANGED: Music On Hold: organization admins are not allowed to create custom
   MoH classes. Fixes Elastix bug #2069.
   SVN Rev[6800]

@@ -460,6 +460,7 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         }
 
         //no puede contener caracteres esoeciales ni salto de lineas
+        $exten=getParameter("exten");        
         $arrProp["fullname"]=getParameter("clid_name");
         if($arrProp["fullname"]!=''){
             if(!preg_match("/^[[:alnum:]_[:space:]-]+$/",$arrProp["fullname"])){
@@ -482,7 +483,6 @@ function saveNewExten($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
             
         if($continuar){
             //seteamos un arreglo con los parametros configurados
-            $exten=getParameter("exten");
             $arrProp["name"]=getParameter("exten"); //nombre del device al que se le agrega como prefijo orgcode_
             $arrProp["exten"]=getParameter("exten");
             $arrProp['secret']=getParameter("secret");

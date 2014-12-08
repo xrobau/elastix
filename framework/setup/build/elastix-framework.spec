@@ -399,6 +399,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Dec  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: somebody forgot the break while checking for valid recording
+  options at extension creation time. Fixes Elastix bug #2071.
+  SVN Rev[6801]
+
 * Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: change file and directory ownership in package to root
   instead of asterisk. Part of fix for Elastix bug #2062.

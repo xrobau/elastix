@@ -1982,24 +1982,10 @@ class paloDevice{
         }else
             $arrProp['rt']=15;
 
-        //validamos los recording
-        switch(strtolower($arrProp["record_in"])){
-            case "always":
-                $arrProp["record_in"]="always";
-            case "never":
-                $arrProp["record_in"]="never";
-            default:
-                $arrProp["record_in"]="on_demand";
-        }
-
-        //validamos los recording
-        switch(strtolower($arrProp["record_out"])){
-            case "always":
-                $arrProp["record_out"]="always";
-            case "never":
-                $arrProp["record_out"]="never";
-            default:
-                $arrProp["record_out"]="on_demand";
+        // Validamos los recording
+        foreach (array('record_in', 'record_out') as $k) {
+            if (!in_array($arrProp[$k], array('always', 'never', 'on_demand')))
+                $arrProp[$k] = 'on_demand'; 
         }
 
         //creamos la cuenat sip que se usa para acceder a la extension del usuario desde la interfaz eb
@@ -2476,30 +2462,10 @@ class paloDevice{
             }else
                 $arrProp['rt']=0;
 
-            //validamos los recording
-            switch(strtolower($arrProp["record_in"])){
-                case "always":
-                    $arrProp["record_in"]="always";
-                    break;
-                case "never":
-                    $arrProp["record_in"]="never";
-                    break;
-                default:
-                    $arrProp["record_in"]="on_demand";
-                    break;
-            }
-
-            //validamos los recording
-            switch(strtolower($arrProp["record_out"])){
-                case "always":
-                    $arrProp["record_out"]="always";
-                    break;
-                case "never":
-                    $arrProp["record_out"]="never";
-                    break;
-                default:
-                    $arrProp["record_out"]="on_demand";
-                    break;
+            // Validamos los recording
+            foreach (array('record_in', 'record_out') as $k) {
+                if (!in_array($arrProp[$k], array('always', 'never', 'on_demand')))
+                    $arrProp[$k] = 'on_demand';
             }
 
             //si la cuenta sip tiene dispositivo elxweb_device entonces se lo agrega

@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Dec  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Designer: switch incorrect use of list control on button strip
+  with proper dropdown filter. Add filter control.
+  SVN Rev[6803]
+
 * Thu Nov 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Incoming Calls Monitoring: explictly require paloSantoGrid class which
   has been previously included via spl_elastix_class_autoload and therefore

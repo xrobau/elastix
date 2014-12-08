@@ -67,11 +67,11 @@ function _moduleContent(&$smarty, $module_name)
         return guardarFormulario($pDB, $smarty, $module_name, $local_templates_dir);
     case 'list':
     default:
-        return listarFormularios($pDB, $smarty, $module_name);
+        return listarFormularios($pDB, $smarty, $module_name, $local_templates_dir);
     }
 }
 
-function listarFormularios($pDB, $smarty, $module_name)
+function listarFormularios($pDB, $smarty, $module_name, $local_templates_dir)
 {
     $arrColumns = array('', _tr('Form Name'), _tr('Form Description'), _tr('Status'), _tr('Options'));
     $cbo_estados = array('all' => _tr('All'), 'A' => _tr('Active'), 'I' => _tr('Inactive'));
@@ -91,7 +91,6 @@ function listarFormularios($pDB, $smarty, $module_name)
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->pagingShow(true);
     $oGrid->setLimit($limit);
-    $oGrid->addComboAction('cbo_estado', _tr('Status'), $cbo_estados, $cbo_estado, 'refresh', 'submit();');
     $oGrid->addNew("?menu=$module_name&action=add", _tr('Create New Form'), TRUE);
     $oGrid->addSubmitAction('activate', _tr('Activate'));
     $oGrid->addSubmitAction('deactivate', _tr('Desactivate'));
@@ -150,11 +149,28 @@ function listarFormularios($pDB, $smarty, $module_name)
             (empty($tuplaForm['descripcion']) ? '&nbsp;' : htmlentities($tuplaForm['descripcion'], ENT_COMPAT, 'UTF-8')),
             ($tuplaForm['estatus'] == 'I' ? _tr('Inactive') : _tr('Active')),
     	    ($tuplaForm['estatus'] == 'I'
-    	        ? '&nbsp;' //"<a href='".construirURL(array('menu' => $module_name, 'action' => 'activate', 'id' => $tuplaForm['id']))."'>"._tr('Activate')."</a>"
+    	        ? '&nbsp;'
                 : "<a href='".construirURL(array('menu' => $module_name, 'action' => 'edit', 'id' => $tuplaForm['id']))."'>"._tr('Edit')."</a>"),
         );
     }
 
+    $oFilterForm = new paloForm($smarty, array(
+        'cbo_estado'    =>    array(
+            "LABEL"                 => _tr('Status'),
+            "REQUIRED"              => "no",
+            "INPUT_TYPE"            => "SELECT",
+            "INPUT_EXTRA_PARAM"     => $cbo_estados,
+            "VALIDATION_TYPE"       => "text",
+            "VALIDATION_EXTRA_PARAM"=> "",
+            "ONCHANGE"              => 'submit();',
+        ),
+    ));
+    $oGrid->addFilterControl(
+        _tr("Filter applied ")._tr("Status")." = ".$cbo_estados[$cbo_estado],
+        $paramFiltro,
+        array("cbo_estado" =>'A'),
+        true);
+    $oGrid->showFilter($oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $paramFiltro));
     $oGrid->setData($arrData);
     return $oGrid->fetchGrid();
 }

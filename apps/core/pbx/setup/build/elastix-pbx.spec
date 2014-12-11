@@ -267,6 +267,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Dec 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: update extensions_override_elastix.conf to write recording
+  filenames on the "recordingfile" field of the cdr table instead of the
+  "userfield" field. This brings the contexts in sync with FreePBX 2.11+ 
+  expectations. Fixes Elastix bug #2073.
+  SVN Rev[6804]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

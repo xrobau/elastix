@@ -86,6 +86,7 @@ rmdir setup/usr/share/elastix/privileged
 
 rmdir setup/usr/share/elastix setup/usr/share setup/usr
 
+chmod +x setup/migrationFilesMonitor*php
 mv setup/     $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
@@ -146,6 +147,14 @@ else
     echo "File extensions_override_freepbx.conf in asterisk not exits, copying include macros elastix..."
     touch /etc/asterisk/extensions_override_freepbx.conf
     echo "#include extensions_override_elastix.conf" > /etc/asterisk/extensions_override_freepbx.conf
+fi
+
+# se verifica si extensions_override_elastix.conf usa audio: sin migrar
+if [ -f "/etc/asterisk/extensions_override_elastix.conf" ]; then
+    if grep -q 'audio:' /etc/asterisk/extensions_override_elastix.conf ; then
+        echo "/etc/asterisk/extensions_override_elastix.conf contains CDR(userfield)=audio: , migrating database..."
+        /usr/share/elastix/module_installer/%{name}-%{version}-%{release}/setup/migrationFilesMonitor2.php
+    fi
 fi
 
 # verifico si se incluye a sip_notify_custom_elastix.conf
@@ -268,6 +277,9 @@ fi
 
 %changelog
 * Thu Dec 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Monitoring: implement migration of monitoring records from the audio:
+  format into the recordingfile field.
+  SVN Rev[6805]
 - FIXED: Monitoring: update extensions_override_elastix.conf to write recording
   filenames on the "recordingfile" field of the cdr table instead of the
   "userfield" field. This brings the contexts in sync with FreePBX 2.11+ 

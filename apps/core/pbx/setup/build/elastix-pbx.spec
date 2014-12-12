@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -276,6 +276,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Dec 12 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Thu Dec 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Monitoring: implement migration of monitoring records from the audio:
   format into the recordingfile field.

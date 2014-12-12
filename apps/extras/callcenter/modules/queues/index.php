@@ -73,15 +73,13 @@ function listarColas($pDB, $smarty, $module_name, $local_templates_dir)
     global $arrLang;
     
     $oColas = new paloSantoColaEntrante($pDB);
-    
+
     // Verificar si alguna cola debe activarse o inactivarse    
-    if (!is_null($id = getParameter('id'))) {
-        if (!is_null(getParameter('activate'))) {
-        	$bExito = $oColas->cambiarMonitoreoCola($id, 'A');
-        } elseif (!is_null(getParameter('deactivate'))) {
-            $bExito = $oColas->cambiarMonitoreoCola($id, 'I');
-        }
-        if (!$bExito) {
+    if (isset($_POST['change_status']) && isset($_POST['status_queue_sel']) &&
+        in_array($_POST['status_queue_sel'], array('activate', 'deactivate')) &&
+        !is_null($id = getParameter('id'))) {
+        $nstate = ($_POST['status_queue_sel'] == 'activate') ? 'A' : 'I';
+        if (!$oColas->cambiarMonitoreoCola($id, $nstate)) {
             $smarty->assign("mb_title", _tr('Unable to change activation'));
             $smarty->assign("mb_message", $oColas->errMsg);
         }
@@ -112,10 +110,7 @@ function listarColas($pDB, $smarty, $module_name, $local_templates_dir)
         "end"      => $end,
         "total"    => $end,
         "columns"  => array(
-                        array("name" => 
-                            "<input class=\"button\" type=\"submit\" name=\"activate\" value=\""._tr('Activate')."\" />".
-                            "<input class=\"button\" type=\"submit\" name=\"deactivate\" value=\""._tr('Deactivate')."\" />"
-                        ),
+                        array("name" => ''),
                         array("name" => _tr('Name Queue')),
                         array("name" => _tr('Status')),
                         array("name" => _tr('Options'))
@@ -131,11 +126,15 @@ function listarColas($pDB, $smarty, $module_name, $local_templates_dir)
             "<a href=\"?menu=$module_name&amp;action=edit_queue&amp;id_queue={$tuplaQueue['id']}\">[".htmlentities(_tr('Edit'), ENT_COMPAT, 'UTF-8')."]</a>",
         );
     }
+    $oGrid->addNew("?menu=$module_name&action=new_queue", _tr('Select Queue'), TRUE);
+    $oGrid->addComboAction('status_queue_sel', _tr("Change Status"), array(
+        'activate'      =>  _tr('Activate'),
+        'deactivate'    =>  _tr('Deactivate'),
+    ), null, 'change_status');
     $oGrid->showFilter(
         '<table width="100%" border="0"><tr>' .
             '<td align="right"><b>'._tr('Status').'</b></td>'.
             '<td align="left"><select name="estatus" onchange="submit();">'.combo(array('' => _tr('all'), 'A' => _tr('active'), 'I' => _tr('inactive')), $sEstado).'</select></td>'.
-            '<td align="right"><b><a href="?menu='.$module_name.'&amp;action=new_queue">'._tr('Select Queue').'&nbsp;&raquo;</a></b></td>'.
         '</tr></table>'
     );
     $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLang);

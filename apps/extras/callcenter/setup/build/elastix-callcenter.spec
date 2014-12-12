@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Fri Dec 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: ECCP Users: update paloSantoGrid API usage to latest Elastix 2.4
+  SVN Rev[6807]
 - CHANGED: External URL: update paloSantoGrid API usage to latest Elastix 2.4
   SVN Rev[6806]
 

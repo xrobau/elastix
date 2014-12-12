@@ -79,7 +79,6 @@ function listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir)
     
     $smarty->assign(array(
         'MODULE_NAME'           =>  $module_name,
-        'LABEL_CREATE_USER' =>  _tr('New ECCP User'),
     ));
     
     // Manejar posible borrado de agentes
@@ -125,7 +124,7 @@ function listarUsuarios($pDB, $smarty, $module_name, $local_templates_dir)
                                         )
                     );
     
-    $oGrid->showFilter($smarty->fetch("$local_templates_dir/filter-list-users.tpl"));
+    $oGrid->addNew("?menu=$module_name&action=new_user", _tr('New ECCP User'), true);
     $sContenido = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
     if (strpos($sContenido, '<form') === FALSE)
         $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";

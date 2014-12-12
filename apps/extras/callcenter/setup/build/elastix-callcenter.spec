@@ -100,6 +100,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Dec 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: External URL: update paloSantoGrid API usage to latest Elastix 2.4
+  SVN Rev[6806]
+
 * Tue Dec  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Form Designer: switch incorrect use of list control on button strip
   with proper dropdown filter. Add filter control.

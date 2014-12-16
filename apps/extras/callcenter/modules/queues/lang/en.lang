@@ -38,5 +38,6 @@ global $arrLangModule;
 'all'             => "All",
 'active'          => "Active",
 'inactive'        => "Inactive",
+'Change Status'   => 'Change Status',
 );
 ?>

@@ -39,6 +39,6 @@ global $arrLangModule;
 'active'          => "Activas",
 'inactive'        => "Inactivas",
 'Deactivate'          => "Desactivar",
-
+'Change Status'   => 'Cambiar Estado',
 );
 ?>

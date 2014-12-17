@@ -232,7 +232,7 @@ class Llamada
                             $this->id_llamada, $this->agente->channel, 
                             is_null($this->actualchannel) ? $this->channel : $this->actualchannel,
                             date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent'],
-                            $this->trunk);
+                            $this->trunk, $this->_queuenumber);
                     }
                     if (isset($this->_actualizacionesPendientes['sqlinsertcurrentcalls'])) {
                         $this->_log->output('INFO: '.__METHOD__.': ya se tiene ID de llamada, insertando current_call_entry...');

@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Dec 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): emit queue number in scenario of delayed AgentLinked
+  event on database async write.
+  SVN Rev[6813]
+
 * Fri Dec 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Queues: update paloSantoGrid API usage to latest Elastix 2.4
   SVN Rev[6809]

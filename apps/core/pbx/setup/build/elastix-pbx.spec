@@ -276,6 +276,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Dec 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: update extensions_override_elastix.conf to check additional
+  context variables in order to detect more recording scenarios in FreePBX 2.11.
+  Part of fix for Elastix bug #2073.
+  SVN Rev[6812]
+
 * Fri Dec 12 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

@@ -101,6 +101,11 @@ fi
 
 %changelog
 * Wed Dec 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Ingoing Calls Success: complete rewrite. Database queries were 
+  rewritten to make use of joins and foreign keys, parametrized to remove SQL
+  vulnerabilities, and module logic was simplified. Updated to latest grid
+  API.
+  SVN Rev[6814]
 - FIXED: Dialer (ECCP): emit queue number in scenario of delayed AgentLinked
   event on database async write.
   SVN Rev[6813]

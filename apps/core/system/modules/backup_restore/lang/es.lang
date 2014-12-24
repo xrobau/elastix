@@ -28,7 +28,7 @@
   $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Are you sure you wish to delete backup (s)?" => "Esta seguro de eliminar el correo el(los) backup(s)?",
+"Are you sure you wish to delete backup (s)?" => "Esta seguro de eliminar el(los) backup(s)?",
 "Database" => "Base de Datos",
 "PDF" => "PDF",
 "Endpoint" => "Endpoint",

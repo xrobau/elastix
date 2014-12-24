@@ -663,10 +663,7 @@ function action_runBackup($opt)
     if (preg_match('|^(.+)/$|', $sTempDir, $regs)) {
     	$sTempDir = $regs[1];
     }
-    if (is_null($sBackupFile)) {
-        error_exit("Option --backupfile: Must specify a backup filename.\n");
-    }
-    if (file_exists($sTempDir.'/'.$sBackupFile)) {
+    if (!is_null($sBackupFile) && file_exists($sTempDir.'/'.$sBackupFile)) {
         error_exit("Option --backupfile: File already exists!\n");
     }
     list($selectedComponents, $unknownComponents) = expandBackupComponents($sComponentString);
@@ -702,21 +699,23 @@ function action_runBackup($opt)
     	}
     }
     
-    // Create tarball with final result
-    $output = $retval = NULL;
-    $sBackupPath = $sTempDir.'/'.$sBackupFile;
-    exec('tar -C '.escapeshellarg($sTempDir).' -cf '.escapeshellarg($sBackupPath).' backup', $output, $retval);
-    if ($retval != 0) {
-        error_exit("FATAL: failed to pack final tarball on $sWorkingDir\n");
-    }
-    
-    // Remove working directory
-    $output = $retval = NULL;
-    exec('rm -rf '.escapeshellarg($sWorkingDir), $output, $retval);
+    if (!is_null($sBackupFile)) {
+		// Create tarball with final result
+		$output = $retval = NULL;
+		$sBackupPath = $sTempDir.'/'.$sBackupFile;
+		exec('tar -C '.escapeshellarg($sTempDir).' -cf '.escapeshellarg($sBackupPath).' backup', $output, $retval);
+		if ($retval != 0) {
+		    error_exit("FATAL: failed to pack final tarball on $sWorkingDir\n");
+		}
+		
+		// Remove working directory
+		$output = $retval = NULL;
+		exec('rm -rf '.escapeshellarg($sWorkingDir), $output, $retval);
 
-    // Switch tarball file permission to asterisk:asterisk
-    chown($sBackupPath, 'asterisk');
-    chgrp($sBackupPath, 'asterisk');
+		// Switch tarball file permission to asterisk:asterisk
+		chown($sBackupPath, 'asterisk');
+		chgrp($sBackupPath, 'asterisk');
+    }
 
     return $bGlobalSuccess;
 }

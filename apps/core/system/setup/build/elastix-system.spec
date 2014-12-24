@@ -137,6 +137,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Dec 24 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: allow missing --backupfile option. This will now 
+  leave the tarball components unpacked during backup. Part of a set of changes
+  for remote incremental backup/restore.
+  SVN Rev[6816]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.

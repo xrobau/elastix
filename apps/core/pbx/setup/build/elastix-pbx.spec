@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -276,6 +276,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Dec 30 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Wed Dec 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: update extensions_override_elastix.conf to check additional
   context variables in order to detect more recording scenarios in FreePBX 2.11.
@@ -285,6 +289,7 @@ fi
 * Fri Dec 12 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[6810]
 
 * Thu Dec 11 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Monitoring: implement migration of monitoring records from the audio:
@@ -299,10 +304,12 @@ fi
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[6773]
 
 * Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-18
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6758]
 
 * Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 
 - FIXED: preg_match function error, scape character "/" .

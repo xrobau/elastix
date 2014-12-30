@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Dec 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): scheduled calls now inherit any form values entered
+  from the original call.
+  SVN Rev[6817]
+
 * Wed Dec 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Ingoing Calls Success: complete rewrite. Database queries were 
   rewritten to make use of joins and foreign keys, parametrized to remove SQL

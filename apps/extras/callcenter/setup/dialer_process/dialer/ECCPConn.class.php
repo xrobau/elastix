@@ -2810,6 +2810,18 @@ SQL_LLAMADA_ATRIBUTOS_AGENDAMIENTO;
             $attrLlamada[1][1] = $sNuevoNombre;
         }
 
+        // Leer los datos de los formularios para la llamada
+        $sqlLlamadaForm = <<<SQL_LLAMADA_FORM_STATIC
+SELECT id_form_field, value FROM form_data_recolected
+WHERE id_calls = ?
+SQL_LLAMADA_FORM_STATIC;
+        $recordset = $this->_db->prepare($sqlLlamadaForm);
+        $recordset->execute(array($infoLlamada['callid']));
+        $formLlamada = array();
+        foreach ($recordset as $tupla) {
+            $formLlamada[$tupla['id_form_field']] = $tupla['value'];
+        }
+        
         // Validar que no exista una llamada por agendar al mismo número
         $sqlExistenciaLlamadaPrevia = <<<SQL_LLAMADA_PREVIA
 SELECT COUNT(*) FROM calls 
@@ -2848,6 +2860,14 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $tuplaAttr[] = $iColNum;        // Debería ser posición 2
                 $tuplaAttr[] = $idNuevaLlamada; // Debería ser posición 3
                 $sth->execute($tuplaAttr);
+            }
+            
+            // Insertar valores de formularios
+            $sth = $this->_db->prepare(
+                'INSERT INTO form_data_recolected (value, id_form_field, id_calls) '.
+                'VALUES (?, ?, ?)');
+            foreach ($formLlamada as $id_ff => $value) {
+                $sth->execute(array($value, $id_ff, $idNuevaLlamada));
             }
             
             // Final de transacción

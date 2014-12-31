@@ -404,7 +404,15 @@ class CampaignProcess extends TuberiaProcess
                 'incoming'  =>  array(),
                 'outgoing'  =>  array(),
             );
-
+            
+            // Desactivar todas las campañas que sigan activas y que hayan superado
+            // la fecha final de duración de campaña
+            $sPeticionDesactivarCaducas = <<<PETICION_DESACTIVAR_CADUCAS
+UPDATE campaign SET estatus = "I" WHERE datetime_end < ? AND estatus = "A"
+PETICION_DESACTIVAR_CADUCAS;
+            $sth = $this->_db->prepare($sPeticionDesactivarCaducas);
+            $sth->execute(array($sFecha));            
+            
             // Leer la lista de campañas salientes que entran en actividad ahora
             $sPeticionCampanias = <<<PETICION_CAMPANIAS_SALIENTES
 SELECT id, name, trunk, context, queue, max_canales, num_completadas,
@@ -424,6 +432,14 @@ PETICION_CAMPANIAS_SALIENTES;
             foreach ($recordset as $tupla) {
             	$listaCampanias['outgoing'][] = $tupla;
             }
+            
+            // Desactivar todas las campañas que sigan activas y que hayan superado
+            // la fecha final de duración de campaña
+            $sPeticionDesactivarCaducas = <<<PETICION_DESACTIVAR_CADUCAS
+UPDATE campaign_entry SET estatus = "I" WHERE datetime_end < ? AND estatus = "A" 
+PETICION_DESACTIVAR_CADUCAS;
+            $sth = $this->_db->prepare($sPeticionDesactivarCaducas);
+            $sth->execute(array($sFecha));
             
             // Leer la lista de campañas entrantes que entran en actividad ahora
             $sPeticionCampanias = <<<PETICION_CAMPANIAS_ENTRANTES

@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Dec 31 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: any active campaign (incoming or outgoing) with end date past
+  current date will now get marked as inactive.
+  SVN Rev[6818]
+
 * Tue Dec 30 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): scheduled calls now inherit any form values entered
   from the original call.

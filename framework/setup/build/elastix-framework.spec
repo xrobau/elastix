@@ -192,6 +192,9 @@ fi
 sed --in-place "s,User\sapache,#User apache,g" /etc/httpd/conf/httpd.conf
 sed --in-place "s,Group\sapache,#Group apache,g" /etc/httpd/conf/httpd.conf
 
+# Patch php.conf to remove the assignment to session.save_path in CentOS 7
+sed --in-place "s,php_value session.save_path,#php_value session.save_path,g" /etc/httpd/conf.d/php.conf 
+
 # ** Uso de elastix-dbprocess ** #
 pathModule="/usr/share/elastix/module_installer/%{name}-%{version}-%{release}"
 preversion=`cat $pathModule/preversion_elastix-framework.info`
@@ -279,6 +282,9 @@ fi
 
 
 %preun
+# Reverse the patching of php.conf
+sed --in-place "s,#php_value session.save_path,php_value session.save_path,g" /etc/httpd/conf.d/php.conf
+
 # Reverse the patching of httpd.conf
 sed --in-place "s,#User\sapache,User apache,g" /etc/httpd/conf/httpd.conf
 sed --in-place "s,#Group\sapache,Group apache,g" /etc/httpd/conf/httpd.conf
@@ -338,6 +344,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Jan 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: Disable assignment to session.save_path in php.conf
+  so that setting in elastix.ini can take effect.
+  SVN Rev[6819]
+
 * Tue Dec 02 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

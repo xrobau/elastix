@@ -173,6 +173,7 @@ fi
 # Habilito inicio automático de servicios necesarios
 chkconfig --level 345 ntpd on
 chkconfig --level 345 mysqld on
+chkconfig --level 345 mariadb on 
 chkconfig --level 345 httpd on
 chkconfig --del cups  &> /dev/null
 chkconfig --del gpm   &> /dev/null
@@ -345,9 +346,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Jan 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: Attempt to enable mariadb in addition to mysqld for 
+  CentOS 7.
+  SVN Rev[6821]
 - FIXED: Framework: Disable assignment to session.save_path in php.conf
   so that setting in elastix.ini can take effect.
-  SVN Rev[6819]
+  SVN Rev[6820]
 
 * Tue Dec 02 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest

@@ -81,11 +81,18 @@ elif [ $1 -eq 2 ]; then #update
 fi
 
 ARCH=`uname -m`
+CENTOSVER=`php -r 'if (preg_match("/CentOS.+?release (\d)/i", file_get_contents("/etc/redhat-release"), $regs)) print $regs[1];'`
 if [ "$ARCH" != "i386" ] && [ "$ARCH" != "i686" ] && [ "$ARCH" != "x86_64" ] ; then
+        echo "Incompatible architecture $ARCH , removing PostgreSQL repository..."
+        rm -rf /etc/yum.repos.d/pgdg-91-centos.repo
+        rm -rf /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
+elif [ "0$CENTOSVER" -ge 7 ] ; then
+        echo "CentOS base install too new, removing PostgreSQL repository..."
         rm -rf /etc/yum.repos.d/pgdg-91-centos.repo
         rm -rf /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
 else
         # import the GPG-key
+        echo "Importing RPM key for PostgreSQL repository..."
         /bin/rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG-91
 fi
 
@@ -124,6 +131,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Wed Jan 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: In addition to the architecture check, the PostgreSQL repo must be
+  removed when installing on CentOS 7 or later.
+  SVN Rev[6822]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

@@ -185,8 +185,7 @@ rm -f /usr/share/elastix/sudoers
 
 # ** Change content of CentOS-Base.repo ** #
 if [ -e /etc/yum.repos.d/CentOS-Base.repo ] ; then
-    cat   /usr/share/elastix/CentOS-Base.repo > /etc/yum.repos.d/CentOS-Base.repo
-    rm -f /usr/share/elastix/CentOS-Base.repo
+    /usr/bin/elastix-add-yum-exclude /etc/yum.repos.d/CentOS-Base.repo 'redhat-logos' 'php53*'
 fi
 
 # Patch httpd.conf so that User and Group directives in elastix.conf take effect
@@ -327,6 +326,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-menuremove
 /usr/bin/elastix-dbprocess
 /usr/bin/elastix-helper
+/usr/bin/elastix-add-yum-exclude
 /usr/bin/compareVersion
 /usr/bin/search_ami_admin_pwd
 /usr/sbin/elastix-helper
@@ -346,6 +346,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Jan 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: switch from overwriting the CentOS repo to patching it
+  as required. This prevents insertion or removal of repos that might not be
+  appropriate for current CentOS distro. Required for CentOS 7.
+  SVN Rev[6823]
 - CHANGED: Framework: Attempt to enable mariadb in addition to mysqld for 
   CentOS 7.
   SVN Rev[6821]

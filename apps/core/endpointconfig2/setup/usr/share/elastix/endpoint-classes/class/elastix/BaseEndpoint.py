@@ -35,6 +35,7 @@ import sha
 import random
 from os.path import isfile
 from datetime import datetime
+import MySQLdb
 
 ENDPOINT_DIR = '/usr/share/elastix/endpoint-classes'
 ENDPOINT_CUSTOM_DIR = '/usr/local/share/elastix/endpoint-classes'

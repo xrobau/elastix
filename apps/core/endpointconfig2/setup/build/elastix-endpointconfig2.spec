@@ -155,6 +155,9 @@ fi
 
 %changelog
 * Thu Jan 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: actually import MySQLdb in order to handle an
+  exception of type MySQLdb.Error.
+  SVN Rev[6825]
 - CHANGED: Endpoint Configurator: use time.timezone to get timezone offset
   instead of querying /etc/sysconfig/clock AND using pytz to derive offset.
   SVN Rev[6824]

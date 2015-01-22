@@ -19,7 +19,6 @@ Requires: pyOpenSSL
 Requires: python-daemon
 Requires: MySQL-python
 Requires: python-cjson
-Requires: pytz
 Requires: php-magpierss
 Requires: python-paramiko >= 1.7.6-2
 Prereq: tftp-server
@@ -155,6 +154,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Jan 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: use time.timezone to get timezone offset
+  instead of querying /etc/sysconfig/clock AND using pytz to derive offset.
+  SVN Rev[6824]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

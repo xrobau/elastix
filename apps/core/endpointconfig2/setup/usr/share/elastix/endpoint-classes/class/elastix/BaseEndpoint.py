@@ -29,20 +29,18 @@
 import logging
 import tempita
 import re
-from eventlet.green import os, socket, urllib2, urllib
+from eventlet.green import os, socket, urllib2, urllib, time
 import errno
 import sha
 import random
 from os.path import isfile
 from datetime import datetime
-from pytz import timezone
 
 ENDPOINT_DIR = '/usr/share/elastix/endpoint-classes'
 ENDPOINT_CUSTOM_DIR = '/usr/local/share/elastix/endpoint-classes'
 TFTP_DIR = '/tftpboot'
 
 class BaseEndpoint(object):
-    _timezoneOffset = None
     
     @staticmethod
     def updateGlobalConfig(serveriplist, amipool, endpoints):
@@ -456,17 +454,4 @@ class BaseEndpoint(object):
  
     @staticmethod
     def getTimezoneOffset():
-        if BaseEndpoint._timezoneOffset == None:
-            # Read zone name from system definition
-            zone = None
-            configfile = open('/etc/sysconfig/clock', 'r')
-            for configline in configfile:
-                m = re.search(r'^ZONE="(.+)"', configline)
-                if m != None:
-                    zone = m.group(1)
-            configfile.close()
-            
-            # Calculate timezone offset as seconds relative to GMT
-            local_offset = timezone(zone).utcoffset(datetime.now())
-            BaseEndpoint._timezoneOffset = local_offset.days * 86400 + local_offset.seconds
-        return BaseEndpoint._timezoneOffset
+        return -1 * time.timezone

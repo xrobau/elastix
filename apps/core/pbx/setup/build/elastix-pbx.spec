@@ -276,6 +276,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jan 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Control Panel: work around attributeBinding no longer picking up
+  context.idattr in Ember.js. Fixes Elastix bug #2131.
+  SVN Rev[6826]
+
 * Thu Dec 30 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

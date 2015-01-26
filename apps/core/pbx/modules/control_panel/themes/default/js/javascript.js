@@ -560,8 +560,11 @@ $(document).ready(function() {
 			
 			// Localizar la extensión que debe de quitarse
 			var r = parentController.localizarControladorExtension('idattr', dropped_id);
-			var srcController = r[0];
-			var removepos = r[1];
+			var srcController = null;
+			if (r != null) {
+				srcController = r[0];
+				var removepos = r[1];
+			}
 			if (srcController == null) {
 				console.error('BUG: failed to fetch srcController for extension!');
 				ui.sender.sortable('cancel'); return;
@@ -623,7 +626,10 @@ $(document).ready(function() {
 	App.PBXElementView = Ember.View.extend({
 		classNames: ['pbxelement'],
 		classNameBindings: ['context.registered:pbxactive'],
-		attributeBindings: ['context.idattr:data-idattr'],
+		attributeBindings: ['dataIdattr:data-idattr'],
+		dataIdattr: function() {
+			return this.get('context.idattr');
+		}.property('context.idattr'),
 		truncatedDescription: function() {
 			var s = this.get('context.description');
 			if (s.length <= 12) return s;

@@ -92,6 +92,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Jan 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: CDR Report: add new column that is required by the CDR module in 
+  FreePBX. Fixes Elastix bugs #2127, #2074.
+  SVN Rev[6827]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump version and release in specfile.

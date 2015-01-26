@@ -1,0 +1,1 @@
+ALTER TABLE cdr ADD COLUMN `did` varchar(50) NOT NULL DEFAULT '';

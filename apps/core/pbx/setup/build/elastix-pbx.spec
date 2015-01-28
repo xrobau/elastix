@@ -276,6 +276,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jan 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Voicemail: fix imcomplete conversion of regexp functions from SVN
+  commit #6638. Fixes Elastix bug #2137.
+  SVN Rev[6828]
+
 * Mon Jan 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: work around attributeBinding no longer picking up
   context.idattr in Ember.js. Fixes Elastix bug #2131.

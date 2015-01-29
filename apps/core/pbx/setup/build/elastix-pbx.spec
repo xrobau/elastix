@@ -276,6 +276,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Voicemail, Monitoring: use <audio> instead of <embed> for audio
+  playback, with <embed> fallback.
+  SVN Rev[6829]
+
 * Wed Jan 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Voicemail: fix imcomplete conversion of regexp functions from SVN
   commit #6638. Fixes Elastix bug #2137.

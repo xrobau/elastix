@@ -212,9 +212,7 @@ function _moduleContent(&$smarty, $module_name)
             switch( $format ) {
 
                 case "mp3": $ctype="audio/mpeg"; break;
-                case "wav": $ctype="audio/x-wav"; break;
-                case "Wav": $ctype="audio/x-wav"; break;
-                case "WAV": $ctype="audio/x-wav"; break;
+                case "wav": $ctype='audio/wav'; break;
                 case "gsm": $ctype="audio/x-gsm"; break;
                 // not downloadable
                 default: die("<b>404 ".$arrLang["no_file"]."</b>"); break ;
@@ -223,11 +221,23 @@ function _moduleContent(&$smarty, $module_name)
 			if($sContenido == "")
                 $session_id = session_id();
 
+			$audiourl = construirURL(array(
+			    'menu'           =>  $module_name,
+			    'action'         =>  'download',
+			    'ext'            =>  $ext,
+			    'name'           =>  $file,
+			    'rawmode'        =>  'yes',
+			    'elastixSession' =>  $session_id,
+			));
             $sContenido=<<<contenido
+<!DOCTYPE html>
 <html>
 <head><title>Elastix</title></head>
 <body>
-    <embed src='index.php?menu=$module_name&action=download&ext=$ext&name=$file&rawmode=yes&elastixSession=$session_id' width=300, height=20 autoplay=true loop=false type="$ctype"></embed><br/>
+    <audio src="$audiourl" controls autoplay>
+        <embed src="$audiourl" type="$ctype" width="300" height="20" autoplay="true" loop="false" />
+    </audio>
+    <br/>
 </body>
 </html>
 contenido;
@@ -282,9 +292,7 @@ contenido;
             switch( $extension ) {
     
                 case "mp3": $ctype="audio/mpeg"; break;
-                case "wav": $ctype="audio/x-wav"; break;
-                case "Wav": $ctype="audio/x-wav"; break;
-                case "WAV": $ctype="audio/x-wav"; break;
+                case "wav": $ctype='audio/wav'; break;
                 case "gsm": $ctype="audio/x-gsm"; break;
                 // not downloadable
                 default: die("<b>404 ".$arrLang["no_file"]."</b>"); break ;

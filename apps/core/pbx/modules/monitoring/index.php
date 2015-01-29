@@ -417,8 +417,8 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     
     // Set Content-Type according to file extension
     $contentTypes = array(
-        'wav'   =>  'audio/x-wav',
-        'gsm'   =>  'audio/x-gsm',
+        'wav'   =>  'audio/wav',
+        'gsm'   =>  'audio/gsm',
         'mp3'   =>  'audio/mpeg',
     );
     $extension = substr(strtolower($file), -3);
@@ -489,10 +489,8 @@ function record_format(&$pDB, $arrConf){
         switch( $extension ) {
 
             case "mp3": $ctype="audio/mpeg"; break;
-            case "wav": $ctype="audio/x-wav"; break;
-            case "Wav": $ctype="audio/x-wav"; break;
-            case "WAV": $ctype="audio/x-wav"; break;
-            case "gsm": $ctype="audio/x-gsm"; break;
+            case "wav": $ctype="audio/wav"; break;
+            case "gsm": $ctype="audio/gsm"; break;
             // not downloadable
             default: $ctype=""; break ;
         }
@@ -501,33 +499,39 @@ function record_format(&$pDB, $arrConf){
 }
 
 function display_record($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension, $esAdministrador){
-    $action = getParameter("action");
     $file = getParameter("id");
     $namefile = getParameter('namefile');
     $pMonitoring = new paloSantoMonitoring($pDB);
     $path_record = $arrConf['records_dir'];
     $sContenido="";
-    switch($action){
-        case "display_record":
-            if(!$esAdministrador){
-                if(!$pMonitoring->recordBelongsToUser($file, $extension)){
-                    $sContenido = _tr("You are not authorized to listen this file");
-                }
-            }
-            if($sContenido == "")
-                $session_id = session_id();
-                $ctype=record_format($pDB, $arrConf);
-                $sContenido=<<<contenido
+    if(!$esAdministrador){
+        if(!$pMonitoring->recordBelongsToUser($file, $extension)){
+            return _tr("You are not authorized to listen this file");
+        }
+    }
+    $session_id = session_id();
+    $ctype=record_format($pDB, $arrConf);
+	$audiourl = construirURL(array(
+	    'menu'             =>  $module_name,
+	    'action'           =>  'download',
+	    'id'               =>  $file,
+	    'namefile'         =>  $namefile,
+	    'rawmode'          =>  'yes',
+	    'elastixSession'   =>  $session_id,
+	));
+    $sContenido=<<<contenido
+<!DOCTYPE html>
 <html>
 <head><title>Elastix</title></head>
 <body>
-    <embed src='index.php?menu=$module_name&action=download&id=$file&namefile=$namefile&rawmode=yes&elastixSession=$session_id' width=300, height=20 autoplay=true loop=false type="$ctype"></embed><br/>
+    <audio src="$audiourl" controls autoplay>
+        <embed src="$audiourl" width="300" height="20" autoplay="true" loop="false" type="$ctype" />
+    </audio>
+    <br/>
 </body>
 </html>
 contenido;
-            break;
-    }
-    echo $sContenido;
+    return $sContenido;
 }
 
 function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension, $esAdministrador)

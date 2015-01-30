@@ -871,8 +871,11 @@ class AMIClientConn extends MultiplexConn
     /** Show all entries in the asterisk database
      * @return Array associative array of key=>value
      */
-    function database_show() {
-        $r = $this->command("database show");
+    function database_show($family = NULL, $keytree = NULL) {
+        $c = 'database show';
+        if (!is_null($family)) $c .= ' '.$family;
+        if (!is_null($keytree)) $c .= ' '.$keytree;
+        $r = $this->command($c);
         
         $data = explode("\n",$r["data"]);
         $db = array();

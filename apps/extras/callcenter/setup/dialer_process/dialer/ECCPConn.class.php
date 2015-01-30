@@ -1688,7 +1688,7 @@ LISTA_EXTENSIONES;
             $arrColas[$sAgente] = array();
         }
         
-        $db_output = $this->_ami->database_show();
+        $db_output = $this->_ami->database_show('QPENALTY');
         foreach (array_keys($db_output) as $k) {
             $regs = NULL;
             if (preg_match('|^/QPENALTY/(\d+)/agents/(\S+)$|', $k, $regs)) {

@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Jan 30 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): implement optional filtering in the database_show AMI
+  wrapper, and use it to cut down on the amount of data to parse for collecting
+  queues for each agent.
+  SVN Rev[6830]
+
 * Wed Dec 31 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: any active campaign (incoming or outgoing) with end date past
   current date will now get marked as inactive.

@@ -192,6 +192,11 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Mon Feb  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Virtual Fax List: display a more useful message when fax list in 
+  database gets out of sync with actual fax devices.
+  SVN Rev[6831] 
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
   history. Changed Version and Release in specfile.

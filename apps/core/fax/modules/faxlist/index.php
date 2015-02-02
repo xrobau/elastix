@@ -105,7 +105,7 @@ function listFax($smarty, $module_name, $local_templates_dir)
         $arrTmp[3] = $fax['email'];
         $arrTmp[4] = $fax['clid_name'] . "&nbsp;";
         $arrTmp[5] = $fax['clid_number'] . "&nbsp;";
-        $arrTmp[6] = $arrFaxStatus['modems']['ttyIAX' . $fax['dev_id']].' on ttyIAX' . $fax['dev_id'];
+        $arrTmp[6] = msgStatusFaxDevice($arrFaxStatus, $fax['dev_id']);
         $arrData[] = $arrTmp;
     }
 
@@ -147,7 +147,7 @@ function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf, $a
     $arrFaxStatus = $oFax->getFaxStatus();
     $arrData    = array();
     foreach($arrFax as $fax) {
-        $arrData[$fax['extension']] = $arrFaxStatus['modems']['ttyIAX'.$fax['dev_id']].' on ttyIAX'.$fax['dev_id'];
+        $arrData[$fax['extension']] = msgStatusFaxDevice($arrFaxStatus, $fax['dev_id']);
     }
 
     $statusArr    = thereChanges($arrData);
@@ -167,6 +167,15 @@ function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf, $a
                  "data" => $jsonObject->createJSON());
 }
 
+function msgStatusFaxDevice(&$arrFaxStatus, $fax_dev_id)
+{
+    if (isset($arrFaxStatus['modems']['ttyIAX'.$fax_dev_id])) {
+        return $arrFaxStatus['modems']['ttyIAX'.$fax_dev_id].' on ttyIAX'.$fax_dev_id;
+    } else {
+        return _tr('(internal error) Fax device does not exist').': ttyIAX'.$fax_dev_id;
+    }
+}
+
 function thereChanges($data){
     $session = getSession();
     $arrData = array();
@@ -177,7 +186,7 @@ function thereChanges($data){
     foreach($arrData as $key => $value){
         $fax = $value[1];
         $status = $value[6];
-        if(isset($data[$fax]) & $data[$fax] != $status){
+        if(isset($data[$fax]) && $data[$fax] != $status){
             $arraResult[$fax] = $data[$fax];
             $arrData[$key][6] = $data[$fax];
         }

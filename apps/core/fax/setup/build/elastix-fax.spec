@@ -193,6 +193,9 @@ fi
 
 %changelog
 * Mon Feb  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: New Virtual Fax: display error messages if a fax fails to be created
+  or updated.
+  SVN Rev[6832]
 - FIXED: Virtual Fax List: display a more useful message when fax list in 
   database gets out of sync with actual fax devices.
   SVN Rev[6831] 

@@ -133,10 +133,18 @@ function _moduleContent(&$smarty, $module_name)
         if($oForm->validateForm($_POST)) {
             // Exito, puedo procesar los datos ahora.
             $oFax = new paloFax();
-            // TODO: Debo revisar por errores aqui
-            $oFax->createFaxExtension($_POST['name'], $_POST['extension'], $_POST['secret'], $_POST['email'], 
+            
+            $bExito = $oFax->createFaxExtension($_POST['name'], $_POST['extension'], $_POST['secret'], $_POST['email'], 
                                       $_POST['clid_name'], $_POST['clid_number'],$_POST['country_code'],$_POST['area_code']);
-            header("Location: ?menu=faxlist");
+            if ($bExito) {
+                header("Location: ?menu=faxlist");
+            } else {
+                $smarty->assign(array(
+                    'mb_title'  =>  _tr('Failed to create fax extension'),
+                    'mb_message'    =>  $oFax->errMsg,
+                ));
+                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["New Virtual Fax"], $_POST);
+            }
         } else {
             // Error
             $smarty->assign("mb_title", $arrLang["Validation Error"]);
@@ -156,11 +164,19 @@ function _moduleContent(&$smarty, $module_name)
         if($oForm->validateForm($_POST)) {
             // Exito, puedo procesar los datos ahora.
             $oFax = new paloFax();
-            $oFax->editFaxExtension($_POST['id_fax'],$_POST['name'], $_POST['extension'],
+            $bExito = $oFax->editFaxExtension($_POST['id_fax'],$_POST['name'], $_POST['extension'],
                               $_POST['secret'], $_POST['email'],$_POST['clid_name'],
                               $_POST['clid_number'],$_POST['dev_id'],
                               $_POST['port'],$_POST['country_code'],$_POST['area_code']);
-            header("Location: ?menu=faxlist");
+            if ($bExito) {
+                header("Location: ?menu=faxlist");
+            } else {
+                $smarty->assign(array(
+                    'mb_title'  =>  _tr('Failed to update fax extension'),
+                    'mb_message'    =>  $oFax->errMsg,
+                ));
+                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Edit Virtual Fax"], $_POST);
+            }
         } else {
             // Error
             $smarty->assign("mb_title", $arrLang["Validation Error"]);

@@ -277,6 +277,10 @@ fi
 
 %changelog
 * Wed Feb  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: update SQL conditions to filter recordings based on type.
+  Partial Fix for Elastix bug #2147.
+  CHANGED: tweak layout of monitoring filter.
+  SVN Rev[6834]
 - FIXED: Monitoring: recognize recording prefixes changed from FreePBX 2.8.1 to
   FreePBX 2.11. Partial fix for Elastix bug #2147.
   SVN Rev[6833] 

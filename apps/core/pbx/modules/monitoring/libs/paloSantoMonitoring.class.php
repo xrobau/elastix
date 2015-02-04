@@ -51,29 +51,38 @@ class paloSantoMonitoring {
 
     /*HERE YOUR FUNCTIONS*/
 
+    // Construir condición SQL en base a valor de filter_value para recordingfile
+    private function _getWhereCondRecordingFile($filter_value)
+    {
+        // TODO: manejar subdirectorios de monitor
+        $monitor_dir = '/var/spool/asterisk/monitor';
+        
+        $in_val = strtolower($filter_value);
+        switch($in_val){
+            case "outgoing":
+                return "(recordingfile like 'O%' OR recordingfile like '{$monitor_dir}/O%'".
+                    " OR recordingfile like 'o%' OR recordingfile like '{$monitor_dir}/o%')";
+            case "group":
+                return "(recordingfile like 'g%' OR recordingfile like '{$monitor_dir}/g%'".
+                    " OR recordingfile like 'r%' OR recordingfile like '{$monitor_dir}/r%')";
+            case "queue":
+                return "(recordingfile like 'q%' OR recordingfile like '{$monitor_dir}/q%')";
+            default :
+                // TODO: esto no filtra realmente, deja pasar cualquier número
+                return "recordingfile REGEXP '[[:<:]][0-9]' ";
+        }
+    }
+    
     function getNumMonitoring($filter_field, $filter_value, $extension, $date_initial, $date_final)
     {
         $where = "";
-	$arrParam = array();
+        $arrParam = array();
+        if (!in_array($filter_field, array('dst', 'src', 'recordingfile'))) $filter_field = '';
         if(isset($filter_field) && $filter_field !="" && isset($filter_value) && $filter_value !=""){
-            if($filter_field == "recordingfile"){
-                $in_val = strtolower($filter_value);
-                switch($in_val){
-                    case "outgoing":
-                        $where = " AND (recordingfile like 'O%' OR recordingfile like '/var/spool/asterisk/monitor/O%') ";
-                        break;
-                    case "group":
-                        $where = " AND (recordingfile like 'g%' OR recordingfile like '/var/spool/asterisk/monitor/g%') ";
-                        break;
-                    case "queue":
-                        $where = " AND (recordingfile like 'q%' OR recordingfile like '/var/spool/asterisk/monitor/q%') ";
-                        break;
-                    default :
-                        $where = " AND recordingfile REGEXP '[[:<:]][0-9]' ";
-                        break;
-                }
-            }else{
-		$arrParam[] = "$filter_value%";
+            if ($filter_field == "recordingfile") {
+                $where = ' AND '.$this->_getWhereCondRecordingFile($filter_value).' ';
+            } else {
+                $arrParam[] = "$filter_value%";
                 $where = " AND $filter_field like ? AND recordingfile LIKE '%' ";
             }
          }
@@ -111,26 +120,13 @@ class paloSantoMonitoring {
     function getMonitoring($limit, $offset, $filter_field, $filter_value, $extension, $date_initial, $date_final)
     {
         $where = "";
-	$arrParam = array();
+        $arrParam = array();
+        if (!in_array($filter_field, array('dst', 'src', 'recordingfile'))) $filter_field = '';
         if(isset($filter_field) & $filter_field !=""){
             if($filter_field == "recordingfile"){
-                $in_val = strtolower($filter_value);
-                switch($in_val){
-                    case "outgoing":
-                        $where = " AND (recordingfile like 'O%' OR recordingfile like '/var/spool/asterisk/monitor/O%') ";
-                        break;
-                    case "group":
-                        $where = " AND (recordingfile like 'g%' OR recordingfile like '/var/spool/asterisk/monitor/g%') ";
-                        break;
-                    case "queue":
-                        $where = " AND (recordingfile like 'q%' OR recordingfile like '/var/spool/asterisk/monitor/q%') ";
-                        break;
-                    default :
-                        $where = " AND recordingfile REGEXP '[[:<:]][0-9]' ";
-                        break;
-                }
+                $where = ' AND '.$this->_getWhereCondRecordingFile($filter_value).' ';
             }else{
-		$arrParam[] = "$filter_value%";
+                $arrParam[] = "$filter_value%";
                 $where = " AND $filter_field like ? AND recordingfile LIKE '%' ";
             }
          }

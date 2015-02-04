@@ -92,6 +92,14 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Feb  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: CDR Report: reinstalling FreePBX adds the cdr.did column 
+  independently from elastix-reports. This could cause a failure to apply all
+  SQL scripts from elastix-reports. Fix by declaring and running a temporary
+  stored procedure to check whether cdr.did exists. This method was lifted from
+  elastix-callcenter.
+  SVN Rev[6835] 
+
 * Mon Jan 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: CDR Report: add new column that is required by the CDR module in 
   FreePBX. Fixes Elastix bugs #2127, #2074.

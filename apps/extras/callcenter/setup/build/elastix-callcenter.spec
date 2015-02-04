@@ -3,7 +3,7 @@
 Summary: Elastix Call Center 
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,6 +100,9 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Feb  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-8
+- Bump version for release.
+
 * Fri Jan 30 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer (ECCP): implement optional filtering in the database_show AMI
   wrapper, and use it to cut down on the amount of data to parse for collecting

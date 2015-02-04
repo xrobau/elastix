@@ -1,3 +1,38 @@
+2.2.0-8 (SVN revision 6836)
+* FIXED: Dialer (ECCP): implement optional filtering in the database_show AMI
+  wrapper, and use it to cut down on the amount of data to parse for collecting
+  queues for each agent.
+* CHANGED: Dialer: any active campaign (incoming or outgoing) with end date past
+  current date will now get marked as inactive.
+* CHANGED: Dialer (ECCP): scheduled calls now inherit any form values entered
+  from the original call.
+* CHANGED: Ingoing Calls Success: complete rewrite. Database queries were 
+  rewritten to make use of joins and foreign keys, parametrized to remove SQL
+  vulnerabilities, and module logic was simplified. Updated to latest grid
+  API.
+* FIXED: Dialer (ECCP): emit queue number in scenario of delayed AgentLinked
+  event on database async write.
+* CHANGED: Queues: update paloSantoGrid API usage to latest Elastix 2.4
+* CHANGED: ECCP Users: update paloSantoGrid API usage to latest Elastix 2.4
+* CHANGED: External URL: update paloSantoGrid API usage to latest Elastix 2.4
+* CHANGED: Form Designer: switch incorrect use of list control on button strip
+  with proper dropdown filter. Add filter control.
+* FIXED: Incoming Calls Monitoring: explictly require paloSantoGrid class which
+  has been previously included via spl_elastix_class_autoload and therefore
+  fails to load in elastix-framework earlier than 2.4.0-7.
+* CHANGED: Update minimum elastix-framework to 2.4.0-7 or later.
+* CHANGED: Form Designer: add placeholder content for new field name.
+* CHANGED: Form Designer: update cursor styles on draggable rows to indicate
+  draggable capability.
+* CHANGED: Campaign Out: update paloSantoGrid API usage to latest Elastix 2.4
+* CHANGED: Campaign In: update paloSantoGrid API usage to latest Elastix 2.4
+* CHANGED: CallCenter Config: reorganize form fields.
+* CHANGED: Break Administrator: update paloSantoGrid API usage to latest
+  Elastix 2.4. Fix potential undefined variable reference on validation error.
+* CHANGED: Callback Extensions: update paloSantoGrid API usage to latest 
+  Elastix 2.4.
+* CHANGED: Agents: update paloSantoGrid API usage to latest Elastix 2.4.
+
 2.2.0-7 (SVN revision 6740)
 * CHANGED: Dialer (ECCP): create new request getmultipleagentstatus. This 
   request allows for a report of agent status for a group of agents at once.

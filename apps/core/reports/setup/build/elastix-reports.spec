@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -92,6 +92,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Feb 04 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Wed Feb  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: CDR Report: reinstalling FreePBX adds the cdr.did column 
   independently from elastix-reports. This could cause a failure to apply all
@@ -112,6 +116,7 @@ fi
 * Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-10
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6758]
 
 * Mon Sep  8 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: CDR Report: fix fallout resulting from commit 6638 breaking any regexp

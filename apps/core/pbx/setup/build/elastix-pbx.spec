@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX 
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -276,7 +276,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
-* Wed Feb  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Feb 04 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Wed Feb  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: update SQL conditions to filter recordings based on type.
   Partial Fix for Elastix bug #2147.
   CHANGED: tweak layout of monitoring filter.
@@ -285,17 +289,17 @@ fi
   FreePBX 2.11. Partial fix for Elastix bug #2147.
   SVN Rev[6833] 
 
-* Thu Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Jan 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Voicemail, Monitoring: use <audio> instead of <embed> for audio
   playback, with <embed> fallback.
   SVN Rev[6829]
 
-* Wed Jan 28 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Jan 28 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Voicemail: fix imcomplete conversion of regexp functions from SVN
   commit #6638. Fixes Elastix bug #2137.
   SVN Rev[6828]
 
-* Mon Jan 26 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Mon Jan 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Control Panel: work around attributeBinding no longer picking up
   context.idattr in Ember.js. Fixes Elastix bug #2131.
   SVN Rev[6826]
@@ -303,6 +307,7 @@ fi
 * Thu Dec 30 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[6818]
 
 * Wed Dec 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: update extensions_override_elastix.conf to check additional

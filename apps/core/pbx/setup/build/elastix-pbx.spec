@@ -276,6 +276,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Feb  4 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: recognize recording prefixes changed from FreePBX 2.8.1 to
+  FreePBX 2.11. Partial fix for Elastix bug #2147.
+  SVN Rev[6833] 
+
 * Thu Jan 29 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Voicemail, Monitoring: use <audio> instead of <embed> for audio
   playback, with <embed> fallback.

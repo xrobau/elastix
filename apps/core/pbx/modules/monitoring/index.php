@@ -225,23 +225,25 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
                 $arrTmp[3] = $value['dst'];
                 $arrTmp[4] = SecToHHMMSS($value['duration']);
                 $file = $value['uniqueid'];
-                    $namefile = basename($value['recordingfile']);
-                    if ($namefile == 'deleted') {
-                        $arrTmp[5] = _tr('Deleted');
-                    } else switch($namefile[0]){
-                         case "O":
-                              $arrTmp[5] = _tr("Outgoing");
-                         break;
-                         case "g":
-                              $arrTmp[5] = _tr("Group");
-                         break;
-                         case "q":
-                              $arrTmp[5] = _tr("Queue");
-                         break;
-                         default :
-                              $arrTmp[5] = _tr("Incoming");
-                         break;
-                    }
+                $namefile = basename($value['recordingfile']);
+                if ($namefile == 'deleted') {
+                    $arrTmp[5] = _tr('Deleted');
+                } else switch($namefile[0]){
+                     case 'O':  // FreePBX 2.8.1
+                     case 'o':  // FreePBX 2.11+
+                        $arrTmp[5] = _tr("Outgoing");
+                        break;
+                     case 'g':  // FreePBX 2.8.1
+                     case 'r':  // FreePBX 2.11+
+                        $arrTmp[5] = _tr("Group");
+                        break;
+                     case "q":
+                        $arrTmp[5] = _tr("Queue");
+                        break;
+                     default :
+                        $arrTmp[5] = _tr("Incoming");
+                        break;
+                }
                 $arrTmp[6] = $namefile;
                 $arrData[] = $arrTmp;
             }

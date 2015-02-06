@@ -218,14 +218,38 @@ class BaseVendorResource
      */
     protected function leerCanalRSS($rss_url, &$sMensaje)
     {
-        require_once 'magpierss/rss_fetch.inc';
-        if (!defined('MAGPIE_CACHE_DIR')) {
-            define('MAGPIE_CACHE_DIR', '/tmp/rss-cache');
-            define('MAGPIE_OUTPUT_ENCODING', 'UTF-8');
-        }
+        require_once 'php-simplepie/simplepie.inc';
+        
         $sMensaje = '';
-        $infoRSS = @fetch_rss($rss_url);
-        $sMensaje = magpie_error();
+        $cachedir = '/tmp/rss-cache';
+        $feed = new SimplePie();
+        $feed->set_feed_url($rss_url);
+        $feed->enable_order_by_date(TRUE);
+        $feed->set_output_encoding('UTF-8');
+        $feed->enable_cache(TRUE);
+        $feed->set_cache_location($cachedir);
+        if (!is_dir($cachedir) && ! @mkdir($cachedir)) {
+            $feed->enable_cache(FALSE);
+        }
+        if (!$feed->init()) {
+            $sMensaje = $feed->error();
+            return false;
+        }
+        
+        $infoRSS = new StdClass();
+        $infoRSS->channel = array(
+            'title'     =>  $feed->get_title(),
+            'link'      =>  $feed->get_link(),
+        );
+        $infoRSS->items = array();
+        foreach ($feed->get_items() as $item) {
+            $infoRSS->items[] = array(
+                'title'             =>  $item->get_title(),
+                'date_timestamp'    =>  $item->get_date('U'),
+                'summary'           =>  $item->get_description(),
+            );
+        }
+        
         return $infoRSS;
     }
 }

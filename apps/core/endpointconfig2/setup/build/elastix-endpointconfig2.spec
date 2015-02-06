@@ -19,7 +19,7 @@ Requires: pyOpenSSL
 Requires: python-daemon
 Requires: MySQL-python
 Requires: python-cjson
-Requires: php-magpierss
+Requires: php-simplepie
 Requires: python-paramiko >= 1.7.6-2
 Prereq: tftp-server
 Conflicts: elastix-pbx <= 2.4.0-15
@@ -155,6 +155,9 @@ fi
 
 %changelog
 * Fri Feb  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: migrate from magpierss to simplepie for RSS
+  parsing.
+  SVN Rev[6840]
 - CHANGED: Endpoint Configurator: factor out accesses to RSS feeds into a common
   method. This should make migration to SimplePie RSS easier.
   SVN Rev[6839]

@@ -29,7 +29,6 @@
 */
 
 require_once 'vendor/BaseVendorResource.class.php';
-require_once 'magpierss/rss_fetch.inc';
 
 class Aastra extends BaseVendorResource
 {
@@ -201,10 +200,9 @@ class Aastra extends BaseVendorResource
                 return;
             }
             
-            define('MAGPIE_CACHE_DIR', '/tmp/rss-cache');
-            define('MAGPIE_OUTPUT_ENCODING', 'UTF-8');
-            $infoRSS = @fetch_rss($rssfeeds[$chosenfeed][1]);
-            $sMensaje = magpie_error();
+            $sMensaje = NULL;
+            $infoRSS = $this->leerCanalRSS($rssfeeds[$chosenfeed][1], $sMensaje);
+            
             if (strpos($sMensaje, 'HTTP Error: connection failed') !== FALSE) {
                 header("HTTP/1.1 500 Internal Server Error");
                 print _tr('Could not get web server information. You may not have internet access or the web server is down');
@@ -212,6 +210,11 @@ class Aastra extends BaseVendorResource
             } elseif (strpos($sMensaje, '404 Not Found') !== FALSE) {
                 header('HTTP/1.1 404 Not Found');
                 print $sMensaje;
+                return;
+            } elseif (!is_object($infoRSS)) {
+                header('HTTP/1.1 503 Internal Server Error');
+                print $sMensaje;
+                return;
             } else {
                 $xml = new SimpleXMLElement('<?xml version="1.0" ?><AastraIPPhoneFormattedTextScreen/>');
                 $xml_header = $xml->addChild('Line', str_replace('&', '&amp;', $rssfeeds[$chosenfeed][0]));

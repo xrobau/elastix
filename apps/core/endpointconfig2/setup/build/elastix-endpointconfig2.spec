@@ -154,7 +154,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Thu Jan 22 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Feb  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: factor out accesses to RSS feeds into a common
+  method. This should make migration to SimplePie RSS easier.
+  SVN Rev[6839]
+
+* Thu Jan 22 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: actually import MySQLdb in order to handle an
   exception of type MySQLdb.Error.
   SVN Rev[6825]

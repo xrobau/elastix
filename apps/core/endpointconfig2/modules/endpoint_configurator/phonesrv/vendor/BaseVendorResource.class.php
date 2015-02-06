@@ -197,5 +197,36 @@ class BaseVendorResource
         
         return $rssfeeds;
     }
+    
+    /**
+     * Procedimiento para leer los datos del canal RSS y devolverlos. El objeto
+     * MagpieRSS debe contener por lo menos los siguientes elementos:
+     * 
+     * MagpieRSS Object
+     *      channel Array
+     *          title   Título del RSS
+     *          link    Link URL asociado al RSS
+     *      items[] Array
+     *          date_timestamp  Timestamp UNIX del artículo
+     *          title           Título del artículo
+     *          summary         Texto de resumen del artículo
+     * 
+     * @param   string      $rss_url    URL del RSS
+     * @param   string(out) $sMensaje   Posible mensaje de error
+     * 
+     * @return  Objeto MagpieRSS
+     */
+    protected function leerCanalRSS($rss_url, &$sMensaje)
+    {
+        require_once 'magpierss/rss_fetch.inc';
+        if (!defined('MAGPIE_CACHE_DIR')) {
+            define('MAGPIE_CACHE_DIR', '/tmp/rss-cache');
+            define('MAGPIE_OUTPUT_ENCODING', 'UTF-8');
+        }
+        $sMensaje = '';
+        $infoRSS = @fetch_rss($rss_url);
+        $sMensaje = magpie_error();
+        return $infoRSS;
+    }
 }
 ?>

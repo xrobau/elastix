@@ -111,34 +111,34 @@ function reportDhcpClientlist($smarty, $module_name, $local_templates_dir, &$pDB
         for($i=1 ; $i<=$total; $i++){
             //$arrTmp[0]  = "<input type='checkbox' name='DhcpListID_$i'  />";
 //          $arrTmp[1] = "<a href='?menu=$module_name&action=show&id=".$id."'>".$arrResult[$id]['iphost']."</a>";
-            $arrTmp[0] = "".$arrResult[$i]['iphost'];
-            $arrTmp[1] = "".$arrResult[$i]['macaddress'];
-            $arrTmp[2] = "<a href='?menu=$module_name&action=see_dhcpclient&id=".$i."'>{$arrLang["View Details"]}</a>";
-    
-            $arrData[] = $arrTmp;
+            $arrData[] = array(
+                $arrResult[$i]['iphost'],
+                $arrResult[$i]['macaddress'],
+                ($arrResult[$i]['binding state'] == 'active') ? _tr('Yes') : _tr('No'),
+                "<a href='?menu=$module_name&action=see_dhcpclient&id=".$i."'>"._tr('View Details')."</a>",
+            );            
         }
     }
 
     $buttonDelete = "<input type='submit' name='delete_dhcpclient' value='{$arrLang["Delete"]}' class='button' onclick=\" return confirmSubmit('{$arrLang["Are you sure you wish to delete the Ip."]}');\" />";
 
-    $arrGrid = array("title"    => $arrLang["DHCP Client List"],
-                        "icon"     => "modules/$module_name/images/system_network_dhcp_client_list.png",
-                        "width"    => "99%",
-                        "start"    => ($total==0) ? 0 : $offset + 1,
-                        "end"      => $end,
-                        "total"    => $total,
-                        "url"      => $url,
-                        "columns"  => array(
+    $arrGrid = array(
+        "title"    => _tr("DHCP Client List"),
+        "icon"     => "modules/$module_name/images/system_network_dhcp_client_list.png",
+        "width"    => "99%",
+        "start"    => ($total==0) ? 0 : $offset + 1,
+        "end"      => $end,
+        "total"    => $total,
+        "url"      => $url,
+        "columns"  => array(
 //             0 => array("name"      => $buttonDelete,
 //                                    "property1" => ""),
-            0 => array("name"      => $arrLang["IP Address"],
-                                   "property1" => ""),
-            1 => array("name"      => $arrLang["MAC Address"],
-                                   "property1" => ""),
-            2 => array("name"      => $arrLang["Action"],
-                                   "property1" => ""),
-                                        )
-                    );
+            0 => array("name"      => _tr("IP Address")),
+            1 => array("name"      => _tr("MAC Address")),
+            2 => array('name'      => _tr('Active')),
+            3 => array("name"      => _tr("Action")),
+        )
+    );
     //begin section filter
 
    // $arrFormFilterDhcplist = createFieldFilter($arrLang);

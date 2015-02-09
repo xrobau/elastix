@@ -52,128 +52,42 @@ class paloSantoDhcpClienList {
 
     /////////NEW FUNCTIONS FOR MODULE DHCP_CLIENT
     
-    function readFileDhcpClient()
+    function getDhcpClientList()
     {
-        $myFile='/var/lib/dhcpd/dhcpd.leases';
-        $fh = fopen($myFile, 'r');
-    
-        return $fh;
-    }
-
-    function saveNewFileConf($reemplazar){
-        $fp = fopen('/var/lib/dhcpd/dhcpd.leases', 'w');
-        
-        fwrite($fp, $reemplazar);
-
-        fclose($fp);
-        return $reemplazar;
-    }
-
-    function addSantoDhcpClienList($data)
-    {
-        $queryInsert = $this->_DB->construirInsert('dhcp_info', $data);
-
-        $result = $this->_DB->genQuery($queryInsert);
-
-        return $result;
-    }
-
-
-
-//     function getDhcpClientByAll(){
-//         $query   = "SELECT iphost, date_start, macaddress FROM dhcp_info ";
-//         
-//         $result=$this->_DB->fetchTable($query, true);
-// 
-//         if($result==FALSE){
-//             $this->errMsg = $this->_DB->errMsg;
-//             return array();
-//         }
-//         return $result;
-//     }
-
-
-    //function saveFileDhcpClientList($pDB){
-    function getDhcpClientList(){
-	    $FILE='/var/lib/dhcpd/dhcpd.leases';
-        //$query = "DELETE FROM dhcp_info";
-        //$result = $this->_DB->genQuery($query);
-	    $count = 1;
 	    $data = array();
-	    $fp = fopen($FILE,'r');
-        
-        while($line = fgets($fp))
-        {
+	    $i = 0;    // Por compat, la lista empieza desde 1
+        foreach (file('/var/lib/dhcpd/dhcpd.leases') as $line) {
             // Saltarse los comentarios
             if (preg_match('/^\s*#/', $line)) continue;
-
-	        if(preg_match("/lease/i", $line)) {
-		        if(preg_match("/([0-9.]+)/", $line, $arrReg)){
-		            //$data[$count]['iphost'] = $pDB->DBCAMPO($arrReg[1]);
-		            $data[$count]['iphost'] = $arrReg[1];
-		        }
-	        }elseif(preg_match("/starts/i", $line)) {
-		        if(preg_match("/^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:digit:]]+)[[:space:]]([0-9/]+)[[:space:]]([0-9:]+)/", $line, $arrReg)){
-		            //$data[$count]['date_starts'] = $pDB->DBCAMPO($arrReg[3]." ".$arrReg[4]);
-		            $data[$count]['date_starts'] = $arrReg[3]." ".$arrReg[4];
-		        }
-	        }elseif(preg_match("/ends/i", $line)) {
-		        if(preg_match("/^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:digit:]]+)[[:space:]]([0-9/]+)[[:space:]]([0-9:]+)/", $line, $arrReg)){
-		            //$data[$count]['date_ends'] = $pDB->DBCAMPO($arrReg[3]." ".$arrReg[4]);
-		            $data[$count]['date_ends'] = $arrReg[3]." ".$arrReg[4];
-		        }else $data[$count]['date_ends'] = "";
-	        }elseif(preg_match("/hardware/i", $line)) {
-		        if(preg_match("/^[[:space:]][[:space:]]([[:alnum:]]+)[[:space:]]([[:alnum:]]+)[[:space:]]([a-z0-9:]+)/", $line, $arrReg)){
-		            //$data[$count]['macaddress'] = $pDB->DBCAMPO($arrReg[3]);
-		            $data[$count]['macaddress'] = $arrReg[3];
-		        }
-		        $count++;
-	        }
+            
+            $regs = NULL;
+            if (preg_match('/^\s*lease\s+([0-9.]+)/i', $line, $regs)) {
+                $data[++$i] = array('iphost'    =>  $regs[1]);
+            } elseif (preg_match('|^\s*starts\s+\d+\s+([0-9/]+)\s+([0-9:]+)|i', $line, $regs)) {
+                $data[$i]['date_starts'] = $regs[1].' '.$regs[2];
+            } elseif (preg_match('|^\s*ends\s+\d+\s+([0-9/]+)\s+([0-9:]+)|i', $line, $regs)) {
+                $data[$i]['date_ends'] = $regs[1].' '.$regs[2];
+            } elseif (preg_match('/hardware\s+\S+\s+([a-z0-9:]+)/i', $line, $regs)) {
+                $data[$i]['macaddress'] = $regs[1];
+            } elseif (preg_match('/^\s*binding\sstate\s+(\w+)/i', $line, $regs)) {
+                $data[$i]['binding state'] = $regs[1];
+            }
         }
-// 	$result = $this->addSantoDhcpClienList($data);
-// 
-//         if($result == false){
-//             $this->errMsg = $this->_DB->errMsg;
-//             return false;
-//         }
-        fclose($fp);
+
         return $data;
     }
     
     function getDhcpClientListById($id)
     {
-//         $query   = "SELECT * FROM dhcp_info ";
-//         $strWhere = "id=$id";
-// 
-//         // Clausula WHERE aqui
-//         if(!empty($strWhere)) $query .= "WHERE $strWhere ";
-// 
-//         $result=$this->_DB->getFirstRowQuery($query, true);
         $result = array();
         $arrResult = $this->getDhcpClientList();
 
-        if(is_array($arrResult) && count($arrResult)>0){
-            for($i=1 ; $i<=count($arrResult); $i++){
-                if($id==$i){
-                    $result['iphost'] = $arrResult[$i]['iphost'];
-                    $result['date_starts'] = $arrResult[$i]['date_starts'];
-                    if($arrResult[$i]['date_ends']!="") $result['date_ends'] = $arrResult[$i]['date_ends'];
-                    else $result['date_ends'] = "never";
-                    $result['macaddress'] = $arrResult[$i]['macaddress'];
-                }
-            }
+        if ($id >= 1 && $id <= count($arrResult)) {
+            $result = $arrResult[$id];
+            if ($result['date_ends'] == '') $result['date_ends'] = 'never';
         }
 
         return $result;
     }
-
-
-//     function updateDhcpClientList($data, $where)
-//     {
-//         $queryUpdate = $this->_DB->construirUpdate('dhcp_info', $data,$where);
-//         $result = $this->_DB->genQuery($queryUpdate);
-// 
-//         return $result;
-//     }
 }
 ?>

@@ -137,6 +137,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Feb  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: DHCP Client List: remove dead code, fix regexp after preg_match 
+  migration, add additional column to check whether a lease is active.
+  SVN Rev[6841]
+
 * Wed Dec 24 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: allow missing --backupfile option. This will now 
   leave the tarball components unpacked during backup. Part of a set of changes

@@ -154,6 +154,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Feb  9 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: introduce new Elastix model LXP180 which 
+  behavers like a RCA 160s.
+  SVN Rev[6842]
+
 * Fri Feb  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: migrate from magpierss to simplepie for RSS
   parsing.

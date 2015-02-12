@@ -83,8 +83,10 @@ This script install, update and delete database.
 
 
 //This script must recieve at least two parameters, the action and the path folder, and for updates must recieve also the version
-if ($argc < 2){
-   die("Please specify the action and folder path files sqls.\n Usage: {$_SERVER['argv'][0]} install /usr/share/elastix/.../db/  version sql_export\n");
+$arrActions = array("install","update","delete");
+if (count($argv) < 3 || !in_array($argv[1], $arrActions)) {
+    fputs(STDERR, "Usage: $argv[0] {install|update|delete} path_folder_files_sqls [preversion [export_sql]]\n");
+    return 1;
 }
 
 $documentRoot="/var/www/html";
@@ -96,50 +98,74 @@ load_default_timezone();
 global $arrConf;
 require_once("$arrConf[basePath]/libs/paloSantoConfig.class.php");
 
-$arrActions = array("install","update","delete");
-if(isset($_SERVER['argv'][1]) && in_array($_SERVER['argv'][1],$arrActions)){
-    if(isset($_SERVER['argv'][2])){
-        $action      = $_SERVER['argv'][1];
-        $path_folder = $_SERVER['argv'][2]; 
-	    $sql_export  = isset($_SERVER['argv'][4])?$_SERVER['argv'][4]:false;
-        $version     = isset($_SERVER['argv'][3])?$_SERVER['argv'][3]:false;
-        $data        = getData($path_folder);
-        $result      = 0;
-        if(is_null($data)){
-            echo "No databases were found in file db.info\n";
-            return 0;
-        }
+$action      = $_SERVER['argv'][1];
+$path_folder = $_SERVER['argv'][2]; 
+$version     = isset($_SERVER['argv'][3])?$_SERVER['argv'][3]:false;
+$sql_export  = isset($_SERVER['argv'][4])?$_SERVER['argv'][4]:false;
+$data        = getDatabaseData($path_folder);
+$result      = 0;
+if(is_null($data)){
+    echo "WARN: No databases were found in file db.info\n";
+    exit(0);
+}
 
-        //Doing the action for each database according to the file db.info
-        foreach($data as $key => $db){
-            deleteFileinFirstBoot($key,$action);
-            if($db["engine"] != "mysql" && $db["engine"] != "sqlite3")
-                echo "Engine $db[engine] is not supported. Aborting action $action in database $key\n";
-            else{
-                $password="";
-                if($sql_export==false)
-                    $password = getMysqlPassword();
-                $success = createSQLFile($action,$path_folder,$key,$db["engine"],$sql_export,$password,$version,$db["ignore_backup"]);
-                $return  = true;
-                if($success)
-                   $result = executeSQL($db,$path_folder,$sql_export,$key,$action,$password);
-                //If any error occur the SQL file will be copy to the path of FirstBoot
-                if(!$success || !$result)
-                    $result = copyToFirstBoot($path_folder,$key,$action);
-            }
-        }
-        if($result)
-            return 0;
-        return 1;
-    }
-    else{
-        echo "Error: second arg not defined. Usage: {$_SERVER['argv'][0]} action path_folder_files_sqls\nThe actions will be: install, update and delete.\n";
-        return 1;
+//Doing the action for each database according to the file db.info
+foreach($data as $key => $db) {
+    deleteFileinFirstBoot($key,$action);
+    if (!in_array($db["engine"], array('mysql', 'sqlite3')))
+        fputs(STDERR, "WARN: Engine $db[engine] is not supported. Aborting action $action in database $key\n");
+    else {
+        $password="";
+        if($sql_export==false)
+            $password = getMysqlPassword();
+        $success = createSQLFile($action,$path_folder,$key,$db["engine"],$sql_export,$password,$version,$db["ignore_backup"]);
+        if($success)
+           $result = executeSQL($db,$path_folder,$sql_export,$key,$action,$password);
+        //If any error occur the SQL file will be copy to the path of FirstBoot
+        if(!$success || !$result)
+            $result = copyToFirstBoot($path_folder,$key,$action);
     }
 }
-else{
-echo "Error: first arg not defined. Usage: {$_SERVER['argv'][0]} action path_folder_files_sqls \n The actions will be: install, update and delete.\n";
-return 1;
+exit($result ? 0 : 1);
+
+/**
+ * Function that parsed the file db.info This file must have the following format:
+ *   [databaseName1]
+ *   ignore_backup = no
+ *   engine = sqlite3
+ *   path = /var/www/db
+ *
+ *   [databaseName2]
+ *   ignore_backup = yes
+ *   engine = sqlite3
+ *   path = /var/www/db
+ *
+ *   [databaseName3]
+ *     ...
+ *     ...
+ *     ...
+ *
+ * @param  string   $path_folder    Path where the file db.info and folders install update and delete are
+ * @return array    Array with the data parsed from the file db.info
+ */
+function getDatabaseData($path_folder)
+{
+    $fullpath = $path_folder."/db.info";
+    if (!file_exists($fullpath)) {
+        fputs(STDERR, "ERR: metadata file $fullpath not found.\n");
+        return NULL;
+    }
+    if (filesize($fullpath) <= 0) {
+        fputs(STDERR, "ERR: metadata file $fullpath is empty.\n");
+        return NULL;
+    }
+
+    $arrData = parse_ini_file($fullpath, TRUE);
+    if (!is_array($arrData)) {
+        fputs(STDERR, "ERR: failed to parse $fullpath as an INI file.\n");
+        return NULL;
+    }
+    return $arrData;
 }
 
 /**
@@ -165,22 +191,22 @@ function createSQLFile($action, $path_folder, $dbName, $engine, $sql_export, $pa
     switch($action){
         case "install":
         case "delete":
-	    if(is_dir("$path_folder/$action/$dbName")){
-		$arrFiles = scandir("$path_folder/$action/$dbName");
-		if(is_array($arrFiles) && count($arrFiles)>0){
-		    $arrFiles = sortArray($arrFiles);
-		    foreach($arrFiles as $key => $file){
-			$extension = pathinfo($file);
-			$extension = $extension["extension"];
-			if(is_file("$path_folder/$action/$dbName/$file"))
-			    if($file[strlen($file)-1]!="~" &&  $file[0]!="." && $extension == "sql"){
-				$stringSQL .= file_get_contents("$path_folder/$action/$dbName/$file");
-				$stringSQL .= "\n";
-			    }
-		    }
-		}
-	    }
-            if($action == "install"){
+            if(is_dir("$path_folder/$action/$dbName")){
+                $arrFiles = scandir("$path_folder/$action/$dbName");
+                if(is_array($arrFiles) && count($arrFiles)>0){
+                    $arrFiles = sortArray($arrFiles);
+                    foreach($arrFiles as $key => $file){
+                        $extension = pathinfo($file);
+                        $extension = $extension["extension"];
+                        if(is_file("$path_folder/$action/$dbName/$file"))
+                            if($file[strlen($file)-1]!="~" &&  $file[0]!="." && $extension == "sql"){
+                                $stringSQL .= file_get_contents("$path_folder/$action/$dbName/$file");
+                                $stringSQL .= "\n";
+                            }
+                    }
+                }
+	        }
+            if($action == "install") {
                 if($engine == "mysql")
                     $stringSQL .= "USE {$dbName};\n";
                 $stringSQL .= getSQLUpdateString(array("0.0.0","0"),$path_folder,"update",$dbName);
@@ -214,44 +240,51 @@ function renameDatabase($engine, $dbName, $password, $path_folder)
 {
     $date = date("YMd_His");
     $dbNewName = $dbName."_$date";
-    echo "Database $dbName already exist. Renaming to $dbNewName\n";
-    if($engine == "sqlite3")
+    fputs(STDERR, "WARN: database $dbName already exists, renaming to $dbNewName...\n");
+    switch ($engine) {
+    case 'sqlite3':
         return rename("/var/www/db/$dbName.db","/var/www/db/$dbNewName");
-    if($engine == "mysql"){
-        if(ismysqlRunning()){
-            $file    = fopen("$path_folder/$dbNewName.dump","w");
-            if($file){
-                $sql = "CREATE DATABASE IF NOT EXISTS $dbNewName;\nUSE $dbNewName;\n";
-                fwrite($file,$sql);
-                fclose($file);
-            }else{
-                echo "Could not create the file $path_folder/$dbNewName.dump The rename action was aborted";
-                return false;
-            }
-            $command = "mysqldump -uroot \"-p$password\" $dbName >> $path_folder/$dbNewName.dump";
-            exec($command,$arrConsole,$status);
-            if($status != 0){
-                echo "Could not create a dump file for database $dbName";
-                return false;
-            }
-            $command = "mysql -uroot \"-p$password\" < $path_folder/$dbNewName.dump";
-            exec($command,$arrConsole,$status);
-            if($status != 0){
-                echo "Could not rename the database $dbName";
-                return false;
-            }
-            $command = "mysql -uroot \"-p$password\" -e 'DROP DATABASE $dbName'";
-            exec($command,$arrConsole,$status);
-            if($status != 0){
-                echo "Could not drop database $dbName";
-                return false;
-            }
-            return true;
+    case 'mysql':
+        if (!ismysqlRunning()) {
+            fputs(STDERR, "ERR: mysqld not running, cannot rename database $dbName\n");
+            return FALSE;
         }
-        else{
-            echo "Mysql is shutdown. Could not rename the database $dbName\n";
-            return false;
+
+        $dumpfile = "$path_folder/$dbNewName.dump";
+        if (FALSE === file_put_contents($dumpfile,
+            "CREATE DATABASE IF NOT EXISTS $dbNewName;\nUSE $dbNewName;\n")) {
+            fputs(STDERR, "ERR: failed to initialize file $dumpfile, aborting rename.\n");
+            return FALSE;
         }
+
+        $mysqlcred = '-u root '.escapeshellarg("-p$password");
+        $cmdarray = array(
+            array(
+                'create dumpfile for',
+                "mysqldump $mysqlcred ".escapeshellarg($dbName).' >> '.escapeshellarg($dumpfile)
+            ),
+            array(
+                'rename',
+                "mysql $mysqlcred < ".escapeshellarg($dumpfile)
+            ),
+            array(
+                'drop',
+                "mysql $mysqlcred -e ".escapeshellarg("DROP DATABASE $dbName")
+            ),
+        );
+        foreach ($cmdarray as $cmd) {
+            $output = $status = NULL;
+            exec($cmd[1], $output, $status);
+            if ($status != 0) {
+                fputs(STDERR, "ERR: failed to $cmd[0] database $dbName\n");
+                fputs(STDERR, "ERR: status $status from command: $cmd[1]\n");
+                return FALSE;
+            }
+        }
+        return TRUE;
+    default:
+        fputs(STDERR, "ERR: unimplemented engine '$engine'\n");
+        return FALSE;
     }
 }
 
@@ -283,51 +316,68 @@ function getMysqlPassword()
  */
 function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $password)
 {
-    if($sql_export==false){
-        if(file_get_contents("$path_folder/1_sqlFile.sql") == ""){
-            echo "Nothing to be done in database $dbName.\n";
-            unlink("$path_folder/1_sqlFile.sql");
-            return true;
-        }
-        if(ismysqlRunning() || $data["engine"] != "mysql"){
-            $command = "";
-            if($data["engine"]=="sqlite3")
-                $command = "sqlite3 $data[path]/$dbName.db '.read $path_folder/1_sqlFile.sql'";
-            if($data["engine"]=="mysql"){
-		if(databaseExists("mysql",$dbName))
-		   $db = $dbName;
-		else
-		   $db = "";
-                $command = "mysql -uroot \"-p$password\" $db < $path_folder/1_sqlFile.sql";
-	    }
-            echo "Executing $command ... \n";
-            exec($command,$arrConsole,$status);
-            echo "RETURN $status\n";
-            if($status != 0){
-                echo "Error, Action $action database $dbName failed.\n";
-                return false;
-            }
-            unlink("$path_folder/1_sqlFile.sql");
-	    if($data["engine"]=="sqlite3"){
-		if(!chown($data['path']."/".$dbName.".db","asterisk")){
-		    echo "Could not change the owner to asterisk to the database $dbName.\n";
-		    return false;
-		}
-		if(!chgrp($data['path']."/".$dbName.".db","asterisk")){
-		    echo "Could not change the group to asterisk to the database $dbName.\n";
-		    return false;
-		} 
-	    }
-            echo "The action $action was successfull for database $dbName\n";
-            return true;
-        }else{
-            echo "Mysql is shutdown.\n";
-            return false;
-        }
+    $fullpath = "$path_folder/1_sqlFile.sql";
+
+    // Export only?
+    if ($sql_export) {
+        echo file_get_contents($fullpath);
+        return TRUE;
     }
-    else
-        echo file_get_contents("$path_folder/1_sqlFile.sql");
-    return true;
+
+    // Check for empty SQL
+    clearstatcache();
+    if (filesize($fullpath) <= 0) {
+        //echo "Nothing to be done in database $dbName.\n";
+        unlink($fullpath);
+        return TRUE;
+    }
+    
+    // Check for stopped mysql
+    if ($data['engine'] == 'mysql' && !ismysqlRunning()) {
+        fputs(STDERR, "WARN: mysqld not running.\n");
+        return FALSE;
+    }
+    
+    // Build and execute command
+    $datafile = NULL;
+    switch ($data['engine']) {
+    case 'sqlite3':
+        $datafile = "$data[path]/$dbName.db";
+        $command = 'sqlite3 '.
+            escapeshellarg($datafile).' '.
+            escapeshellarg(".read $fullpath");
+        break;
+    case 'mysql':
+        $command = 'mysql -uroot '.
+            escapeshellarg("-p$password").' '.
+            escapeshellarg(databaseExists('mysql', $dbName) ? $dbName : '').' < '.
+            escapeshellarg($fullpath);
+        break;
+    default:
+        fputs(STDERR, "ERR: unimplemented engine '{$data['engine']}'\n");
+        return FALSE;
+    }
+    $output = $status = NULL;
+    exec($command, $output, $status);
+    if ($status != 0) {
+        fputs(STDERR, "ERR: action $action failed for database $dbName.\n");
+        fputs(STDERR, "ERR: status $status from command: $command.\n");
+        return FALSE;
+    }
+    
+    unlink($fullpath);
+    if ($data["engine"] == "sqlite3") {
+        if (!chown($datafile, "asterisk")) {
+            fputs(STDERR, "ERR: failed to change owner on $datafile to asterisk.\n");
+            return FALSE;
+        }
+        if (!chgrp($datafile, "asterisk")) {
+            fputs(STDERR, "ERR: failed to change group on $datafile to asterisk.\n");
+            return FALSE;
+        } 
+    }
+    //echo "The action $action was successfull for database $dbName\n";
+    return TRUE;
 }
 
 /**
@@ -340,15 +390,13 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
  */
 function copyToFirstBoot($path_folder, $dbName, $action)
 {
-    echo "Copying $path_folder/1_sqlFile.sql to /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql\n";
-    exec("cp $path_folder/1_sqlFile.sql /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql",$arrConsole,$status);
-    echo "RETURN $status.\n";
-    if($status != 0){
-        echo "Error, Could not copy the file $path_folder/1_sqlFile.sql to FirstBoot.\n";
-        return false;
+    $srcpath = "$path_folder/1_sqlFile.sql";
+    $dstpath = "/var/spool/elastix-mysqldbscripts/{$dbName}_{$action}.sql";
+    if (!rename($srcpath, $dstpath)) {
+        fputs(STDERR, "ERR: failed to move $srcpath to FirstBoot.\n");
+        return FALSE;
     }
-    unlink("$path_folder/1_sqlFile.sql");
-    return true;
+    return TRUE;
 }
 
 /**
@@ -359,9 +407,10 @@ function copyToFirstBoot($path_folder, $dbName, $action)
  */
 function deleteFileinFirstBoot($dbName,$action)
 {
-    if(file_exists("/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql")){
-        echo "Removing file /var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql\n";
-        unlink("/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql");
+    $fullpath = "/var/spool/elastix-mysqldbscripts/$dbName"."_$action.sql";
+    if(file_exists($fullpath)) {
+        echo "Removing file $fullpath\n";
+        unlink($fullpath);
     }
 }
 
@@ -416,36 +465,6 @@ function compareRpmVersion($a, $b)
     $r = compareRpmVersion_string($a[0], $b[0]);
     if ($r != 0) return $r;
     return compareRpmVersion_string($a[1], $b[1]);
-}
-
-/**
- * Function that parsed the file db.info This file must have the following format:
- *   [databaseName1]
- *   ignore_backup = no
- *   engine = sqlite3
- *   path = /var/www/db
- *
- *   [databaseName2]
- *   ignore_backup = yes
- *   engine = sqlite3
- *   path = /var/www/db
- *
- *   [databaseName3]
- *     ...
- *     ...
- *     ...
- *
- * @param  string   $path_folder    Path where the file db.info and folders install update and delete are
- * @return array    Array with the data parsed from the file db.info
- */
-function getData($path_folder)
-{
-    if(file_exists($path_folder."/db.info") && filesize($path_folder."/db.info")!=0){
-        $arrData = parse_ini_file($path_folder."/db.info",true);
-        return $arrData;
-    }
-    else
-        return null;
 }
 
 /**
@@ -513,11 +532,8 @@ function getSQLUpdateString($version_actual,$path_folder,$action,$dbname)
  */
 function ismysqlRunning()
 {
-    exec("/sbin/service mysqld status &>/dev/null",$arrConsole,$flagStatus);
-    if($flagStatus == 0)
-        return true;
-    else
-        return false;
+    // CentOS 7 ISO install runs in chroot which messes up /sbin/service.
+    return (strlen(trim(`/sbin/pidof mysqld`)) > 0);
 }
 
 /**

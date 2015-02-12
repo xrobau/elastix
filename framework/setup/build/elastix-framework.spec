@@ -14,6 +14,7 @@ Prereq: php, php-gd, php-pear, php-xml, php-mysql, php-pdo, php-imap, php-soap
 Prereq: httpd, mysql-server, ntp, nmap, mod_ssl
 Prereq: perl
 Prereq: elastix-firstboot >= 2.3.0-4
+Prereq: /sbin/pidof
 Obsoletes: elastix-additionals
 Provides: elastix-additionals
 Conflicts: elastix-system <= 2.4.0-2
@@ -345,6 +346,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Feb 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: partial cleanup of elastix-dbprocess. Use pidof instead
+  of /sbin/service to check for mysqld in order to work around chroot issue in
+  CentOS 7 install.
+  SVN Rev[6843]
+
 * Tue Jan 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: switch from overwriting the CentOS repo to patching it
   as required. This prevents insertion or removal of repos that might not be

@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -131,6 +131,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Fri Feb 13 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Wed Jan 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: In addition to the architecture check, the PostgreSQL repo must be
   removed when installing on CentOS 7 or later.

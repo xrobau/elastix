@@ -43,6 +43,8 @@ if [ -d /etc/systemd ] ; then
 [Unit]
 Description=elastix-firstboot.service
 After=getty@tty2.service
+After=mariadb.service
+Before=asterisk.service
 
 [Service]
 Type=oneshot

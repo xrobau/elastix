@@ -342,7 +342,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/generic-cloexec
 %defattr(755, root, root)
 /usr/share/elastix/privileged/*
-%defattr(770, root, asterisk)
+%defattr(770, root, asterisk, 770)
 /var/lib/php/session-asterisk
 
 %changelog

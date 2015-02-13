@@ -38,9 +38,35 @@ mv compat-dbscripts/ $RPM_BUILD_ROOT/usr/share/elastix-firstboot/
 
 %post
 
-chkconfig --del elastix-firstboot
-chkconfig --add elastix-firstboot
-chkconfig --level 2345 elastix-firstboot on
+if [ -d /etc/systemd ] ; then
+    cat > /usr/lib/systemd/system/elastix-firstboot.service <<'ELASTIXFIRSTBOOT'
+[Unit]
+Description=elastix-firstboot.service
+After=getty@tty2.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "chvt 2 && /usr/bin/elastix-admin-passwords --init && chvt 1"
+ExecStartPre=/usr/bin/echo -e \033%G
+ExecReload=/bin/kill -HUP $MAINPID
+RemainAfterExit=no
+WorkingDirectory=/
+Environment=TERM=linux
+StandardInput=tty
+StandardOutput=tty
+TTYPath=/dev/tty2
+TTYReset=yes
+TTYVHangup=yes
+
+[Install]
+WantedBy=default.target
+ELASTIXFIRSTBOOT
+    systemctl enable elastix-firstboot.service
+else
+    chkconfig --del elastix-firstboot
+    chkconfig --add elastix-firstboot
+    chkconfig --level 2345 elastix-firstboot on
+fi
 
 # The following scripts are placed in the spool directory if the corresponding
 # database does not exist. This is only temporary and should be removed when the

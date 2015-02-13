@@ -346,17 +346,17 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
-* Thu Feb 12 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+* Thu Feb 12 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 
-* Thu Feb 12 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Feb 12 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: partial cleanup of elastix-dbprocess. Use pidof instead
   of /sbin/service to check for mysqld in order to work around chroot issue in
   CentOS 7 install.
   SVN Rev[6843]
 
-* Tue Jan 20 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Tue Jan 20 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: switch from overwriting the CentOS repo to patching it
   as required. This prevents insertion or removal of repos that might not be
   appropriate for current CentOS distro. Required for CentOS 7.

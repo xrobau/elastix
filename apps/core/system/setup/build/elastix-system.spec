@@ -17,6 +17,7 @@ Prereq: dahdi
 Conflicts: elastix-agenda < 2.2.0-1
 Conflicts: elastix-pbx <= 2.4.0-15
 Requires: dhcp
+Requires: php-simplepie
 
 %description
 Elastix Module System
@@ -137,6 +138,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Feb  18 2015 Armando Chuto <achuto@elastix.com>
+- CHANGED: Applet News: migrate from magpierss to simplepie for RSS
+  SVN Rev[6854]
+
 * Mon Feb  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: DHCP Client List: remove dead code, fix regexp after preg_match 
   migration, add additional column to check whether a lease is active.

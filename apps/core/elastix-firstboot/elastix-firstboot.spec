@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -130,6 +130,14 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Fri Feb 13 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
+  SVN history. Bumped Version and Release in specfile.
+
+* Fri Feb 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  Framework: create systemd service file for elastix-firstboot
+  SVN Rev[6848]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
   SVN history. Bumped Version and Release in specfile.
@@ -137,6 +145,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Dec 26 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
   SVN history. Bumped Release in specfile.
+  SVN Rev[6323]
 
 * Tue Dec 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: elastix-admin-passwords: fix CallCenter SQL addition so that it is

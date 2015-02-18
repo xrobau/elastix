@@ -56,8 +56,8 @@ class Applet_News
         } else {
             // Formato de fecha y hora
             $i=0;
-		    $news=array();
-		    $content=array();
+            $news=array();
+            $content=array();
             // Formato de fecha y hora
                foreach ($infoRSS->get_items() as $item) {
 		        $content['title']=$item->get_title(); 
@@ -70,7 +70,7 @@ class Applet_News
             $smarty->assign(array(
                 'WEBSITE'   =>  'http://www.elastix.org',
                 'NO_NEWS'   =>  _tr('No News to display'),
-                'NEWS_LIST' =>  array_slice($infoRSS->items, 0, 7),
+                'NEWS_LIST' =>  array_slice($news, 0, 7),
             ));
             $local_templates_dir = dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module_name/applets/News/tpl";
             $respuesta['html'] = $smarty->fetch("$local_templates_dir/rssfeed.tpl");

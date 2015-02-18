@@ -25,7 +25,9 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: paloSantoEmailRelay.class.php,v 1.1 2010-07-21 01:08:56 Bruno Macias bmacias@palosanto.com Exp $ */
+  $Id: paloSantoEmailRelay.class.php,v 1.1 2010-07-21 01:08:56 Bruno Macias bmacias@palosanto.com Exp $ 
+   Id: paloSantoEmailRelay.class.php,v 1.2 2015-02-05 12:48:26 Diana Panchana dpanchana@palosanto.com, Armando Chuto achuto@elastix.com Exp $*/
+
 class paloSantoEmailRelay {
     var $_DB;
     var $errMsg;
@@ -142,7 +144,7 @@ class paloSantoEmailRelay {
 
     function checkSMTP($smtp_server, $smtp_port=25, $username, $password, $auth_enabled=false, $tls_enabled=true)
     {
-        require_once("libs/phpmailer/class.smtp.php");
+        require_once("PHPMailer/class.smtp.php");
 
         $smtp = new SMTP();
         $smtp->Connect($smtp_server,$smtp_port);

@@ -25,11 +25,10 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp $
+  $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp 
+  $Id: index.php,v 1.2 2015/02/04 16:27:54 achuto,dpanchana Exp $
 */
-if (file_exists('/usr/share/php/magpierss/rss_fetch.inc'))
-    require_once 'magpierss/rss_fetch.inc';
-else require_once "libs/magpierss/rss_fetch.inc";
+require_once 'php-simplepie/simplepie.inc';
 
 class Applet_News
 {
@@ -37,25 +36,36 @@ class Applet_News
     {
         /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
          * que otras operaciones ajax puedan funcionar. */
+	    $infoRSS =new SimplePie();	
         session_commit();
         
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
         );
-        
-        define('MAGPIE_CACHE_DIR', '/tmp/rss-cache');
-        define('MAGPIE_OUTPUT_ENCODING', 'UTF-8');
-        $infoRSS = @fetch_rss('http://elastix.org/index.php?option=com_mediarss&feed_id=1&format=raw');
-        $sMensaje = magpie_error();
-        if (strpos($sMensaje, 'HTTP Error: connection failed') !== FALSE) {
+            $infoRSS->set_feed_url("http://elastix.org/index.php?option=com_mediarss&feed_id=1&format=raw"); 
+            $infoRSS->enable_cache(FALSE);
+            $infoRSS->set_cache_location("/tmp/rss-cache");
+            $infoRSS->set_output_encoding('UTF-8');
+            $infoRSS->init();
+            $infoRSS->handle_content_type(); //This method ensures that the SimplePie-enabled page is being served with the correct mime-type and character encoding HTTP headers
+
+       if (strpos($infoRSS->error(), 'HTTP Error: connection failed') !== FALSE) {
             $respuesta['status'] = 'error';
             $respuesta['message'] = _tr('Could not get web server information. You may not have internet access or the web server is down');
         } else {
             // Formato de fecha y hora
-            for ($i = 0; $i < count($infoRSS->items); $i++) {
-            	$infoRSS->items[$i]['date_format'] = date('Y.m.d', $infoRSS->items[$i]['date_timestamp']);
-            }
+            $i=0;
+		    $news=array();
+		    $content=array();
+            // Formato de fecha y hora
+               foreach ($infoRSS->get_items() as $item) {
+		        $content['title']=$item->get_title(); 
+                $content['link']=$item->get_link();        
+	            $content['date_format'] = date('Y.m.d',$item->get_date('U'));
+		        $news[$i]=$content; 
+		        $i++;
+               }
             
             $smarty->assign(array(
                 'WEBSITE'   =>  'http://www.elastix.org',

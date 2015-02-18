@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.5.0
-Release: 3
+Release: 4
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -94,7 +94,7 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/etc/cron.d/elastix.cron         
 chmod 644 $RPM_BUILD_ROOT/etc/cron.d/*
 
 # ** Repos config ** #
-mv $RPM_BUILD_DIR/elastix-framework/additionals/etc/yum.repos.d/CentOS-Base.repo     $RPM_BUILD_ROOT/usr/share/elastix/
+#mv $RPM_BUILD_DIR/elastix-framework/additionals/etc/yum.repos.d/CentOS-Base.repo     $RPM_BUILD_ROOT/usr/share/elastix/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/etc/yum.repos.d/elastix.repo         $RPM_BUILD_ROOT/etc/yum.repos.d/
 
 # ** sudoers config ** #
@@ -120,6 +120,7 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-menuremove      
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-dbprocess            $RPM_BUILD_ROOT/usr/bin/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/compareVersion		   $RPM_BUILD_ROOT/usr/bin/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/search_ami_admin_pwd             $RPM_BUILD_ROOT/usr/bin/
+mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-add-yum-exclude             $RPM_BUILD_ROOT/usr/bin/
 chmod 755 $RPM_BUILD_ROOT/usr/bin/compareVersion
 chmod 755 $RPM_BUILD_ROOT/usr/bin/search_ami_admin_pwd
 
@@ -346,9 +347,18 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Feb 13 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Fri Feb 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  Framework: force 770 mode for session directory.
+  SVN Rev[6845]
+
 * Thu Feb 12 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6844]
 
 * Thu Feb 12 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: partial cleanup of elastix-dbprocess. Use pidof instead

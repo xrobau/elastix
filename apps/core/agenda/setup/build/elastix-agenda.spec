@@ -12,6 +12,8 @@ BuildArch: noarch
 Prereq: asterisk
 Prereq: freePBX >= 2.8.1-1
 Prereq: elastix-framework >= 2.4.0-14
+Requires: php-PHPMailer
+
 
 %description
 Elastix Module Agenda

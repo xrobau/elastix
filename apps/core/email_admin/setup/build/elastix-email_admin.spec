@@ -15,6 +15,7 @@ Prereq: RoundCubeMail
 Prereq: php-imap
 Prereq: postfix, spamassassin, cyrus-imapd
 Requires: mailman >= 2.1.9
+Requires: php-jpgraph
 
 %description
 Elastix Module Email

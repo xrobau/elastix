@@ -12,6 +12,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-5
 Prereq: asterisk
+Requires: php-jpgraph
 
 %description
 Elastix Module Reports

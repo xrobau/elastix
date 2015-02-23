@@ -25,14 +25,15 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: default.conf.php,v 1.1 2008-09-01 10:09:57 jjvega Exp $ */
-require_once("libs/jpgraph/jpgraph.php");
-require_once("libs/jpgraph/jpgraph_line.php");
-require_once("libs/jpgraph/jpgraph_pie.php");
-require_once("libs/jpgraph/jpgraph_pie3d.php");
-require_once("libs/jpgraph/jpgraph_bar.php");
-require_once("libs/jpgraph/jpgraph_canvas.php");
-require_once("libs/jpgraph/jpgraph_canvtools.php");
+  $Id: default.conf.php,v 1.1 2008-09-01 10:09:57 jjvega Exp $ 
+  $Id: default.conf.php,v 1.1 2015-02-23 11:05:27 achuto, dpanchana Exp $ */
+require_once("jpgraph/jpgraph.php");
+require_once("jpgraph/jpgraph_line.php");
+require_once("jpgraph/jpgraph_pie.php");
+require_once("jpgraph/jpgraph_pie3d.php");
+require_once("jpgraph/jpgraph_bar.php");
+require_once("jpgraph/jpgraph_canvas.php");
+require_once("jpgraph/jpgraph_canvtools.php");
 require_once "libs/paloSantoDB.class.php";
 require_once "libs/paloSantoSampler.class.php";
 require_once "libs/paloSantoTrunk.class.php";

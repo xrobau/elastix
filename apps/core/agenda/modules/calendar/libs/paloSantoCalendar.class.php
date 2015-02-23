@@ -620,7 +620,7 @@ CONTENIDO_ARCHIVO_AUDIO;
         );
         if (count($this->_notify_emails) <= 0) return;
         
-        require_once 'libs/phpmailer/class.phpmailer.php';
+        require_once 'PHPMailer/class.phpmailer.php';
         
         $sNombreUsuario = $this->_leerNombreUsuario();
         $sHostname = `hostname`; // TODO: mejorar petición de nombre de host

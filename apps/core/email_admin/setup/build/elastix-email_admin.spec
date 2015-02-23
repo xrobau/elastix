@@ -16,6 +16,7 @@ Prereq: php-imap
 Prereq: postfix, spamassassin, cyrus-imapd
 Requires: mailman >= 2.1.9
 Requires: php-jpgraph
+Requires: php-PHPMailer
 
 %description
 Elastix Module Email

@@ -155,6 +155,9 @@ fi
 
 %changelog
 * Mon Feb 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: introduce new Elastix models LXP150 and 
+  LXP250.
+  SVN Rev[6871]
 - CHANGED: Endpoint Configurator: create new method to read manufacturer and
   model information for phone server.
   SVN Rev[6866]

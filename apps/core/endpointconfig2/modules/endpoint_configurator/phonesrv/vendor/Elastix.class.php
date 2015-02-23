@@ -33,5 +33,91 @@ require_once 'vendor/Grandstream.class.php';
 // An Elastix LXP200 phone is a rebranded Grandstream 140x.
 class Elastix extends Grandstream
 {
+    function handle($id_endpoint, $pathList)
+    {
+        if (count($pathList) <= 0) {
+            header('HTTP/1.1 404 Not Found');
+            print 'No '.get_class($this).' resource specified';
+            return;
+        }
+        
+        // Handle LXPx50 as special cases, delegate anything else
+        $tupla = $this->leerInfoEndpoint($id_endpoint);
+        if ($tupla['manufacturer_name'] == 'Elastix'&&
+            in_array($tupla['model_name'], array('LXP150', 'LXP250'))) {
+            $service = array_shift($pathList);
+            switch ($service) {
+                case 'int.xml':
+                    $this->_handle_phonebook($id_endpoint, 'internal');
+                    break;
+                case 'ext.xml':
+                    $this->_handle_phonebook($id_endpoint, 'external');
+                    break;
+                default:
+                    header('HTTP/1.1 404 Not Found');
+                    print 'Unknown '.get_class($this).' resource specified';
+                    break;
+            }
+            return;
+        }
+        return parent::handle($id_endpoint, $pathList);
+    }
+    
+    private function _handle_phonebook($id_endpoint, $addressBookType)
+    {
+        $userdata = $this->obtenerUsuarioElastix($id_endpoint);
+        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8" ?><ContactData/>');
+
+/*
+        $xml_group = $xml->addChild('Group');
+        $xml_group->addAttribute('Id', '1');
+        $xml_group->addAttribute('Name', 'Default');
+        $xml_group->addAttribute('Ring', 'Auto');
+        //$xml_group->addAttribute('Description', '');
+*/
+        
+        $result = $this->listarAgendaElastix(is_null($userdata) ? NULL : $userdata['id_user'], $addressBookType);
+        if (!is_array($result['contacts'])) {
+            Header(($result["fc"] == "DBERROR")
+            ? 'HTTP/1.1 500 Internal Server Error'
+                : 'HTTP/1.1 400 Bad Request');
+                print $result['fm'].' - '.$result['fd'];
+                return;
+        }
+        
+        $labels = array(
+            'internal'  =>  array('Internal', 'Elastix Phonebook - Internal'),
+            'external'  =>  array('External', 'Elastix Phonebook - External'),
+        );
+        
+        $xml_group = $xml->addChild('Group');
+        $xml_group->addAttribute('Id', '1');
+        $xml_group->addAttribute('Name', $labels[$addressBookType][0]);
+        $xml_group->addAttribute('Ring', 'Auto');
+        $xml_group->addAttribute('Description', $labels[$addressBookType][1]);
+        foreach ($result['contacts'] as $idx => $contact) {
+            $xml_contact = $xml_group->addChild('Contact');
+            $xml_contact->addAttribute('Id', $idx + 1);
+            $xml_contact->addAttribute('Line', '0');
+            
+            $xml_contact->addAttribute('DisplayName', isset($contact['last_name'])
+                ? str_replace('&', '&amp;', $contact['name']).' '.str_replace('&', '&amp;', $contact['last_name'])
+                : str_replace('&', '&amp;', $contact['name']));
+        
+            $numlabels = array(
+                'work_phone'    =>  'OfficeNumber',
+                'cell_phone'    =>  'MobileNumber',
+                'home_phone'    =>  'OtherNumber');
+            foreach ($numlabels as $k => $label) {
+                if (!empty($contact[$k]))
+                    $xml_contact->addAttribute($label, str_replace('&', '&amp;', $contact[$k]));
+            }
+            
+            $xml_contact->addAttribute('Ring', 'Auto');
+        }
+        
+        header('Content-Type: text/xml');
+        print $xml->asXML();
+    }
 }
 ?>

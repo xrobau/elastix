@@ -29,8 +29,11 @@
 import logging
 from elastix.BaseEndpoint import BaseEndpoint
 import elastix.vendor.Grandstream
-from eventlet.green import urllib2, urllib
+from eventlet.green import socket, urllib2, urllib
+import cookielib
 import re
+import time
+import os
 
 class Endpoint(elastix.vendor.Grandstream.Endpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
@@ -53,15 +56,34 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
         except Exception, e:
             pass
 
+        if  sModel == None and 'fcgi/do?id=1' in htmlbody:
+            # This condition means we got an LXP150 or LXP250
+            try:
+                opener, body = self._getAuthOpener_LXP150('admin', 'admin')
+                if not opener is None:
+                    m = re.search(r"id=hcProductName type=hidden value='(.+?)'", body)
+                    if m != None:
+                        if m.group(1) == 'SP-R50':
+                            sModel = 'LXP150'
+                        if m.group(1) == 'SP-R53':
+                            sModel = 'LXP250'
+            except Exception, e:
+                logging.error('Endpoint %s@%s LXPx50 failed to authenticate - %s' %
+                (self._vendorname, self._ip, str(e)))
+                
+
         if sModel != None: self._saveModel(sModel)
 
     def updateLocalConfig(self):
         if self._model in ('LXP180'):
             return self._updateLocalConfig_LXP180()
+        elif self._model in ('LXP150', 'LXP250'):
+            return self._updateLocalConfig_LXPx50()
         else:
             # Delegate to old (Grandstream) configuration
             return super(Endpoint, self).updateLocalConfig(self)
     
+    # TODO: consolidar con método parecido de RCA
     def _updateLocalConfig_LXP180(self):
         # This phone configuration is verbose on the network. 
         
@@ -193,4 +215,141 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
         for tuple in postvars:
             postdata.append(urllib.quote_plus(tuple[0]) + '=' + urllib.quote_plus(str(tuple[1])))
         return self._doAuthPost(urlpath, '&'.join(postdata))
+
+    def _getAuthOpener_LXP150(self, http_user, http_pass):
+        ''' Create an authenticated opener for the LXPx50 series.
+        
+        The LXPx50 HTTP authentication is again weird. First, a request must be
+        sent to the phone with a Cookie with a SessionId set to a random number
+        between 0 and 99999. Sending 0 works just as well. The first request must
+        be a GET that asks the phone to calculate a hash for a specified username
+        and password. The hash is embedded inside a HTML fragment in the response.
+        Next the hash must be sent as a new Cookie in a POST request that also
+        includes the original SessionId number and the UserName as cookies. A
+        successful login returns a response with the phone status, including the
+        phone model. Additionally, the response after a successful login includes
+        a brand new SessionId that must be replaced in the opener cookie.
+        '''
+        cookiejar = cookielib.CookieJar(cookielib.DefaultCookiePolicy(rfc2965=True))
+        sesscookie = cookielib.Cookie(None, 'SessionId', '0', None, False,
+            self._ip, False, False,
+            '/', False, False, str((int)(time.time() + 3600)),
+            False, 'SessionId', None, None)        
+        cookiejar.set_cookie(sesscookie)
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
+        response = opener.open('http://' + self._ip + '/fcgi/do?' + urllib.urlencode({
+            'action': 'Encrypt',
+            'UserName' : http_user,
+            'Password' : http_pass}))
+        body = response.read()
+        m = re.search(r"id=hcSingleResult type=hidden value='(.+?)'", body)
+        if m is None:
+            return (None, None)
+        encrypted_password = m.group(1)
+        
+        sesscookie = cookielib.Cookie(None, 'UserName', http_user, None, False,
+            self._ip, False, False, '/', False, False, str((int)(time.time() + 3600)),
+            False, 'UserName', None, None)
+        cookiejar.set_cookie(sesscookie)
+        sesscookie = cookielib.Cookie(None, 'Password', encrypted_password, None, False,
+            self._ip, False, False, '/', False, False, str((int)(time.time() + 3600)),
+            False, 'Password', None, None)
+        cookiejar.set_cookie(sesscookie)
+        response = opener.open('http://' + self._ip + '/fcgi/do?id=1', 
+            'SubmitData=begin%26Operation%3DCreateSession%26DestURL%3Did%6021%26SubmitData%3Dend')
+        
+        # Find new SessionId value. What, no Set-Cookie header?
+        body = response.read()
+        m = re.search(r"id=hcSessionIdNow type=hidden value='(.+?)'", body)
+        if m != None:
+            sesscookie = cookielib.Cookie(None, 'SessionId', m.group(1), None, False,
+                self._ip, False, False,
+                '/', False, False, str((int)(time.time() + 3600)),
+                False, 'SessionId', None, None)        
+            cookiejar.set_cookie(sesscookie)
+        else:
+            logging.error('Endpoint %s@%s LXPx50 failed to authenticate - new session ID not found in response' %
+                (self._vendorname, self._ip))
+            return (None, None)
+        
+        # Subsequent requests must NOT have the UserName/Password cookies
+        cookiejar.clear(self._ip, '/', 'UserName')
+        cookiejar.clear(self._ip, '/', 'Password')
+        return (opener, body)
+    
+    def _updateLocalConfig_LXPx50(self):
+        # Need to calculate lowercase version of MAC address without colons
+        sConfigFile = (self._mac.replace(':', '').lower()) + '.cfg'
+        sConfigPath = self._tftpdir + '/' + sConfigFile
+        
+        vars = self._prepareVarList()
+        
+        # _writeTemplate is used instead of _fetchTemplate because file is
+        # requested by TFTP on reboot
+        self._writeTemplate('Elastix_LXPx50_cfg.tpl', vars, sConfigPath)
+        
+        # Prepare an opener with authentication cookies
+        try:
+            opener, body = self._getAuthOpener_LXP150(self._http_username, self._http_password)
+            if opener is None:
+                # Failed to authenticate
+                os.remove(sConfigPath)
+                return False
+        except Exception, e:
+            logging.error('Endpoint %s@%s LXPx50 failed to authenticate - %s' %
+                (self._vendorname, self._ip, str(e)))
+            os.remove(sConfigPath)
+            return False
+
+        # Send the configuration file through it
+        try:
+            f = open(sConfigPath)
+            cfgcontent = f.read()
+            f.close()
+            
+            boundary = '------------------ENDPOINTCONFIG'
+            postdata = '--' + boundary + '\r\n' +\
+                'Content-Disposition: form-data; name="uploadType"\r\n' +\
+                '\r\n' +\
+                '&Operation=Upload&DestUpFile=endpointconfig.cfg&' + '\r\n' +\
+                '--' + boundary + '\r\n' +\
+                'Content-Disposition: form-data; name="importConfigFile"; filename="endpointconfig.cfg"\r\n' +\
+                'Content-Type: application/octet-stream\r\n' +\
+                '\r\n' +\
+                cfgcontent + '\r\n' +\
+                '--' + boundary + '--\r\n'
+            
+            request = urllib2.Request(
+                'http://' + self._ip + '/fcgi/do?id=6&id=2',
+                postdata,
+                {'Content-Type': ' multipart/form-data; boundary=' + boundary})
+
+            # The phone configuration restore is known to hang for 25-30 seconds 
+            oldtimeout = socket.getdefaulttimeout()
+            socket.setdefaulttimeout(40)            
+            try:
+                response = opener.open(request)
+            finally:
+                socket.setdefaulttimeout(oldtimeout)
+
+            body = response.read()
+            if not 'reboot' in body.lower():
+                logging.error('Endpoint %s@%s failed to maintain authentication (POST)' %
+                        (self._vendorname, self._ip))
+                os.remove(sConfigPath)
+                return False
+        except socket.error, e:
+            logging.error('Endpoint %s@%s failed to connect - %s' %
+                    (self._vendorname, self._ip, str(e)))
+            return False
+        except urllib2.HTTPError, e:
+            logging.error('Endpoint %s@%s unable to send file - %s' %
+                (self._vendorname, self._ip, str(e)))
+            return False
+        
+        # Reboot the phone.
+        self._amireboot('aastra-check-cfg')
+        self._unregister()
+        self._setConfigured()
+        return True
         

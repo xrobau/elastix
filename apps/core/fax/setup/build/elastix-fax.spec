@@ -16,6 +16,7 @@ Prereq: iaxmodem, hylafax
 Requires: ghostscript
 # tiff2pdf supplied by libtiff (CentOS), libtiff-tools (Fedora)
 Requires: /usr/bin/tiff2pdf
+Requires: php-PHPMailer
 
 %description
 Elastix Module Fax

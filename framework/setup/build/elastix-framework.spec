@@ -32,8 +32,6 @@ Conflicts: kernel-module-wanpipe-xen
 Obsoletes: elastix <= 2.2.0-17
 Requires: php-Smarty
 Requires: php-jpgraph
-Requires: php-simplepie
-Requires: php-PHPMailer
 
 %description
 Elastix is a Web based software to administrate a PBX based in open source programs

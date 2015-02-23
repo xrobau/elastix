@@ -529,7 +529,8 @@ function sendEmailFax($conn, $sRepresentativeName, $sDestinationEmail, $sCompany
     }
     
     // Send mail...
-    require_once('libs/phpmailer/class.phpmailer.php');
+    require_once 'PHPMailer/class.phpmailer.php';
+
     $mail = new PHPMailer();
     $mail->From = $emailInfo['remite'];
     $mail->FromName = $emailInfo['remitente'];

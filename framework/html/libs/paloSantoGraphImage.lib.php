@@ -27,13 +27,13 @@
   +----------------------------------------------------------------------+
 */
 
-require_once("libs/jpgraph/jpgraph.php");
-require_once("libs/jpgraph/jpgraph_line.php");
-require_once("libs/jpgraph/jpgraph_pie.php");
-require_once("libs/jpgraph/jpgraph_pie3d.php");
-require_once("libs/jpgraph/jpgraph_bar.php");
-require_once("libs/jpgraph/jpgraph_canvas.php");
-require_once("libs/jpgraph/jpgraph_canvtools.php");
+require_once("jpgraph/jpgraph.php");
+require_once("jpgraph/jpgraph_line.php");
+require_once("jpgraph/jpgraph_pie.php");
+require_once("jpgraph/jpgraph_pie3d.php");
+require_once("jpgraph/jpgraph_bar.php");
+require_once("jpgraph/jpgraph_canvas.php");
+require_once("jpgraph/jpgraph_canvtools.php");
 
 /**
  * Método que sirve de reemplazo al mecanismo de paloSantoGraph y paloSantoGraphLib

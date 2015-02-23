@@ -154,6 +154,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Feb 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: create new method to read manufacturer and
+  model information for phone server.
+  SVN Rev[6866]
+
 * Mon Feb  9 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: introduce new Elastix model LXP180 which 
   behavers like a RCA 160s.

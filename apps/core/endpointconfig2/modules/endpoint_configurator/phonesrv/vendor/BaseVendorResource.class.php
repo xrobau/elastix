@@ -252,5 +252,26 @@ class BaseVendorResource
         
         return $infoRSS;
     }
+
+    protected function leerInfoEndpoint($id_endpoint)
+    {
+        $sql = <<<SQL_INFO_ENDPOINT
+SELECT manufacturer.name AS manufacturer_name, model.name AS model_name
+FROM manufacturer, model, endpoint
+WHERE manufacturer.id = endpoint.id_manufacturer AND model.id = endpoint.id_model AND endpoint.id = ?
+SQL_INFO_ENDPOINT;
+        $tupla = $this->_db->getFirstRowQuery($sql, TRUE, array($id_endpoint));
+        if (!is_array($tupla)) {
+            header('HTTP/1.1 500 Internal Server Error');
+            print $this->_db->errMsg;
+            exit;
+        }
+        if (count($tupla) <= 0) {
+            header('HTTP/1.1 404 Not Found');
+            print 'Manufacturer or model mismatch';
+            exit;
+        }
+        return $tupla;
+    }
 }
 ?>

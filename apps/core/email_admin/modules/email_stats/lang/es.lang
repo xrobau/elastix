@@ -25,15 +25,17 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2011-06-01 10:06:04 Alberto Santos asantos@palosanto.com Exp $ */
+  $Id: en.lang,v 1.1 2011-06-01 10:06:04 Alberto Santos asantos@palosanto.com Exp $ 
+  $Id: en.lang,v 1.2 2014-02-23 11:19:04 Armando Chuto achuto@elastix.com, XDiana Panchana dpanchana@palosanto.com Exp $*/
 global $arrLangModule;
 $arrLangModule=array(
 "Incoming Email" => "Correo entrante",
 "Nothing to show yet" => "Nada que mostrar todavía",
 "Total" => "Total",
-"Number of Emails" => "Número de correos",
-"Incoming Email by Hour" => "Correo entrante por hora",
-"Incoming Email by Day" => "Correo entrante por día",
-"Incoming Email by Month" => "Correo entrante por mes"
+"Incoming Email by Hour" => "Correo entrante por Hora",
+"Incoming Email by Day" => "Correo entrante por Dia",
+"Incoming Email by Month" => "Correo entrante por Mes",
+"Number of Emails" => "Numero de Correos",
+
 );
 ?>

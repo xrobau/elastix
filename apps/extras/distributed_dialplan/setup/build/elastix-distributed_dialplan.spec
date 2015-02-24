@@ -84,12 +84,18 @@ if [ $1 -eq 0 ] ; then # Validation for desinstall this rpm
 fi
 
 %files
-%defattr(-, asterisk, asterisk)
-%{_localstatedir}/www/html/*
-/usr/share/elastix/module_installer/*
-/var/www/html/elastixConnection/*
+%defattr(-, root, root)
+%{_datadir}/elastix/module_installer/*
+%{_localstatedir}/www/html/modules/*
+%{_localstatedir}/www/html/elastixConnection/*
 
 %changelog
+* Tue Feb 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Distributed Dialplan: fix file packaging section so all files are owned
+  by root, and package does not directly own /var/www/html/modules. Fixes Elastix
+  bug #2018.
+  SVN Rev[6872]
+
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Remote Servers, Server Key, Company Information: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
   SVN Rev[6368]

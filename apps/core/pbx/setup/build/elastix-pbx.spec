@@ -276,6 +276,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Feb 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Embedded FreePBX: add $itemid to list of global variables for daynight
+  module. Fixes Elastix bug #2031.
+  SVN Rev[6875]
+
 * Wed Feb 04 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

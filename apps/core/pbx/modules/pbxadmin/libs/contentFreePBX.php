@@ -100,6 +100,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
     global $quietmode;
     global $recordings_save_path;
     global $path_to_dir;
+    global $itemid; // required by FreePBX 2.11.x daynight module
     $return_HTML = "";
     
     // This needs to be included BEFORE the session_start or we fail so

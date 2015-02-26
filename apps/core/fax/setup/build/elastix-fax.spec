@@ -228,6 +228,11 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Thu Feb 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: faxconfig: fix incorrect variables used in recordset when refreshing
+  configuration files.
+  SVN Rev[6878]
+
 * Tue Dec  2 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Fax: change file and directory ownership in package to root
   instead of asterisk. Part of fix for Elastix bug #2062.

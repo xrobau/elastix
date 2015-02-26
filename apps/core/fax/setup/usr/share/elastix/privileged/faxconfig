@@ -370,9 +370,8 @@ function rewriteFileFax(){
         // Read all the fax configuration information
         $sth = $conn->query('SELECT dev_id,notify_email FROM fax');       
         while($tupla = $sth->fetch(PDO::FETCH_OBJ)){ 
-            if(!empty($tupla->value))
-                $arrDev[]=$tupla->value;
-                $fDispatch[]="  ttyIAX".$tupla->value.") SENDTO=".$tupla->username.";;\n";
+            $arrDev[] = $tupla->dev_id;
+            $fDispatch[] = "  ttyIAX".$tupla->dev_id.") SENDTO=".$tupla->notify_email.";;\n";;
         }
     } catch (PDOException $e) {
         fprintf(STDERR, "ERR: failed to query fax - %s\n", $e->getMessage());

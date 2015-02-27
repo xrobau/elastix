@@ -1,7 +1,7 @@
 <?php
-require("fpdf/fpdf.php");
-define('FPDF_FONTPATH','libs/fpdf/font/');
-class paloPDF extends FPDF
+require("tcpdf/tcpdf.php"); 
+define ('K_TCPDF_EXTERNAL_CONFIG', 'tcpdf/fonts/');
+class paloPDF extends TCPDF
 {    
     var $wMaxCol=0;
     var $widthCol;
@@ -142,12 +142,13 @@ class paloPDF extends FPDF
 
     function printTable($nameFile,$title,$header,$data){
         $this->setTitle($title);
-        $this->AliasNbPages();
-	$this->AddFont('Verdana','','verdana.php');
+        $this->getAliasNbPages();
+	//$this->AddFont('Verdana','','verdana.php');
 	parent::AddPage();
 	$this->SetLineWidth(0.05);
 	$this->SetDrawColor(153,153,153);
         $this->setWidthTable();
+	$this->SetY(20);
 	$this->BasicTable($header,$data);
 	parent::Output($nameFile,'D');
     }
@@ -175,7 +176,7 @@ class paloPDF extends FPDF
     function setFormat($format)
     {
         if(is_string($format))
-	   $format=$this->_getpageformat($format);
+       	   $format=$this->setPageFormat($format); 
             
         $this->DefPageFormat=$format;
 	$this->CurPageFormat=$format;
@@ -222,7 +223,7 @@ class paloPDF extends FPDF
         }
     }
 
-    function CheckPageBreak($h,$addpage)
+  /*  function CheckPageBreak($h,$addpage)
     {
         //If the height h would cause an overflow, add a new page immediately
         if($addpage){
@@ -233,20 +234,21 @@ class paloPDF extends FPDF
             return true;
         else 
             return false; 
-    }
+    }*/
 
     function NbLines($w,$txt)
     {
+        $nl=2;
         //Computes the number of lines a MultiCell of width w will take
         $cw=&$this->CurrentFont['cw'];
         if($w==0)
-            $w=$this->w-$this->rMargin-$this->x;
+         /*   $w=$this->w-$this->rMargin-$this->x;
         $wmax=($w-2*$this->cMargin)*1000/$this->FontSize;
         $s=str_replace("\r",'',$txt);
-        $nb=strlen($s);
+        $nb=strlen($s);*/
         if($nb>0 and $s[$nb-1]=="\n")
             $nb--;
-        $sep=-1;
+       /* $sep=-1;
         $i=0;
         $j=0;
         $l=0;
@@ -282,12 +284,13 @@ class paloPDF extends FPDF
             }
             else
                 $i++;
-        }
+        }*/
         return $nl;
     }
 
     function Row($data1,$type,$color,$a)
     {
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         //Calculate the height of the row
         $data=array();
         if($type==0)
@@ -315,7 +318,8 @@ class paloPDF extends FPDF
             else
                 $this->Rect($x,$y,$w,$h);
             //Print the text
-            $this->MultiCell($w,5, utf8_decode(rtrim($data[$i])),0,$a);
+            //$this->MultiCell($w,5, utf8_decode(rtrim($data[$i])),0,$a);
+	    $this->MultiCell($w,5, rtrim($data[$i]),0,$a);
             //Put the position to the right of the cell
             $this->SetXY($x+$w,$y);
         }

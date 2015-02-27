@@ -13,6 +13,7 @@ BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-5
 Prereq: asterisk
 Requires: php-jpgraph
+Requires: php-tcpdf
 
 %description
 Elastix Module Reports

@@ -11,6 +11,7 @@ Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-9
+Requires: php-PHPMailer
 
 %description
 Elastix Module Distributed Dial Plan
@@ -90,6 +91,10 @@ fi
 %{_localstatedir}/www/html/elastixConnection/*
 
 %changelog
+* Fri Feb 27 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Distributed Dialplan: fix include path for system PHPMailer.
+  SVN Rev[6881]
+
 * Tue Feb 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Distributed Dialplan: fix file packaging section so all files are owned
   by root, and package does not directly own /var/www/html/modules. Fixes Elastix

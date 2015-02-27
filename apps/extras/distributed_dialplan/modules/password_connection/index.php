@@ -30,7 +30,7 @@
 include_once "libs/paloSantoGrid.class.php";
 include_once "libs/paloSantoForm.class.php";
 include_once "libs/paloSantoJSON.class.php";
-include_once "libs/phpmailer/class.phpmailer.php";
+include_once "PHPMailer/class.phpmailer.php";
 
 function _moduleContent(&$smarty, $module_name)
 {

@@ -13,7 +13,6 @@ BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-5
 Prereq: asterisk
 Requires: php-jpgraph
-Requires: php-tcpdf
 
 %description
 Elastix Module Reports
@@ -94,6 +93,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Mar  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-reports does not directly require php-tcpdf. Instead it is
+  indirectly referenced through paloSantoPDF from framework.
+  SVN Rev[6887]
+
 * Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.

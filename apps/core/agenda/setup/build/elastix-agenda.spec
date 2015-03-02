@@ -119,14 +119,14 @@ fi
   SVN history. Bump release in specfile.
   SVN Rev[6665]
 
+* Fri Jul 04 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- FIXED: Address book: Was fixed the bug #1928.
+  SVN Rev[6662]
+
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 
 - CHANGED: trunk - core/specs: Update specfile with latest SVN history. Bump
   Release in specfile.
   SVN Rev[6650]
-
-* Fri Jul 04 2014 Sergio Broncano <sbroncano@palosanto.com> 
-- FIXED: Address book: Was fixed the bug #1928.
-  SVN Rev[6662]
 
 * Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
 - UPDATED: languages modules were updated.

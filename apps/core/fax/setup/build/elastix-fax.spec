@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -193,6 +193,18 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
+  history. Changed Version and Release in specfile.
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- CHANGED: /apps/core/fax/setup/hylafax/bin changed route of PHPMailer library
+  SVN Rev[6870]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- ADDED: /apps/core/fax/setup/built added PHPMailer library
+  SVN Rev[6868]
+
 * Mon Feb  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: New Virtual Fax: display error messages if a fax fails to be created
   or updated.
@@ -204,10 +216,12 @@ fi
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
   history. Changed Version and Release in specfile.
+  SVN Rev[6773]
 
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
   history. Changed Release in specfile.
+  SVN Rev[6379]
 
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Virtual Fax List, New Virtual Fax, Send Fax, Fax Queue, Fax Master, 

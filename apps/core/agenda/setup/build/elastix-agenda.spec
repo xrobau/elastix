@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -96,18 +96,37 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump version and release in specfile.
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- CHANGED: /apps/core/agenda/modules/calendar/libs changed route of PHPMailer
+  library
+  SVN Rev[6869]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- ADDED: /apps/core/agenda/setup/built added PHPMailer library
+  SVN Rev[6867]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump version and release in specfile.
+  SVN Rev[6773]
 
 * Thu Jul 29 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-14
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6665]
 
 * Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 
 - CHANGED: trunk - core/specs: Update specfile with latest SVN history. Bump
   Release in specfile.
   SVN Rev[6650]
+
+* Fri Jul 04 2014 Sergio Broncano <sbroncano@palosanto.com> 
+- FIXED: Address book: Was fixed the bug #1928.
+  SVN Rev[6662]
 
 * Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
 - UPDATED: languages modules were updated.

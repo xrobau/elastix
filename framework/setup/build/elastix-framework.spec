@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.5.0
-Release: 4
+Release: 5
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -32,6 +32,8 @@ Conflicts: kernel-module-wanpipe-xen
 Obsoletes: elastix <= 2.2.0-17
 Requires: php-Smarty
 Requires: php-jpgraph
+Requires: php-simplepie
+Requires: php-PHPMailer
 
 %description
 Elastix is a Web based software to administrate a PBX based in open source programs
@@ -349,9 +351,67 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Mar 2 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-5
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[6846]
+
+* Fri Feb 27 2015 Armando Chuto <armando@palosanto.com> 
+- DELETED: delete fpdf folder
+  SVN Rev[6883]
+
+* Fri Feb 27 2015 Armando Chuto <armando@palosanto.com> 
+- CHANGED: framework/palosantoPDF: change palosantoPDF.class.pdf for tcpdf
+  library
+  SVN Rev[6882]
+
+* Wed Feb 25 2015 Armando Chuto <armando@palosanto.com> 
+- DELETED: delete jpgraph folder
+  SVN Rev[6878]
+
+* Wed Feb 25 2015 Armando Chuto <armando@palosanto.com> 
+- DELETED: delete phpmailer folder
+  SVN Rev[6877]
+
+* Wed Feb 25 2015 Armando Chuto <armando@palosanto.com> 
+- DELETED: delete smarty folder
+  SVN Rev[6876]
+
+* Wed Feb 25 2015 Armando Chuto <armando@palosanto.com> 
+- DELETED: delete magpierss folder
+  SVN Rev[6874]
+
+* Wed Feb 25 2015 Armando Chuto <armando@palosanto.com> 
+- CHANGED: Update icon
+  SVN Rev[6873]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- UPDATE: /framework/setup/build/ added library to Elastix Framework
+  SVN Rev[6865]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- ADDED: /framework/setup/build/ added library to Elastix Framework
+  SVN Rev[6864]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- CHANGE: framework libs/paloSantoGraphImage.lib.php: change the route to
+  usr/share/php of gpgraph library
+  SVN Rev[6858]
+
+* Thu Feb 19 2015 Luis Abarca <labarca@palosanto.com> 
+- ADDED: framework - themes/tennant: A partial migration of tennant theme of
+  Elastix MT has been made.
+  SVN Rev[6857]
+
+* Fri Feb 13 2015 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: framework - elastix-framework.spec: Put the correct date in the
+  changelog of spec in order to create an rpm.
+  SVN Rev[6847]
+
 * Fri Feb 13 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6846]
 
 * Fri Feb 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
   Framework: force 770 mode for session directory.

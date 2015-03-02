@@ -3,7 +3,7 @@
 Summary: Elastix Module Email 
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -199,13 +199,47 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- ADDED: /core/reports/setup/build/ added library php-PHPMailer
+  SVN Rev[6863]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- ADDED: /core/email_admin/setup/build/ added library php-jpgraph
+  SVN Rev[6861]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- CHANGED: core/email_admin/modules/email_stats/lang: language
+  SVN Rev[6860]
+
+* Wed Feb 18 2015 Armando Chuto <armando@palosanto.com> 
+- CHANGED: the PHPMailer directory change of var/www/html/libs to
+  usr/share/php/PHPMailer/class.smtp.php
+  SVN Rev[6855]
+
+* Mon Nov 24 2014 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: module email_admin, when service is off, port number, user and
+  password are not saved. Keep defaults as port number 25 and user -
+  password is null. bugs.elastix.org[#2025].
+  SVN Rev[6778]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
 
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
+  packages were depreciated many functions, the equivalent functions are
+  updated in the files that use to have the menctioned functions.
+  SVN Rev[6638]
+
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-6
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6379]
 
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Domains, Accounts, Relay, Antispam, Remote SMTP, Email list, Email stats,

@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -94,9 +94,27 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+* Fri Feb 27 2015 Armando Chuto <armando@palosanto.com> 
+- ADDED: framework/report added tcpdf library
+  SVN Rev[6880]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- ADDED: /core/reports/setup/build/ added library php-jpgraph
+  SVN Rev[6862]
+
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+- CHANGED: core/reports/modules/graphic_report: change the route to usr/share
+  of jpgraph library
+  SVN Rev[6859]
+
 * Wed Feb 04 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[6838]
 
 * Wed Feb  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: CDR Report: reinstalling FreePBX adds the cdr.did column 
@@ -114,6 +132,7 @@ fi
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump version and release in specfile.
+  SVN Rev[6773]
 
 * Thu Oct 16 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-10
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest

@@ -32,7 +32,7 @@ Conflicts: kernel-module-wanpipe-xen
 Obsoletes: elastix <= 2.2.0-17
 Requires: php-Smarty
 Requires: php-jpgraph
-Requires: php-simplepie
+Requires: php-tcpdf
 Requires: php-PHPMailer
 
 %description
@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Mar  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: framework - elastix-framework does not directly require php-simplepie.
+  However, it does require php-tcpdf.
+  SVN Rev[6885]
+
 * Mon Mar 2 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-5
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

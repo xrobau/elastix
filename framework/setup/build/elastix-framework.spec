@@ -352,6 +352,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: fix two issues with Smarty on CentOS 7. 1) Smarty 3.0 renamed 
+  get_template_vars to getTemplateVars and SmartyBC must be instantiated to get
+  the old name 2) Smarty 3.0 now complains on unassigned template placeholders
+  unless $smarty->error_reporting is set to emulate the old behavior.
+  SVN Rev[6886]
 - CHANGED: framework - elastix-framework does not directly require php-simplepie.
   However, it does require php-tcpdf.
   SVN Rev[6885]

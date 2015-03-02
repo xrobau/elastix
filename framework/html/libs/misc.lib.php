@@ -796,22 +796,28 @@ function load_default_timezone()
 // Create a new Smarty object and initialize template directories
 function getSmarty($mainTheme, $basedir = '/var/www/html')
 {
-    if (file_exists('/usr/share/php/Smarty/Smarty.class.php'))
+    $smartyClass = 'Smarty';
+    if (file_exists('/usr/share/php/Smarty/Smarty.class.php')) {
         require_once('Smarty/Smarty.class.php');
-    else if(file_exists('$basedir/libs/smarty/libs/Smarty.class.php'))
-	require_once("$basedir/libs/smarty/libs/Smarty.class.php");
+        if (!method_exists($smartyClass, 'get_template_vars')) {
+            require_once('Smarty/SmartyBC.class.php');
+            $smartyClass = 'SmartyBC';
+        }
+    } else if(file_exists('$basedir/libs/smarty/libs/Smarty.class.php'))
+        require_once("$basedir/libs/smarty/libs/Smarty.class.php");
     else{
         global $arrConf;
         $basedir = $arrConf['basePath'];
         require_once("$basedir/libs/smarty/libs/Smarty.class.php");
     }
-       
-    $smarty = new Smarty();
-    
+
+    $smarty = new $smartyClass();
+   
     $smarty->template_dir = "$basedir/themes/$mainTheme";
     $smarty->config_dir =   "$basedir/configs/";
     $smarty->compile_dir =  "$basedir/var/templates_c/";
     $smarty->cache_dir =    "$basedir/var/cache/";
+    $smarty->error_reporting = E_ALL & ~E_NOTICE;
 
     return $smarty;
 }

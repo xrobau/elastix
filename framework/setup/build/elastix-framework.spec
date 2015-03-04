@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Mar  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: check whether /etc/localtime is a symlink and use it as an additional
+  way to find out the current timezone.
+  SVN Rev[6891]
+
 * Mon Mar  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: fix two issues with Smarty on CentOS 7. 1) Smarty 3.0 renamed 
   get_template_vars to getTemplateVars and SmartyBC must be instantiated to get

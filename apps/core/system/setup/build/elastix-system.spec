@@ -138,6 +138,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Mar  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: also check mariadb for database activity report. Required
+  for CentOS 7 compatibility.
+  SVN Rev[6890]
+
 * Mon Feb  18 2015 Armando Chuto <achuto@elastix.com>
 - CHANGED: Applet News: migrate from magpierss to simplepie for RSS
   SVN Rev[6854]

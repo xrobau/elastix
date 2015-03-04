@@ -217,7 +217,7 @@ class Applet_ProcessesStatus
         $arrSERVICES["Postfix"]["activate"]        = $this->_isActivate("postfix");
         $arrSERVICES["Postfix"]["name_service"]    = "Email Service";
 
-        $arrSERVICES["MySQL"]["status_service"]    = $this->_existPID_ByCMD("mysqld","mysqld");
+        $arrSERVICES["MySQL"]["status_service"]    = $this->_existPID_ByCMD("mysqld",array("mysqld", "mariadb"));
         $arrSERVICES["MySQL"]["activate"]      = $this->_isActivate("mysqld");
         $arrSERVICES["MySQL"]["name_service"]      = "Database Service";
 
@@ -244,6 +244,7 @@ class Applet_ProcessesStatus
 
     private function _existPID_ByCMD($serviceName, $nameService)
     {
+        if (!is_array($nameService)) $nameService = array($nameService);
         if (!$this->_existService($nameService)) return "Not_exists";
         foreach (explode(' ', trim(`/sbin/pidof $serviceName`)) as $pid) {
             if (ctype_digit($pid) && (is_dir("/proc/$pid"))) return 'OK';
@@ -253,10 +254,13 @@ class Applet_ProcessesStatus
 
     private function _existService($nameService)
     {
-        if (file_exists("/usr/lib/systemd/system/{$nameService}.service"))
-            return TRUE;
-        if (file_exists("/etc/rc.d/init.d/{$nameService}"))
-            return TRUE;
+        if (!is_array($nameService)) $nameService = array($nameService);
+        foreach ($nameService as $ns) {
+            if (file_exists("/usr/lib/systemd/system/{$ns}.service"))
+                return TRUE;
+            if (file_exists("/etc/rc.d/init.d/{$ns}"))
+                return TRUE;
+        }
         return FALSE;
     }
 

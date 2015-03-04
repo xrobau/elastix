@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Mar  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: factor out querying of system timezone into a separate function.
+  Required for time_config module in elastix-system.
+  SVN Rev[6892]
 - CHANGED: check whether /etc/localtime is a symlink and use it as an additional
   way to find out the current timezone.
   SVN Rev[6891]

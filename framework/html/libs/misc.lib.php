@@ -775,8 +775,7 @@ function getStickyNote($pdbACL, $uid, $menu)
     return $arrResult;
 }
 
-// Set default timezone from /etc/sysconfig/clock for PHP 5.3+ compatibility
-function load_default_timezone()
+function get_default_timezone()
 {
     $sDefaultTimezone = @date_default_timezone_get();
     if ($sDefaultTimezone == 'UTC') {
@@ -793,7 +792,13 @@ function load_default_timezone()
             }
         }
     }
-    date_default_timezone_set($sDefaultTimezone);
+    return $sDefaultTimezone;
+}
+
+// Set default timezone from /etc/sysconfig/clock for PHP 5.3+ compatibility
+function load_default_timezone()
+{
+    date_default_timezone_set(get_default_timezone());
 }
 
 // Create a new Smarty object and initialize template directories

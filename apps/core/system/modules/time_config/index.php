@@ -91,21 +91,7 @@ function _moduleContent(&$smarty, $module_name)
 	// Cargar de /etc/sysconfig/clock la supuesta zona horaria configurada.
 	// El resto de contenido del archivo se preserva, y la clave ZONE se 
 	// escribirá como la última línea en caso de actualizar
-	$sZonaActual = "America/New_York";
-	$infoZona = NULL;
-	$hArchivo = fopen('/etc/sysconfig/clock', 'r');
-	if ($hArchivo) {
-		$infoZona = array();
-		while (!feof($hArchivo)) {
-			$s = fgets($hArchivo);
-			$regs = NULL;
-			if (preg_match('/^ZONE="(.*)"/', $s, $regs))
-				$sZonaActual = $regs[1];
-			else $infoZona[] = $s;
-		}
-		fclose($hArchivo);
-	}
-
+	$sZonaActual = get_default_timezone();  // <-- requiere elastix-framework >= 2.5.0-6
 
 	if (isset($_POST['Actualizar'])) {
 //		print '<pre>';print_r($_POST);print '</pre>';
@@ -155,7 +141,7 @@ function _moduleContent(&$smarty, $module_name)
 		} else {
 			if ($sZonaNueva != $sZonaActual) {
                 $sComando = '/usr/bin/elastix-helper dateconfig'.
-                    ' --timezone '.$sZonaNueva.
+                    ' --timezone '.escapeshellarg($sZonaNueva).
                     ' 2>&1';
                 $output = $ret = NULL;
                 exec($sComando, $output, $ret);

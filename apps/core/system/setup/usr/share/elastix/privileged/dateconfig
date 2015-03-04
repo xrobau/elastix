@@ -94,38 +94,66 @@ function action_dateConfiguration($opt)
     }
 
     if (!is_null($sTimezone)) {
-    	// Original content de /etc/sysconfig/clock
         $sTimezoneAnterior = 'America/New_York';
-        $contenidoClock = array();
-        foreach (file('/etc/sysconfig/clock') as $s) {
+        if (is_link("/etc/localtime")) {
+            // System uses a symlink to keep track of current timezone
             $regs = NULL;
-        	if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
-        		$sTimezoneAnterior = $regs[1];
-        	} else $contenidoClock[] = $s;
-        }
-        $contenidoClock[] = "ZONE=\"$sTimezone\"\n";
-        
-        if ($sTimezone != $sTimezoneAnterior) {
-            $sZonefile = '/usr/share/zoneinfo/'.$sTimezone;
-            
-            // Update /etc/localtime
-            if ($bExito && !copy($sZonefile, '/etc/localtime')) {
-            	$bExito = FALSE;
-                fwrite(STDERR, "ERR: failed update to /etc/localtime\n");
+            if (preg_match("|/usr/share/zoneinfo/(.+)|", readlink("/etc/localtime"), $regs)) {
+                $sTimezoneAnterior = $regs[1];
             }
             
-            // Update /var/spool/postfix/etc/localtime if present
-            if ($bExito && file_exists('/var/spool/postfix/etc/localtime') 
-                && !copy($sZonefile, '/var/spool/postfix/etc/localtime')) {
-                $bExito = FALSE;    	
-                fwrite(STDERR, "ERR: failed update to /var/spool/postfix/etc/localtime\n");
+            if ($sTimezone != $sTimezoneAnterior) {
+                // Update /var/spool/postfix/etc/localtime if present
+                // TODO: symlink?
+                if ($bExito && file_exists('/var/spool/postfix/etc/localtime') 
+                    && !copy($sZonefile, '/var/spool/postfix/etc/localtime')) {
+                    $bExito = FALSE;    	
+                    fwrite(STDERR, "ERR: failed update to /var/spool/postfix/etc/localtime\n");
+                }
+                
+                if ($bExito && !unlink('/etc/localtime')) {
+                    $bExito = FALSE;
+                    fwrite(STDERR, "ERR: failed to remove previous symlink /etc/localtime\n");
+                }
+
+                if ($bExito && !symlink('../usr/share/zoneinfo/'.$sTimezone, '/etc/localtime')) {
+                    $bExito = FALSE;
+                    fwrite(STDERR, "ERR: failed to create new symlink /etc/localtime\n");
+                }
             }
+        } else {
+            // Original content de /etc/sysconfig/clock
+            $contenidoClock = array();
+            foreach (file('/etc/sysconfig/clock') as $s) {
+                $regs = NULL;
+            	if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
+            		$sTimezoneAnterior = $regs[1];
+            	} else $contenidoClock[] = $s;
+            }
+            $contenidoClock[] = "ZONE=\"$sTimezone\"\n";
             
-            // Update /etc/sysconfig/clock            
-            if ($bExito) file_put_contents('/etc/sysconfig/clock', $contenidoClock);
-            
-            // TODO: /etc/dhcpd.conf contains reference to current timezone
+            if ($sTimezone != $sTimezoneAnterior) {
+                $sZonefile = '/usr/share/zoneinfo/'.$sTimezone;
+                
+                // Update /etc/localtime
+                if ($bExito && !copy($sZonefile, '/etc/localtime')) {
+                	$bExito = FALSE;
+                    fwrite(STDERR, "ERR: failed update to /etc/localtime\n");
+                }
+                
+                // Update /var/spool/postfix/etc/localtime if present
+                if ($bExito && file_exists('/var/spool/postfix/etc/localtime') 
+                    && !copy($sZonefile, '/var/spool/postfix/etc/localtime')) {
+                    $bExito = FALSE;    	
+                    fwrite(STDERR, "ERR: failed update to /var/spool/postfix/etc/localtime\n");
+                }
+                
+                // Update /etc/sysconfig/clock            
+                if ($bExito) file_put_contents('/etc/sysconfig/clock', $contenidoClock);                
+            }
         }
+
+        // TODO: /etc/dhcpd.conf contains reference to current timezone
     }
 
     if (!is_null($sDatetime)) {

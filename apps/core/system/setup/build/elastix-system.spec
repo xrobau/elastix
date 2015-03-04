@@ -10,7 +10,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.4.0-10
+Prereq: elastix-framework >= 2.5.0-6
 Prereq: elastix-fax >= 2.2.0-4 
 Prereq: php-soap
 Prereq: dahdi
@@ -139,6 +139,9 @@ fi
 
 %changelog
 * Wed Mar  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Date/Time: recognize and preserve scenario of timezone via symlink on
+  /etc/localtime when changing timezones.
+  SVN Rev[6893]
 - FIXED: Dashboard: also check mariadb for database activity report. Required
   for CentOS 7 compatibility.
   SVN Rev[6890]

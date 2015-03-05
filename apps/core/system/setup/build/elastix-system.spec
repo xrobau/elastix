@@ -18,6 +18,7 @@ Conflicts: elastix-agenda < 2.2.0-1
 Conflicts: elastix-pbx <= 2.4.0-15
 Requires: dhcp
 Requires: php-simplepie
+Requires: hdparm
 
 %description
 Elastix Module System
@@ -138,6 +139,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Mar  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: add hdparm to Requires list.
+  SVN Rev[6894]
+
 * Wed Mar  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Date/Time: recognize and preserve scenario of timezone via symlink on
   /etc/localtime when changing timezones.

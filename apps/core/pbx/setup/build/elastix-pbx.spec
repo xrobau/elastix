@@ -15,7 +15,8 @@ Prereq: elastix-system >= 2.3.0-10
 Prereq: vsftpd
 Prereq: asterisk >= 1.8
 Requires: festival >= 1.95
-Requires: freePBX >= 2.11.0-1
+#Requires: freePBX >= 2.11.0-1
+Prereq: freePBX >= 2.11.0-1
 
 Conflicts: elastix-endpointconfig2 <= 0.0.7
 Requires: elastix-endpointconfig2 >= 2.4.0-0
@@ -276,6 +277,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Mar  5 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- The elastix-php installer.php requires phpagi-asmanager from FreePBX. Therefore
+  the package needs a Prereq: freePBX
+  SVN Rev[6898]
+
 * Wed Feb 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Embedded FreePBX: add $itemid to list of global variables for daynight
   module. Fixes Elastix bug #2031.

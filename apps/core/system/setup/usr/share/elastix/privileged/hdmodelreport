@@ -68,7 +68,7 @@ if (is_array($listaDiscos)) foreach ($listaDiscos as $sDisco) {
 
         // stat() no me da la información de dev mayor/menor
         $output2 = NULL;
-        exec("/usr/bin/stat $sDisco", $output2);
+        exec("LANG=C /usr/bin/stat $sDisco", $output2);
         foreach ($output2 as $p) {
             $p = trim($p);
             $regs = NULL;
@@ -81,8 +81,8 @@ if (is_array($listaDiscos)) foreach ($listaDiscos as $sDisco) {
 }
 
 // Reporte de modelos para discos LVM
-$listaDiscos = glob('/dev/mapper/VolGroup*');
-if (is_array($listaDiscos)) foreach ($listaDiscos as $sDisco) {
+$listaDiscos = glob('/dev/mapper/*');
+if (is_array($listaDiscos)) foreach ($listaDiscos as $sDisco) if (basename($sDisco) != 'control') {
     $output = NULL;
     exec("/sbin/dmsetup deps $sDisco", $output);
     foreach ($output as $s) {        

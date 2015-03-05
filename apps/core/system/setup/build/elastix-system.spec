@@ -140,6 +140,9 @@ fi
 
 %changelog
 * Thu Mar  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: force LANG=C for call to /usr/bin/stat, and examine all 
+  devices under /dev/mapper for its hard disk.
+  SVN Rev[6897]
 - FIXED: Dashboard: check for php-simplepie autoloader and use it if present,
   before requiring older include file.
   SVN Rev[6895]

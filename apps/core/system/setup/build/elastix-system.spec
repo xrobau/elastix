@@ -140,6 +140,9 @@ fi
 
 %changelog
 * Thu Mar  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: check for php-simplepie autoloader and use it if present,
+  before requiring older include file.
+  SVN Rev[6895]
 - FIXED: Dashboard: add hdparm to Requires list.
   SVN Rev[6894]
 

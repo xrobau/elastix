@@ -28,7 +28,10 @@
   $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp 
   $Id: index.php,v 1.2 2015/02/04 16:27:54 achuto,dpanchana Exp $
 */
-require_once 'php-simplepie/simplepie.inc';
+if (file_exists('/usr/share/php/php-simplepie/autoloader.php'))
+    require_once 'php-simplepie/autoloader.php';
+else
+    require_once 'php-simplepie/simplepie.inc';
 
 class Applet_News
 {

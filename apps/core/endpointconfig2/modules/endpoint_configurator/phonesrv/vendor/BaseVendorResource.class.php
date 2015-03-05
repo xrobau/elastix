@@ -218,7 +218,10 @@ class BaseVendorResource
      */
     protected function leerCanalRSS($rss_url, &$sMensaje)
     {
-        require_once 'php-simplepie/simplepie.inc';
+        if (file_exists('/usr/share/php/php-simplepie/autoloader.php'))
+            require_once 'php-simplepie/autoloader.php';
+        else
+            require_once 'php-simplepie/simplepie.inc';
         
         $sMensaje = '';
         $cachedir = '/tmp/rss-cache';

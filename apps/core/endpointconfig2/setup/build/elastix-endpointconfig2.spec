@@ -154,6 +154,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Mar  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: add epoll file descriptor to the list of file
+  descriptors to preserve when daemonizing.
+  SVN Rev[6899]
+
 * Thu Mar  5 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: check for php-simplepie autoloader and use it if
   present, before requiring older include file.

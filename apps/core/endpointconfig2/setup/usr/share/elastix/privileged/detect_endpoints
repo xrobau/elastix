@@ -50,6 +50,7 @@ import eventlet
 from eventlet.green import socket, subprocess, select, os, time
 from eventlet.greenpool import GreenPool
 from eventlet.db_pool import ConnectionPool
+import eventlet.hubs
 import os.path
 import MySQLdb
 daemon = eventlet.import_patched('daemon')
@@ -99,6 +100,10 @@ def main():
 	# Become a daemon here
 	if daemonize:
 		daemonctx = daemon.DaemonContext()
+		# Prevent daemon from closing the epoll fd behind our backs
+		ehub = eventlet.hubs.get_hub()
+		if hasattr(ehub, 'poll') and hasattr(ehub.poll, 'fileno'):
+			daemonctx.files_preserve = [ehub.poll]
 		daemonctx.stderr = open('/tmp/stderr_detect_endpoints.txt', 'w+')
 		daemonctx.open()
 	

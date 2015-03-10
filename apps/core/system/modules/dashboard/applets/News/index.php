@@ -46,23 +46,26 @@ class Applet_News
             'status'    =>  'success',
             'message'   =>  '(no message)',
         );
-            $infoRSS->set_feed_url("http://elastix.org/index.php?option=com_mediarss&feed_id=1&format=raw"); 
+
+            $infoRSS->set_feed_url("http://elastix.org/index.php/en/company/news/");
             $infoRSS->enable_cache(FALSE);
             $infoRSS->set_cache_location("/tmp/rss-cache");
             $infoRSS->set_output_encoding('UTF-8');
             $infoRSS->init();
             $infoRSS->handle_content_type(); //This method ensures that the SimplePie-enabled page is being served with the correct mime-type and character encoding HTTP headers
 
-       if (strpos($infoRSS->error(), 'HTTP Error: connection failed') !== FALSE) {
+
+        if (strpos($infoRSS->error(), 'HTTP Error: connection failed') !== FALSE) {
             $respuesta['status'] = 'error';
             $respuesta['message'] = _tr('Could not get web server information. You may not have internet access or the web server is down');
         } else {
             // Formato de fecha y hora
             $i=0;
-            $news=array();
-            $content=array();
+		    $news=array();
+		    $content=array();
             // Formato de fecha y hora
                foreach ($infoRSS->get_items() as $item) {
+
 		        $content['title']=$item->get_title(); 
                 $content['link']=$item->get_link();        
 	            $content['date_format'] = date('Y.m.d',$item->get_date('U'));
@@ -73,7 +76,7 @@ class Applet_News
             $smarty->assign(array(
                 'WEBSITE'   =>  'http://www.elastix.org',
                 'NO_NEWS'   =>  _tr('No News to display'),
-                'NEWS_LIST' =>  array_slice($news, 0, 7),
+                'NEWS_LIST' =>  array_slice($infoRSS->items, 0, 7),
             ));
             $local_templates_dir = dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module_name/applets/News/tpl";
             $respuesta['html'] = $smarty->fetch("$local_templates_dir/rssfeed.tpl");

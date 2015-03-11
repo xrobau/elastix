@@ -139,6 +139,13 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Mar 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: fix regression introduced by commit 6900. Use direct RSS
+  url to save one HTTP request to elastix.org. Enable use of cache directory 
+  after checking said directory exists or can be created. Fix indentation and
+  replace tabs with spaces.
+  SVN Rev[6901] 
+
 * Thu Mar  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: force LANG=C for call to /usr/bin/stat, and examine all 
   devices under /dev/mapper for its hard disk.

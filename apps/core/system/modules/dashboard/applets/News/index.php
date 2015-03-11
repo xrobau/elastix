@@ -46,14 +46,18 @@ class Applet_News
             'status'    =>  'success',
             'message'   =>  '(no message)',
         );
-
+        $lang=get_language();
         $cachedir = '/tmp/rss-cache';
-        $infoRSS->set_feed_url("http://elastix.org/index.php/en/company/news.feed?type=rss");
+        if($lang=="es")
+           {$infoRSS->set_feed_url("http://elx.ec/newses");}
+        else
+           {$infoRSS->set_feed_url("http://elx.ec/newsen");}
         $infoRSS->enable_order_by_date(TRUE);
         $infoRSS->set_output_encoding('UTF-8');
         $infoRSS->enable_cache(TRUE);
         $infoRSS->set_cache_location($cachedir);
         if (!is_dir($cachedir) && ! @mkdir($cachedir)) {
+           // $infoRSS->set_feed_url("http://elastix.org/index.php/en/company/news.feed?type=rss");
             $infoRSS->enable_cache(FALSE);
         }
         $infoRSS->init();

@@ -199,6 +199,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Mar 12 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Antispam: do not depend on output from "service spamassassin status"
+  command, and instead check for return code. Fixes Elastix bug #2196.
+  SVN Rev[6905]
+
 * Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

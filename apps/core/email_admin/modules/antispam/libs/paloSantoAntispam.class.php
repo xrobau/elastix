@@ -50,13 +50,10 @@ class paloSantoAntispam {
 
     function isActiveSpamFilter()
     {
-        $step_three_config = false;
-        exec("sudo /sbin/service generic-cloexec spamassassin status",$arrConsole,$flagStatus);
-        if($flagStatus == 0){
-            if(preg_match("/pid/",$arrConsole[0]))
-                $step_three_config = true;
-        }
-        return $step_three_config;
+        $output = $retval = NULL;
+        exec('sudo /sbin/service generic-cloexec spamassassin status',
+            $output, $retval);
+        return ($retval == 0);
     }
 
     function getValueRequiredHits()

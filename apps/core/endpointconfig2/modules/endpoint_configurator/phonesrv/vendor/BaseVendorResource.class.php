@@ -31,6 +31,7 @@
 require_once(ELASTIX_BASE.'configs/default.conf.php');
 require_once(ELASTIX_BASE.'modules/address_book/libs/paloSantoAdressBook.class.php');
 require_once(ELASTIX_BASE.'modules/address_book/configs/default.conf.php');
+require_once(ELASTIX_BASE.'libs/misc.lib.php');
 
 $arrConf = array_merge($arrConf, $arrConfModule);
 
@@ -175,15 +176,17 @@ class BaseVendorResource
      */
     protected function listarCanalesRSS()
     {
+        $lang = get_language();
+        
         // TODO: leer esta lista de una base de datos
         $rssfeeds = array(
             'elastixnews'       =>  array(
                 'Elastix News',
-                'http://elastix.org/index.php/en/news.feed?type=rss'
+                ($lang == 'es') ? 'http://elx.ec/newses' : 'http://elx.ec/newsen'
             ),
             'elastixtraining'   =>  array(
                 'Elastix Training',
-                'http://elastix.org/index.php/en/events.feed?type=rss'
+                ($lang == 'es') ? 'http://elx.ec/eventses' : 'http://elx.ec/eventsen'
             ),
             'wsjonline'         =>  array(
                 "What's News - US",

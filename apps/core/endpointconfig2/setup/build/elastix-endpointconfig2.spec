@@ -154,6 +154,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Mar 12 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: update RSS URLs to point to redirector.
+  SVN Rev[6096]
+
 * Fri Mar  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: add epoll file descriptor to the list of file
   descriptors to preserve when daemonizing.

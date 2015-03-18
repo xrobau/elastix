@@ -11,7 +11,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: /sbin/chkconfig, /etc/sudoers, sudo
 Prereq: php, php-gd, php-pear, php-xml, php-mysql, php-pdo, php-imap, php-soap
-Prereq: httpd, mysql-server, ntp, nmap, mod_ssl
+Prereq: httpd, mysql-server, ntp, mod_ssl
 Prereq: perl
 Prereq: elastix-firstboot >= 2.3.0-4
 Prereq: /sbin/pidof
@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Mar 18 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: remove obsolete nmap dependency. The only user of nmap is the network
+  scan in the Endpoint Configurator.
+  SVN Rev[6098]
+
 * Wed Mar  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: factor out querying of system timezone into a separate function.
   Required for time_config module in elastix-system.

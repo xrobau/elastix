@@ -114,6 +114,49 @@ class Agente
         $this->number = $iNumero;
     }
     
+    private function _nul($i) { return is_null($i) ? '(ninguno)' : "$i"; }
+    
+    public function dump($log)
+    {
+        $s = "----- AGENTE -----\n";
+        $s .= ("\tid_agent...........".$this->id_agent)."\n";
+        $s .= ("\tname...............".$this->name)."\n";
+        $s .= ("\testatus............".$this->estatus)."\n";
+        $s .= ("\ttype...............".$this->type)."\n";
+        $s .= ("\tnumber.............".$this->number)."\n";
+        $s .= ("\tchannel............".$this->channel)."\n";
+        $s .= ("\testado_consola.....".$this->estado_consola)."\n";
+        
+        $s .= ("\tid_sesion..........".$this->_nul($this->id_sesion))."\n";
+        $s .= ("\tid_break...........".$this->_nul($this->id_break))."\n";
+        $s .= ("\tid_audit_break.....".$this->_nul($this->id_audit_break))."\n";
+        $s .= ("\tid_hold............".$this->_nul($this->id_hold))."\n";
+        $s .= ("\tid_audit_hold......".$this->_nul($this->id_audit_hold))."\n";
+        $s .= ("\tUniqueid...........".$this->_nul($this->Uniqueid))."\n";
+        $s .= ("\tUniqueidAgente.....".$this->_nul($this->UniqueidAgente))."\n";
+        $s .= ("\tlogin_channel......".$this->_nul($this->login_channel))."\n";
+        $s .= ("\textension..........".$this->_nul($this->extension))."\n";
+        $s .= ("\tnum_pausas.........".$this->num_pausas)."\n";
+        $s .= ("\ten_pausa...........".($this->en_pausa ? 'SI' : 'NO'))."\n";
+        $s .= ("\treservado..........".($this->reservado ? 'SI' : 'NO'))."\n";
+        $s .= ("\tmax_inactivo.......".$this->_nul($this->max_inactivo))."\n";
+        $s .= ("\ttimeout_inactivo...".$this->timeout_inactivo)."\n";
+
+        $s .= ("\tllamada............".(is_null($this->_llamada)
+            ? '(ninguna)'
+            : $this->_llamada->__toString()
+            ));
+        $log->output($s);
+    }
+    
+    public function __toString()
+    {
+        return 'ID='.$this->id_agent.
+            ' type='.$a->type.
+            ' number='.$this->_nul($a->number).
+            ' '.$a->name;
+    }
+    
     public function __get($s)
     {
         switch ($s) {

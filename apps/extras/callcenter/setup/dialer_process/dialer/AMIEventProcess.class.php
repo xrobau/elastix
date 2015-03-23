@@ -79,7 +79,7 @@ class AMIEventProcess extends TuberiaProcess
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente', 
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
             'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante',
-            'pingAgente') as $k)
+            'pingAgente', 'dumpstatus') as $k)
             $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -1068,6 +1068,16 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_pingAgente'), $datos));
     }
     
+    public function rpc_dumpstatus($sFuente, $sDestino, 
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
+            array($this, '_dumpstatus'), $datos));
+    }
+    
     /**************************************************************************/
 
     public function msg_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje, 
@@ -1955,6 +1965,37 @@ class AMIEventProcess extends TuberiaProcess
                 }
             }
         }
+    }
+
+    private function _dumpstatus()
+    {
+        $this->_log->output('INFO: '.__METHOD__.' volcando status de seguimiento...');        
+        $this->_log->output("\n");
+        
+        $this->_log->output("Versión detectada de Asterisk............".implode('.', $this->_asteriskVersion));
+        $this->_log->output("Timestamp de arranque de Asterisk........".$this->_asteriskStartTime);
+        $this->_log->output("Última verificación de llamadas viejas...".date('Y-m-d H:i:s', $this->_iTimestampVerificacionLlamadasViejas));
+        $this->_log->output("\n\nLista de campañas salientes:\n");
+
+        foreach ($this->_campaniasSalientes as $c)
+            $c->dump($this->_log);
+        
+        $this->_log->output("\n\nLista de colas entrantes:\n");
+        foreach ($this->_colasEntrantes as $c) {
+            $this->_log->output("queue:               ".$c['queue']);
+            $this->_log->output("id_queue_call_entry: ".$c['id_queue_call_entry']);
+            if (is_null($c['campania']))
+                $this->_log->output("(sin campaña)\n");
+            else $c['campania']->dump($this->_log);
+        }
+
+        $this->_log->output("\n\nLista de agentes:\n");
+        $this->_listaAgentes->dump($this->_log);
+        
+        $this->_log->output("\n\nLista de llamadas:\n");
+        $this->_listaLlamadas->dump($this->_log);
+        
+        $this->_log->output('INFO: '.__METHOD__.' fin de volcado status de seguimiento...');
     }
 }
 ?>

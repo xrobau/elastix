@@ -67,6 +67,39 @@ class Campania
         $this->_log = $log;
     }
 
+    public function __toString()
+    {
+        return "ID={$this->id} {$this->tipo_campania} name={$this->name}";
+    }
+    
+    public function dump($log)
+    {
+        $s = "----- CAMPAÑA -----\n";
+        $s .= "\tid......................".$this->id."\n";
+        $s .= "\tname....................".$this->name."\n";
+        $s .= "\tqueue...................".$this->queue."\n";
+        $s .= "\tdatetime_init...........".$this->datetime_init."\n";
+        $s .= "\tdatetime_end............".$this->datetime_end."\n";
+        $s .= "\tdaytime_init............".$this->daytime_init."\n";
+        $s .= "\tdaytime_end.............".$this->daytime_end."\n";
+        $s .= "\ttipo_campania...........".$this->tipo_campania."\n";
+        $s .= "\t_iTiempoContestacion....".$this->_iTiempoContestacion."\n";
+        $s .= "\t_historial_contestada...[".implode(' ', $this->_historial_contestada)."]\n";
+        if ($this->tipo_campania == 'outgoing') {
+            $s .= "\ttrunk...................".(is_null($this->trunk) ? '(por plan de marcado)' : $this->trunk)."\n";
+            $s .= "\tcontext.................".$this->context."\n";
+            $s .= "\t_num_completadas........".$this->_num_completadas."\n";
+            $s .= "\t_promedio...............".(is_null($this->_promedio) ? 'N/D' : $this->_promedio)."\n";
+            $s .= "\t_desviacion.............".(is_null($this->_desviacion) ? 'N/D' : $this->_desviacion)."\n";
+            $s .= "\t_variancia..............".(is_null($this->_variancia) ? 'N/D' : $this->_variancia)."\n";
+            
+        } elseif ($this->tipo_campania == 'incoming') {
+            $s .= "\tid_queue_call_entry.....".$this->id_queue_call_entry."\n";
+        }
+
+        $log->output($s);
+    }
+    
     function estadisticasIniciales($num, $prom, $stddev)
     {
     	$this->_num_completadas = $num;

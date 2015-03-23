@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Mar 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): create new request dumpstatus. This request causes
+  AMIEventProcess to dump its internal status to the log file. This request is
+  intended for debugging.
+  SVN Rev[6909]
+
 * Wed Feb  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-8
 - Bump version for release.
 

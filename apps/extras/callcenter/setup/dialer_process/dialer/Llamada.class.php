@@ -166,6 +166,56 @@ class Llamada
         $this->_log = $log;
     }
     
+    private function _nul($i) { return is_null($i) ? '(ninguno)' : "$i"; }
+    private function _nultime($i) { return is_null($i) ? '----/--/-- --:--:--' : date('Y/m/d H:i:s', $i); }
+    private function _agentecorto($a) { return is_null($a) ? '(ninguno)' : $a->__toString(); }
+    
+    public function __toString()
+    {
+        return "ID=".($this->id_llamada).
+            " tipo=".($this->tipo_llamada).
+            " uniqueid=".($this->uniqueid).
+            " channel=".($this->channel).
+            " actualchannel=".($this->actualchannel);
+    }
+    
+    public function dump($log)
+    {
+        $s = "----- LLAMADA -----\n";
+        $s .= "\ttipo_llamada.................".$this->tipo_llamada."\n";
+        $s .= "\tid_llamada...................".$this->_nul($this->id_llamada)."\n";
+        $s .= "\tphone........................".$this->_nul($this->phone)."\n";
+        $s .= "\tdialstring...................".$this->_nul($this->dialstring)."\n";
+        $s .= "\tuniqueid.....................".$this->_nul($this->uniqueid)."\n";
+        $s .= "\tchannel......................".$this->_nul($this->channel)."\n";
+        $s .= "\tactualchannel................".$this->_nul($this->actualchannel)."\n";
+        $s .= "\tagentchannel.................".$this->_nul($this->agentchannel)."\n";
+        $s .= "\ttrunk........................".$this->_nul($this->trunk)."\n";
+        $s .= "\tstatus.......................".$this->_nul($this->status)."\n";
+        $s .= "\tactionid.....................".$this->_nul($this->actionid)."\n";
+        $s .= "\tid_current_call..............".$this->_nul($this->id_current_call)."\n";
+        $s .= "\tduration.....................".$this->_nul($this->duration)."\n";
+        $s .= "\ttimestamp_originatestart.....".$this->_nultime($this->timestamp_originatestart)."\n";
+        $s .= "\ttimestamp_originateend.......".$this->_nultime($this->timestamp_originateend)."\n";
+        $s .= "\ttimestamp_enterqueue.........".$this->_nultime($this->timestamp_enterqueue)."\n";
+        $s .= "\ttimestamp_link...............".$this->_nultime($this->timestamp_link)."\n";
+        $s .= "\ttimestamp_hangup.............".$this->_nultime($this->timestamp_hangup)."\n";
+        $s .= "\tduration_wait................".$this->_nul($this->duration_wait)."\n";
+        $s .= "\tduration_answer..............".$this->_nul($this->duration_answer)."\n";
+        $s .= "\tesperando_contestar..........".($this->esperando_contestar ? 'SI' : 'NO')."\n";
+        $s .= "\trequest_hold.................".($this->request_hold ? 'SI' : 'NO')."\n";        
+        $s .= "\tid_queue_call_entry..........".$this->_nul($this->id_queue_call_entry)."\n";
+        $s .= "\t_queuenumber.................".$this->_nul($this->_queuenumber)."\n";
+        $s .= "\tagente.......................".$this->_agentecorto($this->agente)."\n";
+        $s .= "\tagente_agendado..............".$this->_agentecorto($this->agente_agendado)."\n";
+        $s .= "\tcampania.....................".(is_null($this->campania) ? '(ninguna)' : $this->campania->__toString())."\n";
+        
+        $s .= "\tAuxChannels..................".print_r($this->AuxChannels, TRUE)."\n";
+        $s .= "\t_actualizacionesPendientes...".print_r($this->_actualizacionesPendientes, TRUE)."\n";
+
+        $log->output($s);
+    }
+    
     public function __get($s)
     {
         switch ($s) {

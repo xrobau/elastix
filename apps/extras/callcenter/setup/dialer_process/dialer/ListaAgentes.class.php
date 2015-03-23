@@ -88,5 +88,10 @@ class ListaAgentes implements IteratorAggregate
             }
         }
     }
+    
+    function dump($log)
+    {
+        foreach ($this->_agentes as &$agente) $agente->dump($log);
+    }
 }
 ?>

@@ -113,5 +113,11 @@ class ListaLlamadas implements IteratorAggregate
     		}
     	}
     }
+    
+    function dump($log)
+    {
+        foreach ($this->_llamadas as &$llamada) $llamada->dump($log);
+        
+    }
 }
 ?>

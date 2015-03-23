@@ -3840,6 +3840,15 @@ LOG_CAMPANIA_SALIENTE;
         return $xml_response;
     }
 
+    private function Request_eccpauth_dumpstatus($comando)
+    {
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_dumpstatusResponse = $xml_response->addChild('dumpstatus_response');
+        $this->_tuberia->AMIEventProcess_dumpstatus();
+        $xml_dumpstatusResponse->addChild('success');
+        return $xml_response;
+    }
+    
     /***************************** EVENTOS *****************************/
     
     function notificarEvento_AgentLogin($sAgente, $bExitoLogin)

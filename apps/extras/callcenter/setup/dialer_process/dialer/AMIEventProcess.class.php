@@ -53,6 +53,16 @@ class AMIEventProcess extends TuberiaProcess
     // Contadores para actividades ejecutadas regularmente
     private $_iTimestampVerificacionLlamadasViejas = 0; // Última verificación de llamadas viejas
 
+    // Número de llamadas esperando atención por cola, inicializado por 
+    // QueueEntry y actualizado en Join y Leave
+    private $_numLlamadasEnCola = array();
+    // Este temporal se intercambia por _numLlamadasEnCola en QueueStatusComplete
+    private $_tmp_numLlamadasEnCola = NULL;
+    // Estado de agente, por agente y luego por cola, inicializado por
+    // QueueMember y actualizado en QueueMemberStatus y QueueMemberAdded
+    private $_tmp_estadoAgenteCola = NULL;
+    private $_tmp_actionid_queuestatus = NULL;
+    
     public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
     	$this->_log = $oMainLog;
@@ -137,6 +147,8 @@ class AMIEventProcess extends TuberiaProcess
                     $a->terminarLoginAgente();
                 }
             }
+            
+            $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
         }
 
         // Rutear todos los mensajes pendientes entre tareas
@@ -222,7 +234,9 @@ class AMIEventProcess extends TuberiaProcess
             // Instalación de los manejadores de eventos
             foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join', 
                 'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
-                'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved') as $k)
+                'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved',
+                'QueueMemberStatus', 'QueueParams', 'QueueMember', 'QueueEntry',
+                'QueueStatusComplete', 'Leave', 'Reload') as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
             $astman->add_event_handler('Bridge', array($this, "msg_Link")); // Visto en Asterisk 1.6.2.x
             if ($this->DEBUG && $this->_config['dialer']['allevents'])
@@ -1105,7 +1119,21 @@ class AMIEventProcess extends TuberiaProcess
                         $a->estado_consola);
                 }
             }
+
+            // Iniciar pertenencia de agentes dinámicos
+            $dyn = array();
+            if (isset($datos[1][$sAgente]))
+                $dyn = $datos[1][$sAgente];
+            $a->asignarColasDinamicas($dyn);
         }
+        
+        // Iniciar actualización del estado de las colas activas
+        $this->_tmp_actionid_queuestatus = posix_getpid().'-'.time();
+        $this->_tmp_estadoAgenteCola = array();
+        $this->_tmp_numLlamadasEnCola = array();
+        $this->_ami->QueueStatus($this->_tmp_actionid_queuestatus);
+        
+        // En msg_QueueStatusComplete se valida pertenencia a colas dinámicas
     }
     
     public function msg_avisoInicioOriginate($sFuente, $sDestino, $sNombreMensaje, 
@@ -1480,6 +1508,7 @@ class AMIEventProcess extends TuberiaProcess
             return FALSE;
         }        
         
+        $a->actualizarEstadoEnCola($params['Queue'], $params['Status']);
         if ($a->estado_consola != 'logged-in') {
             $a->completarLoginAgente();
             $this->_tuberia->msg_ECCPProcess_AgentLogin(
@@ -1513,24 +1542,36 @@ class AMIEventProcess extends TuberiaProcess
             return FALSE;
         }        
 
+        $a->quitarEstadoEnCola($params['Queue']);
         if ($a->estado_consola == 'logged-in') {
-            $this->_tuberia->msg_ECCPProcess_AgentLogoff(
-                $params['Location'],
-                $params['local_timestamp_received'], 
-                $a->id_agent,
-                $a->id_sesion,
-                $a->id_audit_break,
-                $a->id_audit_hold);
-            $a->terminarLoginAgente();
+            if ($a->type == 'Agent') {
+                if ($this->DEBUG) {
+                    $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberRemoved({$params['Location']}) , ignorando...");
+                }                
+            } elseif ($a->hayColasDinamicasLogoneadas()) {
+                if ($this->DEBUG) {
+                    $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberRemoved({$params['Location']}) todavía quedan colas pendientes, ignorando...");
+                }
+            } else {
+                $this->_tuberia->msg_ECCPProcess_AgentLogoff(
+                    $params['Location'],
+                    $params['local_timestamp_received'], 
+                    $a->id_agent,
+                    $a->id_sesion,
+                    $a->id_audit_break,
+                    $a->id_audit_hold);
+                $a->terminarLoginAgente();
+            }
         } else {
             if ($this->DEBUG) {
-                $this->_log->output("DEBUG: ".__METHOD__.": AgentLogin({$params['Location']}) duplicado (múltiples colas), ignorando");
-                $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogoff");
+                $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberRemoved({$params['Location']}) en estado no-logoneado, ignorando...");
             }
         }
         
         if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
-        
+        if ($this->DEBUG) {
+            $this->_log->output("DEBUG: ".__METHOD__.": EXIT QueueMemberRemoved");
+        }
         return FALSE;
     }
 
@@ -1542,7 +1583,11 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
                 );
         }
-    
+
+        if (!isset($this->_numLlamadasEnCola[$params['Queue']]))
+            $this->_numLlamadasEnCola[$params['Queue']] = 0;
+        $this->_numLlamadasEnCola[$params['Queue']]++;
+        
         $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid']);
         if (is_null($llamada) && isset($this->_colasEntrantes[$params['Queue']])) {
         	// Llamada de campaña entrante
@@ -1945,6 +1990,176 @@ class AMIEventProcess extends TuberiaProcess
     	}
     }
     
+    public function msg_QueueParams($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+            );
+        }
+        
+        if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
+        if (!isset($this->_tmp_numLlamadasEnCola[$params['Queue']]))
+            $this->_tmp_numLlamadasEnCola[$params['Queue']] = 0;
+    }
+    
+    public function msg_QueueMember($sEvent, $params, $sServer, $iPort)
+    {
+        /*
+        Event: QueueMember
+        Queue: 8001
+        Name: Agent/9000
+        Location: Agent/9000
+        StateInterface: Agent/9000
+        Membership: static
+        Penalty: 0
+        CallsTaken: 0
+        LastCall: 0
+        Status: 5
+        Paused: 0
+        ActionID: gato
+         */
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+            );
+        }
+        
+        if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;        
+        $this->_tmp_estadoAgenteCola[$params['Name']][$params['Queue']] = $params['Status'];
+    }
+    
+    public function msg_QueueEntry($sEvent, $params, $sServer, $iPort)
+    {
+        /*
+         Event: QueueEntry
+         Queue: 8000
+         Position: 1
+         Channel: SIP/1064-00000000
+         Uniqueid: 1378401225.0
+         CallerIDNum: 1064
+         CallerIDName: Alex
+         ConnectedLineNum: unknown
+         ConnectedLineName: unknown
+         Wait: 40
+         */
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+            );
+        }
+        
+        if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
+        if (!isset($this->_tmp_numLlamadasEnCola[$params['Queue']]))
+            $this->_tmp_numLlamadasEnCola[$params['Queue']] = 0;
+        $this->_tmp_numLlamadasEnCola[$params['Queue']]++;
+    }
+    
+    public function msg_QueueStatusComplete($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+            );
+        }
+        
+        if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
+        
+        /* Finalizó la enumeración. Ahora se puede actualizar el estado de los 
+         * agentes de forma atómica.
+         */
+        $this->_numLlamadasEnCola = $this->_tmp_numLlamadasEnCola;
+        $this->_tmp_numLlamadasEnCola = NULL;
+        $this->_tmp_actionid_queuestatus = NULL;
+        foreach ($this->_tmp_estadoAgenteCola as $sAgente => $estadoCola) {
+            $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+            if (!is_null($a)) {
+                $a->asignarEstadoEnColas($estadoCola);
+                
+                $diffcolas = $a->diferenciaColasDinamicas();
+                if (is_array($diffcolas)) {
+                    // Colas a las que no pertenece y debería pertenecer
+                    foreach ($diffcolas[0] as $cola) {
+                        $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
+                            'agregado a la cola '.$cola);
+                        $this->_ami->QueueAdd($cola, $sAgente);
+                        if ($a->num_pausas > 0)
+                            $this->_ami->QueuePause($cola, $sAgente, 'true');
+                    }
+                    
+                    // Colas a las que pertenece y no debe pertenecer
+                    foreach ($diffcolas[1] as $cola) {
+                        $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
+                            'quitado de la cola '.$cola);
+                        $this->_ami->QueueRemove($cola, $sAgente);
+                    }
+                }
+            } else {
+                if ($this->DEBUG) {
+                    $this->_log->output('WARN: agente '.$sAgente.' no es un agente registrado en el callcenter, se ignora');
+                }
+            }
+        }
+    }
+    
+    // En Asterisk 11 e inferior, este evento se emite sólo si eventmemberstatus
+    // está seteado en la cola respectiva.
+    public function msg_QueueMemberStatus($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+            );
+        }
+        
+        $a = $this->_listaAgentes->buscar('agentchannel', $params['Location']);
+        if (!is_null($a)) {
+            // TODO: existe $params['Paused'] que indica si está en pausa
+            $a->actualizarEstadoEnCola($params['Queue'], $params['Status']);
+        } else {
+            if ($this->DEBUG) {
+                $this->_log->output('WARN: agente '.$params['Location'].' no es un agente registrado en el callcenter, se ignora');
+            }
+        }
+    }
+    
+    public function msg_Leave($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+            );
+        }
+        
+        if (!isset($this->_numLlamadasEnCola[$params['Queue']]))
+            $this->_numLlamadasEnCola[$params['Queue']] = 0;
+        if ($this->_numLlamadasEnCola[$params['Queue']] > 0)
+            $this->_numLlamadasEnCola[$params['Queue']]--;
+        else {
+            $this->_log->output('ERR: número de llamadas en espera fuera de sincronía, se intenta refrescar...');
+            $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+        }
+    }
+    
+    public function msg_Reload($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+            );
+        }
+        
+        $this->_log->output('INFO: se ha recargado configuración de Asterisk, se refresca agentes...');
+        $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+    }
+    
     private function _forzarLogoffAgente($a)
     {
     	if ($a->type == 'Agent')
@@ -1994,6 +2209,11 @@ class AMIEventProcess extends TuberiaProcess
         
         $this->_log->output("\n\nLista de llamadas:\n");
         $this->_listaLlamadas->dump($this->_log);
+        
+        $this->_log->output("\n\nLlamadas en espera en colas:");
+        foreach ($this->_numLlamadasEnCola as $q => $n) {
+            $this->_log->output("\t$q.....$n");
+        }
         
         $this->_log->output('INFO: '.__METHOD__.' fin de volcado status de seguimiento...');
     }

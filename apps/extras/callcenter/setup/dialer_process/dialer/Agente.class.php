@@ -27,6 +27,16 @@
   +----------------------------------------------------------------------+
   $Id: DialerProcess.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
 
+define('AST_DEVICE_NOTINQUEUE', -1);
+define('AST_DEVICE_UNKNOWN',    0);
+define('AST_DEVICE_NOT_INUSE',  1);
+define('AST_DEVICE_INUSE',      2);
+define('AST_DEVICE_BUSY',       3);
+define('AST_DEVICE_INVALID',    4);
+define('AST_DEVICE_UNAVAILABLE',5);
+define('AST_DEVICE_RINGING',    6);
+define('AST_DEVICE_RINGINUSE',  7);
+define('AST_DEVICE_ONHOLD',     8);
 
 class Agente
 {
@@ -98,6 +108,12 @@ class Agente
     /* Timestamp de la última actividad del agente */
     private $_ultima_actividad;
 
+    /* Estado del agente en todas las colas a la que pertenece */
+    private $_estado_agente_colas = array();
+    
+    /* Sólo agentes dinámicos: lista de colas dinámicas a las que debe pertenecer */
+    private $_colas_dinamicas = array();
+    
     var $llamada_agendada = NULL;
 
     function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
@@ -125,6 +141,9 @@ class Agente
         $s .= ("\ttype...............".$this->type)."\n";
         $s .= ("\tnumber.............".$this->number)."\n";
         $s .= ("\tchannel............".$this->channel)."\n";
+        if ($this->type != 'Agent')
+            $s .= ("\tcolas dinámicas....[".implode(', ', $this->_colas_dinamicas))."]\n";
+        $s .= ("\testado de colas....[".$this->_strestadocolas())."]\n";
         $s .= ("\testado_consola.....".$this->estado_consola)."\n";
         
         $s .= ("\tid_sesion..........".$this->_nul($this->id_sesion))."\n";
@@ -152,9 +171,34 @@ class Agente
     public function __toString()
     {
         return 'ID='.$this->id_agent.
-            ' type='.$a->type.
-            ' number='.$this->_nul($a->number).
-            ' '.$a->name;
+            ' type='.$this->type.
+            ' number='.$this->_nul($this->number).
+            ' '.$this->name;
+    }
+    
+    private function _strestadocolas()
+    {
+        // El estado de la cola sólo es usable si eventmemberstatus está activo
+        // para la cola en cuestión.
+        /*
+        $states = array(
+            -1  =>  'Not in queue',
+            0   =>  "Unknown",
+            1   =>  "Not in use",
+            2   =>  "In use",
+            3   =>  "Busy",
+            4   =>  "Invalid",
+            5   =>  "Unavailable",
+            6   =>  "Ringing",
+            7   =>  "Ring+Inuse",
+            8   =>  "On Hold",
+        );
+        $s = array();
+        foreach ($this->_estado_agente_colas as $q => $st)
+            $s[] = "$q (".$states[$st].")";
+        return implode(', ', $s);
+        */
+        return implode(', ', array_keys($this->_estado_agente_colas));
     }
     
     public function __get($s)
@@ -365,6 +409,52 @@ class Agente
             $this->_listaAgentes->removerIndice('uniqueidlink', $this->_UniqueidAgente);
         $this->_UniqueidAgente = NULL;
         $this->resetTimeout();
+    }
+
+    public function asignarEstadoEnColas($nuevoEstado)
+    {
+        $this->_estado_agente_colas = $nuevoEstado;
+        asort($this->_estado_agente_colas);
+    }
+    
+    public function actualizarEstadoEnCola($queue, $status)
+    {
+        $this->_estado_agente_colas[$queue] = $status;
+    }
+    
+    public function quitarEstadoEnCola($queue)
+    {
+        unset($this->_estado_agente_colas[$queue]);
+    }
+    
+    // El estado de la cola sólo es usable si eventmemberstatus está activo
+    // para la cola en cuestión. Excepto que siempre se sabe si está o no en cola.
+    public function estadoEnCola($queue)
+    {
+        return isset($this->_estado_agente_colas[$queue]) ? AST_DEVICE_NOTINQUEUE : $this->_estado_agente_colas[$queue];
+    }
+    
+    public function asignarColasDinamicas($lista)
+    {
+        $this->_colas_dinamicas = $lista;
+        sort($this->_colas_dinamicas);
+    }
+    
+    public function diferenciaColasDinamicas()
+    {
+        if ($this->type == 'Agent') return NULL;
+        if ($this->estado_consola != 'logged-in') return NULL;
+        $currcolas = array_keys($this->_estado_agente_colas);
+        return array(
+            array_diff($this->_colas_dinamicas, $currcolas), // colas a las cuales agregar agente
+            array_diff($currcolas, $this->_colas_dinamicas), // colas de las cuales quitar agente
+        );
+    }
+    
+    public function hayColasDinamicasLogoneadas()
+    {
+        $currcolas = array_keys($this->_estado_agente_colas);
+        return (count(array_intersect($currcolas, $this->_colas_dinamicas)) > 0);
     }
 }
 ?>

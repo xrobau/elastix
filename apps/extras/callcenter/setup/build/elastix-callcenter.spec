@@ -101,6 +101,11 @@ fi
 
 %changelog
 * Mon Mar 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add tracking of queue membership by agent. For dynamic agents
+  this allows detection of changes in queue membership as saved by FreePBX in 
+  order to update the in-memory membership in asterisk. This in turn enables
+  moving of live dynamic agents between queues once the Reload event is hooked.
+  SVN Rev[6911]
 - CHANGED: Dialer (ECCP): create new request dumpstatus. This request causes
   AMIEventProcess to dump its internal status to the log file. This request is
   intended for debugging.

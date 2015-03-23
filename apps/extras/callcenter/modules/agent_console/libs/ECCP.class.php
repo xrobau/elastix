@@ -653,5 +653,12 @@ class ECCP
         return $xml_response->pingagent_response;
     }
 
+    public function dumpstatus()
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('dumpstatus');
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->dumpstatus_response;
+    }
 }
 ?>

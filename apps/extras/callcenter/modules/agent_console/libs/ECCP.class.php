@@ -660,5 +660,13 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->dumpstatus_response;
     }
+
+    public function refreshagents()
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('refreshagents');
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->refreshagents_response;
+    }
 }
 ?>

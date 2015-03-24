@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Tue Mar 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): create new request refreshagents. This request causes 
+  CampaignProcess to reload and send the updated agent status to AMIEventProcess
+  for it to add or remove queue members as required.
+  SVN Rev[6913]
 - CHANGED: Dialer: count number of AMI events received, classified by event, and
   dump this count in the dumpstatus handler. This count can help optimize AMI
   event filters in order to improve performance.

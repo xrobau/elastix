@@ -108,13 +108,17 @@ class CampaignProcess extends TuberiaProcess
         // Iniciar la conexión Asterisk
         if (!$this->_iniciarConexionAMI()) return FALSE;
         
-        // Registro de manejadores de eventos desde CampaignProcess
+        // Registro de manejadores de eventos desde AMIEventProcess
         foreach (array('requerir_nuevaListaAgentes', 'sqlinsertcalls', 
             'sqlupdatecalls', 'sqlinsertcurrentcalls', 'sqldeletecurrentcalls',
             'sqlupdatecurrentcalls', 'sqlupdatestatcampaign',
             'actualizarCanalRemoto', 'finalsql', 'verificarFinLlamadasAgendables') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
+        // Registro de manejadores de eventos desde ECCPProcess
+        foreach (array('requerir_nuevaListaAgentes') as $k)
+            $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "msg_$k"));
+            
         // Registro de manejadores de eventos desde HubProcess
         $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
 

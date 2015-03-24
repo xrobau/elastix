@@ -3848,7 +3848,16 @@ LOG_CAMPANIA_SALIENTE;
         $xml_dumpstatusResponse->addChild('success');
         return $xml_response;
     }
-    
+
+    private function Request_eccpauth_refreshagents($comando)
+    {
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_dumpstatusResponse = $xml_response->addChild('refreshagents_response');
+        $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+        $xml_dumpstatusResponse->addChild('success');
+        return $xml_response;
+    }
+
     /***************************** EVENTOS *****************************/
     
     function notificarEvento_AgentLogin($sAgente, $bExitoLogin)

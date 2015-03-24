@@ -473,7 +473,7 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
     $sAction = getParameter('action');
     if (!in_array($sAction, array('', 'checkStatus', 'agentLogout', 'hangup', 
         'break', 'unbreak', 'transfer', 'confirm_contact', 'schedule', 
-        'saveforms')))
+        'saveforms', 'ping')))
         $sAction = '';
 
     // Se verifica si el agente sigue logoneado en la cola de Asterisk
@@ -514,6 +514,18 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
         break;
     case 'saveforms':
         $sContenido = manejarSesionActiva_saveForms($oPaloConsola, $estado);
+        break;
+    case 'ping':
+        $gc_maxlifetime = ini_get('session.gc_maxlifetime');
+        if ($gc_maxlifetime == "") $gc_maxlifetime = 10 * 60;
+        $gc_maxlifetime = (int)$gc_maxlifetime;
+        
+        $json = new Services_JSON();
+        Header('Content-Type: application/json');
+        $sContenido = $json->encode(array(
+            'statusResponse'    =>  'OK',
+            'gc_maxlifetime'    =>  $gc_maxlifetime,
+        ));
         break;
     default:
         if ($estado['estadofinal'] != 'logged-in') {

@@ -581,6 +581,14 @@ function do_save_forms()
 	});
 }
 
+function do_ping()
+{
+	$.get('index.php', {menu: module_name, action: 'ping', rawmode: 'yes'}, function (respuesta) {
+		verificar_error_session(respuesta);
+		setTimeout(do_ping, (respuesta['gc_maxlifetime'] / 2) * 1000);
+	});
+}
+
 function do_checkstatus()
 {
 	params = {
@@ -598,6 +606,9 @@ function do_checkstatus()
 		evtSource.onerror = function(event) {
 			mostrar_mensaje_error('Lost connection to server (SSE), retrying...');
 		}
+		
+		// Iniciar el ping de inmediato
+		setTimeout(do_ping, 1);
 	} else {
 		$.post('index.php?menu=' + module_name + '&rawmode=yes', params,
 		function (respuesta) {

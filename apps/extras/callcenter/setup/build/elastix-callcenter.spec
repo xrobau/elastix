@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Tue Mar 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: implement a periodic ping to the server in an attempt
+  to keep the PHP session from expiring. The chosen interval is half the value
+  reported by session.gc_maxlifetime.
+  SVN Rev[6914]
 - CHANGED: Dialer (ECCP): create new request refreshagents. This request causes 
   CampaignProcess to reload and send the updated agent status to AMIEventProcess
   for it to add or remove queue members as required.

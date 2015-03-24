@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Mar 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: count number of AMI events received, classified by event, and
+  dump this count in the dumpstatus handler. This count can help optimize AMI
+  event filters in order to improve performance.
+  SVN Rev[6912]
+
 * Mon Mar 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: add tracking of queue membership by agent. For dynamic agents
   this allows detection of changes in queue membership as saved by FreePBX in 

@@ -2215,6 +2215,14 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output("\t$q.....$n");
         }
         
+        $this->_log->output("\n\nCuenta de eventos recibidos:");
+        $cuenta = $this->_ami->cuentaEventos;
+        if (count($cuenta) > 0) {
+            arsort($cuenta);
+            $padlen = max(array_map("strlen", array_keys($cuenta)));
+            foreach ($cuenta as $ev => $cnt)
+                $this->_log->output("\t".str_pad($ev, $padlen, '.').'...'.sprintf("%6d", $cnt));
+        }
         $this->_log->output('INFO: '.__METHOD__.' fin de volcado status de seguimiento...');
     }
 }

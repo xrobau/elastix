@@ -41,6 +41,8 @@ class AMIClientConn extends MultiplexConn
     private $_listaEventos = array();   // Eventos pendientes por procesar
     private $_response = NULL;          // Respuesta recibida del último comando
     
+    public $cuentaEventos = array();    // Cuenta de eventos recibidos
+    
    /**
     * Event Handlers
     *
@@ -72,6 +74,9 @@ class AMIClientConn extends MultiplexConn
         foreach ($listaPaquetes as $paquete) {
         	if (isset($paquete['Event'])) {
                 $e = strtolower($paquete['Event']);
+                if (!isset($this->cuentaEventos[$e]))
+                    $this->cuentaEventos[$e] = 0;
+                $this->cuentaEventos[$e]++;
                 if (isset($this->event_handlers[$e]) || isset($this->event_handlers['*'])) {
                     $paquete['local_timestamp_received'] = microtime(TRUE);
                     $this->_listaEventos[] = $paquete;

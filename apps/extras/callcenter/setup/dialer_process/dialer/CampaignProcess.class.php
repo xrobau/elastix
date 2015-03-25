@@ -540,8 +540,6 @@ PETICION_CAMPANIAS_ENTRANTES;
             $iTimeoutOriginate = NULL;
         else $iTimeoutOriginate *= 1000; // convertir a milisegundos
 
-        $iNumLlamadasColocar = 0;
-
         // Construir patrón de marcado a partir de trunk de campaña
         $datosTrunk = $this->_construirPlantillaMarcado($infoCampania['trunk']);
         if (is_null($datosTrunk)) {
@@ -553,7 +551,8 @@ PETICION_CAMPANIAS_ENTRANTES;
 
         // Leer cuántas llamadas (como máximo) se pueden hacer por campaña
         $iNumLlamadasColocar = $infoCampania['max_canales'];
-        if (!is_null($iNumLlamadasColocar) && $iNumLlamadasColocar <= 0) return FALSE;
+        if (!is_null($iNumLlamadasColocar) && $iNumLlamadasColocar <= 0)
+            $iNumLlamadasColocar = NULL;
 
         $oPredictor = new Predictivo($this->_ami);
 

@@ -86,37 +86,46 @@ function listarColas($pDB, $smarty, $module_name, $local_templates_dir)
     }
 
     // Estado indicado por el filtro
-    $sEstado = getParameter('estatus');
-    if (is_null($sEstado)) $sEstado = 'A';
-    if (!in_array($sEstado, array('', 'A', 'I'))) $sEstado = 'A';
-    if ($sEstado == '') $sEstado = NULL;
-
-    // Consulta de las colas
-    $arrDataQueues = $oColas->leerColas(NULL, $sEstado);
-    if (!is_array($arrDataQueues)) {
+    $sEstado = 'A';
+    $tmpEstado = getParameter('cbo_estado');
+    $arrStatus = array('all' => _tr('all'), 'A' => _tr('active'), 'I' => _tr('inactive'));
+    
+    if (isset($tmpEstado) && isset($arrStatus[$tmpEstado])){ 
+        $sEstado = $tmpEstado;
+    }
+    
+    $total = $oColas->getNumColas(NULL, $sEstado);
+    if($total===false){
+        $total=0;
         $smarty->assign("mb_title", _tr('Unable to read queues'));
         $smarty->assign("mb_message", _tr('Cannot read queues').' - '.$oColas->errMsg);
-        $arrDataQueues = array();
     }
-
-    // Construcción del reporte
-    $end = count($arrDataQueues);
-    $url = construirUrl(array('menu' => $module_name), array('nav', 'start'));
-    $arrGrid = array("title"    => _tr('Queue List'),
-        'url'      => $url,
-        "icon"     => "images/list.png",
-        "width"    => "99%",
-        "start"    => ($end==0) ? 0 : 1,
-        "end"      => $end,
-        "total"    => $end,
-        "columns"  => array(
-                        array("name" => ''),
-                        array("name" => _tr('Name Queue')),
-                        array("name" => _tr('Status')),
-                        array("name" => _tr('Options'))
-                        )
-    );
+    
+    $limit=50;
     $oGrid = new paloSantoGrid($smarty);
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal($total);
+    $offset = $oGrid->calculateOffset();
+    $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
+    $oGrid->setTitle(_tr('Queue List'));
+    $oGrid->setWidth("99%");
+    $oGrid->setStart(($total==0) ? 0 : $offset + 1);
+    $oGrid->setEnd($end);
+    $oGrid->setIcon("images/list.png");
+    $oGrid->setURL(array('menu' => $module_name, 'cbo_estado' => $sEstado));
+    $oGrid->setColumns(array('', _tr('Name Queue'), _tr('Status'), _tr('Options')));
+    
+    $arrDataQueues=array();
+    if($total !=0 ){
+        // Consulta de las colas
+        $arrDataQueues = $oColas->leerColas(NULL, $sEstado, $limit, $offset);
+        if (!is_array($arrDataQueues)) {
+            $smarty->assign("mb_title", _tr('Unable to read queues'));
+            $smarty->assign("mb_message", _tr('Cannot read queues').' - '.$oColas->errMsg);
+            $arrDataQueues = array();
+        }
+    }
+    
     $arrData = array();
     foreach ($arrDataQueues as $tuplaQueue) {
         $arrData[] = array(
@@ -126,6 +135,8 @@ function listarColas($pDB, $smarty, $module_name, $local_templates_dir)
             "<a href=\"?menu=$module_name&amp;action=edit_queue&amp;id_queue={$tuplaQueue['id']}\">[".htmlentities(_tr('Edit'), ENT_COMPAT, 'UTF-8')."]</a>",
         );
     }
+
+    //addActions
     $oGrid->addNew("?menu=$module_name&action=new_queue", _tr('Select Queue'), TRUE);
     $oGrid->addComboAction('status_queue_sel', _tr("Change Status"), array(
         'activate'      =>  _tr('Activate'),
@@ -134,12 +145,10 @@ function listarColas($pDB, $smarty, $module_name, $local_templates_dir)
     $oGrid->showFilter(
         '<table width="100%" border="0"><tr>' .
             '<td align="right"><b>'._tr('Status').'</b></td>'.
-            '<td align="left"><select name="estatus" onchange="submit();">'.combo(array('' => _tr('all'), 'A' => _tr('active'), 'I' => _tr('inactive')), $sEstado).'</select></td>'.
+            '<td align="left"><select name="cbo_estado" onchange="submit();">'.combo($arrStatus, $sEstado).'</select></td>'.
         '</tr></table>'
     );
-    $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLang);
-    if (strpos($sContenido, '<form') === FALSE)
-        $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
+    $sContenido = $oGrid->fetchGrid(array(), $arrData, $arrLang);
     return $sContenido;
 }
 

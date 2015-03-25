@@ -52,6 +52,53 @@ class paloSantoColaEntrante
         }
     }
     
+    private function _construirCondicionWhere($idCola, $status)
+    {
+        $listaWhere = array();
+        $paramSQL = array();
+        
+        // Selección de cola específica
+        if (!is_null($idCola)) {
+            if (!ctype_digit("$idCola")) {
+                $this->errMsg = '(internal) Invalid queue ID';
+                return false;
+            }
+            $listaWhere[] = 'id = ?';
+            $paramSQL[] = $idCola;
+        }
+        
+        // Selección de estado de la cola
+        if (!is_null($status) && $status!='all') {
+            if (!in_array($status, array('A', 'I'))) {
+                $this->errMsg = '(internal) Invalid status, must be A,I';
+                return false;
+            }
+            $listaWhere[] = 'estatus = ?';
+            $paramSQL[] = $status;
+        }
+        
+        return array($listaWhere, $paramSQL);
+    }
+    
+    function getNumColas($idCola = NULL, $status = NULL)
+    {
+        $l = $this->_construirCondicionWhere($idCola, $status);
+        if (!is_array($l)) return FALSE;
+        list($listaWhere, $paramSQL) = $l;        
+        
+        // Construcción de SQL
+        $sql = 'SELECT count(id) FROM queue_call_entry'.
+            ((count($listaWhere) > 0) ? ' WHERE '.implode(' AND ',$listaWhere) : '').
+            ' ORDER BY queue';
+            
+        $recordset = $this->_DB->getFirstRowQuery($sql, FALSE, $paramSQL);
+        if (!is_array($recordset)) {
+            $this->errMsg = '(internal) Unable to read queues - '.$this->_DB->errMsg;
+            return false;
+        }
+        return $recordset[0];
+    }
+    
     /**
      * Procedimiento para leer toda la información de las colas entrantes 
      * monitoreadas. 
@@ -61,35 +108,27 @@ class paloSantoColaEntrante
      * 
      * @return  mixed   Recordset de las colas, o NULL
      */
-    function leerColas($idCola = NULL, $status = NULL)
+    function leerColas($idCola = NULL, $status = NULL, $limit = NULL, $offset = NULL)
     {
-    	$listaWhere = array();
-        $paramSQL = array();
-        
-        // Selección de cola específica
-        if (!is_null($idCola)) {
-            if (!ctype_digit("$idCola")) {
-                $this->errMsg = '(internal) Invalid queue ID';
-                return NULL;
-            }
-        	$listaWhere[] = 'id = ?';
-            $paramSQL[] = $idCola;
-        }
-        
-        // Selección de estado de la cola
-        if (!is_null($status)) {
-            if (!in_array($status, array('A', 'I'))) {
-                $this->errMsg = '(internal) Invalid status, must be A,I';
-                return NULL;
-            }
-        	$listaWhere[] = 'estatus = ?';
-            $paramSQL[] = $status;
-        }
+        $l = $this->_construirCondicionWhere($idCola, $status);
+        if (!is_array($l)) return FALSE;
+        list($listaWhere, $paramSQL) = $l;        
         
         // Construcción de SQL
         $sql = 'SELECT id, queue, estatus, script FROM queue_call_entry'.
             ((count($listaWhere) > 0) ? ' WHERE '.implode($listaWhere) : '').
             ' ORDER BY queue';
+            
+        if (!is_null($limit)) {
+            $sql .=" LIMIT ?";
+            $paramSQL[] = $limit;
+        }
+        
+        if (!is_null($offset)) {
+            $sql .=" OFFSET ?";
+            $paramSQL[] = $offset;
+        }
+        
         $recordset = $this->_DB->fetchTable($sql, TRUE, $paramSQL);
         if (!is_array($recordset)) {
             $this->errMsg = '(internal) Unable to read queues - '.$this->_DB->errMsg;

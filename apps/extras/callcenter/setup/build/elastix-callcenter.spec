@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Mar 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Queues: implement pagination. Use more of the PaloSantoGrid API and
+  synchronize partially with Call Center PRO.
+  SVN Rev[6915]
+
 * Tue Mar 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: implement a periodic ping to the server in an attempt
   to keep the PHP session from expiring. The chosen interval is half the value

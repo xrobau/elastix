@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Wed Mar 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: accept max channels value of 0 as equivalent to NULL, which
+  in turn is equivalent to unlimited simultaneous calls per campaign.
+  SVN Rev[6916]
 - CHANGED: Queues: implement pagination. Use more of the PaloSantoGrid API and
   synchronize partially with Call Center PRO.
   SVN Rev[6915]

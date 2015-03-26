@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Wed Mar 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: change default value of max channels to 0, in order to
+  allow unlimited calls by default as allowed by SVN commit #6916.
+  SVN Rev[6917]
 - CHANGED: Dialer: accept max channels value of 0 as equivalent to NULL, which
   in turn is equivalent to unlimited simultaneous calls per campaign.
   SVN Rev[6916]

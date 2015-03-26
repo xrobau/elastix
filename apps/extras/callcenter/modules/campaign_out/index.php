@@ -113,23 +113,6 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
         }
     }
 
-/*
-    // Revisar si se debe activar una campaña elegida
-    if (isset($_POST['activate']) && !is_null($id_campaign)) {
-        if(!$oCampaign->activar_campaign($id_campaign, 'A')) {
-            $smarty->assign("mb_title", _tr('Activate Error'));
-            $smarty->assign("mb_message", _tr('Error when Activating the Campaign'));
-        }
-    }
-
-    // Revisar si se debe desactivar una campaña elegida
-    if (isset($_POST['deactivate']) && !is_null($id_campaign)) {
-        if(!$oCampaign->activar_campaign($id_campaign, 'I')) {
-            $smarty->assign("mb_title", _tr("Desactivate Error"));
-            $smarty->assign("mb_message", _tr("Error when desactivating the Campaign"));
-        }
-    }
-*/
     // Activar o desactivar campañas elegidas
     if (isset($_POST['change_status']) && !is_null($id_campaign)){
         if($_POST['status_campaing_sel']=='activate'){
@@ -227,48 +210,6 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
     $oGrid->setData($arrData);
     $oGrid->showFilter($smarty->fetch("$local_templates_dir/filter-list-campaign.tpl"));
     return $oGrid->fetchGrid();
-    
-/*
-    $arrGrid = array(
-        "title"    => _tr("Campaigns List"),
-        "url"      => $url,
-        "icon"     => "images/list.png",
-        "width"    => "99%",
-        "columns"  => array(
-            0 => array("name"      => ''),
-            1 => array("name"      => _tr("Name Campaign")),
-            2 => array("name"      => _tr("Range Date")),
-            3 => array("name"      => _tr("Schedule per Day")),
-            4 => array("name"      => _tr("Retries")),
-            5 => array("name"      => _tr("Trunk")),
-            6 => array("name"      => _tr("Queue")),
-            7 => array("name"      => _tr("Completed Calls")),
-            8 => array("name"      => _tr("Average Time")),
-            9 => array("name"     => _tr("Status")),
-            10 => array("name"     => _tr("Options"))
-        )
-    );
-
-    // Construir el HTML del filtro
-    $smarty->assign(array(
-        'MODULE_NAME'                   =>  $module_name,
-        'LABEL_CAMPAIGN_STATE'          =>  _tr('Campaign state'),
-        'estados'                       =>  $estados,
-        'estado_sel'                    =>  $sEstado,
-        'LABEL_CREATE_CAMPAIGN'         =>  _tr('Create New Campaign'),
-        'LABEL_WITH_SELECTION'          =>  _tr('With selection'),
-        'LABEL_ACTIVATE'                =>  _tr('Activate'),
-        'LABEL_DEACTIVATE'              =>  _tr('Desactivate'),
-        'LABEL_DELETE'                  =>  _tr('Delete'),
-        'MESSAGE_CONTINUE_DEACTIVATE'   =>  _tr("Are you sure you wish to continue?"),
-        'MESSAGE_CONTINUE_DELETE'       =>  _tr("Are you sure you wish to delete campaign?"),
-    ));
-    $oGrid->showFilter($smarty->fetch("$local_templates_dir/filter-list-campaign.tpl"));
-    $sContenido = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
-    if (strpos($sContenido, '<form') === FALSE)
-        $sContenido = "<form  method=\"POST\" style=\"margin-bottom:0;\" action=\"$url\">$sContenido</form>";
-    return $sContenido;
-*/
 }
 
 function newCampaign($pDB, $smarty, $module_name, $local_templates_dir)
@@ -386,6 +327,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
         $smarty->assign("SAVE", _tr("Save"));
         $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
         $smarty->assign('LABEL_CALL_FILE', _tr('Call File'));
+        $smarty->assign('LABEL_CHANNEL_ZERO_DISABLE', _tr('(Leave as 0 to disable channel limit)'));
 
         // Valores por omisión para primera carga
         $arrNoElegidos = array();   // Lista de selección de formularios elegibles
@@ -397,7 +339,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                 $_POST["context"] = "from-internal";
             }
             if (!isset($_POST['max_canales']) || $_POST['max_canales'] == '')
-                $_POST['max_canales'] = 23;
+                $_POST['max_canales'] = 0;
             if (!isset($_POST['reintentos']) || $_POST['reintentos'] == '')
                 $_POST['reintentos'] = 5;
             if (!isset($_POST['rte_script'])) $_POST['rte_script'] = '';
@@ -472,7 +414,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                     $strErrorMsg .= _tr("Script");
                 $strErrorMsg .= "";
                 $smarty->assign("mb_message", $strErrorMsg);
-            } elseif ($_POST['max_canales'] <= 0) { 
+            } elseif ($_POST['max_canales'] < 0) { 
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr('At least 1 used channel must be allowed.'));
             } elseif ((int)$_POST['reintentos'] <= 0) { 

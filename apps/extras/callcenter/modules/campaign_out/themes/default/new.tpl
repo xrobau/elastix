@@ -115,7 +115,7 @@ var rte_script = new richTextEditor('rte_script');
       </tr>
       <tr  height='30'>
 		<td align='right'>{$max_canales.LABEL}: <span  class="required">*</span></td>
-		<td colspan='2'>{$max_canales.INPUT}</td>
+		<td colspan='2'>{$max_canales.INPUT}&nbsp;{$LABEL_CHANNEL_ZERO_DISABLE}</td>
       </tr>
       <tr height='30'>
 		<td align='right'>{$context.LABEL}: <span  class="required">*</span></td>

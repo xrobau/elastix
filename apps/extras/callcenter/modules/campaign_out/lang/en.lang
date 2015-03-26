@@ -166,5 +166,6 @@ $arrLangModule=array(
 
 'Call file not specified or failed to be uploaded' => 'Call file not specified or failed to be uploaded',
 'Change Status' => 'Change Status',
+'(Leave as 0 to disable channel limit)' => '(Leave as 0 to disable channel limit)',
 );
 ?>

@@ -149,7 +149,7 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
             'mb_title'  =>  'ERROR',
             'mb_message'    =>  $oPaloConsola->errMsg,
         ));
-    	return '';
+        return '';
     }
     ksort($estadoMonitor);
 

@@ -96,6 +96,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sat Mar 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agenda - jQuery-1.11.2 migration - empty strings are no longer 
+  considered a valid JSON response by jQuery. Return "null" instead.
+  SVN Rev[6922]
+
 * Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump version and release in specfile.

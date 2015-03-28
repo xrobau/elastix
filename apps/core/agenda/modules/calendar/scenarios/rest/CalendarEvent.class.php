@@ -150,6 +150,7 @@ class CalendarEventBase extends REST_Resource
         if ($result !== FALSE) {
             Header('HTTP/1.1 201 Created');
             Header('Location: '.REST_CALENDAR_BASEURL.$result);
+            return 'null';            
         } else {
             $error = $pCore_Calendar->getError();
             if ($error["fc"] == "DBERROR")
@@ -228,6 +229,7 @@ class CalendarEventById extends REST_Resource
             $_POST['emails_notification']);
         if ($result !== FALSE) {
             header('HTTP/1.1 205 Reset Content');
+            return 'null';
         } else {
             $error = $pCore_Calendar->getError();
             if ($error["fc"] == "DBERROR")

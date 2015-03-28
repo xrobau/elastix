@@ -410,11 +410,11 @@ function clearEventDialog()
     $(':input[name="ReminderTime"]').val('10');
     $(':input[name="call_to"]').val('');
     $(':input[name="tts"]').val('').change();
-    $('#CheckBoxRemi').attr('checked', null).button('refresh');
+    $('#CheckBoxRemi').prop('checked', false).button('refresh');
     $('.remin').hide();
     
     // Campos de notificaciones
-    $('#CheckBoxNoti').attr('checked', null).button('refresh');
+    $('#CheckBoxNoti').prop('checked', false).button('refresh');
     $('#tags').val('');
     $('.notif').hide();
     $('#grilla tbody').empty();
@@ -441,13 +441,13 @@ function fillEventDialog(eventdata)
     if (eventdata.call_to != null) $(':input[name="call_to"]').val(eventdata.call_to);
     if (eventdata.recording != null) $(':input[name="tts"]').val(eventdata.recording).change();
     if (eventdata.asterisk_call) {
-        $('#CheckBoxRemi').attr('checked', 'checked').button('refresh');
+        $('#CheckBoxRemi').prop('checked', true).button('refresh');
         $('.remin').show();
     }
 
     // Campos de notificaciones
     if (eventdata.emails_notification.length > 0) {
-        $('#CheckBoxNoti').attr('checked', 'checked').button('refresh');
+        $('#CheckBoxNoti').prop('checked', true).button('refresh');
         $('.notif').show();
         $('#grilla').show();
         
@@ -502,16 +502,16 @@ function saveEventDialog(url)
         description:    $(':input[name="description"]').val(),
         color:          rgb2hex($('#colorSelector div').css('backgroundColor')),
         
-        asterisk_call:  ($('#CheckBoxRemi').attr('checked') != undefined),
+        asterisk_call:  $('#CheckBoxRemi').is(':checked'),
         recording:      $(':input[name="tts"]').val(),
         call_to:        $(':input[name="call_to"]').val(),
         reminder_timer: $(':input[name="ReminderTime"]').val(),
         
-        emails_notification: ($('#CheckBoxNoti').attr('checked') != undefined) 
+        emails_notification: ($('#CheckBoxNoti').is(':checked')) 
             ? $('#grilla tbody tr').map(function(tr) { return $(this).data('email'); }).get()
             : []
     };
-    if ($('#CheckBoxNoti').attr('checked') != undefined) {
+    if ($('#CheckBoxNoti').is(':checked')) {
         var email_regexp = /^"?(.*?)"?\s*<?(\S+@\S+?)>?$/;
         var newemails = $('#tags').val().split(',').map(function (s) { return s.trim(); });
         for (var i = 0; i < newemails.length; i++) if (newemails[i] != '') {

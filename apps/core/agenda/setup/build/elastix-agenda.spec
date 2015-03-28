@@ -97,6 +97,9 @@ fi
 
 %changelog
 * Sat Mar 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agenda - jQuery-1.11.2 migration - fix incorrect use of
+  attribute instead of property.
+  SVN Rev[6923]
 - CHANGED: Agenda - jQuery-1.11.2 migration - empty strings are no longer 
   considered a valid JSON response by jQuery. Return "null" instead.
   SVN Rev[6922]

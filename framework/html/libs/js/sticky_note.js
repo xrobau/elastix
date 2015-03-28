@@ -128,45 +128,33 @@ function showCharCount() {
 /**
  * Funcion que envia la peticion de guardar o editar una nota.
  */
-function send_sticky_note(){
-	var arrAction = new Array();
-	arrAction["menu"] = "_elastixutils";
-	arrAction["id_menu"] = getCurrentElastixModule();
-	arrAction["action"]  = "save_sticky_note";
-	arrAction["description"]  = $("#neo-sticky-note-textarea").val();
-	var checkeado=$("#neo-sticky-note-auto-popup").attr("checked");
-	if(checkeado) {
-		arrAction["popup"]  = 1;
-	} else {
-		arrAction["popup"]  = 0;
-	}
-	arrAction["rawmode"] = "yes";
-	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#save_note_label').val()+"</span></div></div>";
-	$.blockUI({
-	  message: urlImaLoading
-	});
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-			$.unblockUI();
-			if(statusResponse == "OK"){
-				$("#neo-sticky-note").addClass("neo-display-none");
-				$("#neo-sticky-note-text").removeClass("neo-display-none");
-				$("#neo-sticky-note-text-edit").addClass("neo-display-none");
-				$("#neo-sticky-note").data("neo-sticky-note-status", "hidden");
-				var themeName = $('#elastix_theme_name').val();
-				if(themeName == "elastixneo"){
-					if(arrAction['description'] != ""){
-						var imgName = "themes/elastixneo/images/tab_notes_on.png";
-						$('#togglestickynote1').attr('src',imgName);
-					}else{
-						var imgName = "themes/elastixneo/images/tab_notes.png";
-						$('#togglestickynote1').attr('src',imgName);
-					}
-				}
-			}else{
-				alert(error);
-			}
-		}
-	);
+function send_sticky_note()
+{
+    var description = $('#neo-sticky-note-textarea').val();
+    $.blockUI({
+        message:    "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#save_note_label').val()+"</span></div></div>"
+    });
+    request('index.php', {
+        menu:           '_elastixutils',
+        id_menu:        getCurrentElastixModule(),
+        action:         'save_sticky_note',
+        description:    description,
+        popup:          $('#neo-sticky-note-auto-popup').is(':checked') ? 1 : 0,
+        rawmode:        'yes'
+    }, false, function(arrData,statusResponse,error) {
+        $.unblockUI();
+        if (statusResponse != 'OK') {
+            alert(dataResponse.error);
+            return;
+        }
+        $("#neo-sticky-note-text").removeClass("neo-display-none");
+        $("#neo-sticky-note-text-edit").addClass("neo-display-none");
+        $("#neo-sticky-note")
+            .addClass("neo-display-none")
+            .data("neo-sticky-note-status", "hidden");
+        if ($('#elastix_theme_name').val() == 'elastixneo') {
+            $('#togglestickynote1').attr('src', 'themes/elastixneo/images/' 
+                + ((description != '') ? 'tab_notes_on.png' : 'tab_notes.png'));
+        }
+    });
 }

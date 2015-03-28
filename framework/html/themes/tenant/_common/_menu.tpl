@@ -3,7 +3,7 @@
    {literal}
         <script type='text/javascript'>
         $('.togglestickynote').ready(function(e) {
-            $("#neo-sticky-note-auto-popup").attr('checked', true);
+            $("#neo-sticky-note-auto-popup").prop('checked', true);
             note();
         });
         </script>

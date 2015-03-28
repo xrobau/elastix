@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Mar 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: framework - jQuery-1.11.2 migration - themes: fix incorrect use of
+  attribute instead of property.
+  SVN Rev[6921]
 - CHANGED: framework - jQuery-1.11.2 migration - StickyNote: fix incorrect use
   of attribute instead of property.
   SVN Rev[6920]

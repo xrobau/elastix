@@ -4,11 +4,11 @@ var module_name = 'agent_console';
 var schedule_call_error_msg_missing_date = '';
 
 /* El siguiente objeto es el estado de la interfaz del CallCenter. Al comparar
- * este objeto con los cambios de estado producto de eventos del ECCP, se 
+ * este objeto con los cambios de estado producto de eventos del ECCP, se
  * consigue detectar los cambios requeridos a la interfaz sin tener que recurrir
  * a llamadas repetidas al servidor.
  * Este objeto se inicializa en initialize_client_state() */
-var estadoCliente = 
+var estadoCliente =
 {
 	onhold:		false,	// VERDADERO si el sistema está en hold
 	break_id:	null,	// Si != null, el ID del break en que está el agente
@@ -36,12 +36,12 @@ $(document).ready(function() {
 	$('#elastix-callcenter-error-message').hide();
 	$('#elastix-callcenter-info-message').hide();
 	$('#elastix-callcenter-agendar-llamada-error-message').hide();
-    
+
     $('#label_extension_callback').hide();
     $('#input_extension_callback').hide();
     $('#label_password_callback').hide();
-    $('#input_password_callback').hide();    
-    
+    $('#input_password_callback').hide();
+
     $('#btn_hangup').button();
     $('#btn_togglebreak').button();
     $('#btn_transfer').button();
@@ -60,7 +60,7 @@ $(document).ready(function() {
     		externalurl = null;
     	}
     });
-    
+
     // Operaciones que deben de repetirse al obtener formulario vía AJAX
     apply_form_styles();
 
@@ -68,7 +68,7 @@ $(document).ready(function() {
     $('#btn_logout').click(do_logout);
     $('#btn_hangup').click(do_hangup);
     $('#btn_confirmar_contacto').click(do_confirm_contact);
-    
+
     // El siguiente código se ejecuta al hacer click en el botón de break
     $('#btn_togglebreak').click(function() {
     	if ($('#btn_togglebreak').hasClass('elastix-callcenter-boton-unbreak')) {
@@ -78,19 +78,19 @@ $(document).ready(function() {
     		$('#elastix-callcenter-seleccion-break').dialog('open');
     	}
     });
-    
+
     $('#btn_transfer').click(function() {
 		$('#elastix-callcenter-seleccion-transfer').dialog('open');
     });
     $('#btn_agendar_llamada').click(function() {
 		$('#elastix-callcenter-agendar-llamada').dialog('open');
     });
-    
+
     // El siguiente código se ejecuta al presionar el botón de VTiger
     $('#btn_vtigercrm').click(function() {
     	window.open("/vtigercrm/","vtigercrm");
     });
-    
+
     var fechasAgenda = $('#schedule_date_start, #schedule_date_end').datepicker({
     	minDate:		0,
     	showOn:			'both',
@@ -106,7 +106,7 @@ $(document).ready(function() {
 						instance.settings.dateFormat ||
 						$.datepicker._defaults.dateFormat,
 						selectedDate, instance.settings );
-    		fechasAgenda.not( this ).datepicker( "option", option, date );    		
+    		fechasAgenda.not( this ).datepicker( "option", option, date );
     	}
     });
     $('#schedule_type_campaign_end').change(function() {
@@ -115,31 +115,31 @@ $(document).ready(function() {
     $('#schedule_type_bydate').change(function() {
     	$('#schedule_date').show();
     });
-    
+
     $('#input_callback').click(function() {
 		var $this = $(this);
-		// $this will contain a reference to the checkbox   
-		if ($this.is(':checked')) {	    
-		    $('#input_extension').hide();	    
-		    $('#input_agent_user').hide();	    
+		// $this will contain a reference to the checkbox
+		if ($this.is(':checked')) {
+		    $('#input_extension').hide();
+		    $('#input_agent_user').hide();
 		    $('#label_extension').hide();
-		    $('#label_agent_user').hide();	
-		    
+		    $('#label_agent_user').hide();
+
 		    $('#label_extension_callback').show();
 		    $('#input_extension_callback').show();
 		    $('#label_password_callback').show();
 		    $('#input_password_callback').show();
-		    
+
 		} else {
 		    $('#input_extension').show();
 		    $('#input_agent_user').show();
 		    $('#label_extension').show();
 		    $('#label_agent_user').show();
-		      
+
 		    $('#label_extension_callback').hide();
 		    $('#input_extension_callback').hide();
 		    $('#label_password_callback').hide();
-		    $('#input_password_callback').hide();   	    
+		    $('#input_password_callback').hide();
 		}
     });
 });
@@ -192,7 +192,7 @@ function iniciar_cronometro(timer_seconds)
 	}
 	fechaInicio = null;
 	$('#elastix-callcenter-cronometro').text('00:00:00');
-	
+
 	// Iniciar el estado nuevo, si es válido
 	if (timer_seconds != null) {
 		fechaInicio = new Date();
@@ -277,7 +277,7 @@ function apply_ui_styles(uidata)
             }
         ]
     });
-    
+
     externalurl_title = uidata['external_url_tab'];
 }
 
@@ -295,14 +295,14 @@ function verificar_error_session(respuesta)
 function do_login()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
-		rawmode:	'yes',
-		action:		'doLogin',
-		agent:		$('#input_agent_user').attr('value'),
-		ext:		$('#input_extension').attr('value'),
-		ext_callback: 	$('#input_extension_callback').attr('value'),
-        pass_callback: 	$('#input_password_callback').attr('value'),
-        callback:	$('#input_callback').attr('checked')
+        menu:		module_name,
+        rawmode:	'yes',
+        action:		'doLogin',
+        agent:		$('#input_agent_user').val(),
+        ext:		$('#input_extension').val(),
+        ext_callback: 	$('#input_extension_callback').val(),
+        pass_callback: 	$('#input_password_callback').val(),
+        callback:	$('#input_callback').is(':checked')
 	},
 	function(respuesta) {
 		verificar_error_session(respuesta);
@@ -325,7 +325,7 @@ function do_hangup()
 {
 	$('#btn_hangup').button('disable');
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'hangup'
 	},
@@ -336,7 +336,7 @@ function do_hangup()
         	if (estadoCliente.campaign_id != null)
                 $('#btn_hangup').button('enable');
         }
-        
+
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
 	}, 'json')
@@ -349,7 +349,7 @@ function do_hangup()
 function do_checklogin()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-			menu:		module_name, 
+			menu:		module_name,
 			rawmode:	'yes',
 			action:		'checkLogin'
 		},
@@ -377,7 +377,7 @@ function do_checklogin()
 function do_logout()
 {
     $.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'agentLogout'
 	},
@@ -401,7 +401,7 @@ function login_estado_espera(msg)
     $('#login_icono_espera').attr("style", "visibility: visible; position: none;");
     $('#login_fila_estado').attr("style", "visibility: visible; position: none;");
     $('#login_msg_espera').text(msg);
-    $('#login_msg_error').text("");    
+    $('#login_msg_error').text("");
 }
 
 // Cambiar el mensaje de login al estado de error
@@ -410,7 +410,7 @@ function login_estado_error(msg)
     $('#login_icono_espera').attr("style", "visibility: hidden; position: absolute;");
     $('#login_fila_estado').attr("style", "visibility: visible; position: none;");
     $('#login_msg_espera').text("");
-    $('#login_msg_error').text(msg);    
+    $('#login_msg_error').text(msg);
 }
 
 // Cambiar el mensaje de login al estado ocioso
@@ -419,13 +419,13 @@ function login_estado_ocioso()
     $('#login_icono_espera').attr("style", "visibility: hidden; position: absolute;");
     $('#login_fila_estado').attr("style", "visibility: hidden; position: absolute;");
     $('#login_msg_espera').text("");
-    $('#login_msg_error').text("");    
+    $('#login_msg_error').text("");
 }
 
 function do_break()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'break',
 		breakid:	$('#break_select').val()
@@ -435,7 +435,7 @@ function do_break()
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         }
-        
+
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
         // TODO: definir evento agentbreakenter y agentbreakexit
@@ -449,7 +449,7 @@ function do_unbreak()
 {
 	// Botón está en estado de quitar break
     $.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'unbreak'
 	},
@@ -458,7 +458,7 @@ function do_unbreak()
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         }
-        
+
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
         // TODO: definir evento agentbreakenter y agentbreakexit
@@ -471,18 +471,18 @@ function do_unbreak()
 function do_transfer()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'transfer',
 		extension:	$('#transfer_extension').val(),
-		atxfer: 	$('#transfer_type_attended').attr('checked')
+		atxfer: 	$('#transfer_type_attended').is(':checked')
 	},
 	function (respuesta) {
 		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
         }
-        
+
         // El cambio de estado de la interfaz se delega a la revisión
         // periódica del estado del agente.
 	}, 'json')
@@ -494,7 +494,7 @@ function do_transfer()
 function do_confirm_contact()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'confirm_contact',
 		id_contact:	$('#llamada_entrante_contacto_id').val()
@@ -506,7 +506,7 @@ function do_confirm_contact()
         } else {
         	mostrar_mensaje_info(respuesta['message']);
         }
-        
+
 	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
@@ -516,7 +516,7 @@ function do_confirm_contact()
 function do_schedule()
 {
 	// Verificar que se ha elegido realmente una fecha
-	if ($('#schedule_type_bydate').attr('checked') && 
+	if ($('#schedule_type_bydate').is(':checked') &&
 		($('#schedule_date_start').datepicker('getDate') == null || $('#schedule_date_end').datepicker('getDate') == null )) {
 
 		$('#elastix-callcenter-agendar-llamada-error-message-text').text(schedule_call_error_msg_missing_date);
@@ -526,16 +526,16 @@ function do_schedule()
 			}, 5000);
 		});
 		return false;
-	}	
+	}
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'schedule',
 		data:		{
 			schedule_new_phone:		$('#schedule_new_phone').val(),
 			schedule_new_name:		$('#schedule_new_name').val(),
-			schedule_use_daterange:	$('#schedule_type_bydate').attr('checked'),
-			schedule_use_sameagent:	$('#schedule_same_agent').attr('checked'),
+			schedule_use_daterange:	$('#schedule_type_bydate').is(':checked'),
+			schedule_use_sameagent:	$('#schedule_same_agent').is(':checked'),
 			schedule_date_start:	$('#schedule_date_start').val(),	// Asume yyyy-mm-dd
 			schedule_date_end:		$('#schedule_date_end').val(),		// Asume yyyy-mm-dd
 			schedule_time_start:	$('#schedule_time_start_hh').val() + ':' + $('#schedule_time_start_mm').val() + ':00',
@@ -549,7 +549,7 @@ function do_schedule()
         } else {
         	mostrar_mensaje_info(respuesta['message']);
         }
-        
+
 	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
@@ -560,7 +560,7 @@ function do_schedule()
 function do_save_forms()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'saveforms',
 		data:		$('.elastix-callcenter-field').map(function() {
@@ -574,7 +574,7 @@ function do_save_forms()
         } else {
         	mostrar_mensaje_info(respuesta['message']);
         }
-        
+
 	}, 'json')
 	.fail(function() {
 		mostrar_mensaje_error('Failed to connect to server to run request!');
@@ -592,7 +592,7 @@ function do_ping()
 function do_checkstatus()
 {
 	params = {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'checkStatus',
 		clientstate: estadoCliente
@@ -606,7 +606,7 @@ function do_checkstatus()
 		evtSource.onerror = function(event) {
 			mostrar_mensaje_error('Lost connection to server (SSE), retrying...');
 		}
-		
+
 		// Iniciar el ping de inmediato
 		setTimeout(do_ping, 1);
 	} else {
@@ -614,7 +614,7 @@ function do_checkstatus()
 		function (respuesta) {
 			verificar_error_session(respuesta);
 			manejarRespuestaStatus(respuesta);
-			
+
 			// Lanzar el método de inmediato
 			setTimeout(do_checkstatus, 1);
 		}, 'json').fail(function() {
@@ -642,7 +642,7 @@ function manejarRespuestaStatus(respuesta)
 				iniciar_cronometro(null);
 			}
 		}
-		
+
 		switch (respuesta[i].event) {
 		case 'logged-out':
 			// El refresco debería conducir a la página de login
@@ -679,7 +679,7 @@ function manejarRespuestaStatus(respuesta)
 			estadoCliente.callid = respuesta[i].callid;
 	        $('#btn_hangup').button('enable');
 	        $('#btn_transfer').button('enable');
-			$('#elastix-callcenter-cronometro').text(respuesta[i].cronometro);				
+			$('#elastix-callcenter-cronometro').text(respuesta[i].cronometro);
 			$('#elastix-callcenter-llamada-info')
 				.empty()
 				.append(respuesta[i].llamada_informacion);
@@ -692,7 +692,7 @@ function manejarRespuestaStatus(respuesta)
 			$('#llamada_entrante_contacto_telefono, #llamada_saliente_contacto_telefono')
 				.text(respuesta[i].txt_contacto_telefono);
 			$('#schedule_new_phone').val(respuesta[i].txt_contacto_telefono);
-			
+
 			// Preparar y mostrar la barra correspondiente
 			$('#elastix-callcenter-cejillas-contenido')
 				.removeClass('elastix-callcenter-cejillas-contenido-barra-oculta')
@@ -716,7 +716,7 @@ function manejarRespuestaStatus(respuesta)
 				$('#elastix-callcenter-barra-llamada-entrante').show();
 			} else if (respuesta[i].calltype == 'outgoing') {
 				$('#elastix-callcenter-barra-llamada-entrante').hide();
-				
+
 				$('#llamada_saliente_nombres').text(respuesta[i].txt_contacto_nombres);
 				$('#schedule_new_name').val(respuesta[i].txt_contacto_nombres);
 				$('#elastix-callcenter-barra-llamada-saliente').show();
@@ -730,7 +730,7 @@ function manejarRespuestaStatus(respuesta)
 			estadoCliente.calltype = null;
 			estadoCliente.campaign_id = null;
 			estadoCliente.callid = null;
-			
+
 			$('#btn_hangup').button('disable');
 	        $('#btn_transfer').button('disable');
 	        $('#elastix-callcenter-cronometro').text('00:00:00');
@@ -739,7 +739,7 @@ function manejarRespuestaStatus(respuesta)
 			$('#elastix-callcenter-llamada-info').empty();
 			$('#elastix-callcenter-llamada-script').empty();
 			//$('#elastix-callcenter-llamada-form').empty();
-	        
+
 	        // Ocultar las barras
 	        $('#elastix-callcenter-barra-llamada-entrante').hide();
 	        $('#elastix-callcenter-barra-llamada-saliente').hide();

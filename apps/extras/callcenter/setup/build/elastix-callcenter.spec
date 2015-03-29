@@ -1,6 +1,6 @@
 %define modname callcenter
 
-Summary: Elastix Call Center 
+Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
 Release: 8
@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sun Mar 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console - jQuery-1.11.2 migration: fix incorrect use of
+  attribute instead of property.
+  SVN Rev[6929]
+
 * Wed Mar 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: change default value of max channels to 0, in order to
   allow unlimited calls by default as allowed by SVN commit #6916.
@@ -116,7 +121,7 @@ fi
   to keep the PHP session from expiring. The chosen interval is half the value
   reported by session.gc_maxlifetime.
   SVN Rev[6914]
-- CHANGED: Dialer (ECCP): create new request refreshagents. This request causes 
+- CHANGED: Dialer (ECCP): create new request refreshagents. This request causes
   CampaignProcess to reload and send the updated agent status to AMIEventProcess
   for it to add or remove queue members as required.
   SVN Rev[6913]
@@ -127,7 +132,7 @@ fi
 
 * Mon Mar 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: add tracking of queue membership by agent. For dynamic agents
-  this allows detection of changes in queue membership as saved by FreePBX in 
+  this allows detection of changes in queue membership as saved by FreePBX in
   order to update the in-memory membership in asterisk. This in turn enables
   moving of live dynamic agents between queues once the Reload event is hooked.
   SVN Rev[6911]
@@ -156,7 +161,7 @@ fi
   SVN Rev[6817]
 
 * Wed Dec 17 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Ingoing Calls Success: complete rewrite. Database queries were 
+- CHANGED: Ingoing Calls Success: complete rewrite. Database queries were
   rewritten to make use of joins and foreign keys, parametrized to remove SQL
   vulnerabilities, and module logic was simplified. Updated to latest grid
   API.
@@ -206,7 +211,7 @@ fi
   SVN Rev[6750]
 
 * Wed Sep 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Callback Extensions: update paloSantoGrid API usage to latest 
+- CHANGED: Callback Extensions: update paloSantoGrid API usage to latest
   Elastix 2.4.
   SVN Rev[6749]
 - CHANGED: Agents: update paloSantoGrid API usage to latest Elastix 2.4.
@@ -216,11 +221,11 @@ fi
 - Bump version for release.
 
 * Thu Sep 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dialer (ECCP): create new request getmultipleagentstatus. This 
+- CHANGED: Dialer (ECCP): create new request getmultipleagentstatus. This
   request allows for a report of agent status for a group of agents at once.
   This cuts down again on the number of ECCP requests required for the Agent
   Monitoring report. Part of the fix for Elastix bug #1820.
-  SVN Rev[6739] 
+  SVN Rev[6739]
 - CHANGED: Dialer (ECCP): create new request getmultipleagentqueues. This
   request allows for a report of agents subscribed on queues for a group of
   agents at once. This cuts down on the number of ECCP requests required for
@@ -231,8 +236,8 @@ fi
 - CHANGED: Do Not Call List: complete rewrite. This rewrite uses ordinary grid
   pagination instead of loading the entire recordset in memory, and simplifies
   the support libraries. Additionally a new index is added to the dont_call
-  table to speed up lookup by caller_id. Finally, a small utility is now 
-  provided to load a CSV file to the DNC list from the command line. Fixes 
+  table to speed up lookup by caller_id. Finally, a small utility is now
+  provided to load a CSV file to the DNC list from the command line. Fixes
   Elastix bug #1984.
   SVN Rev[6734]
 - CHANGED: Form Designer: tweak error message handling to integrate it better
@@ -269,7 +274,7 @@ fi
   also fixes a serious scenario where a query that takes more than 5 seconds
   would cause the server to accumulate unfinished SQL queries.
   SVN Rev[6717]
-- CHANGED: Dialer (ECCP): emit queue number (if available) when linking and 
+- CHANGED: Dialer (ECCP): emit queue number (if available) when linking and
   unlinking a call, to save the client the trouble of asking for it. Required
   for next commit.
   SVN Rev[6716]
@@ -297,13 +302,13 @@ fi
 - CHANGED: Dialer: disable PDO::ATTR_EMULATE_PREPARES on all MySQL PDO connections
   in order to use native prepared statements instead of the default PHP emulation.
   Workaround for PHP bug #44639. Might fix Elastix bug #1844.
-  SVN Rev[6489] 
+  SVN Rev[6489]
 
 * Tue Feb 18 2014 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-6
 - Bump version for release.
-- CHANGED: Agent Console, Campaign Monitoring, Agent Monitoring: the Elastix 
-  framework sends an error in a JSON response if a rawmode request is made with 
-  an invalid/expired session. Check for this response and alert/redirect to 
+- CHANGED: Agent Console, Campaign Monitoring, Agent Monitoring: the Elastix
+  framework sends an error in a JSON response if a rawmode request is made with
+  an invalid/expired session. Check for this response and alert/redirect to
   Elastix login page if received.
   SVN Rev[6483]
 
@@ -327,11 +332,11 @@ fi
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
 - CHANGED: Agent Console, Campaigns, Do not Call List, External URLs, Queues,
   Clients, Ingoing Campaigns, Agents, ECCP Users, Callback Extensions, Breaks,
-  Form Designer, Form Preview, Reports Break, Calls Detail, Calls per hour, 
-  Calls per Agent, Hold time, Login Logout, Ingoing Calls Success, Graphic Calls 
-  per hour, Agent Information, Agents Monitoring, Trunks used per hour, 
-  Incoming calls monitoring, Campaign monitoring, Configuration: For each module 
-  listed here the english help file was renamed to en.hlp and a spanish help file 
+  Form Designer, Form Preview, Reports Break, Calls Detail, Calls per hour,
+  Calls per Agent, Hold time, Login Logout, Ingoing Calls Success, Graphic Calls
+  per hour, Agent Information, Agents Monitoring, Trunks used per hour,
+  Incoming calls monitoring, Campaign monitoring, Configuration: For each module
+  listed here the english help file was renamed to en.hlp and a spanish help file
   called es.hlp was ADDED.
   SVN Rev[6354]
 
@@ -358,7 +363,7 @@ fi
   generation of PaloSantoForm as much as possible. Remove dead xajax references.
   SVN Rev[6263]
 - FIXED: Dialer: during an Asterisk restart, the startup time reported by
-  CoreStatus may get stuck at year 1969 for a few seconds, and break the 
+  CoreStatus may get stuck at year 1969 for a few seconds, and break the
   detection of a restarted Asterisk instance. Fix by rejecting and retrying the
   call until a valid date is returned.
   SVN Rev[6262]
@@ -378,7 +383,7 @@ fi
   SVN Rev[6044]
 
 * Tue Oct 29 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Campaign Monitoring: refactor the client-side javascript code to 
+- CHANGED: Campaign Monitoring: refactor the client-side javascript code to
   conform to best Ember.js coding practices. Instead of explicitly binding to
   controllers as variables in App, controllers are now references from the
   corresponding views and setup through routes. Each campaign detail is now
@@ -392,7 +397,7 @@ fi
   SVN Rev[6029]
 
 * Fri Sep 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Campaign Monitoring: fix swapped labels in display. Fixes Elastix 
+- FIXED: Campaign Monitoring: fix swapped labels in display. Fixes Elastix
   bug #1707.
   SVN Rev[5917]
 
@@ -402,10 +407,10 @@ fi
   removes dead references to xajax and other unneeded libraries, and brings the
   code up to newer coding standards. The filter template is exported to a
   separate file. Fixes Elastix bug #1726.
-  SVN Rev[5901] 
-- FIXED: Calls Per Agent: remove pagination code as this report is actually a 
+  SVN Rev[5901]
+- FIXED: Calls Per Agent: remove pagination code as this report is actually a
   summary report. Fixes Elastix bug #1710.
-  SVN Rev[5896] 
+  SVN Rev[5896]
 - CHANGED: Campaign Out: remove last traces of xajax dead code from the module.
   SVN Rev[5895]
 
@@ -426,17 +431,17 @@ fi
   SVN Rev[5819]
 
 * Mon Aug  5 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Incoming Campaigns: fix missing SQL parameter to UNION query for 
+- FIXED: Incoming Campaigns: fix missing SQL parameter to UNION query for
   campaign forms. Fixes Elastix bug #1641.
   SVN Rev[5546]
 
 * Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-2
-- FIXED: Campaign Monitoring: fix design flaw that requested very large datasets 
+- FIXED: Campaign Monitoring: fix design flaw that requested very large datasets
   because of log entries on busy servers. Now log entries are not requested on
   load, but only on demand, and only 100 at a time.
 
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dialer (ECCP): extend campaignlog request to request the last N 
+- CHANGED: Dialer (ECCP): extend campaignlog request to request the last N
   records instead of all of the log entries for a given date range.
 
 * Fri Jun 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
@@ -458,20 +463,20 @@ fi
 - FIXED: Agent Console: filter breaks to remove inactive breaks from list.
 
 * Tue Apr 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Dialer: tag all incoming calls with no end timestamp as LostTrack on 
-  startup. This sanity check was lost on the multiple-process rewrite. May fix 
+- FIXED: Dialer: tag all incoming calls with no end timestamp as LostTrack on
+  startup. This sanity check was lost on the multiple-process rewrite. May fix
   part of Elastix bug #1531.
 
 * Mon Apr 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Incoming Campaign: fix assignment to incorrect template variable 
-  leading to visualization of New Campaign form when there are no incoming 
+- FIXED: Incoming Campaign: fix assignment to incorrect template variable
+  leading to visualization of New Campaign form when there are no incoming
   queues. Fixes Elastix bug #1533.
 
 * Wed Apr 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-0
 - Bump version for release.
-- CHANGED: Campaign Monitoring, Dialer (ECCP): extend the getcampaignstatus and 
+- CHANGED: Campaign Monitoring, Dialer (ECCP): extend the getcampaignstatus and
   getincomingqueuestatus requests to report statistic values for the queried
-  campaign or queue. Use these to implement display of average and maximum call 
+  campaign or queue. Use these to implement display of average and maximum call
   duration in Campaign Monitoring realtime display.
 
 * Mon Apr 01 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
@@ -484,45 +489,45 @@ fi
 * Wed Mar 20 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: display VtigerCRM button only if VtigerCRM is installed
 - CHANGED: Dialer: add code to repair corrupted audit entries on dialer startup.
-- CHANGED: Agent Console: modify connect function in order to return result of 
-  login command, and use this to check whether ECCP login succeeded. 
+- CHANGED: Agent Console: modify connect function in order to return result of
+  login command, and use this to check whether ECCP login succeeded.
 
 * Mon Mar 18 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calls per Agent: make call type specification case-insensitive
 
 * Thu Mar 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Dialer: Specify a proper CallerID string as 'Agent/XXXX Login' to 
+- FIXED: Dialer: Specify a proper CallerID string as 'Agent/XXXX Login' to
   prevent the softphones from displaying confusing strings as the CallerID.
 
 * Mon Mar 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-11.beta
 - Bump version for release
 
 * Wed Feb 27 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Campaign Monitoring: in case of client state hash mismatch, only 
+- CHANGED: Campaign Monitoring: in case of client state hash mismatch, only
   reload if the request hash is identical to the one stored by the web client.
 
 * Tue Feb 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calls per hour, Graphics Calls per hour: transpose the rows and columns
   of the report so that the report is thinner. Fixes Elastix bug #1494.
-- CHANGED: Campaign Monitoring: place incoming queue calls as the last items in 
+- CHANGED: Campaign Monitoring: place incoming queue calls as the last items in
   the drop-down list.
-- FIXED: Campaign Monitoring: append available campaigns to report list instead 
+- FIXED: Campaign Monitoring: append available campaigns to report list instead
   of indexing by ID. Fixes Elastix bug #1496.
-- FIXED: Dialer: Check whether the agent is on break before deciding that it 
+- FIXED: Dialer: Check whether the agent is on break before deciding that it
   should receive a scheduled call. Fixes Elastix bug #1497.
 
-* Mon Feb 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 
+* Mon Feb 25 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Login Logout: fix English translations for titles. Fixes Elastix bug #1491.
 
 * Fri Feb 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-10.beta
-- FIXED: Agent Console: apparently a jQuery update now sends null variables in 
-  javascript structs as empty strings instead of not-set variables in a 
+- FIXED: Agent Console: apparently a jQuery update now sends null variables in
+  javascript structs as empty strings instead of not-set variables in a
   $.post() request. This causes the non-SSE mode of the Agent Console to spin
   endlessly. Fixed. Fixes Elastix bug #1479.
 
 * Wed Jan 23 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Do not Call List: The action "Apply" had no effect if there were no 
-  pending calls. This scenario could happen if the DNC is loaded prior to 
+- FIXED: Do not Call List: The action "Apply" had no effect if there were no
+  pending calls. This scenario could happen if the DNC is loaded prior to
   defining the first outgoing call. Fixed.
 
 * Tue Jan 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
@@ -531,88 +536,88 @@ fi
   Elastix bug #1452.
 
 * Mon Jan 21 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Agents, Callback Extensions: multiple fixes. Enforce uniqueness of 
-  agent number across Agent and Callback agents on agent creation. Verify that 
-  agent number that is being modified actually exists. Fix removed successful 
-  return from agent modification. Agent modification screens may not longer 
-  change the agent number onscreen, as doing so has no effect on the actual 
+- FIXED: Agents, Callback Extensions: multiple fixes. Enforce uniqueness of
+  agent number across Agent and Callback agents on agent creation. Verify that
+  agent number that is being modified actually exists. Fix removed successful
+  return from agent modification. Agent modification screens may not longer
+  change the agent number onscreen, as doing so has no effect on the actual
   record.
 
 * Thu Jan 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-9.beta
-- FIXED: Campaign Monitoring: add cancelling of long polling when switching 
-  campaigns in the absence of SSE (Internet Explorer). Otherwise multiple 
-  pollings may accumulate. Additionally, invalidate the polling on server-side 
-  when the monitored campaign is changed. Loosen up one call status comparison 
-  that otherwise resulted in unnecessary refreshings in non-SSE mode. Update 
-  total counter properly when receiving incoming calls. Remove stray debugging 
+- FIXED: Campaign Monitoring: add cancelling of long polling when switching
+  campaigns in the absence of SSE (Internet Explorer). Otherwise multiple
+  pollings may accumulate. Additionally, invalidate the polling on server-side
+  when the monitored campaign is changed. Loosen up one call status comparison
+  that otherwise resulted in unnecessary refreshings in non-SSE mode. Update
+  total counter properly when receiving incoming calls. Remove stray debugging
   statement.
 - CHANGED: Campaign Monitoring: add support for monitoring of incoming calls
-  without an incoming campaign, by selection of raw queue. Add some i18n to 
+  without an incoming campaign, by selection of raw queue. Add some i18n to
   labels.
-- CHANGED: Dialer (ECCP): add support for new requests "getincomingqueuestatus" 
-  and "getincomingqueuelist" required for monitoring incoming calls with no 
+- CHANGED: Dialer (ECCP): add support for new requests "getincomingqueuestatus"
+  and "getincomingqueuelist" required for monitoring incoming calls with no
   associated campaign.
-- FIXED: Dialer (ECCP): add ECCP authentication to several requests that missed 
+- FIXED: Dialer (ECCP): add ECCP authentication to several requests that missed
   it.
 
 * Mon Jan 14 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Agent Information: fix some misspellings and awkward phrasings  
+- FIXED: Agent Information: fix some misspellings and awkward phrasings
 - FIXED: Remove now obsolete "Agent Connection Time" item from Elastix menu.
 
 * Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Campaign Monitoring: fix javascript syntax rejected by IE. Also, work 
+- FIXED: Campaign Monitoring: fix javascript syntax rejected by IE. Also, work
   around IE issue that collapses JSON members that contain only empty objects or
   arrays into nulls.
-- FIXED: Dialer (ECCP): getcampaignstatus: fix callstatus lowercase, use 
+- FIXED: Dialer (ECCP): getcampaignstatus: fix callstatus lowercase, use
   camelcase.
 
 * Fri Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-8.beta
 - Bump version for release
 - FIXED: Dialer (ECCP): getcampaignstatus: fix crashing bug when fetching status
   of a campaign with at least one logged-in static agent.
-- FIXED: Callback Extensions: fixed multiple bugs in a single function: 
-  1) removed incorrect attempt to use database root user for ordinary module 
+- FIXED: Callback Extensions: fixed multiple bugs in a single function:
+  1) removed incorrect attempt to use database root user for ordinary module
   operation. 2) fixed incorrect assumption that selected database user can read
-  both the 'call_center' and the 'asterisk' databases. 3) added missing error 
+  both the 'call_center' and the 'asterisk' databases. 3) added missing error
   reporting so that database failures are not hidden.
 
 * Thu Jan 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-7.beta
 - Bump version for release.
-- ADDED: Campaign Monitoring: added new module. This module displays a 
-  campaign-centric view of the callcenter activity. This module displays basic 
-  information on the campaign, and counters of call states. Additionally there 
-  is a panel of agents that handle calls, with current state and the phone 
-  number that is being handled. Another panel shows in-progress calls that are 
+- ADDED: Campaign Monitoring: added new module. This module displays a
+  campaign-centric view of the callcenter activity. This module displays basic
+  information on the campaign, and counters of call states. Additionally there
+  is a panel of agents that handle calls, with current state and the phone
+  number that is being handled. Another panel shows in-progress calls that are
   being placed and do not yet have an assigned agent. A log view displays all of
-  the call-related activities with timestamps. All of this information is 
+  the call-related activities with timestamps. All of this information is
   updated in realtime using ECCP events.
 
 * Wed Jan 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: add support for new request "callprogress".
-- CHANGED: Agent Console: add support for the three new fields in agentunlinked 
+- CHANGED: Agent Console: add support for the three new fields in agentunlinked
   event.
-- CHANGED: Dialer (ECCP): add debug tracking to msg_QueueMemberRemoved. 
-- CHANGED: Dialer (ECCP): getcampaignstatus: callstatus is now camelcased 
+- CHANGED: Dialer (ECCP): add debug tracking to msg_QueueMemberRemoved.
+- CHANGED: Dialer (ECCP): getcampaignstatus: callstatus is now camelcased
   (internal representation) instead of lowercase. Fix documentation to reflect
   this.
-- CHANGED: Dialer (ECCP): agentunlinked event was modified with three new 
+- CHANGED: Dialer (ECCP): agentunlinked event was modified with three new
   fields. Fix documentation to reflect this.
 
 * Tue Jan 08 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Dialer (ECCP): add and document new request 'campaignlog'. This request
   allows to retrieve the event log for a particular campaign.
 - CHANGED: Dialer (ECCP): emit queue on callprogress event.
-- FIXED: Dialer (ECCP): getcampaignstatus: propagate trunk for each call. 
+- FIXED: Dialer (ECCP): getcampaignstatus: propagate trunk for each call.
   Display all agents, not just the ones handling a call.
 
 * Mon Jan 07 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Dialer (ECCP): fix validation that prevented incoming calls from 
+- FIXED: Dialer (ECCP): fix validation that prevented incoming calls from
   entering OnQueue state.
-- FIXED: Dialer (ECCP): fix forgotten specification of campaign type on 
+- FIXED: Dialer (ECCP): fix forgotten specification of campaign type on
   implementation of getcampaignstatus request.
-- CHANGED: Dialer (ECCP): modify many of the ECCP example scripts to get agent and 
+- CHANGED: Dialer (ECCP): modify many of the ECCP example scripts to get agent and
   password from the command line.
-- FIXED: Dialer (ECCP): fix error message for hangup request when agent exists but is 
+- FIXED: Dialer (ECCP): fix error message for hangup request when agent exists but is
   not handling a call.
 - FIXED: Dialer (ECCP): add required campaign ID when starting hold.
 
@@ -621,9 +626,9 @@ fi
 - FIXED: Agent Console: fix two javascript warnings in IE6.
 
 * Wed Jan 02 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Agents, Callback Extensions: do not modify the audit or call tables 
-  from the module. Now that the dialer has exclusive responsibility over 
-  auditing on logoff, modification of audit tables on forced disconnection, as 
+- FIXED: Agents, Callback Extensions: do not modify the audit or call tables
+  from the module. Now that the dialer has exclusive responsibility over
+  auditing on logoff, modification of audit tables on forced disconnection, as
   allowed by these modules, is actually harmful.
 
 * Fri Dec 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
@@ -631,29 +636,29 @@ fi
   Currently the supported agents are SIP and IAX2 extensions. The agents must be
   declared at the Callback Extensions module under Call Center-->Agent Options,
   and also added as Dynamic Members of the queues to use for the campaigns, as
-  S4321 (for extension SIP/4321) or I4321 (for extension IAX2/4321). The 
+  S4321 (for extension SIP/4321) or I4321 (for extension IAX2/4321). The
   extensions will be added with QueueAdd at login and will only ring if a call
   enters the corresponding queue.
 
 * Tue Dec 18 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- ADDED: Dialer (ECCP): add and document call progress events. Rework call 
-  progress logging so that the campaign ID is available. Add a new request 
+- ADDED: Dialer (ECCP): add and document call progress events. Rework call
+  progress logging so that the campaign ID is available. Add a new request
   'callprogress' to enable call progress events, which are disabled by default.
 
 * Fri Dec 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Campaign Out: fix incorrect declaration of string constants for rexexp.
-- ADDED: Dialer: add logging capability of events that happen to a call. For 
-  this a new database table was created. Allow campaign deletion to cope with 
+- ADDED: Dialer: add logging capability of events that happen to a call. For
+  this a new database table was created. Allow campaign deletion to cope with
   the new table. This is required functionality for call progress events.
 
 * Mon Dec 10 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- ADDED: Dialer: add new column calls.trunk to keep track of trunk used for 
+- ADDED: Dialer: add new column calls.trunk to keep track of trunk used for
   outgoing call. Add outgoing trunk support to dialer code. This is required for
   planned functionality of trunk display of in-progress calls.
 
 * Thu Dec 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Agent Console: use the new getchanvars request to add the list of 
-  channel variables to the ones available in an external URL. This allows 
+- CHANGED: Agent Console: use the new getchanvars request to add the list of
+  channel variables to the ones available in an external URL. This allows
   variables set via custom contexts or AGIs to be used to drive external URLs.
 
 * Wed Dec 05 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
@@ -661,37 +666,37 @@ fi
   channel variables of the call currently handled by the agent.
 
 * Mon Dec 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Agent Console: expose the Uniqueid of the linked call as an 
+- CHANGED: Agent Console: expose the Uniqueid of the linked call as an
   additional variable for External URL.
 
 * Thu Nov 22 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Login Logout: fix issue of report export displaying only a single page.
 - CHANGED: Login Logout: add consistency checks on audit records to counter the
-  situation where an abnormal termination of the dialer leaves unclosed audit 
+  situation where an abnormal termination of the dialer leaves unclosed audit
   records. Inconsistent records are now displayed as CORRUPTED instead of adding
   invalid values as if they were valid ONLINE records.
 
 * Wed Nov 21 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Dialer: fix inability to record scheduled calls. Now the dialer will 
-  use a special context to enable recording if the campaign queue recorded 
+- FIXED: Dialer: fix inability to record scheduled calls. Now the dialer will
+  use a special context to enable recording if the campaign queue recorded
   calls.
 
 * Wed Nov 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dialer: set CALLERID(num) in OriginateResponse handler in order to 
+- CHANGED: Dialer: set CALLERID(num) in OriginateResponse handler in order to
   ensure the CDR has a meaningful source field value. Fixes Elastix bug #1411.
 
 * Tue Nov 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Trunks Used per Hour: core query method rewritten to use SQL 
+- CHANGED: Trunks Used per Hour: core query method rewritten to use SQL
   parameters. SQL was reimplemented to use more efficient grouping. HTML
   formatting moved to index.php. Trunk filter now allows report on calls from
   all trunks.
 
 * Thu Nov  8 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- DELETED: Agents Connection Time: removed. This report is now essentially 
+- DELETED: Agents Connection Time: removed. This report is now essentially
   identical to Login Logout.
 - CHANGED: Login Logout: complete rewrite. This rewrite takes advantage of the
-  updated Elastix API for paloSantoGrid available since elastix-framework 
-  2.2-18. The custom code for calendars was replaced with standard date 
+  updated Elastix API for paloSantoGrid available since elastix-framework
+  2.2-18. The custom code for calendars was replaced with standard date
   controls. Most importantly, the SQL query was considerably simplified for
   readability, and in the process, fixes the calculation of total session time.
   Finally, the filtering by incoming queue from Agents Connection Time was added
@@ -713,10 +718,10 @@ fi
 * Tue Oct 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: Campaign modification now allows upload of call file,
   which will be appended to the call list already present.
-- CHANGED: Campaign In,Campaign Out: lift restriction on removing campaigns with 
-  connected calls. Users really do need to remove campaigns even after calls 
+- CHANGED: Campaign In,Campaign Out: lift restriction on removing campaigns with
+  connected calls. Users really do need to remove campaigns even after calls
   have been made.
-- FIXED: Agent Console: fix scenario in which an agent that opens several 
+- FIXED: Agent Console: fix scenario in which an agent that opens several
   instances of the agent console under the same session will find that the pause
   duration increases by the pause multiplied by the number of consoles.
 
@@ -728,16 +733,16 @@ fi
   the dialer is stuck with stale agent/call status until restarted.
 
 * Tue Oct 23 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Campaign Out: fix broken campaign edit due to character encoding 
+- FIXED: Campaign Out: fix broken campaign edit due to character encoding
   verification. Fixes Elastix bug #1403.
 
 * Fri Oct 19 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dialer (ECCP): intercept PeerStatus message to detect whether an 
+- CHANGED: Dialer (ECCP): intercept PeerStatus message to detect whether an
   extension currently in use for an agent login has been unregistered.
 
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Dialer (ECCP): restore writing to database of transferred extension, 
-  lost when rewriting the Agent Console to use the ECCP protocol. Fixes Elastix 
+- FIXED: Dialer (ECCP): restore writing to database of transferred extension,
+  lost when rewriting the Agent Console to use the ECCP protocol. Fixes Elastix
   bug #1396.
 
 * Mon Oct 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
@@ -748,10 +753,10 @@ fi
   in PHP 5.4.
 
 * Wed Oct 03 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-5.alpha
-- CHANGED: Agent Console: fix bug in which a chronometer counter that starts 
+- CHANGED: Agent Console: fix bug in which a chronometer counter that starts
   from 0, as signaled in an event might be mistakenly interpreted as an order to
-  stop the chronometer. Might fix Elastix bug #1319. Also, set consistent 
-  behavior of stopping chronometer on idle agent case. 
+  stop the chronometer. Might fix Elastix bug #1319. Also, set consistent
+  behavior of stopping chronometer on idle agent case.
 - CHANGED: Agent Console: if Elastix user matches an agent number, suggest this
   agent number as the default agent to use for initial agent login. Second part
   of fix for Elastix bug #1354.
@@ -759,35 +764,35 @@ fi
   said state. This prevents a potential issue of hitting a maximum URL length
   limit due to unbounded size of agent list.
 - CHANGED: Calls Per Agent: clean up implementation to use SQL query parameters
-  and simplify the API. Fix average calculation. Fixes Elastix bug #1371. 
+  and simplify the API. Fix average calculation. Fixes Elastix bug #1371.
 
 * Tue Oct 02 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agents Monitoring: improve error handling when dialer process is shut
   down in the middle of monitoring.
-- CHANGED: Installer: change form_field.etiqueta and form_field.value fields to 
+- CHANGED: Installer: change form_field.etiqueta and form_field.value fields to
   TEXT. Fixes Elastix bug #1250.
 - CHANGED: Dialer: put workaround for PHP bug #18556 which breaks dialerd with
-  Turkish locales. Fixes Elastix bug #1381. 
+  Turkish locales. Fixes Elastix bug #1381.
 - CHANGED: Campaign Out: implement manual choosing of character set encoding for
-  CSV file upload. 
+  CSV file upload.
 
 * Thu Sep 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: fix incorrect field access syntax on trunk error output.
 
 * Tue Aug 28 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: if Elastix user has a default extension, suggest this
-  extension as the extension to use for initial agent login. Possible fix for 
+  extension as the extension to use for initial agent login. Possible fix for
   Elastix bug #1354.
-- CHANGED: Agents Monitoring: make use of "getagentactivitysummary" request to 
+- CHANGED: Agents Monitoring: make use of "getagentactivitysummary" request to
   rewrite the implementation of the real-time status report. The report now uses
-  long polling and Server Sent Events in a way similar to the Agent Console. 
+  long polling and Server Sent Events in a way similar to the Agent Console.
   This rewrite is expected to significantly reduce the server load over the old
   strategy of running the complete report algorithm every four seconds.
-- CHANGED: Agent Console: extend library to add support for the 
+- CHANGED: Agent Console: extend library to add support for the
   "getagentactivitysummary" request.
 - CHANGED: Dialer (ECCP): new request "getagentactivitysummary" that produces a
-  summary of agent activity on a date range. 
-- CHANGED: Dialer (ECCP): extend "getagentstatus" request to report the queue 
+  summary of agent activity on a date range.
+- CHANGED: Dialer (ECCP): extend "getagentstatus" request to report the queue
   number that assigned the call currently connected to the agent.
 
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-4.alpha
@@ -795,25 +800,25 @@ fi
   schedule_use_sameagent flags in call scheduling.
 
 * Thu Jul 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Agent Console: fix incorrect check for atxfer parameter in call 
+- FIXED: Agent Console: fix incorrect check for atxfer parameter in call
   transfer. This should allow attended transfer to work from the web console.
 
-* Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 
+* Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: remove last call to deprecated ereg().
 
 * Wed Jun 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Agent Console: add onsubmit handling to login form so that pressing 
+- CHANGED: Agent Console: add onsubmit handling to login form so that pressing
   ENTER also starts login process.
 
 * Mon Jun 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dialer: remove E_STRICT from error_reporting to silence warning 
+- CHANGED: Dialer: remove E_STRICT from error_reporting to silence warning
   messages at daemon startup in Fedora 17.
 
 * Tue Apr 24 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-3.alpha
 - Comment out menu item for not-yet-committed module in development.
 - From CHANGELOG:
     - Dialer: set the timezone explictly for PHP 5.3+ compatibility.
-    - Dialer: parse manager.conf manually as it may contain characters that 
+    - Dialer: parse manager.conf manually as it may contain characters that
       choke parse_ini_file(). Fixes Elastix bug #1211.
     - Dialer: add new configuration parameter to specify the maximum number of
       seconds to wait for the Originate AMI request before timeout.
@@ -824,12 +829,12 @@ fi
     - Installer: fix invalid SQL syntax on foreign key creation for external URL
     - Reports Break: some cleanup on language loading
     - External URL: (trivial) remove useless assignment
-    - Dialer: signaling termination to the process group could result in 
-      subprocesses terminating before receiving shutdown requests, which in turn 
+    - Dialer: signaling termination to the process group could result in
+      subprocesses terminating before receiving shutdown requests, which in turn
       caused HubProcess to hang waiting for an answer that will never come.
       Fixed.
     - Dialer: fix broken Do Not Call check for outgoing calls by checking
-      whether phone number appears in DNC at time of call. Fixes Elastix 
+      whether phone number appears in DNC at time of call. Fixes Elastix
       bug #1178.
     - Campaign Out: do not allow creation of campaigns with 0 retries.
 
@@ -841,15 +846,15 @@ fi
     - Dialer: fix broken recovery on database loss due to dangling connection in
       configuration object.
     - Campaign Out: fix failed creation of new campaign with no external URL.
-    - Campaign Out: allow free-format text as custom context. Fix for Elastix 
+    - Campaign Out: allow free-format text as custom context. Fix for Elastix
       bug #1168.
-    - Agent Console: fix opening of blank page when receiving call in campaign 
+    - Agent Console: fix opening of blank page when receiving call in campaign
       that does not have an external URL defined.
-    - Dialer (ECCP): new requirement "atxfercall" that invokes the "atxfer" AMI 
+    - Dialer (ECCP): new requirement "atxfercall" that invokes the "atxfer" AMI
       action.
-    - Campaign Out: Add Failure Code and Failure Cause to CSV report. This 
+    - Campaign Out: Add Failure Code and Failure Cause to CSV report. This
       reports the failure cause reported when a call attempt failed.
-    - Dialer: init script MUST specify signal to send to shutdown process. 
+    - Dialer: init script MUST specify signal to send to shutdown process.
       Otherwise killproc timeouts and sends SIGKILL to monitor process.
 
 * Wed Feb 08 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.99-0.alpha
@@ -857,16 +862,16 @@ fi
 - From CHANGELOG:
     - Agent Console: add support for opening external URLs for a connected call.
       External URLs can be opened in three different ways: as a new window, as
-      an embedded frame inside a tab in the agent console, or as a JSONP call 
+      an embedded frame inside a tab in the agent console, or as a JSONP call
       that loads and executes Javascript in the context of the agent console.
     - Campaign In: add support for linking external URLs to a campaign.
     - Campaign Out: add support for linking external URLs to a campaign.
     - Dialer (ECCP): extend "getcampaigninfo" request to report external URLs
     - External URL: new module for management of external URLs to be opened on
       each connected call.
-    - Agent Console: when reading ECCP password for agent, only active agents 
+    - Agent Console: when reading ECCP password for agent, only active agents
       should be considered. Fixes Elastix bug #1157.
-    - Dialer (ECCP): protocol change: the agentloggedin and agentloggedout 
+    - Dialer (ECCP): protocol change: the agentloggedin and agentloggedout
       events no longer report agent membership to queues. The effort required to
       parse the output of "queue show" scales linearly with the number of agents
       in queues, and also with the number of queues defined, resulting in
@@ -876,25 +881,25 @@ fi
       During a deployment with a moderately large number of agents, several
       design flaws were uncovered in the dialer code. The largest of such design
       flaws was the attempt to handle all of the operations of the dialer in a
-      single process. Coupled with this, several event handlers required 
-      synchronous database updates or reads, and in at least one handler, a 
-      database access with every single event, whether the event was from a 
+      single process. Coupled with this, several event handlers required
+      synchronous database updates or reads, and in at least one handler, a
+      database access with every single event, whether the event was from a
       handled call or not. In addition to this, the same event handler required
       a synchronous AMI request that required three seconds to parse completely.
       Furthermore, several instances were found where data was read from the
-      database that could have been cached, since the dialer itself generated 
-      the data. All of this added up to large and ever-increasing delays in 
-      event processing that degraded the responsiveness of the agent console 
+      database that could have been cached, since the dialer itself generated
+      the data. All of this added up to large and ever-increasing delays in
+      event processing that degraded the responsiveness of the agent console
       (any implementation) by tens of seconds or more. To fix all of these
       problems, the dialer was rewritten to make use of multiple processes. One
       process handles AMI events, and does not read or write to the database.
-      All of the database updates are sent as asynchronous messages to another 
-      process, the process that reads outgoing campaign calls and places its 
+      All of the database updates are sent as asynchronous messages to another
+      process, the process that reads outgoing campaign calls and places its
       calls. A third process handles the ECCP protocol and database accesses
       that result from ECCP requests and events. Also, I seized the opportunity
       to reorganize the code around a fully object-oriented model that caches as
       much information as possible in memory and unifies almost all of the
-      handling for outgoing and incoming calls. 
+      handling for outgoing and incoming calls.
     - Dialer (ECCP): add new example program getcallinfo.php
     - Agent Monitoring: fix some uses of undefined variables
     - CallCenter Configuration: add new flag to completely disable dial
@@ -903,25 +908,25 @@ fi
       of operation saves further bandwidth by removing a POST request after an
       event is received or after the 2-minute timeout. Long polling is kept as a
       fallback for Internet Explorer.
-    - Agent Console: fix incorrect initial break state that caused console to 
+    - Agent Console: fix incorrect initial break state that caused console to
       immediately refresh break state if agent console is entered while agent is
       in break.
     - Agent Console: fix incorrect function reference that caused login process
-      to hang if user navigates to a different module and back during login 
-      process. 
-    - Agent Console: do not loop endlessly when some other client puts *our* 
+      to hang if user navigates to a different module and back during login
+      process.
+    - Agent Console: do not loop endlessly when some other client puts *our*
       agent on hold.
-    - Agent Console: fail more gracefully when shutting down dialer process, by 
+    - Agent Console: fail more gracefully when shutting down dialer process, by
       logging out the agent instead of getting stuck in an infinite loop.
-    - Dialer: add new function MultiplexServer::vaciarBuferesEscritura() to 
+    - Dialer: add new function MultiplexServer::vaciarBuferesEscritura() to
       flush all output buffers.
-    - Dialer: modify packet processing algorithm to prioritize the Asterisk AMI 
+    - Dialer: modify packet processing algorithm to prioritize the Asterisk AMI
       connection over other connections.
-    - Dialer: flush output buffers after every packet processing to ensure 
+    - Dialer: flush output buffers after every packet processing to ensure
       events are delivered as soon as possible.
     - Dialer: add cache for output of 'agent show' and 'queue show' commands.
-      These commands are expensive to execute and greatly slow down the 
-      'getagentstatus' ECCP procedure. The current cache lifetime is 1.5 
+      These commands are expensive to execute and greatly slow down the
+      'getagentstatus' ECCP procedure. The current cache lifetime is 1.5
       seconds.
     - Dialer: add utility function Predictivo::leerEstadoAgente() that will make
       use of the output cache if possible.
@@ -934,37 +939,37 @@ fi
     - Dialer: discard AMI events for which there are no handlers upon reception.
       Also put a microsecond timestamp for benchmarking.
     - Dialer (ECCP): on hangup request, check clientchannel present instead of
-      status for reporting that agent is not in call. 
+      status for reporting that agent is not in call.
     - Agent Console: reorder code so that ECCP call to 'getcampaigninfo' happens
       at most once in status check.
     - Dialer (ECCP): work around https://bugs.php.net/bug.php?id=41175 which
       throws a warning on an attempt to set a XML attribute to an empty string.
-      Triggered by a form with an empty description. 
+      Triggered by a form with an empty description.
     - Dialer (ECCP): remove bogus copy-paste leftover in form information
       fetching.
-    - Dialer: at hangup, the check for scheduled calls requires access to 
+    - Dialer: at hangup, the check for scheduled calls requires access to
       campaign data, but the campaign may already have ended, so it might not be
       in the campaign array. Read campaign data from database if required.
     - Dialer (ECCP): fix access to possibly-undefined property 'ActualChannel'
-      when looping through calls - ActualChannel is set OnLink, but loop also 
-      visits unlinked calls in progress. 
-    - Dialer: subsys lock file must have the same name as the service in 
+      when looping through calls - ActualChannel is set OnLink, but loop also
+      visits unlinked calls in progress.
+    - Dialer: subsys lock file must have the same name as the service in
       /etc/init.d in order to shutdown properly.
 
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.1.3-1
 - Changes in Spec file in Prereq elastix to elastix-framework >= 2.2.0-18
-- FIXED: Dialer (ECCP): fix copy/paste error in "getcampaignqueuewait" request 
+- FIXED: Dialer (ECCP): fix copy/paste error in "getcampaignqueuewait" request
   on error path. (SVN revision 3350)
 
 * Mon Nov 21 2011 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.3-0
 - Updated version, synchronized with CallCenter 1.6.3 (SVN revision 3327)
 - From CHANGELOG:
-    - Agent Console: fix broken POST variable parsing when scheduling a call. 
-      Fixes Elastix bug #1083. 
+    - Agent Console: fix broken POST variable parsing when scheduling a call.
+      Fixes Elastix bug #1083.
     - Agent Console: allow scrolling on right panel. Fixes Elastix bug #1082.
     - Dialer (ECCP): Do not dial to *8888 anymore for agent login. Instead, dial
-      channel directly into the AgentLogin application. This frees the dialer 
-      from having to know a special dialstring for agent login. Fixes Elastix 
+      channel directly into the AgentLogin application. This frees the dialer
+      from having to know a special dialstring for agent login. Fixes Elastix
       bug #1076.
 
 * Fri Nov 11 2011 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.2-0
@@ -977,7 +982,7 @@ fi
     - Agent Console: wait up to 1 second after login request in order to catch
       early login failure.
     - Form Preview: replace HTML entity in Spanish translation
-    - Queues: complete rewrite, fixes potential SQL injections, makes use of 
+    - Queues: complete rewrite, fixes potential SQL injections, makes use of
       elastix2.lib.php functions, fix title display under elastixneo theme.
     - Agent Console: disconnect from databases when performing long polling since
       open database connections are no longer used while waiting.
@@ -985,10 +990,10 @@ fi
       and report additional information in case of failure. Should fix Elastix bug
       #1053
     - Dialer (ECCP): add check for failure to list extensions in loginagent request
-    - CallCenter Configuration, Campaigns Out, Do not Call List, Agent Console, 
+    - CallCenter Configuration, Campaigns Out, Do not Call List, Agent Console,
       Clients, Campaign In, Agents, ECCP Users, Break Administrator, Form Designer,
       Form Preview: fix title display under elastixneo theme
-    - CallCenter Configuration, Campaigns Out: Do not Call List, Clients, Campaign In, 
+    - CallCenter Configuration, Campaigns Out: Do not Call List, Clients, Campaign In,
       Agents, ECCP Users, Break Administrator:
       import elastix2.lib.php instead of defining functions _tr and load_language_module
     - Do not Call List, Form Designer, Form Preview: convert module to use of _tr
@@ -998,45 +1003,45 @@ fi
 * Fri Oct 21 2011 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.1-0
 - Updated version, synchronized with CallCenter 1.6.1 (SVN revision 3102)
 - From CHANGELOG:
-    - Agent Console: perform translation of legacy contact labels for incoming 
-      calls into user-friendly values subject to i18n. Fixes Elastix bug #1039. 
+    - Agent Console: perform translation of legacy contact labels for incoming
+      calls into user-friendly values subject to i18n. Fixes Elastix bug #1039.
     - Dialer (ECCP): extend "getcampaignlist" request to add extra filtering options
     - Dialer (ECCP): fix behavior when an incoming call is put on hold, and then
       is hung up by the remote side.
     - Agent Console: specify explicit font size in CSS to prevent font size from
       varying with the selected theme. Helps fix Elastix bug #1035.
-    - Agent Console: rewrite script and header inclusion so that javascript.js 
+    - Agent Console: rewrite script and header inclusion so that javascript.js
       from module is included exactly once. Fixes Elastix bug #1036.
-    - Dialer (ECCP): allow the "agentlogout" request to cancel a login that is 
+    - Dialer (ECCP): allow the "agentlogout" request to cancel a login that is
       still in progress and asking for the agent numeric password.
 
 * Mon Oct 17 2011 Alex Villacis Lasso <a_villacis@palosanto.com> 2.1.0-0
 - Updated version, synchronized with CallCenter 1.6 (SVN revision 3087)
 - From CHANGELOG:
     - Agent Console: complete rewrite.
-      This version of the Call Center module has a completely rewritten Agent 
-      Console based on the Elastix CallCenter Protocol (ECCP). This rewrite is 
-      intended to showcase the capabilities of ECCP and become the reference 
+      This version of the Call Center module has a completely rewritten Agent
+      Console based on the Elastix CallCenter Protocol (ECCP). This rewrite is
+      intended to showcase the capabilities of ECCP and become the reference
       implementation for an ECCP client. Some highlights of the rewrite:
       - The previous Agent Console polled the webserver every 4 seconds for updates
         on the agent state. This polling gets multiplied by the number of simultaneous
         agents and becomes a heavy burden on the server CPU with more than a few
-        tens of agents. The new Agent Console switches to Long Polling 
+        tens of agents. The new Agent Console switches to Long Polling
         (http://en.wikipedia.org/wiki/Push_technology#Long_polling) in which the
         browser is left waiting for a response for up to 2 minutes at a time while
-        the server listens to state change events with very little CPU usage. This 
-        is made possible thanks to ECCP events. Fixes Elastix bug #114, probably 
+        the server listens to state change events with very little CPU usage. This
+        is made possible thanks to ECCP events. Fixes Elastix bug #114, probably
         fixes Elastix bugs #412, #489, #637.
       - Agent Console now works correctly in Internet Explorer. Tested with IE6, IE8
         and IE9. Fixes Elastix bug #30.
-      - The previous console visual layout is now reimplemented using jQueryUI. This 
+      - The previous console visual layout is now reimplemented using jQueryUI. This
         introduces niceties such as decent tabs, dialogs with shading, and themed
         buttons, as well as greatly simplifying and reorganizing the JavaScript
         implementation.
       - The previous Agent Console depends on the agent being willing and able to
         close the agent session correctly from within the interface. Failure to do
-        this results in corrupted (stale) session and break audit records. This 
-        corruption is the probable root cause of Elastix bug #494. The new Agent 
+        this results in corrupted (stale) session and break audit records. This
+        corruption is the probable root cause of Elastix bug #494. The new Agent
         Console is immune to this failure scenario, since the audit record update
         is now done by the dialer daemon process.
       - The agent audit now properly handles the case where an agent is deactivated
@@ -1045,19 +1050,19 @@ fi
       - As a result of improved handling of the interface state, it is now possible
         to switch to other Elastix modules while the agent is logged in, then switch
         back to the Agent Console, which will display the correct interface state.
-        It is even possible to close the browser while handling a call, then log 
+        It is even possible to close the browser while handling a call, then log
         back into Elastix, and choose the agent number and extension previously used,
-        and "log-in" back into a correct console session, as long as the agent   
+        and "log-in" back into a correct console session, as long as the agent
         telephone call is kept open all the time.
       - The Transfer capability is expanded to any arbitrary extension/queue. Partial
         fix for Elastix bug #419.
       As a side effect of the rewrite, may also fix Elastix bugs #879, #796, #414.
     - Dialer (ECCP): implement "getcampaignlist" request
-    - Dialer (ECCP): log out an agent immediately if login succeeded but audit 
+    - Dialer (ECCP): log out an agent immediately if login succeeded but audit
       record cannot be inserted.
     - Agent Information: fix division by zero on no connection time.
     - Incoming calls monitoring: fix use of undefined array index.
-    - Campaigns In: new module to define campaigns for incoming calls 
+    - Campaigns In: new module to define campaigns for incoming calls
     - Campaigns Out: include NoAnswer and Abandoned calls in CSV report too.
     - Agents: Do not leave newly created or modified agent without an ECCP password.
       The ECCP password is autogenerated if required. Also, assign an ECCP password
@@ -1072,15 +1077,15 @@ fi
     - Dialer (ECCP): implement new events "pausestart" and "pauseend".
     - Dialer (ECCP): fix incorrect parameter verification in "getcallinfo" request
     - Dialer (ECCP): implement "getqueuescript" request
-    - Dialer (ECCP): the "getcampaigninfo" request has been extended to return 
+    - Dialer (ECCP): the "getcampaigninfo" request has been extended to return
       additional form attributes "name" and "description" in the <form> tag.
-    - CHANGED: module agent_console, verify if function "obtenerClaveAMIAdmin" 
+    - CHANGED: module agent_console, verify if function "obtenerClaveAMIAdmin"
       exists, if not the password is set with "elastix456"
-    - CHANGED: changed the password "elastix456" of AMI to the password set in 
+    - CHANGED: changed the password "elastix456" of AMI to the password set in
       /etc/elastix.conf
     - Dialer (ECCP): implement "filterbyagent" request
-    - Dialer (ECCP): Added the following fields to response for "getagentstatus" 
-      request: onhold pauseinfo remote_channel callinfo . 
+    - Dialer (ECCP): Added the following fields to response for "getagentstatus"
+      request: onhold pauseinfo remote_channel callinfo .
     - Login Logout: fix time format representation for time in calls. Fixes Elastix
       bug #705.
     - Dialer (ECCP): fixed bug that prevented the hold/schedulecall/transfercall
@@ -1097,18 +1102,18 @@ fi
     - Dialer (ECCP): extended "transfercall" request to work with calls connected
       to an agent that were not tracked by the dialer.
     - Dialer (ECCP): fixed bug in which a transfer request of an incoming campaign
-      call into an outgoing campaign queue results in a new incoming agentlinked 
+      call into an outgoing campaign queue results in a new incoming agentlinked
       message.
     - Dialer (ECCP): fixed bug in which a transfer request of an incoming campaign
-      call into a incoming campaign queue (the same one the call came from or a 
+      call into a incoming campaign queue (the same one the call came from or a
       different one) results in an agentunlinked event with an incomplete agent
-      number. 
+      number.
     - Installer: add section in extensions_custom.conf that will hold required
       callcenter extensions for extra functionality.
     - Dialer (ECCP): implement "schedulecall" request
     - Dialer (ECCP): allow call to be hung up when agent is both busy and paused.
     - Dialer (ECCP): implement "getrequestlist" request
-    - Dialer (ECCP): fixed a 200-byte-per-request memory leak on XML response ID 
+    - Dialer (ECCP): fixed a 200-byte-per-request memory leak on XML response ID
       assignment.
     - Dialer (ECCP): implement "getcampaignstatus" request
     - Dialer (ECCP): implement "transfercall" request
@@ -1116,7 +1121,7 @@ fi
       table. Also reuse stored channel at hold time instead of querying the channel
       again from Asterisk. May fix Elastix bug #796.
     - Dialer: remove use of deprecated ereg* functions from Predictivo.class.php
-    - Dialer: fixed regular expression for parsing of 'agent show' report that 
+    - Dialer: fixed regular expression for parsing of 'agent show' report that
       missed DAHDI channels (and possibly other custom channels).
     - Dialer: fix accounting of parked calls (for Hold) in incoming-calls case
 
@@ -1124,9 +1129,9 @@ fi
 - Updated version, synchronized with CallCenter 1.5-4.1 (SVN revision 2847)
 - From CHANGELOG:
     1.5-4.1 (SVN revision 2847)
-    - Dialer (ECCP): Added "extension" and "channel" fields to response for 
+    - Dialer (ECCP): Added "extension" and "channel" fields to response for
       "getagentstatus" request.
-    - Agent Console: display error diagnostic messages when pause/unpause fails. 
+    - Agent Console: display error diagnostic messages when pause/unpause fails.
       Also display attempted hangup channel when Hangup operation failed.
     - Agents, Break Administrator, Campaigns Out: undo use of <button> inside of <a>
       as this combination does not work as intended in Firefox 4.0.1. Fixes Elastix
@@ -1159,14 +1164,14 @@ fi
 - Calls Detail: complete rewrite. Reorganized library methods now use SQL query
   parameters, have more readable code and a cleaner API, allows simultaneous
   filtering by more criteria, no longer requires fetching of all records to find
-  the total number, and fixes several design flaws. Reorganized interface 
+  the total number, and fixes several design flaws. Reorganized interface
   replaces the filtering by up to two criteria with a four-criteria filter with
-  drop-down lists for Call Type, Agent, Queues. Should also contain fix for 
+  drop-down lists for Call Type, Agent, Queues. Should also contain fix for
   Elastix bug #638.
 - Reports Break, Calls Detail, Calls per Agent, Hold Time, Login Logout: do not
   add HTML tags on non-HTML exports when using production versions of Elastix
   framework 2.0.
-- Break Administrator: use parametrized SQL queries instead of string 
+- Break Administrator: use parametrized SQL queries instead of string
   concatenation. Remove uses of construirInsert and construirUpdate. Make code
   smaller and add additional parameter validation. Remove unneeded AJAX calls.
   Expose functionality to activate/deactivate breaks in break listing. Use POST
@@ -1184,38 +1189,38 @@ fi
 - From CHANGELOG:
 1.5-3.8 (SVN Revision 2084)
     - Dialer (phpagi-asmanager): fix broken database_get method
-    - Hold Time, Login Logout: remove unused HTML templates 
+    - Hold Time, Login Logout: remove unused HTML templates
     - Break Administrator, Hold Time: remove dead code.
     - CallCenter Config, Agent Console, Agents, Break Administrator, Calls Detail,
       Calls per Agent, Calls per Hour, Campaign Out, Ingoing Calls Success,
       Login Logout, Agent Information, Agents Connection Time, Trunks Used per Hour,
       Hold Time: Use methods load_language_module and _tr from Elastix framework.
       Define them if they do not exist.
-    - Campaigns: improve speed and memory usage of CSV download of completed 
+    - Campaigns: improve speed and memory usage of CSV download of completed
       campaign data by replacing single big SQL query by multiple smaller ones.
-      Fixes Elastix bug #600. 
+      Fixes Elastix bug #600.
     - Agents, Break Administrator, Calls Detail, Calls per Agent, Calls per Hour,
       Campaign Out, Ingoing Calls Success, Login Logout, Agents Connection Time,
       Trunks Used per Hour: make module aware of url parameter in
       paloSantoGrid::fetchGrid().
     - Agents, Break Administrator, Calls Detail, Calls per Agent, Calls per Hour,
-      Campaign Out, Ingoing Calls Success, Login Logout, Agent Information, 
+      Campaign Out, Ingoing Calls Success, Login Logout, Agent Information,
       Hold Time: remove <form> tags from the filter HTML template. They are not
-      required, since the template already includes a proper <form> tag enclosing 
+      required, since the template already includes a proper <form> tag enclosing
       the grid.
     - Agent Console (programar_llamadas): restrict call reprogramming interface to
       requests with a valid Elastix session and authorization to the Agent Console.
-      Also, clean up form code to use the default Elastix support for date controls.  
+      Also, clean up form code to use the default Elastix support for date controls.
     - Form List: fix breakage from i18n unification and remove useless code
     - Agent Console: move around conditional declaration of getParameter so that
       it is available at the moment it is required.
     - Dialer: Found probable cause of unexpected delays in outgoing calls. Asterisk
-      AMI may emit events at any arbitrary frequency. If AMI manages to continuosly 
+      AMI may emit events at any arbitrary frequency. If AMI manages to continuosly
       emit events with less than 1 second delay, the event loop in the dialer will
       get stuck processing events (even if not interesting) and never dispatch any
-      new calls. Fixed by forcing end of event receipt inside wait_response() method 
+      new calls. Fixed by forcing end of event receipt inside wait_response() method
       in phpagi-asmanager-elastix.php. Might fix Elastix bugs #543, #577.
-    - Web interface: cleanup of i18n files to bring them in line with the rest of 
+    - Web interface: cleanup of i18n files to bring them in line with the rest of
       the Elastix code.
 
 * Fri Dec  3 2010 Alex Villacis Lasso <a_villacis@palosanto.com>
@@ -1226,24 +1231,24 @@ fi
 - Updated version, synchronized with CallCenter 1.5-3.7 (SVN revision 1843)
 - From CHANGELOG:
 1.5-3.7 (SVN revision 1843)
-    - Dialer: Add debug notification when record has just been inserted in 
+    - Dialer: Add debug notification when record has just been inserted in
       current_calls. Should help debug unexplained delays of call notifications in
       agent console.
-    - Dialer: Asterisk 1.6.x expects context variables separated by commas, not 
+    - Dialer: Asterisk 1.6.x expects context variables separated by commas, not
       pipes. Should fix Elastix bug #558.
     - Dialer: asterisk 1.6.2.x emits Dial event with changed property name. Account
       for the difference in order to prevent access to undefined property.
     - Reports (Agent Information): behave properly when no queues have been defined.
-    - Agent Console: protect private declaration of getParameter() in call 
+    - Agent Console: protect private declaration of getParameter() in call
       programming so that it does not conflict with Elastix 2 framework. Fixes
       Elastix bug #478.
-    - Trunks Used per Hour: fix over-complicated query for active trunks from 
+    - Trunks Used per Hour: fix over-complicated query for active trunks from
       FreePBX database that resulted in misnamed trunk sources. Should fix Elastix
       bug #499.
-    - Campaigns Out: set array variables holding recordsets to NULL as soon as 
+    - Campaigns Out: set array variables holding recordsets to NULL as soon as
       possible in the CSV download codepath. This reduces memory usage and allows
       processing of a larger number of call records without exceeding the PHP
-      memory limit. Also, for the same purpose, replace superfluous array 
+      memory limit. Also, for the same purpose, replace superfluous array
       assignment via loop, with direct recordset assignment.
 
 * Mon Aug 23 2010 Alex Villacis Lasso <a_villacis@palosanto.com> 2.0.0-9
@@ -1252,39 +1257,39 @@ fi
 1.5-3.6 (SVN revision 1713)
     - Configuration: detect and use generic-cloexec if available. Should fix issue
       of httpd failing to restart due to dialer process grabbing HTTP[S] ports
-      as in Elastix bug #425. If generic-cloexec is not available, this has no 
+      as in Elastix bug #425. If generic-cloexec is not available, this has no
       effect.
-    - Dialer: remove broken "reload" verb support from init script. Should fix 
+    - Dialer: remove broken "reload" verb support from init script. Should fix
       Elastix bug #434.
     - Reports (Agent Connection Time, Agent Information, Trunks Used per Hour):
       remove hardcoded freePBX database credentials, and instead parse them from
       /etc/amportal.conf .
-    - Dialer: with low-quality phone number databases with lots of repeated 
+    - Dialer: with low-quality phone number databases with lots of repeated
       numbers, the generation of a call with the same number as one already
       being originated or monitored will confuse the dialer and mix up events.
-      So skip over calls that duplicate calls already originated/in progress.  
+      So skip over calls that duplicate calls already originated/in progress.
     - Dialer: if the AMI reports an OriginateResponse with a Success status, but
       the channel (or an auxiliary channel) has seen a Hangup, treat the call as
-      a failure instead. 
+      a failure instead.
     - Dialer: when receiving a Link event before an OriginateResponse, do not wait
-      until the OriginateResponse if the Uniqueid is known. Instead, fake an 
-      OriginateResponse event to handle the call as soon as possible. 
+      until the OriginateResponse if the Uniqueid is known. Instead, fake an
+      OriginateResponse event to handle the call as soon as possible.
     - Dialer: prevent event re-entrancy when originating outgoing calls and pausing
       queue agents.
     - Dialer: document more possible re-entrancy points where nested event handling
       could happen.
     - Dialer: add debugging function to dump list of current_calls to log
-    - Dialer: phpagi-asmanager-elastix.php: factor out handling of queued events 
+    - Dialer: phpagi-asmanager-elastix.php: factor out handling of queued events
       into a separate function, and add events to the queue, not only on reentrancy,
       but also when the queue is non-empty. This ensures that any events already in the
       queue when entering wait_response() will be dispatched before any new events
-      that were picked up on the event loop.  
+      that were picked up on the event loop.
     - Calls Detail: fix broken chronological ordering of call records. Spotted while
       fixing Elastix bug #373.
     - Calls Detail: when filtering by phone number, the SELECT statement for incoming
       calls failed to take into account that there might be no contact available for
       a given incoming call, but the Caller ID was available anyway. This resulted in
-      missing incoming calls when filtering by telephone. Fixed. Should fix Elastix 
+      missing incoming calls when filtering by telephone. Fixed. Should fix Elastix
       bug #373.
 
 * Mon Jun 21 2010 Alex Villacis Lasso <a_villacis@palosanto.com> 2.0.0-8
@@ -1292,17 +1297,17 @@ fi
 - From CHANGELOG:
 1.5-3.5 (SVN revision 1563)
     - Dialer: add and use new column to record timestamp of Originate execution for
-      call. This is needed for upcoming support for outgoing monitoring 
-      information. 
+      call. This is needed for upcoming support for outgoing monitoring
+      information.
     - Reports Break: rewrite introduced a regression in date select that prevented
       data from being fetched if the start and end date are the same. Fixed. Should
       fix Elastix bug #360.
     - Dialer: fix accessing of undefined Uniqueid variable in OnDial event.
     - Agent Console: recognize call attributes that are HTTP URLs, and display them
       as hyperlinks.
-    - Dialer: merge fix to prevent stale pidfile that happens to match an active 
-      process from making the daemon hang on startup. See Elastix bug #356. 
-    - Agent Console: add interface for scheduling of calls to particular agents. 
+    - Dialer: merge fix to prevent stale pidfile that happens to match an active
+      process from making the daemon hang on startup. See Elastix bug #356.
+    - Agent Console: add interface for scheduling of calls to particular agents.
       This support requires a specific context to work properly.
 
 * Fri Jun 11 2010 Alex Villacis Lasso <a_villacis@palosanto.com> 2.0.0-7
@@ -1321,9 +1326,9 @@ fi
 - From CHANGELOG:
     1.5-3.3
     - Clients: implement download of existing contact information.
-    - Clients: rewrite file upload support to resemble campaign upload code, and 
+    - Clients: rewrite file upload support to resemble campaign upload code, and
       detect charset encoding. Intended to fix Elastix bug #334.
-    - Agent Console,Campaign Out: remove HTML codes from French translations, as 
+    - Agent Console,Campaign Out: remove HTML codes from French translations, as
       they seep into CSV export output. Fix #2 for Elastix bug #325.
     - Forms Designer: fix default selection of field type. Should prevent instances
       of Elastix bug #206.
@@ -1335,23 +1340,23 @@ fi
       order to always store UTF-8 data in the database. Currently detects UTF-8
       and ISO-8859-15. Should fix Elastix bug #325.
     - Agent Information: (1/2) Replace questionable UNION statement that tries to
-      fetch everything at once with three distinct SELECTs. The UNION mixed 
-      different datatypes in several columns, resulting in a mangling of UTF-8 
-      encoding for break names. This mangling required a workaround in the view 
+      fetch everything at once with three distinct SELECTs. The UNION mixed
+      different datatypes in several columns, resulting in a mangling of UTF-8
+      encoding for break names. This mangling required a workaround in the view
       via utf8_decode(), which did not work at all with characters outside latin-1.
       The mangling and the utf8_decode() workaround are no longer necessary.
       (2/2) Rewrite report to use the new data structure returned by (1/2). Remove
-      dead code from (1/2). Fix CSV export to not insert HTML tags in download. 
+      dead code from (1/2). Fix CSV export to not insert HTML tags in download.
     - Agent Console: fix issue in which a session or break is incorrectly marked as
-      belonging to an inactive agent with the same agent number as the current 
+      belonging to an inactive agent with the same agent number as the current
       active agent. Should fix Elastix bug #329.
     - Dialer: monitor additional instances of Uniqueid that can be associated with
       a given call and might hold additional call failure information in their
       Hangup events.
     - Reports Break: complete rewrite. Replace inefficient time lookup, and fix
       no-data issue on CSV export, as well as HTML tags in CSV export. Should fix
-      Elastix bug #324. 
-    - Dialer: add support for reopening of logs when receiving SIGHUP, and 
+      Elastix bug #324.
+    - Dialer: add support for reopening of logs when receiving SIGHUP, and
       implement a corresponding logrotate directive to make use of this.
     - Dialer: record hangup cause code and description for a failed outgoing call
       Currently implemented only for calls sent through default dialplan.
@@ -1373,20 +1378,20 @@ fi
 - From CHANGELOG:
     1.5-3.2
     - Form Designer: fix missing string translation
-    - Agent Console: fix reference for nonexistent icon image. 
+    - Agent Console: fix reference for nonexistent icon image.
     - Configuration: allow to save settings that include blank login, and
       blank out the password in that case, to use settings from manager.conf.
     - Dialer: store Asterisk 1.6.x Bridge event as Link in current_calls.
-    - Dialer: newer FreePBX versions store trunk information in table 
+    - Dialer: newer FreePBX versions store trunk information in table
       'asterisk.trunks' instead of 'asterisk.globals' as previous versions did.
-      The dialer daemon must look now on 'asterisk.trunks' if it exists. 
+      The dialer daemon must look now on 'asterisk.trunks' if it exists.
     - Dialer: seems newer FreePBX versions store DAHDI trunk information as DAHDI
       not ZAP as previous versions. The dialer now needs to check under both names
       when supplied a DAHDI trunk.
-    - Dialer: use queue show instead of show queue for free agent report. 
+    - Dialer: use queue show instead of show queue for free agent report.
     - Campaigns Out: modify CSV report of completed calls to add Uniqueid and all
       attributes defined for each call.
-    - Campaigns Out: previous fix for new campaign selection broke on old 
+    - Campaigns Out: previous fix for new campaign selection broke on old
       Elastix versions. Fix it properly for all Elastix versions.
     - Dialer: Handle Bridge event fired by Asterisk 1.6.2.x instead of Link
 
@@ -1419,7 +1424,7 @@ fi
     - Remove declarations of getParameter() that conflict with existing declaration
       included in Elastix 2.0
     - Merge new CallCenter reports into SVN:
-      - Agent Information: show summary of agent, first/last disconnection, and 
+      - Agent Information: show summary of agent, first/last disconnection, and
         received incoming calls.
       - Agents Monitoring: real-time status of agents per queue, with total login
         time and number of calls
@@ -1429,7 +1434,7 @@ fi
         percentage of agent session actually spent handling calls, per queue, over
         a specified time period.
       - Incoming calls monitoring: real-time summary of incoming calls, grouped
-        by queue and status. 
+        by queue and status.
     - Dialer: Always save start_time when marking a call as ShortCall. Should fix
       Elastix bug #262.
     - Dialer: Remove per-queue counter of pending calls. This code is prone to get
@@ -1438,7 +1443,7 @@ fi
     - Dialer: Fix assumption that Link and Join events will always occur after
       the OriginateResponse event. This does not always hold for calls made through
       the dialplan (Local/XXX@from-internal). Should fix issue of some calls not
-      being detected when using dialplan for campaigns. 
+      being detected when using dialplan for campaigns.
     - Dialer: An incoming call that is transferred should result in the agent being
       marked as idle in the database, instead of incorrectly keep displaying the
       information for the transferred call. Fixes Elastix bug #213.
@@ -1446,13 +1451,13 @@ fi
     - Agent Console: only build VTiger link if contact information for incoming call
       actually exists.
     - Agent Console: fix case typo for reference to translated string
-    - Agent Console: tweak loading of language files to have English strings as 
+    - Agent Console: tweak loading of language files to have English strings as
       fallback if no localized string is available
     - Break Administrator: fix reference to nonexistent translation string. Spotted
       and fixed by Jorge Gutierrez.
     - Agents: detect and fail operation to add an agent if the agent already exists.
       Should fix Elastix bug #209
-    - Agents: remove obsolete parameter from method call that references an 
+    - Agents: remove obsolete parameter from method call that references an
       undefined variable.
     - Merge improvements to templates for Campaign Out by Franck Danard
     - Display callerid as incoming number for incoming calls
@@ -1464,10 +1469,10 @@ fi
 
     - Agents: Merge changes from http://elajonjoli.org/node/25 to provide defined
       ordering of agent report and reloading just chan_agent, not entire Asterisk,
-      when agent configuration changes. Tracked at Elastix bug #191. 
+      when agent configuration changes. Tracked at Elastix bug #191.
 
     - Dialer - fix check for wrong column name that led to assuming nonexistent
-      support for scheduled agents on systems that lack the required column 
+      support for scheduled agents on systems that lack the required column
       'calls.agent'.
 
     - Agents: Major rewrite:
@@ -1486,12 +1491,12 @@ fi
      - Replace pattern of copying configuration file into temporary file
      - Improve interface to place agent removal functionality in main screen
      - Simplify loading and parsing of agent configuration file
-     - Move filter HTML into separate template 
+     - Move filter HTML into separate template
 
     1.5-2
-    - Agents, Calls Detail, Calls per Agent, Calls per Hour, Campaign Out, 
+    - Agents, Calls Detail, Calls per Agent, Calls per Hour, Campaign Out,
       Form Designer, Hold Time, Incoming Calls Success, Login/Logout, Reports Break,
-      : Tweak loading of language files to have English strings as fallback if no 
+      : Tweak loading of language files to have English strings as fallback if no
       localized string is available
     - Agents: Add missing English language strings
     - Agents: Look for phpagi-asmanager.php in libs/ in addition to /var/lib/asterisk/agi-bin
@@ -1500,38 +1505,38 @@ fi
     - Report - Calls Detail: Add missing language string
     - Report - Calls per Agent: Add missing language string
     - Report - Calls per Hour: Fix incorrect index for internationalized strings
-    - Report - Hold Time: Actually define internationalized strings that are being 
+    - Report - Hold Time: Actually define internationalized strings that are being
       used.
     - Report - Incoming Calls Success: Fix use of undefined variables when no calls
       are present
-    - Report - Login/Logout: Actually define internationalized strings that are 
+    - Report - Login/Logout: Actually define internationalized strings that are
       being used.
-    - Break Administrator: Actually define internationalized strings that are being 
+    - Break Administrator: Actually define internationalized strings that are being
       used.
     - Form Designer: Actually define internationalized strings that are being used.
-    - Report - Calls Details: Actually define internationalized strings that are 
+    - Report - Calls Details: Actually define internationalized strings that are
       being used.
-    - Dialer - Fix bug in which a scheduled agent in pause would receive calls even 
+    - Dialer - Fix bug in which a scheduled agent in pause would receive calls even
       when paused.
-    - Dialer - Try harder to work around a bug in some Asterisk versions where 
-      agents are reported as busy when they are really free, by manually modifying 
+    - Dialer - Try harder to work around a bug in some Asterisk versions where
+      agents are reported as busy when they are really free, by manually modifying
       the Asterisk database and restarting Asterisk.
     - Dialer - Fix use of undefined variable in some code paths.
-    - Dialer - Fix bug in which an agent that belongs to both an incoming and 
+    - Dialer - Fix bug in which an agent that belongs to both an incoming and
       outgoing campaign will cause outgoing calls to be handled as incoming.
     - Outgoing Campaigns: Major rewrite:
-     - Code cleanup/refactoring to remove duplicated functionality between creation 
+     - Code cleanup/refactoring to remove duplicated functionality between creation
        and modification of a campaign.
      - Use rawmode for display of CSV data instead of a separate callable PHP script.
-     - Improve usability of New Campaign/Edit Campaign with links to relevant 
+     - Improve usability of New Campaign/Edit Campaign with links to relevant
        resource managers.
-     - Display error message instead of form when trying to create an outgoing 
+     - Display error message instead of form when trying to create an outgoing
        campaign without   defining forms or queues, or when all available queues are
        used by incoming campaigns.
-     - Move out embedded HTML markup for report filter into a separate Smarty 
+     - Move out embedded HTML markup for report filter into a separate Smarty
        template.
      - Rework query for campaign CSV data to be more readable.
-     - Rework campaign report to make accessible more of the available 
+     - Rework campaign report to make accessible more of the available
        functionality. Now the operations for Deactivate/Delete campaign are show in
        the report instead of having to use the View link.
      - Fixed use of undefined localized strings.
@@ -1543,12 +1548,12 @@ fi
      - Rewrite code to remove write of query data to a temporary PHP file, replaced
        by rawmode and proper query
      - Refactor code to eliminate repeating code for hour processing
-     - Use SQL with GROUP BY and IF conditionals to replace PHP code that built 
+     - Use SQL with GROUP BY and IF conditionals to replace PHP code that built
        histogram from a direct query of calls
      - Move out HTML code for report filter into a proper template
      - Fix use of undefined localization strings
-    - Dialer - Fixed improper handling of multiple Link events for monitored 
-      incoming calls that lead to temporary incoming call information not being 
+    - Dialer - Fixed improper handling of multiple Link events for monitored
+      incoming calls that lead to temporary incoming call information not being
       removed from the database
     - At long last, actually include a CHANGELOG in the tarball ;-)
     - Ingoing Calls Success - remove vim swapfile unwittingly committed into repository
@@ -1557,14 +1562,14 @@ fi
     - Agent Console: Fix up conformance to XHTML in several templates.
     - Add missing translations for strings "Name" and "Retype Password" (Elastix bug
       #167)
-    - Dialer Configuration: Add support for setting Service Percent (97 percent by 
+    - Dialer Configuration: Add support for setting Service Percent (97 percent by
       default)
     - Report - Calls Detail: Actually use internationalized string for "End Time"
-    - Report - Calls per Hour: Actually use internationalized strings for call 
+    - Report - Calls per Hour: Actually use internationalized strings for call
       states
     - Report - Calls per Hour: Expand French localization strings
-    - Outgoing Campaigns: Add library support (not yet exposed in interface) to 
-      leave trunk blank in order to use default Asterisk dialplan through 
+    - Outgoing Campaigns: Add library support (not yet exposed in interface) to
+      leave trunk blank in order to use default Asterisk dialplan through
       Local/$OUTNUM$@from-internal
     - Report - Graphic Calls per hour: fix French localization for "Total Calls"
     - Report - Hold Time: Internationalize strings for average wait time
@@ -1580,15 +1585,15 @@ fi
       odds that a currently-active call will hang up after a certain set time.
       Previously this value was hardcoded to 97 percent. This parameter is exposed
       on the web configuration as Service Percent.
-    - Dialer - Add code to verify whether the database connection was lost and 
+    - Dialer - Add code to verify whether the database connection was lost and
       attempt to reconnect to the database periodically.
-    - Dialer - Add code to figure out the time between originating a call and 
-      linking the call to an agent, and use it for predictive calculations. 
+    - Dialer - Add code to figure out the time between originating a call and
+      linking the call to an agent, and use it for predictive calculations.
       Previously this value was hardcoded to 8 seconds.
     - Dialer - Add enter/exit trace code for debugging events
-    - Dialer - Record incoming trunk for incoming calls, if database column is 
+    - Dialer - Record incoming trunk for incoming calls, if database column is
       available
-    - Dialer - Add code to attempt to eliminate reentrancy on handling of Asterisk 
+    - Dialer - Add code to attempt to eliminate reentrancy on handling of Asterisk
       events.
     - Dialer - Remove dead code for normal distribution for call prediction.
 

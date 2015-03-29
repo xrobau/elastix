@@ -42,10 +42,10 @@ function changeActivateDefault()
 {
     var status = $('#statusSpam').val();
     if(status=="active"){
-        $("input[name=chkoldstatus]").attr("checked", "checked");
+        $("input[name=chkoldstatus]").prop("checked", true);
         $("#status").val("on");
     }else{
-        $("input[name=chkoldstatus]").removeAttr("checked");
+        $("input[name=chkoldstatus]").prop("checked", false);
         $("#status").val("off");
     }
 }

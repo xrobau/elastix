@@ -1,6 +1,6 @@
 %define modname email_admin
 
-Summary: Elastix Module Email 
+Summary: Elastix Module Email
 Name:    elastix-%{modname}
 Version: 2.5.0
 Release: 2
@@ -81,7 +81,7 @@ mv setup/usr/local/bin/spamfilter.sh          $RPM_BUILD_ROOT/usr/local/bin/
 
 rmdir setup/etc/postfix setup/etc
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
-rmdir setup/usr/local/bin setup/usr/local setup/usr 
+rmdir setup/usr/local/bin setup/usr/local setup/usr
 
 mv setup/   $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 mv menu.xml $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
@@ -199,7 +199,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Thu Mar 12 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Sun Mar 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam - jQuery-1.11.2 migration: fix incorrect use of attribute
+  instead of property.
+  SVN Rev[6925]
+
+* Thu Mar 12 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Antispam: do not depend on output from "service spamassassin status"
   command, and instead check for return code. Fixes Elastix bug #2196.
   SVN Rev[6905]
@@ -208,24 +213,24 @@ fi
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
 
-* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com>
 - ADDED: /core/reports/setup/build/ added library php-PHPMailer
   SVN Rev[6863]
 
-* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com>
 - ADDED: /core/email_admin/setup/build/ added library php-jpgraph
   SVN Rev[6861]
 
-* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com>
 - CHANGED: core/email_admin/modules/email_stats/lang: language
   SVN Rev[6860]
 
-* Wed Feb 18 2015 Armando Chuto <armando@palosanto.com> 
+* Wed Feb 18 2015 Armando Chuto <armando@palosanto.com>
 - CHANGED: the PHPMailer directory change of var/www/html/libs to
   usr/share/php/PHPMailer/class.smtp.php
   SVN Rev[6855]
 
-* Mon Nov 24 2014 Bruno Macias <bmacias@palosanto.com> 
+* Mon Nov 24 2014 Bruno Macias <bmacias@palosanto.com>
 - FIXED: module email_admin, when service is off, port number, user and
   password are not saved. Keep defaults as port number 25 and user -
   password is null. bugs.elastix.org[#2025].
@@ -235,7 +240,7 @@ fi
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
 
-* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
   packages were depreciated many functions, the equivalent functions are
   updated in the files that use to have the menctioned functions.
@@ -253,7 +258,7 @@ fi
   SVN Rev[6342]
 
 * Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Antispam, Remote SMTP: update jquery.ibutton.js to 1.0.03, fix 
+- CHANGED: Antispam, Remote SMTP: update jquery.ibutton.js to 1.0.03, fix
   potential incompatibilities with jQuery 1.9+
   SVN Rev[6329]
 
@@ -262,43 +267,43 @@ fi
   SVN history. Bump Release in specfile.
   SVN Rev[5785]
 
-* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file es.lang.
   SVN Rev[5736]
 
-* Mon Aug 12 2013 Jose Briones <jbriones@palosanto.com> 
+* Mon Aug 12 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5718]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added translation file fr.lang.
   SVN Rev[5616]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added translation file fr.lang.
   SVN Rev[5615]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added translation file fr.lang.
   SVN Rev[5614]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5613]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5612]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5611]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5610]
 
-* Tue Aug 06 2013 Jose Briones <jbriones@palosanto.com> 
+* Tue Aug 06 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Added support to translate some error messages.
   SVN Rev[5570]
 
@@ -312,52 +317,52 @@ fi
   refusing to run mail traffic sampler. Fixes Elastix bug #1635.
   SVN Rev[5511]
 
-* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module vacations. Correction of some mistakes in the translation
   files.
   SVN Rev[5497]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module remote_smtp. Correction of some mistakes in the translation
   files.
   SVN Rev[5496]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module email_accounts. Correction of some mistakes in the
   translation files.
   SVN Rev[5495]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module vacations. Correction of some mistakes in the translation
   files.
   SVN Rev[5476]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module remote_smtp. Correction of some mistakes in the translation
   files.
   SVN Rev[5456]
 
-* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module  email_stats. Correction of some mistakes in the translation
   files.
   SVN Rev[5397]
 
-* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module  email_list. Correction of some mistakes in the translation
   files.
   SVN Rev[5396]
 
-* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module  email_domains. Correction of some mistakes in the
   translation files.
   SVN Rev[5395]
 
-* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 24 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module email_accounts. Correction of some mistakes in the
   translation files.
   SVN Rev[5394]
 
-* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module antispam. Correction of some mistakes in the translation to
   english.
   SVN Rev[5337]
@@ -372,8 +377,8 @@ fi
   SVN Rev[4983]
 
 * Fri May 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Vacations: add shell escaping to fix potential code injection 
-  vulnerabilities in vacation script configuration. Pointed out by Fortify 
+- CHANGED: Vacations: add shell escaping to fix potential code injection
+  vulnerabilities in vacation script configuration. Pointed out by Fortify
   report.
   SVN Rev[4973]
 
@@ -424,7 +429,7 @@ fi
   SVN Rev[4648]
 
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
-- CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in 
+- CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in
   specfile according to the current branch.
   SVN Rev[4636]
 
@@ -474,10 +479,10 @@ fi
   SVN history. Changed release in specfile.
   SVN Rev[4441]
 
-* Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 
-- CHANGED: Email_admin: comment out statement that logs every single IMAP 
+* Fri Nov 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email_admin: comment out statement that logs every single IMAP
   command, inherited from the Stickgate project.
-  SVN Rev[4420] 
+  SVN Rev[4420]
 
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-9
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
@@ -485,30 +490,30 @@ fi
   SVN Rev[4356]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Framework,Modules: remove temporary file preversion_MODULE.info under 
+- Framework,Modules: remove temporary file preversion_MODULE.info under
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
-  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on
   RPM update. Part of the fix for Elastix bug #1398.
 - Framework,Modules: switch as many files and directories as possible under
-  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
   Elastix bug #1399.
-- Framework,Modules: clean up specfiles by removing directories under 
+- Framework,Modules: clean up specfiles by removing directories under
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
   SVN Rev[4347]
 
 * Tue Oct  9 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Email Relay: create new helper script 'relayconfig' and use it to 
+- CHANGED: Email Relay: create new helper script 'relayconfig' and use it to
   reimplement the modification of the email relay list. This removes the last
   four sudo chown instances in the Elastix core packages.
-  SVN Rev[4336] 
-- CHANGED: Email List: extend helper script 'mailman_config' to add action to 
-  check main.cf, and use it to reimplement the check. This removes one indirect 
+  SVN Rev[4336]
+- CHANGED: Email List: extend helper script 'mailman_config' to add action to
+  check main.cf, and use it to reimplement the check. This removes one indirect
   use of sudo chown via escribir_configuracion.
-  SVN Rev[4334] 
-- CHANGED: SMTP Relay: create new helper script 'remotesmtp' and use it to 
+  SVN Rev[4334]
+- CHANGED: SMTP Relay: create new helper script 'remotesmtp' and use it to
   reimplement administration of SMTP relay. This removes six instances of sudo
-  chown, two uses of sudo to restart services, and one indirect use of sudo 
+  chown, two uses of sudo to restart services, and one indirect use of sudo
   chown via escribir_configuracion.
   SVN Rev[4333]
 - CHANGED: SMTP Relay: mark some methods as private, and some cleanup.
@@ -516,14 +521,14 @@ fi
 
 * Fri Oct  5 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam: extend spamconfig helper to refresh spam filter on request
-  and reimplement checkSpamFolder.php on top of this. This unifies the 
+  and reimplement checkSpamFolder.php on top of this. This unifies the
   implementation of the spam script refresh and simplifies the antispam API.
   SVN Rev[4328]
-- CHANGED: Antispam: reimplement GUI operations via the spamconfig helper 
+- CHANGED: Antispam: reimplement GUI operations via the spamconfig helper
   module. This manages to remove a large amount of instances of sudo chown.
   SVN Rev[4327]
-- CHANGED: Antispam: the spam removal interval is empty if antispam cronfile 
-  does not exist. Take advantage of this to simplify display logic and remove 
+- CHANGED: Antispam: the spam removal interval is empty if antispam cronfile
+  does not exist. Take advantage of this to simplify display logic and remove
   one sudo chown.
   SVN Rev[4326]
 - ADDED: New helper script 'spamconfig'. This script enables and disables spam
@@ -532,7 +537,7 @@ fi
 
 * Thu Sep 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Antispam: methods uploadScriptSieve and deleteScriptSieve are used
-  only when enabling spam filtering, so the calls to the methods are now 
+  only when enabling spam filtering, so the calls to the methods are now
   integrated to activateSpamFilter. Now the two methods can become private.
   SVN Rev[4219]
 
@@ -552,7 +557,7 @@ fi
 - CHANGED: Accounts: fix remaining methods in paloEmail to use SQL parameters.
   SVN Rev[4216]
 - CHANGED: Accounts: extend email_account helper script to change the password
-  of a single mail account. Rework invocation of saslpasswd2 to use popen 
+  of a single mail account. Rework invocation of saslpasswd2 to use popen
   instead of echo via the shell.
   SVN Rev[4215]
 
@@ -569,12 +574,12 @@ fi
   SVN Rev[4211]
 
 * Thu Sep 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Accounts: extend email_account helper script to add and remove 
+- CHANGED: Accounts: extend email_account helper script to add and remove
   individual mail accounts.
   SVN Rev[4210]
 
 * Wed Sep 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Domains: extend email_account helper script to add and remove 
+- CHANGED: Domains: extend email_account helper script to add and remove
   mail domains. Domain operations are now reimplemented on top of the extended
   email_account helper. This removes some uses of paloSantoConfig (indirect
   sudo chown) and removes the need to grant sudo access to /usr/sbin/postfix.
@@ -617,12 +622,12 @@ fi
   SVN REV[3966]
 
 * Fri Apr 13 2012 Luis Abarca <labarca@palosanto.com>
-- ADDED: Build - SPEC's: The spec files were added to the corresponding modules 
+- ADDED: Build - SPEC's: The spec files were added to the corresponding modules
   and the framework.
   SVN REV[3849]
 
 * Mon Apr 02 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-6
-- CHANGED: Email_Admin - Remote_Smtp: Changed in index.php and remote.js to 
+- CHANGED: Email_Admin - Remote_Smtp: Changed in index.php and remote.js to
   show other as default option in smpt_server
   SVN REV[3820] - [3819]
 
@@ -640,7 +645,7 @@ fi
   SVN Rev[3793]
 
 * Tue Mar 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-4
-- ADDED: email_admin - privileged/email_account: Script that repair mailbox 
+- ADDED: email_admin - privileged/email_account: Script that repair mailbox
   when cyrus file have been corrupted
   Svn Rev[3784]
 
@@ -666,7 +671,7 @@ fi
 - CHANGED: In spec file, changed prereq elastix-framework >= 2.3.0-2
 - CHANGED: Modules - Email_List: Add filter controls in the reports
   SVN Rev[3734]
-- CHANGED: Modules - Email_List: Add filter controls in the reports and now 
+- CHANGED: Modules - Email_List: Add filter controls in the reports and now
   dyplay in the grid the action export_account y return
   SVN Rev[3733]
 
@@ -682,13 +687,13 @@ fi
   SVN Rev[3639].
 
 * Wed Feb 1 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-14
-- CHANGED: In spec file changed Prereq elastix to 
+- CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-30
 - CHANGED: to fixed the problem with the paged. SVN Rev[3613].
 
 * Fri Jan 27 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-13
 - CHANGED: In spec file changed Prereq elastix to elastix-framework >= 2.2.0-28
-- CHANGED: modules - images: icon image title was changed on some modules. 
+- CHANGED: modules - images: icon image title was changed on some modules.
   SVN Rev[3572].
 - CHANGED: modules - trunk/core/email_admin/modules/email_accounts/themes
   /default/accounts_filter.tpl: Se modifico el archivo accounts_filter.tpl
@@ -696,22 +701,22 @@ fi
   filtro. SVN Rev[3569].
 - CHANGED: modules - vacation: Se cambia mensaje default que aparece al
   activar las vacaciones. SVN Rev[3567].
-- CHANGED: modules - icons: Se cambio de algunos módulos los iconos que 
+- CHANGED: modules - icons: Se cambio de algunos módulos los iconos que
   los representaba. SVN Rev[3563].
 - UPDATED: modules - popup-grid: Se incluye hoja de estilo table.css para
   la presentación nueva de las tablas-grillas. SVN Rev [3550].
 - CHANGED: modules - * : Cambios en ciertos mòdulos que usan grilla para
-  mostrar ciertas opciones fuera del filtro, esto debido al diseño del 
-  nuevo filtro. SVN Rev[3549]. 
-- UPDATED: modules - *.tpl: Se elimino en los archivos .tpl de ciertos 
+  mostrar ciertas opciones fuera del filtro, esto debido al diseño del
+  nuevo filtro. SVN Rev[3549].
+- UPDATED: modules - *.tpl: Se elimino en los archivos .tpl de ciertos
   módulos que tenian una tabla demás en su diseño de filtro que formaba
   parte de la grilla. SVN Rev [3541].
- 
+
 * Tue Jan 17 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-12
 - CHANGED: In spec file changed Prereq elastix to elastix-framework >= 2.2.0-26
-- ADDED: modules - antispam/libs/paloSantoAntispam.class.php: Al iniciar y 
-  apagar el servicio de antispam se agrego la acción de que el servicio 
-  sea tambien agregado o quitado en chkconfig para que cumpla los 
+- ADDED: modules - antispam/libs/paloSantoAntispam.class.php: Al iniciar y
+  apagar el servicio de antispam se agrego la acción de que el servicio
+  sea tambien agregado o quitado en chkconfig para que cumpla los
   efectos adecuados al reiciar el servidor. SVN Rev[3501].
 
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-11
@@ -720,20 +725,20 @@ fi
 
 * Tue Nov 22 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-10
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-15
-- CHANGED: module email_accounts, the asterisks and word 
-  "Required field" were removed when option "File Upload" is 
+- CHANGED: module email_accounts, the asterisks and word
+  "Required field" were removed when option "File Upload" is
   activated. SVN Rev[3326]
-- CHANGED: module email_domains, the asterisks and word 
+- CHANGED: module email_domains, the asterisks and word
   "Requiered field" were removed from the form. SVN Rev[3321]
-- CHANGED: module email_accounts, in spanish changed the word 
+- CHANGED: module email_accounts, in spanish changed the word
   "quota" to "cuota". SVN Rev[3292]
-- CHANGED: module email_accounts, now the administrator can 
+- CHANGED: module email_accounts, now the administrator can
   change the quota of an account without changing the password
   SVN Rev[3291]
-- CHANGED: library paloSantoEmail.class.php, added a function 
-  called "accountExists" that determines if an account given 
+- CHANGED: library paloSantoEmail.class.php, added a function
+  called "accountExists" that determines if an account given
   exists or not. SVN Rev[3290]
-- FIXED: Email List: remove nested <form> tag, again in 
+- FIXED: Email List: remove nested <form> tag, again in
   membership report. SVN Rev[3275]
 - FIXED: Email List: remove nested <form> tag. SVN Rev[3274]
 
@@ -742,13 +747,13 @@ fi
 
 * Sat Oct 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-8
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-12
-- FIXED: Modules - Vacations: Fixed template to get data by user 
+- FIXED: Modules - Vacations: Fixed template to get data by user
   account (popup) in theme elastixNeo. SVN Rev[3196]
-- CHANGED: module vacations, the module title is now handled by 
+- CHANGED: module vacations, the module title is now handled by
   the framework. SVN Rev[3176]
-- CHANGED: module email_stats, the module title is now handled 
+- CHANGED: module email_stats, the module title is now handled
   by the framework. SVN Rev[3143]
-- CHANGED: module email_list, the module title is now handled 
+- CHANGED: module email_list, the module title is now handled
   by the framework. SVN Rev[3141]
 - CHANGED: module remote_smtp, the module title is now handled
   by the framework. SVN Rev[3139]
@@ -762,7 +767,7 @@ fi
   by the framework. SVN Rev[3132]
 
 * Tue Sep 27 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-7
-- CHANGED: module email_accounts, use of function fgetcsv to 
+- CHANGED: module email_accounts, use of function fgetcsv to
   parse the csv file
   SVN Rev[2991]
 
@@ -774,7 +779,7 @@ fi
 - CHANGED: module email_domains, in view mode the asterisks
   and word required were removed
   SVN Rev[2948]
-- FIXED: main.cf.elastix, commented line inet_protocols = all 
+- FIXED: main.cf.elastix, commented line inet_protocols = all
   due to warnings in log /var/log/maillog
   SVN Rev[2938]
 - CHANGED: script postfix_stats.php, now the output is redirected
@@ -786,8 +791,8 @@ fi
   SVN Rev[2931]
 
 * Tue Aug 30 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-5
-- FIXED: Email Admin - Vacations: Fixed bug where registers was 
-  duplicated sometimes, this error was produced by updating of 
+- FIXED: Email Admin - Vacations: Fixed bug where registers was
+  duplicated sometimes, this error was produced by updating of
   status vacations per account. SVN Rev[2924]
 
 * Mon Aug 29 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-4
@@ -835,26 +840,26 @@ fi
   SVN Rev[2874]
 
 * Wed Aug 03 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-2
-- FIXED: module email_list, the report was displaying the members 
+- FIXED: module email_list, the report was displaying the members
   of all lists. Now only displays the members of the selected list
   SVN Rev[2867]
 
 * Tue Aug 02 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-1
 - FIXED: mailman_config, fixed security holes
   SVN Rev[2860]
-- CHANGED: module email_admin, in file default.conf.php was a 
+- CHANGED: module email_admin, in file default.conf.php was a
   wrong module name
   SVN Rev[2859]
-- FIXED: module email_list, the module email_list was totally 
+- FIXED: module email_list, the module email_list was totally
   overwritten
   SVN Rev[2858]
 - CHANGED: In Spec file changed prereq elastix >= 2.2.0-1
 - ADDED: In Spec file added requires mailman >= 2.1.9
 
 * Fri Jul 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-17
-- FIXED: Modules - Antispam: Fixed bug where spams were not deleted 
-  due to the command store do not receive the ids separate by ",". 
-  Other reason was the amount of spam in one line and the request 
+- FIXED: Modules - Antispam: Fixed bug where spams were not deleted
+  due to the command store do not receive the ids separate by ",".
+  Other reason was the amount of spam in one line and the request
   sent by socket support a limit of size in bytes. SVN Rev[2846]
 
 * Thu Jun 30 2011 Alberto Santos <asantos@palosanto.com> 2.0.4-16
@@ -864,33 +869,33 @@ fi
 
 * Fri Jun 24 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-15
 - CHANGED: In Spec file change prereq elastix >= 2.0.4-25
-- CHANGED: Email_admin - Vacations: Change label about 
+- CHANGED: Email_admin - Vacations: Change label about
   translations (en.lang, es.lang). SVN Rev[2752][2753]
-- CHANGED: Email_admin - Email_Domain: Better organization in 
+- CHANGED: Email_admin - Email_Domain: Better organization in
   structure of code. This commit require SVN Rev[2738]
   SVN Rev[2740][2751]
-- CHANGED: Email_admin - Email_Account: Better organization in 
+- CHANGED: Email_admin - Email_Account: Better organization in
   structure of code. This commit require SVN Rev[2738].
   SVN Rev[2739]
-- CHANGED: EMAIL_ADMIN - Setup: Add new functions 
+- CHANGED: EMAIL_ADMIN - Setup: Add new functions
   in paloSantoEmail.class.php. This commit require SVN Rev[2737]
   SVN Rev[2738]
 
 * Mon Jun 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-14
-- NEW:     Email_admin - Vacations: New module in email to configure 
+- NEW:     Email_admin - Vacations: New module in email to configure
   the automatic replies when a user is not available. SVN Rev[2718]
-- CHANGED: Email_admin - Antispam: Changes in Antispam to support 
+- CHANGED: Email_admin - Antispam: Changes in Antispam to support
   the new modules Vacations. SVN Rev[2718]
 - NEW: new module email_stats. SVN Rev[2703]
-- CHANGED: Modules - Trunk: The ereg function was replaced by the 
-  preg_match function due to that the ereg function was deprecated 
+- CHANGED: Modules - Trunk: The ereg function was replaced by the
+  preg_match function due to that the ereg function was deprecated
   since PHP 5.3.0. SVN Rev[2688]
-- CHANGED: The split function of these modules was replaced by the 
-  explode function due to that the split function was deprecated 
+- CHANGED: The split function of these modules was replaced by the
+  explode function due to that the split function was deprecated
   since PHP 5.3.0. SVN Rev[2650][2668]
-- CHANGED: Email_admin - Remote_smtp: Add validation if the server 
-  is "GMAIL, HOTMAIL or YAHOO" required add the account with password, 
-  but "OTHER"  is not necessary add account and password, so the user 
+- CHANGED: Email_admin - Remote_smtp: Add validation if the server
+  is "GMAIL, HOTMAIL or YAHOO" required add the account with password,
+  but "OTHER"  is not necessary add account and password, so the user
   has the option to add or not an account whit the server is "OTHER".
   SVN Rev[2625]
 
@@ -900,48 +905,48 @@ fi
 - CHANGED: In Spec file, changed prereq of elastix to 2.0.4-19
 
 * Wed Apr 06 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0-4-12
-- FIXED:   email_admin - remote_smtp:  Fixed the event to add a 
-  relay smtp host where if the host needs a certificate ,this 
-  allow to send emails through but the mail server cannot 
+- FIXED:   email_admin - remote_smtp:  Fixed the event to add a
+  relay smtp host where if the host needs a certificate ,this
+  allow to send emails through but the mail server cannot
   receive mails. SVN Rev[2517]
 
 * Tue Apr 05 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-11
-- CHANGED:  email_admin - antispam: Changes translation lang 
+- CHANGED:  email_admin - antispam: Changes translation lang
   files. SVN Rev[2509]
-- FIXED: Module Remote SMTP, bad definition language Ex. 
+- FIXED: Module Remote SMTP, bad definition language Ex.
   SVN Rev[2505]
 - CHANGED: Email - Antispam: Changed sieve script to improve
   Spam filtering. SVN Rev[2503]
-- CHANGED: Module antispam, replace "start service" to 
+- CHANGED: Module antispam, replace "start service" to
   "restart service". SVN Rev[2500]
 
 * Tue Mar 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-10
 - CHANGED: Fixed usability bug:
-  "http://bugs.elastix.org/view.php?id=799" where password fields 
+  "http://bugs.elastix.org/view.php?id=799" where password fields
   (password and re-type password) must be join. SVN Rev[2468]
-- CHANGED: Email - Remote SMTP:  Add label as example: 
-  username@domain.com and change the image of help. 
-  Change labels user (Email Account) password (Email Account) 
+- CHANGED: Email - Remote SMTP:  Add label as example:
+  username@domain.com and change the image of help.
+  Change labels user (Email Account) password (Email Account)
   to Username and Password. SVN Rev[2467]
 
 * Mon Mar 28 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-9
-- CHANGED: Email - Antispam: Change el name of button "Update" 
+- CHANGED: Email - Antispam: Change el name of button "Update"
   to "Save". SVN Rev[2466]
-- CHANGED: New look and styles in Remote SMTP. Add functionality 
-  to show the commons Mail servers like GMAIL, HOTMAIL, YAHOO. 
+- CHANGED: New look and styles in Remote SMTP. Add functionality
+  to show the commons Mail servers like GMAIL, HOTMAIL, YAHOO.
   SVN Rev[2465]
-- FIXED:   Fix bug "http://bugs.elastix.org/view.php?id=800". 
-  Form don't have any required values. However appear a 
+- FIXED:   Fix bug "http://bugs.elastix.org/view.php?id=800".
+  Form don't have any required values. However appear a
   legend "* Required field", this legend must be removed.
   SVN Rev[2464]
-- CHANGED: Change the styles of remote smtp module and the way 
-  to create certificates was changed by executing a 
-  command "/etc/pki/tls/certs/make-dummy-cert" to create a 
+- CHANGED: Change the styles of remote smtp module and the way
+  to create certificates was changed by executing a
+  command "/etc/pki/tls/certs/make-dummy-cert" to create a
   new certicate. SVN Rev[2460]
 
 * Thu Mar 24 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-8
-- FIXED:  modules - email_admin: Fixed bug where Spam folder 
-  per user was never "subscribe". 
+- FIXED:  modules - email_admin: Fixed bug where Spam folder
+  per user was never "subscribe".
   For more information "http://bugs.elastix.org/view.php?id=792"
   SVN Rev[2455]
 
@@ -949,20 +954,20 @@ fi
 - CHANGED: In spec file move files to execute the action to
   to remove Spam and create Spam folders per email accounts.
 - CHANGED: In spec file change prereq elastix >= 2.0.4-13
-- CHANGED: email_admin - antispam:  Added Help  entry of 
-  the Antispam module and the automatic periodic deletion 
+- CHANGED: email_admin - antispam:  Added Help  entry of
+  the Antispam module and the automatic periodic deletion
   of messages inside each account's Spam folder. SVN Rev[2441]
-- CHANGED: Misspelling of the word mailman, changed from 
+- CHANGED: Misspelling of the word mailman, changed from
   mailmam to mailman.  SVN Rev[2409]
 - CHANGED:  New functionality of Antispam.
         - Automatically create Spam folder to each email account
         - Improved Spam filtering through the use of Sieve Service
         - Improved performance
-  SVN Rev[2396] 
+  SVN Rev[2396]
 
 * Tue Mar 01 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-6
 - CHANGED: In spec file change prereq elastix >= 2.0.4-10
-- CHANGED: In spec file removed lines to change password of 
+- CHANGED: In spec file removed lines to change password of
   cyrus user, now firstboot has the job to do it.
 
 * Mon Feb 07 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-5
@@ -971,67 +976,67 @@ fi
 * Mon Feb 07 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
 - CHANGED:   In Spec add lines to support install or update
   proccess by script.sql.
-- DELETED:   Databases sqlite were removed to use the new 
-  format to sql script for administer process install, update 
+- DELETED:   Databases sqlite were removed to use the new
+  format to sql script for administer process install, update
   and delete. SVN Rev[2332]
-- ADDED: module antispam, added a new field to change the 
+- ADDED: module antispam, added a new field to change the
   rewrite header in the file local.cf. SVN Rev[2330]
-- FIXED: module remote_smtp, fixed spelling mistake, the 
+- FIXED: module remote_smtp, fixed spelling mistake, the
   word autentification was replaced by aunthentication.
   SVN Rev[2326]
-- CHANGED: module antispam, the configuration files are 
-  created only in the action activate spam filter, also 
+- CHANGED: module antispam, the configuration files are
+  created only in the action activate spam filter, also
   changed the error messages. SVN Rev[2323]
-- ADDED: Module antispam, added the exec command service 
-  spamassassin start and stop for the activation or 
+- ADDED: Module antispam, added the exec command service
+  spamassassin start and stop for the activation or
   desactivation of the antispam service. SVN Rev[2319]
-- CHANGED: changed the db.info of fax to the format used in 
+- CHANGED: changed the db.info of fax to the format used in
   elastix-dbprocess. SVN Rev[2316]
-- ADDED: added the folders update, delete and install, and the 
-  sql script for the installation, also db.info has the 
+- ADDED: added the folders update, delete and install, and the
+  sql script for the installation, also db.info has the
   correct format used in elastix-dbprocess. SVN Rev[2315]
 
 * Thu Feb 03 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-3
-- CHANGED:  menu.xml to support new tag "permissions" where has 
-  all permissions of group per module and new attribute "desc" 
-  into tag  "group" for add a description of group. 
+- CHANGED:  menu.xml to support new tag "permissions" where has
+  all permissions of group per module and new attribute "desc"
+  into tag  "group" for add a description of group.
   SVN Rev[2294][2299]
-- FIXED:    Email_admin - Remote SMTP: fixed bug #643 and #687 
+- FIXED:    Email_admin - Remote SMTP: fixed bug #643 and #687
   in elastix.org.
        #643: config file main.cf with respect add a relay host
        #687: error in validation username as email
   SVN Rev[2255]
-- FIXED:    Problem if any account was deleted due to if there 
-  is an error while to delete an email account and its user on 
-  system cannot be removed the account is deleted but the user not, 
-  it occur when a new account is created with the same user that 
-  was deleted because this user in system exist.. [#489] 
+- FIXED:    Problem if any account was deleted due to if there
+  is an error while to delete an email account and its user on
+  system cannot be removed the account is deleted but the user not,
+  it occur when a new account is created with the same user that
+  was deleted because this user in system exist.. [#489]
   SVN Rev[2246][2247][2249]
-- FIXED:    Email - Email Account:  password of email account 
-  cannot be replaced using module email account, the error was 
-  in function edit_email_account where use 
-  "crear_usuario_correo_sistema" where send var $email="". 
+- FIXED:    Email - Email Account:  password of email account
+  cannot be replaced using module email account, the error was
+  in function edit_email_account where use
+  "crear_usuario_correo_sistema" where send var $email="".
   SVN Rev[2240]
-  
+
 
 * Thu Dec 30 2010 Eduardo Cueva <ecueva@palsoanto.com> 2.0.4-2
-- CHANGED: In Spec file put process to move cyradm.php to 
+- CHANGED: In Spec file put process to move cyradm.php to
   /var/www/html/libs
 
 * Thu Dec 23 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-1
-- CHANGED: Additionals libs, move libs from additional folder 
+- CHANGED: Additionals libs, move libs from additional folder
   to each specify module. By example paloSantoEmail.class.php
   SVN Rev[2150]
 
 * Mon Dec 20 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-25
 - CHANGED: In spec file add instructions post and install about
   email from elastix.spec.
-- NEW:     Files about configuration email was moved from 
-  additionals to setup forlder of email_admin module, these 
+- NEW:     Files about configuration email was moved from
+  additionals to setup forlder of email_admin module, these
   change is for better organization in elastix.spec. SVN Rev[2111]
 * Mon Dec 06 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-24
 - ADD:     Add new prereq to roundcube in spec file
-- CHANGED: massive search and replace of HTML encodings with the 
+- CHANGED: massive search and replace of HTML encodings with the
   actual characters. SVN Rev[2002]
 
 * Wed Oct 27 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-23
@@ -1039,7 +1044,7 @@ fi
 
 * Mon Oct 18 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-22
 - FIXED:  postfix configuration support in migration from 1.6 to 2.0.
-  Some changes appear in email account 
+  Some changes appear in email account
   See in http://bugs.elastix.org/view.php?id=490 [#490] SVN Rev[1840]
 - CHANGED: Updated fr.lang. SVN Rev[1825]
 
@@ -1062,17 +1067,17 @@ fi
 - CHANGED:   Change the help files of email_list and remote SMTP modules.
 
 * Wed Jul 28 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-15
-- CHANGED:   Maintenance coding(Menu WebMail from menu.xml). Rev[1638] 
+- CHANGED:   Maintenance coding(Menu WebMail from menu.xml). Rev[1638]
 
 * Fri Jul 23 2010 Bruno Macias <bmacias@palosanto.com> 2.0.0-14
 - FIXED: Name actions button was changed to "Enable" and "Disable".
 
 * Wed Jul 21 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-13
-- CHANGED: Module remote SMTP was improved. 
+- CHANGED: Module remote SMTP was improved.
 -          Fixed bug the radio button enable or disable remote smtp [#237].
 
 * Thu Jul 01 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-12
-- CHANGED: Change the style in Remote SMTP module. 
+- CHANGED: Change the style in Remote SMTP module.
 
 * Mon Jun  7 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-11
 - Fixed bug where a domain cannot have a character "_"

@@ -1,8 +1,8 @@
-{literal} 
+{literal}
 <script type="text/javascript">
 $(document).ready(function() {
  $('.checkall').click(function () {
-     $(".letra12").find(':checkbox').attr('checked', this.checked);
+     $(".letra12").find(':checkbox').prop('checked', $(this).is(':checked'));
  });
 
 
@@ -31,7 +31,7 @@ $(document).ready(function() {
                 <b>{$applet.name}:</b>
             </td>
             <td align="left">
-                <input name="chkdau_{$applet.id}" type="checkbox" {if $applet.activated} checked="checked" {/if}> 
+                <input name="chkdau_{$applet.id}" type="checkbox" {if $applet.activated} checked="checked" {/if}>
             </td>
         </tr>
     {/foreach}

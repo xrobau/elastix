@@ -1,6 +1,6 @@
 %define modname system
 
-Summary: Elastix Module System 
+Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 2.5.0
 Release: 1
@@ -11,7 +11,7 @@ Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
 Prereq: elastix-framework >= 2.5.0-6
-Prereq: elastix-fax >= 2.2.0-4 
+Prereq: elastix-fax >= 2.2.0-4
 Prereq: php-soap
 Prereq: dahdi
 Conflicts: elastix-agenda < 2.2.0-1
@@ -139,15 +139,20 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Sun Mar 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Applet Admin - jQuery-1.11.2 migration: fix incorrect use of
+  attribute instead of property.
+  SVN Rev[6924]
+
 * Wed Mar 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: fix regression introduced by commit 6900. Use direct RSS
-  url to save one HTTP request to elastix.org. Enable use of cache directory 
+  url to save one HTTP request to elastix.org. Enable use of cache directory
   after checking said directory exists or can be created. Fix indentation and
   replace tabs with spaces.
-  SVN Rev[6901] 
+  SVN Rev[6901]
 
 * Thu Mar  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
-- FIXED: Dashboard: force LANG=C for call to /usr/bin/stat, and examine all 
+- FIXED: Dashboard: force LANG=C for call to /usr/bin/stat, and examine all
   devices under /dev/mapper for its hard disk.
   SVN Rev[6897]
 - FIXED: Dashboard: check for php-simplepie autoloader and use it if present,
@@ -169,12 +174,12 @@ fi
   SVN Rev[6854]
 
 * Mon Feb  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
-- FIXED: DHCP Client List: remove dead code, fix regexp after preg_match 
+- FIXED: DHCP Client List: remove dead code, fix regexp after preg_match
   migration, add additional column to check whether a lease is active.
   SVN Rev[6841]
 
 * Wed Dec 24 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGED: Backup/Restore: allow missing --backupfile option. This will now 
+- CHANGED: Backup/Restore: allow missing --backupfile option. This will now
   leave the tarball components unpacked during backup. Part of a set of changes
   for remote incremental backup/restore.
   SVN Rev[6816]
@@ -184,7 +189,7 @@ fi
   SVN history. Changed version and release in specfile.
 
 * Thu Oct 23 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGED: Backup/Restore: filter backup name on restore. This is consistent 
+- CHANGED: Backup/Restore: filter backup name on restore. This is consistent
   with the filtering done elsewhere and cuts a number of XSS at once.
   SVN Rev[6760]
 
@@ -192,7 +197,7 @@ fi
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
 
-* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
   packages were depreciated many functions, the equivalent functions are
   updated in the files that use to have the menctioned functions.
@@ -205,7 +210,7 @@ fi
   SVN Rev[6490]
 
 * Fri Feb 14 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGED: DHCP Server: privileged script now uses endpointconfig database 
+- CHANGED: DHCP Server: privileged script now uses endpointconfig database
   instead of endpoint.db for --phonesonly option.
   SVN Rev[6476]
 - CHANGED: Backup/Restore: backup and restore the new endpointconfig database
@@ -222,7 +227,7 @@ fi
   SVN history. Changed release in specfile.
   SVN Rev[6379]
 
-* Wed Jan 08 2014 Jose Briones <jbriones@palosanto.com> 
+* Wed Jan 08 2014 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Update to the changelog about the english and spanish help files in
   the system modules.
   SVN Rev[6339]
@@ -239,8 +244,8 @@ fi
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.
 
-* Wed Dec 11 2013 Luis Abarca <labarca@palosanto.com> 
-- ADDED: package -verify_rpm,rpms_availables,QueryRPMs.class.php,rpm.class.php: 
+* Wed Dec 11 2013 Luis Abarca <labarca@palosanto.com>
+- ADDED: package -verify_rpm,rpms_availables,QueryRPMs.class.php,rpm.class.php:
   It was implemented a REST service that query the rpms of Elastix Family (addons
   included) that are currently installed in the system.
   SVN Rev[6274]
@@ -253,7 +258,7 @@ fi
 * Mon Nov 18 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Hardware Detector: with recent DAHDI versions, the configuration parser
   misparses "EC: OSLEC - INACTIVE" as having an echo canceller called
-  "OSLEC - INACTIVE", which then shows up as "none" in the GUI. Fixed. Fixes 
+  "OSLEC - INACTIVE", which then shows up as "none" in the GUI. Fixed. Fixes
   Elastix bug #1777.
   SVN Rev[6112]
 
@@ -286,7 +291,7 @@ fi
   additional Requires: php-magpierss.
   SVN Rev[5990]
 
-* Wed Aug 21 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Aug 21 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Updated the transalation file es.lang of SystemResources
   SVN Rev[5793]
 
@@ -295,84 +300,84 @@ fi
   SVN history. Changed release in specfile.
   SVN Rev[5791]
 
-* Wed Aug 21 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Aug 21 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Added support for transalating some words.
   SVN Rev[5781]
 
 * Fri Aug  9 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: further to choosing between astdb and astdb.sqlite3,
   astdb.sqlite3 must be deleted before running astdb2sqlite3.
-  SVN Rev[5717] 
+  SVN Rev[5717]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file es.lang.
   SVN Rev[5716]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file es.lang.
   SVN Rev[5715]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file es.lang.
   SVN Rev[5714]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file es.lang.
   SVN Rev[5713]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file es.lang.
   SVN Rev[5712]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5710]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5709]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5708]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5707]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5706]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5705]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5704]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5703]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5702]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5701]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5700]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5699]
 
-* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 09 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5698]
 
@@ -387,51 +392,51 @@ fi
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5607]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5605]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5604]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5603]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5602]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5601]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5600]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5599]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5596]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5595]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5594]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5593]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5592]
 
@@ -440,7 +445,7 @@ fi
   the encoding to utf-8 instead.
   SVN Rev[5580]
 
-* Wed Aug 07 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Aug 07 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file es.lang.
   SVN Rev[5575]
 
@@ -449,56 +454,56 @@ fi
   SVN history. Changed release in specfile.
   SVN Rev[5562]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module backup_restore. Correction of some mistakes in the
   translation files.
   SVN Rev[5490]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module packages. Correction of some mistakes in the translation
   files.
   SVN Rev[5489]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module userlist. Correction of some mistakes in the translation
   files.
   SVN Rev[5488]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - ADDED: Module dhcp_clientlist. Added the translation file es.lang.
   SVN Rev[5487]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module applet_admin. Correction of some mistakes in the translation
   files.
   SVN Rev[5486]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module applet_admin. Correction of some mistakes in the translation
   files.
   SVN Rev[5485]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module applet_admin. Correction of some mistakes in the translation
   files.
   SVN Rev[5484]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module applet_admin. Code added for supporting the applets' name in
   the translation files.
   SVN Rev[5483]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module applet_admin. Correction of some mistakes in the translation
   files.
   SVN Rev[5482]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module applet_admin. Correction of some mistakes in the translation
   files.
   SVN Rev[5481]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module applet_admin. Creation of translation file es.lang.
   SVN Rev[5480]
 
@@ -508,47 +513,47 @@ fi
   restored in Asterisk 11.
   SVN Rev[5478]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module userlist. Correction of some mistakes in the translation
   files.
   SVN Rev[5475]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module time_config. Correction of some mistakes in the translation
   files.
   SVN Rev[5474]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module repositories. Correction of some mistakes in the translation
   files.
   SVN Rev[5463]
 
-* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module packages. Correction of some mistakes in the translation
   files.
   SVN Rev[5438]
 
-* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module network_parameters .Correction of some mistakes in the
   translation files.
   SVN Rev[5437]
 
-* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module hardware_detector. Correction of some mistakes in the
   translation files.
   SVN Rev[5423]
 
-* Mon Jul 22 2013 Jose Briones <jbriones@palosanto.com> 
+* Mon Jul 22 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module dhcp_server. Correction of some mistakes in the translation
   files.
   SVN Rev[5389]
 
-* Mon Jul 22 2013 Jose Briones <jbriones@palosanto.com> 
+* Mon Jul 22 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module dhcp_by_mac. Correction of some mistakes in the translation
   files.
   SVN Rev[5388]
 
-* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module backup_restore. Correction of some mistakes in the
   translation files.
   SVN Rev[5356]
@@ -558,7 +563,7 @@ fi
   SVN history. Changed release in specfile.
   SVN Rev[5354]
 
-* Thu Jul 18 2013 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Thu Jul 18 2013 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: the Calls applet does not really require trunk access or
   Asterisk AMI access, so both requires can be removed.
   SVN Rev[5341]
@@ -571,16 +576,16 @@ fi
   vulnerabilities were closed, and all applets were reviewed in the process of
   reorganization. Some highlights:
   All applets: most of the HTML embedded in the source code was moved to templates.
-  SystemResources: a long-standing design flaw was fixed. Previously the CPU 
+  SystemResources: a long-standing design flaw was fixed. Previously the CPU
   gauge would only show the CPU load for a small interval while the applet was
   being rendered, with the result that it would frequently show 100% of use, and
   it would not refresh automatically. Now it refreshes every 5 seconds. In order
   to reduce CPU load due to redrawing of the gauge, the client side now uses an
   HTML5 Canvas to redraw the gauge in the browser.
   HardDrives: It was found that systems with large amounts of data in mail or
-  recordings directories would spend an inordinate amount of time running du 
+  recordings directories would spend an inordinate amount of time running du
   in order to report the disk usage by directory. Now this report is only run by
-  explicit request and displays a warning that fetching the information will 
+  explicit request and displays a warning that fetching the information will
   impact system performance. Also, some i18n work for Spanish.
   PerformanceGraphic: i18n work.
   CommunicationActivity: i18n work, and the network activity updates in real time.
@@ -589,7 +594,7 @@ fi
   SVN Rev[5311]
 
 * Wed Jul 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Dashboard: send explicit module as part of various ajax requests that 
+- FIXED: Dashboard: send explicit module as part of various ajax requests that
   were missing it.
   SVN Rev[5209]
 
@@ -614,12 +619,12 @@ fi
 
 * Wed Jun 12 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: use internal glob instead of exec'd shell piping to
-  list backup files. Modernize pagination. Convert more uses of $arrLang to 
+  list backup files. Modernize pagination. Convert more uses of $arrLang to
   _tr(). Remove a large code duplication at automatic backup handling. Use the
   -O option of tar to extract XML to stdout instead of using temporary files.
-  SVN Rev[5093] 
+  SVN Rev[5093]
 - CHANGED: Backup/Restore: partial rewrite of FTP implementation to clean up the
-  API and improve error reporting and handling. Remove a style in custom CSS 
+  API and improve error reporting and handling. Remove a style in custom CSS
   that conflicts with a framework style. Remove dead code. Convert some uses of
   $arrLang to _tr(). Fixes Elastix bug #1586.
   SVN Rev[5092]
@@ -641,9 +646,9 @@ fi
   to check whether each package is installed when one invocation is enough. Make
   a distinction between same-named packages for different architectures. Do not
   display anything but the latest version of a not-installed package. All of
-  this results in a noticeable speedup (from 8 seconds to 3 for the basic 
+  this results in a noticeable speedup (from 8 seconds to 3 for the basic
   listing).
-  SVN Rev[5055] 
+  SVN Rev[5055]
 
 * Mon Jun 03 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix regression in restore functionality due to missing
@@ -661,7 +666,7 @@ fi
   a glob and caches the results instead of spawning a ls and a grep. Also add
   support for systemd services.
   SVN Rev[5045]
-- CHANGED: Dashboard: request several applets concurrently instead of 
+- CHANGED: Dashboard: request several applets concurrently instead of
   sequentially.
   SVN Rev[5044]
 
@@ -678,13 +683,13 @@ fi
   SVN Rev[5042]
 
 * Tue May 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dashboard: the Hard Disks applet does not call the method 
+- CHANGED: Dashboard: the Hard Disks applet does not call the method
   getSysInfo() anymore, but uses popen() on two commands in an attempt to run
   them in parallel. This saves some unnecessary file opens in /proc as well as
   an unneeded usleep().
   SVN Rev[5038]
 - CHANGED: Dashboard: the System Resources applet does not call the method
-  getSysInfo() anymore, but discrete functions. This saves two unnecessary 
+  getSysInfo() anymore, but discrete functions. This saves two unnecessary
   process spawns and at least one disk hit for unused free space information.
   SVN Rev[5036]
 
@@ -733,10 +738,10 @@ fi
 
 * Mon Apr 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: work around a jQueryUI Droppable bug in which an <ul>
-  list of initial height 0 will not trigger drop event if dragged element 
+  list of initial height 0 will not trigger drop event if dragged element
   triggers a resize of the list. Fixes Elastix bug #1526.
   SVN Rev[4846]
-- CHANGED: Backup/Restore: replace remote filelist filter implementation with 
+- CHANGED: Backup/Restore: replace remote filelist filter implementation with
   a more compact version using regexps, with note about assumed workaround in
   previous implementation.
   SVN Rev[4844]
@@ -804,14 +809,14 @@ fi
 * Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: some restore operations overwrite known passwords, such
   as the root mysql password and the ami manager password. If passwords are
-  changed between a backup and a restore on the same system, or a backup is 
-  restored on a system with different passwords, the freepbx interface will 
+  changed between a backup and a restore on the same system, or a backup is
+  restored on a system with different passwords, the freepbx interface will
   break due to password mismatch. Fix by restoring passwords from elastix.conf.
   Fixes Elastix bug #1462.
   SVN Rev[4660]
 - FIXED: Backup/Restore: Due to unintended bug-for-bug compatibility with the
-  previous backup/restore implementation, the backupengine script restored 
-  fax.db with chmod 644, which resulted in fax notifications breaking for any 
+  previous backup/restore implementation, the backupengine script restored
+  fax.db with chmod 644, which resulted in fax notifications breaking for any
   fax sent or received after a restore that included fax information. Fixed.
   This fixes part 8 of Elastix bug #1461.
   SVN Rev[4657]
@@ -833,7 +838,7 @@ fi
   SVN Rev[4647]
 
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
-- CHANGED: system - Build/elastix-system.spec: Changed Version and Release in 
+- CHANGED: system - Build/elastix-system.spec: Changed Version and Release in
   specfile according to the current branch.
   SVN Rev[4645]
 
@@ -880,15 +885,15 @@ fi
   SVN history. Changed release in specfile.
 
 * Fri Nov 30 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Backup/Restore: mailbox quotas need to be repaired after a mailbox 
+- FIXED: Backup/Restore: mailbox quotas need to be repaired after a mailbox
   restore. Otherwise the quotas of the restored mailboxes always appear as 0.
   Fixes part 10a of Elastix bug #1416.
-  SVN Rev[4489] 
+  SVN Rev[4489]
 
 * Thu Nov 29 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: since the privileged script conversion, the backupengine
   script writes an XML manifest with untranslated strings. This conflicts with
-  the 'not installed' case in the GUI, which uses translated strings for 
+  the 'not installed' case in the GUI, which uses translated strings for
   comparison. Now both are consistently using non-translated strings. Fixes part
   8 of Elastix bug #1416.
   SVN Rev[4479]
@@ -920,22 +925,22 @@ fi
   SVN Rev[4352]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Framework,Modules: remove temporary file preversion_MODULE.info under 
+- Framework,Modules: remove temporary file preversion_MODULE.info under
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
-  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on
   RPM update. Part of the fix for Elastix bug #1398.
 - Framework,Modules: switch as many files and directories as possible under
-  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
   Elastix bug #1399.
-- Framework,Modules: clean up specfiles by removing directories under 
+- Framework,Modules: clean up specfiles by removing directories under
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
-- Endpoint Configurator: install new configurator properly instead of leaving 
+- Endpoint Configurator: install new configurator properly instead of leaving
   it at module_installer/MODULE/setup
   SVN Rev[4347]
 
 * Tue Oct 16 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: implemented new helper script 'ryum' and use it to replace 
+- CHANGED: implemented new helper script 'ryum' and use it to replace
   invocations of 'sudo yum' with the helper script.
   SVN Rev[4342]
 
@@ -956,7 +961,7 @@ fi
   Elastix bug #1380.
   SVN Rev[4330]
 - CHANGED: Hardware Detector: Elastix 3 no longer ships /usr/sbin/amportal which
-  is part of FreePBX. Check whether /usr/sbin/amportal exists in 
+  is part of FreePBX. Check whether /usr/sbin/amportal exists in
   hardware_detector and use asterisk script instead if necessary.
   SVN Rev[4329]
 
@@ -985,14 +990,14 @@ fi
 
 * Thu Sep 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: extend 'backupengine' privileged script to install
-  a new crontab for automatic backup. Reimplement automatic backup 
-  administration using this capability. This removes four instances of sudo 
+  a new crontab for automatic backup. Reimplement automatic backup
+  administration using this capability. This removes four instances of sudo
   chown.
   SVN Rev[4185]
 - CHANGED: Backup/Restore: reimplement automatic_backup.php as a wrapper around
   a direct call to backupengine. This removes one duplication of the backup
   implementation.
-  SVN Rev[4184]  
+  SVN Rev[4184]
 - ADDED: Backup/Restore: new privileged script 'backupengine' that reimplements
   backup/restore functionality.
   SVN Rev[4183]
@@ -1013,7 +1018,7 @@ fi
   SVN Rev[4088]
 
 * Fri Jul 20 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: DHCP Server (dhcpconfig): implement new option --phonesonly. If 
+- CHANGED: DHCP Server (dhcpconfig): implement new option --phonesonly. If
   specified, the DHCP server will be configured to answer only to MAC addresses
   from known phone vendor prefixes. This potentially enables the Elastix DHCP
   server and another DHCP server to coexist in the same LAN.
@@ -1059,7 +1064,7 @@ fi
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: DHCP Server: Several fixes for Fedora 17 compatibility:
   1) dhcpconfig need to explicitly load the default timezone for PHP
-  2) dhcpd.conf is at a different place in Fedora and access is denied to 
+  2) dhcpd.conf is at a different place in Fedora and access is denied to
      asterisk by default, so a new privileged action dumpconfig was created
   3) Be aware of location change between CentOS and Fedora 17 when writing
      configuration file
@@ -1071,25 +1076,25 @@ fi
   SVN Rev[3995]
 
 * Mon Jun 11 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: PaloSantoNetwork: rewrite network parameter query to stop using 
+- FIXED: PaloSantoNetwork: rewrite network parameter query to stop using
   ifconfig which changed output format between CentOS and Fedora 17. Add
   documentation on the output format of network query methods.
   SVN Rev[3984]
 
 * Thu Jun 07 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: PaloSantoNetwork: mark some methods as private
-- CHANGED: PaloSantoNetwork: more efficient implementation for IP manipulation 
+- CHANGED: PaloSantoNetwork: more efficient implementation for IP manipulation
   methods.
   SVN Rev[3974]
 
 * Wed Jun 06 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: Reorganize some of the code for system status. Before this
-  commit, each gauge graph had to run the system probe anew in order to build 
+  commit, each gauge graph had to run the system probe anew in order to build
   the display. This, despite having the correct value superimposed on the graph
-  from the HTML output. This could sometimes lead to the gauge displaying a 
-  different value from the one in HTML. Now the gauge merely displays a value 
-  supplied by the URL, which is the same value used in HTML. This cuts three 
-  system probes. It also allows to remove some now-dead code. Additionally the 
+  from the HTML output. This could sometimes lead to the gauge displaying a
+  different value from the one in HTML. Now the gauge merely displays a value
+  supplied by the URL, which is the same value used in HTML. This cuts three
+  system probes. It also allows to remove some now-dead code. Additionally the
   paloSantoSysInfo class was changed to only do the system probe on an explicit
   call, instead of every time an object is built.
   SVN Rev[3961]
@@ -1139,7 +1144,7 @@ fi
 
 * Thu Mar 29 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-5
 - CHANGED: In spec file, changed prereq elastix-framework >= 2.3.0-5
-- CHANGED: System - Packages: Changed action updateREpositories and install 
+- CHANGED: System - Packages: Changed action updateREpositories and install
   repositories. Before this action use xajax, now are implemented with json
   SVN Rev[3805].
 
@@ -1203,9 +1208,9 @@ fi
   SVN Rev[3626]
 
 * Wed Feb 01 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-21
-- FIXED: modules - modules/packages: Problems with the paged 
+- FIXED: modules - modules/packages: Problems with the paged
   are now solved. SVN Rev[3619]
-- FIXED: modules - modules/repositories: Problems with the paged 
+- FIXED: modules - modules/repositories: Problems with the paged
   are now solved. SVN Rev[3618]
 
 * Mon Jan 30 2012 Alberto Santos <asantos@palosanto.com> 2.2.0-20
@@ -1228,42 +1233,42 @@ fi
 
 * Fri Jan 27 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-19
 - CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-28
-- CHANGED: modules - images: icon image title was changed on 
+- CHANGED: modules - images: icon image title was changed on
   some modules. SVN Rev[3572].
 - CHANGED: modules - icons: Se cambio de algunos módulos los iconos
   que los representaba. SVN Rev[3563].
-- CHANGED: modules - trunk/core/system/modules/repositories/: Se 
-  modifico los archivos themes/default/js/javascript.js, index.php, 
-  PalosantoRepositories.class.php para que la funcion defaultValues() 
-  tenga soporte cuando se cambie los repositories a centos6. 
+- CHANGED: modules - trunk/core/system/modules/repositories/: Se
+  modifico los archivos themes/default/js/javascript.js, index.php,
+  PalosantoRepositories.class.php para que la funcion defaultValues()
+  tenga soporte cuando se cambie los repositories a centos6.
   SVN Rev[3562].
 - CHANGED: modules - * : Cambios en ciertos mòdulos que usan grilla para
-  mostrar ciertas opciones fuera del filtro, esto debido al diseño del 
+  mostrar ciertas opciones fuera del filtro, esto debido al diseño del
   nuevo filtro. SVN Rev[3549].
-- CHANGED: Modules - System: Support for the new grid layout. 
+- CHANGED: Modules - System: Support for the new grid layout.
   SVN Rev[3543].
-- UPDATED: modules - *.tpl: Se elimino en los archivos .tpl de ciertos 
-  módulos que tenian una tabla demás en su diseño de filtro que formaba 
+- UPDATED: modules - *.tpl: Se elimino en los archivos .tpl de ciertos
+  módulos que tenian una tabla demás en su diseño de filtro que formaba
   parte de la grilla. SVN Rev[3541].
 
 
 * Tue Jan 17 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-18
 - CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-26
 - CHANGED: system, library paloSantoNetwork.class.php, added new functions to calculate the network of an ip  address. SVN Rev[3522]
-- CHANGED: Modules - System/Hardware_detector: Changes in javascript to better the message of pop-up. 
+- CHANGED: Modules - System/Hardware_detector: Changes in javascript to better the message of pop-up.
   This changes require the commit SVN Rev[3514]. SVN Rev[3518]
-- DELETED: Modules - System/Hardware_detector: Removed jquery1.blockUI.js because this js already 
+- DELETED: Modules - System/Hardware_detector: Removed jquery1.blockUI.js because this js already
   exist as part of framework. SVN Rev[3518]
-- CHANGED: Modules - system/modules/dashboard/themes: Changes in styles of dashboard 
-  (1_style.css, 1_javascript.js) to remove a border black and better the design of applet 
+- CHANGED: Modules - system/modules/dashboard/themes: Changes in styles of dashboard
+  (1_style.css, 1_javascript.js) to remove a border black and better the design of applet
   "Processes Status" in the drop-down menu (actions to start, restart, stop process). SVN Rev[3504]
 
 
 * Tue Dec 20 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-17
 - CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-23
-- FIXED: Backup/Restore: fix invalid javascript syntax for object literal 
+- FIXED: Backup/Restore: fix invalid javascript syntax for object literal
   in sortable declaration. SVN Rev[3454]
-- FIXED: Hardware Detector: fix invalid javascript syntax for object 
+- FIXED: Hardware Detector: fix invalid javascript syntax for object
   literal in draggable declaration. SVN Rev[3453]
 
 * Fri Nov 25 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-16
@@ -1275,7 +1280,7 @@ fi
   report at end of tar download
   SVN Rev[3341]
 - CHANGED: Fax: make use of 'faxconfig' in fax library instead of sudo chown
-  CHANGED: Backup/Restore: refresh fax configuration on restore using 
+  CHANGED: Backup/Restore: refresh fax configuration on restore using
   standard fax API. SVN Rev[3340]
 
 * Tue Nov 22 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-15
@@ -1299,7 +1304,7 @@ fi
 - CHANGED:  System - Hardware detector:  Changed javascript to show
   in "Configuration of Span" the spans in 2 columns
   SVN Rev[3279]
-- FIXED: DHCP Client List: /var/lib/dhcpd/dhcpd.leases may have 
+- FIXED: DHCP Client List: /var/lib/dhcpd/dhcpd.leases may have
   comments which must be skipped.
   SVN Rev[3273]
 - FIXED: DHCP Client List: remove nested <form> tag
@@ -1317,16 +1322,16 @@ fi
 
 * Sat Oct 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-14
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-13
-- CHANGED: Module dashboard delete default applet communication 
+- CHANGED: Module dashboard delete default applet communication
   activity. SVN Rev[3241]
-- ADDED: Modules - Dashboard : Added new sql script to update 
+- ADDED: Modules - Dashboard : Added new sql script to update
   dashboard.db. SVN Rev[3230]
 
 * Sat Oct 29 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-13
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-12
 - CHANGED: In spec file, changed %defattr(-, root, root) to
   %defattr(-, root, root)
-- CHANGED: Modules - System: Changed menu.xml to move Applet Admin 
+- CHANGED: Modules - System: Changed menu.xml to move Applet Admin
   from Preference to Dashboard. SVN Rev[3226]
 - CHANGED: module backup_restore, added style border-radius
   SVN Rev[3223]
@@ -1360,11 +1365,11 @@ fi
 - FIXED: Dashboard: Hard disks: new layout with used space for
   selected directories.
   SVN Rev[3197]
-- FIXED: Dashboard: process states must be capitalized. Also 
+- FIXED: Dashboard: process states must be capitalized. Also
   internationalized properly (Spanish).
   FIXED: Dashboard: process names internationalized properly (Spanish).
   SVN Rev[3195]
-- CHANGED: Dashboard: System Resources: define single class for 
+- CHANGED: Dashboard: System Resources: define single class for
   percentages on gauges
   CHANGED: Dashboard: System Resources: use one decimal, not two,
   for percentages
@@ -1373,13 +1378,13 @@ fi
   SVN Rev[3194]
 - CHANGED: Dashboard: update icons
   SVN Rev[3193]
-- CHANGED: Dashboard: allow closing of process control menu by 
+- CHANGED: Dashboard: allow closing of process control menu by
   clicking anywhere in the document.
   SVN Rev[3192]
-- FIXED: Dashboard: change to commit 3142 - value displayed for CPU 
+- FIXED: Dashboard: change to commit 3142 - value displayed for CPU
   Usage was really intended to be CPU Speed but was using the wrong counter.
   SVN Rev[3190]
-- FIXED: Dashboard: System resources applet - values must also have 
+- FIXED: Dashboard: System resources applet - values must also have
   nowrap specification.
   SVN Rev[3189]
 - CHANGED: Dashboard: implement process control menu in System Process applet.
@@ -1396,7 +1401,7 @@ fi
   SVN Rev[3177]
 - CHANGED: Dashboard: new Twitter icon, required for previous commit.
   SVN Rev[3175]
-- CHANGED: Dashboard: new layout for RSS feed, now includes news date 
+- CHANGED: Dashboard: new layout for RSS feed, now includes news date
   and Twitter link.
   SVN Rev[3174]
 - CHANGED: Dashboard: add numeric percents as direct values on top of gauges.
@@ -1445,7 +1450,7 @@ fi
   change your password account , this action  must not to destroy the
   current session
   SVN Rev[3103]
-- CHANGED: Dashboard: allow image width and height to be specified 
+- CHANGED: Dashboard: allow image width and height to be specified
   independently.
   SVN Rev[3099]
 - CHANGED: Dashboard: add extra parameters to force fixed size in image tag.
@@ -1470,7 +1475,7 @@ fi
 - FIXED: module hardware_detector, in some cards the word
   "HDLCFCS" identify a hardware controlled
   SVN Rev[3064]
-- Hardware Detector: add --hw_dtmf=YES to wancfg_dahdi invocation 
+- Hardware Detector: add --hw_dtmf=YES to wancfg_dahdi invocation
   to enable hardware DTMF detection. Fixes Elastix bug #967.
   SVN Rev[3062]
 - CHANGED: module dhcp_by_mac, deleted the folder js because
@@ -1481,7 +1486,7 @@ fi
   SVN Rev[3019]
 
 * Wed Sep 28 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-9
-- FIXED: module dhcp_by_mac, when user press enter in filter 
+- FIXED: module dhcp_by_mac, when user press enter in filter
   text box, the page is redirected to the form for button
   "Assign ip Address". Now it shows the results of the filter
   SVN Rev[3004]
@@ -1494,7 +1499,7 @@ fi
 
 * Thu Sep 22 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-7
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-4
-- FIXED: Hardware Detector: remove --smg parameter from 
+- FIXED: Hardware Detector: remove --smg parameter from
   wancfg_dahdi invocation. This allows recent wanpipe-utils
   to configure Sangoma BRI cards as DAHDI cards, since wanpipe-3.5.23.
   SVN Rev[2974]
@@ -1504,14 +1509,14 @@ fi
 * Wed Sep 07 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-6
 - ADDED: In spec file, added conflicts elastix-agenda < 2.2.0-1
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-3
-- FIXED: system - dashboard: Links to access calendar events 
+- FIXED: system - dashboard: Links to access calendar events
   do not work, this bug was solved adding new variable into
   the url like event_date. This changes require commit SVN[2955].
   SVN Rev[2956]
 - CHANGED: module userlist, in view mode the asterisks and word
   required were removed
   SVN Rev[2946]
-- FIXED: modules - dashboard: fixed bug in applet Faxes from 
+- FIXED: modules - dashboard: fixed bug in applet Faxes from
   dashboard module the link to download a fax do not work.
   SVN Rev[2943]
 - FIXED: module hardware_detector, the popup for configuration of
@@ -1540,8 +1545,8 @@ fi
   was appering anywhere. Now it appears near to the applet
   SVN Rev[2876]
 - FIXED: Hardware Detector: Some drivers, such as opvxg400, do not
-  accept an echocanceller setting on a control channel, not even 
-  'none'. Therefore, the echocanceller is instead left to its 
+  accept an echocanceller setting on a control channel, not even
+  'none'. Therefore, the echocanceller is instead left to its
   default value (which is assumed to be 'none')
   SVN Rev[2875]
 
@@ -1552,51 +1557,51 @@ fi
 - FIXED: Network Parameters: use smarty assign for error message
   instead of raw echo.
   SVN Rev[2870]
-- FIXED: Network Parameters: relax hostname validation in order 
+- FIXED: Network Parameters: relax hostname validation in order
   to accept localhost.localdomain.
   SVN Rev[2869]
-- FIXED: Network Parameters: DNS 2 can be blank, so use --dns2 
+- FIXED: Network Parameters: DNS 2 can be blank, so use --dns2
   only with nonempty parameter
   SVN Rev[2868]
 
 * Tue Aug 02 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-1
-- FIXED: module repositories, the active repos from other type 
+- FIXED: module repositories, the active repos from other type
   (main or others) were deactivated. Now these active repos remain active
   SVN Rev[2864]
-- CHANGED: SQL script, userlist-profile in system, mejor definición 
+- CHANGED: SQL script, userlist-profile in system, mejor definición
   del formato.
   SVN Rev[2857]
 - CHANGED: In Spec file changed prereq elastix >= 2.2.0-1
 
 * Fri Jul 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-18
-- FIXED: System - Backup Restore: Fixed bug where a backup of 
+- FIXED: System - Backup Restore: Fixed bug where a backup of
   mailbox of emails cannot be restored. SVN Rev[2850]
 - CHANGED: Module dashboard, RSS URL was changed. SVN Rev[2849]
 - CHANGED: module repositories, changed the word "type" to "Repo"
   SVN Rev[2830]
-- CHANGED: Hardware Detector: implement modification of span 
-  parameters (priority, framing, coding, LBO) for ISDN digital 
+- CHANGED: Hardware Detector: implement modification of span
+  parameters (priority, framing, coding, LBO) for ISDN digital
   spans. SVN Rev[2824]
-- CHANGED: Hardware Detector: implement interface for switching 
+- CHANGED: Hardware Detector: implement interface for switching
   ISDN media type (E1 or T1) for Sangoma digital cards. SVN Rev[2824]
 - CHANGED: Hardware Detector: fix a few incorrect English translations
   SVN Rev[2824]
-- FIXED: Hardware Detector: dahdiconfig - tighten up parameter 
+- FIXED: Hardware Detector: dahdiconfig - tighten up parameter
   validation for span parameters. SVN Rev[2824]
 - CHANGED: Hardware Detector: remove unexplained initializing of
   tables with data that is always removed on hardware detection.
   SVN Rev[2823]
-- CHANGED: Hardware Detector: dahdiconfig must only write crc4 
+- CHANGED: Hardware Detector: dahdiconfig must only write crc4
   for E1 spans. SVN Rev[2819]
-- ADDED: module repositories, added some translations to other 
+- ADDED: module repositories, added some translations to other
   languages. SVN Rev[2804]
-- FIXED: module packages, the packages were not searched in repos 
-  extras and epel due to a wrong database name. The problem was 
+- FIXED: module packages, the packages were not searched in repos
+  extras and epel due to a wrong database name. The problem was
   fixed and now it is also searched in repos extras and epel.
   SVN Rev[2802]
-- CHANGED: module repositories, the repositories were divided into 
+- CHANGED: module repositories, the repositories were divided into
   three categories "main", "others" and "all". SVN Rev[2801]
-- CHANGED: module backup_restore, changed the place of the buttons 
+- CHANGED: module backup_restore, changed the place of the buttons
   save and cancel. SVN Rev[2797]
 - CHANGED: module userlist, now a user can have an empty extension.
   SVN Rev[2791]
@@ -1605,17 +1610,17 @@ fi
 - CHANGED: System: fix license declaration on all helpers. SVN Rev[2781]
 - FIXED: module userlist, fixed security hole when editing a user
   SVN Rev[2780]
-- CHANGED: module channelusage, when there is no data to show 
-  a jpgraph error was displayed. Now in this case a blank image 
-  with the message "Nothing to show yet" and the title of it is 
+- CHANGED: module channelusage, when there is no data to show
+  a jpgraph error was displayed. Now in this case a blank image
+  with the message "Nothing to show yet" and the title of it is
   displayed. SVN Rev[2778]
-- CHANGED: Hardware Detector: make use of dahdiconfig helper for 
-  echocanceller and span configuration. As a side effect, fix 
-  unnecessary repeating of dahdi restart when modifying echocanceller 
+- CHANGED: Hardware Detector: make use of dahdiconfig helper for
+  echocanceller and span configuration. As a side effect, fix
+  unnecessary repeating of dahdi restart when modifying echocanceller
   for a span. SVN Rev[2775]
 - CHANGED: Hardware Detector: fix misspelling of KB1 as KBL. SVN Rev[2775]
-- ADDED: Hardware Detector: Introduce 'dahdiconfig' privileged 
-  helper. This makes use of the elastix-helper framework introduced 
+- ADDED: Hardware Detector: Introduce 'dahdiconfig' privileged
+  helper. This makes use of the elastix-helper framework introduced
   in commit 2683. SVN Rev[2771]
 
 * Wed Jun 29 2011 Alberto Santos <asantos@palosanto.com> 2.0.4-17
@@ -1629,118 +1634,118 @@ fi
 
 * Fri Jun 24 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-16
 - CHANGED: IN spec file change prereq elastix >= 2.0.4-25
-- FIXED: database network.db, the first 20 registers of table 
+- FIXED: database network.db, the first 20 registers of table
   dhcp_conf were deleted because these data were inappropriate.
   SVN Rev[2745]
-- FIXED: Hardware Detector: fix database fill using wrong field 
+- FIXED: Hardware Detector: fix database fill using wrong field
   from configuration. SVN Rev[2744]
-- CHANGED: Hardware Detector: refactored code into two methods 
+- CHANGED: Hardware Detector: refactored code into two methods
   for clarity. SVN Rev[2744]
-- FIXED: System - Hardware_detector: missing image images/pci.png 
+- FIXED: System - Hardware_detector: missing image images/pci.png
   in hardware detector module. SVN Rev[2743]
-- CHANGED: System - Backup_restore:   Function used to create 
-  emails accounts were changes because before are in misc.lib.php  
-  and now are in palosantoEmail.class.php. 
+- CHANGED: System - Backup_restore:   Function used to create
+  emails accounts were changes because before are in misc.lib.php
+  and now are in palosantoEmail.class.php.
   This commit require SVN Rev[2738]. SVN Rev[2741]
-- CHANGED: System - Hardware Detector: Missing images pci.png 
+- CHANGED: System - Hardware Detector: Missing images pci.png
   this doesn't appear in the title of modules. SVN Rev[2724]
-- NEW:     Security - Change Password: New module Change Password 
-  allow to change the passwords of freePBX and enable or disables 
+- NEW:     Security - Change Password: New module Change Password
+  allow to change the passwords of freePBX and enable or disables
   the access per browser to the freePBX non-Embedded. SVN Rev[2724]
 
 * Mon Jun 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-15
-- CHANGED: System, changed order of update child's, now the first 
+- CHANGED: System, changed order of update child's, now the first
   is repositories and the second is packages. SVN Rev[2723]
-- CHANGED: System/Hardware Detector: (trivial) mark some methods 
+- CHANGED: System/Hardware Detector: (trivial) mark some methods
   as private. SVN Rev[2716]
-- CHANGED: System/Repositories: re-implement module library using 
+- CHANGED: System/Repositories: re-implement module library using
   repoconfig helper.  Requires commit 2683,2706. SVN Rev[2715]
-- CHANGED: System/Repositories: replace uses of deprecated ereg 
+- CHANGED: System/Repositories: replace uses of deprecated ereg
   with preg_match. SVN Rev[2715]
-- CHANGED: System/Repositories: (trivial) mark two methods as 
+- CHANGED: System/Repositories: (trivial) mark two methods as
   private. SVN Rev[2715]
-- ADDED: System/Repositories: Introduce 'repoconfig' privileged 
+- ADDED: System/Repositories: Introduce 'repoconfig' privileged
   helper. This makes use of the elastix-helper framework introduced
   in commit 2683. SVN Rev[2714]
-- CHANGED: System/DHCP by MAC: rewrite module library around the 
-  concept of network.db database directing changes to 
-  /etc/dhcpd.conf, not the other way around as before. Also make 
+- CHANGED: System/DHCP by MAC: rewrite module library around the
+  concept of network.db database directing changes to
+  /etc/dhcpd.conf, not the other way around as before. Also make
   use of "dhcpconfig --refresh" helper. Requires commit 2683,2706.
   SVN Rev[2713]
-- FIXED: System/DHCP by MAC: fix long-standing bug in which 
-  /etc/dhcpd.conf with no host specifications resulted in inability 
-  to create first host specification, as side effect of reworking 
+- FIXED: System/DHCP by MAC: fix long-standing bug in which
+  /etc/dhcpd.conf with no host specifications resulted in inability
+  to create first host specification, as side effect of reworking
   module library. SVN Rev[2713]
-- CHANGED: System/DHCP by MAC: make use of _tr() for translations 
+- CHANGED: System/DHCP by MAC: make use of _tr() for translations
   instead of $arrLang. SVN Rev[2713]
 - ADDED: System/DHCP by MAC: provide Spanish translation. SVN Rev[2713]
 - CHANGED: System/DHCP by MAC: add --refresh option for dhcpconfig
   SVN Rev[2712]
-- ADDED: System/DHCP Server: Rework dhcpconfig in preparation 
+- ADDED: System/DHCP Server: Rework dhcpconfig in preparation
   for alternate configuration of dhcpd.conf file. SVN Rev[2711]
-- CHANGED: System/DHCP by MAC: remove dead code and mark two 
+- CHANGED: System/DHCP by MAC: remove dead code and mark two
   methods as private in class paloSantoDHCP_Configuration.
   SVN Rev[2710]
-- CHANGED: System/Date Time: re-implement modification of date 
+- CHANGED: System/Date Time: re-implement modification of date
   parameters using dateconfig helper. Requires commit 2683,2706.
   SVN Rev[2707]
-- ADDED: System/Date Time: Introduce 'dateconfig' privileged 
-  helper. This makes use of the elastix-helper framework 
+- ADDED: System/Date Time: Introduce 'dateconfig' privileged
+  helper. This makes use of the elastix-helper framework
   introduced in commit 2683. SVN Rev[2705]
-- CHANGED: System/Date Time: (trivial) Sync module to be 
+- CHANGED: System/Date Time: (trivial) Sync module to be
   identical in 1.6 and 2.0. SVN Rev[2704]
-- CHANGED: System/DHCP Server: re-implement modification of 
-  network parameters using dhcpconfig helper. Requires commit 
-  2683. Also, remove dead code resulting from the switch. 
+- CHANGED: System/DHCP Server: re-implement modification of
+  network parameters using dhcpconfig helper. Requires commit
+  2683. Also, remove dead code resulting from the switch.
   SVN Rev[2702]
-- ADDED: System/DHCP Server: Introduce 'dhcpconfig' privileged 
-  helper. This makes use of the elastix-helper framework 
+- ADDED: System/DHCP Server: Introduce 'dhcpconfig' privileged
+  helper. This makes use of the elastix-helper framework
   introduced in commit 2683. SVN Rev[2701]
-- CHANGED: System/DHCP Server: No sudo required for service dhcpd 
+- CHANGED: System/DHCP Server: No sudo required for service dhcpd
   status. SVN Rev[2700]
-- CHANGED: System/DHCP Server: Mark two template functions as 
+- CHANGED: System/DHCP Server: Mark two template functions as
   private. SVN Rev[2700]
-- CHANGED: System/DHCP Server: Prevent access to undefined indexes 
+- CHANGED: System/DHCP Server: Prevent access to undefined indexes
   on DHCP IPs not in network for current interfaces. SVN Rev[2700]
-- DELETED: System/DHCP Server: Remove sysmanip.lib.php. This 
-  library has never worked due to requiring /sg/bin/sudo 
-  which does not exist in Elastix. Additionally the result of 
-  the only method called is never used as is, and the only 
+- DELETED: System/DHCP Server: Remove sysmanip.lib.php. This
+  library has never worked due to requiring /sg/bin/sudo
+  which does not exist in Elastix. Additionally the result of
+  the only method called is never used as is, and the only
   values used are assigned from different sources. SVN Rev[2698]
-- CHANGED: System/DHCP Server: (trivial) Sync index.php to be 
+- CHANGED: System/DHCP Server: (trivial) Sync index.php to be
   identical in 1.6 and 2.0. SVN Rev[2697]
-- CHANGED: System/Network Parameters: re-implement modification 
+- CHANGED: System/Network Parameters: re-implement modification
   of network parameters using netconfig helper. Requires commit
-  2683. Also, remove dead code resulting from the switch. 
+  2683. Also, remove dead code resulting from the switch.
   SVN Rev[2694]
-- FIXED: System/Network Parameters: netconfig - several settings 
-  should always exist even if they were previously absent. 
+- FIXED: System/Network Parameters: netconfig - several settings
+  should always exist even if they were previously absent.
   SVN Rev[2693]
-- CHANGED: System/Network Parameters: Invocation of netconfig 
+- CHANGED: System/Network Parameters: Invocation of netconfig
   --hostname should also modify /etc/hosts. SVN Rev[2692]
-- ADDED: System/Network Parameters: Introduce 'netconfig' 
-  privileged helper. This makes use of the elastix-helper 
+- ADDED: System/Network Parameters: Introduce 'netconfig'
+  privileged helper. This makes use of the elastix-helper
   framework introduced in commit 2683. SVN Rev[2689]
-- CHANGED: Modules - Trunk: The ereg function was replaced by 
-  the preg_match function due to that the ereg function was 
+- CHANGED: Modules - Trunk: The ereg function was replaced by
+  the preg_match function due to that the ereg function was
   deprecated since PHP 5.3.0. SVN Rev[2688]
 
 * Tue May 31 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-14
 - CHANGED: The split function of these modules was replaced by
   the explode function due to that the split function was
   deprecated since PHP 5.3.0. SVN Rev[2668][2650]
-- CHANGED: Module Time Config, se cambio de lugar al módulo time 
+- CHANGED: Module Time Config, se cambio de lugar al módulo time
   config, paso de framework a modules/core/system. SVN Rev[2666]
-- FIXED: module dashboard, the applet communication activity was 
-  not displaying the correct number of trunks. Now it displays 
+- FIXED: module dashboard, the applet communication activity was
+  not displaying the correct number of trunks. Now it displays
   the number of trunks sip and iax. SVN Rev[2624]
 
 * Tue May 03 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-13
 - FIXED: module packages, fixed pagination. SVN Rev[2615]
-- FIXED: System - dashboard: Fixed bug [#846] from bugs.elastix.org, 
-  where script update from version 10 to version 11 is wrong and 
+- FIXED: System - dashboard: Fixed bug [#846] from bugs.elastix.org,
+  where script update from version 10 to version 11 is wrong and
   should be from 10 to 13. SVN Rev[2613]
-- FIXED: module network_parameters, text required field was 
+- FIXED: module network_parameters, text required field was
   displayed in the view. Now its only displayed when it is edit mode
   SVN Rev[2600]
 
@@ -1761,77 +1766,77 @@ fi
 - CHANGED: In Spec file, changed prereq of elastix to 2.0.4-19
 
 * Tue Apr 12 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-11
-- FIXED:     System - hardware_detector:  Fixed bug where to 
+- FIXED:     System - hardware_detector:  Fixed bug where to
   install a mISDN hardware this required to do a yum install
-  mISDN but this process do not have misdnportinfo file which 
-  is in the mISDNuser package and mISDN not required mISDNuser 
+  mISDN but this process do not have misdnportinfo file which
+  is in the mISDNuser package and mISDN not required mISDNuser
   but mISDNuser required mISDN. SVN Rev[2535]
 - CHANGED:   System - Hardware_detector:  New icons and images
   to improve the style of hardware detector module. SVN Rev[2534]
-  FIXED:     System - Hardware_detector:  Fixed bug where 
-  channels of "Channelbank Xorcom" don't show correctly the 
-  states of Spans(channels). For more details:  
+  FIXED:     System - Hardware_detector:  Fixed bug where
+  channels of "Channelbank Xorcom" don't show correctly the
+  states of Spans(channels). For more details:
   http://bugs.elastix.org/view.php?id=808. SVN Rev[2534]
 - FIXED: fix broken wanpipe hardware detection by adding /usr/sbin
-  to path in hardware_detector. Otherwise the command 
+  to path in hardware_detector. Otherwise the command
   /usr/sbin/wanrouter is not found. SVN Rev[2533]
 
 * Tue Apr 05 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-10
-- CHANGED: module userlist, eliminated the field Retype Webmail 
+- CHANGED: module userlist, eliminated the field Retype Webmail
   Password. SVN Rev[2515]
-- CHANGED: module hardware_detector, changed the words 
-  "Channel detected and not used" to 
-  "Channel detected and not in service" and 
-  "Channel detected and in use" to 
+- CHANGED: module hardware_detector, changed the words
+  "Channel detected and not used" to
+  "Channel detected and not in service" and
+  "Channel detected and in use" to
   "Channel detected and in service". SVN Rev[2510]
 
 * Tue Mar 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-9
-- CHANGED: module shutdown, unnecessary word "Required field". 
+- CHANGED: module shutdown, unnecessary word "Required field".
   That word is not longer showed. SVN Rev[2462]
-- FIXED:  system - network_parameters:  Fixed Bug 
-  "http://bugs.elastix.org/view.php?id=723" where if an user 
-  put the parameter GATEWAY in 
-  /etc/sysconfig/network-scripts/ifcfg-dev 
+- FIXED:  system - network_parameters:  Fixed Bug
+  "http://bugs.elastix.org/view.php?id=723" where if an user
+  put the parameter GATEWAY in
+  /etc/sysconfig/network-scripts/ifcfg-dev
   (ifcfg-dev === ifcfg-eth0 or ifcfg-eth1) the GATEWAY by default
-  will be read in this files and not from /etc/sysconfig/network 
-  because this files have a major priority that network file. 
+  will be read in this files and not from /etc/sysconfig/network
+  because this files have a major priority that network file.
   SVN Rev[2450]
-- FIXED: Fixed Bug "http://bugs.elastix.org/view.php?id=735" 
+- FIXED: Fixed Bug "http://bugs.elastix.org/view.php?id=735"
   where appear a message "Couldn't connect to server" when a FTP
   server was not entered in the form. SVN Rev[2444]
-- ADDED: module repositories, added a new button called default 
+- ADDED: module repositories, added a new button called default
   which puts the marks checks to the default installation state.
   SVN Rev[2416]
-- CHANGED: module userlist, now the field name is not required 
+- CHANGED: module userlist, now the field name is not required
   to create a new user. SVN Rev[2410]
 
 * Tue Mar 01 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-8
 - CHANGED:  In Spec file add prerequiste elastix 2.0.4-10
-- CHANGED: update of dashboard.db, changed the code of applets 
+- CHANGED: update of dashboard.db, changed the code of applets
   and added a new column called icon. SVN Rev[2379]
-- CHANGED: module dashboard, it validates the case that there 
+- CHANGED: module dashboard, it validates the case that there
   is not internet access or the elastix web server is down.
   SVN Rev[2372]
 - CHANGED: Module Dashboard, Rename style, javascript and tpls
   files, now are 1_style.css, 1_javascript.js and applets.tpl.
   SVN Rev[2369]
-- CHANGED: Module Dashboard, add language word "loading", 
-  delete files jquery* now action will be in jquery elastix 
+- CHANGED: Module Dashboard, add language word "loading",
+  delete files jquery* now action will be in jquery elastix
   framework. SVN Rev[2368]
-- CHANGED: module dashboard, the applets data is loaded using 
-  the request function, the index code is now more generic, 
-  also a loading image is showed while the applet data is being 
+- CHANGED: module dashboard, the applets data is loaded using
+  the request function, the index code is now more generic,
+  also a loading image is showed while the applet data is being
   loaded. SVN Rev[2367]
-- CHANGED: module packages, the columns installed and options 
+- CHANGED: module packages, the columns installed and options
   were merged into one column called status. SVN Rev[2342]
-- CHANGED: module shutdown, changed the informative message 
+- CHANGED: module shutdown, changed the informative message
   to shutdown the machine by web interface. SVN Rev[2340]
-- CHANGED: module dhcp_server, changed the label "Start range 
-  of IPs" to "Starting IP Address", "End range of IPs" to 
-  "Ending IP Address" and "IP Address Lease Time" to 
+- CHANGED: module dhcp_server, changed the label "Start range
+  of IPs" to "Starting IP Address", "End range of IPs" to
+  "Ending IP Address" and "IP Address Lease Time" to
   "Lease Time". SVN Rev[2338]
-- ADDED: module system, added a file .sql in the folder update 
-  for changing the name from Hard Drivers to Hard Drives to the 
+- ADDED: module system, added a file .sql in the folder update
+  for changing the name from Hard Drivers to Hard Drives to the
   id = 3. SVN Rev[2335]
 
 * Mon Feb 07 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-7
@@ -1840,14 +1845,14 @@ fi
 * Mon Feb 07 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-6
 - CHANGED:   In Spec add lines to support install or update
   proccess by script.sql.
-- DELETED:   Databases sqlite were removed to use the new format 
+- DELETED:   Databases sqlite were removed to use the new format
   to sql script for administer process install, update and delete
   SVN Rev[2332]
-- CHANGED:   Put lines transaccion and commit in script 
+- CHANGED:   Put lines transaccion and commit in script
   db/install/acl/1_userlist-profile.sql. SVN Rev[2320]
-- CHANGED: changed the db.info of fax to the format used in 
+- CHANGED: changed the db.info of fax to the format used in
   elastix-dbprocess. SVN Rev[2316]
-- CHANGED: created the folders install, delete and update and 
+- CHANGED: created the folders install, delete and update and
   added in install the sql scripts also the file db.info has
   the new format that is used in elastix-dbprocess. SVN Rev[2314]
 
@@ -1856,38 +1861,38 @@ fi
   update databases using script.sql with elastix-dbprocess
 - CHANGED:  In Spec file, add lines to create tables of profiles
   in acl.db
-- NEW:      System - setup: New file db.info, this file has 
-  information about the database that is used in process to 
+- NEW:      System - setup: New file db.info, this file has
+  information about the database that is used in process to
   install, update or delete. SVN Rev[2309]
-- CHANGED:  menu.xml to support new tag "permissions" where has 
-  all permissions of group per module and new attribute "desc" 
-  into tag  "group" for add a description of group. 
+- CHANGED:  menu.xml to support new tag "permissions" where has
+  all permissions of group per module and new attribute "desc"
+  into tag  "group" for add a description of group.
   SVN Rev[2294][2299]
 - CHANGED: module currency,added the Russian Ruble. SVN Rev[2281]
-- NEW:     new tabs or folders in trunk/core to create a new 
+- NEW:     new tabs or folders in trunk/core to create a new
   rpms im and extras it is for better organization. SVN Rev[2266]
 - ADDED:   module currency, added currency Great British Pound
   SVN Rev[2264]
 
 * Mon Jan 03 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
-- CHANGED:  New styles to hardware_detector module, and change 
-  function to update echo canceller parameters by ajax. 
+- CHANGED:  New styles to hardware_detector module, and change
+  function to update echo canceller parameters by ajax.
   SVN Rev[2202]
 
 * Wed Dec 29 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-3
-- FIXED: Fixed bug [#646] in bugs.elastix.org about FTP Backup 
-  de backup_restore where do not work backup in ftp servers on 
-  windows, the solution was to show the list of ftp with "-la ." 
+- FIXED: Fixed bug [#646] in bugs.elastix.org about FTP Backup
+  de backup_restore where do not work backup in ftp servers on
+  windows, the solution was to show the list of ftp with "-la ."
   before was ".".
 
 * Tue Dec 28 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-2
-- CHANGE: module dhcp_server, file /etc/dhcpd.conf is written 
-  with value of nis-domain and domain-name equal to 
-  asterisk.local . Now is written with the real host-name of 
+- CHANGE: module dhcp_server, file /etc/dhcpd.conf is written
+  with value of nis-domain and domain-name equal to
+  asterisk.local . Now is written with the real host-name of
   the server. SVN Rev[2161]
 
 * Thu Dec 23 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-1
-- CHANGED: Additionals libs, move libs from additional folder 
+- CHANGED: Additionals libs, move libs from additional folder
   to each specify module. By example paloSantoNetwork.class.php
   SVN Rev[2150]
 - CHANGE: currency module, changed the symbol of the salvadorian
@@ -1895,40 +1900,40 @@ fi
 
 * Mon Dec 20 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-40
 - CHANGED: In spec file add lines in post and install about openfire
-  and hardware_detector from elastix.spec 
+  and hardware_detector from elastix.spec
 - FIXED: fix typo in null redirection. SVN Rev[2125]
-- FIXED: move dahdi_genconf modules after second attempt to 
+- FIXED: move dahdi_genconf modules after second attempt to
   shutdown dahdi, and fix comment. SVN Rev[2125]
-- CHANGED:  Added option (-s: disable dahdi_genconf). 
-  By default dahdi_genconf is true to execute but the option -s 
+- CHANGED:  Added option (-s: disable dahdi_genconf).
+  By default dahdi_genconf is true to execute but the option -s
   with hardware_detector do not execute "dahdi_genconf modules"
   SVN Rev[2123]
-- ADDED:    New file hardware_detector in setup folder of system, 
+- ADDED:    New file hardware_detector in setup folder of system,
   it was move from additionals. SVN Rev[2110]
-- FIXED:  Fix bug http://bugs.elastix.org/view.php?id=610 in 
-  module currency where some label of languages are not exist. 
+- FIXED:  Fix bug http://bugs.elastix.org/view.php?id=610 in
+  module currency where some label of languages are not exist.
   This soluction is for both elastix. SVN Rev[2098]
 
 * Mon Dec 06 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-39
 - CHANGED: Add new Prereq openfire, wanpipe-util, dahdi
-- CHANGED: massive search and replace of HTML encodings with the 
+- CHANGED: massive search and replace of HTML encodings with the
   actual characters. SVN Rev[2002]
 - FIXED: Packages: fixed syntax error in hr language. SVN Rev[2001]
 - CHANGED: Backup/Restore: stop assigning template variable "url"
   directly, and remove nested <form> tag. SVN Rev[1193]
-- CHANGED: Repositories: stop assigning template variable "url" 
+- CHANGED: Repositories: stop assigning template variable "url"
   directly, and remove nested <form> tag. SVN Rev[1986]
-- CHANGED: Dashboard: switch to use of palosantoGraphImage.lib.php 
+- CHANGED: Dashboard: switch to use of palosantoGraphImage.lib.php
   for graph generation. Requires commits 1964,1969 to work properly.
   SVN Rev[1973]
-- CHANGED: Shutdown: remove link that cannot be accessed anyway 
+- CHANGED: Shutdown: remove link that cannot be accessed anyway
   during shutdown or reboot. SVN Rev[1971]
-- FIXED:  Fixed bug in dhcp server where appear html code 
+- FIXED:  Fixed bug in dhcp server where appear html code
   "<b>Time of client refreshment</b>" the tags are put in tpl file
   SVN Rev[1959]
 
 * Mon Nov 15 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-38
-- Fixed bug in dhcp server where appear html code "<b>.</b>" 
+- Fixed bug in dhcp server where appear html code "<b>.</b>"
   it occur because now html is scaped in palosantoForm. SVN Rev[1957]
 
 * Mon Nov 15 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-37
@@ -1939,10 +1944,10 @@ fi
 - FIXED: make module aware of url-as-array in paloSantoGrid.
      Split up URL construction into an array.
      Assign the URL array as a member of the $arrGrid structure.
-     Remove <form> tags from the filter HTML template. They are not 
-      required, since the template already includes a proper <form> tag 
+     Remove <form> tags from the filter HTML template. They are not
+      required, since the template already includes a proper <form> tag
       enclosing the grid.
-     Part of fix for Elastix bug #572. Requires commits 1901 and 1902 in 
+     Part of fix for Elastix bug #572. Requires commits 1901 and 1902 in
       order to work properly.
   SVN Rev[1913]
 
@@ -1950,16 +1955,16 @@ fi
 - CHANGED: Updated the Bulgarian language elastix. SVN Rev[1857]
 
 * Tue Oct 26 2010 Eduardo Cueva <eceuva@palosanto.com> 2.0.0-34
-- CHANGED: Move line elastix-menumerge at beginning the "%post" in spec file. 
+- CHANGED: Move line elastix-menumerge at beginning the "%post" in spec file.
   It is for the process to update.
 
 * Mon Oct 18 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-33
 - FIXED:   Fixed security bug with audio.php and popup.php where an user can be
-  download files system without authentication. 
+  download files system without authentication.
   See in http://bugs.elastix.org/view.php?id=552 [#522] SVN Rev[1830]
 - CHANGED:  Updated fr.lang. SVN Rev[1825]
 - ADDES:    New lang file, fa.lang (Persian). SVN Rev[1823]
-- FIXED:  fixed bug 359 about permissions in userlist module. 
+- FIXED:  fixed bug 359 about permissions in userlist module.
   See in http://bugs.elastix.org/view.php?id=359. SVN Rev[1816]
 
 * Mon Sep 27 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-32
@@ -1967,7 +1972,7 @@ fi
 
 * Tue Sep 14 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-31
 - CHANGED:    Move css file to css folder in hardware_detector in the same way to js files to support framework. Rev[1737]
-- FIXED: Do NOT recursively change owner of /tftpboot to root:root after a backup or restore. This causes failures to configure future endpoint provisionings because the web interface fails to write to files now owned by root (permission denied). Instead, just restore permission to /tftpboot, not to its contents. Rev[1730] 
+- FIXED: Do NOT recursively change owner of /tftpboot to root:root after a backup or restore. This causes failures to configure future endpoint provisionings because the web interface fails to write to files now owned by root (permission denied). Instead, just restore permission to /tftpboot, not to its contents. Rev[1730]
 
 * Wed Aug 18 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-30
 - CHANGED: Prereq elastix-2.0.0-34
@@ -2014,16 +2019,16 @@ fi
 * Wed Jul 21 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-19
 - NEW:     Include framework jquery 1.3.2 and jquery-ui 1.7.2 in js folder to mount files css and js (dashboard).
 - CHANGED: index.php from dashboard was added a new line to not include the last framework jquery because there are some problems with the last version.
--          Support jquery to the framework, now the framework load js an d css from module backup_restore. 
+-          Support jquery to the framework, now the framework load js an d css from module backup_restore.
 -          Support format themes/default/css and themes/default/js
 
 * Thu Jul 01 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-18
-- CHANGED:  Dashboard : The regular expressions were improved for show the numbers of trunks in applet COMMUNICATION ACTIVITY 
+- CHANGED:  Dashboard : The regular expressions were improved for show the numbers of trunks in applet COMMUNICATION ACTIVITY
 * Mon Jun 28 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-17
 - CHANGED: Dashboard module, change how to show parameter network traffic in COMMUNICATION ACTIVITY. New word in lang.
 
 * Mon Jun 28 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-16
-- CHANGED: Links for RSS in module dashboard to reference new webside elasti.org. 
+- CHANGED: Links for RSS in module dashboard to reference new webside elasti.org.
 
 * Mon Jun  7 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-15
 - Change files languages, some var were corrected.
@@ -2036,7 +2041,7 @@ fi
 - Fixed bug in module network parameters, now defined localhost and localhost.localdomain to 127.0.0.1.
 
 * Fri Mar 19 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-12
-- Change info to web services (webservice.elastix.org) 
+- Change info to web services (webservice.elastix.org)
 
 * Tue Mar 16 2010 Bruno Macias <bmacias@palosanto.com> 2.0.0-11
 - Support save position applets.

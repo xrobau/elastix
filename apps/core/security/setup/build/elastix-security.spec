@@ -1,6 +1,6 @@
 %define modname security
 
-Summary: Elastix Security 
+Summary: Elastix Security
 Name:    elastix-%{modname}
 Version: 2.5.0
 Release: 1
@@ -127,6 +127,11 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Sun Mar 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Advanced Settings - jQuery-1.11.2 migration: fix incorrect use of
+  attribute instead of property.
+  SVN Rev[6928]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
@@ -135,11 +140,11 @@ fi
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 
-* Wed Jun 04 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Wed Jun 04 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: fix typo in previous commit
   SVN Rev[6643]
 
-* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
   packages were depreciated many functions, the equivalent functions are
   updated in the files that use to have the menctioned functions.
@@ -156,17 +161,17 @@ fi
   Fixes item 6 of Elastix bug #1831.
   SVN Rev[6439]
 
-* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com> 
+* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com>
 - UPDATED: sec_advanced_settings module, Message copy right FreePBX was
   changed.
   SVN Rev[6423]
 
-* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com> 
+* Mon Jan 27 2014 Bruno Macias <bmacias@palosanto.com>
 - UPDATED: sec_advanced_settings module, Message copy right FreePBX was
   changed.
   SVN Rev[6422]
 
-* Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com> 
+* Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: security - sec_advanced_settings-index.html,en.lang,es.lang: A
   correction in the use of trademark FreePBX has made it within the code of
   this module.
@@ -177,7 +182,7 @@ fi
   SVN history. Bump Release in specfile.
   SVN Rev[6379]
 
-* Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com> 
+* Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Update to the changelog about the english and spanish help files in
   the security modules.
   SVN Rev[6365]
@@ -190,7 +195,7 @@ fi
   SVN Rev[6364]
 
 * Fri Jan 03 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Advanced Settings: update jquery.ibutton.js to 1.0.03, fix 
+- CHANGED: Advanced Settings: update jquery.ibutton.js to 1.0.03, fix
   potential incompatibilities with jQuery 1.9+
   SVN Rev[6329]
 
@@ -199,15 +204,15 @@ fi
   SVN history. Bump Release in specfile.
   SVN Rev[5790]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5645]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file fr.lang.
   SVN Rev[5644]
 
-* Wed Aug 07 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Aug 07 2013 Jose Briones <jbriones@palosanto.com>
   ADD: Added the translation file es.lang.
   SVN Rev[5573]
 
@@ -220,27 +225,27 @@ fi
 - ADDED: Firewall Rules: add new rule for DHCP. Fixes Elastix bug #1645.
   SVN Rev[5504]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module sec_weak_keys. Correction of some mistakes in the translation
   files.
   SVN Rev[5469]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module sec_rules. Correction of some mistakes in the translation
   files.
   SVN Rev[5468]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module sec_portknock_if. Correction of some mistakes in the
   translation files.
   SVN Rev[5467]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module sec_advanced_settings. Correction of some mistakes in the
   translation files.
   SVN Rev[5466]
 
-* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module sec_rules. Correction of a mistake in the english translation
   file
   SVN Rev[5320]
@@ -298,7 +303,7 @@ fi
   SVN Rev[4683]
 
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
-- CHANGED: security - Build/elastix-security.spec: Changed Version and Release in 
+- CHANGED: security - Build/elastix-security.spec: Changed Version and Release in
   specfile according to the current branch.
   SVN Rev[4644]
 
@@ -328,14 +333,14 @@ fi
   SVN history. Changed release in specfile.
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Framework,Modules: remove temporary file preversion_MODULE.info under 
+- Framework,Modules: remove temporary file preversion_MODULE.info under
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
-  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on
   RPM update. Part of the fix for Elastix bug #1398.
 - Framework,Modules: switch as many files and directories as possible under
-  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
   Elastix bug #1399.
-- Framework,Modules: clean up specfiles by removing directories under 
+- Framework,Modules: clean up specfiles by removing directories under
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
   SVN Rev[4347]
@@ -378,8 +383,8 @@ fi
 * Tue Jun 12 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Sec_Rules: Remove code that was copypasted from paloSantoNetwork, and
   reference the source directly. This allows the module to work properly with
-  the fixes made for Fedora 17. Also, remove an unneeded reference to 
-  paloSantoConfig. 
+  the fixes made for Fedora 17. Also, remove an unneeded reference to
+  paloSantoConfig.
   SVN Rev[3996]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-5
@@ -390,10 +395,10 @@ fi
 
 * Fri Mar 30 2012 Bruno Macias <bmacias@palosanto.com> 2.3.0-4
 - CHANGED: In spec file, changed prereq elastix-framework >= 2.3.0-5
-- FiXED: Security - Sec_Rules: Fixed action changed order firewalls rules. 
+- FiXED: Security - Sec_Rules: Fixed action changed order firewalls rules.
   This problem appear by the new grid.
-  SVN Rev[3801] 
-- CHANGED: modules - firewall, se revierte los cambios del firewall activado 
+  SVN Rev[3801]
+- CHANGED: modules - firewall, se revierte los cambios del firewall activado
   por omisión hasta mejorar el diseño y conjunto de reglas activas.
   SVN Rev[3799]
 
@@ -442,23 +447,23 @@ fi
 
 * Fri Jan 27 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-11
 - CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-28
-- CHANGED: modules - trunk/core/security/modules/sec_rules/index.php: 
-  Se modifico el archivo index.php para mejorar apariencia debido a 
+- CHANGED: modules - trunk/core/security/modules/sec_rules/index.php:
+  Se modifico el archivo index.php para mejorar apariencia debido a
   nueva grilla. SVN Rev[3577].
-- CHANGED: modules - images: icon image title was changed on some 
+- CHANGED: modules - images: icon image title was changed on some
   modules. SVN Rev[3572].
-- CHANGED: modules - icons: Se cambio de algunos módulos los iconos 
+- CHANGED: modules - icons: Se cambio de algunos módulos los iconos
   que los representaba. SVN Rev[3563].
 - CHANGED: Modules - Security: Added support for the new grid layout.
   SN Rev[3546].
 - UPDATED: modules - *.tpl: Se elimino en los archivos .tpl de ciertos
-  módulos que tenian una tabla demás en su diseño de filtro que 
+  módulos que tenian una tabla demás en su diseño de filtro que
   formaba parte de la grilla. SVN Rev[3541].
 
 * Mon Dec 26 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-10
-- FIXED: Modules - Security: In privileged file "anonymoussip" add 
-  validation when asterisk services is shutdown, it only occur in a 
-  proccess install of ISO because this script do a reload asterisk 
+- FIXED: Modules - Security: In privileged file "anonymoussip" add
+  validation when asterisk services is shutdown, it only occur in a
+  proccess install of ISO because this script do a reload asterisk
   and in that stage asterisk do not UP. SVN Rev[3485]
 
 * Fri Nov 25 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-9
@@ -472,7 +477,7 @@ fi
 - CHANGED: Advanced Security Settings: report success or failure
   to modify all files in setadminpwd
   SVN Rev[3397]
-- CHANGED: Advanced Security Settings: use privileged script 
+- CHANGED: Advanced Security Settings: use privileged script
   'setadminpwd' to reimplement administrator password reset
   SVN Rev[3396]
 - FIXED: module sec_advanced_settings, the informative message
@@ -538,14 +543,14 @@ fi
   value of the port for its ids, also this change is made in
   script 1_schema.sql for new installations
   SVN Rev[3041]
-- FIXED: module sec_ports, added an id of "filter_value" to the 
+- FIXED: module sec_ports, added an id of "filter_value" to the
   filter text box, also the filter now looks for any coincidence
   that has the word entered in the filter
   SVN Rev[3031]
 
 * Tue Sep 27 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-3
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-5
-- CHANGED: changed the password "elastix456" of AMI to the 
+- CHANGED: changed the password "elastix456" of AMI to the
   password set in /etc/elastix.conf
   SVN Rev[2995]
 
@@ -571,14 +576,14 @@ fi
   /usr/share/elastix/privileged
 
 * Tue Jul 28 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-15
-- CHANGED: Firewall Rules: make use of fwconfig helper for 
+- CHANGED: Firewall Rules: make use of fwconfig helper for
   flush/apply rules. SVN Rev[2785]
-- CHANGED: Firewall Rules: fwconfig: use escapeshellarg() on every 
+- CHANGED: Firewall Rules: fwconfig: use escapeshellarg() on every
   value extracted from the database. SVN Rev[2784]
-- ADDED: Firewall Rules: Introduce 'fwconfig' privileged helper. 
-  This makes use of the elastix-helper framework introduced in 
+- ADDED: Firewall Rules: Introduce 'fwconfig' privileged helper.
+  This makes use of the elastix-helper framework introduced in
   commit 2683. SVN Rev[2783]
-- CHANGED: Security/Firewall Rules: (trivial) mark some methods 
+- CHANGED: Security/Firewall Rules: (trivial) mark some methods
   as private. SVN Rev[2779]
 
 * Wed Jun 29 2011 Alberto Santos <asantos@palosanto.com> 2.0.4-14
@@ -593,18 +598,18 @@ fi
 
 * Mon Jun 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-13
 - NEW: new module sec_advanced_settings created
-- CHANGED: In SPEC file changed prereq freepbx >= 2.8.1.1 and 
+- CHANGED: In SPEC file changed prereq freepbx >= 2.8.1.1 and
   elastix >= 2.0.4-24
 - CHANGED: module sec_accessaudit, changed module name to "Audit".
   SVN Rev[2720]
-- FIXED: module sec_rules, when a source port and destiny port 
-  are entered the word "-p protocol" in the iptable rule is written 
+- FIXED: module sec_rules, when a source port and destiny port
+  are entered the word "-p protocol" in the iptable rule is written
   twice. Now that word its only written once. SVN Rev[2671]
-- CHANGED: The split function of these modules was replaced by the 
-  explode function due to that the split function was deprecated 
+- CHANGED: The split function of these modules was replaced by the
+  explode function due to that the split function was deprecated
   since PHP 5.3.0. SVN Rev[2650]
-- FIXED: module sec_rules, rules can not change order between pages. 
-  Now the user can change the order of rules to other page. 
+- FIXED: module sec_rules, rules can not change order between pages.
+  Now the user can change the order of rules to other page.
   SVN Rev[2630]
 
 * Wed Apr 27 2011 Alberto Santos <asantos@palosanto.com> 2.0.4-12
@@ -620,9 +625,9 @@ fi
 
 * Tue Mar 01 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-11
 - CHANGED: In spec file changed prereq elastix >= 2.0.4-10
-- FIXED: module sec_rules, changed the event from onClick to 
+- FIXED: module sec_rules, changed the event from onClick to
   onChange. SVN Rev[2364]
-- CHANGED: module sec_rules, changed the translate or spelling 
+- CHANGED: module sec_rules, changed the translate or spelling
   of some labels. SVN Rev[2363]
 - CHANGED:  Change the way to organize the script.sql of databases
   SVN Rev[2334]
@@ -633,9 +638,9 @@ fi
   SVN Rev[2334]
 
 * Thu Feb 03 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-9
-- CHANGED:  menu.xml to support new tag "permissions" where has 
-  all permissions of group per module and new attribute "desc" 
-  into tag  "group" for add a description of group. 
+- CHANGED:  menu.xml to support new tag "permissions" where has
+  all permissions of group per module and new attribute "desc"
+  into tag  "group" for add a description of group.
   SVN Rev[2294][2299]
 - CHANGED:  changed name and path of file.info to db.info. This
   file contains the database name of all db used for this rpm.
@@ -644,17 +649,17 @@ fi
 * Wed Feb 02 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-8
 - CHANGED: Add new column "state" in table filter of iptable.db.
   SVN Rev[2292]
-- ADD:     new field in the table filter and new rule was inserted 
+- ADD:     new field in the table filter and new rule was inserted
   in the table filter. SVN Rev[2263]
 - FIXED:   module sec_rules, new rule that allows yum and ssh.
   SVN Rev[2262]
-- FIXED:   module sec_weak_keys, pagination did not work. Now the 
+- FIXED:   module sec_weak_keys, pagination did not work. Now the
   pagination is working. SVN Rev[2260]
 
 * Thu Jan 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-7
 - CHANGED: module sec_rules, added new button desactivate Firewall
   SVN Rev[2239]
-- CHANGED: module sec_rules, new images for the help and new icon 
+- CHANGED: module sec_rules, new images for the help and new icon
   for the module. SVN Rev[2238]
 - CHANGED: module sec_rules, the first time state interaction was
   improved. SVN Rev[2236]
@@ -662,31 +667,31 @@ fi
   SVN Rev[2231]
 
 * Wed Jan 05 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-6
-- CHANGED: module sec_weak_keys, changed the word key for secret 
+- CHANGED: module sec_weak_keys, changed the word key for secret
   and new validations for security. SVN Rev[2221]
 
 * Wed Jan 05 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-5
 - ADDED: schema of database, new column in the table tmp_execute
   SVN Rev[2214]
-- CHANGED: module sec_weak_keys, validation if the user is admin 
+- CHANGED: module sec_weak_keys, validation if the user is admin
   or not for privileges. SVN Rev[2213]
 - UPDATED: Module Rule Firewall, New Rule was added to accept
   IMAP traffic. SVN Rev[2210]
-- FIXED: Module Access Audit, Fixed bug where do not showing 
+- FIXED: Module Access Audit, Fixed bug where do not showing
   the correct amount of pages. SVN Rev[2208]
 
 * Thu Dec 30 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
 - CHANGED: module sec_rules, new method for validation of ip.
   SVN Rev[2194]
-- FIXED: Module Security, New rule of firewall to accept 
+- FIXED: Module Security, New rule of firewall to accept
   resolve DNS. SVN Rev[2193]
 
 * Wed Dec 29 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-3
-- CHANGED: Module Security, Change name of modules and join up 
+- CHANGED: Module Security, Change name of modules and join up
   the modules "details port" and "rulers". SVN Rev[2178]
 
 * Tue Dec 28 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-2
-- CHANGE: module sec_rules, add a line to create the file 
+- CHANGE: module sec_rules, add a line to create the file
   /etc/sysconfig/iptabl. SVN Rev[2172]
 
 * Wed Dec 22 2010 Bruno Macias V. <bmacias@palosanto.com> 2.0.4-1

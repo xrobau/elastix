@@ -5,7 +5,7 @@ function prepararBoton(s)
 		labelOff:	"Off",
 		change: function ($input) {
 			var arrAction = {
-				menu:		'sec_advanced_settings', 
+				menu:		'sec_advanced_settings',
 				rawmode:	'yes',
 				action:		'update_' + s
 			};
@@ -20,12 +20,12 @@ function prepararBoton(s)
 					} else {
 						// Restaurar valor anterior
 						if ($("#old" + s).val() == 1) {
-							$("#" + s).attr("checked", "checked");
+							$("#" + s).prop("checked", true);
 						} else {
-							$("#" + s).removeAttr("checked");
+							$("#" + s).prop("checked", false);
 						}
 					}
-					
+
 					// Mostrar mensajes
 					$("#message_error").remove();
 					if (document.getElementById("neo-contentbox-maincolumn")) {

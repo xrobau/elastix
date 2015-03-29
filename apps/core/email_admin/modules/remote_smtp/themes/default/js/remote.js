@@ -7,7 +7,7 @@ $(document).ready(function(){
         if(domain == "custom"){
             $('input[name=relayhost]').val("");
             $('input[name=port]').val("");
-        }else{ 
+        }else{
             $('input[name=relayhost]').val(domain);
             $('input[name=port]').val("587");
         }
@@ -29,10 +29,10 @@ $(document).ready(function(){
         var example = "";
 
         if(server=="GMAIL" || server=="HOTMAIL"){
-            $('input[name=chkoldautentification]').attr("checked", "checked");
+            $('input[name=chkoldautentification]').prop("checked", true);
             $('#autentification').val("on");
         }else{
-            $('input[name=chkoldautentification]').removeAttr("checked");
+            $('input[name=chkoldautentification]').prop("checked", false);
             $('#autentification').val("off");
         }
         if(server=="GMAIL" || server=="HOTMAIL" || server=="YAHOO"){
@@ -48,7 +48,7 @@ $(document).ready(function(){
 
 
 function setSelectedDomain(){
-	
+
     $('#SMTP_Server option').each(function(){
         var dominio = $('input[name=relayhost]').val();
         var relay   = $(this).text();
@@ -65,13 +65,13 @@ function setSelectedDomain(){
             $('#example').text(example);
         }
     });
-    
+
     var server = $('#SMTP_Server option:selected').val();
 	if(server=="custom")
 		$('.validpass').hide();
     else
 		$('.validpass').show();
-    
+
 }
 
 // cambia el estado del hidden "status" de on a off
@@ -79,10 +79,10 @@ function changeActivateDefault()
 {
     var status = $('#status').val();
     if(status=="on"){
-        $("input[name=chkoldstatus]").attr("checked", "checked");
+        $("input[name=chkoldstatus]").prop("checked", true);
         $("#status").val("on");
     }else{
-        $("input[name=chkoldstatus]").removeAttr("checked");
+        $("input[name=chkoldstatus]").prop("checked", false);
         $("#status").val("off");
     }
 }

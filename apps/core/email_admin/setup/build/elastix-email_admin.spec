@@ -200,6 +200,9 @@ fi
 
 %changelog
 * Sun Mar 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Remote SMTP - jQuery-1.11.2 migration: fix incorrect use of attribute
+  instead of property.
+  SVN Rev[6926]
 - CHANGED: Antispam - jQuery-1.11.2 migration: fix incorrect use of attribute
   instead of property.
   SVN Rev[6925]

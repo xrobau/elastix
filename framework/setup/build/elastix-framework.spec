@@ -351,6 +351,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: update jQuery to 1.11.2
+- CHANGED: Framework: update jQueryUI to 1.11.4
+- CHANGED: Framework: update colResizable to 1.5
+  SVN Rev[6930]
+
 * Sat Mar 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: framework - jQuery-1.11.2 migration - themes: fix incorrect use of
   attribute instead of property.

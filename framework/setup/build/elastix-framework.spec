@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove older copies of jQuery and jQueryUI in tenant
+  theme.
+  SVN Rev[6931]
 - CHANGED: Framework: update jQuery to 1.11.2
 - CHANGED: Framework: update jQueryUI to 1.11.4
 - CHANGED: Framework: update colResizable to 1.5

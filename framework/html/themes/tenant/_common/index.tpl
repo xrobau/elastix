@@ -5,8 +5,6 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
         <title>Elastix</title>
 
-<link rel="stylesheet" href="https://cdn.oesmith.co.uk/morris-0.4.3.min.css">
-
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/font-icons/entypo/css/entypo.css">
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/font-icons/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
@@ -37,7 +35,6 @@
     {$HEADER_MODULES}
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-<script src="https://cdn.oesmith.co.uk/morris-0.4.3.min.js"></script>
 <!--<script src="/admin/web/themes/tenant/js/jquery.easypiechart.js"></script>-->
 <script src="/themes/tenant/js/jquery.easypiechart.js"></script>
 

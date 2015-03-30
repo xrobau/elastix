@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove references to unused plugin Morris in tenant theme.
+  SVN Rev[6934]
 - FIXED: Framework: remove reference to removed older copy of jQueryUI in tenant
   theme.
   SVN Rev[6933]

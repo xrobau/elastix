@@ -7,7 +7,6 @@
 
 <link rel="stylesheet" href="https://cdn.oesmith.co.uk/morris-0.4.3.min.css">
 
-    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css">
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/font-icons/entypo/css/entypo.css">
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/font-icons/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
@@ -97,7 +96,6 @@
 
     <!-- Bottom Scripts -->
     <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/gsap/main-gsap.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js"></script>
     <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/bootstrap.js"></script>
     <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/joinable.js"></script>
     <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/resizeable.js"></script>

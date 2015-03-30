@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: remove reference to removed older copy of jQueryUI in tenant
+  theme.
+  SVN Rev[6933]
 - FIXED: Framework: replace call to nonexistent javascript function with 
   hardcoded default for Elastix 2. This fixes issue of broken drop-down filters
   in tenant theme.

@@ -34,8 +34,6 @@
         {$HEADER}
     {$HEADER_MODULES}
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-<!--<script src="/admin/web/themes/tenant/js/jquery.easypiechart.js"></script>-->
 <script src="/themes/tenant/js/jquery.easypiechart.js"></script>
 
     </head>

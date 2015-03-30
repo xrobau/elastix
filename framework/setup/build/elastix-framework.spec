@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix reference to removed older copy of jQuery in tenant 
+  login screen.
+  SVN Rev[6936]
 - CHANGED: Framework: remove reference to unused plugin Raphaël in tenant theme.
   SVN Rev[6935]
 - CHANGED: Framework: remove references to unused plugin Morris in tenant theme.

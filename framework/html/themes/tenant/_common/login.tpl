@@ -19,8 +19,6 @@
 	<link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/neon-forms.css">
 	<link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/custom.css">
 
-	<script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/jquery-1.11.0.min.js"></script>
-
 	<!--[if lt IE 9]><script src="{$WEBPATH}themes/{$THEMENAME}/js/ie8-responsive-file-warning.js"></script><![endif]-->
 
 	<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -29,7 +27,7 @@
 		<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
 	<![endif]-->
 	
-	
+    {$HEADER_LIBS_JQUERY}
 </head>
 <body class="page-body login-page login-form-fall" data-url="http://neon.dev">
 

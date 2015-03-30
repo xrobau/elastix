@@ -247,7 +247,7 @@
         var filter_hide = "{$FILTER_GRID_HIDE}";
     {/if}
 {literal}
-        var webCommon=getWebCommon();
+        var webCommon = /*getWebCommon()*/ '';
         if($("#neo-table-header-filterrow").data("neo-table-header-filterrow-status")=="visible") {
             $("#neo-table-header-filterrow").addClass("neo-display-none");
             $("#neo-tabla-img-arrow").attr("src",webCommon+"images/icon_arrowdown2.png");

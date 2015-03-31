@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Mar 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: move Bootstrap before jQueryUI on tenant theme. This is
+  necessary because the button plugin conflicts between Bootstrap and jQueryUI
+  and jQueryUI must take precedence.
+  SVN Rev[6941]
 - FIXED: Framework: fix inclusion of hidden form variable that stores current
   Elastix module for tenant theme.
   SVN Rev[6940]

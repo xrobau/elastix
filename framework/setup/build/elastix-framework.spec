@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: use jquery-ui-timepicker plugin instead of jscalendar.
+  This plugin meshes better with jQueryUI themes. The old jscalendar library is
+  not yet removed at this point.
+  SVN Rev[6938]
 - FIXED: Framework: fix reference to removed older copy of jQuery in tenant 
   login screen.
   SVN Rev[6936]

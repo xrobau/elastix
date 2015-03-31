@@ -319,40 +319,87 @@ class paloForm
                     }
                     break;
                 case "DATE":
-                    if($bIngresoActivo) {
-                        require_once("libs/js/jscalendar/calendar.php");    
-                        $time = false;
-                        $format = '%d %b %Y';
-                        $timeformat = '12';
-                        $firstDay = 1;
-                        if(is_array($arrVars['INPUT_EXTRA_PARAM']) && count($arrVars['INPUT_EXTRA_PARAM'])>0) {
-                            foreach($arrVars['INPUT_EXTRA_PARAM'] as $key => $value){
-                                if($key=='TIME')
-                                    $time=$value;
-                                if($key=='FORMAT')
-                                    $format = $value;
-                                if($key=='TIMEFORMAT')
-                                    $timeformat = $value;
-                                if($key=='FIRSTDAY')
-                                    $firstDay = $value;
+                    if ($bIngresoActivo) {
+                        require_once 'libs/JSON.php';
+                        
+                        // Mapa para traducir de formato jsCalendar a DateTimePicker
+                        $dateFormatMap = array(
+                            '%Y'    =>  'yy',
+                            '%m'    =>  'mm',
+                            '%b'    =>  'M',
+                            '%d'    =>  'dd',
+                        );
+                        $timeFormatMap = array(
+                            '%H'    =>  'HH',
+                            '%M'    =>  'mm',
+                        );
+                        $defaultValues = array(
+                            'showOn'            =>  'button',
+                            'firstDay'          =>  1,
+                            'buttonImage'       =>  'images/calendar.gif',
+                            'buttonImageOnly'   =>  TRUE,
+                            'dateFormat'        =>  'dd M yy',
+                            'timeFormat'        =>  'HH:mm',
+                            'changeMonth'       =>  TRUE,
+                            'changeYear'        =>  TRUE,
+                            'showWeek'          =>  TRUE,
+                            'constrainInput'    =>  TRUE,
+                        );
+                        
+                        // Evaluación de los valores para formulario
+                        $useTimePicker = FALSE;
+                        $datewidget = 'datepicker';
+                        $formValues = array();
+                        
+                        if (is_array($arrVars['INPUT_EXTRA_PARAM'])) {
+                            $useTimePicker = (isset($arrVars['INPUT_EXTRA_PARAM']['TIME'])
+                                && $arrVars['INPUT_EXTRA_PARAM']['TIME']);
+                            $datewidget = $useTimePicker ? 'datetimepicker' : 'datepicker';
+                            if (isset($arrVars['INPUT_EXTRA_PARAM']['FIRSTDAY']))
+                                $formValues['firstDay'] = (int)$arrVars['INPUT_EXTRA_PARAM']['FIRSTDAY'];
+                            if (!isset($arrVars['INPUT_EXTRA_PARAM']['FORMAT']))
+                                $arrVars['INPUT_EXTRA_PARAM']['FORMAT'] = '%d %b %Y';
+                            if (!isset($arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT']))
+                                $arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] = '%H:%M';
+                            
+                            // El siguiente código asume que el formato de hora siempre 
+                            // se especifica luego del formato de fecha
+                            $timepos = FALSE;
+                            foreach (array_keys($timeFormatMap) as $tf) {
+                                $tp = strpos($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], $tf);
+                                if ($timepos === FALSE || ($tp !== FALSE && $timepos > $tp))
+                                    $timepos = $tp;
+                            }
+                            if ($timepos !== FALSE) {
+                                $arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] = trim(substr($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], $timepos));
+                                $arrVars['INPUT_EXTRA_PARAM']['FORMAT'] = trim(substr($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], 0, $timepos));
+                            }
+                            if ($arrVars['INPUT_EXTRA_PARAM']['FORMAT'] != '%d %b %Y') {
+                                $formValues['dateFormat'] = str_replace(
+                                    array_keys($dateFormatMap),
+                                    array_values($dateFormatMap),
+                                    $arrVars['INPUT_EXTRA_PARAM']['FORMAT']);
+                            }
+                            if ($arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] != '%H:%M') {
+                                $formValues['timeFormat'] = str_replace(
+                                    array_keys($timeFormatMap),
+                                    array_values($timeFormatMap),
+                                    $arrVars['INPUT_EXTRA_PARAM']['FORMAT']);
                             }
                         }
-                        $oCal = new DHTML_Calendar("/libs/js/jscalendar/", "en", "calendar-win2k-2", $time);
-                        $this->smarty->assign("HEADER", $oCal->load_files());
-
-                        $strInput .= $oCal->make_input_field(
-                                        array('firstDay'       => $firstDay, // show Monday=1 first by default or Sunday=7
-                                              'showsTime'      => true,
-                                              'showOthers'     => true,
-                                              'ifFormat'       => $format,
-                                              'timeFormat'     => $timeformat),
-                                        // field attributes go here
-                                        array('style'          => 'width: 10em; color: #840; background-color: #fafafa; ' .
-                                                                   'border: 1px solid #999999; text-align: center',
-                                              'name'        => $varName,
-                                              //'value'       => strftime('%d %b %Y', strtotime('now'))));
-                                              'value'       => $arrPreFilledValues[$varName]));
-
+                            
+                        $json = new Services_JSON();
+                        $params = $json->encode(array_merge($defaultValues, $formValues));
+                        $strInput = <<<DATETIME_PICKER_FIELD
+<input type="text" name="{$varName_escaped}" value="{$varValue_escaped}"
+    style="width: 10em; color: #840; background-color: #fafafa; border: 1px solid #999999; text-align: center">
+</input>
+<script type="text/javascript">
+$(function() {
+    $("input[name={$varName}]").{$datewidget}({$params});
+});
+</script>
+DATETIME_PICKER_FIELD;
                     } else {
                         $strInput = $varValue_escaped;
                     }

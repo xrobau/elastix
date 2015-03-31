@@ -94,7 +94,7 @@ $(document).ready(function() {
     var fechasAgenda = $('#schedule_date_start, #schedule_date_end').datepicker({
     	minDate:		0,
     	showOn:			'both',
-    	buttonImage:	'libs/js/jscalendar/img.gif',
+    	buttonImage:	'images/calendar.gif',
     	buttonImageOnly: true,
     	showButtonPanel: true,
     	dateFormat:		'yy-mm-dd',

@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Mar 30 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: use framework calendar icon instead of jscalendar 
+  icon which might be removed soon.
+  SVN Rev[6939]
+
 * Sun Mar 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console - jQuery-1.11.2 migration: fix incorrect use of
   attribute instead of property.

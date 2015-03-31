@@ -59,17 +59,3 @@ div.neo-applet-tdesc {
     float:left;
     overflow:hidden;
 }
-
-.appletwindow > .appletwindow_content{
-    width: 480px !important;
-}
-
-.appletwindow{
-    height: 310px !important;
-}
-
-
-.appletwindow_fullcontent * {
-    box-sizing: content-box;
-    -webkit-box-sizing: content-box;
-}

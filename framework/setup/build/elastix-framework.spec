@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Mar 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: removed applet theme overrides for tenant theme.
+  SVN Rev[6943]
 - FIXED: Framework: remove min-width from main module content in order to fit
   in smaller displays. Set back box-sizing property for content inside main
   module.

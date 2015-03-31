@@ -32,7 +32,9 @@
     /*position:relative;
     width:1025px;
     float:left;*/
+    /*
     min-width:1025px;
+    */
     margin-top: 0px;
     margin-right: 10px;
     margin-bottom: 10px;
@@ -127,9 +129,14 @@ div.neo-module-content {
     background-color:#f0f0f0;
     border: 1px solid #999;
 }
+div.neo-module-content *, div.neo-module-content *::before, div.neo-module-content *::after {
+    box-sizing :initial;
+}
+/*
 div.neo-module-content td {
     padding:5px;
 }
+*/
 div.neo-addons-header-row {
 	height:40px;
 	margin-top:0px;

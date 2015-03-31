@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Mar 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: remove min-width from main module content in order to fit
+  in smaller displays. Set back box-sizing property for content inside main
+  module.
+  SVN Rev[6942]
 - FIXED: Framework: move Bootstrap before jQueryUI on tenant theme. This is
   necessary because the button plugin conflicts between Bootstrap and jQueryUI
   and jQueryUI must take precedence.

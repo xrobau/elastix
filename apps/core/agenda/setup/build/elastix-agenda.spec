@@ -96,6 +96,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: isolate datetime formatting function and make it check for
+  the presence of Date.print before falling back to datetimepicker methods.
+  SVN Rev[6937]
+
 * Sat Mar 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Agenda - jQuery-1.11.2 migration - fix incorrect use of
   attribute instead of property.

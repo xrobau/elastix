@@ -81,7 +81,7 @@ $(document).ready(function() {
     
     // Botón de nuevo evento
     $("#calendar_newevent").button().click(function() {
-        clearEventDialog();        
+        clearEventDialog();
         $('#calendar_eventdialog').dialog({
             title: arrLang_main['LBL_NEW_EVENT'],
             buttons: [
@@ -402,7 +402,7 @@ function clearEventDialog()
     $('#colorSelector').ColorPickerSetColor('#3366CC');
     $('#colorSelector div').css('backgroundColor', '#3366CC');
     
-    var today_str = (new Date()).print('%Y-%m-%d %H:%M');
+    var today_str = formatdate(new Date);
     $(':input[name="date"]').val(today_str);
     $(':input[name="to"]').val(today_str);
 
@@ -433,8 +433,8 @@ function fillEventDialog(eventdata)
     
     /* Se tiene que usar la utilidad parseISO8601 para que el parseo de la fecha
      * funcione en IE8 (...típico) */
-    $(':input[name="date"]').val(($.fullCalendar.parseISO8601(eventdata.starttime)  ).print('%Y-%m-%d %H:%M'));
-    $(':input[name="to"]').val(($.fullCalendar.parseISO8601(eventdata.endtime)).print('%Y-%m-%d %H:%M'));
+    $(':input[name="date"]').val(formatdate($.fullCalendar.parseISO8601(eventdata.starttime)));
+    $(':input[name="to"]').val(formatdate($.fullCalendar.parseISO8601(eventdata.endtime)));
 
     // Campos de llamada de recordatorio
     if (eventdata.reminder_timer != null) $(':input[name="ReminderTime"]').val(eventdata.reminder_timer);
@@ -577,3 +577,13 @@ function datehhmm(s)
 
 function split(val) { return val.split(/,\s*/); }
 function extractLast(term) { return split(term).pop(); }
+
+function formatdate(d)
+{
+	// Date.print es provisto por jsCalendar en proceso de ser reemplazado
+	if (typeof d.print != 'undefined')
+		return d.print('%Y-%m-%d %H:%M');
+	else
+		return $.datepicker.formatDate('yy-mm-dd', d) + ' ' +
+			$.datepicker.formatTime('HH:mm', {hour: d.getHours(), minute: d.getMinutes()});
+}

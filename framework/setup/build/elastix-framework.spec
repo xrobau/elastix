@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Mar 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: revert SVN commit 6941, and instead manually disable the
+  Bootstrap button plugin.
+  SVN Rev[6944]
 - FIXED: Framework: removed applet theme overrides for tenant theme.
   SVN Rev[6943]
 - FIXED: Framework: remove min-width from main module content in order to fit

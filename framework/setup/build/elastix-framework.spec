@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Mar 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix inclusion of hidden form variable that stores current
+  Elastix module for tenant theme.
+  SVN Rev[6940]
+
 * Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: use jquery-ui-timepicker plugin instead of jscalendar.
   This plugin meshes better with jQueryUI themes. The old jscalendar library is

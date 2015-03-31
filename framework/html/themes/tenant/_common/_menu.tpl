@@ -333,7 +333,7 @@ function removeNeoDisplayOnMouseOver(ref){
             {/if}
             </span><div class="neo-module-title-buttonstab-left"></div>
         </div>-->
-        <input type="hidden" id="elastix_framework_module_id" value="{$idSubMenu2Selected}" />
+        <input type="hidden" id="elastix_framework_module_id" value="{if empty($idSubMenu2Selected)}{$idSubMenuSelected}{else}{$idSubMenu2Selected}{/if}" />
         <input type="hidden" id="elastix_framework_webCommon" value="{$WEBCOMMON}" />
         <div class="neo-module-content">
 

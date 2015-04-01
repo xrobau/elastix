@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Apr  1 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: fix second use of jscalendar icon. Also enable month
+  and year selection on date field.
+  SVN Rev[6945]
+
 * Mon Mar 30 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: use framework calendar icon instead of jscalendar 
   icon which might be removed soon.

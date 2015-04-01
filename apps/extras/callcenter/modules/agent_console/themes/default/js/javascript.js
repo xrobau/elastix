@@ -156,9 +156,11 @@ function apply_form_styles()
     $('#elastix-callcenter-cejillas-formulario').tabs();
     $('.elastix-callcenter-field-date').datepicker({
     	showOn:			'both',
-    	buttonImage:	'libs/js/jscalendar/img.gif',
+    	buttonImage:	'images/calendar.gif',
     	buttonImageOnly: true,
     	showButtonPanel: true,
+    	changeMonth:	true,
+    	changeYear:		true,
     	dateFormat:		'yy-mm-dd'
     });
     $('#btn_guardar_formularios')

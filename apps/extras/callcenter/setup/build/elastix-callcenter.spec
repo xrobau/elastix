@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Wed Apr  1 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: perform consistency checks to diagnose when a logged-out
+  agent gets stuck with a call.
+  SVN Rev[6946]
 - CHANGED: Agent Console: fix second use of jscalendar icon. Also enable month
   and year selection on date field.
   SVN Rev[6945]

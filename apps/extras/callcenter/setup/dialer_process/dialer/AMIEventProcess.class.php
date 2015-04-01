@@ -1560,6 +1560,7 @@ class AMIEventProcess extends TuberiaProcess
                     $a->id_sesion,
                     $a->id_audit_break,
                     $a->id_audit_hold);
+                $this->_verificarLlamadaActivaLogoff($a, $params['Event']);
                 $a->terminarLoginAgente();
             }
         } else {
@@ -1962,6 +1963,7 @@ class AMIEventProcess extends TuberiaProcess
             $a->id_sesion,
             $a->id_audit_break,
             $a->id_audit_hold);
+        $this->_verificarLlamadaActivaLogoff($a, $params['Event']);
         $a->terminarLoginAgente();
         
         if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
@@ -2182,6 +2184,19 @@ class AMIEventProcess extends TuberiaProcess
         }
     }
 
+    private function _verificarLlamadaActivaLogoff($a, $evtname)
+    {
+        if (is_null($a->llamada)) return;
+        
+        $this->_log->output('WARN: agente '.$a->channel.' todavía tiene una '.
+            'llamada al procesar '.$evtname.', se cierra...');
+        $r = $this->_ami->Hangup($a->llamada->agentchannel);
+        if ($r['Response'] != 'Success') {
+            $this->_log->output('ERR: No se puede colgar la llamada para '.$a->channel.
+                ' ('.$a->llamada->agentchannel.') - '.$r['Message']);
+        }
+    }
+    
     private function _dumpstatus()
     {
         $this->_log->output('INFO: '.__METHOD__.' volcando status de seguimiento...');        

@@ -679,6 +679,12 @@ class Llamada
         if (is_null($this->actualchannel))
             $this->_tuberia->msg_CampaignProcess_actualizarCanalRemoto(
                 $this->agente->number, $this->tipo_llamada, $this->uniqueid);
+
+        // Verificación de consistencia
+        if ($this->agente->estado_consola != 'logged-in') {
+            $this->_log->output("ERR: llamada ha sido asignada a agente en estado ".
+                $this->agente->estado_consola.'. Esto no debería haber pasado: '.print_r($this, TRUE));
+        }
     }
     
     public function llamadaRegresaHold($iTimestamp, $uniqueid_nuevo = NULL, $sAgentChannel = NULL)

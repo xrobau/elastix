@@ -351,6 +351,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Apr  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove unused template file in registration module.
+- CHANGED: Framework: remove tag styling from forms. This styling is a no-op for
+  most themes and removing it improve appearance in blackmin theme.
+  SVN Rev[6948]
+
 * Tue Mar 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: revert SVN commit 6941, and instead manually disable the
   Bootstrap button plugin.

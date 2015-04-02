@@ -456,7 +456,7 @@ function fillEventDialog(eventdata)
         var email_regexp = /^"?(.*?)"?\s*<?(\S+@\S+?)>?$/;
         for (var i = 0; i < eventdata.emails_notification.length; i++) {
             var emailrow = $(
-                '<tr class="letra12" style="font-size:12px;">'
+                '<tr class="letra12">'
                     +'<td align="center"><!-- INDEX --></td>'
                     +'<td align="center"><!-- CONTACT --></td>'
                     +'<td align="center"><!-- EMAIL --></td>'

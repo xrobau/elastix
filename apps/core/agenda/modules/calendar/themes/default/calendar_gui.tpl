@@ -1,8 +1,8 @@
 <form  method='POST' style='margin-bottom:0;' name='formCalendar' id='formCalendar'>
 <br />
-<table class="tabForm" style="font-size: 16px;" width="100%"><tr>
-	<td id="calendar_toolbar" width="10%" align="left" valign="top" style="font-size:64%;">
-	    <div id="calendar_buttonbox" style="margin: 0px 10px 6px 10px;" valign="middle">
+<table class="tabForm" width="100%"><tr>
+	<td id="calendar_toolbar" width="10%" align="left" valign="top">
+	    <div id="calendar_buttonbox" style="margin: 0px 10px 6px 10px; text-align: center;" valign="middle">
 	        <a href="#" id="calendar_newevent" >{$LBL_CREATE_EVENT}</a>    
 	    </div>
 	    <div id="calendar_datepick">    

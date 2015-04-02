@@ -67,18 +67,18 @@
                 <b id="notification_email_label">{$notification_email}: <span  class="required">*</span></b>
             </div>
             <div class="ui-widget">
-                <textarea id="tags" cols="48px" rows="2" style="color: #333333; font-size:12px; width: 365px; height: 36px; "></textarea>
+                <textarea id="tags" cols="48px" rows="2" style="color: #333333; width: 365px; height: 36px; "></textarea>
             </div>
         </td>
     </tr>
 </table>
 <div class="letra12 notif" id="email_to" align="center">
-    <table id="grilla" style="font-size: 16px;" width="90%" border="0">
+    <table id="grilla" width="90%" border="0">
 	    <thead>
 	       <tr>
 	           <td>&nbsp;</td>
-	           <td class="letra12" align="center" style="color:#666666; font-weight:bold;font-size:12px;">{$LBL_CONTACT_NAME}</td>
-               <td class="letra12" align="center" style="color:#666666; font-weight:bold;font-size:12px;">{$LBL_CONTACT_EMAIL}</td>
+	           <td class="letra12" align="center" style="color:#666666; font-weight:bold;">{$LBL_CONTACT_NAME}</td>
+               <td class="letra12" align="center" style="color:#666666; font-weight:bold;">{$LBL_CONTACT_EMAIL}</td>
                <td>&nbsp;</td>
 	       </tr>
 	    </thead>

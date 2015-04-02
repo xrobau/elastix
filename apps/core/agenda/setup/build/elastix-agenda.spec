@@ -96,6 +96,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Apr  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: remove extraneous explicit font sizing.
+  SVN Rev[6950] 
+
 * Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: isolate datetime formatting function and make it check for
   the presence of Date.print before falling back to datetimepicker methods.

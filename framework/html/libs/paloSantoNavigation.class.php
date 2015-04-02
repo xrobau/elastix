@@ -321,7 +321,8 @@ class paloSantoNavigation extends paloSantoNavigationBase
         // TODO: allow custom theme to define a jQueryUI theme
         $jquery_ui_theme = 'ui-lightness';
         switch ($arrConf['mainTheme']) {
-        case 'blackmin':    $jquery_ui_theme = 'black-tie'; break;
+        case 'tenant':
+        case 'blackmin':    $jquery_ui_theme = 'smoothness'; break;
         case 'giox':
         case 'elastixblue':
         case 'elastixneo':  $jquery_ui_theme = 'redmond'; break;

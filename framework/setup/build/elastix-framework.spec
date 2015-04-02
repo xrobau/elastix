@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Apr  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: choose smoothness jQueryUI theme for tenant and blackmin.
+  SVN Rev[6949]
 - DELETED: Framework: remove unused template file in registration module.
 - CHANGED: Framework: remove tag styling from forms. This styling is a no-op for
   most themes and removing it improve appearance in blackmin theme.

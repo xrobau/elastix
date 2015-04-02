@@ -65,7 +65,7 @@ body
     font-family: verdana, arial, helvetica, sans-serif;
     background: #FFFFFF;
     color: #000000;
-    font-size: 9pt;
+    font-size: 81.25%;
     margin: 0;
 }
 
@@ -73,49 +73,52 @@ input
 {
     color: #333333;
     background: #fafafa;
-    border-top: 1px #999999 solid; 
-    border-left: 1px #999999 solid; 
-    border-bottom: 1px #cccccc solid; 
-    border-right: 1px #cccccc solid; 
+    border-top: 1px #999999 solid;
+    border-left: 1px #999999 solid;
+    border-bottom: 1px #cccccc solid;
+    border-right: 1px #cccccc solid;
     font-family: verdana, arial, helvetica, sans-serif;
     text-decoration: none;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    font-size:12px;
-    min-height: 22px;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    font-size: 1em;
+/*    min-height: 22px;*/
 }
 textarea
 {
     color: #333333;
     background: #fafafa;
-    border-top: 1px #999999 solid; 
-    border-left: 1px #999999 solid; 
-    border-bottom: 1px #cccccc solid; 
-    border-right: 1px #cccccc solid; 
+    border-top: 1px #999999 solid;
+    border-left: 1px #999999 solid;
+    border-bottom: 1px #cccccc solid;
+    border-right: 1px #cccccc solid;
     font-family: verdana, arial, helvetica, sans-serif;
     text-decoration: none;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    font-size:12px;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    font-size: 1em;
 }
+
 select
 {
-    color: #333333;
+	color: #333333;
     background: #fafafa;
-    border-top: 1px #999999 solid; 
-    border-left: 1px #999999 solid; 
-    border-bottom: 1px #cccccc solid; 
-    border-right: 1px #cccccc solid; 
+    border-top: 1px #999999 solid;
+    border-left: 1px #999999 solid;
+    border-bottom: 1px #cccccc solid;
+    border-right: 1px #cccccc solid;
     font-family: verdana, arial, helvetica, sans-serif;
     text-decoration: none;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    font-size:12px;
-    min-height: 26px;
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    font-size: 1em;
+/*    min-height: 26px;*/
+
 }
+
 input.button, input.submit
 {
 	border: 1px solid #999999;
@@ -140,7 +143,7 @@ INPUT:disabled {
     padding: 0;
     color: #ffffff;
     background: #000000;
-    font-size: 11pt;
+    font-size: 1em;
     font-weight: bold;
 }
 #elx-blackmin-content-menu>img
@@ -170,7 +173,7 @@ INPUT:disabled {
 {
 	display: inline;
 	font-family: verdana, arial, helvetica, sans-serif;
-	font-size: 9pt;
+/*	font-size: 1.1em;*/
 }
 #elx-blackmin-menu .raquo
 {
@@ -198,7 +201,7 @@ INPUT:disabled {
     background: #000000;
     color: #bbbbbb;
     position: absolute;
-    font-size: 11pt;
+/*    font-size: 1em;*/
     display: none;
     z-index: 1000000;
 }
@@ -218,7 +221,7 @@ INPUT:disabled {
 }
 #elx-blackmin-menu>div>ul li.selected
 {
-    font-weight: bold;
+/*    font-weight: bold;*/
 }
 #elx-blackmin-menu>div>ul li:hover
 {
@@ -279,12 +282,12 @@ form.elx-blackmin-form-table>table>tbody>tr>td
 {
     border-bottom: 1px #eeeeee solid;
     padding: 4px;
-} 
+}
 form.elx-blackmin-form-table>table>tbody>tr>td.table_data_last_row
 {
     border-bottom: 1px #aaaaaa solid;
     padding: 4px;
-} 
+}
 
 form.elx-blackmin-form-table>table>tfoot
 {
@@ -476,7 +479,7 @@ td a.link_summary_on{
     height:33px;
     float:left;
     padding:8px 10px 0px 10px;
-    border: 1px solid #aaa;    
+    border: 1px solid #aaa;
     cursor: pointer;
 }
 .table-header-row-filter {
@@ -579,7 +582,7 @@ td a.link_summary_on{
     width:20%;
     color:blue;
     top:5px;
-    
+
 }
 
 .loadingRPMimg{
@@ -588,10 +591,10 @@ td a.link_summary_on{
 
 #loadingRPM{
     display: block;
-    text-align:center;	
+    text-align:center;
     position: absolute;
     top:45%;
-    left:45%; 
+    left:45%;
 
 }
 

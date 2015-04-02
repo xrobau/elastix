@@ -644,14 +644,15 @@ CONTENIDO_ARCHIVO_AUDIO;
             $sNombre = '';
             $sEmail = $sDireccionEmail;
             $regs = NULL;
-            if (preg_match('/"?(.*?)"?\s+<(\S+)>/', $sDireccionEmail, $regs)) {
+            if (preg_match('/"?(.*?)"?\s*<(\S+)>/', $sDireccionEmail, $regs)) {
                 $sNombre = $regs[1];
                 $sEmail = $regs[2];
             }
-
-            $oMail->ClearAddresses();
-            $oMail->AddAddress($sEmail, $sNombre);
-            $oMail->Send();
+            if ($oMail->ValidateAddress($sEmail)) {
+                $oMail->ClearAddresses();
+                $oMail->AddAddress($sEmail, $sNombre);
+                $oMail->Send();
+            }
         } 
     }
     

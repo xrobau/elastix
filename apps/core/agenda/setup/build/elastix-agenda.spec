@@ -97,6 +97,8 @@ fi
 
 %changelog
 * Thu Apr  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: fix regexp that separates friendly name from email address.
+  SVN Rev[6951]
 - CHANGED: Calendar: remove extraneous explicit font sizing.
   SVN Rev[6950] 
 

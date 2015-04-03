@@ -122,10 +122,10 @@ select
 input.button, input.submit
 {
 	border: 1px solid #999999;
-	background-color: #ffffff;
-	background-image: url(../../images/bgGray.gif);
+	background-color: #eeeeee;
     background-repeat: repeat-x;
     background-position: bottom;
+    color: #444444;
 }
 input:focus, textarea:focus, select:focus
 {
@@ -137,6 +137,72 @@ INPUT:disabled {
 	color: #E6E6E6;
 	border: #E6E6E6 1px solid;
 }
+
+
+
+
+
+
+
+#elx-blackmin-topnav-toolbar
+{
+	position: absolute;
+	width: 100%;
+	left: 0;
+	top: 0;
+	right: 0;
+    height: 36px;
+    color: #ffffff;
+    background: #000000;
+    font-size: 1em;
+    font-weight: bold;
+}
+#elx-blackmin-wrap
+{
+	position: absolute;
+	width: 100%;
+	left: 0;
+	bottom: 0; /* TODO: dejar espacio para mensaje de copyright */
+	right: 0;
+	top: 36px;
+	overflow: auto;
+}
+ul.elx-blackmin-topnav
+{
+	list-style: outside none none;
+	padding-left: 0;
+	margin: 0;
+}
+ul.elx-blackmin-topnav > li
+{
+    position: relative;
+    display: block;
+    float: left;
+}
+ul.elx-blackmin-topnav > li.navButton
+{
+	float: right;
+	background: #777777;
+	padding: 8px;
+	border-left: 1px #666666 solid;
+	position: static;
+}
+ul.elx-blackmin-topnav > li.navButton:hover
+{
+	background: #888888;
+}
+#elx-blackmin-module-title
+{
+	padding: 7px;
+}
+
+
+
+
+
+
+
+
 #elx-blackmin-content-menu
 {
     position: relative;
@@ -151,36 +217,28 @@ INPUT:disabled {
     border: 0;
     cursor: pointer;
 }
-#elx-blackmin-quicklink
-{
-    height: 36px;
-	position: absolute;
-	right: 0;
-}
-#elx-blackmin-quicklink a
-{
-    color: #bbbbbb;
-    text-decoration: none;
-    font-weight: bold;
-}
-#elx-blackmin-quicklink a:hover
-{
-    color: #ffffff;
-}
 
 /* Definición del menú de la página */
-#elx-blackmin-menu
+@-webkit-keyframes elx-blackmin-menu-fadein
 {
-	display: inline;
-	font-family: verdana, arial, helvetica, sans-serif;
-/*	font-size: 1.1em;*/
+	from { opacity: 0; }
+	to   { opacity: 1; }
 }
-#elx-blackmin-menu .raquo
+@keyframes elx-blackmin-menu-fadein
+{
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+li.elx-blackmin-menu
+{
+	font-family: verdana, arial, helvetica, sans-serif;
+}
+li.elx-blackmin-menu .raquo
 {
 	position: absolute;
 	right: 0;
 }
-#elx-blackmin-menu li
+li.elx-blackmin-menu li
 {
 	margin:    0px;
 	padding:   0px;
@@ -188,58 +246,74 @@ INPUT:disabled {
     line-height: normal;
     white-space: nowrap;
 }
-#elx-blackmin-menu a
+li.elx-blackmin-menu a
 {
     color: #bbbbbb;
     text-decoration: none;
     width: 100%;
     display: inline-block;
-    padding: 3pt;
+    padding: 5pt;
 }
-#elx-blackmin-menu>div
+li.elx-blackmin-menu>div
 {
-    background: #000000;
+    background-color: rgba(0, 0, 0, 0.83);
     color: #bbbbbb;
     position: absolute;
 /*    font-size: 1em;*/
     display: none;
-    z-index: 1000000;
+    z-index: 4; /* porque el iButton tien zindex 3 */
 }
-#elx-blackmin-menu:hover>div
+li.elx-blackmin-menu>div>p
+{
+	margin:    0px;
+	padding:   5pt;
+}
+li.elx-blackmin-menu:hover>div
 {
 	display: block;
+    -webkit-animation: elx-blackmin-menu-fadein 0.3s;
+    animation: elx-blackmin-menu-fadein 0.3s;
 }
-#elx-blackmin-menu ul
+li.elx-blackmin-menu ul
 {
     list-style-type: none;
     padding: 0;
     min-width: 100%;
 }
-#elx-blackmin-menu>div>ul ul
+li.elx-blackmin-menu>div>ul ul
 {
 	display: none;
 }
-#elx-blackmin-menu>div>ul li.selected
+li.elx-blackmin-menu>div>ul li.selected
 {
 /*    font-weight: bold;*/
 }
-#elx-blackmin-menu>div>ul li:hover
+li.elx-blackmin-menu>div>ul li:hover
 {
     background: #444444;
 }
-#elx-blackmin-menu>div>ul li:hover>a
+li.elx-blackmin-menu>div>ul li:hover>a
 {
     color: #ffffff;
 }
-#elx-blackmin-menu>div>ul li:hover>ul
+li.elx-blackmin-menu>div>ul li:hover>ul
 {
     display: block;
-    background: #000000;
+    background-color: rgba(0, 0, 0, 0.83);
     position: absolute;
     left: 100%;
-    top: -1px;
-    border:1px #888 solid;
+    top: 0px;
+    -webkit-animation: elx-blackmin-menu-fadein 0.3s;
+    animation: elx-blackmin-menu-fadein 0.3s;
 }
+li.navButton > div
+{
+	position: absolute;
+	right: 0px;
+	top: 36px;
+	min-width: 220px;
+}
+
 
 /* Definición del contenido de la página */
 #elx-blackmin-content
@@ -424,14 +498,14 @@ TD.menudescription {
 .close_image_box{
     cursor: pointer;
 }
-
+/*
 #viewDetailsRPMs{
     cursor: pointer;
     text-decoration: underline;
     color: #0000FF;
     font-weight: normal;
 }
-
+*/
 .tdRPMDetail{
     background-color: #E8E8E8;
 }

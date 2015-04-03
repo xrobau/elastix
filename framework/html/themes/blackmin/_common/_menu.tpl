@@ -1,5 +1,4 @@
 <div>
-<hr />
 <ul>{foreach from=$arrMainMenu key=idMenu item=menu}
 <li {if $idMenu eq $idMainMenuSelected}class="selected"{/if} >
     <a href="index.php?menu={$idMenu}">{$menu.Name}&nbsp;&nbsp;&nbsp;{if count($menu.children) > 0}<span class="raquo">&raquo;</span>{/if}</a>
@@ -19,10 +18,4 @@
     {/if}
 </li>
 {/foreach}</ul>
-<hr />
-<ul>
-<li class="selected"><a href='http://www.elastix.org' target='_blank'>Website</a></li>
-<li class="selected"><a href="index.php?logout=yes">{$LOGOUT}</a></li>
-</ul>
-<hr />
 </div>

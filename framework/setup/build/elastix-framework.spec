@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: fix addons icon sticking out from toolbar in blackmin
+  theme under IE8.
+  SVN Rev[6954]
 - CHANGED: Framework: fix hollow menus in blackmin theme arising from
   unsupported transparency in IE8.
   SVN Rev[6953]

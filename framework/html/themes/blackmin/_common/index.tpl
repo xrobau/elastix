@@ -35,7 +35,7 @@
         </li>
         <li class="navButton">
             <!-- Enlace a módulo de addons -->
-            <a href="index.php?menu=addons"><img height="20" align="absmiddle" src="themes/{$THEMENAME}/images/toolbar_addons.png" alt="elastix_addons" /></a>
+            <a href="index.php?menu=addons"><img height="20" align="absmiddle" src="themes/{$THEMENAME}/images/toolbar_addons.png" alt="elastix_addons" border="0" align="absmiddle" /></a>
         </li>
         <li class="navButton elx-blackmin-menu">
             <!-- Acciones de sistema: registro, versión y mensajes de copyright -->

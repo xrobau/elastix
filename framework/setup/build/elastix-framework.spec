@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: fix hollow menus in blackmin theme arising from
+  unsupported transparency in IE8.
+  SVN Rev[6953]
 - CHANGED: Framework: tidying up of blackmin theme navigation. The menu now has
   transparency (when supported by the browser). The long texts at the right were
   replaced by icons and now show CSS drop-down menus in the same layout as the

@@ -45,7 +45,7 @@ function obtenerDetallesRPMS()
         'Asterisk'      =>  array('asterisk', 'asterisk-perl', 'asterisk-addons'),
         'FAX'           =>  array('hylafax', 'iaxmodem'),
         'DRIVERS'       =>  array('dahdi', 'rhino', 'wanpipe-util'),
-        
+
     );
     $sCommand = 'rpm -qa  --queryformat "%{name} %{version} %{release}\n"';
     foreach ($packageClass as $packageLists) {
@@ -59,7 +59,7 @@ function obtenerDetallesRPMS()
     	$fields = explode(' ', $s);
         $packageVersions[$fields[0]] = $fields;
     }
-    
+
     $result = array();
     foreach ($packageClass as $sTag => $packageLists) {
     	if (!isset($result[$sTag])) $result[$sTag] = array();
@@ -135,10 +135,8 @@ function setUserPassword()
 function searchModulesByName()
 {
     include_once "libs/JSON.php";
-    include_once "modules/group_permission/libs/paloSantoGroupPermission.class.php";
     $json = new Services_JSON();
 
-    $pGroupPermission = new paloSantoGroupPermission();
     $name = getParameter("name_module_search");
     $result = array();
     $arrIdMenues = array();
@@ -172,10 +170,8 @@ function searchModulesByName()
     $parameter_to_find[] = $name;
 
     // buscando en la base de datos acl.db tabla acl_resource con el campo description
-    if(empty($parameter_to_find))
-        $arrResult = $pGroupPermission->ObtainResources(25, 0, $name);
-    else
-        $arrResult = $pGroupPermission->ObtainResources(25, 0, $parameter_to_find);
+    $arrResult = $pACL->getListResources(25, 0,
+    	empty($parameter_to_find) ? $name : $parameter_to_find);
 
     foreach($arrResult as $key2 => $value2){
         // leyendo el resultado del query

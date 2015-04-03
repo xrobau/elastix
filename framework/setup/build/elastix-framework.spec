@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove middle man and use paloACL directly. The
+  palosantoGroupPermission class just calls one paloACL method and does not add
+  any useful abstraction.
+  SVN Rev[6955]
 - CHANGED: Framework: fix addons icon sticking out from toolbar in blackmin
   theme under IE8.
   SVN Rev[6954]

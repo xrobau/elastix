@@ -3,7 +3,8 @@ border #AED0EA;
 inside #DEEDF7;
 */
 /** Main layout */
-body { 
+/*
+body {
 	font-family: Helvetica, Geneva, Arial, SunSans-Regular, sans-serif, Verdana, "Trebuchet MS", SunSans-Regular;
 	font-size:11pt ;
 }
@@ -13,6 +14,7 @@ body {
    padding:0;
    height:100%;
 }
+*/
 #menuitem_beta {
 	color:#999;
 	text-align: center;
@@ -85,7 +87,7 @@ input[type=email]:invalid {
 	color:white;
 	font-weight:bold;
 }
-.attention img { 
+.attention img {
 	vertical-align:top;
 	padding-right:5px;
 }
@@ -165,15 +167,15 @@ div.attention {
 }
 #nav ul li a:hover {
 	color: #ff8a00;
-	background: #D6D4D6 
+	background: #D6D4D6
 }
-#nav ul li a.current{ 
+#nav ul li a.current{
 	color: #ff8a00;
 	background: #D6D4D6
 }
 #nav li.current, #nav li.current a { /* active item */
 	background: white;
-	color: #ff8a00; 
+	color: #ff8a00;
 }
 
 /***** footer *****/
@@ -318,7 +320,7 @@ a.info:hover span{
 	border:none;
 }
 .attention a.info:hover span{
-	left:10em; 
+	left:10em;
 	border:1px solid black;
 	background: red;
 	color:white;
@@ -389,15 +391,15 @@ a.info:hover span{
 }
 
 /*** reload button ****/
-#button_reload { 
-	display:none; 
+#button_reload {
+	display:none;
         width:90%;
 	/*width:1023px;*/
-        background-color:#f6bbbb; 
+        background-color:#f6bbbb;
         height:23px;
         border-radius: 6px;
         padding-top: 3px;
-        
+
 }
 
 /************************* For modules page *************************/
@@ -407,10 +409,10 @@ a.info:hover span{
 #shield_link {
 	background-size: 96px 138px;
 	display:inline-block;
-	height:138px; 
-	width:96px; 
-	margin:8px; 
-	position:relative; 
+	height:138px;
+	width:96px;
+	margin:8px;
+	position:relative;
 	top:-50px;
 }
 #shield_link.updates_off {
@@ -518,7 +520,7 @@ div.modulebuttons {
 	text-decoration : none;
 }
 #modulelist div.tabbertab {
-	margin-left:1.5em; 
+	margin-left:1.5em;
 	height:6.5em; /* This should be .5 less than div.moduleinfopain height */
 	overflow:auto;
 }

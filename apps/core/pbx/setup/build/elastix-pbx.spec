@@ -277,6 +277,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sun Apr  5 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: pbxadmin: comment out styles that affect the entire page. These
+  styles mess up several themes, including blackmin.
+  SVN Rev[6959]
+
 * Sun Mar 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Festival - jQuery-1.11.2 migration: fix incorrect use of attribute
   instead of property.

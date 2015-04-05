@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Sat Apr  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Group Permissions: complete rewrite. Now the set of modules is shown
+  using a grid to simulate a tree with expanding and collapsing branches.
+  SVN Rev[6956]
+
 * Fri Apr  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove middle man and use paloACL directly. The
   palosantoGroupPermission class just calls one paloACL method and does not add

@@ -162,7 +162,7 @@ INPUT:disabled {
 	position: absolute;
 	width: 100%;
 	left: 0;
-	bottom: 0; /* TODO: dejar espacio para mensaje de copyright */
+	bottom: 35px;
 	right: 0;
 	top: 36px;
 	overflow: auto;
@@ -195,8 +195,25 @@ ul.elx-blackmin-topnav > li.navButton:hover
 {
 	padding: 7px;
 }
-
-
+#elx-blackmin-footerbox
+{
+    position: absolute;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    height: 25px;
+    padding:10px 0px 0px 0px;
+    color: #444;
+    text-shadow: 1px 1px #ccc;
+    text-align: center;
+    background: url(images/bgfooter.png) repeat #ccc;
+}
+#elx-blackmin-footerbox > a
+{
+	color: #444;
+	text-decoration: none;
+}
 
 
 

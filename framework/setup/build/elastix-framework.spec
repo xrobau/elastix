@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Sun Apr  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add Elastix copyright footer at bottom of screen. Taken
+  from elastixneo theme.
+  SVN Rev[6958]
+
 * Sat Apr  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: tweak z-index again to fix FullCalendar button appearing
   on top of the blackmin menu.

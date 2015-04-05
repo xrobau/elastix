@@ -112,6 +112,11 @@
 </div>
 </div>
 
+{* Pie de página con copyright de Elastix *}
+<div id="elx-blackmin-footerbox">
+    <a href="http://www.elastix.org" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.
+</div>
+
 {* Diálogo de Acerca De *}
 <div id="acerca_de" title="{$ABOUT_ELASTIX}">
     {$ABOUT_ELASTIX_CONTENT}<br />

@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Apr  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: tweak z-index again to fix FullCalendar button appearing
+  on top of the blackmin menu.
+  SVN Rev[6957]
 - CHANGED: Group Permissions: complete rewrite. Now the set of modules is shown
   using a grid to simulate a tree with expanding and collapsing branches.
   SVN Rev[6956]

@@ -265,7 +265,7 @@ li.elx-blackmin-menu>div
     position: absolute;
 /*    font-size: 1em;*/
     display: none;
-    z-index: 4; /* porque el iButton tien zindex 3 */
+    z-index: 5; /* porque el calendar tiene un botón con zindex 4 */
 }
 li.elx-blackmin-menu>div>p
 {

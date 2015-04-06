@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Apr  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: tweak z-index again to fix JCResizer control appearing
+  on top of the blackmin menu.
+  SVN Rev[6961]
+
 * Sun Apr  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: port report grid and dialog look and feel from elastixneo
   to blackmin.

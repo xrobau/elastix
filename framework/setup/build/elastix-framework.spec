@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sun Apr  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: port report grid and dialog look and feel from elastixneo
+  to blackmin.
+  SVN Rev[6960]
 - CHANGED: Framework: add Elastix copyright footer at bottom of screen. Taken
   from elastixneo theme.
   SVN Rev[6958]

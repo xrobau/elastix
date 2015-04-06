@@ -280,7 +280,6 @@ li.elx-blackmin-menu>div
 	background-color: rgba(0, 0, 0, 0.83);
     color: #bbbbbb;
     position: absolute;
-/*    font-size: 1em;*/
     display: none;
     z-index: 5; /* porque el calendar tiene un botón con zindex 4 */
 }
@@ -344,8 +343,24 @@ li.navButton > div
 #elx-blackmin-content
 {
     position: relative;
+/*
     padding: 0 0 0 0;
     min-height: 100%;
+*/
+    margin: 4px;
+    padding: 3px 0px 10px 0px;
+    background-color: #f0f0f0;
+    border: 1px solid #999;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    overflow: auto;
+}
+#elx-blackmin-content > div#message_error
+{
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 5px;
 }
 form.elx-blackmin-form-table>div
 {
@@ -353,12 +368,19 @@ form.elx-blackmin-form-table>div
 }
 form.elx-blackmin-form-table>table
 {
-	border: 1px solid #999999;
+	/*border: 1px solid #999999;*/
+	margin: 0px;
+	border-top: 1px solid #999999;
+	border-bottom: 1px solid #999999;
 }
 form.elx-blackmin-form-table>table>thead
 {
+/*
     background: #000000;
     color: #ffffff;
+*/
+    background: #555555;
+    color: #eeeeee;
 }
 form.elx-blackmin-form-table>table>thead>tr.filterForm
 {
@@ -369,18 +391,180 @@ form.elx-blackmin-form-table>table>thead>tr.filterForm
     background-repeat: repeat-x;
     background-position: top;
 }
+form.elx-blackmin-form-table>table>thead>tr.elx-blackmin-table-title-row,
+form.elx-blackmin-form-table>table>tfoot>tr.elx-blackmin-table-title-row
+{
+	height: 32px;
+}
 form.elx-blackmin-form-table>table>thead>tr.filterForm td
 {
     padding: 4px;
 }
+form.elx-blackmin-form-table>table>thead>tr>th,
+form.elx-blackmin-form-table>table>tfoot>tr>th
+{
+    border-bottom: 1px #aaaaaa solid;
+    padding: 4px;
+    text-align: left;
+}
+form.elx-blackmin-form-table>table>thead>tr>th a.link_summary_off
+{
+  text-decoration: none;
+  color:#FFFFFF;
+}
+
+form.elx-blackmin-form-table>table>thead>tr>th a.link_summary_on
+{
+  text-decoration: none;
+  color:#F5DEB3;
+  font-weight:bold;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row,
+form.elx-blackmin-form-table>table>tfoot>tr>td>div.elx-blackmin-table-control-row
+{
+    position: relative;
+    height: 30px;
+    padding: 0px 0px 10px 0px;
+    margin: 0px;
+    background: #f0f0f0 url(../../../images/addons_header_row_bg.png) repeat-x top;
+    color: #444444;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row
+{
+    border-bottom: 1px #b6b6b6 solid;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row div.elx-blackmin-table-toolcell,
+form.elx-blackmin-form-table>table>tfoot>tr>td>div.elx-blackmin-table-control-row div.elx-blackmin-table-toolcell
+{
+    position: relative;
+    display: inline-block;
+    height: 30px;
+    padding:10px 10px 0px 10px;
+    text-align:center;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row div.elx-blackmin-table-toolaction
+{
+    float: left;
+    border-right: 1px solid #aaa;
+    height: 32px;
+    padding:8px 10px 0px 10px;
+    cursor: pointer;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row div.elx-blackmin-table-toolaction:hover,
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row div.export-background
+{
+    background: -moz-linear-gradient(center top , #777777, #999999);
+    background: -webkit-gradient(linear,0% 40%,0% 70%,from(#777),to(#999));
+    background: linear-gradient(center top , #777777, #999999);
+    border-color: #888888 !important;
+    color: #FFFFFF;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row a,
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row div.elx-blackmin-table-toolaction>input.neo-table-action
+{
+    border:0px;
+    background-color:transparent;
+    cursor:pointer;
+    padding: 0px;
+    vertical-align: middle;
+    color:#444;
+    text-decoration:none;
+}
+div.elx-blackmin-exportmenu>div
+{
+    /* Véase notas en li.elx-blackmin-menu>div */
+    -moz-box-shadow: 0px 0px 1px #000000;
+    -webkit-box-shadow: 0px 0px 1px #000000;
+    -moz-border-radius: 0px 10px 10px 10px;
+    -webkit-border-radius: 0px 10px 10px 10px;
+    box-shadow: 0px 0px 1px #000000;
+    border-radius: 0px 10px 10px 10px;
+    padding: 5px;
+    background: none repeat scroll 0 0 #F7F7F7;
+    color: #000000;
+
+    position: absolute;
+    display: none;
+    z-index: 5; /* porque el calendar tiene un botón con zindex 4 */
+    left: 0px;
+    right: 0px;
+    top: 40px;
+    text-align: left;
+}
+div.elx-blackmin-exportmenu:hover>div
+{
+    display: block;
+    -webkit-animation: elx-blackmin-menu-fadein 0.3s;
+    animation: elx-blackmin-menu-fadein 0.3s;
+}
+div.elx-blackmin-exportmenu>div>ul
+{
+	list-style: outside none none;
+	padding-left: 0;
+	margin: 0;
+}
+div.elx-blackmin-exportmenu>div>ul>li:hover
+{
+	background: #f4fa58;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-control-row div.elx-blackmin-table-navigation,
+form.elx-blackmin-form-table>table>tfoot>tr>td>div.elx-blackmin-table-control-row div.elx-blackmin-table-navigation
+{
+    float: right;
+    border-left: 1px solid #aaa;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div#elx-blackmin-table-filter-row
+{
+    position: relative;
+    padding: 10px;
+    background: #dddddd;
+    color: #444444;
+
+    display: none;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-filterctl-row
+{
+    background-color: #FFFFFF;
+    min-height: 28px;
+    margin: 0px;
+    padding: 0px;
+    border: 0px;
+    position: relative;
+    float: none;
+    color: #444444;
+}
+form.elx-blackmin-form-table>table>thead>tr>td>div.elx-blackmin-table-filterctl-row>div
+{
+    background-color: #E7D8E3;
+    margin-left: 3px;
+    margin-right: 1px;
+    margin-top: 3px;
+    margin-bottom: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border: 1px solid #aaa;
+    border-radius:5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    height: 17px;
+    position: relative;
+    display: inline-block;
+}
 form.elx-blackmin-form-table>table>tbody>tr:hover
 {
-	background: #f2f2f2;
+	background: #e0e0e0;
 }
 form.elx-blackmin-form-table>table>tbody>tr>td
 {
-    border-bottom: 1px #eeeeee solid;
+/*
+	border-bottom: 1px #eeeeee solid;
     padding: 4px;
+*/
+    text-indent: 5px;
+    border-bottom: 1px #b6b6b6 solid;
+    padding: 6px 6px 6px 6px;
 }
 form.elx-blackmin-form-table>table>tbody>tr>td.table_data_last_row
 {
@@ -390,28 +574,29 @@ form.elx-blackmin-form-table>table>tbody>tr>td.table_data_last_row
 
 form.elx-blackmin-form-table>table>tfoot
 {
+/*
     background: #000000;
     color: #ffffff;
-}
-form.elx-blackmin-form-table>table>thead>tr>th
-{
-    border-bottom: 1px #aaaaaa solid;
-    padding: 4px;
-    text-align: left;
+*/
+    background: #555555;
+    color: #eeeeee;
 }
 .tabForm
 {
-	background: #fafafa;
-	color: #000000;
+/*	background: #fafafa;*/
+	color: #aaaaaa;
+/*
 	border: 1px solid #999;
 	padding-left:5px;
 	background-image: url(../../images/bggrisForm.gif);
     background-repeat: repeat-x;
     background-position: top;
+*/
 }
 .tabForm td
 {
 	padding: 4px;
+	color: #333333;
 }
 .required {
     color: #ff0000;

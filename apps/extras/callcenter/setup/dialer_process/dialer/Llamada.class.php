@@ -682,8 +682,9 @@ class Llamada
 
         // Verificación de consistencia
         if ($this->agente->estado_consola != 'logged-in') {
-            $this->_log->output("ERR: llamada ha sido asignada a agente en estado ".
-                $this->agente->estado_consola.'. Esto no debería haber pasado: '.print_r($this, TRUE));
+            $this->_log->output("WARN: llamada ha sido asignada a agente en estado ".
+                $this->agente->estado_consola.'. Esto no debería haber pasado: ');
+            $this->dump($this->_log);
         }
     }
     

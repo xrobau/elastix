@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Apr  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: remove use of print_r which risks memory exhaustion by 
+  recursive dumping of linked objects. Use dump function instead.
+  SVN Rev[6962]
+
 * Wed Apr  1 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: perform consistency checks to diagnose when a logged-out
   agent gets stuck with a call.

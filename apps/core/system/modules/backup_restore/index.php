@@ -207,7 +207,7 @@ function automatic_backup($smarty, $module_name, $local_templates_dir, $dir_back
     return report_backup_restore($smarty, $module_name, $local_templates_dir, $dir_backup, $pDB);
 }
 
-function downloadBackup($smarty, $module_name, $local_templates_dir, $dir_backup, &$pDB)
+function downloadBackup($smarty, $module_name, $local_templates_dir, $dir_backup)
 {
     $bArchivoValido = TRUE;
 

@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Mon Apr  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: do not attempt to fetch a caller-id from the channel of a 
+  failed call in OriginateRespose. Also compare against possible value of 
+  CallerIDNum and report any differences.
+  SVN Rev[6964]
 - FIXED: Dialer: remove use of print_r which risks memory exhaustion by 
   recursive dumping of linked objects. Use dump function instead.
   SVN Rev[6962]

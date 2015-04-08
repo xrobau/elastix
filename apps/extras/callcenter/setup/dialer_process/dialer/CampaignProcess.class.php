@@ -830,7 +830,7 @@ SQL_LLAMADA_COLOCADA;
                 $resultado = $this->_ami->Originate(
                     $tupla['dialstring'], $infoCampania['queue'], $infoCampania['context'], 1,
                     NULL, NULL, $iTimeoutOriginate, 
-                    (isset($datosTrunk['CID']) ? $datosTrunk['CID'] : NULL), 
+                    (isset($datosTrunk['CID']) ? $datosTrunk['CID'] : $tupla['phone']), 
                     $sCadenaVar,
                     NULL, 
                     TRUE, $tupla['actionid']);
@@ -842,7 +842,7 @@ SQL_LLAMADA_COLOCADA;
                 $resultado = $this->_ami->Originate(
                     $tupla['dialstring'], $sExten, 'llamada_agendada', 1,
                     NULL, NULL, $iTimeoutOriginate, 
-                    (isset($datosTrunk['CID']) ? $datosTrunk['CID'] : NULL), 
+                    (isset($datosTrunk['CID']) ? $datosTrunk['CID'] : $tupla['phone']), 
                     $sCadenaVar,
                     NULL, 
                     TRUE, $tupla['actionid']);

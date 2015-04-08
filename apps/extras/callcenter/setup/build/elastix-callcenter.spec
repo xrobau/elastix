@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Apr  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: Originate through Local@from-internal requires setting
+  CallerID in order to guarantee a nonempty src field in the CDR record. This
+  is the root cause behind various reports of empty src on dialer calls.
+  SVN Rev[6965]
+
 * Mon Apr  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: do not attempt to fetch a caller-id from the channel of a 
   failed call in OriginateRespose. Also compare against possible value of 

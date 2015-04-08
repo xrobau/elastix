@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Apr  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: read Sticky Note status for blackmin theme.
+  SVN Rev[6967]
 - CHANGED: Framework: tweak z-index again to fix FullCalendar event appearing
   on top of the blackmin menu.
   SVN Rev[6966]

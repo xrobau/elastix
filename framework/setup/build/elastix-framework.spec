@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Apr  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: tweak z-index again to fix FullCalendar event appearing
+  on top of the blackmin menu.
+  SVN Rev[6966]
+
 * Mon Apr  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: tweak z-index again to fix JCResizer control appearing
   on top of the blackmin menu.

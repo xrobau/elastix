@@ -281,7 +281,7 @@ li.elx-blackmin-menu>div
     color: #bbbbbb;
     position: absolute;
     display: none;
-    z-index: 6; /* porque el jcresizer tiene un handle con zindex 5 */
+    z-index: 9; /* porque el fullcalendar event tiene un handle con zindex 8 */
 }
 li.elx-blackmin-menu>div>p
 {
@@ -485,7 +485,7 @@ div.elx-blackmin-exportmenu>div
 
     position: absolute;
     display: none;
-    z-index: 6; /* porque el jcresizer tiene un handle con zindex 5 */
+    z-index: 9; /* porque el fullcalendar event tiene un handle con zindex 8 */
     left: 0px;
     right: 0px;
     top: 40px;

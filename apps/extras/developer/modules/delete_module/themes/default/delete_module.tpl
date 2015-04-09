@@ -37,36 +37,3 @@
     </tr>
 </table>
 </div>
-{literal}
-<script type="text/javascript">
-    function mostrar_menu()
-    {
-        var level = -1;
-        var id_module_level_1 = '', id_module_level_2 = '', id_module_level_3 = '';
-
-        var select_level = document.getElementById("select_level");
-        var index_level = select_level.selectedIndex;
-        level = select_level.options[ index_level ].value;
-
-        var module_level_1 = document.getElementById("module_level_1");
-        var index_level_1 = module_level_1.selectedIndex;
-        id_module_level_1 = module_level_1.options[ index_level_1 ].value;
-
-        var module_level_2 = document.getElementById("module_level_2");
-        if(module_level_2 != null)
-        {
-            var index_level_2 = module_level_2.selectedIndex;
-            id_module_level_2 = module_level_2.options[ index_level_2 ].value;
-        }
-
-        var module_level_3 = document.getElementById("module_level_3");
-        if(module_level_3 != null)
-        {
-            var index_level_3 = module_level_3.selectedIndex;
-            id_module_level_3 = module_level_3.options[ index_level_3 ].value;
-        }
-
-        xajax_mostrar_menu(level, id_module_level_1, id_module_level_2, id_module_level_3);
-    }
-</script>
-{/literal}

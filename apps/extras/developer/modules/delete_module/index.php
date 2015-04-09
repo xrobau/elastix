@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 2.5.0                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,39 +25,32 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: index.php,v 1.1 2008/05/16 15:55:57 afigueroa Exp $ */
+  $Id: index.php,v 1.2 2015/04/07 15:55:57 bmacias Exp $ */
+
+//include elastix framework
+require_once "libs/paloSantoForm.class.php";
+require_once "libs/paloSantoDB.class.php";
+require_once "libs/paloSantoJSON.class.php";
+require_once('libs/paloSantoMenu.class.php');
+require_once('libs/paloSantoNavigation.class.php');
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include elastix framework
-    include_once "libs/paloSantoGrid.class.php";
-    include_once "libs/paloSantoValidar.class.php";
-    include_once "libs/paloSantoConfig.class.php";
-    include_once "libs/misc.lib.php";
-    include_once "libs/paloSantoForm.class.php";
-    include_once "libs/xajax/xajax.inc.php";
-
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoDeleteModule.class.php";
-    global $arrConf;
+    
+    load_language_module($module_name);
 
-    //include lang local module
-    global $arrLangModule;
-    $lang=get_language();
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    if (file_exists("$base_dir/$lang_file"))
-        include_once($lang_file);
-    else
-        include_once("modules/$module_name/lang/en.lang");
+    global $arrConf;
+    global $arrConfModule;
+    $arrConf = array_merge($arrConf,$arrConfModule);
 
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConfig['templates_dir']))?$arrConfig['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-
-    require_once('libs/paloSantoDB.class.php');
+    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
+    $templates_dir = (isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
+    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
+    
     $pDB_acl = new paloDB($arrConf['elastix_dsn']['acl']);
     if(!empty($pDB_acl->errMsg)) {
         echo "ERROR DE DB: $pDB_acl->errMsg <br>";
@@ -68,68 +61,62 @@ function _moduleContent(&$smarty, $module_name)
         echo "ERROR DE DB: $pDB_menu->errMsg <br>";
     }
 
-    $xajax = new xajax();
-    $xajax->registerFunction("mostrar_menu");
-    $xajax->processRequests();
-
-    $content = $xajax->printJavascript("libs/xajax/");
-
-    $delete = isset($_POST['delete'])?$_POST['delete']:'';
-    if($delete!='') $accion = 'delete_module';
-    else $accion = "report_delete_module";
-    switch($accion)
-    {
+    $accion = getAction();
+   
+    switch($accion){
         case 'delete_module':
-            $content .= delete_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl, $pDB_menu);
+            $content = delete_module($smarty, $module_name, $local_templates_dir, $pDB_acl, $pDB_menu);
+            break;
+        case 'mostrar_menu':
+            $content = mostrar_menu($smarty, $module_name, $local_templates_dir, $pDB_acl, $pDB_menu);
             break;
         default:
-            $content .= report_delete_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl);
+            $content = report_delete_module($smarty, $module_name, $local_templates_dir, $pDB_acl, $pDB_menu);
             break;
     }
 
     return $content;
 }
 
-function delete_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl, $pDB_menu)
+function delete_module($smarty, $module_name, $local_templates_dir, $pDB_acl, $pDB_menu)
 {
     $ruta = "/var/www/html/modules";
 
-    $module_level_1 = isset($_POST['module_level_1'])?$_POST['module_level_1']:'';
-    $module_level_2 = isset($_POST['module_level_2'])?$_POST['module_level_2']:'';
-    $module_level_3 = isset($_POST['module_level_3'])?$_POST['module_level_3']:'';
+    $module_level_1 = getParameter('module_level_1');
+    $module_level_2 = getParameter('module_level_2');
+    $module_level_3 = getParameter('module_level_3');
 
-    $delete_files = isset($_POST['delete_files'])?$_POST['delete_files']:'';
-    $delete_menu  = isset($_POST['delete_menu'])?$_POST['delete_menu']:'';
-
+    $delete_files = getParameter('delete_files');
+    $delete_menu  = getParameter('delete_menu');
+    $select_level = getParameter('select_level');
+    
     if(!$delete_files && !$delete_menu)
     {
-        $smarty->assign("mb_title", $arrLangModule["ERROR"]);
-        $smarty->assign("mb_message", $arrLangModule["You haven't selected any option to delete: Menu or Files"]);
-        return report_delete_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl);
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message", _tr("You haven't selected any option to delete: Menu or Files"));
+        return report_delete_module($smarty, $module_name, $local_templates_dir, $pDB_acl, $pDB_menu);
     }
 
-    require_once('libs/paloSantoNavigation.class.php');
-    global $arrConf;
-    $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
+    $pMenu = new paloMenu($pDB_menu);
     $arrMenu = $pMenu->cargar_menu();
     $pNav = new paloSantoNavigation($arrMenu, $smarty);
 
     $arrBorrar_Level_2 = array();
     $arrBorrar_Level_3 = array();
 
-    if($_POST['select_level']==3)
+    if($select_level==3)
     {
         if($module_level_3 != '')
             $arrBorrar_Level_3[$module_level_3] = $module_level_3;
     }
-    else if($_POST['select_level']==2)
+    else if($select_level==2)
     {
         $arrBorrar_Level_2[$module_level_2] = $module_level_2;
         $arrBorrar_Level_3 = $pNav->getArrSubMenu($module_level_2);
         if(!$arrBorrar_Level_3)
             $arrBorrar_Level_3 = array();
     }
-    else if($_POST['select_level']==1)
+    else if($select_level==1)
     {
         $arrBorrar_Level_2 = $pNav->getArrSubMenu($module_level_1);
         if(!$arrBorrar_Level_2)
@@ -184,36 +171,29 @@ function delete_module($smarty, $module_name, $local_templates_dir, $arrLangModu
             }
         }
 
-        if(!$error && $_POST['select_level']==1 && $delete_menu=='on')
+        if(!$error && $select_level==1 && $delete_menu=='on')
         {
             //Finalmente borro nivel 1
             if(!$pDeleteModule_Menu->Eliminar_Menu($module_level_1))   $error = true;
             else if(!$pDeleteModule_ACL->Eliminar_Resource($module_level_1))  $error = true;
         }
 
-        $smarty->assign("mb_message", $arrLangModule["The module was deleted"]);
+        $smarty->assign("mb_message", _tr("The module was deleted"));
         unset($_SESSION['elastix_user_permission']);
     }else{
-        $smarty->assign("mb_title", $arrLangModule["ERROR"]);
-        $smarty->assign("mb_message", $arrLangModule["The module couldn't be deleted"]);
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message", _tr("The module couldn't be deleted"));
     }
 
-    return report_delete_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl);
+    return report_delete_module($smarty, $module_name, $local_templates_dir, $pDB_acl, $pDB_menu);
 }
 
-function report_delete_module($smarty, $module_name, $local_templates_dir, $arrLangModule, $pDB_acl)
+function report_delete_module($smarty, $module_name, $local_templates_dir, $pDB_acl, $pDB_menu)
 {
-    require_once('libs/paloSantoMenu.class.php');
-    global $arrConf;
-
-    $pDB_menu = new paloDB($arrConf['elastix_dsn']['menu']);
-    if(!empty($pDB_menu->errMsg))
-        echo "ERROR DE DB: $pDB_menu->errMsg <br>";
-
     $pMenu = new paloMenu($pDB_menu);
     $arrMenuOptions = $pMenu->getRootMenus();
 
-    $level_1 = "<td align='left'><b>{$arrLangModule["Level 1"]}:</b></td>";
+    $level_1 = "<td align='left'><b>"._tr("Level 1").":</b></td>";
     $level_1 .= "<td align='left'>";
         $level_1 .= "<select onchange='mostrar_menu()' name='module_level_1' id='module_level_1'>";
         foreach($arrMenuOptions as $key => $valor)
@@ -223,51 +203,52 @@ function report_delete_module($smarty, $module_name, $local_templates_dir, $arrL
 
 
     $oForm = new paloForm($smarty, array());
-    $smarty->assign("DELETE", $arrLangModule["Delete"]);
+    $smarty->assign("DELETE", _tr("Delete"));
 
-    $smarty->assign("REQUIRED_FIELD", $arrLangModule["Required field"]);
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
 
-    $smarty->assign("Level", $arrLangModule["Level"]);
+    $smarty->assign("Level", _tr("Level"));
     $smarty->assign("level_1", $level_1);
 
-    $smarty->assign("Delete_Menu", $arrLangModule['Delete Menu']);
-    $smarty->assign("Delete_Files", $arrLangModule['Delete Files']);
+    $smarty->assign("Delete_Menu", _tr('Delete Menu'));
+    $smarty->assign("Delete_Files", _tr('Delete Files'));
 
-    $smarty->assign("CONFIRM_CONTINUE", $arrLangModule["Are you sure you wish to continue?"]);
+    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
     $smarty->assign("icon","images/conference.png");
 
-    $html = $oForm->fetchForm("$local_templates_dir/delete_module.tpl", $arrLangModule["Delete Module"], $_POST);
+    $html = $oForm->fetchForm("$local_templates_dir/delete_module.tpl", _tr("Delete Module"), $_POST);
 
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$html."</form>";
 
     return $contenidoModulo;
 }
 
-function mostrar_menu($level, $id_module_level_1, $id_module_level_2, $id_module_level_3)
+function mostrar_menu($smarty, $module_name, $local_templates_dir, $pDB_acl, $pDB_menu)
 {
     require_once('libs/paloSantoMenu.class.php');
-
-    global $arrLangModule;
-    global $arrConf;
-    $respuesta = new xajaxResponse();
-
+    require_once('libs/paloSantoNavigation.class.php');
+    
+    $level             = getParameter("level");
+    $id_module_level_1 = getParameter("id_module_level_1"); 
+    $id_module_level_2 = getParameter("id_module_level_2");
+    $id_module_level_3 = getParameter("id_module_level_3");
+    
     //Nivel 1
     if($level==1)
     {
-        $respuesta->addAssign("level_2","innerHTML", "");
-        $respuesta->addAssign("level_3","innerHTML", "");
+        $respuesta["level_2"] = "";
+        $respuesta["level_3"] = "";
     }
     //Nivel 2
     if($level==2 || $level==3)
-    {
-        require_once('libs/paloSantoNavigation.class.php');
-        $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
+    {        
+        $pMenu = new paloMenu($pDB_menu);
         $arrMenu = $pMenu->cargar_menu();
         $smarty = NULL;
         $pNav = new paloSantoNavigation($arrMenu, $smarty);
         $arrMenuLevel_2 = $pNav->getArrSubMenu($id_module_level_1);
 
-        $level_2  = "<td align='left'><b>{$arrLangModule["Level 2"]}:</b></td>";
+        $level_2  = "<td align='left'><b>"._tr("Level 2").":</b></td>";
         $level_2 .= "<td>";
             $level_2 .= "<select onchange='mostrar_menu()' name='module_level_2' id='module_level_2'>";
             $tmp_level_2 = "";
@@ -291,24 +272,23 @@ function mostrar_menu($level, $id_module_level_1, $id_module_level_2, $id_module
             $level_2 .= "</select>";
         $level_2 .= "</td>";
 
-        $respuesta->addAssign("level_2","innerHTML", $level_2);
-        $respuesta->addAssign("level_3","innerHTML", "");
+        $respuesta["level_2"] = $level_2;
+        $respuesta["level_3"] = "";
     }
     //Nivel 3
     if($level==3)
     {
-        $level_3  = "<td align='left'><b>{$arrLangModule["Level 3"]}:</b></td>";
+        $level_3  = "<td align='left'><b>"._tr("Level 3").":</b></td>";
 
-        require_once('libs/paloSantoNavigation.class.php');
-        $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
+        $pMenu = new paloMenu($pDB_menu);
         $arrMenu = $pMenu->cargar_menu();
         $smarty = NULL;
-        $pNav = new paloSantoNavigation($arrMenu, $smarty);
+        $pNav = new paloSantoNavigation($arrMenu, $smarty);        
         $arrMenuLevel_3 = $pNav->getArrSubMenu($id_module_level_2);
 
         if($arrMenuLevel_3 && count($arrMenuLevel_3)>0)
         {
-            $level_3  = "<td align='left'><b>{$arrLangModule["Level 3"]}:</b></td>";
+            $level_3  = "<td align='left'><b>"._tr("Level 3").":</b></td>";
             $level_3 .= "<td>";
                 $level_3 .= "<select onchange='mostrar_menu()' name='module_level_3' id='module_level_3'>";
                 foreach($arrMenuLevel_3 as $key2 => $valor2)
@@ -319,12 +299,25 @@ function mostrar_menu($level, $id_module_level_1, $id_module_level_2, $id_module
                         $level_3 .= "<option value='$key2'>"._tr($valor2['Name'])."</option>";
                 }
                 $level_3 .= "</select>";
-        }else $level_3 .= "<td align='left'>".$arrLangModule["This module don't have level 3"]."</td>";
+        }else $level_3 .= "<td align='left'>"._tr("This module don't have level 3")."</td>";
 
         $level_3 .= "</td>";
-        $respuesta->addAssign("level_3","innerHTML", $level_3);
+        
+        $respuesta["level_3"] = $level_3;
     }
 
-    return $respuesta;
+    $jsonObject = new PaloSantoJSON();
+    $jsonObject->set_message($respuesta);
+    return $jsonObject->createJSON();
+}
+
+function getAction()
+{
+    if(getParameter("delete"))
+        return "delete_module";
+    else if(getParameter("action")=="mostrar_menu")
+        return "mostrar_menu";
+    else
+        return "report";
 }
 ?>

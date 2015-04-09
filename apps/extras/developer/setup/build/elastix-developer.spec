@@ -2,15 +2,15 @@
 
 Summary: Elastix Module Developer
 Name:    elastix-%{modname}
-Version: 2.3.0
-Release: 5
+Version: 2.5.0
+Release: 1
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-1.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.4.0-3
+Prereq: elastix-framework >= 2.5.0-6
 
 %description
 Elastix Module Developer
@@ -70,8 +70,16 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Apr 09 2015 Bruno Macias Velasco <bmacias@elastix.com> 2.5.0-1
+- CHANGED: Build Module was changed, index_form.s and index_grid.s reduce
+  lines language handler.
+  FIXED: Delete Module was fixed, new elastix-framework obsolete xajax lib
+  module was changed to use jquery action.
+
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
-- CHANGED: Build Module, Delete Module, Language Admin: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
+- CHANGED: Build Module, Delete Module, Language Admin: For each module 
+  listed here the english help file was renamed to en.hlp and a spanish 
+  help file called es.hlp was ADDED.
   SVN Rev[6358]
 
 * Wed Aug  8 2013 Alex Villacis Lasso <a_villacis@palosanto.com>

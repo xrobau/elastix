@@ -96,7 +96,7 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
-* Thu Mar 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+* Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump version and release in specfile.
 

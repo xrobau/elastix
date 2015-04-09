@@ -216,6 +216,16 @@ if (isset($_SESSION['elastix_user']) &&
             themeSetup($smarty, $selectedMenu, $pdbACL, $pACL, $idUser);
         }
 
+        // La muestra de stickynote está ahora habilitada para todos los temas.
+        // Se obtiene si ese menu tiene una nota agregada.
+        $snvars = array('AUTO_POPUP' => 0, 'STATUS_STICKY_NOTE' => 'false');
+        $statusStickyNote = getStickyNote($pdbACL, $idUser, $selectedMenu);
+        if ($statusStickyNote['status'] && $statusStickyNote['data'] != "") {
+            $snvars['STATUS_STICKY_NOTE'] = 'true';
+            if ($statusStickyNote['popup'] == 1) $snvars['AUTO_POPUP'] = 1;
+        }
+        $smarty->assign($snvars);
+
         // Autorizacion
         if ($bModuleAuthorized) {
             $smarty->assign("CONTENT", $sModuleContent);

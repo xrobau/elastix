@@ -44,7 +44,6 @@ function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
         "RETYPE_PASSWORD"           =>  _tr("Retype New Password"),
         "CHANGE_PASSWORD_BTN"       =>  _tr("Change"),
         "MODULES_SEARCH"            =>  _tr("Search modules"),
-        'STATUS_STICKY_NOTE'        =>  'false',
 /*
         "ADD_BOOKMARK"              =>  _tr("Add Bookmark"),
         "REMOVE_BOOKMARK"           =>  _tr("Remove Bookmark"),
@@ -61,14 +60,5 @@ function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
         'SHORTCUT'                  =>  loadShortcut($pdbACL, $idUser, $smarty),
 */
     ));
-
-
-    // se obtiene si ese menu tiene una nota agregada
-    $statusStickyNote = getStickyNote($pdbACL, $idUser, $selectedMenu);
-    if ($statusStickyNote['status'] && $statusStickyNote['data'] != "") {
-        $smarty->assign('STATUS_STICKY_NOTE', 'true');
-        if ($statusStickyNote['popup'] == 1)
-            $smarty->assign('AUTO_POPUP', '1');
-    }
 }
 ?>

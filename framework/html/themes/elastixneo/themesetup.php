@@ -81,16 +81,7 @@ function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
         'MENU_COLOR'                =>  getMenuColorByMenu($pdbACL, $idUser),
         'IMG_BOOKMARKS'             =>  menuIsBookmark($pdbACL, $idUser, $selectedMenu) ? 'bookmarkon.png' : 'bookmark.png',
         'SHORTCUT'                  =>  loadShortcut($pdbACL, $idUser, $smarty),
-        'STATUS_STICKY_NOTE'        =>  'false',
     ));
-
-    // se obtiene si ese menu tiene una nota agregada
-    $statusStickyNote = getStickyNote($pdbACL, $idUser, $selectedMenu);
-    if ($statusStickyNote['status'] && $statusStickyNote['data'] != "") {
-        $smarty->assign('STATUS_STICKY_NOTE', 'true');
-        if ($statusStickyNote['popup'] == 1)
-            $smarty->assign('AUTO_POPUP', '1');
-    }
 }
 
 ?>

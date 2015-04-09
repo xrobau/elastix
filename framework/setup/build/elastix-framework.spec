@@ -351,6 +351,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Apr 09 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: Sticky Note support for autopopup is supposed to be enabled
+  for all themes but is actually broken for all except elastixneo and tenant.
+  Fixed.
+  SVN Rev[6974]
+
 * Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-6
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

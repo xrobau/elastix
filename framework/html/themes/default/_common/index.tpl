@@ -10,7 +10,7 @@
   {$HEADER_LIBS_JQUERY}
   <script src="libs/js/base.js"></script>
   <script src="libs/js/iframe.js"></script>
-  <script type='text/javascript' src="libs/js/sticky_note.js"></script>
+  <script type='text/javascript' src="libs/js/sticky_note/sticky_note.js"></script>
   {$HEADER}
   {$HEADER_MODULES}
 </head>

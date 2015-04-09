@@ -52,6 +52,7 @@ function _moduleContent(&$smarty, $module_name)
 
 function handleJSON_versionRPM($smarty, $module_name)
 {
+    Header('Content-Type: application/json');
 	$json = new Services_JSON();
     return $json->encode(obtenerDetallesRPMS());
 }

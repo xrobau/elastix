@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Apr 09 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: by properly setting Content-Type, the JSONRPMtoString
+  method becomes unnecessary and can be removed.
+  SVN Rev[6978]
 - CHANGED: Framework: add support for Sticky Note to blackmin theme.
   SVN Rev[6976]
 - CHANGED: Framework: Move Sticky Note autopopup support to the index.tpl of

@@ -556,10 +556,10 @@ function saveToggleTab(){
 //***Genera la Tabla de los Detalles de la Versión
 function loadDetails(){
         var order = "menu=_elastixutils&action=versionRPM&rawmode=yes";
-        $.post("index.php", order, function(theResponse){
+        $.post("index.php", order, function(message){
             $("#loadingRPM").hide();
             $("#changeMode").show();
-            var message = JSONRPMtoString(theResponse);
+
             var html = "";
             var html2 = "";
             var key = "";
@@ -799,13 +799,6 @@ function keyPressed(e)
 		$("form").submit();
 		return false;
 	}
-}
-
-// implement JSON.parse de-serialization
-function JSONRPMtoString(str) {
-	if (str === "") str = '""';
-	eval("var p=" + str + ";");
-	return p;
 }
 
 function changeColorMenu()

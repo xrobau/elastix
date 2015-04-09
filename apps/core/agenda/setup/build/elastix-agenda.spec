@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda 
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -96,7 +96,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
-* Thu Apr  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Thu Mar 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump version and release in specfile.
+
+* Thu Apr 02 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: fix regexp that separates friendly name from email address.
   SVN Rev[6951]
 - CHANGED: Calendar: remove extraneous explicit font sizing.
@@ -118,6 +122,7 @@ fi
 * Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump version and release in specfile.
+  SVN Rev[6888]
 
 * Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
 - CHANGED: /apps/core/agenda/modules/calendar/libs changed route of PHPMailer

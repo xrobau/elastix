@@ -3,7 +3,7 @@
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -155,13 +155,17 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Wed Mar 18 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: move nmap dependency here from elastix-framework.
-  SVN Rev[6097]
+  SVN Rev[6907]
 
 * Thu Mar 12 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: update RSS URLs to point to redirector.
-  SVN Rev[6096]
+  SVN Rev[6906]
 
 * Fri Mar  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: add epoll file descriptor to the list of file
@@ -205,6 +209,7 @@ fi
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[6773]
 
 * Tue Sep  9 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: fix detection of Yealink SIP-T20 endpoint with

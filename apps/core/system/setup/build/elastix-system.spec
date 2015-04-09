@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -139,6 +139,15 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
+* Mon Apr 06 2015 Bruno Macias <bmacias@palosanto.com> 
+- FIXED: module backup_restore, Missing argument 5 for downloadBackup() was
+  deleted.
+  SVN Rev[6962]
+
 * Sun Mar 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Applet Admin - jQuery-1.11.2 migration: fix incorrect use of
   attribute instead of property.

@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.5.0
-Release: 5
+Release: 6
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -351,13 +351,17 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
-* Thu Apr  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-6
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Thu Apr 09 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: rewrite Sticky Note javascript implementation to make it
   smaller and fix unescaped strings leading to XSS. Factor out UI blocking as
   done in Elastix interface into a single function.
   SVN Rev[6970]
 
-* Wed Apr  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Wed Apr 08 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: consolidate all copies of Sticky Note styles into a single
   copy under libs/js/sticky_note.
   SVN Rev[6968]
@@ -367,12 +371,12 @@ rm -rf $RPM_BUILD_ROOT
   on top of the blackmin menu.
   SVN Rev[6966]
 
-* Mon Apr  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Mon Apr 06 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: tweak z-index again to fix JCResizer control appearing
   on top of the blackmin menu.
   SVN Rev[6961]
 
-* Sun Apr  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Sun Apr 05 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: port report grid and dialog look and feel from elastixneo
   to blackmin.
   SVN Rev[6960]
@@ -380,7 +384,7 @@ rm -rf $RPM_BUILD_ROOT
   from elastixneo theme.
   SVN Rev[6958]
 
-* Sat Apr  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Sat Apr 04 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: tweak z-index again to fix FullCalendar button appearing
   on top of the blackmin menu.
   SVN Rev[6957]
@@ -388,7 +392,7 @@ rm -rf $RPM_BUILD_ROOT
   using a grid to simulate a tree with expanding and collapsing branches.
   SVN Rev[6956]
 
-* Fri Apr  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Fri Apr 03 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove middle man and use paloACL directly. The
   palosantoGroupPermission class just calls one paloACL method and does not add
   any useful abstraction.
@@ -406,7 +410,7 @@ rm -rf $RPM_BUILD_ROOT
   blackmin, including module search and password change.
   SVN Rev[6952]
 
-* Thu Apr  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Thu Apr 02 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: choose smoothness jQueryUI theme for tenant and blackmin.
   SVN Rev[6949]
 - DELETED: Framework: remove unused template file in registration module.
@@ -470,7 +474,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Mar 18 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: remove obsolete nmap dependency. The only user of nmap is the network
   scan in the Endpoint Configurator.
-  SVN Rev[6098]
+  SVN Rev[6908]
 
 * Wed Mar  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: factor out querying of system timezone into a separate function.
@@ -493,7 +497,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Mar 2 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-5
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
-  SVN Rev[6846]
+  SVN Rev[6884]
 
 * Fri Feb 27 2015 Armando Chuto <armando@palosanto.com>
 - DELETED: delete fpdf folder

@@ -6,8 +6,10 @@
   <title>Elastix</title>
   <link rel="stylesheet" href="themes/{$THEMENAME}/styles.css" />
   <link rel="stylesheet" href="themes/{$THEMENAME}/help.css" />
+  <link rel="stylesheet" media="screen" type="text/css" href="libs/js/sticky_note/sticky_note.css" />
   {$HEADER_LIBS_JQUERY}
   <script type="text/javascript" src="libs/js/base.js"></script>
+  <script type='text/javascript' src="libs/js/sticky_note/sticky_note.js"></script>
   <script type="text/javascript" src="libs/js/iframe.js"></script>
   {$HEADER}
   {$HEADER_MODULES}
@@ -53,8 +55,8 @@
             <!-- Búsqueda de paquetes  -->
             <img height="20" align="absmiddle" src="themes/{$THEMENAME}/images/searchw.png" alt="user_search" />
             <div>
-      <p>{$MODULES_SEARCH}</p>
-      <p><input type="search"  id="search_module_elastix" name="search_module_elastix"  value="" autofocus="autofocus" placeholder="search" /></p>
+                <p>{$MODULES_SEARCH}</p>
+                <p><input type="search"  id="search_module_elastix" name="search_module_elastix"  value="" autofocus="autofocus" placeholder="search" /></p>
             </div>
         </li>
         <li class="navButton">
@@ -64,6 +66,9 @@
 {else}
     <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
 {/if}<img height="20" src="images/icon-help.png" border="0" align="absmiddle"></a>
+        </li>
+        <li class="navButton">
+            <img height="20" align="absmiddle" alt="tabnotes" id="togglestickynote1" class="togglestickynote" src="themes/{$THEMENAME}/images/{if $STATUS_STICKY_NOTE eq 'true'}tab_notes_on.png{else}tab_notes.png{/if}"/>
         </li>
     </ul>
 </div>
@@ -126,6 +131,28 @@
 {* Popup genérico *}
 <div id="PopupElastix" style="position: absolute; top: 0px; left: 0px;">
 </div>
+
+{* Popup de Sticky Note *}
+<div id="neo-sticky-note">
+    <div id="neo-sticky-note-text"></div>
+    <div id="neo-sticky-note-text-edit">
+        <textarea id="neo-sticky-note-textarea"></textarea>
+        <div id="neo-sticky-note-text-char-count"></div>
+        <input type="button" value="{$SAVE_NOTE}" id="neo-submit-button" />
+        <div id="auto-popup">AutoPopUp <input type="checkbox" id="neo-sticky-note-auto-popup" value="1"></div>
+    </div>
+    <div id="neo-sticky-note-text-edit-delete"></div>
+</div>
+{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *} 
+{if $AUTO_POPUP eq '1'}{literal}
+<script type='text/javascript'>
+$(document).ready(function(e) {
+    $("#neo-sticky-note-auto-popup").prop('checked', true);
+    $('#togglestickynote1').click();
+});
+</script>
+{/literal}{/if}
+
 <!-- Neo Progress Bar -->
 		<div class="neo-modal-elastix-popup-box">
 			<div class="neo-modal-elastix-popup-title"></div>

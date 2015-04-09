@@ -57,16 +57,25 @@
 		<div align="center" id="neo-footerbox"> <!-- mostrando el footer -->
 			<a href="http://www.elastix.org" style="color: #444; text-decoration: none;" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank' style="color: #444; text-decoration: none;" >GPL</a> by <a href="http://www.palosanto.com" target='_blank' style="color: #444; text-decoration: none;">PaloSanto Solutions</a>. 2006 - {$currentyear}.
 		</div>
-		<div id="neo-sticky-note" class="neo-display-none">
+		<div id="neo-sticky-note">
 		  <div id="neo-sticky-note-text"></div>
-		  <div id="neo-sticky-note-text-edit" class="neo-display-none">
+		  <div id="neo-sticky-note-text-edit">
 			<textarea id="neo-sticky-note-textarea"></textarea>
 			<div id="neo-sticky-note-text-char-count"></div>
-			<input type="button" value="{$SAVE_NOTE}" class="neo-submit-button" id="neo-submit-button" onclick="send_sticky_note()" />
+			<input type="button" value="{$SAVE_NOTE}" id="neo-submit-button" />
 			<div id="auto-popup">AutoPopUp <input type="checkbox" id="neo-sticky-note-auto-popup" value="1"></div>
 		  </div>
 		  <div id="neo-sticky-note-text-edit-delete"></div>
 		</div>
+{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *} 
+{if $AUTO_POPUP eq '1'}{literal}
+<script type='text/javascript'>
+$(document).ready(function(e) {
+    $("#neo-sticky-note-auto-popup").prop('checked', true);
+    $('#togglestickynote1').click();
+});
+</script>
+{/literal}{/if}
 		<!-- Neo Progress Bar -->
 		<div class="neo-modal-elastix-popup-box">
 			<div class="neo-modal-elastix-popup-title"></div>

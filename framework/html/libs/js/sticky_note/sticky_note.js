@@ -27,13 +27,13 @@ $(document).ready(function() {
 	
 	// Escritura en el textarea cuenta los caracteres
 	$('#neo-sticky-note-textarea').keyup(sticky_note_count_chars);
+	
+	// Botón de guardar mensaje stickynote
+	$('#neo-submit-button').click(sticky_note_send);
 });
 
 function sticky_note_hide() { $("#neo-sticky-note").hide(); }
 function sticky_note_show() { $("#neo-sticky-note").show(); }
-
-function note() { sticky_note_load(); }	// compat
-function send_sticky_note() { sticky_note_send(); } // compat
 
 function sticky_note_load()
 {

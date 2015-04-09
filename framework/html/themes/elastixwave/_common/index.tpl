@@ -10,7 +10,6 @@
 	{$HEADER_LIBS_JQUERY}
         <script type='text/javascript' src="libs/js/base.js"></script>
         <script type='text/javascript' src="libs/js/sticky_note/sticky_note.js"></script>
-		<script type='text/javascript' src="libs/js/sticky_note.js"></script>
         {$HEADER}
 	{$HEADER_MODULES}
     </head>
@@ -52,16 +51,25 @@
                 </td>
             </tr>
         </table>
-		<div id="neo-sticky-note" class="neo-display-none">
+		<div id="neo-sticky-note">
 		  <div id="neo-sticky-note-text"></div>
-		  <div id="neo-sticky-note-text-edit" class="neo-display-none">
+		  <div id="neo-sticky-note-text-edit">
 			<textarea id="neo-sticky-note-textarea"></textarea>
 			<div id="neo-sticky-note-text-char-count"></div>
-			<input type="button" value="{$SAVE_NOTE}" class="neo-submit-button" id="neo-submit-button" onclick="send_sticky_note()" />
+			<input type="button" value="{$SAVE_NOTE}" id="neo-submit-button" />
 			<div id="auto-popup">AutoPopUp <input type="checkbox" id="neo-sticky-note-auto-popup" value="1"></div>
 		  </div>
 		  <div id="neo-sticky-note-text-edit-delete"></div>
 		</div>
+{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *} 
+{if $AUTO_POPUP eq '1'}{literal}
+<script type='text/javascript'>
+$(document).ready(function(e) {
+    $("#neo-sticky-note-auto-popup").prop('checked', true);
+    $('#togglestickynote1').click();
+});
+</script>
+{/literal}{/if}
 		<!-- Neo Progress Bar -->
 		<div class="neo-modal-elastix-popup-box">
 			<div class="neo-modal-elastix-popup-title"></div>

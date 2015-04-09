@@ -1,15 +1,3 @@
-{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *}
-{if $AUTO_POPUP eq '1'}
-   {literal}
-        <script type='text/javascript'>
-        $('.togglestickynote').ready(function(e) {
-            $("#neo-sticky-note-auto-popup").prop('checked', true);
-            note();
-        });
-        </script>
-   {/literal}
-{/if}
-
 {literal}
 <script type='text/javascript'>
 var themeName='elastixneo'; //nombre del tema

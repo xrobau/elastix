@@ -352,6 +352,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Apr 09 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: Move Sticky Note autopopup support to the index.tpl of
+  every theme for future migration to separate template. Remove compatibility
+  functions for Sticky Note. Remove need for definition of neo-display-none
+  class.
+  SVN Rev[6975]
 - FIXED: Framework: Sticky Note support for autopopup is supposed to be enabled
   for all themes but is actually broken for all except elastixneo and tenant.
   Fixed.

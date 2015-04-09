@@ -367,6 +367,13 @@ function saveNewPasswordElastix(){
 	);
 }
 
+function elastix_blockUI(msg)
+{
+	$.blockUI({
+		message:	"<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+msg+"</span></div></div>"
+	});
+}
+
 function addBookmark(){
 	var arrAction = new Array();
 	arrAction["menu"] = "_elastixutils";
@@ -375,11 +382,10 @@ function addBookmark(){
 	arrAction["rawmode"] = "yes";
 	var srcimg = $('#neo-logobox').find('img:first').attr("src");
 	var theme = srcimg.split("/",2);
-	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_addingBookmark').val()+"</span></div></div>";
 	var imgBookmark = $("#togglebookmark").attr('src');
-	if(/bookmarkon.png/.test(imgBookmark))
-		urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_removingBookmark').val()+"</span></div></div>";
-	$.blockUI({ message: urlImaLoading });
+	elastix_blockUI((/bookmarkon.png/.test(imgBookmark))
+		? $('#toolTip_removingBookmark').val()
+		: $('#toolTip_addingBookmark').val());
 	request("index.php",arrAction,false,
 		function(arrData,statusResponse,error)
 		{

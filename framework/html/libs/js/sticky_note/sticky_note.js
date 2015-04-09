@@ -1,139 +1,78 @@
-  // Shows and hides the sticky note
-function readyFn() {
-  $("#neo-sticky-note").data("neo-sticky-note-status", "hidden");
-  
-  $(document).click(function() {
-	 if($("#neo-sticky-note").data("neo-sticky-note-status")=="visible") {
-	   $("#neo-sticky-note").addClass("neo-display-none");
-       $("#neo-sticky-note").data("neo-sticky-note-status", "hidden");
-	 }
-  });
-
-  $("#neo-sticky-note-text-edit-delete").click(function(){
-	$("#neo-sticky-note").addClass("neo-display-none");
-	$("#neo-sticky-note-text").removeClass("neo-display-none");
-	$("#neo-sticky-note-text-edit").addClass("neo-display-none");
-	$("#neo-sticky-note").data("neo-sticky-note-status", "hidden");
-  });
-
-  $("#neo-sticky-note").click(function(e) {
-    e.stopPropagation();
-  });
- 
- 
-   $('.togglestickynote').click(function(e) {
-	e.stopPropagation(); // Para evitar q el click se propague hasta el "document"
-	note();
-
-   });
-}
-
-function readyFn3() { 
-  
-  $("#neo-sticky-note-text").click(function() {
-	$("#neo-sticky-note-text").addClass("neo-display-none");
-    $("#neo-sticky-note-text-edit").removeClass("neo-display-none");
-	showCharCount();
-  });
-
-  $("#neo-sticky-note-textarea").keyup(function() {
-    showCharCount();
-  });
-}
-
-/**
- * Esta Funcion es un ajax que pide la informacion de la nota de un módulo
- */
-
-var note = function() { 
- 
+$(document).ready(function() {
+	// Click fuera de stickynote oculta el stickynote
+	$(document).click(sticky_note_hide);
+	$('#neo-sticky-note').click(function(e) {
+		e.stopPropagation(); // Para evitar q el click se propague hasta el "document"
+	});
 	
-	if($("#neo-sticky-note").data("neo-sticky-note-status")=="hidden") {
-		var arrAction = new Array();
-		arrAction["menu"] = "_elastixutils";
-		arrAction["id_menu"] = getCurrentElastixModule();
-		arrAction["action"]  = "get_sticky_note";
-		arrAction["rawmode"] = "yes";
-		var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#get_note_label').val()+"</span></div></div>";
-		$.blockUI({
-		  message: urlImaLoading
-		});
-		request("index.php",arrAction,false,
-			function(arrData,statusResponse,error,popup)
-			{
-				$.unblockUI();
-				var description = arrData;
-				
-				var desc = description.replace(/ /gi, "&nbsp;");
-				desc = desc.replace(/\n/gi, "<br>");
-				if(statusResponse == "OK"){
-					if(description != "no_data"){
-						if(description != "")
-							$("#neo-sticky-note-text").html(desc);
-						else{
-							var lbl_no_description = $("#lbl_no_description").val();
-							$("#neo-sticky-note-text").text(lbl_no_description);
-						}
-						$("#neo-sticky-note-textarea").val(description);
-						
-						if($("#neo-sticky-note").data("neo-sticky-note-status")=="visible") {
-							$("#neo-sticky-note").addClass("neo-display-none");
-							$("#neo-sticky-note").data("neo-sticky-note-status", "hidden");
-						} else {
-							$("#neo-sticky-note").removeClass("neo-display-none");
-							$("#neo-sticky-note").data("neo-sticky-note-status", "visible");
-						}
-					}
-				}else{
-					if(error != "no_data")
-						alert(error);
-					$("#neo-sticky-note-text").html(description);
-					if($("#neo-sticky-note").data("neo-sticky-note-status")=="visible") {
-						$("#neo-sticky-note").addClass("neo-display-none");
-						$("#neo-sticky-note").data("neo-sticky-note-status", "hidden");
-					} else {
-						$("#neo-sticky-note").removeClass("neo-display-none");
-						$("#neo-sticky-note").data("neo-sticky-note-status", "visible");
-					}
-				}
-			}
-		);
-	}else{
-		$("#neo-sticky-note").addClass("neo-display-none");
-		$("#neo-sticky-note").data("neo-sticky-note-status", "hidden");
-	}
-  
-}
+	// Click en el control de stickynote abre stickynote
+	$('#togglestickynote1').click(function(e) {
+		e.stopPropagation(); // Para evitar q el click se propague hasta el "document"
+		sticky_note_load();
+	});
+	
+	// Cierre del sticky note lo oculta luego de cambiar a vista sólo lectura
+	$('#neo-sticky-note-text-edit-delete').click(function() {
+		$("#neo-sticky-note-text-edit").hide();
+		$("#neo-sticky-note-text").show();
+		sticky_note_hide();
+	});
 
- $(document).ready(readyFn);
- $(document).ready(readyFn3);
+	// Click en el texto de sólo lectura cambia a modificación
+	$('#neo-sticky-note-text').click(function() {
+		$("#neo-sticky-note-text").hide();
+		$("#neo-sticky-note-text-edit").show();
+		sticky_note_count_chars();
+	});
+	
+	// Escritura en el textarea cuenta los caracteres
+	$('#neo-sticky-note-textarea').keyup(sticky_note_count_chars);
+});
 
-/**
- * Funcion que cuenta la cantidad de caracteres de un textarea para mostrar
- * la cantidad de caracteres que el usuario puede tipear.
- */
-function showCharCount() {
-	var charlimit        = 300;
-	var textareacontent  = $("#neo-sticky-note-textarea").val();
-	var textareanumchars = textareacontent.length;
-	var charleft         = charlimit - textareanumchars;
-	var lbl = $("#amount_char_label").val();
-	if(textareanumchars>charlimit) {
-	  $("#neo-sticky-note-textarea").val(textareacontent.substr(0,charlimit));
-	  charleft = 0;
-	}
-	$("#neo-sticky-note-text-char-count").html(charleft + " " + lbl);
-}
+function sticky_note_hide() { $("#neo-sticky-note").hide(); }
+function sticky_note_show() { $("#neo-sticky-note").show(); }
 
-/**
- * Funcion que envia la peticion de guardar o editar una nota.
- */
-function send_sticky_note()
+function note() { sticky_note_load(); }	// compat
+function send_sticky_note() { sticky_note_send(); } // compat
+
+function sticky_note_load()
 {
-    var description = $('#neo-sticky-note-textarea').val();
-    $.blockUI({
-        message:    "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#save_note_label').val()+"</span></div></div>"
-    });
+	elastix_blockUI($('#get_note_label').val());
+	request('index.php', {
+		menu:		'_elastixutils',
+		id_menu:	getCurrentElastixModule(),
+		action:		'get_sticky_note',
+		rawmode:	'yes'
+	}, false, function(description, statusResponse, error) {
+		$.unblockUI();
+		if (statusResponse == "OK") {
+			if (description == "no_data") return;
+			$("#neo-sticky-note-textarea").val(description);
+			if (description == '') description = $("#lbl_no_description").val();
+		} else {
+			if (error != "no_data") alert(error);
+		}
+		$("#neo-sticky-note-text").text(description);
+		sticky_note_show();
+	});
+}
+
+function sticky_note_count_chars()
+{
+	var charlimit        = 300;
+	var textareacontent  = $('#neo-sticky-note-textarea').val();
+	var charleft         = charlimit - textareacontent.length;
+	if (charleft < 0) {
+		$("#neo-sticky-note-textarea").val(textareacontent.substr(0,charlimit));
+		charleft = 0;
+	}
+	$("#neo-sticky-note-text-char-count").text(charleft + " " + $("#amount_char_label").val());
+}
+
+function sticky_note_send()
+{
+	var description = $('#neo-sticky-note-textarea').val();
+	elastix_blockUI($('#save_note_label').val());
     request('index.php', {
         menu:           '_elastixutils',
         id_menu:        getCurrentElastixModule(),
@@ -147,11 +86,9 @@ function send_sticky_note()
             alert(dataResponse.error);
             return;
         }
-        $("#neo-sticky-note-text").removeClass("neo-display-none");
-        $("#neo-sticky-note-text-edit").addClass("neo-display-none");
-        $("#neo-sticky-note")
-            .addClass("neo-display-none")
-            .data("neo-sticky-note-status", "hidden");
+    	$("#neo-sticky-note-text-edit").hide();
+    	$("#neo-sticky-note-text").show();
+        sticky_note_hide();
         if ($('#elastix_theme_name').val() == 'elastixneo') {
             $('#togglestickynote1').attr('src', 'themes/elastixneo/images/' 
                 + ((description != '') ? 'tab_notes_on.png' : 'tab_notes.png'));

@@ -351,6 +351,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Apr  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: rewrite Sticky Note javascript implementation to make it
+  smaller and fix unescaped strings leading to XSS. Factor out UI blocking as
+  done in Elastix interface into a single function.
+  SVN Rev[6970]
+
 * Wed Apr  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: consolidate all copies of Sticky Note styles into a single
   copy under libs/js/sticky_note.

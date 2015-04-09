@@ -161,7 +161,6 @@ $(document).ready(function(e) {
 		</div>
 		<div class="neo-modal-elastix-popup-blockmask"></div>
 <div id="fade_overlay" class="black_overlay"></div>
-</body>
 <script language="javascript" type="text/javascript">
 {literal}
 $(document).ready(function() {
@@ -183,4 +182,5 @@ $(document).ready(function() {
 </script>
 <input type="hidden" id="lblTextMode" value="{$textMode}" />
 <input type="hidden" id="lblHtmlMode" value="{$htmlMode}" />
+</body>
 </html>

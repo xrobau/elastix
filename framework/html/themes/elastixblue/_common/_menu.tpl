@@ -152,65 +152,6 @@
     </tr>
   </table>
 </div>
-
-<!--<div id="boxRPM" style="display:none;">
-    <div class="popup">
-        <table>
-            <tr>
-                <td class="tl"/>
-                <td class="b"/>
-                <td class="tr"/>
-            </tr>
-            <tr>
-                <td class="b"/>
-                <td class="body">
-                    <div class="content_box">
-                        <div id="table_boxRPM">
-                           <table width="100%" border="0" cellspacing="0" cellpadding="4" align="center">
-                                <tr class="moduleTitle">
-                                    <td class="moduleTitle">
-                                        <div>
-                                            <div style="float: left;">&nbsp;&nbsp;{$VersionPackage}&nbsp;</div>
-                                            <div align="right" style="padding-top: 5px;"><a id="changeMode" style="visibility: hidden;">({$textMode})</a></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="moduleTitle" id="loadingRPM" align="center" style="display: block;">
-                                        <img class="loadingRPMimg" alt="loading" src="images/loading.gif"  />
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td id="tdRpm" style="display: block;">
-                                        <table  id="tableRMP" width="100%" border="1" cellspacing="0" cellpadding="4" align="center">
-
-                                        </table> 
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td id="tdTa" style="display: none;">
-                                        <textarea  id="txtMode" value="" rows="60" cols="60"></textarea>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="footer">
-                        <a class="close_box_RPM">
-                        <img src="images/closelabel.gif" title="close" class="close_image_box" />
-                        </a>
-                    </div>
-                </td>
-                <td class="b"/>
-            </tr>
-            <tr>
-                <td class="bl"/>
-                <td class="b"/>
-                <td class="br"/>
-            </tr>
-        </table>
-    </div>
-</div>-->
 <div id="fade_overlay" class="black_overlay"></div>
 
 <table width="100%" cellpadding="0" cellspacing="0" height="100%">

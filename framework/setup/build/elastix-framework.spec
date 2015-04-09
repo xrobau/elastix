@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Apr  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: consolidate all copies of Sticky Note styles into a single
+  copy under libs/js/sticky_note.
+  SVN Rev[6968]
 - CHANGED: Framework: read Sticky Note status for blackmin theme.
   SVN Rev[6967]
 - CHANGED: Framework: tweak z-index again to fix FullCalendar event appearing

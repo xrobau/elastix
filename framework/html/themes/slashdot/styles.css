@@ -1131,7 +1131,7 @@ td a.link_summary_on{
     right:10px;
     width:18px;
     height:15px;
-    background:url(/images/bookmarks_equis.png) no-repeat;
+    background:url(../../images/bookmarks_equis.png) no-repeat;
     cursor: pointer;
 }
 .neo-modal-elastix-popup-content {

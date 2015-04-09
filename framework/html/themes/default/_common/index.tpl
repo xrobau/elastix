@@ -6,7 +6,7 @@
   <title>Elastix</title>
   <link rel="stylesheet" href="themes/{$THEMENAME}/styles.css">
   <link rel="stylesheet" href="themes/{$THEMENAME}/help.css">
-  <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/sticky_note.css" />
+  <link rel="stylesheet" media="screen" type="text/css" href="libs/js/sticky_note/sticky_note.css" />
   {$HEADER_LIBS_JQUERY}
   <script src="libs/js/base.js"></script>
   <script src="libs/js/iframe.js"></script>

@@ -122,7 +122,7 @@
             {foreach from=$arrFiltersControl key=k item=filterc name=filtersctrl}
                 <div class="neo-filter-control">{$filterc.msg}&nbsp;
 				{if $filterc.defaultFilter eq no}
-					<a href="{$url}&name_delete_filters={$filterc.filters}"><img src='themes/elastixneo/images/bookmarks_equis.png' width="18" height="16" align='absmiddle' border="0" /></a>
+					<a href="{$url}&name_delete_filters={$filterc.filters}"><img src='images/bookmarks_equis.png' width="18" height="16" align='absmiddle' border="0" /></a>
 				{/if}
 				</div>
             {/foreach}

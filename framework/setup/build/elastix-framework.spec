@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: stop using an Array object as a hashtable in registration
+  SVN Rev[6988]
 - CHANGED: Framework: stop using an Array object as a hashtable in base.js
   SVN Rev[6987]
 - CHANGED: Framework: move many elastixneo-specific javascript into its own

@@ -76,22 +76,10 @@
       }
     }
 
-    function openWindow(path)
-    {
-        var features = 'width=700,height=460,resizable=no,scrollbars=yes,toolbar=no,location=no,menubar=no,status=no';
-        var popupWin = window.open(path, "_cmdWin", features);
-        popupWin.focus();
-        //return true;
-    }
+    function openWindow(path) { popUp(path, 700, 460); }
 
-    function confirmSubmit(message)
-    {
-        var agree=confirm(message);
-        if (agree)
-            return true ;
-        else
-	    return false ;
-    }
+    // Función de compatibilidad
+    function confirmSubmit(message) { return confirm(message); }
 
     function popUp(path,width_value,height_value)
     {
@@ -181,8 +169,6 @@ function hide_message_error(){
     document.getElementById("message_error").style.display = 'none';
 }
 
-var modal_elastix_popup_shown = false;
-
 function ShowModalPopUP(title, width, height, html){
 
     $('.neo-modal-elastix-popup-content').html(html);
@@ -213,8 +199,6 @@ function ShowModalPopUP(title, width, height, html){
     $('.neo-modal-elastix-popup-box').css('left', winW/2-width/2);
     $('.neo-modal-elastix-popup-box').fadeIn(2000);
 
-    modal_elastix_popup_shown = true;
-
     $('.neo-modal-elastix-popup-close').click(function() {
         hideModalPopUP();
     });
@@ -225,8 +209,6 @@ function hideModalPopUP()
     $('.neo-modal-elastix-popup-box').fadeOut(10);
     $('.neo-modal-elastix-popup-blockmask').fadeOut(20);
     $('.neo-modal-elastix-popup-content').html("");
-
-    modal_elastix_popup_shown = false;
 }
 
 function isRegisteredServer()
@@ -553,119 +535,19 @@ function saveToggleTab(){
 }
 
 
-//***Genera la Tabla de los Detalles de la Versión
-function loadDetails(){
-        var order = "menu=_elastixutils&action=versionRPM&rawmode=yes";
-        $.post("index.php", order, function(message){
-            $("#loadingRPM").hide();
-            $("#changeMode").show();
+// Procedimiento que carga el diálogo de lista de paquetes Elastix instalados
+function showElastixPackageVersionDialog()
+{
+	request('index.php', {
+    	menu:		'_elastixutils',
+    	action:		'dialogRPM',
+    	rawmode:	'yes'
+    }, false, function(arrData,statusResponse,error) {
+        ShowModalPopUP(arrData['title'],380,800,arrData['html']);  
 
-            var html = "";
-            var html2 = "";
-            var key = "";
-            var key2 = "";
-            var message2 = "";
-            var i = 0;
-            var cont = 0;
-            for(key in message){
-                html += "<table  width='96%' border='0' cellspacing='0' cellpadding='0' style='border:1px solid #999'>"+
-                           "<tr class='letra12'>" +
-                            "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Name</b></td>" +
-                            "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Package Name</b></td>" +
-                            "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Version</b></td>" +
-                            "<td class='letra12 tdRPMNamesCol'>&nbsp;&nbsp;<b>Release</b></td>" +
-                        "</tr>" +
-                        "<tr class='letra12'>" +
-                            "<td class='letra12 tdRPMDetail' colspan='4' align='left'>&nbsp;&nbsp;" + key + "</td>" +
-                        "</tr>";
-                /*html2 += "Name|Package Name|Version|Release\n";*/
-                cont = cont + 2;
-                html2 += "\n " + key+"\n";
-                message2 = message[key];
-                if(key == "Kernel"){
-                    for(i = 0; i<message2.length; i++){
-                        var arryVersions = (message2[i][1]).split("-",2);
-                        html += "<tr class='letra12'>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + message2[i][0] + "(" + message2[i][2] + ")</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + arryVersions[0] + "</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + arryVersions[1] + "</td>" +
-                                "</tr>";
-                        html2+= "   " + message2[i][0] + "(" + message2[i][2] + ")-"+arryVersions[0] + "-"+arryVersions[1] + "\n";
-                        cont++;
-                    }
-                }else{
-                    for(i = 0; i<message2.length; i++){
-                        html += "<tr class='letra12'>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + message2[i][0] + "</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + message2[i][1] + "</td>" +
-                                    "<td class='letra12'>&nbsp;&nbsp;" + message2[i][2] + "</td>" +
-                                "</tr>";
-                        html2+= "   " + message2[i][0] + "-" + message2[i][1] + "-" + message2[i][2] + "\n";
-                        cont++;
-                    }
-                }
-
-            }
-            cont = cont + 2;
-            html +="</table>";
-	    
-            $("#txtMode").attr("rows", cont);
-            $("#tableRMP").html(html);
-	    $("#changeMode").show();
-            $("#txtMode").val(html2);
-            $("#tableRMP").css("border-style", "none");	
-            
-        });
+        // La plantilla tiene una referencia a script que llama a versionRPM
+    });
 }
-
-
-//***Cambia de (Texto->Html)(Html->Texto)
-function changeMode(){	
-        var viewTbRpm = $(".tdRpm").attr("style");
-        if(viewTbRpm == "display: block;"){
-            //change lbltextMode
-            var lblhtmlMode = $("#lblHtmlMode").val();
-            $("#changeMode").text("("+lblhtmlMode+")");
-
-            $(".tdRpm").attr("style","display: none;");
-            $("#tdTa").attr("style","display: block;");
-		
-        }else{
-            //change lblHtmlMode
-            var lbltextMode = $("#lblTextMode").val();
-            $("#changeMode").text("("+lbltextMode+")");
-            $(".tdRpm").attr("style","display: block;");
-            $("#tdTa").attr("style","display: none;");
-            $("#txtMode").css("height","auto");
-        }
-}
-
-//***POPUP VERSION
-function showVersion(){
-	var arrAction = new Array();
-        arrAction["action"]  = "showRPMS_Version";
-        arrAction["rawmode"] = "yes";
-
-        request("register.php",arrAction,false,
-            function(arrData,statusResponse,error)
-            {
-	        ShowModalPopUP(arrData['title'],380,800,arrData['html']);  
-		loadDetails();
-            }
-        );
-       
-	$("#loadingRPM").show();
-        $("#tdTa").hide();
-        $(".tdRpm").show();
-        $("#tdTa").val("");
-        var lbltextMode = $("#lblTextMode").val();
-        $("#changeMode").text("("+lbltextMode+")");
-        $("#txtMode").val("");
-        
-}
-
 
 $(document).ready(function(){
     //***Para los módulos con filtro se llama a la función pressKey
@@ -682,7 +564,7 @@ $(document).ready(function(){
             $("#fade_overlay").attr("style","display: none;");
         });
   
-    $("#viewDetailsRPMs").click(function(){ showVersion(); });
+    $("#viewDetailsRPMs").click(showElastixPackageVersionDialog);
 
     $("#fade_overlay").click(function(){
         $("#boxRPM").attr("style","display: none;");

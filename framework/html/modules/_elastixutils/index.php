@@ -40,9 +40,15 @@ function _moduleContent(&$smarty, $module_name)
     
     load_language_module($module_name);
 
+    //folder path for custom templates
+    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
+    $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
+    $local_templates_dir = "$base_dir/modules/$module_name/" . $templates_dir . '/' . $arrConf['theme'];
+
+    $smarty->assign('module_name', $module_name);
     $sFuncName = 'handleJSON_'.getParameter('action');
     if (function_exists($sFuncName))
-        return $sFuncName($smarty, $module_name);
+        return $sFuncName($smarty, $local_templates_dir, $module_name);
     
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status('false');
@@ -50,14 +56,33 @@ function _moduleContent(&$smarty, $module_name)
     return $jsonObject->createJSON();
 }
 
-function handleJSON_versionRPM($smarty, $module_name)
+function handleJSON_dialogRPM($smarty, $local_templates_dir, $module_name)
+{
+    Header('Content-Type: application/json');
+
+    $smarty->assign(array(
+        'VersionDetails'    =>  _tr('VersionDetails'),
+        'VersionPackage'    =>  _tr('VersionPackage'),
+        'textMode'          =>  _tr('textMode'),
+        'htmlMode'          =>  _tr('htmlMode'),
+    ));
+    
+    $jsonObject = new PaloSantoJSON();
+    $jsonObject->set_message(array(
+        'title' =>  _tr('VersionPackage'),
+        'html'  =>  $smarty->fetch("$local_templates_dir/_rpms_version.tpl"),
+    ));
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_versionRPM($smarty, $local_templates_dir, $module_name)
 {
     Header('Content-Type: application/json');
 	$json = new Services_JSON();
     return $json->encode(obtenerDetallesRPMS());
 }
 
-function handleJSON_changePasswordElastix($smarty, $module_name)
+function handleJSON_changePasswordElastix($smarty, $local_templates_dir, $module_name)
 {
     $jsonObject = new PaloSantoJSON();
     $output = setUserPassword();
@@ -66,12 +91,12 @@ function handleJSON_changePasswordElastix($smarty, $module_name)
     return $jsonObject->createJSON();
 }
 
-function handleJSON_search_module($smarty, $module_name)
+function handleJSON_search_module($smarty, $local_templates_dir, $module_name)
 {
     return searchModulesByName();
 }
 
-function handleJSON_changeColorMenu($smarty, $module_name)
+function handleJSON_changeColorMenu($smarty, $local_templates_dir, $module_name)
 {
     $jsonObject = new PaloSantoJSON();
     $output = changeMenuColorByUser();
@@ -80,7 +105,7 @@ function handleJSON_changeColorMenu($smarty, $module_name)
     return $jsonObject->createJSON();
 }
 
-function handleJSON_addBookmark($smarty, $module_name)
+function handleJSON_addBookmark($smarty, $local_templates_dir, $module_name)
 {
     $jsonObject = new PaloSantoJSON();
     $id_menu = getParameter("id_menu");
@@ -97,13 +122,13 @@ function handleJSON_addBookmark($smarty, $module_name)
     return $jsonObject->createJSON();
 }
 
-function handleJSON_deleteBookmark($smarty, $module_name)
+function handleJSON_deleteBookmark($smarty, $local_templates_dir, $module_name)
 {
     // La función subyacente agrega el bookmark si no existe, o lo quita si existe
-    return handleJSON_addBookmark($smarty, $module_name);
+    return handleJSON_addBookmark($smarty, $local_templates_dir, $module_name);
 }
 
-function handleJSON_save_sticky_note($smarty, $module_name)
+function handleJSON_save_sticky_note($smarty, $local_templates_dir, $module_name)
 {
     $jsonObject = new PaloSantoJSON();
     $id_menu = getParameter("id_menu");
@@ -120,7 +145,7 @@ function handleJSON_save_sticky_note($smarty, $module_name)
     return $jsonObject->createJSON();
 }
 
-function handleJSON_get_sticky_note($smarty, $module_name)
+function handleJSON_get_sticky_note($smarty, $local_templates_dir, $module_name)
 {
     $jsonObject = new PaloSantoJSON();
     $id_menu = getParameter("id_menu");
@@ -142,7 +167,7 @@ function handleJSON_get_sticky_note($smarty, $module_name)
     return $jsonObject->createJSON();
 }
 
-function handleJSON_saveNeoToggleTab($smarty, $module_name)
+function handleJSON_saveNeoToggleTab($smarty, $local_templates_dir, $module_name)
 {
     $jsonObject = new PaloSantoJSON();
     $id_menu = getParameter("id_menu");

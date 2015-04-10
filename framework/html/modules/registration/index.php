@@ -73,9 +73,6 @@ function _moduleContent(&$smarty, $module_name) {
         case "showAboutAs":
             $content = showFormAboutAs($smarty, $module_name, $local_templates_dir, $arrConf);
             break;
-        case "showRPMS_Version":
-            $content = showFormRPMS_Version($smarty, $module_name, $local_templates_dir, $arrConf);
-            break;
         default: // view_form
             $content = viewFormRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $pDBACL);
             break;
@@ -99,23 +96,6 @@ function showFormAboutAs($smarty, $module_name, $local_templates_dir, $arrConf) 
 
     if ($arrConf['mainTheme'] == "elastixwave" || $arrConf['mainTheme'] == "elastixneo")
         $response['title'] = _tr('About Elastix2');
-
-    $jsonObject->set_message($response);
-    return $jsonObject->createJSON();
-}
-
-function showFormRPMS_Version($smarty, $module_name, $local_templates_dir, $arrConf) {
-    $oForm = new paloForm($smarty, array());
-
-    $smarty->assign("VersionDetails", _tr('VersionDetails'));
-    $smarty->assign("VersionPackage", _tr('VersionPackage'));
-    $smarty->assign("textMode", _tr('textMode'));
-    $smarty->assign("htmlMode", _tr('htmlMode'));
-
-    $jsonObject = new PaloSantoJSON();
-    $response = array();
-    $response['html'] = $oForm->fetchForm("$local_templates_dir/_rpms_version.tpl", "", "");
-    $response['title'] = _tr('VersionPackage');
 
     $jsonObject->set_message($response);
     return $jsonObject->createJSON();

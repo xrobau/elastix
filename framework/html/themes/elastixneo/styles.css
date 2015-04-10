@@ -1251,14 +1251,6 @@ td.botonon {
     text-decoration: none;
 }
 
-.tdRPMDetail{
-    background-color: #E8E8E8;
-}
-
-.tdRPMNamesCol{
-    background-color: #B5B5B5;
-}
-
 .black_overlay{
     display: none;
     position: fixed;
@@ -1271,12 +1263,6 @@ td.botonon {
     -moz-opacity: 0.4;
     opacity:.40;
     filter: alpha(opacity=40);
-}
-
-
-
-.loadingRPMimg{
-    padding: 10px;
 }
 
 
@@ -1459,45 +1445,3 @@ TABLE.table_data {
     position: relative;
     top: 20px;
 }
-/*Version*/
-#tableRMP{
-    border:0px solid;
-    display: block;
-    position:relative;
-    top:10px;
-
-}
-#txtMode{
-    width: 95%;
-    position:relative;
-    top:10px;
-    height:750px;
-}
-#tdTa{
-    display: none;
-}
-#changeMode{
-    font-size: 10px;
-    cursor: pointer;
-    position: relative;
-    display: none;
-    left:80%;
-    width:20%;
-    color:blue;
-    top:5px;
-    
-}
-
-.loadingRPMimg{
-    padding: 10px;
-}
-
-#loadingRPM{
-    display: block;
-    text-align:center;	
-    position: absolute;
-    top:45%;
-    left:45%; 
-
-}
-

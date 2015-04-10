@@ -716,13 +716,6 @@ TD.menudescription {
     font-weight: normal;
 }
 */
-.tdRPMDetail{
-    background-color: #E8E8E8;
-}
-
-.tdRPMNamesCol{
-    background-color: #B5B5B5;
-}
 
 .black_overlay{
     display: none;
@@ -736,14 +729,6 @@ TD.menudescription {
     -moz-opacity: 0.4;
     opacity:.40;
     filter: alpha(opacity=40);
-}
-/*#changeMode{
-    font-size: 10px;
-    cursor: pointer;
-}*/
-
-.loadingRPMimg{
-    padding: 10px;
 }
 
 td a.link_summary_off{
@@ -840,45 +825,3 @@ td a.link_summary_on{
     position: relative;
     top: 20px;
 }
-/*Version*/
-#tableRMP{
-    border:0px solid;
-    display: block;
-    position:relative;
-    top:10px;
-
-}
-#txtMode{
-    width: 95%;
-    position:relative;
-    top:10px;
-    height:750px;
-}
-#tdTa{
-    display: none;
-}
-#changeMode{
-    font-size: 10px;
-    cursor: pointer;
-    position: relative;
-    display: none;
-    left:80%;
-    width:20%;
-    color:blue;
-    top:5px;
-
-}
-
-.loadingRPMimg{
-    padding: 10px;
-}
-
-#loadingRPM{
-    display: block;
-    text-align:center;
-    position: absolute;
-    top:45%;
-    left:45%;
-
-}
-

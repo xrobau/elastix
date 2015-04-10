@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: factor out one more instance of blockUI
+  SVN Rev[6983]
 - CHANGED: Framework: boxRPM element does not appear anywhere, style removed.
 - CHANGED: Framework: box_overlayRPM does not appear anywhere, style removed.
 - CHANGED: Framework: close_image_box does not appear anywhere, style removed.

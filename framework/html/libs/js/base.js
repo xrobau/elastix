@@ -439,8 +439,7 @@ function deleteBookmarkByEquis(ref){
 	arrAction["id_menu"] = id_menu;
 	var srcimg = $('#neo-logobox').find('img:first').attr("src");
 	var theme = srcimg.split("/",2);
-	var urlImaLoading = "<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+$('#toolTip_removingBookmark').val()+"</span></div></div>";
-	$.blockUI({ message: urlImaLoading });
+	elastix_blockUI($('#toolTip_removingBookmark').val());
 	request("index.php",arrAction,false,
 		function(arrData,statusResponse,error)
 		{

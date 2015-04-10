@@ -213,49 +213,38 @@ function hideModalPopUP()
 
 function isRegisteredServer()
 {
-    var arrAction         = new Array();
-    arrAction['action']   = "isRegistered";
-    arrAction["rawmode"]  = "yes";
-    
-    request("register.php",arrAction,false,
-        function(arrData,statusResponse,error)
-        {
-            $('.register_link').css('color',arrData['color']);
-            $('.register_link').text(arrData['label']);
-        }
-    );
+    request("register.php", {
+    	action:		'isRegistered',
+    	rawmode:	'yes'
+    }, false, function(arrData,statusResponse,error) {
+        $('.register_link').css('color',arrData['color']);
+        $('.register_link').text(arrData['label']);
+    });
 }
 
-function showPopupCloudLogin(title, width, height){
-    var arrAction         = new Array();
-    arrAction['action']   = "cloudlogin";
-    arrAction["rawmode"]  = "yes";
-    
-    request("register.php",arrAction,false,
-        function(arrData,statusResponse,error)
-        {
-            ShowModalPopUP(title,width,height,arrData['form']);
-            
-            if(arrData['registered']=="yes-all"){
-                showLoading(arrData['msgloading']);
-                getDataWebServer();
-            }
+function showPopupCloudLogin(title, width, height)
+{
+    request("register.php", {
+    	action:		'cloudlogin',
+    	rawmode:	'yes'
+    }, false,  function(arrData,statusResponse,error) {
+        ShowModalPopUP(title,width,height,arrData['form']);
+        
+        if(arrData['registered']=="yes-all"){
+            showLoading(arrData['msgloading']);
+            getDataWebServer();
         }
-    );
+    });
 }
 
 function mostrar()
 {
-    var arrAction = new Array();
-    arrAction["action"]  = "showAboutAs";
-    arrAction["rawmode"] = "yes";
-
-    request("register.php",arrAction,false,
-        function(arrData,statusResponse,error)
-        {
-            ShowModalPopUP(arrData['title'],380,100,arrData['html']);
-        }
-    );
+    request("register.php", {
+    	action:		'showAboutAs',
+    	rawmode:	'yes'
+    }, false, function(arrData,statusResponse,error) {
+        ShowModalPopUP(arrData['title'],380,100,arrData['html']);
+    });
 }
 
 function getElastixKey()
@@ -264,23 +253,25 @@ function getElastixKey()
     arrAction['action']   = "isRegistered";
     arrAction["rawmode"]  = "yes";
     
-    request("register.php",arrAction,false,
-        function(arrData,statusResponse,error)
-        {
-            if(arrData["registered"]=="yes-all"){
-		hideModalPopUP();
-		var callback = $('#callback').val();
-		if(callback && callback !=""){
-		    if(callback=="do_checkDependencies")
-		      do_checkDependencies(arrData["sid"]);
-		    else if(callback=="do_iniciarInstallUpdate")
-		      do_iniciarInstallUpdate();
-		}
+    request("register.php", {
+    	action:		'isRegistered',
+    	rawmode:	'yes'
+    }, false, function(arrData,statusResponse,error) {
+        if (arrData["registered"]=="yes-all") {
+        	hideModalPopUP();
+        	var callback = $('#callback').val();
+        	if (callback && callback !="") {
+        		if(callback=="do_checkDependencies")
+        			do_checkDependencies(arrData["sid"]);
+        		else if(callback=="do_iniciarInstallUpdate")
+        			do_iniciarInstallUpdate();
+        	}
 	    }
-        });
+    });
 }
 
-function setAdminPassword(){
+function setAdminPassword()
+{
     var title = $('#lblChangePass').val();
     var lblCurrentPass = $('#lblCurrentPass').val();
     var lblNewPass = $('#lblNewPass').val();
@@ -309,7 +300,8 @@ function setAdminPassword(){
     ShowModalPopUP(title,width,height,html);
 }
 
-function saveNewPasswordElastix(){
+function saveNewPasswordElastix()
+{
 	var arrAction = new Array();
 	var oldPass   = $('#curr_pass').val();
 	var newPass   = $('#curr_pass_new').val();
@@ -331,22 +323,18 @@ function saveNewPasswordElastix(){
 	  return;
 	}
 
-	arrAction["menu"]          = '_elastixutils';
-	arrAction["action"]        = "changePasswordElastix";
-	arrAction["oldPassword"]   = oldPass;
-	arrAction["newPassword"]   = newPass;
-	arrAction["newRePassword"] = newPassRe;
-	request("index.php",arrAction,false,
-		function(arrData,statusResponse,error)
-		{
-		    if(statusResponse == "false")
-				alert(error);
-			else{
-				alert(error);
-				hideModalPopUP();
-			}
+	request('index.php', {
+    	menu:			'_elastixutils',
+    	action:			'changePasswordElastix',
+    	oldPassword:	oldPass,
+    	newPassword:	newPass,
+    	newRePassword:	newPassRe
+	}, false, function(arrData,statusResponse,error) {
+		alert(error);
+	    if (statusResponse != "false") {
+			hideModalPopUP();
 		}
-	);
+	});
 }
 
 function elastix_blockUI(msg)

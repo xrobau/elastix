@@ -298,27 +298,6 @@ function removeNeoDisplayOnMouseOver(ref){
 <!-- contenido del modulo-->
 <div id="neo-contentbox">
     <div id="neo-contentbox-maincolumn">
-        <!--<div class="neo-module-title"><div class="neo-module-name-left"></div>
-            <span class="neo-module-name">
-            {if $icon ne null}
-                <img src="{$icon}" width="22" height="22" align="absmiddle" />
-            {/if}
-            &nbsp;{$title}</span><div class="neo-module-name-right"></div>
-            <div class="neo-module-title-buttonstab-right"></div><span class="neo-module-title-buttonstab">
-            {if $STATUS_STICKY_NOTE eq 'true'}
-                <img src="{$WEBPATH}themes/{$THEMENAME}/images/tab_notes_on.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />
-            {else}
-                <img src="{$WEBPATH}themes/{$THEMENAME}/images/tab_notes.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />
-            {/if}
-            {if $viewMenuTab}
-            {/if}
-            {if $IMG_BOOKMARKS eq 'bookmark.png'}
-                <img src="{$WEBPATH}themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$ADD_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
-            {else}
-                <img src="{$WEBPATH}themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" title="{$REMOVE_BOOKMARK}" id="togglebookmark" style="cursor: pointer;" onclick='addBookmark()' />
-            {/if}
-            </span><div class="neo-module-title-buttonstab-left"></div>
-        </div>-->
         <input type="hidden" id="elastix_framework_module_id" value="{if empty($idSubMenu2Selected)}{$idSubMenuSelected}{else}{$idSubMenu2Selected}{/if}" />
         <input type="hidden" id="elastix_framework_webCommon" value="{$WEBCOMMON}" />
         <div class="neo-module-content">

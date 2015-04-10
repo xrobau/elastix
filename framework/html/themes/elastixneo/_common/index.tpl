@@ -16,8 +16,9 @@
         <!--[if lte IE 8]><link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/ie.css" /><![endif]-->
 	{$HEADER_LIBS_JQUERY}
         <script type='text/javascript' src="libs/js/base.js"></script>
-	<script type='text/javascript' src="libs/js/sticky_note/sticky_note.js"></script>
+        <script type='text/javascript' src="libs/js/sticky_note/sticky_note.js"></script>
         <script type='text/javascript' src="libs/js/iframe.js"></script>
+        <script type='text/javascript' src="themes/{$THEMENAME}/js/javascript.js"></script>
         {$HEADER}
 	{$HEADER_MODULES}
     </head>

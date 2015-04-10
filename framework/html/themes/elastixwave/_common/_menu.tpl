@@ -159,8 +159,6 @@
 </div>
 
 
-<div id="fade_overlay" class="black_overlay"></div>
-
 <table width="100%" cellpadding="0" cellspacing="0" height="100%">
   <tr>
     {if !empty($idSubMenu2Selected)}

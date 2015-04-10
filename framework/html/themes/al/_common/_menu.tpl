@@ -100,8 +100,6 @@
 </div>
 
 
-<div id="fade_overlay" class="black_overlay"></div>
-
 <div id="miniMenu" style="display: none;">
   <table cellspacing="0" cellpadding="0" width="100%" class="menumini">
     <tr>

@@ -559,17 +559,7 @@ $(document).ready(function(){
     }
     	
     //*****************************************/
-    $(".close_image_box").click(function(){
-            $("#boxRPM").attr("style","display: none;");
-            $("#fade_overlay").attr("style","display: none;");
-        });
-  
     $("#viewDetailsRPMs").click(showElastixPackageVersionDialog);
-
-    $("#fade_overlay").click(function(){
-        $("#boxRPM").attr("style","display: none;");
-        $("#fade_overlay").attr("style","display: none;");
-    });
 
 	$( "#search_module_elastix" )
 		// don't navigate away from the field on tab when selecting an item

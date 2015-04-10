@@ -158,7 +158,6 @@ $(document).ready(function(e) {
 			<div class="neo-modal-elastix-popup-content"></div>
 		</div>
 		<div class="neo-modal-elastix-popup-blockmask"></div>
-<div id="fade_overlay" class="black_overlay"></div>
 <script language="javascript" type="text/javascript">
 {literal}
 $(document).ready(function() {

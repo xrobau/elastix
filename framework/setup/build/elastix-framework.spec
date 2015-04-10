@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove unused hidden input with translated text for
+  package version dialog.
+  SVN Rev[6981]
 - CHANGED: Framework: move responsibility for rpm package version dialog to
   elastixutils. Collect all css and javascript into its own method and remove
   duplicates in all themes.

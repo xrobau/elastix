@@ -73,8 +73,6 @@ function removeNeoDisplayOnMouseOver(ref){
 </script>
 {/literal}
 
-<input type="hidden" id="lblTextMode" value="{$textMode}" />
-<input type="hidden" id="lblHtmlMode" value="{$htmlMode}" />
 <input type="hidden" id="lblRegisterCm"   value="{$lblRegisterCm}" />
 <input type="hidden" id="lblRegisteredCm" value="{$lblRegisteredCm}" />
 <input type="hidden" id="lblCurrentPassAlert" value="{$CURRENT_PASSWORD_ALERT}" />

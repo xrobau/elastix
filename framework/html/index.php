@@ -148,8 +148,6 @@ if (isset($_SESSION['elastix_user']) &&
     $smarty->assign("LOGOUT", _tr('Logout'));
     $smarty->assign("VersionDetails", _tr('VersionDetails'));
     $smarty->assign("VersionPackage", _tr('VersionPackage'));
-	$smarty->assign("textMode", _tr('textMode'));
-    $smarty->assign("htmlMode", _tr('htmlMode'));
 	$smarty->assign("AMOUNT_CHARACTERS", _tr("characters left"));
 	$smarty->assign("SAVE_NOTE", _tr("Save Note"));
 	$smarty->assign("MSG_SAVE_NOTE", _tr("Saving Note"));

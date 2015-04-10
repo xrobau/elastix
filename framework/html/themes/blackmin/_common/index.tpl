@@ -30,7 +30,7 @@
             <img height="20" align="absmiddle" src="themes/{$THEMENAME}/images/user.png" alt="user" />
             <div>
                 <ul>
-                    <li><a href="#" onclick="setAdminPassword();">{$CHANGE_PASSWORD}</a></li>
+                    <li><a href="#" class="setadminpassword">{$CHANGE_PASSWORD}</a></li>
                     <li><a href="index.php?logout=yes">{$LOGOUT} (<font style='color:#FFFFFF;font-style:italic'>{$USER_LOGIN}</font>)</a></li>
                 </ul>
             </div>

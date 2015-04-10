@@ -446,7 +446,7 @@ function oneClickEvent()
 	  <p><span><a href="javascript:mostrar();">{$ABOUT_ELASTIX2}</a></span></p>
 	</div>
 	<div id="neo-cmenu-showbox-user" class="neo-cmenu-showbox neo-display-none">
-	  <p><span><a style="cursor: pointer;" onclick="setAdminPassword();">{$CHANGE_PASSWORD}</a></span></p>
+	  <p><span><a href="#" class="setadminpassword">{$CHANGE_PASSWORD}</a></span></p>
 	  <p><span><a class="logout" href="?logout=yes">{$LOGOUT} (<font style='color:#FFFFFF;font-style:italic'>{$USER_LOGIN}</font>)</a></span></p>
 	</div>
 </div>

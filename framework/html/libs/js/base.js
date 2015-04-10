@@ -557,8 +557,8 @@ $(document).ready(function(){
         $('#pagedown').keypress(keyPressed);
     }
     	
-    //*****************************************/
-    $("#viewDetailsRPMs").click(showElastixPackageVersionDialog);
+    $('#viewDetailsRPMs').click(showElastixPackageVersionDialog);
+    $('a.setadminpassword').click(setAdminPassword);
 
 	$( "#search_module_elastix" )
 		// don't navigate away from the field on tab when selecting an item
@@ -645,17 +645,25 @@ $(document).ready(function(){
 			}
 	});
       
-         var menu = getParameterByName("menu");
-	       if(typeof  menu!== "undefined" && menu){
-	        var lblmenu = menu.split("_");
+    var menu = getParameterByName("menu");
+        if (typeof  menu!== "undefined" && menu) {
+            var lblmenu = menu.split("_");
+
+            if(lblmenu["0"]=="a2b") {
+                $('#myframe').load(function() {
+                    $(".topmenu-right-button a",myframe.document).attr("target","_self");
+            });
+        }
+    }
 	
-	        if(lblmenu["0"]=="a2b"){
-	          $('#myframe').load(function() {
-	              $(".topmenu-right-button a",myframe.document).attr("target","_self");
-	          });
-	        }
-	      }
-	
+    // En la clase paloSantoForm.class.php, a los input radio se definio
+    // que tengan un estilo defaulf de jquery, para ello se declara una
+    // clase global para que hereden todos los input radio el nuevo estilo.
+    $( ".radio_buttonset_elx" ).buttonset();
+
+    // En el index.php del framework se hacía uso de smarty para
+    // setear el estado del registro, ahora se hace desde javascript.
+    isRegisteredServer();
 });
 
 //Si se presiona enter se hace un submit al formulario para que se aplica el filtro
@@ -705,16 +713,3 @@ function getCurrentElastixModule()
 {
 	return $('#elastix_framework_module_id').val();
 }
-
-// En la clase paloSantoForm.class.php, a los input radio se definio
-// que tengan un estilo defaulf de jquery, para ello se declara una
-// clase global para que hereden todos los input radio el nuevo estilo.
-$(document).ready(function(){
-    $( ".radio_buttonset_elx" ).buttonset();
-});
-
-// En el index.php del framework se hacía uso de smarty para
-// setear el estado del registro, ahora se hace desde javascript.
-$(document).ready(function(){
-    isRegisteredServer();
-});

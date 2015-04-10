@@ -1405,3 +1405,6 @@ label[data-tooltip]:hover:before, label[data-tooltip]:hover:after {
     box-sizing :content-box !important;
     webkit-box-sizing: border-box !important;
 }
+a.setadminpassword {
+    cursor: pointer;
+}

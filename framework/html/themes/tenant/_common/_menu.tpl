@@ -212,7 +212,7 @@ function removeNeoDisplayOnMouseOver(ref){
                     
                     <!-- Profile sub-links -->
                     <li>
-                        <a style="cursor: pointer;" onclick="setAdminPassword();">
+                        <a href="#" class="setadminpassword">
                             <i class="entypo-user"></i>
                             {$CHANGE_PASSWORD}
                         </a>

@@ -731,3 +731,6 @@ td a.link_summary_on{
     position: relative;
     top: 20px;
 }
+a.setadminpassword {
+	cursor: pointer;
+}

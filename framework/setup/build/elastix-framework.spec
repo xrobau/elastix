@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add missing images for Sticky Note status for blackmin
+  SVN Rev[6985]
 - CHANGED: Framework: move association of setAdminPassword to classname.
   SVN Rev[6984]
 - CHANGED: Framework: factor out one more instance of blockUI

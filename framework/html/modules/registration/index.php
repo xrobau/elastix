@@ -70,35 +70,11 @@ function _moduleContent(&$smarty, $module_name) {
         case "getDataRegisterServer":
             $content = getDataRegistration($pDB, $arrConf);
             break;
-        case "showAboutAs":
-            $content = showFormAboutAs($smarty, $module_name, $local_templates_dir, $arrConf);
-            break;
         default: // view_form
             $content = viewFormRegister($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $pDBACL);
             break;
     }
     return $content;
-}
-
-function showFormAboutAs($smarty, $module_name, $local_templates_dir, $arrConf) {
-    $oForm = new paloForm($smarty, array());
-
-    $smarty->assign("ABOUT_ELASTIX", _tr('About Elastix') . " " . $arrConf['elastix_version']);
-    $smarty->assign("ABOUT_ELASTIX2", _tr('About Elastix2'));
-    $smarty->assign("ABOUT_ELASTIX_CONTENT", _tr('About Elastix Content'));
-    $smarty->assign("ABOUT_CLOSED", _tr('About Elastix Closed'));
-
-    $jsonObject = new PaloSantoJSON();
-    $response = array();
-
-    $response['html'] = $oForm->fetchForm("$local_templates_dir/_aboutas.tpl", "", "");
-    $response['title'] = _tr('About Elastix') . " " . $arrConf['elastix_version'];
-
-    if ($arrConf['mainTheme'] == "elastixwave" || $arrConf['mainTheme'] == "elastixneo")
-        $response['title'] = _tr('About Elastix2');
-
-    $jsonObject->set_message($response);
-    return $jsonObject->createJSON();
 }
 
 function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pDBACL) {
@@ -132,22 +108,22 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
     // Estado de registrado
     // no      = no registrado
     // yes-all = si registrado y asociado a una cuenta en cloud
-    // yes-inc = si registrado pero no tiene una cuenta asociada en cloud    
+    // yes-inc = si registrado pero no tiene una cuenta asociada en cloud
     $pRegister = new paloSantoRegistration($pDB,$arrConf["url_webservice"]);
     $registered = $pRegister->isRegistered();
     if ($registered=="no")
         $smarty->assign("Activate_registration", _tr("Create Account"));
     else
         $smarty->assign("Activate_registration", _tr("Update Information"));
-    
+
     $tpl = "$local_templates_dir/_registration.tpl";
     $smarty->assign("alert_message", _tr("alert_message_form"));
-    
+
     if(getParameter("action") == "cloudlogin"){
         $tpl = ($registered=="yes-all") ? "$local_templates_dir/_cloud_registered.tpl" : "$local_templates_dir/_cloud_login.tpl";
         $smarty->assign("alert_message", ($registered=="yes-all") ? _tr("alert_message_registered") : _tr("alert_message_unregister"));
     }
-    
+
     if ($pACL->isUserAdministratorGroup($user))
         $htmlForm = $oForm->fetchForm($tpl, "", "");
     else
@@ -168,7 +144,7 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
 function isRegisteredServer(&$pDB, $arrConf) {
     $pRegister = new paloSantoRegistration($pDB,$arrConf["url_webservice"]);
     $iRegister = $pRegister->isRegisteredInfo();
-   
+
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status("TRUE");
     $jsonObject->set_message($iRegister);
@@ -189,25 +165,25 @@ function saveRegisterByAccount(&$pDB, $arrConf) {
     }
 
     $data = array(
-        $username, 
+        $username,
         $password);
-    
+
     if (!$pRegister->processSaveDataRegister($data,"byAccount")) {
         $jsonObject->set_status("FALSE");
         $msg = _tr($pRegister->errMsg);
     } else {
-        $jsonObject->set_status("TRUE");        
+        $jsonObject->set_status("TRUE");
         $msg = _tr("Your information has been saved.");
     }
-    
+
     $iRegister = $pRegister->isRegisteredInfo();
     $iRegister['msg'] = $msg;
-    $jsonObject->set_message($iRegister);    
+    $jsonObject->set_message($iRegister);
     return $jsonObject->createJSON();
 }
 
-// primero se guarda de manera local y luego se llama al webservice 
-// donde envia los datos a almacenar y responde con un valor 
+// primero se guarda de manera local y luego se llama al webservice
+// donde envia los datos a almacenar y responde con un valor
 // si se almaceno correctamente.
 function saveRegister(&$pDB, $arrConf) {
     $pRegister = new paloSantoRegistration($pDB,$arrConf["url_webservice"]);
@@ -224,7 +200,7 @@ function saveRegister(&$pDB, $arrConf) {
     $country = trim(getParameter("countryReg"));
     $str_error = "";
 
-    // proceso de validacion de datos    
+    // proceso de validacion de datos
     if ($company == '')
         $str_error .= _tr("* Company: text ") . ".\n";
     if (!preg_match("/^.+$/", $country))
@@ -251,32 +227,32 @@ function saveRegister(&$pDB, $arrConf) {
 
     $data = array(
         $password, $contact_name,
-        $email, $phone, $company, 
+        $email, $phone, $company,
         $address, $city, $country);
 
     if (!$pRegister->processSaveDataRegister($data,"newAccount")) {
         $jsonObject->set_status("FALSE");
         $msg = _tr($pRegister->errMsg);
     } else {
-        $jsonObject->set_status("TRUE");        
+        $jsonObject->set_status("TRUE");
         $msg = _tr("Your information has been saved.");
     }
-    
+
     $iRegister = $pRegister->isRegisteredInfo();
     $iRegister['msg'] = $msg;
-    $jsonObject->set_message($iRegister);    
+    $jsonObject->set_message($iRegister);
     return $jsonObject->createJSON();
 }
 
 function getDataRegistration(&$pDB, $arrConf) {
     $pRegister = new paloSantoRegistration($pDB,$arrConf["url_webservice"]);
     $data = $pRegister->processGetDataRegister();
-    
+
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_error(_tr($pRegister->errMsg));
     $jsonObject->set_status( ($data) ? "TRUE":"FALSE" );
     $jsonObject->set_message($data);
-    
+
     return $jsonObject->createJSON();
 }
 
@@ -367,7 +343,7 @@ function getAction() {
         return "save_new";
     else if (getParameter("action") == "saveregister")
         return "save";
-    else if (getParameter("action") == "isRegistered") 
+    else if (getParameter("action") == "isRegistered")
         return "isRegistered";
     else if (getParameter("action") == "savebyaccount")
         return "saveByAccount";

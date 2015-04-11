@@ -351,10 +351,14 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
-* Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Sat Apr 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move the About Us dialog from registration to elastixutils
+  SVN Rev[6996]
 - CHANGED: Framework: replace function mostrar() with anonymous function linked
   to CSS class.
-  SVN Rev[6993]
+  SVN Rev[6994]
+
+* Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: improve dimension calculation on popup dialog.
   SVN Rev[6992]
 - CHANGED: Framework: remove legacy About dialog on older themes so that newer

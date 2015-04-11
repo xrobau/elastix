@@ -37,7 +37,7 @@ function _moduleContent(&$smarty, $module_name)
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    
+
     load_language_module($module_name);
 
     //folder path for custom templates
@@ -49,7 +49,7 @@ function _moduleContent(&$smarty, $module_name)
     $sFuncName = 'handleJSON_'.getParameter('action');
     if (function_exists($sFuncName))
         return $sFuncName($smarty, $local_templates_dir, $module_name);
-    
+
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status('false');
     $jsonObject->set_error(_tr('Undefined utility action'));
@@ -66,7 +66,7 @@ function handleJSON_dialogRPM($smarty, $local_templates_dir, $module_name)
         'textMode'          =>  _tr('textMode'),
         'htmlMode'          =>  _tr('htmlMode'),
     ));
-    
+
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_message(array(
         'title' =>  _tr('VersionPackage'),
@@ -137,7 +137,7 @@ function handleJSON_save_sticky_note($smarty, $local_templates_dir, $module_name
         $jsonObject->set_error(_tr('Module not specified'));
     } else {
         $description_note = getParameter("description");
-        $popup_note = getParameter("popup");    
+        $popup_note = getParameter("popup");
         $output = saveStickyNote($id_menu, $description_note, $popup_note);
         $jsonObject->set_status(($output['status'] === TRUE) ? 'OK' : 'ERROR');
         $jsonObject->set_error($output['msg']);
@@ -154,11 +154,11 @@ function handleJSON_get_sticky_note($smarty, $local_templates_dir, $module_name)
         $jsonObject->set_error(_tr('Module not specified'));
     } else {
         global $arrConf;
-        
+
         $pdbACL = new paloDB($arrConf['elastix_dsn']['acl']);
         $pACL = new paloACL($pdbACL);
         $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
-        
+
         $output = getStickyNote($pdbACL, $idUser, $id_menu);
         $jsonObject->set_status(($output['status'] === TRUE) ? 'OK' : 'ERROR');
         $jsonObject->set_error($output['msg']);
@@ -180,6 +180,23 @@ function handleJSON_saveNeoToggleTab($smarty, $local_templates_dir, $module_name
         $jsonObject->set_status(($output['status'] === TRUE) ? 'true' : 'false');
         $jsonObject->set_error($output['msg']);
     }
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_showAboutUs($smarty, $local_templates_dir, $module_name)
+{
+    global $arrConf;
+
+    Header('Content-Type: application/json');
+
+    $jsonObject = new PaloSantoJSON();
+    $smarty->assign('ABOUT_ELASTIX_CONTENT', _tr('About Elastix Content'));
+    $jsonObject->set_message(array(
+        'title' =>  (in_array($arrConf['mainTheme'], array('elastixwave', 'elastixneo'))
+                ? _tr('About Elastix2')
+                : _tr('About Elastix') . " " . $arrConf['elastix_version']),
+        'html'  =>  $smarty->fetch("$local_templates_dir/_aboutus.tpl"),
+    ));
     return $jsonObject->createJSON();
 }
 ?>

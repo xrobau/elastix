@@ -192,16 +192,6 @@ function showPopupCloudLogin(title, width, height)
     });
 }
 
-function mostrar()
-{
-    request("register.php", {
-    	action:		'showAboutAs',
-    	rawmode:	'yes'
-    }, false, function(arrData,statusResponse,error) {
-        ShowModalPopUP(arrData['title'],380,100,arrData['html']);
-    });
-}
-
 function getElastixKey()
 {
     var arrAction         = new Array();
@@ -324,6 +314,14 @@ $(document).ready(function(){
 
     $('#viewDetailsRPMs').click(showElastixPackageVersionDialog);
     $('a.setadminpassword').click(setAdminPassword);
+    $('#dialogaboutelastix').click(function() {
+        request("register.php", {
+            action:     'showAboutAs',
+            rawmode:    'yes'
+        }, false, function(arrData,statusResponse,error) {
+            ShowModalPopUP(arrData['title'],380,100,arrData['html']);
+        });
+    });
 
 	$( "#search_module_elastix" )
 		// don't navigate away from the field on tab when selecting an item

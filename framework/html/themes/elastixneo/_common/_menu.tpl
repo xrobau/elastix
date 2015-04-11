@@ -47,7 +47,7 @@
            </div>
         {/if}
 	  {/foreach}
-		  
+
 	</div>
 	<div id="neo-smenubox"> <!-- mostrando contenido del menu secundario -->
 	  <div id="neo-smenubox-innerdiv">
@@ -81,7 +81,7 @@
 	  <p><span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('',540,335)">{$Registered}</a></span></p>
 	  <p><span><a id="viewDetailsRPMs">{$VersionDetails}</a></span></p>
 	  <p><span><a href="http://www.elastix.org" target="_blank">Elastix Website</a></span></p>
-	  <p><span><a href="javascript:mostrar();">{$ABOUT_ELASTIX2}</a></span></p>
+	  <p><span><a href="#" id="dialogaboutelastix">{$ABOUT_ELASTIX2}</a></span></p>
 	</div>
 	<div id="neo-cmenu-showbox-user" class="neo-cmenu-showbox neo-display-none">
 	  <p><span><a href="#" class="setadminpassword">{$CHANGE_PASSWORD}</a></span></p>
@@ -126,12 +126,12 @@
 		  {else}
 		  <img src="themes/{$THEMENAME}/images/tab_notes.png" width="23" height="21" alt="tabnotes" id="togglestickynote1" class="togglestickynote" style="cursor: pointer;" />
 		  {/if}
-		  
+
 	      <img
 	      {if $viewMenuTab eq 'true'}
 	      src="images/expandOut.png" title="{$SHOW_IZQTAB}"
 	      {else}
-	      src="images/expand.png"  title="{$HIDE_IZQTAB}" 
+	      src="images/expand.png"  title="{$HIDE_IZQTAB}"
 	      {/if}
 	      width="24" height="24" alt="expand" id="toggleleftcolumn" class="neo-picker" border="0" />
 		  <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" {if $IMG_BOOKMARKS eq 'bookmark.png'}title="{$ADD_BOOKMARK}"{else}title="{$REMOVE_BOOKMARK}"{/if} id="togglebookmark" style="cursor: pointer;" />

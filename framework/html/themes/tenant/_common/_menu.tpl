@@ -46,7 +46,7 @@ $(document).ready(function(){
           }
       }
     );
-   
+
     $("#subMenuExport").hover(
       function () {
         $(this).removeClass("neo-display-none");
@@ -101,14 +101,14 @@ function removeNeoDisplayOnMouseOver(ref){
 
 <!-- inicio del menú tipo acordeon-->
 <div class="sidebar-menu">
-    <header class="logo-env"> 
+    <header class="logo-env">
         <!-- logo -->
         <div class="logo">
             <a href="index.php">
                 <img src="{$WEBPATH}themes/{$THEMENAME}/images/elastix_logo_mini2.png" width="120" alt="" />
             </a>
         </div>
-        <!-- logo collapse icon -->            
+        <!-- logo collapse icon -->
         <div class="sidebar-collapse">
             <a href="#" class="sidebar-collapse-icon with-animation"><!-- add class "with-animation" if you want sidebar to have animation during expanding/collapsing transition -->
                 <i class="entypo-menu"></i>
@@ -121,7 +121,7 @@ function removeNeoDisplayOnMouseOver(ref){
             </a>
         </div>
     </header>
-             
+
     <ul id="main-menu" class="">
         <!-- add class "multiple-expanded" to allow multiple submenus to open -->
         <!-- class "auto-inherit-active-class" will automatically add "active" class for parent elements who are marked already with class "active" -->
@@ -172,7 +172,7 @@ function removeNeoDisplayOnMouseOver(ref){
 							<span>{$subMenu2.Name}</span>
                                                     </a>
                                                 </li>
-                                            {/foreach}	
+                                            {/foreach}
                                         </ul>
                                     {/if}
                                 </li>
@@ -180,36 +180,36 @@ function removeNeoDisplayOnMouseOver(ref){
                     </ul>
                 </li>
         {/foreach}
-        
+
         {$SHORTCUT}
-        
-    </ul>            
+
+    </ul>
 </div>
 <!-- fin del menú tipo acordeon-->
 
 <!-- inicio del head principal-->
-<div style="height:71px;background-color:#EB2B06;padding:15px;"> 
+<div style="height:71px;background-color:#EB2B06;padding:15px;">
 
     <!-- Profile Info and Notifications -->
     <div class="col-md-6 col-sm-8 clearfix">
 
         <ul class="user-info pull-left pull-none-xsm">
-        
+
             <!-- Profile Info -->
             <li class="profile-info dropdown"><!-- add class "pull-right" if you want to place this from right -->
-                
+
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-			
+
                     <!--<img  style="border:0px" src="index.php?menu=_elastixutils&action=getImage&ID={$USER_ID}&rawmode=yes" alt="" class="img-circle" width="44" />-->
 			<img  style="border:0px" src="/themes/tenant/images/Icon-user.png" alt="" class="img-circle" width="44" />
                     {$USER_LOGIN}
                 </a>
-                
+
                 <ul class="dropdown-menu">
-                    
+
                     <!-- Reverse Caret -->
                     <li class="caret"></li>
-                    
+
                     <!-- Profile sub-links -->
                     <li>
                         <a href="#" class="setadminpassword">
@@ -219,36 +219,36 @@ function removeNeoDisplayOnMouseOver(ref){
                     </li>
                 </ul>
             </li>
-        
+
         </ul>
-       
+
     </div>
-    
+
     <!-- Raw Links -->
     <div class="col-md-6 col-sm-4 clearfix pull-none-xsm">
-        
+
         <ul class="list-inline links-list pull-right">
-            
-            <!-- Language Selector -->			
+
+            <!-- Language Selector -->
             <li class="dropdown language-selector profile-info">
                 <a href="index.php?menu=language">
                     Language: &nbsp;
-                         
+
                             <img  style="border:0px" src="{$WEBPATH}themes/{$THEMENAME}/images/flags/{$LANG}.png" />
-                       
+
                 </a>
             </li>
-            
+
             <li class="sep"></li>
-            
-            <!-- Information -->          
+
+            <!-- Information -->
             <li class="dropdown language-selector profile-info">
-                
-               
+
+
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-close-others="true">
                     <i class="entypo-info"></i> Info
                 </a>
-                
+
                 <ul class="dropdown-menu pull-right">
                     <li>
                         <a href="http://www.elastix.org">
@@ -256,42 +256,42 @@ function removeNeoDisplayOnMouseOver(ref){
                         </a>
                     </li>
                     <li>
-                        <a href="javascript:mostrar();">
+                        <a href="#" id="dialogaboutelastix">
                             <span>{$ABOUT_ELASTIX2}</span>
                         </a>
                     </li>
                 </ul>
-                
+
             </li>
 
-            
+
             <li class="sep"></li>
-            
+
             <li class="dropdown profile-info">
                 <a href="?logout=yes">
                     Log Out <i class="entypo-logout right"></i>
                 </a>
             </li>
         </ul>
-        
+
     </div>
-    
+
 </div>
 
 				<!-- Breadcrumb 3 -->
 <ol class="breadcrumb bc-2">
-   
+
     {foreach from=$BREADCRUMB item=value name=menu}
-        {if $smarty.foreach.menu.first} 
+        {if $smarty.foreach.menu.first}
              <li>
                 <a href="/"> <i class="entypo-home"></i></a>
                 <a href="#"> {$value}</a>
              </li>
-        {elseif $smarty.foreach.menu.last} 
+        {elseif $smarty.foreach.menu.last}
             <li class="active"><strong>{$value}</strong></li>
-        {else} 
+        {else}
             <li><a href="#">{$value}</a></li>
-        {/if} 
+        {/if}
    {/foreach}
 </ol>
 

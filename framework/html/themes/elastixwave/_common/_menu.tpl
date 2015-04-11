@@ -68,7 +68,7 @@
 			    <span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('',540,335)">{$Registered}</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
                             <span><a class="logout" id="viewDetailsRPMs">{$VersionDetails}</a></span>&nbsp;
                             <span class="menuguion">*</span>&nbsp;
-                            <span><a class="logout" href="javascript:mostrar();">{$ABOUT_ELASTIX2}</a></span>&nbsp;
+                            <span><a class="logout" href="#" id="dialogaboutelastix">{$ABOUT_ELASTIX2}</a></span>&nbsp;
                             <span class="menuguion">*</span>&nbsp;
                             <span>{if !empty($idSubMenu2Selected)}
 					            <a class="logout" href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">

@@ -136,22 +136,24 @@ function ShowModalPopUP(title, width, height, html)
         'left':         '20px',
         'right':        '20px'
     });
-    if (vpad == minpad || hpad == minpad) {
+//    if (vpad == minpad || hpad == minpad) {
         $('.neo-modal-elastix-popup-content').css({
             'overflow-y':   'auto',
             'overflow-x':   'auto'
         });
-    } else {
+/*    } else {
         $('.neo-modal-elastix-popup-content').css({
             'overflow-y':   'visible',
             'overflow-x':   'visible'
         });
     }
+*/
     $('.neo-modal-elastix-popup-box').css({
         'height': winH - 2 * vpad - 2 * boxpady,
         'top': vpad,
         'width': winW - 2 * hpad - 2 * boxpadx,
-        'left': hpad
+        'left': hpad,
+        'box-sizing': 'content-box' // para tema tenant
         });
     $('.neo-modal-elastix-popup-box').fadeIn(2000);
     $('.neo-modal-elastix-popup-close').click(function() {

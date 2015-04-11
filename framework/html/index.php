@@ -1,4 +1,4 @@
-<?php 
+<?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
@@ -109,10 +109,10 @@ if(isset($_POST['submit_login']) and !empty($_POST['input_user'])) {
 }
 
 // 2) Autentico usuario
-if (isset($_SESSION['elastix_user']) && 
-    isset($_SESSION['elastix_pass']) && 
+if (isset($_SESSION['elastix_user']) &&
+    isset($_SESSION['elastix_pass']) &&
     $pACL->authenticateUser($_SESSION['elastix_user'], $_SESSION['elastix_pass'])) {
-    
+
     $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
     $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
     $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser);
@@ -127,13 +127,13 @@ if (isset($_SESSION['elastix_user']) &&
     $smarty->assign("THEMENAME", $arrConf['mainTheme']);
 
     /*agregado para register*/
-    
+
     $smarty->assign("Register", _tr("Register"));
     $smarty->assign("lblRegisterCm", _tr("Register"));
     $smarty->assign("lblRegisteredCm", _tr("Registered"));
     if(!is_file("/etc/elastix.key")){
         $smarty->assign("Registered", _tr("Register"));
-    	$smarty->assign("ColorRegister", "#FF0000"); 
+    	$smarty->assign("ColorRegister", "#FF0000");
     } else {
         $smarty->assign("Registered", _tr("Registered"));
     	$smarty->assign("ColorRegister", "#008800");
@@ -143,8 +143,6 @@ if (isset($_SESSION['elastix_user']) &&
     $sCurYear = date('Y');
     if ($sCurYear < '2013') $sCurYear = '2013';
     $smarty->assign("currentyear", $sCurYear);
-    $smarty->assign("ABOUT_ELASTIX_CONTENT", _tr('About Elastix Content'));
-    $smarty->assign("ABOUT_CLOSED", _tr('About Elastix Closed'));
     $smarty->assign("LOGOUT", _tr('Logout'));
     $smarty->assign("VersionDetails", _tr('VersionDetails'));
     $smarty->assign("VersionPackage", _tr('VersionPackage'));
@@ -161,9 +159,9 @@ if (isset($_SESSION['elastix_user']) &&
      * atienden requerimientos de varios widgets de la interfaz Elastix. Todo
      * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
     // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
-    if (!is_null($selectedMenu) && $selectedMenu == '_elastixutils' && 
+    if (!is_null($selectedMenu) && $selectedMenu == '_elastixutils' &&
         file_exists('modules/_elastixutils/index.php')) {
-        
+
         // Cargar las configuraciones para el módulo elegido
         if (file_exists('modules/_elastixutils/configs/default.conf.php')) {
             require_once 'modules/_elastixutils/configs/default.conf.php';
@@ -172,16 +170,16 @@ if (isset($_SESSION['elastix_user']) &&
             global $arrConfModule;
             $arrConf = array_merge($arrConf, $arrConfModule);
         }
-        
+
         // Cargar las traducciones para el módulo elegido
         load_language_module($selectedMenu);
-        
+
         require_once 'modules/_elastixutils/index.php';
         echo _moduleContent($smarty, $selectedMenu);
         return;
     }
 
-    /* El módulo pbxadmin que integra a FreePBX no construye enlaces con 
+    /* El módulo pbxadmin que integra a FreePBX no construye enlaces con
      * parámetros menu, ni con config.php en todos los casos. Por lo tanto, los
      * usos sucesivos de enlaces en FreePBX embebido requiren recordar que se
      * sirven a través de pbxadmin. */
@@ -199,8 +197,8 @@ if (isset($_SESSION['elastix_user']) &&
 
     // Obtener contenido del módulo, si usuario está autorizado a él
     $bModuleAuthorized = $pACL->isUserAuthorizedById($idUser, "access", $selectedMenu);
-    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : '';    
-    
+    $sModuleContent = ($bModuleAuthorized) ? $oPn->showContent() : '';
+
     // rawmode es un modo de operacion que pasa directamente a la pantalla la salida
     // del modulo. Esto es util en ciertos casos.
     $rawmode = getParameter("rawmode");
@@ -227,8 +225,8 @@ if (isset($_SESSION['elastix_user']) &&
         // Autorizacion
         if ($bModuleAuthorized) {
             $smarty->assign("CONTENT", $sModuleContent);
-            $smarty->assign('MENU', (count($arrMenuFiltered) > 0) 
-                ? $smarty->fetch("_common/_menu.tpl") 
+            $smarty->assign('MENU', (count($arrMenuFiltered) > 0)
+                ? $smarty->fetch("_common/_menu.tpl")
                 : _tr('No modules'));
         }
         $smarty->display("_common/index.tpl");

@@ -38,7 +38,7 @@ function request(url,arrParams, recursive, callback)
     /* Por Alex: muchos usuarios de la funcion request() crean un objeto de tipo
      * Array, y asignan propiedades para que sean usadas como parámetros en la
      * petición. Sin embargo, $.post() no acepta un Array, sino un objeto hash
-     * ordinario. No se puede pasar el parámetro arrParams directamente a 
+     * ordinario. No se puede pasar el parámetro arrParams directamente a
      * $.post(), porque resulta en la ausencia de parámetros en la petición.
      * Por lo tanto, se tiene que iterar por las claves asignadas, y recolectar
      * el valor correspondiente en un hash ordinario. */
@@ -106,8 +106,8 @@ function hide_message_error(){
     document.getElementById("message_error").style.display = 'none';
 }
 
-function ShowModalPopUP(title, width, height, html){
-
+function ShowModalPopUP(title, width, height, html)
+{
     $('.neo-modal-elastix-popup-content').html(html);
     $('.neo-modal-elastix-popup-title').text(title);
 
@@ -122,20 +122,38 @@ function ShowModalPopUP(title, width, height, html){
     var winH = $(window).height();
     var winW = $(window).width();
 
-    var top = winH/2-height/2;
-    if(top<0){
-        top=10;
-        $('.neo-modal-elastix-popup-box').css({'height':"auto", 'bottom':10});
-        $('.neo-modal-elastix-popup-content').css({'overflow-y':"auto", 'overflow-x':"visible", 'bottom':20, 'position': "absolute", 'top':40, 'width':"93%"});
-
-    }else{
-        $('.neo-modal-elastix-popup-box').height(height);
+    var minpad = 10;
+    var boxpadx = 25;
+    var boxpady = 20;
+    var vpad = (winH - height) / 2 - boxpady;
+    var hpad = (winW - width) / 2 - boxpadx;
+    if (vpad < minpad) vpad = minpad;
+    if (hpad < minpad) hpad = minpad;
+    $('.neo-modal-elastix-popup-content').css({
+        'position':     'absolute',
+        'top':          '40px',
+        'bottom':       '20px',
+        'left':         '20px',
+        'right':        '20px'
+    });
+    if (vpad == minpad || hpad == minpad) {
+        $('.neo-modal-elastix-popup-content').css({
+            'overflow-y':   'auto',
+            'overflow-x':   'auto'
+        });
+    } else {
+        $('.neo-modal-elastix-popup-content').css({
+            'overflow-y':   'visible',
+            'overflow-x':   'visible'
+        });
     }
-    $('.neo-modal-elastix-popup-box').width(width);
-    $('.neo-modal-elastix-popup-box').css('top',  top);
-    $('.neo-modal-elastix-popup-box').css('left', winW/2-width/2);
+    $('.neo-modal-elastix-popup-box').css({
+        'height': winH - 2 * vpad - 2 * boxpady,
+        'top': vpad,
+        'width': winW - 2 * hpad - 2 * boxpadx,
+        'left': hpad
+        });
     $('.neo-modal-elastix-popup-box').fadeIn(2000);
-
     $('.neo-modal-elastix-popup-close').click(function() {
         hideModalPopUP();
     });
@@ -166,7 +184,7 @@ function showPopupCloudLogin(title, width, height)
     	rawmode:	'yes'
     }, false,  function(arrData,statusResponse,error) {
         ShowModalPopUP(title,width,height,arrData['form']);
-        
+
         if(arrData['registered']=="yes-all"){
             showLoading(arrData['msgloading']);
             getDataWebServer();
@@ -189,7 +207,7 @@ function getElastixKey()
     var arrAction         = new Array();
     arrAction['action']   = "isRegistered";
     arrAction["rawmode"]  = "yes";
-    
+
     request("register.php", {
     	action:		'isRegistered',
     	rawmode:	'yes'
@@ -289,7 +307,7 @@ function showElastixPackageVersionDialog()
     	action:		'dialogRPM',
     	rawmode:	'yes'
     }, false, function(arrData,statusResponse,error) {
-        ShowModalPopUP(arrData['title'],380,800,arrData['html']);  
+        ShowModalPopUP(arrData['title'],380,800,arrData['html']);
 
         // La plantilla tiene una referencia a script que llama a versionRPM
     });
@@ -297,13 +315,13 @@ function showElastixPackageVersionDialog()
 
 $(document).ready(function(){
     //***Para los módulos con filtro se llama a la función pressKey
-    if (document.getElementById("filter_value") || 
-        document.getElementById("pageup") || 
+    if (document.getElementById("filter_value") ||
+        document.getElementById("pageup") ||
         document.getElementById("neo-sticky-note-textarea")) {
         $('#pageup').keypress(keyPressed);
         $('#pagedown').keypress(keyPressed);
     }
-    	
+
     $('#viewDetailsRPMs').click(showElastixPackageVersionDialog);
     $('a.setadminpassword').click(setAdminPassword);
 
@@ -391,7 +409,7 @@ $(document).ready(function(){
 				return false;
 			}
 	});
-      
+
     var menu = getParameterByName("menu");
         if (typeof  menu!== "undefined" && menu) {
             var lblmenu = menu.split("_");
@@ -402,7 +420,7 @@ $(document).ready(function(){
             });
         }
     }
-	
+
     // En la clase paloSantoForm.class.php, a los input radio se definio
     // que tengan un estilo defaulf de jquery, para ello se declara una
     // clase global para que hereden todos los input radio el nuevo estilo.
@@ -420,7 +438,7 @@ function keyPressed(e)
     if (window.event) keycode = window.event.keyCode;
     else if (e) keycode = e.which;
     else return true;
-        
+
 	if (keycode == 13) {
 		$("form").submit();
 		return false;

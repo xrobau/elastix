@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: improve dimension calculation on popup dialog.
+  SVN Rev[6992]
 - CHANGED: Framework: remove legacy About dialog on older themes so that newer
   About dialog can be seen.
   SVN Rev[6991]

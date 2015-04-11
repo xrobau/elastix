@@ -1,5 +1,3 @@
-<div id="PopupElastix" style="position: absolute; top: 0px; left: 0px;"></div>
-
 <input type="hidden" id="lblRegisterCm"   value="{$lblRegisterCm}" />
 <input type="hidden" id="lblRegisteredCm" value="{$lblRegisteredCm}" />
 <input type="hidden" id="lblCurrentPassAlert" value="{$CURRENT_PASSWORD_ALERT}" />

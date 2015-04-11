@@ -126,10 +126,6 @@
     <a href='http://www.elastix.org' target='_blank'>www.elastix.org</a>
 </div>
 
-{* Popup genérico *}
-<div id="PopupElastix" style="position: absolute; top: 0px; left: 0px;">
-</div>
-
 {* Popup de Sticky Note *}
 <div id="neo-sticky-note">
     <div id="neo-sticky-note-text"></div>

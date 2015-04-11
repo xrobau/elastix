@@ -134,9 +134,6 @@
     {/if}
 <!-- Va al tpl index.tlp-->
 
-<div id="PopupElastix" style="position: absolute; top: 0px; left: 0px;">
-</div>
-
 {literal}
 <style type='text/css'>
 #acerca_de{

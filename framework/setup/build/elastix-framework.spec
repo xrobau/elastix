@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: nothing uses the PopupElastix div anymore. Removed.
+  SVN Rev[6990]
 - CHANGED: Framework: reimplement old function changeMenu() using jQuery.
   SVN Rev[6989]
 - CHANGED: Framework: stop using an Array object as a hashtable in registration

@@ -134,9 +134,6 @@
     {/if}
 {literal}
 
-<div id="PopupElastix" style="position: absolute; top: 0px; left: 0px;">
-</div>
-
 <style type='text/css'>
 #acerca_de{
     position:fixed;

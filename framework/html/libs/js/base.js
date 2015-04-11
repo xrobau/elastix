@@ -1,80 +1,17 @@
-    <!-- Begin
-    var ie4 = (document.all) ? true : false;
-    var ns4 = (document.layers) ? true : false;
-    var ns6 = (document.getElementById && !document.all) ? true : false;
-    var bshowMenu = 1;
-
-    function changeMenu() {
-
-      layerMenu='fullMenu';
-      layerMenuMini='miniMenu';
-      layerMenuIzq='tdMenuIzq';
-
-      if(bshowMenu==1) {
-          bshowMenu=0;
-      } else {
-          bshowMenu=1;
-      }
-
-      if (ie4) {
-          if(bshowMenu==1) {
-              document.all[layerMenu].style.visibility = "visible";
-              document.all[layerMenu].style.position = "";
-              if(document.all[layerMenuIzq]) {
-                  document.all[layerMenuIzq].style.visibility = "visible";
-                  document.all[layerMenuIzq].style.position = "";
-              }
-              document.all[layerMenuMini].style.visibility = "hidden";
-              document.all[layerMenuMini].style.position = "absolute";
-          } else {
-              document.all[layerMenu].style.visibility = "hidden";
-              document.all[layerMenu].style.position = "absolute";
-              if(document.all[layerMenuIzq]) {
-                  document.all[layerMenuIzq].style.visibility = "hidden";
-                  document.all[layerMenuIzq].style.position = "absolute";
-              }
-              document.all[layerMenuMini].style.visibility = "visible";
-              document.getElementById([layerMenuMini]).style.display = "";
-              document.all[layerMenuMini].style.position = "";
-          }
-      }
-      if (ns4) {
-          if(bshowMenu==1) {
-              document.layers[layerMenu].visibility = "show";
-              if(document.layers[layerMenuIzq]) {
-                  document.layers[layerMenuIzq].visibility = "show";
-              }
-              document.layers[layerMenuMini].visibility = "hide";
-          } else {
-              document.layers[layerMenu].visibility = "hide";
-              if(document.layers[layerMenuIzq]) {
-                  document.layers[layerMenuIzq].visibility = "hide";
-              }
-              document.layers[layerMenuMini].visibility = "show";
-          }
-      }
-      if (ns6) {
-          if(bshowMenu==1) {
-              document.getElementById([layerMenu]).style.display = "";
-              document.getElementById([layerMenu]).style.position = "";
-              if(document.getElementById([layerMenuIzq])!=null) {
-                  document.getElementById([layerMenuIzq]).style.display = "";
-                  document.getElementById([layerMenuIzq]).style.position = "";
-              }
-              document.getElementById([layerMenuMini]).style.display = "none";
-              document.getElementById([layerMenuMini]).style.position = "absolute";
-          } else {
-              document.getElementById([layerMenu]).style.display = "none";
-              document.getElementById([layerMenu]).style.position = "absolute";
-              if(document.getElementById([layerMenuIzq])!=null) {
-                  document.getElementById([layerMenuIzq]).style.display = "none";
-                  document.getElementById([layerMenuIzq]).style.position = "absolute";
-              }
-              document.getElementById([layerMenuMini]).style.display = "";
-              document.getElementById([layerMenuMini]).style.position = "";
-          }
-      }
-    }
+function changeMenu()
+{
+	if ($('#miniMenu').is(':visible')) {
+		// Cambiar de mini a menú completo
+		$('#miniMenu').hide();
+		$('#fullMenu').show();
+		$('#tdMenuIzq').show();
+	} else {
+		// Cambiar de menú completo a mini
+		$('#fullMenu').hide();
+		$('#tdMenuIzq').hide();
+		$('#miniMenu').show();
+	}
+}
 
     function openWindow(path) { popUp(path, 700, 460); }
 

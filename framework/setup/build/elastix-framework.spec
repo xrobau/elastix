@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Apr 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove legacy About dialog on older themes so that newer
+  About dialog can be seen.
+  SVN Rev[6991]
 - CHANGED: Framework: nothing uses the PopupElastix div anymore. Removed.
   SVN Rev[6990]
 - CHANGED: Framework: reimplement old function changeMenu() using jQuery.

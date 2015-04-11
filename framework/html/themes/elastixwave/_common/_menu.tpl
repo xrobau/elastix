@@ -54,7 +54,7 @@
                                                     <div class="div_bar_right">&nbsp;</div>
                                                 </td>
 											</tr>
-										</table> 
+										</table>
 									</td>
                                  {/if}
                             {/foreach}
@@ -128,34 +128,12 @@
             <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
           {else}
             <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
-          {/if}<img alt="" src="themes/{$THEMENAME}/images/help_bottom.gif" border="0" 
+          {/if}<img alt="" src="themes/{$THEMENAME}/images/help_bottom.gif" border="0"
           align="absmiddle" /></a>
           &nbsp;&nbsp;<a href="javascript:changeMenu()"><img alt="" src="themes/{$THEMENAME}/images/arrow_bottom.gif" border="0" align="absmiddle" /></a>&nbsp;&nbsp;
       </td>
     </tr>
   </table>
-</div>
-
-
-<div id='acerca_de'>
-    <table border='0' cellspacing="0" cellpadding="2" width='100%'>
-        <tr class="moduleTitle">
-            <td class="moduleTitle" align="center" colspan='2'>
-                {$ABOUT_ELASTIX2}
-            </td>
-        </tr>
-        <tr class="tabForm" >
-            <td class="tabForm"  height='120' colspan='2' align='center'>
-                {$ABOUT_ELASTIX_CONTENT}<br />
-                <a href='http://www.elastix.org' target='_blank'>www.elastix.org</a>
-            </td>
-        </tr>
-        <tr>
-            <td class="moduleTitle" align="center" colspan='2'>
-                <input type='button' value='{$ABOUT_CLOSED}' onclick="javascript:cerrar();" />
-            </td>
-        </tr>
-    </table> 
 </div>
 
 
@@ -178,34 +156,8 @@
 <!-- Va al tpl index.tlp-->
 
 {literal}
-<style type='text/css'>
-#acerca_de{
-    position:fixed;
-    background-color:#FFFFFF; 
-    width:420px;
-    height:190px;
-    border:1px solid #800000;
-    z-index: 10000;
-}
-</style>
 <script type='text/javascript'>
 //<![CDATA[
-cerrar();
-function cerrar()
-{
-    var div_contenedor = document.getElementById('acerca_de');
-    div_contenedor.style.display = 'none';
-}
-
-function mostrar()
-{
-    var ancho = 440;
-    var div_contenedor = document.getElementById('acerca_de');
-    var eje_x=(screen.width - ancho) / 2;
-    div_contenedor.setAttribute("style","left:"+ eje_x + "px; top:123px");
-    div_contenedor.style.display = 'block';
-}
-
 function mostrar_Menu(element)
 {
     var subMenu;
@@ -225,45 +177,12 @@ function mostrar_Menu(element)
     else idMenu.setAttribute("value", "");
 }
 
-
-// function createMenuSelectedSplash()
-// {
-//     var desc_menu = document.getElementById("desc_menu").value;
-//     var arrDesc = desc_menu.split(",");
-// 
-//     var html  = "<table cellspacing='0' cellpadding='0' border='0' style='position:relative;top:17px'>";
-//         html += "   <tr>";
-//         html += "       <td valign='top'><img alt='' border='0' align='absmiddle' src='themes/" + arrDesc[0] + "/images/fondo_boton_on_left.gif'/></td>";
-//         html += "       <td class='menutabletabon2' nowrap='nowrap'>";
-//         html += "           <a class='menutable2' href='javascript:openMenu(\"" + arrDesc[1] + "\");'>" + arrDesc[2] + "</a>";
-//         html += "       </td>";
-//         html += "       <td valign='top'><img alt='' border='0' align='absmiddle' src='themes/" + arrDesc[0] + "/images/fondo_boton_on_right.gif'/></td>";
-//         html += "   </tr>";
-//         html += "</table>";
-// 
-//     var menu_selected = document.getElementById("menu_selected");
-//     menu_selected.innerHTML = html;
-// }
-// setTimeout("createMenuSelectedSplash()",1400);
-
-// var cnt = 0;
-// function load()
-// {
-//     if(cnt > 1)
-//         createMenuSelectedSplash();
-//     else {
-//         setTimeout("load()",500);
-//         cnt++;
-//     }
-// }
-// load();
-
 //]]>
 </script>
 
 <script type="text/javascript">
 //<![CDATA[
-    $(".menutabletaboff").mouseover(function(){ 
+    $(".menutabletaboff").mouseover(function(){
         var source_img = $('.menulogo').find('a:first').find('img:first').attr("src");
         var themeName = source_img.split("/",2);
         $(this).css("background-image","url(themes/"+themeName[1]+"/images/fondo_boton_center2.gif)");

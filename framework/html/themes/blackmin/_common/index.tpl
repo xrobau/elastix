@@ -120,12 +120,6 @@
     <a href="http://www.elastix.org" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.
 </div>
 
-{* Diálogo de Acerca De *}
-<div id="acerca_de" title="{$ABOUT_ELASTIX}">
-    {$ABOUT_ELASTIX_CONTENT}<br />
-    <a href='http://www.elastix.org' target='_blank'>www.elastix.org</a>
-</div>
-
 {* Popup de Sticky Note *}
 <div id="neo-sticky-note">
     <div id="neo-sticky-note-text"></div>
@@ -137,7 +131,7 @@
     </div>
     <div id="neo-sticky-note-text-edit-delete"></div>
 </div>
-{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *} 
+{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *}
 {if $AUTO_POPUP eq '1'}{literal}
 <script type='text/javascript'>
 $(document).ready(function(e) {
@@ -155,23 +149,6 @@ $(document).ready(function(e) {
 		</div>
 		<div class="neo-modal-elastix-popup-blockmask"></div>
 <script language="javascript" type="text/javascript">
-{literal}
-$(document).ready(function() {
-    $('#about_elastix2').click(function() { $('#acerca_de').dialog('open'); });
-    $('#acerca_de').dialog({
-        autoOpen: false,
-        width: 500,
-        height: 220,
-        modal: true,
-        buttons: [
-            {
-                text: "{/literal}{$ABOUT_CLOSED}{literal}",
-                click: function() { $(this).dialog('close'); }
-            }
-        ]
-    });
-});
-{/literal}
 </script>
 </body>
 </html>

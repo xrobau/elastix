@@ -26,36 +26,6 @@
             </td>
             {/if}
             {/foreach}
-            <td>
-                <div id='acerca_de'>
-                    <table border='0' cellspacing="0" cellpadding="2" width='100%'>
-                        <tr class="moduleTitle">
-                            <td class="moduleTitle" align="center" colspan='2'>
-                                {$ABOUT_ELASTIX}
-                            </td>
-                        </tr>
-                        <!--<tr class="tabForm">
-                            <td class="tabForm" >
-                                <img src="images/logo_elastix_about.gif" />
-                            </td>
-                            <td class="tabForm" >
-                                <img src="images/logo_palosanto_about.gif" />
-                            </td>
-                        </tr>-->
-                        <tr class="tabForm" >
-                            <td class="tabForm"  height='138' colspan='2' align='center'>
-                                {$ABOUT_ELASTIX_CONTENT}<br />
-                                <a href='http://www.elastix.org' target='_blank'>www.elastix.org</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="moduleTitle" align="center" colspan='2'>
-                                <input type='button' value='{$ABOUT_CLOSED}' onclick="javascript:cerrar();" />
-                            </td>
-                        </tr>
-                    </table> 
-                </div>
-            </td>
 	    <td class="menuaftertab" align="right"><span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('',540,335)">{$Registered}</a></span>&nbsp;&nbsp;&nbsp;&nbsp;</td>
             <td class="menuaftertab" width="40%" align="right">&nbsp;<a class="logout" id="viewDetailsRPMs">{$VersionDetails}</a></td>
             <td class="menuaftertab" width="40%" align="right">&nbsp;<a href="javascript:mostrar();">{$ABOUT_ELASTIX}</a></td>
@@ -109,7 +79,7 @@
             <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}','1000','460')">
           {else}
             <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}','1000','460')">
-          {/if}<img src="images/help_bottom.gif" border="0" 
+          {/if}<img src="images/help_bottom.gif" border="0"
           align="absmiddle"></a>
           &nbsp;&nbsp;<a href="javascript:changeMenu()"><img src="images/arrow_bottom.gif" border="0" align="absmiddle"></a>&nbsp;&nbsp;
       </td>
@@ -132,37 +102,6 @@
       </table>
     </td>
     {/if}
-{literal}
-
-<style type='text/css'>
-#acerca_de{
-    position:fixed;
-    background-color:#FFFFFF; 
-    width:440px;
-    height:200px;
-    border:1px solid #800000;
-    z-index: 10000;
-}
-</style>
-<script type='text/javascript'>
-cerrar();
-function cerrar()
-{
-    var div_contenedor = document.getElementById('acerca_de');
-    div_contenedor.style.display = 'none';
-}
-
-function mostrar()
-{
-    var ancho = 440;
-    var div_contenedor = document.getElementById('acerca_de');
-    var eje_x=(screen.width - ancho) / 2;
-    div_contenedor.setAttribute("style","left:"+ eje_x + "px; top:123px");
-    div_contenedor.style.display = 'block';
-}
-</script>
-{/literal}
-
 <input type="hidden" id="lblRegisterCm"   value="{$lblRegisterCm}" />
 <input type="hidden" id="lblRegisteredCm" value="{$lblRegisteredCm}" />
 <input type="hidden" id="amount_char_label" value="{$AMOUNT_CHARACTERS}" />

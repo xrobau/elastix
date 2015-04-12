@@ -647,34 +647,6 @@ td a.link_summary_on{
   font-weight:bold;
 }
 
-.table-header-row-filter-first {
-    position:relative;
-    display:inline-block;
-    height:33px;
-    float:left;
-    padding:8px 10px 0px 10px;
-    border: 1px solid #aaa;
-    cursor: pointer;
-}
-.table-header-row-filter {
-    position:relative;
-    display:inline-block;
-    height:33px;
-    float:left;
-    padding:8px 10px 0px 10px;
-    border: 1px solid #aaa;
-    border-left:0px;
-    cursor: pointer;
-}
-.table-action{
-    border:0px;
-    background-color:transparent;
-    cursor:pointer;
-    padding:0px;
-    font: 13px Verdana, Arial,Helvetica,sans-serif;
-    color:#444;
-    text-decoration:none;
-}
 /* Nuevo estilo */
 
 .neo-modal-elastix-popup-blockmask {

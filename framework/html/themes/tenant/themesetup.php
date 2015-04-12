@@ -29,10 +29,10 @@
 
 function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
 {
-    /* El tema elastixneo muestra hasta 7 items de menú de primer nivel, y 
-     * coloca el resto en una lista desplegable a la derecha del último item. 
-     * Se debe de garantizar que el item actualmente seleccionado aparezca en 
-     * un menú de primer nivel que esté entre los 7 primeros, reordenando los 
+    /* El tema elastixneo muestra hasta 7 items de menú de primer nivel, y
+     * coloca el resto en una lista desplegable a la derecha del último item.
+     * Se debe de garantizar que el item actualmente seleccionado aparezca en
+     * un menú de primer nivel que esté entre los 7 primeros, reordenando los
      * items si es necesario. */
     $lang = get_language();
     $arrMainMenu = $smarty->get_template_vars('arrMainMenu');
@@ -54,13 +54,13 @@ function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
 
     $idMainMenuSelected = $smarty->get_template_vars('idMainMenuSelected');
     $MAX_ITEMS_VISIBLES = 7;
-    
+
     if (count($arrMainMenu) > $MAX_ITEMS_VISIBLES) {
         // Se transfiere a arreglo numérico para manipular orden de enumeración
         $tempMenulist = array();
         $idxMainMenu = NULL;
         foreach ($arrMainMenu as $key => $value) {
-            if ($key == $idMainMenuSelected) $idxMainMenu = count($tempMenulist); 
+            if ($key == $idMainMenuSelected) $idxMainMenu = count($tempMenulist);
             $tempMenulist[] = array($key, $value);
         }
         if (!is_null($idxMainMenu) && $idxMainMenu >= $MAX_ITEMS_VISIBLES) {
@@ -80,14 +80,7 @@ function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
         "HELP"                      =>  _tr('HELP'),
         "USER_LOGIN"                =>  $_SESSION['elastix_user'],
         "USER_ID"                   =>  $idUser,
-        "CURRENT_PASSWORD_ALERT"    =>  _tr("Please write your current password."),
-        "NEW_RETYPE_PASSWORD_ALERT" =>  _tr("Please write the new password and confirm the new password."),
-        "PASSWORDS_NOT_MATCH"       =>  _tr("The new password doesn't match with retype password."),
         "CHANGE_PASSWORD"           =>  _tr("Change Elastix Password"),
-        "CURRENT_PASSWORD"          =>  _tr("Current Password"),
-        "NEW_PASSWORD"              =>  _tr("New Password"),
-        "RETYPE_PASSWORD"           =>  _tr("Retype New Password"),
-        "CHANGE_PASSWORD_BTN"       =>  _tr("Change"),
         "MODULES_SEARCH"            =>  _tr("Search modules"),
         "ADD_BOOKMARK"              =>  _tr("Add Bookmark"),
         "REMOVE_BOOKMARK"           =>  _tr("Remove Bookmark"),
@@ -120,8 +113,8 @@ function setIcon($idMenu){
         case 'addons': return 'fa fa-cubes';
         case 'extras': return 'fa fa-plus';
         //case 'sysdash': return 'fa fa-tachometer';
-       
-        default: return 'fa fa-caret-right';  
+
+        default: return 'fa fa-caret-right';
     }
  }
 
@@ -135,23 +128,23 @@ function setIcon1($idSubMenu){
  }
 
  function setBreadcrumb($arrMainMenu,$currentMenu){
-     
+
       foreach ($arrMainMenu as $key => $value) {
             $breadcrumb = array();
-            //array_push($breadcrumb, $value["description"]); 
-            array_push($breadcrumb, $value["Name"]); 
+            //array_push($breadcrumb, $value["description"]);
+            array_push($breadcrumb, $value["Name"]);
             if($key == $currentMenu)
                return $breadcrumb;
-            
+
             foreach ($arrMainMenu[$key]["children"] as $akey ) {
                  if(count($breadcrumb)>1)
                     array_pop($breadcrumb);
 
-                //array_push($breadcrumb, $akey["description"]);  
-                array_push($breadcrumb, $akey["Name"]);  
+                //array_push($breadcrumb, $akey["description"]);
+                array_push($breadcrumb, $akey["Name"]);
                  if($akey["id"] == $currentMenu)
                     return $breadcrumb;
-                                  
+
                  if($akey["HasChild"]) {
                    foreach ($akey["children"] as $bkey => $bvalue) {
                        if($bkey == $currentMenu){

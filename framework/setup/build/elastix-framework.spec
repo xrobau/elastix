@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Apr 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move the Change Password dialog to elastixutils.
+  SVN Rev[6997]
 - CHANGED: Framework: move the About Us dialog from registration to elastixutils
   SVN Rev[6996]
 - CHANGED: Framework: replace function mostrar() with anonymous function linked

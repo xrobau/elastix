@@ -82,6 +82,27 @@ function handleJSON_versionRPM($smarty, $local_templates_dir, $module_name)
     return $json->encode(obtenerDetallesRPMS());
 }
 
+function handleJSON_dialogPasswordElastix($smarty, $local_templates_dir, $module_name)
+{
+    Header('Content-Type: application/json');
+
+    $smarty->assign(array(
+        'CURRENT_PASSWORD'      =>  _tr('Current Password'),
+        'NEW_PASSWORD'          =>  _tr('New Password'),
+        'RETYPE_PASSWORD'       =>  _tr('Retype New Password'),
+        'CHANGE_PASSWORD_BTN'   =>  _tr('Change'),
+        "CURRENT_PASSWORD_ALERT"    =>  _tr("Please write your current password."),
+        "NEW_RETYPE_PASSWORD_ALERT" =>  _tr("Please write the new password and confirm the new password."),
+        "PASSWORDS_NOT_MATCH"       =>  _tr("The new password doesn't match with retype new password."),
+    ));
+    $jsonObject = new PaloSantoJSON();
+    $jsonObject->set_message(array(
+        'title' =>  _tr('Change Elastix Password'),
+        'html'  =>  $smarty->fetch("$local_templates_dir/_change_password.tpl"),
+    ));
+    return $jsonObject->createJSON();
+}
+
 function handleJSON_changePasswordElastix($smarty, $local_templates_dir, $module_name)
 {
     $jsonObject = new PaloSantoJSON();

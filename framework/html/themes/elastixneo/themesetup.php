@@ -29,10 +29,10 @@
 
 function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
 {
-    /* El tema elastixneo muestra hasta 7 items de menú de primer nivel, y 
-     * coloca el resto en una lista desplegable a la derecha del último item. 
-     * Se debe de garantizar que el item actualmente seleccionado aparezca en 
-     * un menú de primer nivel que esté entre los 7 primeros, reordenando los 
+    /* El tema elastixneo muestra hasta 7 items de menú de primer nivel, y
+     * coloca el resto en una lista desplegable a la derecha del último item.
+     * Se debe de garantizar que el item actualmente seleccionado aparezca en
+     * un menú de primer nivel que esté entre los 7 primeros, reordenando los
      * items si es necesario. */
     $arrMainMenu = $smarty->get_template_vars('arrMainMenu');
     $idMainMenuSelected = $smarty->get_template_vars('idMainMenuSelected');
@@ -42,7 +42,7 @@ function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
         $tempMenulist = array();
         $idxMainMenu = NULL;
         foreach ($arrMainMenu as $key => $value) {
-            if ($key == $idMainMenuSelected) $idxMainMenu = count($tempMenulist); 
+            if ($key == $idMainMenuSelected) $idxMainMenu = count($tempMenulist);
             $tempMenulist[] = array($key, $value);
         }
         if (!is_null($idxMainMenu) && $idxMainMenu >= $MAX_ITEMS_VISIBLES) {
@@ -59,14 +59,7 @@ function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
         "ABOUT_ELASTIX2"            =>  _tr('About Elastix2'),
         "HELP"                      =>  _tr('HELP'),
         "USER_LOGIN"                =>  $_SESSION['elastix_user'],
-        "CURRENT_PASSWORD_ALERT"    =>  _tr("Please write your current password."),
-        "NEW_RETYPE_PASSWORD_ALERT" =>  _tr("Please write the new password and confirm the new password."),
-        "PASSWORDS_NOT_MATCH"       =>  _tr("The new password doesn't match with retype password."),
         "CHANGE_PASSWORD"           =>  _tr("Change Elastix Password"),
-        "CURRENT_PASSWORD"          =>  _tr("Current Password"),
-        "NEW_PASSWORD"              =>  _tr("New Password"),
-        "RETYPE_PASSWORD"           =>  _tr("Retype New Password"),
-        "CHANGE_PASSWORD_BTN"       =>  _tr("Change"),
         "MODULES_SEARCH"            =>  _tr("Search modules"),
         "ADD_BOOKMARK"              =>  _tr("Add Bookmark"),
         "REMOVE_BOOKMARK"           =>  _tr("Remove Bookmark"),

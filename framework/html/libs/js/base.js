@@ -217,92 +217,11 @@ function getElastixKey()
     });
 }
 
-function setAdminPassword()
-{
-    var title = $('#lblChangePass').val();
-    var lblCurrentPass = $('#lblCurrentPass').val();
-    var lblNewPass = $('#lblNewPass').val();
-    var lblRetypeNewPass = $('#lblRetypePass').val();
-    var btnChange = $('#btnChagePass').val();
-    var height = 160;
-    var width = 380;
-    var html =
-        "<table class='tabForm' style='font-size: 16px;' width='100%' >" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblCurrentPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass' name='curr_pass' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblNewPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass_new' name='curr_pass_new' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='left'><b>"+lblRetypeNewPass+"</b></td>" +
-                "<td align='left'><input type='password' id='curr_pass_renew' name='curr_pass_renew' value='' /></td>" +
-            "</tr>" +
-            "<tr class='letra12'>" +
-                "<td align='center'  colspan='2'><input type='button' id='sendChanPass' name='sendChanPss' value='"+btnChange+"' onclick='saveNewPasswordElastix()' /></td>" +
-            "</tr>" +
-        "</table>";
-    ShowModalPopUP(title,width,height,html);
-}
-
-function saveNewPasswordElastix()
-{
-	var arrAction = new Array();
-	var oldPass   = $('#curr_pass').val();
-	var newPass   = $('#curr_pass_new').val();
-	var newPassRe = $('#curr_pass_renew').val();
-
-	if(oldPass == ""){
-	  var lable_err = $('#lblCurrentPassAlert').val();
-	  alert(lable_err)
-	  return
-	}
-	if(newPass == "" || newPassRe == ""){
-	  var lable_err = $('#lblNewRetypePassAlert').val();
-	  alert(lable_err);
-	  return;
-	}
-	if(newPass != newPassRe){
-	  var lable_err = $('#lblPassNoTMatchAlert').val();
-	  alert(lable_err);
-	  return;
-	}
-
-	request('index.php', {
-    	menu:			'_elastixutils',
-    	action:			'changePasswordElastix',
-    	oldPassword:	oldPass,
-    	newPassword:	newPass,
-    	newRePassword:	newPassRe
-	}, false, function(arrData,statusResponse,error) {
-		alert(error);
-	    if (statusResponse != "false") {
-			hideModalPopUP();
-		}
-	});
-}
-
 function elastix_blockUI(msg)
 {
 	$.blockUI({
 		message:	"<div style='margin: 10px;'><div align='center'><img src='images/loading2.gif' /></div><div align='center'><span style='font-size: 14px; '>"+msg+"</span></div></div>"
 	});
-}
-
-// Procedimiento que carga el diálogo de lista de paquetes Elastix instalados
-function showElastixPackageVersionDialog()
-{
-	request('index.php', {
-    	menu:		'_elastixutils',
-    	action:		'dialogRPM',
-    	rawmode:	'yes'
-    }, false, function(arrData,statusResponse,error) {
-        ShowModalPopUP(arrData['title'],380,800,arrData['html']);
-
-        // La plantilla tiene una referencia a script que llama a versionRPM
-    });
 }
 
 $(document).ready(function(){
@@ -314,14 +233,35 @@ $(document).ready(function(){
         $('#pagedown').keypress(keyPressed);
     }
 
-    $('#viewDetailsRPMs').click(showElastixPackageVersionDialog);
-    $('a.setadminpassword').click(setAdminPassword);
-    $('#dialogaboutelastix').click(function() {
-        request("register.php", {
-            action:     'showAboutAs',
+    $('#viewDetailsRPMs').click(function() {
+        request('index.php', {
+            menu:       '_elastixutils',
+            action:     'dialogRPM',
             rawmode:    'yes'
         }, false, function(arrData,statusResponse,error) {
-            ShowModalPopUP(arrData['title'],380,100,arrData['html']);
+            ShowModalPopUP(arrData['title'],380,800,arrData['html']);
+
+            // La plantilla tiene una referencia a script que llama a versionRPM
+        });
+    });
+    $('a.setadminpassword').click(function () {
+        request('index.php', {
+            menu:       '_elastixutils',
+            action:     'dialogPasswordElastix',
+            rawmode:    'yes'
+        }, false, function(arrData,statusResponse,error) {
+            ShowModalPopUP(arrData['title'], 380, 160, arrData['html']);
+
+            // La plantilla tiene una referencia a script que llama a changePasswordElastix
+       });
+    });
+    $('#dialogaboutelastix').click(function() {
+        request("index.php", {
+            menu:       '_elastixutils',
+            action:     'showAboutUs',
+            rawmode:    'yes'
+        }, false, function(arrData,statusResponse,error) {
+            ShowModalPopUP(arrData['title'],450,120,arrData['html']);
         });
     });
 

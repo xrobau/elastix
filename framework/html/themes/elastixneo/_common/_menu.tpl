@@ -1,13 +1,5 @@
 <input type="hidden" id="lblRegisterCm"   value="{$lblRegisterCm}" />
 <input type="hidden" id="lblRegisteredCm" value="{$lblRegisteredCm}" />
-<input type="hidden" id="lblCurrentPassAlert" value="{$CURRENT_PASSWORD_ALERT}" />
-<input type="hidden" id="lblNewRetypePassAlert"   value="{$NEW_RETYPE_PASSWORD_ALERT}" />
-<input type="hidden" id="lblPassNoTMatchAlert" value="{$PASSWORDS_NOT_MATCH}" />
-<input type="hidden" id="lblChangePass" value="{$CHANGE_PASSWORD}" />
-<input type="hidden" id="lblCurrentPass" value="{$CURRENT_PASSWORD}" />
-<input type="hidden" id="lblRetypePass" value="{$RETYPE_PASSWORD}" />
-<input type="hidden" id="lblNewPass" value="{$NEW_PASSWORD}" />
-<input type="hidden" id="btnChagePass" value="{$CHANGE_PASSWORD_BTN}" />
 <input type="hidden" id="userMenuColor" value="{$MENU_COLOR}" />
 <input type="hidden" id="lblSending_request" value="{$SEND_REQUEST}" />
 <input type="hidden" id="toolTip_addBookmark" value="{$ADD_BOOKMARK}" />

@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Apr 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: tweak blackmin menu to remove invisible overhang on menu
+  items that forces a scrollbar to appear when right-hand menus are displayed.
+  SVN Rev[6999]
 - CHANGED: Framework: move the Change Password dialog to elastixutils.
   SVN Rev[6997]
 - CHANGED: Framework: move the About Us dialog from registration to elastixutils

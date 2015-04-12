@@ -267,8 +267,7 @@ li.elx-blackmin-menu a
 {
     color: #bbbbbb;
     text-decoration: none;
-    width: 100%;
-    display: inline-block;
+    display: block;
     padding: 5pt;
 }
 li.elx-blackmin-menu>div

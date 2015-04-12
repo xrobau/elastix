@@ -13,7 +13,7 @@
         <td align='left'><input type='password' id='curr_pass_renew' name='curr_pass_renew' value='' /></td>
     </tr>
     <tr class='letra12'>
-        <td align='center' colspan='2'><input type='button' id='sendChanPass' name='sendChanPss' value='{$CHANGE_PASSWORD_BTN}' onclick='saveNewPasswordElastix()' /></td>
+        <td align='center' colspan='2'><input type='button' id='sendChanPass' name='sendChanPss' value='{$CHANGE_PASSWORD_BTN}' /></td>
     </tr>
 </table>
 <input type="hidden" id="lblCurrentPassAlert" value="{$CURRENT_PASSWORD_ALERT}" />

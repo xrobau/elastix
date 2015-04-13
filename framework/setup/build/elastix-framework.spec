@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Apr 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: further tweak to grid support in order to fix double 
+  borders.
+  SVN Rev[7004]
+
 * Sun Apr 12 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: add colResizable support to blackmin theme grid.
   SVN Rev[7002]

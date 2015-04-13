@@ -347,6 +347,12 @@ li.navButton > div
 	margin-right: 5px;
 	margin-top: 5px;
 }
+
+/* Grilla con controles de paloSantoGrid */
+form.elastix-standard-formgrid
+{
+	border-top: 1px solid #aaa;
+}
 form.form.elastix-standard-formgrid>div
 {
 	background: #bbbbbb;
@@ -359,7 +365,6 @@ form.elastix-standard-formgrid>div.controls
     margin: 0px;
     background: #f0f0f0 url(../../../images/addons_header_row_bg.png) repeat-x top;
     color: #444444;
-    border-top: 1px solid #aaa;
     border-bottom: 1px solid #aaa;
 }
 form.elastix-standard-formgrid>div.controls div.toolcell
@@ -435,8 +440,6 @@ form.elastix-standard-formgrid>div.controls div.exportmenu>div>ul>li:hover
 {
     background: #f4fa58;
 }
-
-/* Grilla con controles de paloSantoGrid */
 form.elastix-standard-formgrid>div.controls div.navigation
 {
     float: right;
@@ -449,6 +452,7 @@ form.elastix-standard-formgrid>div#filter-row
     background: #dddddd;
     color: #444444;
 
+    border-bottom: 1px solid #aaa;
     display: none;
 }
 form.elastix-standard-formgrid>div.appliedfilters
@@ -457,7 +461,7 @@ form.elastix-standard-formgrid>div.appliedfilters
     min-height: 28px;
     margin: 0px;
     padding: 0px;
-    border: 0px;
+    border-bottom: 1px solid #aaa;
     position: relative;
     float: none;
     color: #444444;
@@ -557,7 +561,7 @@ form.elastix-standard-formgrid>table.elastix-standard-table
     width: 100%;
     border-left: 0px;
     border-right: 0px;
-    border-bottom: 0px;
+    border-top: 0px;
 }
 
 /* Compatibilidad con funcionalidades requeridas */

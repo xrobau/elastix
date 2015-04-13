@@ -148,15 +148,15 @@
                 <tr><td class="table_data" colspan="{$numColumns}" align="center">{$NO_DATA_FOUND}</td></tr>
             {/if}
         </tbody>
-        <tfoot>
             {if $numData > 3}
+        <tfoot>
             <tr>
                 {section name=columnNum loop=$numColumns start=0 step=1}
                 <th>{$header[$smarty.section.columnNum.index].name}&nbsp;</th>
                 {/section}
             </tr>
-            {/if}
         </tfoot>
+            {/if}
     </table>
     <div class="controls">
         <div class="toolcell navigation">

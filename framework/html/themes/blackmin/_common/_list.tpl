@@ -220,6 +220,11 @@ $(document).ready(function() {
             $(this).addClass("export-background");
         }
     });
+
+    $('form.elastix-standard-formgrid>table.elastix-standard-table').colResizable({
+        liveDrag:   true,
+        marginLeft: "0px"
+    });
 });
 </script>
 {/literal}

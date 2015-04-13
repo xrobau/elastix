@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sun Apr 12 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add colResizable support to blackmin theme grid.
+  SVN Rev[7002]
 - CHANGED: Framework: shorten CSS class names in blackmin theme and attempt to
   introduce a future naming standard. Factor out table grid as a separate class
   that could be applied to standalone tables not part of a recordset grid.

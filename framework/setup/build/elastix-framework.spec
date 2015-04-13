@@ -351,6 +351,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Sun Apr 12 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: shorten CSS class names in blackmin theme and attempt to
+  introduce a future naming standard. Factor out table grid as a separate class
+  that could be applied to standalone tables not part of a recordset grid.
+  SVN Rev[7001]
+
 * Sat Apr 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: tweak blackmin menu to remove invisible overhang on menu
   items that forces a scrollbar to appear when right-hand menus are displayed.

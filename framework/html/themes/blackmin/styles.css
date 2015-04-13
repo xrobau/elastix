@@ -330,7 +330,8 @@ li.navButton > div
 /* Definición del contenido de la página */
 #elx-blackmin-content
 {
-    position: relative;
+/*  La combinación de relative y overflow: auto daña los diálogos de jQueryUI */
+/*  position: relative;*/
     margin: 4px;
     padding: 3px 0px 10px 0px;
     background-color: #f0f0f0;

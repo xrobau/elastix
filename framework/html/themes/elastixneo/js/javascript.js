@@ -478,10 +478,13 @@ function addBookmark()
 
 function deleteBookmarkByEquis(ref)
 {
+	var linkMenu = $(ref).parent().children(':first-child').attr('href');
+	var arrLinkMenu = linkMenu.split("menu=",2);
+	var id_menu = arrLinkMenu[1];
 	elastix_blockUI($('#toolTip_removingBookmark').val());
 	request("index.php", {
 		menu:		'_elastixutils',
-		id_menu:	getCurrentElastixModule(),
+		id_menu:	id_menu,
 		action:		'deleteBookmark',
 		rawmode:	'yes'
 	}, false, function(arrData,statusResponse,error) {

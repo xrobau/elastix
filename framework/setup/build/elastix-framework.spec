@@ -351,6 +351,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Apr 15 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix regression in bookmark handling.
+  SVN Rev[7005]
+
 * Mon Apr 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: further tweak to grid support in order to fix double 
   borders.

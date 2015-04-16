@@ -89,9 +89,7 @@ function sticky_note_send()
     	$("#neo-sticky-note-text-edit").hide();
     	$("#neo-sticky-note-text").show();
         sticky_note_hide();
-        if ($('#elastix_theme_name').val() == 'elastixneo') {
-            $('#togglestickynote1').attr('src', 'themes/elastixneo/images/' 
-                + ((description != '') ? 'tab_notes_on.png' : 'tab_notes.png'));
-        }
+        $('#togglestickynote1').attr('src', 'themes/'+$('#elastix_theme_name').val()+'/images/' 
+            + ((description != '') ? 'tab_notes_on.png' : 'tab_notes.png'));
     });
 }

@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Apr 16 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: stop testing for elastixneo theme in Sticky Note 
+  implementation. Instead use the control that contains the theme name.
+  SVN Rev[7006]
+
 * Wed Apr 15 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix regression in bookmark handling.
   SVN Rev[7005]

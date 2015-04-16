@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Apr 15 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Report Break: remove unnecessary <form> tag around grid filter which
+  leads to nested <form> tag.
+  SVN Rev[7006]
+
 * Wed Apr  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: Originate through Local@from-internal requires setting
   CallerID in order to guarantee a nonempty src field in the CDR record. This

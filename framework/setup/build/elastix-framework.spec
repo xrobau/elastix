@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.5.0
-Release: 6
+Release: 7
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -351,6 +351,15 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Apr 17 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-7
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Fri Apr 17 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  Framework: restore image in elastixneo theme. The callcenterPRO module makes
+  use of it.
+  SVN Rev[7008]
+
 * Thu Apr 16 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: stop testing for elastixneo theme in Sticky Note 
   implementation. Instead use the control that contains the theme name.
@@ -441,6 +450,7 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-6
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6972]
 
 * Thu Apr 09 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: rewrite Sticky Note javascript implementation to make it

@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Apr 17 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: introduce new Grandstream models GXP2130 and
+  GXP2140.
+  SVN Rev[7009]
+
 * Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

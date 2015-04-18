@@ -42,18 +42,18 @@ class AMIEventProcess extends TuberiaProcess
 
     // Estimación de la versión de Asterisk que se usa
     private $_asteriskVersion = array(1, 4, 0, 0);
-    
+
     // Fecha y hora de inicio de Asterisk, para detectar reinicios
     private $_asteriskStartTime = NULL;
     private $_bReinicioAsterisk = FALSE;
 
     private $_finalizandoPrograma = FALSE;
     private $_finalizacionConfirmada = FALSE;
-    
+
     // Contadores para actividades ejecutadas regularmente
     private $_iTimestampVerificacionLlamadasViejas = 0; // Última verificación de llamadas viejas
 
-    // Número de llamadas esperando atención por cola, inicializado por 
+    // Número de llamadas esperando atención por cola, inicializado por
     // QueueEntry y actualizado en Join y Leave
     private $_numLlamadasEnCola = array();
     // Este temporal se intercambia por _numLlamadasEnCola en QueueStatusComplete
@@ -62,7 +62,7 @@ class AMIEventProcess extends TuberiaProcess
     // QueueMember y actualizado en QueueMemberStatus y QueueMemberAdded
     private $_tmp_estadoAgenteCola = NULL;
     private $_tmp_actionid_queuestatus = NULL;
-    
+
     public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
     	$this->_log = $oMainLog;
@@ -77,7 +77,7 @@ class AMIEventProcess extends TuberiaProcess
             'idnewcall', 'idcurrentcall', 'canalRemotoAgente', 'actualizarConfig',
             'quitarReservaAgente') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
-        foreach (array('informarCredencialesAsterisk', 'nuevasCampanias', 
+        foreach (array('informarCredencialesAsterisk', 'nuevasCampanias',
             'leerTiempoContestar', 'nuevasLlamadasMarcar',
             'contarLlamadasEsperandoRespuesta', 'agentesAgendables') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "rpc_$k"));
@@ -86,7 +86,7 @@ class AMIEventProcess extends TuberiaProcess
         foreach (array('idNuevaSesionAgente', 'idNuevoBreakAgente',
             'quitarBreakAgente', 'idNuevoHoldAgente', 'quitarHoldAgente') as $k)
             $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "msg_$k"));
-        foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente', 
+        foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente',
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
             'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante',
             'pingAgente', 'dumpstatus') as $k)
@@ -97,7 +97,7 @@ class AMIEventProcess extends TuberiaProcess
 
         return TRUE;
     }
-    
+
     public function procedimientoDemonio()
     {
         // Verificar si la conexión AMI sigue siendo válida
@@ -118,7 +118,7 @@ class AMIEventProcess extends TuberiaProcess
         // Verificar si se ha reiniciado Asterisk en medio de procesamiento
         if (!is_null($this->_ami) && $this->_bReinicioAsterisk) {
         	$this->_bReinicioAsterisk = FALSE;
-            
+
             // Cerrar todas las llamadas
             $listaLlamadas = array();
             foreach ($this->_listaLlamadas as $llamada) {
@@ -133,13 +133,13 @@ class AMIEventProcess extends TuberiaProcess
                      'Cause-txt'                =>  NULL,
                 ));
             }
-            
+
             // Desconectar a todos los agentes
             foreach ($this->_listaAgentes as $a) {
                 if (!is_null($a->id_sesion)) {
                     $this->_tuberia->msg_ECCPProcess_AgentLogoff(
                         $a->channel,
-                        microtime(TRUE), 
+                        microtime(TRUE),
                         $a->id_agent,
                         $a->id_sesion,
                         $a->id_audit_break,
@@ -147,7 +147,7 @@ class AMIEventProcess extends TuberiaProcess
                     $a->terminarLoginAgente();
                 }
             }
-            
+
             $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
         }
 
@@ -155,16 +155,16 @@ class AMIEventProcess extends TuberiaProcess
         if ($this->_multiplex->procesarPaquetes())
             $this->_multiplex->procesarActividad(0);
         else $this->_multiplex->procesarActividad(1);
-        
+
         $this->_limpiarLlamadasViejasEspera();
         $this->_limpiarAgentesTimeout();
-        
+
     	return TRUE;
     }
-    
+
     public function limpiezaDemonio($signum)
     {
-    	
+
         // Mandar a cerrar todas las conexiones activas
         $this->_multiplex->finalizarServidor();
     }
@@ -176,14 +176,14 @@ class AMIEventProcess extends TuberiaProcess
         if (!is_null($this->_ami)) {
             $this->_log->output('INFO: Desconectando de sesión previa de Asterisk...');
             $this->_ami->disconnect();
-            $this->_ami = NULL;            
+            $this->_ami = NULL;
         }
         $astman = new AMIClientConn($this->_multiplex, $this->_log);
         //$this->_momentoUltimaConnAsterisk = time();
 
         $this->_log->output('INFO: Iniciando sesión de control de Asterisk...');
         if (!$astman->connect(
-                $this->_config['asterisk']['asthost'], 
+                $this->_config['asterisk']['asthost'],
                 $this->_config['asterisk']['astuser'],
                 $this->_config['asterisk']['astpass'])) {
             $this->_log->output("FATAL: no se puede conectar a Asterisk Manager");
@@ -199,7 +199,7 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_log->output("INFO: no hay soporte CoreSettings en Asterisk Manager, se asume Asterisk 1.4.x.");
             }
 
-            /* Ejecutar el comando CoreStatus para obtener la fecha de arranque de 
+            /* Ejecutar el comando CoreStatus para obtener la fecha de arranque de
              * Asterisk. Si se tiene una fecha previa distinta a la obtenida aquí,
              * se concluye que Asterisk ha sido reiniciado. Durante el inicio
              * temprano de Asterisk, la fecha de inicio todavía no está lista y
@@ -223,7 +223,7 @@ class AMIEventProcess extends TuberiaProcess
                 	$bFechaValida = TRUE;
                 }
             } while (!$bFechaValida);
-            
+
             if (is_null($this->_asteriskStartTime)) {
                 $this->_asteriskStartTime = $sFechaInicio;
             } elseif ($this->_asteriskStartTime != $sFechaInicio) {
@@ -232,7 +232,7 @@ class AMIEventProcess extends TuberiaProcess
             }
 
             // Instalación de los manejadores de eventos
-            foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join', 
+            foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join',
                 'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
                 'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved',
                 'QueueMemberStatus', 'QueueParams', 'QueueMember', 'QueueEntry',
@@ -246,7 +246,7 @@ class AMIEventProcess extends TuberiaProcess
             return TRUE;
         }
     }
-    
+
     private function _infoSeguimientoAgente($sAgente)
     {
         if (is_array($sAgente)) {
@@ -261,7 +261,7 @@ class AMIEventProcess extends TuberiaProcess
             return (is_null($a)) ? NULL : $a->resumenSeguimiento();
         }
     }
-    
+
     private function _agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -271,14 +271,14 @@ class AMIEventProcess extends TuberiaProcess
         }
         return !is_null($a);
     }
-    
+
     private function _cancelarIntentoLoginAgente($sAgente)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (!is_null($a)) $a->respuestaLoginAgente('Failure', NULL, NULL);
         return !is_null($a);
     }
-    
+
     private function _idNuevaSesionAgente($sAgente, $id_sesion)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -291,7 +291,7 @@ class AMIEventProcess extends TuberiaProcess
             $a->id_sesion = $id_sesion;
         }
     }
-    
+
     private function _idNuevoBreakAgente($sAgente, $idBreak, $idAuditBreak)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -308,7 +308,7 @@ class AMIEventProcess extends TuberiaProcess
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (!is_null($a)) {
-            if (!is_null($a->id_break)) { 
+            if (!is_null($a->id_break)) {
                 $a->clearBreak();
             }
         }
@@ -330,12 +330,12 @@ class AMIEventProcess extends TuberiaProcess
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (!is_null($a)) {
-            if (!is_null($a->id_hold)) { 
+            if (!is_null($a->id_hold)) {
                 $a->clearHold();
             }
         }
     }
-    
+
     private function _quitarReservaAgente($sAgente)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -354,7 +354,7 @@ class AMIEventProcess extends TuberiaProcess
             $il = array();
             foreach ($sAgente as $s) {
                 $a = $this->_listaAgentes->buscar('agentchannel', $s);
-                $il[$s] = (is_null($a) || is_null($a->llamada)) 
+                $il[$s] = (is_null($a) || is_null($a->llamada))
                     ? NULL
                     : $a->llamada->resumenLlamada();
             }
@@ -368,7 +368,7 @@ class AMIEventProcess extends TuberiaProcess
 
     /**
      * Procedimiento que reporta la información sobre todas las llamadas que
-     * pertenecen a la campaña indicada por $idCampania. 
+     * pertenecen a la campaña indicada por $idCampania.
      */
     private function _reportarInfoLlamadasCampania($sTipoCampania, $idCampania)
     {
@@ -386,7 +386,7 @@ class AMIEventProcess extends TuberiaProcess
         return array(
             'queuestatus'   =>  $estadoCola,
             'activecalls'   =>  $llamadasPendientes,
-        );        
+        );
     }
 
     /**
@@ -401,7 +401,7 @@ class AMIEventProcess extends TuberiaProcess
         $llamadasPendientes = array();
         if (isset($this->_colasEntrantes[$sCola])) {
             foreach ($this->_listaLlamadas as $llamada) {
-                if (is_null($llamada->campania) && 
+                if (is_null($llamada->campania) &&
                     $llamada->id_queue_call_entry == $this->_colasEntrantes[$sCola]['id_queue_call_entry']) {
                     $this->_agregarInfoLlamadaCampania($llamada, $estadoCola, $llamadasPendientes);
                 }
@@ -411,7 +411,7 @@ class AMIEventProcess extends TuberiaProcess
         return array(
             'queuestatus'   =>  $estadoCola,
             'activecalls'   =>  $llamadasPendientes,
-        );        
+        );
     }
 
     private function _agregarInfoLlamadaCampania($llamada, &$estadoCola, &$llamadasPendientes)
@@ -444,7 +444,7 @@ class AMIEventProcess extends TuberiaProcess
             if (!is_null($llamada->timestamp_enterqueue))
                 $callStatus['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
             if (!is_null($llamada->trunk)) $callStatus['trunk'] = $llamada->trunk;
-            
+
             $llamadasPendientes[] = $callStatus;
         }
     }
@@ -452,7 +452,7 @@ class AMIEventProcess extends TuberiaProcess
     private function _manejarLlamadaEspecialECCP($params)
     {
     	$sKey = $params['ActionID'];
-        
+
         // Se revisa si esta es una de las llamadas para logonear un agente estático
         $listaECCP = explode(':', $sKey);
         if ($listaECCP[0] == 'ECCP' /*&& $listaECCP[2] == posix_getpid()*/) {
@@ -482,7 +482,7 @@ class AMIEventProcess extends TuberiaProcess
                         $this->_tuberia->msg_ECCPProcess_AgentLogin(
                             $listaECCP[4],
                             $params['local_timestamp_received'],
-                            NULL);                    
+                            NULL);
                     }
                 }
                 return TRUE;
@@ -492,7 +492,7 @@ class AMIEventProcess extends TuberiaProcess
                 return TRUE;
             case 'QueueMemberAdded':
                 /* Nada que hacer */
-                $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberAdded detectado");  
+                $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberAdded detectado");
                 return TRUE;
             default:
                 $this->_log->output("ERR: ".__METHOD__.": no se ha implementado soporte ECCP para: {$sKey}");
@@ -543,7 +543,7 @@ class AMIEventProcess extends TuberiaProcess
             $c->context = $tupla['context'];
             $c->estadisticasIniciales($tupla['num_completadas'], $tupla['promedio'], $tupla['desviacion']);
         }
-        
+
         // Purgar todas las campañas entrantes fuera de horario
         $iTimestamp = time();
         $sFecha = date('Y-m-d', $iTimestamp);
@@ -563,7 +563,7 @@ class AMIEventProcess extends TuberiaProcess
                 }
             }
         }
-        
+
         // Quitar las colas aisladas que no tengan asociada una campaña entrante
         foreach ($listaCampaniasAvisar['incoming_queue_old'] as $id => $tupla) {
         	if (isset($this->_colasEntrantes[$tupla['queue']])) {
@@ -574,7 +574,7 @@ class AMIEventProcess extends TuberiaProcess
                 unset($this->_colasEntrantes[$tupla['queue']]);
             }
         }
-        
+
         // Crear nuevos registros para las nuevas colas aisladas
         foreach ($listaCampaniasAvisar['incoming_queue_new'] as $id => $tupla) {
             if (!isset($this->_colasEntrantes[$tupla['queue']]))
@@ -588,7 +588,7 @@ class AMIEventProcess extends TuberiaProcess
                     'campania'              =>  NULL,
                 );
         }
-        
+
         // Crear nuevas campañas que entran en servicio
         foreach ($listaCampaniasAvisar['incoming'] as $id => $tupla) {
             if (!isset($this->_colasEntrantes[$tupla['queue']]))
@@ -619,7 +619,7 @@ class AMIEventProcess extends TuberiaProcess
                 }
             }
         }
-        
+
         /*
         if ($this->DEBUG) {
             // Desactivado porque rellena demasiado el log
@@ -651,7 +651,7 @@ class AMIEventProcess extends TuberiaProcess
                     $llamada->actionid = $tupla['actionid'];
                     $llamada->dialstring = $tupla['dialstring'];
                     $llamada->campania = $this->_campaniasSalientes[$tupla['id_campaign']];
-                    
+
                     if (!is_null($tupla['agent'])) {
                     	$a = $this->_listaAgentes->buscar('agentchannel', $tupla['agent']);
                         if (is_null($a)) {
@@ -685,7 +685,7 @@ class AMIEventProcess extends TuberiaProcess
                 	$a = $llamada->agente_agendado;
                     $llamada->agente_agendado = NULL;
                     $a->llamada_agendada = NULL;
-                    
+
                     /* Se debe quitar la reservación únicamente si no hay más
                      * llamadas agendadas para este agente. Si se cumple esto,
                      * CampaignProcess lanzará el evento quitarReservaAgente
@@ -762,7 +762,7 @@ class AMIEventProcess extends TuberiaProcess
         }
         return !is_null($a);
     }
-    
+
     private function _agentesAgendables($listaAgendables)
     {
     	$entraronPausa = array();
@@ -776,12 +776,12 @@ class AMIEventProcess extends TuberiaProcess
                     if ($a->num_pausas == 1) $entraronPausa[] = $sAgente;
                 }
             }
-            
-            /* Un agente ocioso para agendamiento debe estar reservado, sin 
+
+            /* Un agente ocioso para agendamiento debe estar reservado, sin
              * llamada activa, sin llamada agendada, y sin ninguna otra pausa.
              */
-            if ($a->reservado && 
-                is_null($a->llamada) && 
+            if ($a->reservado &&
+                is_null($a->llamada) &&
                 is_null($a->llamada_agendada) &&
                 $a->num_pausas == 1)
                 $ociosos[] = $sAgente;
@@ -791,7 +791,7 @@ class AMIEventProcess extends TuberiaProcess
             'ociosos'   =>  $ociosos,
         );
     }
-    
+
     private function _actualizarConfig($k, $v)
     {
     	switch ($k) {
@@ -812,7 +812,7 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('INFO: actualizando intervalo de llamada corta a '.$v);
             $this->_config['dialer']['llamada_corta'] = $v;
             break;
-        case 'dialer_tiempo_contestar': 
+        case 'dialer_tiempo_contestar':
             $this->_log->output('INFO: actualizando intervalo inicial de contestar a '.$v);
             $this->_config['dialer']['tiempo_contestar'] = $v;
             foreach ($this->_campaniasSalientes as $c) {
@@ -836,7 +836,7 @@ class AMIEventProcess extends TuberiaProcess
             break;
     	}
     }
-    
+
     private function _limpiarLlamadasViejasEspera()
     {
     	$iTimestamp = time();
@@ -844,20 +844,20 @@ class AMIEventProcess extends TuberiaProcess
         	// Remover llamadas viejas luego de 5 * 60 segundos de espera sin respuesta
             $listaLlamadasViejas = array();
             foreach ($this->_listaLlamadas as $llamada) {
-        		if (!is_null($llamada->timestamp_originatestart) && 
-                    is_null($llamada->timestamp_originateend) && 
+        		if (!is_null($llamada->timestamp_originatestart) &&
+                    is_null($llamada->timestamp_originateend) &&
                     $iTimestamp - $llamada->timestamp_originatestart > 5 * 60) {
                     $listaLlamadasViejas[] = $llamada;
                 }
         	}
-            
+
             foreach ($listaLlamadasViejas as $llamada) {
             	$iEspera = $iTimestamp - $llamada->timestamp_originatestart;
                 $this->_log->output('ERR: '.__METHOD__.": llamada {$llamada->actionid} ".
                     "espera respuesta desde hace $iEspera segundos, se elimina.");
                 $llamada->llamadaFueOriginada($iTimestamp, NULL, NULL, 'Failure');
             }
-            
+
             $this->_iTimestampVerificacionLlamadasViejas = $iTimestamp;
         }
     }
@@ -888,16 +888,16 @@ class AMIEventProcess extends TuberiaProcess
         }
     }
 
-    /* Deshacerse de todas las llamadas monitoreadas bajo la premisa de que 
-     * Asterisk se ha caído anormalmente y ya no está siguiendo llamadas */ 
+    /* Deshacerse de todas las llamadas monitoreadas bajo la premisa de que
+     * Asterisk se ha caído anormalmente y ya no está siguiendo llamadas */
     private function _abortarTodasLasLlamadas()
     {
-    	/* Copiar todas las llamadas a una lista temporal. Esto es necesario 
+    	/* Copiar todas las llamadas a una lista temporal. Esto es necesario
          * para poder modificar la lista principal. */
         $listaLlamadasRemover = array();
         foreach ($this->_listaLlamadas as $llamada)
             $listaLlamadasRemover[] = $llamada;
-        
+
         $this->_log->output("WARN: abortando todas las llamadas activas...");
         foreach ($listaLlamadasRemover as $llamada) {
         	if (is_null($llamada->status)) {
@@ -907,7 +907,7 @@ class AMIEventProcess extends TuberiaProcess
                     $a = $llamada->agente_agendado;
                     $llamada->agente_agendado = NULL;
                     $a->llamada_agendada = NULL;
-                    
+
                     /* No puedo verificar estado de reserva de agente porque
                      * se requiere de la conexión a Asterisk.*/
                 }
@@ -933,7 +933,7 @@ class AMIEventProcess extends TuberiaProcess
 
     /**************************************************************************/
 
-    public function rpc_informarCredencialesAsterisk($sFuente, $sDestino, 
+    public function rpc_informarCredencialesAsterisk($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -942,30 +942,30 @@ class AMIEventProcess extends TuberiaProcess
         $this->_config = $datos[0];
         $bExito = $this->_iniciarConexionAMI();
 
-        $this->DEBUG = $this->_config['dialer']['debug'];        
+        $this->DEBUG = $this->_config['dialer']['debug'];
 
         // Informar a la fuente que se ha terminado de procesar
         $this->_tuberia->enviarRespuesta($sFuente, $bExito);
     }
 
-    public function rpc_leerTiempoContestar($sFuente, $sDestino, 
+    public function rpc_leerTiempoContestar($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
-    	$this->_tuberia->enviarRespuesta($sFuente, 
-            isset($this->_campaniasSalientes[$datos[0]]) 
-            ? $this->_campaniasSalientes[$datos[0]]->leerTiempoContestar() 
-            : NULL);        
+    	$this->_tuberia->enviarRespuesta($sFuente,
+            isset($this->_campaniasSalientes[$datos[0]])
+            ? $this->_campaniasSalientes[$datos[0]]->leerTiempoContestar()
+            : NULL);
     }
 
-    public function rpc_contarLlamadasEsperandoRespuesta($sFuente, $sDestino, 
+    public function rpc_contarLlamadasEsperandoRespuesta($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
     	$queue = $datos[0];
         $iNumEspera = 0;
 
         foreach ($this->_listaLlamadas as $llamada) {
-        	if (!is_null($llamada->campania) && 
-                $llamada->campania->queue == $queue && 
+        	if (!is_null($llamada->campania) &&
+                $llamada->campania->queue == $queue &&
                 $llamada->esperando_contestar) {
                 $iNumEspera++;
                 if ($this->DEBUG) {
@@ -982,7 +982,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, $iNumEspera);
     }
 
-    public function rpc_nuevasCampanias($sFuente, $sDestino, 
+    public function rpc_nuevasCampanias($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
     	if ($this->DEBUG) {
@@ -992,7 +992,7 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_nuevasCampanias'), $datos));
     }
 
-    public function rpc_nuevasLlamadasMarcar($sFuente, $sDestino, 
+    public function rpc_nuevasLlamadasMarcar($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1002,7 +1002,7 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_nuevasLlamadasMarcar'), $datos));
     }
 
-    public function rpc_agregarIntentoLoginAgente($sFuente, $sDestino, 
+    public function rpc_agregarIntentoLoginAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1011,8 +1011,8 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_agregarIntentoLoginAgente'), $datos));
     }
-    
-    public function rpc_cancelarIntentoLoginAgente($sFuente, $sDestino, 
+
+    public function rpc_cancelarIntentoLoginAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1021,8 +1021,8 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_cancelarIntentoLoginAgente'), $datos));
     }
-    
-    public function rpc_infoSeguimientoAgente($sFuente, $sDestino, 
+
+    public function rpc_infoSeguimientoAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1031,8 +1031,8 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_infoSeguimientoAgente'), $datos));
     }
-    
-    public function rpc_reportarInfoLlamadaAtendida($sFuente, $sDestino, 
+
+    public function rpc_reportarInfoLlamadaAtendida($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1041,8 +1041,8 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_reportarInfoLlamadaAtendida'), $datos));
     }
-    
-    public function rpc_reportarInfoLlamadasCampania($sFuente, $sDestino, 
+
+    public function rpc_reportarInfoLlamadasCampania($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1051,8 +1051,8 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_reportarInfoLlamadasCampania'), $datos));
     }
-    
-    public function rpc_agentesAgendables($sFuente, $sDestino, $sNombreMensaje, 
+
+    public function rpc_agentesAgendables($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1062,7 +1062,7 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_agentesAgendables'), $datos));
     }
 
-    public function rpc_reportarInfoLlamadasColaEntrante($sFuente, $sDestino, 
+    public function rpc_reportarInfoLlamadasColaEntrante($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1071,8 +1071,8 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_reportarInfoLlamadasColaEntrante'), $datos));
     }
-    
-    public function rpc_pingAgente($sFuente, $sDestino, 
+
+    public function rpc_pingAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1081,8 +1081,8 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_pingAgente'), $datos));
     }
-    
-    public function rpc_dumpstatus($sFuente, $sDestino, 
+
+    public function rpc_dumpstatus($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1091,10 +1091,10 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_dumpstatus'), $datos));
     }
-    
+
     /**************************************************************************/
 
-    public function msg_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje, 
+    public function msg_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)
     {
         foreach ($datos[0] as $tupla) {
@@ -1103,7 +1103,7 @@ class AMIEventProcess extends TuberiaProcess
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (is_null($a)) {
             	// Agente nuevo por registrar
-                $a = $this->_listaAgentes->nuevoAgente($tupla['id'], 
+                $a = $this->_listaAgentes->nuevoAgente($tupla['id'],
                     $tupla['number'], $tupla['name'], ($tupla['estatus'] == 'A'),
                     $tupla['type']);
             } elseif ($a->id_agent != $tupla['id']) {
@@ -1126,17 +1126,17 @@ class AMIEventProcess extends TuberiaProcess
                 $dyn = $datos[1][$sAgente];
             $a->asignarColasDinamicas($dyn);
         }
-        
+
         // Iniciar actualización del estado de las colas activas
         $this->_tmp_actionid_queuestatus = posix_getpid().'-'.time();
         $this->_tmp_estadoAgenteCola = array();
         $this->_tmp_numLlamadasEnCola = array();
         $this->_ami->QueueStatus($this->_tmp_actionid_queuestatus);
-        
+
         // En msg_QueueStatusComplete se valida pertenencia a colas dinámicas
     }
-    
-    public function msg_avisoInicioOriginate($sFuente, $sDestino, $sNombreMensaje, 
+
+    public function msg_avisoInicioOriginate($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1144,8 +1144,8 @@ class AMIEventProcess extends TuberiaProcess
         }
         call_user_func_array(array($this, '_avisoInicioOriginate'), $datos);
     }
-    
-    public function msg_idNuevaSesionAgente($sFuente, $sDestino, 
+
+    public function msg_idNuevaSesionAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1153,8 +1153,8 @@ class AMIEventProcess extends TuberiaProcess
         }
         call_user_func_array(array($this, '_idNuevaSesionAgente'), $datos);
     }
-    
-    public function msg_idNuevoBreakAgente($sFuente, $sDestino, 
+
+    public function msg_idNuevoBreakAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1163,7 +1163,7 @@ class AMIEventProcess extends TuberiaProcess
         call_user_func_array(array($this, '_idNuevoBreakAgente'), $datos);
     }
 
-    public function msg_quitarBreakAgente($sFuente, $sDestino, 
+    public function msg_quitarBreakAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1172,7 +1172,7 @@ class AMIEventProcess extends TuberiaProcess
         call_user_func_array(array($this, '_quitarBreakAgente'), $datos);
     }
 
-    public function msg_idNuevoHoldAgente($sFuente, $sDestino, 
+    public function msg_idNuevoHoldAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1181,7 +1181,7 @@ class AMIEventProcess extends TuberiaProcess
         call_user_func_array(array($this, '_idNuevoHoldAgente'), $datos);
     }
 
-    public function msg_quitarHoldAgente($sFuente, $sDestino, 
+    public function msg_quitarHoldAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1189,8 +1189,8 @@ class AMIEventProcess extends TuberiaProcess
         }
         call_user_func_array(array($this, '_quitarHoldAgente'), $datos);
     }
-    
-    public function msg_quitarReservaAgente($sFuente, $sDestino, 
+
+    public function msg_quitarReservaAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1199,7 +1199,7 @@ class AMIEventProcess extends TuberiaProcess
         call_user_func_array(array($this, '_quitarReservaAgente'), $datos);
     }
 
-    public function msg_idnewcall($sFuente, $sDestino, 
+    public function msg_idnewcall($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1207,8 +1207,8 @@ class AMIEventProcess extends TuberiaProcess
         }
         call_user_func_array(array($this, '_idnewcall'), $datos);
     }
-    
-    public function msg_idcurrentcall($sFuente, $sDestino, 
+
+    public function msg_idcurrentcall($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1216,8 +1216,8 @@ class AMIEventProcess extends TuberiaProcess
         }
         call_user_func_array(array($this, '_idcurrentcall'), $datos);
     }
-    
-    public function msg_canalRemotoAgente($sFuente, $sDestino, 
+
+    public function msg_canalRemotoAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1225,8 +1225,8 @@ class AMIEventProcess extends TuberiaProcess
         }
         call_user_func_array(array($this, '_canalRemotoAgente'), $datos);
     }
-    
-    public function msg_actualizarConfig($sFuente, $sDestino, 
+
+    public function msg_actualizarConfig($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1249,7 +1249,7 @@ class AMIEventProcess extends TuberiaProcess
     }
 
     /**************************************************************************/
-    
+
     public function msg_Default($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1259,7 +1259,7 @@ class AMIEventProcess extends TuberiaProcess
                 );
         }
     }
-    
+
     public function msg_Newchannel($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1269,10 +1269,10 @@ class AMIEventProcess extends TuberiaProcess
                 );
         }
         $regs = NULL;
-        if (isset($params['Channel']) && 
+        if (isset($params['Channel']) &&
             preg_match('#^(Local/.+@from-internal)-[\dabcdef]+(,|;)(1|2)$#', $params['Channel'], $regs)) {
             if ($this->DEBUG) {
-                $this->_log->output("DEBUG: ".__METHOD__.": se ha creado pata {$regs[3]} de llamada {$regs[1]}");         
+                $this->_log->output("DEBUG: ".__METHOD__.": se ha creado pata {$regs[3]} de llamada {$regs[1]}");
             }
             $llamada = $this->_listaLlamadas->buscar('dialstring', $regs[1]);
             if (!is_null($llamada)) {
@@ -1283,11 +1283,11 @@ class AMIEventProcess extends TuberiaProcess
                         $this->_log->output("DEBUG: ".__METHOD__.": Llamada localizada, Uniqueid={$params['Uniqueid']}");
                     }
                 } elseif ($regs[3] == '2') {
-                    /* Pata 2, se requiere para recuperar razón de llamada 
+                    /* Pata 2, se requiere para recuperar razón de llamada
                      * fallida, en caso de que se desconozca vía pata 1. Además
                      * permite reconocer canal físico real al recibir Link sobre
                      * pata auxiliar. */
-                    $llamada->AuxChannels[$params['Uniqueid']] = array(); 
+                    $llamada->AuxChannels[$params['Uniqueid']] = array();
                     $llamada->registerAuxChannels();
                     if ($this->DEBUG) {
                         $this->_log->output("DEBUG: ".__METHOD__.": Llamada localizada canal auxiliar Uniqueid={$params['Uniqueid']}");
@@ -1295,10 +1295,10 @@ class AMIEventProcess extends TuberiaProcess
                 }
             }
         }
-        
+
         return FALSE;
     }
-    
+
     public function msg_Dial($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1322,7 +1322,7 @@ class AMIEventProcess extends TuberiaProcess
             [SrcUniqueID] => 1274385698.159
             [DestUniqueID] => 1274385698.160
         )
-        
+
         Asterisk 1.6.2.x
         2010-10-08 18:49:18 : (DialerProcess) DEBUG: dial:
         params => Array
@@ -1350,8 +1350,8 @@ class AMIEventProcess extends TuberiaProcess
 
         if (!is_null($srcUniqueId) && !is_null($destUniqueID)) {
             /* Si el SrcUniqueID es alguno de los Uniqueid monitoreados, se añade el
-             * DestUniqueID correspondiente. Potencialmente esto permite también 
-             * trazar la troncal por la cual salió la llamada. 
+             * DestUniqueID correspondiente. Potencialmente esto permite también
+             * trazar la troncal por la cual salió la llamada.
              */
             $llamada = $this->_listaLlamadas->buscar('uniqueid', $srcUniqueId);
             if (is_null($llamada))
@@ -1360,7 +1360,7 @@ class AMIEventProcess extends TuberiaProcess
             	$llamada->AuxChannels[$destUniqueID]['Dial'] = $params;
                 $llamada->registerAuxChannels();
                 if ($this->DEBUG) {
-                    $this->_log->output("DEBUG: ".__METHOD__.": encontrado canal auxiliar para llamada: {$llamada->actionid}");         
+                    $this->_log->output("DEBUG: ".__METHOD__.": encontrado canal auxiliar para llamada: {$llamada->actionid}");
                 }
 
                 if (strpos($params['Destination'], 'Local/') !== 0) {
@@ -1368,9 +1368,9 @@ class AMIEventProcess extends TuberiaProcess
                         // Primer Dial observado, se asigna directamente
                         $this->_asignarCanalRemotoReal($params, $llamada);
                     } elseif ($llamada->actualchannel != $params['Destination']) {
-                        
+
                         /* Es posible que el plan de marcado haya colgado por congestión
-                         * al canal en $llamada->actualchannel y este Dial sea el 
+                         * al canal en $llamada->actualchannel y este Dial sea el
                          * siguiente intento usando una troncal distinta en la ruta
                          * saliente. Se verifica si el canal auxiliar ya tiene un
                          * Hangup registrado. */
@@ -1383,7 +1383,7 @@ class AMIEventProcess extends TuberiaProcess
                                 break;
                             }
                         }
-                                                
+
                         if ($bCanalPrevioColgado) {
                         	if ($this->DEBUG) {
                         		$this->_log->output("DEBUG: ".__METHOD__.": canal ".
@@ -1415,10 +1415,10 @@ class AMIEventProcess extends TuberiaProcess
                 }
             }
         }
-        
+
         return FALSE;
     }
-    
+
     private function _asignarCanalRemotoReal(&$params, $llamada)
     {
         $llamada->actualchannel = $params['Destination'];
@@ -1426,12 +1426,12 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('DEBUG: '.__METHOD__.
                 ': capturado canal remoto real: '.$params['Destination']);
         }
-        
+
         // Notificar el progreso de la llamada
         $paramProgreso = array(
             'datetime_entry'=>  date('Y-m-d H:i:s', $params['local_timestamp_received']),
             'new_status'    =>  'Dialing',
-            'trunk'         =>  $llamada->trunk,                            
+            'trunk'         =>  $llamada->trunk,
         );
         if ($llamada->tipo_llamada == 'outgoing') {
             $paramProgreso['id_call_outgoing'] = $llamada->id_llamada;
@@ -1442,7 +1442,7 @@ class AMIEventProcess extends TuberiaProcess
         }
         $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
     }
-    
+
     public function msg_OriginateResponse($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1451,17 +1451,17 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
                 );
         }
-        
+
         // Todas las llamadas del dialer contienen un ActionID
         if (!isset($params['ActionID'])) return FALSE;
-        
+
         // Verificar si esta es una llamada especial de ECCP
         if ($this->_manejarLlamadaEspecialECCP($params)) return FALSE;
-        
+
         $llamada = $this->_listaLlamadas->buscar('actionid', $params['ActionID']);
         if (is_null($llamada)) return FALSE;
 
-        $llamada->llamadaFueOriginada($params['local_timestamp_received'], 
+        $llamada->llamadaFueOriginada($params['local_timestamp_received'],
             $params['Uniqueid'], $params['Channel'], $params['Response']);
 
         $calleridnum = NULL;
@@ -1469,9 +1469,9 @@ class AMIEventProcess extends TuberiaProcess
             $calleridnum = in_array(trim($params['CallerIDNum']), array('', '<null>', '(null)'))
                 ? '' : trim($params['CallerIDNum']);
         }
-        
+
         // Si el estado de la llamada es Failure, el canal probablemente ya no existe
-        if ($params['Response'] != 'Failure') {        
+        if ($params['Response'] != 'Failure') {
             // Si la fuente de la llamada está en blanco, se asigna al número marcado
             $r = $this->_ami->GetVar($params['Channel'], 'CALLERID(num)');
             if ($r['Response'] != 'Success') {
@@ -1483,8 +1483,8 @@ class AMIEventProcess extends TuberiaProcess
             	    $this->_log->output('ERR: '.__METHOD__.': ...pero CallerIDNum es '.$calleridnum);
             	}
             } else {
-                $r['Value'] = in_array(trim($params['Value']), array('', '<null>', '(null)'))
-                    ? '' : trim($params['Value']);
+                $r['Value'] = in_array(trim($r['Value']), array('', '<null>', '(null)'))
+                    ? '' : trim($r['Value']);
                 if (!is_null($calleridnum)) {
                     if ($calleridnum != $r['Value']) {
                         $this->_log->output('WARN: '.__METHOD__.': discrepancia en canal '.
@@ -1504,31 +1504,31 @@ class AMIEventProcess extends TuberiaProcess
         }
         return FALSE;
     }
-    
+
     // Nueva función
     public function msg_QueueMemberAdded($sEvent, $params, $sServer, $iPort)
-    {  
+    {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
                 "\n$sEvent: => ".print_r($params, TRUE)
                 );
-        }      
+        }
 
-       $sAgente = $params['Location']; 
-       
+       $sAgente = $params['Location'];
+
        /* tomado de msg_agentLogin */
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
 
-        /* if (is_null($a) || $a->estado_consola == 'logged-out') { // Línea original */ 
+        /* if (is_null($a) || $a->estado_consola == 'logged-out') { // Línea original */
        if (is_null($a)) {
             if ($this->DEBUG) {
                 $this->_log->output("DEBUG: ".__METHOD__.": AgentLogin($sAgente) no iniciado por programa, no se hace nada.");
                 $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogin");
             }
             return FALSE;
-        }        
-        
+        }
+
         $a->actualizarEstadoEnCola($params['Queue'], $params['Status']);
         if ($a->estado_consola != 'logged-in') {
             $a->completarLoginAgente();
@@ -1552,7 +1552,7 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
                 );
         }
-        
+
         $a = $this->_listaAgentes->buscar('agentchannel', $params['Location']);
 
         if (is_null($a)) {
@@ -1561,14 +1561,14 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogoff");
             }
             return FALSE;
-        }        
+        }
 
         $a->quitarEstadoEnCola($params['Queue']);
         if ($a->estado_consola == 'logged-in') {
             if ($a->type == 'Agent') {
                 if ($this->DEBUG) {
                     $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberRemoved({$params['Location']}) , ignorando...");
-                }                
+                }
             } elseif ($a->hayColasDinamicasLogoneadas()) {
                 if ($this->DEBUG) {
                     $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberRemoved({$params['Location']}) todavía quedan colas pendientes, ignorando...");
@@ -1576,7 +1576,7 @@ class AMIEventProcess extends TuberiaProcess
             } else {
                 $this->_tuberia->msg_ECCPProcess_AgentLogoff(
                     $params['Location'],
-                    $params['local_timestamp_received'], 
+                    $params['local_timestamp_received'],
                     $a->id_agent,
                     $a->id_sesion,
                     $a->id_audit_break,
@@ -1589,7 +1589,7 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberRemoved({$params['Location']}) en estado no-logoneado, ignorando...");
             }
         }
-        
+
         if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
         if ($this->DEBUG) {
             $this->_log->output("DEBUG: ".__METHOD__.": EXIT QueueMemberRemoved");
@@ -1609,7 +1609,7 @@ class AMIEventProcess extends TuberiaProcess
         if (!isset($this->_numLlamadasEnCola[$params['Queue']]))
             $this->_numLlamadasEnCola[$params['Queue']] = 0;
         $this->_numLlamadasEnCola[$params['Queue']]++;
-        
+
         $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid']);
         if (is_null($llamada) && isset($this->_colasEntrantes[$params['Queue']])) {
         	// Llamada de campaña entrante
@@ -1629,10 +1629,10 @@ class AMIEventProcess extends TuberiaProcess
                 $params['Channel'],
                 $params['Queue']);
         }
-        
+
         return FALSE;
     }
-    
+
     public function msg_Link($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1641,7 +1641,7 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
                 );
         }
-        
+
         $llamada = NULL;
 
         // Recuperar el agente local y el canal remoto
@@ -1654,8 +1654,8 @@ class AMIEventProcess extends TuberiaProcess
             $sAgentNum = $regs[1];
             $sChannel = $sAgentChannel = $params['Channel1'];
             $sRemChannel = $params['Channel2'];
-        } elseif (  preg_match('|^(SIP/(\d+))\-\w+$|',  $params['Channel1'], $regs) || 
-                    preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel1'], $regs)) {        
+        } elseif (  preg_match('|^(SIP/(\d+))\-\w+$|',  $params['Channel1'], $regs) ||
+                    preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel1'], $regs)) {
             $sAgentNum   = $regs[2];
             $sChannel    = $regs[1];
             $sRemChannel = $params['Channel2'];
@@ -1665,24 +1665,24 @@ class AMIEventProcess extends TuberiaProcess
             $sAgentNum = $regs[1];
             $sChannel = $sAgentChannel = $params['Channel2'];
             $sRemChannel = $params['Channel1'];
-        } elseif(   preg_match('|^(SIP/(\d+))\-\w+$|', $params['Channel2'], $regs) || 
+        } elseif(   preg_match('|^(SIP/(\d+))\-\w+$|', $params['Channel2'], $regs) ||
                     preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel2'], $regs)) {
-            $sAgentNum = $regs[2];         
-            $sChannel  = $regs[1];                    
+            $sAgentNum = $regs[2];
+            $sChannel  = $regs[1];
             $sRemChannel = $params['Channel1']; // Remote Channel
             $sAgentChannel = $params['Channel2'];
         }
 
         if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid1']);
         if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid2']);
-        
+
         if (!is_null($llamada) && !is_null($llamada->timestamp_link) &&
             !is_null($llamada->agente) && $llamada->agente->channel != $sChannel) {
-            /* Si la llamada ya ha sido enlazada previamente, y ahora se enlaza 
-             * a un canal distinto del agente original, se asume que ha sido 
-             * transferida a una extensión fuera de monitoreo, y ya no debe de 
+            /* Si la llamada ya ha sido enlazada previamente, y ahora se enlaza
+             * a un canal distinto del agente original, se asume que ha sido
+             * transferida a una extensión fuera de monitoreo, y ya no debe de
              * monitorearse. Ya que Asterisk no ejecuta un Hangup en este caso,
-             * se lo debe simular. 
+             * se lo debe simular.
              */
             $a = $this->_listaAgentes->buscar('agentchannel', $sChannel);
             if (!is_null($a)) {
@@ -1705,11 +1705,11 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_config['dialer']['llamada_corta']);
             return FALSE;
         }
-        
-        /* Si no se tiene clave, todavía puede ser llamada agendada que debe 
+
+        /* Si no se tiene clave, todavía puede ser llamada agendada que debe
          * buscarse por nombre de canal. También podría ser una llamada que
          * regresa de Hold, y que ha sido asignado un Uniqueid distinto. Para
-         * distinguir los dos casos, se verifica el estado de Hold de la 
+         * distinguir los dos casos, se verifica el estado de Hold de la
          * llamada.
          */
         $sNuevo_Uniqueid = NULL;
@@ -1745,12 +1745,12 @@ class AMIEventProcess extends TuberiaProcess
             	$llamada = NULL;
             }
         }
-        
-        
+
+
         if (!is_null($llamada)) {
             // Se tiene la llamada principal monitoreada
             if (!is_null($llamada->timestamp_link)) return FALSE;   // Múltiple link se ignora
-            
+
             $a = $this->_listaAgentes->buscar('agentchannel', $sChannel);
             if (is_null($a)) {
             	$this->_log->output("ERR: ".__METHOD__.": no se puede identificar agente ".
@@ -1764,7 +1764,7 @@ class AMIEventProcess extends TuberiaProcess
                     $sAgentChannel);
             }
         } else {
-        	/* El Link de la pata auxiliar con otro canal puede indicar el 
+        	/* El Link de la pata auxiliar con otro canal puede indicar el
              * ActualChannel requerido para poder manipular la llamada. */
             $sCanalCandidato = NULL;
             if (is_null($llamada)) {
@@ -1775,7 +1775,7 @@ class AMIEventProcess extends TuberiaProcess
                 $llamada = $this->_listaLlamadas->buscar('auxchannel', $params['Uniqueid2']);
                 if (!is_null($llamada)) $sCanalCandidato = $params['Channel1'];
             }
-            if (!is_null($llamada) && !is_null($sCanalCandidato) && 
+            if (!is_null($llamada) && !is_null($sCanalCandidato) &&
                 strpos($sCanalCandidato, 'Local/') !== 0) {
             	if (is_null($llamada->actualchannel)) {
                     $llamada->actualchannel = $sCanalCandidato;
@@ -1798,10 +1798,10 @@ class AMIEventProcess extends TuberiaProcess
             	}
             }
         }
-        
+
         return FALSE;
     }
-    
+
     public function msg_Unlink($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1810,7 +1810,7 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
                 );
         }
-        
+
         $llamada = NULL;
         if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid1']);
         if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid2']);
@@ -1825,7 +1825,7 @@ class AMIEventProcess extends TuberiaProcess
         }
         return FALSE;
     }
-    
+
     public function msg_Hangup($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1834,7 +1834,7 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
                 );
         }
-        
+
         if ($this->_manejarHangupAgentLoginFallido($params)) {
             if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
             return FALSE;
@@ -1843,10 +1843,10 @@ class AMIEventProcess extends TuberiaProcess
         $a = NULL;
         $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid']);
         if (is_null($llamada)) {
-        	/* Si la llamada ha sido transferida, la porción que está siguiendo 
+        	/* Si la llamada ha sido transferida, la porción que está siguiendo
              * el marcador todavía está activa, pero transferida a otra extensión.
-             * Sin embargo, el agente está ahora libre y recibirá otra llamada. 
-             * El hangup de aquí podría ser para la parte de la llamada del 
+             * Sin embargo, el agente está ahora libre y recibirá otra llamada.
+             * El hangup de aquí podría ser para la parte de la llamada del
              * agente. */
             $a = $this->_listaAgentes->buscar('uniqueidlink', $params['Uniqueid']);
             if (!is_null($a)) {
@@ -1855,10 +1855,10 @@ class AMIEventProcess extends TuberiaProcess
         }
 
         if (is_null($llamada)) {
-            /* Si no se encuentra la llamada, es posible que se haya recibido 
-             * Hangup del canal de una llamada que se ha enviado a HOLD, y que 
+            /* Si no se encuentra la llamada, es posible que se haya recibido
+             * Hangup del canal de una llamada que se ha enviado a HOLD, y que
              * ya ha expirado su espera y debe finalizarse. Entonces OnHold será
-             * verdadero, y Channel coincidirá con el ActualChannel de una de 
+             * verdadero, y Channel coincidirá con el ActualChannel de una de
              * las llamadas. Además debe de localizarse el agente ECCP que mandó
              * a HOLD la llamada y quitarle la pausa. */
             $llamada = $this->_listaLlamadas->buscar('actualchannel', $params['Channel']);
@@ -1885,31 +1885,31 @@ class AMIEventProcess extends TuberiaProcess
                     $this->_log->output(
                         "DEBUG: ".__METHOD__.": Hangup de canal auxiliar de ".
                         "llamada por fallo de Originate para llamada ".
-                        $llamada->uniqueid." canal auxiliar ".$params['Uniqueid']);                        
+                        $llamada->uniqueid." canal auxiliar ".$params['Uniqueid']);
                 }
             }
         }
-        
+
         if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
         return FALSE;
     }
-    
+
     /* Procesamiento de llamada identificada: params requiere los elementos:
      * local_timestamp_received Uniqueid Channel Cause Cause-txt
-     * Esta función también se invoca al cerrar todas las llamadas luego de 
-     * reiniciado Asterisk. 
+     * Esta función también se invoca al cerrar todas las llamadas luego de
+     * reiniciado Asterisk.
      */
     private function _procesarLlamadaColgada($llamada, $params)
     {
         if (is_null($llamada->timestamp_link)) {
-            /* Si se detecta el Hangup antes del OriginateResponse, se marca 
+            /* Si se detecta el Hangup antes del OriginateResponse, se marca
              * la llamada como fallida y se deja de monitorear. */
-            if (is_null($llamada->timestamp_originateend) && 
+            if (is_null($llamada->timestamp_originateend) &&
                 !is_null($llamada->timestamp_originatestart)) {
                 if ($this->DEBUG) {
-                    $this->_log->output("DEBUG: ".__METHOD__.": Hangup de llamada por fallo de Originate");                        
+                    $this->_log->output("DEBUG: ".__METHOD__.": Hangup de llamada por fallo de Originate");
                 }
-                $llamada->llamadaFueOriginada($params['local_timestamp_received'], 
+                $llamada->llamadaFueOriginada($params['local_timestamp_received'],
                     $params['Uniqueid'], $params['Channel'], 'Failure',
                     $params['Cause'], $params['Cause-txt']);
             } else {
@@ -1930,7 +1930,7 @@ class AMIEventProcess extends TuberiaProcess
             }
         }
     }
-    
+
     public function msg_Agentlogin($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1949,14 +1949,14 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogin");
             }
             return FALSE;
-        }        
+        }
         $a->completarLoginAgente();
         $this->_tuberia->msg_ECCPProcess_AgentLogin(
             $sAgente,
             $params['local_timestamp_received'],
             $a->id_agent);
     }
-    
+
     public function msg_Agentlogoff($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -1975,20 +1975,20 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_log->output("DEBUG: ".__METHOD__.": EXIT OnAgentlogoff");
             }
             return FALSE;
-        }        
-        
+        }
+
         $this->_tuberia->msg_ECCPProcess_AgentLogoff(
             $sAgente,
-            $params['local_timestamp_received'], 
+            $params['local_timestamp_received'],
             $a->id_agent,
             $a->id_sesion,
             $a->id_audit_break,
             $a->id_audit_hold);
         $this->_verificarLlamadaActivaLogoff($a, $params['Event']);
         $a->terminarLoginAgente();
-        
+
         if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
-        
+
         return FALSE;
     }
 
@@ -2012,7 +2012,7 @@ class AMIEventProcess extends TuberiaProcess
             }
     	}
     }
-    
+
     public function msg_QueueParams($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -2021,12 +2021,12 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
             );
         }
-        
+
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
         if (!isset($this->_tmp_numLlamadasEnCola[$params['Queue']]))
             $this->_tmp_numLlamadasEnCola[$params['Queue']] = 0;
     }
-    
+
     public function msg_QueueMember($sEvent, $params, $sServer, $iPort)
     {
         /*
@@ -2049,11 +2049,11 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
             );
         }
-        
-        if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;        
+
+        if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
         $this->_tmp_estadoAgenteCola[$params['Name']][$params['Queue']] = $params['Status'];
     }
-    
+
     public function msg_QueueEntry($sEvent, $params, $sServer, $iPort)
     {
         /*
@@ -2074,13 +2074,13 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
             );
         }
-        
+
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
         if (!isset($this->_tmp_numLlamadasEnCola[$params['Queue']]))
             $this->_tmp_numLlamadasEnCola[$params['Queue']] = 0;
         $this->_tmp_numLlamadasEnCola[$params['Queue']]++;
     }
-    
+
     public function msg_QueueStatusComplete($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -2089,10 +2089,10 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
             );
         }
-        
+
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
-        
-        /* Finalizó la enumeración. Ahora se puede actualizar el estado de los 
+
+        /* Finalizó la enumeración. Ahora se puede actualizar el estado de los
          * agentes de forma atómica.
          */
         $this->_numLlamadasEnCola = $this->_tmp_numLlamadasEnCola;
@@ -2102,7 +2102,7 @@ class AMIEventProcess extends TuberiaProcess
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (!is_null($a)) {
                 $a->asignarEstadoEnColas($estadoCola);
-                
+
                 $diffcolas = $a->diferenciaColasDinamicas();
                 if (is_array($diffcolas)) {
                     // Colas a las que no pertenece y debería pertenecer
@@ -2113,7 +2113,7 @@ class AMIEventProcess extends TuberiaProcess
                         if ($a->num_pausas > 0)
                             $this->_ami->QueuePause($cola, $sAgente, 'true');
                     }
-                    
+
                     // Colas a las que pertenece y no debe pertenecer
                     foreach ($diffcolas[1] as $cola) {
                         $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
@@ -2128,7 +2128,7 @@ class AMIEventProcess extends TuberiaProcess
             }
         }
     }
-    
+
     // En Asterisk 11 e inferior, este evento se emite sólo si eventmemberstatus
     // está seteado en la cola respectiva.
     public function msg_QueueMemberStatus($sEvent, $params, $sServer, $iPort)
@@ -2139,7 +2139,7 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
             );
         }
-        
+
         $a = $this->_listaAgentes->buscar('agentchannel', $params['Location']);
         if (!is_null($a)) {
             // TODO: existe $params['Paused'] que indica si está en pausa
@@ -2150,7 +2150,7 @@ class AMIEventProcess extends TuberiaProcess
             }
         }
     }
-    
+
     public function msg_Leave($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -2159,7 +2159,7 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
             );
         }
-        
+
         if (!isset($this->_numLlamadasEnCola[$params['Queue']]))
             $this->_numLlamadasEnCola[$params['Queue']] = 0;
         if ($this->_numLlamadasEnCola[$params['Queue']] > 0)
@@ -2169,7 +2169,7 @@ class AMIEventProcess extends TuberiaProcess
             $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
         }
     }
-    
+
     public function msg_Reload($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -2178,11 +2178,11 @@ class AMIEventProcess extends TuberiaProcess
                 "\n$sEvent: => ".print_r($params, TRUE)
             );
         }
-        
+
         $this->_log->output('INFO: se ha recargado configuración de Asterisk, se refresca agentes...');
         $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
     }
-    
+
     private function _forzarLogoffAgente($a)
     {
     	if ($a->type == 'Agent')
@@ -2190,15 +2190,15 @@ class AMIEventProcess extends TuberiaProcess
         else {
             $sAgentType = $a->type;
             $sAgentNumber = $a->number;
-            
+
             // $key_input tomaría la forma agents/S100 (para SIP) ó agents/I110 (para IAX)
-            $extension = $sAgentType{0}.$sAgentNumber; 
-            $db_output = $this->_ami->database_showkey('agents/'.$extension); 
-        
+            $extension = $sAgentType{0}.$sAgentNumber;
+            $db_output = $this->_ami->database_showkey('agents/'.$extension);
+
             $arrColas = array();
-            foreach($db_output as $k => $val){  
+            foreach($db_output as $k => $val){
                 $preg_match_string = "|^/QPENALTY/(\d+)/agents/$extension$|";
-                if (preg_match($preg_match_string, $k, $regs)) {     
+                if (preg_match($preg_match_string, $k, $regs)) {
                     $this->_ami->QueueRemove($regs[1], $a->channel);
                 }
             }
@@ -2208,7 +2208,7 @@ class AMIEventProcess extends TuberiaProcess
     private function _verificarLlamadaActivaLogoff($a, $evtname)
     {
         if (is_null($a->llamada)) return;
-        
+
         $this->_log->output('WARN: agente '.$a->channel.' todavía tiene una '.
             'llamada al procesar '.$evtname.', se cierra...');
         $r = $this->_ami->Hangup($a->llamada->agentchannel);
@@ -2217,12 +2217,12 @@ class AMIEventProcess extends TuberiaProcess
                 ' ('.$a->llamada->agentchannel.') - '.$r['Message']);
         }
     }
-    
+
     private function _dumpstatus()
     {
-        $this->_log->output('INFO: '.__METHOD__.' volcando status de seguimiento...');        
+        $this->_log->output('INFO: '.__METHOD__.' volcando status de seguimiento...');
         $this->_log->output("\n");
-        
+
         $this->_log->output("Versión detectada de Asterisk............".implode('.', $this->_asteriskVersion));
         $this->_log->output("Timestamp de arranque de Asterisk........".$this->_asteriskStartTime);
         $this->_log->output("Última verificación de llamadas viejas...".date('Y-m-d H:i:s', $this->_iTimestampVerificacionLlamadasViejas));
@@ -2230,7 +2230,7 @@ class AMIEventProcess extends TuberiaProcess
 
         foreach ($this->_campaniasSalientes as $c)
             $c->dump($this->_log);
-        
+
         $this->_log->output("\n\nLista de colas entrantes:\n");
         foreach ($this->_colasEntrantes as $c) {
             $this->_log->output("queue:               ".$c['queue']);
@@ -2242,15 +2242,15 @@ class AMIEventProcess extends TuberiaProcess
 
         $this->_log->output("\n\nLista de agentes:\n");
         $this->_listaAgentes->dump($this->_log);
-        
+
         $this->_log->output("\n\nLista de llamadas:\n");
         $this->_listaLlamadas->dump($this->_log);
-        
+
         $this->_log->output("\n\nLlamadas en espera en colas:");
         foreach ($this->_numLlamadasEnCola as $q => $n) {
             $this->_log->output("\t$q.....$n");
         }
-        
+
         $this->_log->output("\n\nCuenta de eventos recibidos:");
         $cuenta = $this->_ami->cuentaEventos;
         if (count($cuenta) > 0) {

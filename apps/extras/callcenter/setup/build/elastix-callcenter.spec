@@ -100,6 +100,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Apr 18 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix incorrect variable verification after GetVar call.
+  SVN Rev[7011]
+
 * Wed Apr 15 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Report Break: remove unnecessary <form> tag around grid filter which
   leads to nested <form> tag.
@@ -112,11 +116,11 @@ fi
   SVN Rev[6965]
 
 * Mon Apr  6 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dialer: do not attempt to fetch a caller-id from the channel of a 
-  failed call in OriginateRespose. Also compare against possible value of 
+- CHANGED: Dialer: do not attempt to fetch a caller-id from the channel of a
+  failed call in OriginateRespose. Also compare against possible value of
   CallerIDNum and report any differences.
   SVN Rev[6964]
-- FIXED: Dialer: remove use of print_r which risks memory exhaustion by 
+- FIXED: Dialer: remove use of print_r which risks memory exhaustion by
   recursive dumping of linked objects. Use dump function instead.
   SVN Rev[6962]
 
@@ -129,7 +133,7 @@ fi
   SVN Rev[6945]
 
 * Mon Mar 30 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Agent Console: use framework calendar icon instead of jscalendar 
+- CHANGED: Agent Console: use framework calendar icon instead of jscalendar
   icon which might be removed soon.
   SVN Rev[6939]
 

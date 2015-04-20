@@ -351,6 +351,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Apr 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- Framework: remove unused templates _alert_container_{confirmation|information|
+  error}.tpl in all themes.
+  SVN Rev[7013]
+
 * Fri Apr 17 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-7
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

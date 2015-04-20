@@ -352,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Apr 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- Framework: add missing template listcsv.tpl to blackmin theme.
+  SVN Rev[7014]
 - Framework: remove unused templates _alert_container_{confirmation|information|
   error}.tpl in all themes.
   SVN Rev[7013]

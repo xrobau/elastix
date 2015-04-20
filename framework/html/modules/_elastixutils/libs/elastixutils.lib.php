@@ -137,7 +137,10 @@ function searchModulesByName()
     include_once "libs/JSON.php";
     $json = new Services_JSON();
 
-    $name = getParameter("name_module_search");
+    //$name = getParameter("name_module_search");
+    $name = NULL;
+    if (isset($_REQUEST['term'])) $name = $_REQUEST['term'];
+    if (isset($_REQUEST['name_module_search'])) $name = $_REQUEST['name_module_search'];
     $result = array();
     $arrIdMenues = array();
     $lang=get_language();
@@ -176,7 +179,7 @@ function searchModulesByName()
     foreach($arrResult as $key2 => $value2){
         // leyendo el resultado del query
         if(in_array($value2["name"], $arrIdMenues)){
-            $arrMenu['caption'] = _tr($value2["description"]);
+            $arrMenu[/*'caption'*/'label'] = _tr($value2["description"]);
             $arrMenu['value']   = $value2["name"];
             $result[] = $arrMenu;
         }

@@ -265,91 +265,15 @@ $(document).ready(function(){
         });
     });
 
-	$( "#search_module_elastix" )
-		// don't navigate away from the field on tab when selecting an item
-		.bind( "keydown", function( event ) {
-			if ( event.keyCode === $.ui.keyCode.TAB && $( this ).data( "autocomplete" ).menu.active ) {
-				event.preventDefault();
-			}
-		})
-		.autocomplete({
-			autoFocus: true,
-		    delay: 0,
-			minLength: 0,
-			source: function(request, response){
-				//$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
-				$("#neo-cmenu-showbox-search").hover(
-				  function() {
-					$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
-				  },
-				  function() {
-					$("#neo-cmenu-showbox-search").removeClass("neo-display-none");}
-				);
-				$.ajax({
-					url: 'index.php?menu=_elastixutils&action=search_module&rawmode=yes',
-					dataType: "json",
-					data: {
-						name_module_search: ((request.term).split( /,\s*/ ) ).pop()
-					},
-					success: function( data ) {
-						response( $.map( data, function( item ) {
-							return {
-								label: item.caption,
-								value: item.value
-							}
-						}));
-					}
-				});
-			},
-			focus: function() {
-				// prevent value inserted on focus
-				return false;
-			},
-			open: function() { // parche que resuelve el bug del panel de busqueda de modulo en PBX
-				var top_var  = $('.ui-autocomplete').css("top");
-				var left_var = $('.ui-autocomplete').css("left");
-				if(top_var == "0px" & left_var == "0px"){
-					var searchPosition = $('#search_module_elastix').position();
-					var top = searchPosition.top + 53;
-					if (/Chrome[\/\s](\d+\.\d+)/.test(navigator.userAgent))
-						top = searchPosition.top + 50;
-					$('.ui-autocomplete').css("top",top+"px");
-					$('.ui-autocomplete').css("left","1054px");
-					$('.ui-autocomplete').css("width","174px");
-				}
-			},
-			close: function() {
-				$('#neo-cmenu-showbox-search').one('click', function(e) {
-					//$( "#search_module_elastix" ).autocomplete( "close" );
-					$( "#search_module_elastix" ).val("");
-					e.stopPropagation();
-				});
-				$('body').one('click', function(e) {
-					$("#neo-cmenu-showbox-search").hover(
-					  function() {
-						$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
-					  },
-					  function() {
-						$("#neo-cmenu-showbox-search").addClass("neo-display-none");
-					  }
-					);
-					$("#neo-cmenu-showbox-search").addClass("neo-display-none");
-					e.stopPropagation();
-				});
-				//$("#neo-cmenu-showbox-search").addClass("neo-display-none");
-			},
-			/*change: function( event, ui ) {
-
-			},*/
-			select: function( event, ui ) {
-				//$("#neo-cmenu-showbox-search").removeClass("neo-display-none");
-				this.value = ui.item.label;
-				document.location.href = "?menu="+ui.item.value;
-				// enviando la redireccion al index.php
-				return false;
-			}
-	});
-
+    $('#search_module_elastix').autocomplete({
+    	autoFocus:		true,
+    	delay:			0,
+    	minLength:		1,
+    	source:			'index.php?menu=_elastixutils&action=search_module&rawmode=yes',
+    	focus:			function() { return false; },
+    	select:			function(event, ui) { window.open('?menu='+ui.item.value, '_self'); }
+    });
+    
     var menu = getParameterByName("menu");
         if (typeof  menu!== "undefined" && menu) {
             var lblmenu = menu.split("_");

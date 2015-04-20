@@ -91,6 +91,11 @@ fi
 %{_localstatedir}/www/html/elastixConnection/*
 
 %changelog
+* Sun Apr 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- REMOVED: Peers Information - remove private copy of jQuery - framework has a
+  newer version.
+  SVN Rev[]
+
 * Fri Feb 27 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Distributed Dialplan: fix include path for system PHPMailer.
   SVN Rev[6881]
@@ -105,7 +110,7 @@ fi
 - CHANGED: Remote Servers, Server Key, Company Information: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
   SVN Rev[6368]
 
-* Thu Oct 3 2013 Jose Briones <jbriones@elastix.com> 
+* Thu Oct 3 2013 Jose Briones <jbriones@elastix.com>
 - UPDATED: Module peer_information. Translation support for a message was added
   SVN Rev[5969]
 

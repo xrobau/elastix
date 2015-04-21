@@ -3,7 +3,7 @@
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -155,6 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Apr 21 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Fri Apr 17 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: introduce new Grandstream models GXP2130 and
   GXP2140.
@@ -163,6 +167,7 @@ fi
 * Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[6972]
 
 * Wed Mar 18 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: move nmap dependency here from elastix-framework.

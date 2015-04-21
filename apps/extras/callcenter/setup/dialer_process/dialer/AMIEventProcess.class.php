@@ -1471,27 +1471,16 @@ class AMIEventProcess extends TuberiaProcess
         }
 
         // Si el estado de la llamada es Failure, el canal probablemente ya no existe
-        if ($params['Response'] != 'Failure') {
+        if ($params['Response'] != 'Failure' && empty($calleridnum)) {
             // Si la fuente de la llamada está en blanco, se asigna al número marcado
             $r = $this->_ami->GetVar($params['Channel'], 'CALLERID(num)');
             if ($r['Response'] != 'Success') {
             	$this->_log->output('ERR: '.__METHOD__.
                     ': fallo en obtener CALLERID(num) para canal '.$params['Channel'].
                     ': '.$r['Response'].' - '.$r['Message']);
-            	if (!empty($calleridnum)) {
-            	    // En teoría esta condición no se cumple nunca
-            	    $this->_log->output('ERR: '.__METHOD__.': ...pero CallerIDNum es '.$calleridnum);
-            	}
             } else {
                 $r['Value'] = in_array(trim($r['Value']), array('', '<null>', '(null)'))
                     ? '' : trim($r['Value']);
-                if (!is_null($calleridnum)) {
-                    if ($calleridnum != $r['Value']) {
-                        $this->_log->output('WARN: '.__METHOD__.': discrepancia en canal '.
-                            $params['Channel'].' de CallerID: CallerIDNum='.
-                            $calleridnum.' GetVar(CALLERID(num))='.$r['Value']);
-                    }
-                }
                 if (empty($r['Value'])) {
                     $r = $this->_ami->SetVar($params['Channel'], 'CALLERID(num)', $llamada->phone);
                     if ($r['Response'] != 'Success') {

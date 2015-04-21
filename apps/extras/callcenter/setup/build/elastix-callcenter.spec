@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Apr 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: on OriginateRespose, only evaluate CallerID when CallerIDNum
+  is empty. This cuts down on unnecessary calls to AMI GetVar.
+  SVN Rev[7018]
+
 * Sat Apr 18 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: fix incorrect variable verification after GetVar call.
   SVN Rev[7011]

@@ -266,12 +266,16 @@ $(document).ready(function(){
     });
 
     $('#search_module_elastix').autocomplete({
-    	autoFocus:		true,
-    	delay:			0,
-    	minLength:		1,
-    	source:			'index.php?menu=_elastixutils&action=search_module&rawmode=yes',
-    	focus:			function() { return false; },
-    	select:			function(event, ui) { window.open('?menu='+ui.item.value, '_self'); }
+    	autoFocus:	true,
+    	delay:		0,
+    	minLength:	1,
+    	source:		'index.php?menu=_elastixutils&action=search_module&rawmode=yes',
+    	focus:		function() { return false; },
+    	select:		function(event, ui) { window.open('?menu='+ui.item.value, '_self'); },
+    	
+    	// El div de búsqueda debe permanecer visible mientras se selecciona
+    	open:		function(event, ui) { $(this).parents('div').first().css('display', 'block'); },
+    	close:		function(event, ui) { $(this).parents('div').first().css('display', ''); }
     });
     
     var menu = getParameterByName("menu");

@@ -351,6 +351,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Apr 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- Framework: force search div to remain visible while suggestion menu is open.
+  SVN Rev[7017]
+
 * Mon Apr 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - Framework: simplify autocomplete binding for module search.
   SVN Rev[7015]

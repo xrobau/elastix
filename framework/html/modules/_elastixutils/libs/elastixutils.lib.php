@@ -137,7 +137,6 @@ function searchModulesByName()
     include_once "libs/JSON.php";
     $json = new Services_JSON();
 
-    //$name = getParameter("name_module_search");
     $name = NULL;
     if (isset($_REQUEST['term'])) $name = $_REQUEST['term'];
     if (isset($_REQUEST['name_module_search'])) $name = $_REQUEST['name_module_search'];

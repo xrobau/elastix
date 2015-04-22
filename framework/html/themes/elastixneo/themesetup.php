@@ -29,32 +29,6 @@
 
 function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
 {
-    /* El tema elastixneo muestra hasta 7 items de menú de primer nivel, y
-     * coloca el resto en una lista desplegable a la derecha del último item.
-     * Se debe de garantizar que el item actualmente seleccionado aparezca en
-     * un menú de primer nivel que esté entre los 7 primeros, reordenando los
-     * items si es necesario. */
-    $arrMainMenu = $smarty->get_template_vars('arrMainMenu');
-    $idMainMenuSelected = $smarty->get_template_vars('idMainMenuSelected');
-    $MAX_ITEMS_VISIBLES = 7;
-    if (count($arrMainMenu) > $MAX_ITEMS_VISIBLES) {
-        // Se transfiere a arreglo numérico para manipular orden de enumeración
-        $tempMenulist = array();
-        $idxMainMenu = NULL;
-        foreach ($arrMainMenu as $key => $value) {
-            if ($key == $idMainMenuSelected) $idxMainMenu = count($tempMenulist);
-            $tempMenulist[] = array($key, $value);
-        }
-        if (!is_null($idxMainMenu) && $idxMainMenu >= $MAX_ITEMS_VISIBLES) {
-            $menuitem = array_splice($tempMenulist, $idxMainMenu, 1);
-            array_splice($tempMenulist, $MAX_ITEMS_VISIBLES - 1, 0, $menuitem);
-            $arrMainMenu = array();
-            foreach ($tempMenulist as $menuitem) $arrMainMenu[$menuitem[0]] = $menuitem[1];
-        }
-        unset($tempMenulist);
-        $smarty->assign('arrMainMenu', $arrMainMenu);
-    }
-
     $smarty->assign(array(
         "ABOUT_ELASTIX2"            =>  _tr('About Elastix2'),
         "HELP"                      =>  _tr('HELP'),

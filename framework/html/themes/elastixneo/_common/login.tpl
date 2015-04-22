@@ -3,38 +3,35 @@
   <head>
 	<title>Elastix - {$PAGE_NAME}</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<!--<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">-->
-	<link rel="stylesheet" href="themes/{$THEMENAME}/login_styles.css">
+	<link rel="stylesheet" href="themes/{$THEMENAME}/styles.css">
     {$HEADER_LIBS_JQUERY}
+    {literal}
+    <script type="text/javascript">
+        $(document).ready(function() {
+             $("#neo-login-box").draggable();
+             $("#input_user").focus();
+        });         
+    </script>
+    {/literal}
   </head>
   <body>
 	<form method="POST">
 	  <div id="neo-login-box">
-		<div id="neo-login-logo">
-		  <img src="themes/{$THEMENAME}/images/elastix_logo_mini.png" width="200" height="62" alt="elastix logo" />
+		<div id="neo-login-logo"><img src="themes/{$THEMENAME}/images/elastix_logo_mini.png" width="200" height="62" alt="elastix logo" /></div>
+		<div>
+		  <div>{$USERNAME}:</div>
+		  <div class="inputbox"><input type="text" id="input_user" name="input_user" /></div>
 		</div>
-		<div class="neo-login-line">
-		  <div class="neo-login-label">{$USERNAME}:</div>
-		  <div class="neo-login-inputbox"><input type="text" id="input_user" name="input_user" class="neo-login-input" /></div>
+		<div>
+		  <div>{$PASSWORD}:</div>
+		  <div class="inputbox"><input type="password" name="input_pass" /></div>
 		</div>
-		<div class="neo-login-line">
-		  <div class="neo-login-label">{$PASSWORD}:</div>
-		  <div class="neo-login-inputbox"><input type="password" name="input_pass" class="neo-login-input" /></div>
+		<div>
+		  <div></div>
+		  <div class="inputbox"><input type="submit" name="submit_login" value="{$SUBMIT}" /></div>
 		</div>
-		<div class="neo-login-line">
-		  <div class="neo-login-label"></div>
-		  <div class="neo-login-inputbox"><input type="submit" name="submit_login" value="{$SUBMIT}" class="neo-login-submit" /></div>
-		</div>
-		<div class="neo-footernote"><a href="http://www.elastix.org" style="text-decoration: none;" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" style="text-decoration: none;" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" style="text-decoration: none;" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.</div>
-		<br>
-        {literal}
-		<script type="text/javascript">
-            $(document).ready(function() {
-                 $("#neo-login-box").draggable();
-            });
-			document.getElementById("input_user").focus();
-		</script>
-        {/literal}
+		<div class="neo-footernote"><a href="http://www.elastix.org" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" style="text-decoration: none;" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.</div>
+		<br/>
 	  </div>
 	</form>
   </body>

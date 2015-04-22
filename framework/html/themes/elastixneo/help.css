@@ -1,3 +1,7 @@
+body {
+	background: none;
+}
+
 #hlp_content p {
 	text-align: justify;
 }

@@ -351,6 +351,16 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Apr 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: complete reimplementation of elastixneo theme. This
+  reimplementation does away with many unused images, replaces many uses of
+  javascript for hover behavior with equivalent :hover CSS rules, allows free
+  resizing instead of fixing the module width to 1280 pixels, reworks the menu
+  overflow to cope with resizing, replaces many uses of the neo-display-none
+  class with .hide() and .show jQuery calls, and copies a standard table class
+  from the blackmin theme.
+  SVN Rev[7020]
+
 * Wed Apr 22 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-8
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

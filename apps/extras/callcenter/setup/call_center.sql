@@ -475,6 +475,24 @@ CREATE TABLE IF NOT EXISTS `call_progress_log` (
     KEY `outgoing_datetime_entry` (`id_call_outgoing`, `datetime_entry`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Table structure for table `call_recording`
+-- 
+CREATE TABLE IF NOT EXISTS `call_recording` (
+    `id` int(10) unsigned NOT NULL auto_increment,
+
+    `datetime_entry`    datetime    NOT NULL,
+    `id_call_incoming`      int(10) unsigned,
+    `id_call_outgoing`      int(10) unsigned,
+    `uniqueid`              varchar(32) NOT NULL,
+    `channel`               varchar(80) NOT NULL,
+    `recordingfile`         varchar(255),
+
+    PRIMARY KEY (`id`),
+    CONSTRAINT `call_recording_ibfk_1` FOREIGN KEY (`id_call_incoming`) REFERENCES `call_entry` (`id`),
+    CONSTRAINT `call_recording_ibfk_2` FOREIGN KEY (`id_call_outgoing`) REFERENCES `calls` (`id`)
+);
+
 
 /* Procedimiento que agrega soporte para DNC (DO NOT CALL) y quita la columna agent.queue */
 DELIMITER ++ ;

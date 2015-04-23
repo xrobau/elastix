@@ -543,6 +543,7 @@ SQL_UPDATE_CAMPAIGN;
     {
         $listaSQL = array(
             'DELETE FROM campaign_form WHERE id_campaign = ?',
+            'DELETE FROM call_recording WHERE id_call_outgoing IN (SELECT id from calls WHERE id_campaign = ?)',
             'DELETE FROM call_attribute WHERE id_call IN (SELECT id from calls WHERE id_campaign = ?)',
             'DELETE FROM form_data_recolected WHERE id_calls IN (SELECT id from calls WHERE id_campaign = ?)',
             'DELETE call_progress_log FROM call_progress_log, calls '.

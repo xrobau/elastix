@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Apr 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add tracking of recording files associated with outgoing
+  calls, by monitoring assignment to MIXMONITOR_FILENAME on tracked channels.
+  SVN Rev[7022] 
+
 * Tue Apr 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: on OriginateRespose, only evaluate CallerID when CallerIDNum
   is empty. This cuts down on unnecessary calls to AMI GetVar.

@@ -112,7 +112,8 @@ class CampaignProcess extends TuberiaProcess
         foreach (array('requerir_nuevaListaAgentes', 'sqlinsertcalls', 
             'sqlupdatecalls', 'sqlinsertcurrentcalls', 'sqldeletecurrentcalls',
             'sqlupdatecurrentcalls', 'sqlupdatestatcampaign',
-            'actualizarCanalRemoto', 'finalsql', 'verificarFinLlamadasAgendables') as $k)
+            'actualizarCanalRemoto', 'finalsql', 'verificarFinLlamadasAgendables',
+            'agregarArchivoGrabacion') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde ECCPProcess
@@ -1462,6 +1463,15 @@ PETICION_LLAMADAS_AGENTE;
         call_user_func_array(array($this, '_verificarFinLlamadasAgendables'), $datos);
     }
 
+    public function msg_agregarArchivoGrabacion($sFuente, $sDestino, 
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_agregarArchivoGrabacion'), $datos);
+    }
+    
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
     	$this->_log->output('INFO: recibido mensaje de finalización, se detienen campañas...');
@@ -1714,6 +1724,30 @@ PETICION_LLAMADAS_AGENTE;
             	$r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
             }
             $this->_tuberia->msg_AMIEventProcess_quitarReservaAgente($sAgente);
+        }
+    }
+    
+    private function _agregarArchivoGrabacion($tipo_llamada, $id_llamada, $uniqueid, $channel, $recordingfile)
+    {
+        // TODO: configurar prefijo de monitoring
+        $sDirBaseMonitor = '/var/spool/asterisk/monitor/';
+        
+        // Quitar el prefijo de monitoring de todos los archivos
+        if (strpos($recordingfile, $sDirBaseMonitor) === 0)
+            $recordingfile = substr($recordingfile, strlen($sDirBaseMonitor));
+        
+        // Se asume que el archivo está completo con extensión
+        $field = ($tipo_llamada == 'outgoing') ? 'id_call_outgoing' : 'id_call_incoming';
+        $recordset = $this->_db->prepare("SELECT COUNT(*) AS N FROM call_recording WHERE {$field} = ? AND recordingfile = ?");
+        $recordset->execute(array($id_llamada, $recordingfile));
+        $iNumDuplicados = $recordset->fetch(PDO::FETCH_COLUMN, 0);
+        $recordset->closeCursor();
+        if ($iNumDuplicados <= 0) {
+            // El archivo no constaba antes - se inserta con los datos actuales
+            $sth = $this->_db->prepare(
+                "INSERT INTO call_recording (datetime_entry, {$field}, uniqueid, channel, recordingfile) ".
+                'VALUES (NOW(), ?, ?, ?, ?)');
+            $sth->execute(array($id_llamada, $uniqueid, $channel, $recordingfile));
         }
     }
 }

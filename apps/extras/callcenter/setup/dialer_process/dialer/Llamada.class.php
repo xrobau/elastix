@@ -876,5 +876,12 @@ class Llamada
     
         $this->_listaLlamadas->remover($this);
     }
+    
+    public function agregarArchivoGrabacion($uniqueid, $channel, $recordingfile)
+    {
+        $this->_tuberia->msg_CampaignProcess_agregarArchivoGrabacion(
+            $this->tipo_llamada, $this->id_llamada, $uniqueid, $channel,
+            $recordingfile);
+    }
 }
 ?>

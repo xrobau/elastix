@@ -234,7 +234,7 @@ class AMIEventProcess extends TuberiaProcess
             // Instalación de los manejadores de eventos
             foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join',
                 'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
-                'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved',
+                'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved','VarSet',
                 'QueueMemberStatus', 'QueueParams', 'QueueMember', 'QueueEntry',
                 'QueueStatusComplete', 'Leave', 'Reload') as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
@@ -1250,6 +1250,36 @@ class AMIEventProcess extends TuberiaProcess
 
     /**************************************************************************/
 
+    public function msg_VarSet($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        switch ($params['Variable']) {
+        case 'MIXMONITOR_FILENAME':
+            /*
+Event: VarSet
+Privilege: dialplan,all
+Channel: SIP/5547741200-000193aa
+Variable: MIXMONITOR_FILENAME
+Value: /var/spool/asterisk/monitor/2015/04/21/out-5528733168-5528733168-20150421-134747-1429642067.241009.wav
+Uniqueid: 1429642067.241008
+             */
+            foreach (array('channel', 'actualchannel', 'auxchannel') as $idx) {
+                $llamada = $this->_listaLlamadas->buscar($idx, $params['Channel']);
+                if (!is_null($llamada)) {
+                    $llamada->agregarArchivoGrabacion($params['Uniqueid'], $params['Channel'], $params['Value']);
+                    break;
+                }
+            }
+            break;
+        }
+    }
+    
     public function msg_Default($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {

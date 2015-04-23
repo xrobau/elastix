@@ -1500,6 +1500,13 @@ PETICION_LLAMADAS_AGENTE;
             $sqlTabla = 'INSERT INTO call_entry ';
         }
 
+        // Recoger el canal para llamada entrante
+        $channel = NULL;
+        if (isset($paramInsertar['channel'])) {
+            $channel = $paramInsertar['channel'];
+            unset($paramInsertar['channel']);
+        }
+        
         // Caso especial: llamada entrante requiere ID de contacto
         if ($tipo_llamada == 'incoming') {
             /* Se consulta el posible contacto en base al caller-id. Si hay 
@@ -1542,6 +1549,24 @@ PETICION_LLAMADAS_AGENTE;
         // Mandar de vuelta el ID de inserción a AMIEventProcess
         $this->_tuberia->msg_AMIEventProcess_idnewcall(
             $tipo_llamada, $paramInsertar['uniqueid'], $idCall);
+        
+        // Para llamadas entrantes se busca si tiene MIXMONITOR_FILENAME
+        if ($tipo_llamada == 'incoming' && !is_null($channel)) {
+            $r = $this->_ami->GetVar($channel, 'MIXMONITOR_FILENAME');
+            if ($r['Response'] != 'Success') {
+                if ($this->DEBUG) {
+                    $this->_log->output('DEBUG: '.__METHOD__.
+                        ': fallo en obtener MIXMONITOR_FILENAME para canal '.$channel.
+                        ': '.$r['Response'].' - '.$r['Message']);
+                }
+            } else {
+                $r['Value'] = trim($r['Value']);
+                if (!empty($r['Value'])) {
+                    $this->_agregarArchivoGrabacion($tipo_llamada, $idCall,
+                        $paramInsertar['uniqueid'], $channel, $r['Value']);
+                }
+            }
+        }
     }
 
     // Procedimiento que actualiza una sola llamada de la tabla calls o call_entry

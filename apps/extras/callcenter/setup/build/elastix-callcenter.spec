@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Thu Apr 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add tracking of recording files associated with incoming 
+  calls, by asking for the value of MIXMONITOR_FILENAME on the channel just
+  after inserting the incoming call record.
+  SVN Rev[7024]
 - CHANGED: Campaign Out, Campaign In: move edit link into the campaign name as
   done in CallCenterPRO.
   SVN Rev[7023]

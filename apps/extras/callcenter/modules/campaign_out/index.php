@@ -159,7 +159,8 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
         foreach($arrCampaign as $campaign) {
             $arrTmp    = array();
             $arrTmp[0] = "<input class=\"button\" type=\"radio\" name=\"id_campaign\" value=\"$campaign[id]\" />";
-            $arrTmp[1] = $campaign['name'];
+            $arrTmp[1] = "<a href='?menu=$module_name&amp;action=edit_campaign&amp;id_campaign=".$campaign['id']."'>".
+                htmlentities($campaign['name'], ENT_COMPAT, 'UTF-8').'</a>';
             $arrTmp[2] = $campaign['datetime_init'].' - '.$campaign['datetime_end'];
             $arrTmp[3] = $campaign['daytime_init'].' - '.$campaign['daytime_end'];
             $arrTmp[4] = ($campaign['retries']!="")?$campaign['retries']:"&nbsp;";
@@ -168,18 +169,14 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
             $arrTmp[7] = ($campaign['num_completadas']!="") ? $campaign['num_completadas'] : "N/A";
             $arrTmp[8] = ($campaign['promedio']!="") ? number_format($campaign['promedio'],0) : "N/A";
 
-            $csv_data = "&nbsp;<a href='?menu=$module_name&amp;action=csv_data&amp;id_campaign=".$campaign['id']."&amp;rawmode=yes'>["._tr('CSV Data')."]</a>";
-            $ver_campania = "&nbsp;<a href='?menu=$module_name&amp;action=edit_campaign&amp;id_campaign=".$campaign['id']."'>["._tr('Edit')."]</a>";
             if($campaign['estatus']=='I'){
                 $arrTmp[9] = _tr('Inactive');
-                $arrTmp[10] = $ver_campania.$csv_data;
             } elseif($campaign['estatus']=='A'){
                 $arrTmp[9] = _tr('Active');
-                $arrTmp[10] = $ver_campania.$csv_data;
             } elseif ($campaign['estatus']=='T') {
                 $arrTmp[9] = _tr('Finish');
-                $arrTmp[10] = $ver_campania.$csv_data;
             }
+            $arrTmp[10] = "<a href='?menu=$module_name&amp;action=csv_data&amp;id_campaign=".$campaign['id']."&amp;rawmode=yes'>["._tr('CSV Data')."]</a>";
             $arrData[] = $arrTmp;
         }
     }

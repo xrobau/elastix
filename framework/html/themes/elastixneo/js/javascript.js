@@ -45,6 +45,24 @@ $(document).ready(function() {
 	elxneo_display_colorchange();
 	$('#cmenubox>div#cpallet').ColorPickerSetColor($('#userMenuColor').val());
 
+	
+	// Manejo de la columna de menú de tercer nivel
+	$("#toggleleftcolumn").click(function() {
+		request("index.php", {
+			menu:		'_elastixutils',
+			id_menu:	getCurrentElastixModule(),
+			action:		'saveNeoToggleTab',
+			statusTab:	$('#neo-lengueta-minimized').is(':visible') ? 'false' : 'true',
+			rawmode:	'yes'
+		}, false, function(arrData,statusResponse,error) {
+			if(statusResponse == "false") {
+				elxneo_toggle_3menu_visible();
+				alert(error);
+			}
+		});
+	});
+	$("#toggleleftcolumn, #neo-lengueta-minimized").click(elxneo_toggle_3menu_visible);
+
 	// Manejo de marcadores
 	$("#togglebookmark").click(function() {
 		var imgBookmark = $("#togglebookmark").attr('src');
@@ -148,23 +166,6 @@ function elxneo_adjust_mmenu()
 	if ($('div#smenubox>div:last-child').position().top > 0)
 		$('div#smenubox-arrows').show();
 	else $('div#smenubox-arrows').hide();
-	
-	// Manejo de la columna de menú de tercer nivel
-	$("#toggleleftcolumn").click(function() {
-		request("index.php", {
-			menu:		'_elastixutils',
-			id_menu:	getCurrentElastixModule(),
-			action:		'saveNeoToggleTab',
-			statusTab:	$('#neo-lengueta-minimized').is(':visible') ? 'false' : 'true',
-			rawmode:	'yes'
-		}, false, function(arrData,statusResponse,error) {
-			if(statusResponse == "false") {
-				elxneo_toggle_3menu_visible();
-				alert(error);
-			}
-		});
-	});
-	$("#toggleleftcolumn, #neo-lengueta-minimized").click(elxneo_toggle_3menu_visible);
 }
 
 function elxneo_move_one_mmenu_to_overflow()

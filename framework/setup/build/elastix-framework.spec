@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Apr 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix bookmark toggling that was incorrectly placed at the
+  window resize handler.
+  SVN Rev[7021]
 - CHANGED: Framework: complete reimplementation of elastixneo theme. This
   reimplementation does away with many unused images, replaces many uses of
   javascript for hover behavior with equivalent :hover CSS rules, allows free

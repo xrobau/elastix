@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Apr 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring, Agents Monitoring, Incoming Calls Monitoring:
+  raise SSE retry interval to 5000 ms.
+  SVN Rev[7025]
+
 * Thu Apr 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: add tracking of recording files associated with incoming 
   calls, by asking for the value of MIXMONITOR_FILENAME on the channel just

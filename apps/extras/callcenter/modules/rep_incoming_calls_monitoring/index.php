@@ -238,7 +238,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
     if ($bSSE) {
         Header('Content-Type: text/event-stream');
-        printflush("retry: 1\n");
+        printflush("retry: 5000\n");
     } else {
         Header('Content-Type: application/json');
     }

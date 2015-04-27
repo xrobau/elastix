@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.5.0
-Release: 8
+Release: 9
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -351,6 +351,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Apr 27 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-9
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu Apr 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix bookmark toggling that was incorrectly placed at the
   window resize handler.
@@ -367,6 +371,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Apr 22 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-8
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[7019]
 
 * Tue Apr 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - Framework: force search div to remain visible while suggestion menu is open.

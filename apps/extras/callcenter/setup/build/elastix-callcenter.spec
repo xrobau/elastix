@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Apr 27 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring, Agents Monitoring, Incoming Calls Monitoring:
+  close (and reload if required) EventSource when getting an error. This should
+  prevent retries with obsolete state hash.
+  SVN Rev[7027]
+
 * Fri Apr 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Monitoring, Agents Monitoring, Incoming Calls Monitoring:
   raise SSE retry interval to 5000 ms.

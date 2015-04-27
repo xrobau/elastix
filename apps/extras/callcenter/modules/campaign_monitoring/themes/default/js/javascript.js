@@ -262,6 +262,13 @@ $(document).ready(function() {
 				this.evtSource.onmessage = function(event) {
 					this.manejarRespuestaStatus($.parseJSON(event.data));
 				}.bind(this);
+				this.evtSource.onerror = function(event) {
+					/* NO QUIERO REINTENTOS EN CASO DE ERROR: para cuando se
+					 * realiza el reintento, se lo hace con el mismo hash que
+					 * se usó iniciamente, pero ese hash ya no es válido porque
+					 * el estado es volátil. */
+					event.target.close();
+				}.bind(this);
 			} else {
 				this.longPoll = $.get('index.php', params, function (respuesta) {
 					verificar_error_session(respuesta);

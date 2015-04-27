@@ -159,7 +159,15 @@ function do_checkstatus()
 		evtSource = new EventSource('index.php?' + $.param(params));
 		evtSource.onmessage = function(event) {
 			manejarRespuestaStatus($.parseJSON(event.data));
-		}
+		};
+		evtSource.onerror = function(event) {
+			/* NO QUIERO REINTENTOS EN CASO DE ERROR: para cuando se
+			 * realiza el reintento, se lo hace con el mismo hash que
+			 * se usó iniciamente, pero ese hash ya no es válido porque
+			 * el estado es volátil. */
+			event.target.close();
+			location.reload();
+		};
 	} else {
 		$.post('index.php?menu=' + module_name + '&rawmode=yes', params,
 		function (respuesta) {

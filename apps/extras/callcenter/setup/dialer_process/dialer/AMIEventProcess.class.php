@@ -1131,6 +1131,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tmp_actionid_queuestatus = posix_getpid().'-'.time();
         $this->_tmp_estadoAgenteCola = array();
         $this->_tmp_numLlamadasEnCola = array();
+        $this->_log->output("INFO: iniciando verificación de pertenencia a colas con QueueStatus...");
         $this->_ami->QueueStatus($this->_tmp_actionid_queuestatus);
 
         // En msg_QueueStatusComplete se valida pertenencia a colas dinámicas
@@ -2041,6 +2042,7 @@ Uniqueid: 1429642067.241008
             );
         }
 
+        if (is_null($this->_tmp_actionid_queuestatus)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
         if (!isset($this->_tmp_numLlamadasEnCola[$params['Queue']]))
             $this->_tmp_numLlamadasEnCola[$params['Queue']] = 0;
@@ -2069,6 +2071,7 @@ Uniqueid: 1429642067.241008
             );
         }
 
+        if (is_null($this->_tmp_actionid_queuestatus)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
         $this->_tmp_estadoAgenteCola[$params['Name']][$params['Queue']] = $params['Status'];
     }
@@ -2094,6 +2097,7 @@ Uniqueid: 1429642067.241008
             );
         }
 
+        if (is_null($this->_tmp_actionid_queuestatus)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
         if (!isset($this->_tmp_numLlamadasEnCola[$params['Queue']]))
             $this->_tmp_numLlamadasEnCola[$params['Queue']] = 0;
@@ -2109,6 +2113,7 @@ Uniqueid: 1429642067.241008
             );
         }
 
+        if (is_null($this->_tmp_actionid_queuestatus)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
 
         /* Finalizó la enumeración. Ahora se puede actualizar el estado de los
@@ -2146,6 +2151,7 @@ Uniqueid: 1429642067.241008
                 }
             }
         }
+        $this->_tmp_estadoAgenteCola = NULL;        
     }
 
     // En Asterisk 11 e inferior, este evento se emite sólo si eventmemberstatus

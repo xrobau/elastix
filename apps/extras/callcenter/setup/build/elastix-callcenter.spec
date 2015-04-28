@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Tue Apr 28 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: remove astdb query in the middle of asterisk AMI event 
+  processing when handling PeerStatus. Instead use the queue membership cached
+  in Agent objects and delegate the actual forced logoff to CampaignProcess.
+  SVN Rev[7029]
 - CHANGED: Dialer: clear agent list use by QueueStatus after enumeration. Check
   that expected events arising from QueueStatus enumeration have an ActionID
   and that our own value is non-null before processing.

@@ -865,10 +865,12 @@ class AMIEventProcess extends TuberiaProcess
     private function _limpiarAgentesTimeout()
     {
         foreach ($this->_listaAgentes as $a) {
-            if ($a->estado_consola == 'logged-in' && is_null($a->llamada) && $a->num_pausas <= 0 && $a->timeout_inactivo) {
-            	$this->_log->output('INFO: deslogoneando a '.$a->channel.' debido a inactividad...');
+            if ($a->estado_consola == 'logged-in' && is_null($a->llamada) && 
+                $a->num_pausas <= 0 && $a->timeout_inactivo) {
+                
+                $this->_log->output('INFO: deslogoneando a '.$a->channel.' debido a inactividad...');
                 $a->resetTimeout();
-                $this->_forzarLogoffAgente($a);
+                $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->listaColasAgente());
             }
         }
     }
@@ -1242,7 +1244,13 @@ class AMIEventProcess extends TuberiaProcess
         $this->_finalizandoPrograma = TRUE;
         foreach ($this->_listaAgentes as $a) {
         	if ($a->estado_consola != 'logged-out') {
-                if (!is_null($this->_ami)) $this->_forzarLogoffAgente($a);
+                if (!is_null($this->_ami)) {
+                	if ($a->type == 'Agent') {
+                        $this->_ami->Agentlogoff($a->number);
+                	} else {
+                	    foreach ($a->listaColasAgente() as $q) $this->_ami->QueueRemove($q, $a->channel);
+                    }
+                }
             }
         }
         $this->_log->output('INFO: esperando a que finalicen todas las llamadas monitoreadas...');
@@ -2028,7 +2036,7 @@ Uniqueid: 1429642067.241008
             	// La extensión usada para login se ha desregistrado - deslogonear al agente
                 $this->_log->output('INFO: '.__METHOD__.' se detecta desregistro de '.
                     $params['Peer'].' - deslogoneando '.$a->channel.'...');
-                $this->_forzarLogoffAgente($a);
+                $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->listaColasAgente());
             }
     	}
     }
@@ -2151,6 +2159,7 @@ Uniqueid: 1429642067.241008
                 }
             }
         }
+        $this->_log->output("INFO: fin de verificación de pertenencia a colas con QueueStatus.");
         $this->_tmp_estadoAgenteCola = NULL;        
     }
 
@@ -2206,28 +2215,6 @@ Uniqueid: 1429642067.241008
 
         $this->_log->output('INFO: se ha recargado configuración de Asterisk, se refresca agentes...');
         $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
-    }
-
-    private function _forzarLogoffAgente($a)
-    {
-    	if ($a->type == 'Agent')
-            $this->_ami->Agentlogoff($a->number);
-        else {
-            $sAgentType = $a->type;
-            $sAgentNumber = $a->number;
-
-            // $key_input tomaría la forma agents/S100 (para SIP) ó agents/I110 (para IAX)
-            $extension = $sAgentType{0}.$sAgentNumber;
-            $db_output = $this->_ami->database_showkey('agents/'.$extension);
-
-            $arrColas = array();
-            foreach($db_output as $k => $val){
-                $preg_match_string = "|^/QPENALTY/(\d+)/agents/$extension$|";
-                if (preg_match($preg_match_string, $k, $regs)) {
-                    $this->_ami->QueueRemove($regs[1], $a->channel);
-                }
-            }
-        }
     }
 
     private function _verificarLlamadaActivaLogoff($a, $evtname)

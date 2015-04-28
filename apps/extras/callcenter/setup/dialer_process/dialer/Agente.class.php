@@ -444,7 +444,7 @@ class Agente
     {
         if ($this->type == 'Agent') return NULL;
         if ($this->estado_consola != 'logged-in') return NULL;
-        $currcolas = array_keys($this->_estado_agente_colas);
+        $currcolas = $this->listaColasAgente();
         return array(
             array_diff($this->_colas_dinamicas, $currcolas), // colas a las cuales agregar agente
             array_diff($currcolas, $this->_colas_dinamicas), // colas de las cuales quitar agente
@@ -455,6 +455,12 @@ class Agente
     {
         $currcolas = array_keys($this->_estado_agente_colas);
         return (count(array_intersect($currcolas, $this->_colas_dinamicas)) > 0);
+    }
+    
+    // Colas a las cuales pertenece actualmente el agente
+    public function listaColasAgente()
+    {
+        return array_keys($this->_estado_agente_colas);
     }
 }
 ?>

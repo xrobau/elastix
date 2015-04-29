@@ -110,7 +110,8 @@ class ECCP
         $s = $xml_request->asXML();
         while ($s != '') {
             $iEscrito = @fwrite($this->_hConn, $s);
-            if ($iEscrito === FALSE) throw new ECCPIOException('output');
+            // fwrite en socket bloqueante puede devolver 0 en lugar de FALSE en error
+            if ($iEscrito === FALSE || $iEscrito <= 0) throw new ECCPIOException('output');
             $s = substr($s, $iEscrito);
         }
         $xml_response = $this->wait_response();

@@ -100,6 +100,14 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Apr 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: fix for undocumented fwrite() behavior. According to
+  http://php.net/manual/en/function.fwrite.php#96951 fwrite() returns 0, not 
+  FALSE, when writing to a blocking socket and encountering an error that 
+  prevents any data from being written. This behavior is not documented anywhere
+  in the PHP manual and causes infinite loops unless taken into account.
+  SVN Rev[7030]
+
 * Tue Apr 28 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: remove astdb query in the middle of asterisk AMI event 
   processing when handling PeerStatus. Instead use the queue membership cached

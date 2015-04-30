@@ -101,6 +101,12 @@ fi
 
 %changelog
 * Thu Apr 30 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: sometimes a failed call will report a Hangup on its channel
+  before AMIEventProcess manages to receive the origination start message. This
+  causes annoying messages about an originated call not found. Fix this by
+  setting a flag on the call object in this case, and keeping it around until
+  both the origination message AND OriginateResponse are received.
+  SVN Rev[7032]
 - CHANGED: Dialer: AMIEventProcess is now Single Source of Truth for queue
   membership. On customer tests, it was observed that the blocking query to 
   astdb takes longer and longer with increasing asterisk load. Since the event

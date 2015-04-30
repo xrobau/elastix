@@ -137,8 +137,8 @@ class Llamada
     var $request_hold = FALSE;  // Se asigna a VERDADERO al invocar requerimiento hold, y se verifica en Unlink 
     
     // Timestamps correspondientes a diversos eventos de la llamada
-    var $timestamp_originatestart = NULL;   // Inicio de Originate en CampaignProcess
-    var $timestamp_originateend = NULL;     // Recepción de OriginateResponse
+    private $_timestamp_originatestart = NULL;   // Inicio de Originate en CampaignProcess
+    private $_timestamp_originateend = NULL;     // Recepción de OriginateResponse
     var $timestamp_enterqueue = NULL;       // Recepción de Join
     var $timestamp_link = NULL;             // Recepción de primer Link
     var $timestamp_hangup = NULL;           // Recepción de Hangup
@@ -156,6 +156,11 @@ class Llamada
 
     // Actualizaciones pendientes en la base de datos por faltar id_llamada
     private $_actualizacionesPendientes = array();
+    
+    /* Esta bandera indica si se ha señalado final de procesamiento de la
+     * llamada, y por lo tanto, candidata a ser quitada del seguimiento, cuando
+     * todavía no ha llegado el aviso del inicio de Originate. */ 
+    private $_stillborn = FALSE;
     
     // Este constructor sólo debe invocarse desde ListaLlamadas::nuevaLlamada()
     function __construct(ListaLlamadas $lista, $tipo_llamada, $tuberia, $log)
@@ -195,6 +200,7 @@ class Llamada
         $s .= "\tactionid.....................".$this->_nul($this->actionid)."\n";
         $s .= "\tid_current_call..............".$this->_nul($this->id_current_call)."\n";
         $s .= "\tduration.....................".$this->_nul($this->duration)."\n";
+        if ($this->_stillborn) $s .= "\tSTILLBORN\n";
         $s .= "\ttimestamp_originatestart.....".$this->_nultime($this->timestamp_originatestart)."\n";
         $s .= "\ttimestamp_originateend.......".$this->_nultime($this->timestamp_originateend)."\n";
         $s .= "\ttimestamp_enterqueue.........".$this->_nultime($this->timestamp_enterqueue)."\n";
@@ -230,6 +236,9 @@ class Llamada
         case 'trunk':           return $this->_trunk;
         case 'status':          return $this->_status;
         case 'actionid':        return $this->_actionid;
+        case 'stillborn':       return $this->_stillborn;
+        case 'timestamp_originatestart':return $this->_timestamp_originatestart;
+        case 'timestamp_originateend':  return $this->_timestamp_originateend;
         case 'duration':        return (!is_null($this->timestamp_link) && !is_null($this->timestamp_hangup)) 
                                         ? $this->timestamp_hangup - $this->timestamp_link : NULL;
         case 'duration_wait':   return (!is_null($this->timestamp_link) && !is_null($this->timestamp_enterqueue)) 
@@ -386,6 +395,15 @@ class Llamada
                 }
             }
             break;
+        case 'timestamp_originatestart':
+            $this->_timestamp_originatestart = $v;
+            if ($this->_stillborn && !is_null($this->timestamp_originateend)) {
+                /* Esta asignación se hace al recibir el evento avisoInicioOriginate.
+                 * Por lo tanto, si la llamada ya recibió el Hangup, se la debe 
+                 * quitar de la lista de seguimiento. */
+                $this->_listaLlamadas->remover($this);
+            }
+            break;
         default:
             $this->_log->output('ERR: '.__METHOD__.' - propiedad no implementada: '.$s);
             die(__METHOD__.' - propiedad no implementada: '.$s."\n");
@@ -430,7 +448,7 @@ class Llamada
     public function llamadaFueOriginada($timestamp, $uniqueid, $channel, 
         $sStatus, $iCause = NULL, $sCauseTxt = NULL)
     {
-        $this->timestamp_originateend = $timestamp;
+        $this->_timestamp_originateend = $timestamp;
         if (is_null($this->channel)) $this->channel = $channel;
 
         if ($uniqueid == '<null>') $uniqueid = NULL;
@@ -496,8 +514,9 @@ class Llamada
                     $a->channel, $this->campania->id, $a->resumenSeguimiento());
             }
             
-            // Remover llamada que no se pudo colocar
-            $this->_listaLlamadas->remover($this);                    
+            // Remover llamada que no se pudo colocar si ya se recibió avisoInicioOriginate
+            if (!($this->_stillborn && is_null($this->timestamp_originatestart)))
+                $this->_listaLlamadas->remover($this);                    
         } else {
             // Verificar si Onnewchannel procesó pata equivocada
             if ($this->uniqueid != $uniqueid) {
@@ -516,6 +535,10 @@ class Llamada
                 $this->_log->output("DEBUG: llamada colocada luego de $iSegundosEspera s. de espera."); 
             }
             */
+            if ($this->_stillborn) {
+                $this->_log->output("WARN: ".__METHOD__." llamada recibió Hangup pero OriginateResponse indica status=$sStatus");
+                if (!is_null($this->timestamp_originatestart)) $this->_listaLlamadas->remover($this);
+            }
         }
         
         // Actualizar asíncronamente las propiedades de la llamada
@@ -760,6 +783,8 @@ class Llamada
 
     	$this->timestamp_hangup = $timestamp;
         $this->_agentchannel = NULL;
+        if ($this->tipo_llamada == 'outgoing' && is_null($this->timestamp_originatestart))
+            $this->_stillborn = TRUE;
         
         // Mandar a borrar el registro de current_calls
         if (!is_null($this->id_current_call)) {
@@ -785,8 +810,13 @@ class Llamada
          * contestado entre hangup y el inicio del Originate */
         if (is_null($this->timestamp_link)) {
         	if ($this->tipo_llamada == 'outgoing') {
-                $this->campania->agregarTiempoContestar($this->timestamp_hangup - $this->timestamp_originatestart);
-                $paramActualizar['inc_retries'] = 1;
+                if (!$this->_stillborn) {
+                    $this->campania->agregarTiempoContestar($this->timestamp_hangup - $this->timestamp_originatestart);
+                    $paramActualizar['inc_retries'] = 1;
+        	    } else {
+        	        $this->campania->agregarTiempoContestar(0);
+        	        // Se espera que inc_retries se actualice al manejar OriginateResponse
+        	    }
             }
             if (is_null($this->timestamp_enterqueue)) {
             	// Llamada nunca fue contestada
@@ -879,7 +909,8 @@ class Llamada
             }
         }
     
-        $this->_listaLlamadas->remover($this);
+        // Se espera que la llamada sea removida al manejar OriginateResponse
+        if (!$this->_stillborn) $this->_listaLlamadas->remover($this);
     }
     
     public function agregarArchivoGrabacion($uniqueid, $channel, $recordingfile)

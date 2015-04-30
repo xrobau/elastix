@@ -1635,70 +1635,20 @@ LISTA_EXTENSIONES;
             if ($r['Response'] != 'Success')
                 $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
         } else {
-            /* 
-             * Deben obtenerse las colas en las que la extension es Dynamic Member. 
-             * Las colas a continuación están quemadas por el momento. 
-             * La contraseña debe ingresarse desde un input en la interfaz de login y validarse en el servidor. 
-             * No es necesario que Asterisk genere una llamada a la extensión pra validar la contraseña.
+            /*
+             * Las colas dinámicas a las que debe pertenecer el agente las sabe
+             * AMIEventProcess. Si pertenece a al menos una, AMIEventProcess le
+             * manda la orden a CampaignProcess para que empiece a agregar el
+             * agente a las colas. El AMIEventProcess hace entonces el equivalente
+             * a agregarIntentoLoginAgente.
              */
-            $arrColas = $this->_getQueuesGivenDynamicMember($agentFields['type'], $agentFields['number']);
-    
-            if (count($arrColas) > 0) {
-                $this->_tuberia->AMIEventProcess_agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout);
-                foreach($arrColas as $cola) {  
-                    // Lo saco de todas las colas ...
-                    $r = $this->_ami->QueueRemove($cola, $sAgente);
-            
-                    // Para volverlos a agregar aqui.
-                    $r = $this->_ami->QueueAdd($cola, $sAgente);
-                }
-                if ($r['Response'] != 'Success')
-                    $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
-            } else {
-            	// Este agente no tiene colas asociadas
+            $c = $this->_tuberia->AMIEventProcess_agregarAgenteColasDinamicas($sAgente, $sExtension, $iTimeout);
+            if ($c <= 0) {
+                // Este agente no tiene colas asociadas
                 $this->_log->output('WARN: agente dinámico '.$sAgente.' no es miembro dinámico de ninguna cola, no se puede realizar login.');
             }
         }
         return $r;
-    }
-
-    private function _getQueuesGivenDynamicMember($sAgentType, $sAgentNumber)
-    {
-        // $key_input tomaría la forma agents/S100 (para SIP) ó agents/I110 (para IAX)
-        $extension = $sAgentType{0}.$sAgentNumber; 
-        $db_output = $this->_ami->database_showkey('agents/'.$extension); 
-    
-        $arrColas = array();
-        foreach($db_output as $k => $val){  
-            $preg_match_string = "|^/QPENALTY/(\d+)/agents/$extension$|";
-            if (preg_match($preg_match_string, $k, $regs)) {     
-                $arrColas[] = $regs[1];
-            }
-        }
-        return $arrColas;
-    }
-    
-    private function _getQueuesFromDynamicList(&$agentlist)
-    {
-        $arrColas = array();
-        $arrExt = array();
-        foreach ($agentlist as $sAgente => $agentFields) {
-            $extension = $agentFields['type']{0} . $agentFields['number'];
-            $arrExt[$extension] = $sAgente;
-            $arrColas[$sAgente] = array();
-        }
-        
-        $db_output = $this->_ami->database_show('QPENALTY');
-        foreach (array_keys($db_output) as $k) {
-            $regs = NULL;
-            if (preg_match('|^/QPENALTY/(\d+)/agents/(\S+)$|', $k, $regs)) {
-                if (isset($arrExt[$regs[2]])) {
-                    $arrColas[$arrExt[$regs[2]]][] = $regs[1];
-                }
-            }
-        } 
-        
-        return $arrColas;
     }
 
     /**
@@ -1772,11 +1722,8 @@ LISTA_EXTENSIONES;
                 $this->_ami->Hangup($infoAgente['clientchannel']);
             }
  
-            // Lo saco de todas las colas ...
-            $arrColas = $this->_getQueuesGivenDynamicMember($agentFields['type'], $agentFields['number']);      
-            foreach ($arrColas as $cola) {  
-                $r = $this->_ami->QueueRemove($cola, $sAgente);
-            }
+            // AMIEventProcess sabe de qué colas hay que quitar al agente
+            $this->_tuberia->AMIEventProcess_quitarAgenteColasDinamicas($sAgente);
         }
         return $this->Response_LogoutAgentResponse('logged-out');
     }
@@ -2324,18 +2271,14 @@ LISTA_EXTENSIONES;
             $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
         
-        // Estado de los agentes logoneados en la cola
-        $listaAgentes = array_unique(array_merge(
-            $this->_listarAgentesLogoneadosCola($statusCampania_DB['queue']),
-            $this->_listarAgentesDinamicosCola($statusCampania_DB['queue'])));
-        foreach ($listaAgentes as $sAgente) if (!isset($statusCampania_AMI['queuestatus'][$sAgente])) {
-            $infoAgente = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
-            if (!is_null($infoAgente)) {
-                $xml_agent = $xml_agents->addChild('agent');
-                $xml_agent->addChild('agentchannel', $sAgente);
-            
-                $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
-            }
+        // Estado de los agentes logoneados en la cola, sin llamada en atención
+        $infoAgentes = $this->_tuberia->AMIEventProcess_infoSeguimientoAgentesCola(
+            $statusCampania_DB['queue'], array_keys($statusCampania_AMI['queuestatus']));
+        foreach ($infoAgentes as $sAgente => $infoAgente) {
+            $xml_agent = $xml_agents->addChild('agent');
+            $xml_agent->addChild('agentchannel', $sAgente);
+        
+            $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
 
         // Estado de las llamadas pendientes de enlazar
@@ -3338,19 +3281,11 @@ Privilege: Command
             return $xml_response;
         }
         
-        $listaColas = $this->_listarColasAgente(array($sAgente));
+        // Reportar las colas a las que el agente está suscrito o puede suscribirse
+        $listaColas = $this->_tuberia->AMIEventProcess_listarTotalColasTrabajoAgente(array($sAgente));
         $xml_agentQueues = $xml_getagentqueuesResponse->addChild('queues');
-
-        // Reportar también las colas a las que está suscrito el agente
         if (is_array($listaColas) && isset($listaColas[$sAgente])) foreach ($listaColas[$sAgente] as $sCola) {
             $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
-        }
-
-        // Agregar además las colas a las cuales va a suscribirse el agente dinámico
-        $listaColasDyn = $this->_getQueuesGivenDynamicMember($agentFields['type'], $agentFields['number']);
-        if (is_array($listaColasDyn)) foreach ($listaColasDyn as $sCola) {
-            if (!(isset($listaColas[$sAgente]) && in_array($sCola, $listaColas[$sAgente])))
-                $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
         }
 
         return $xml_response;
@@ -3391,19 +3326,12 @@ Privilege: Command
             return $xml_response;
         }
         
-        // Acumular las colas para cada agente
-        $listaColas = $this->_listarColasAgente(array_keys($agentlist));
+        // Acumular las colas estáticas y dinámicas para cada agente
+        $listaColas = $this->_tuberia->AMIEventProcess_listarTotalColasTrabajoAgente(array_keys($agentlist));
         foreach ($listaColas as $sAgente => $queuelist) {
             if (isset($agentlist[$sAgente])) $agentlist[$sAgente]['queues'] = $queuelist;
         }
         unset($listaColas);
-        
-        // Acumular colas dinámicas para cada agente
-        $listaColasDyn = $this->_getQueuesFromDynamicList($agentlist);
-        foreach (array_keys($listaColasDyn) as $sAgente) {
-            $agentlist[$sAgente]['queues'] = array_unique(array_merge(
-                $agentlist[$sAgente]['queues'], $listaColasDyn[$sAgente]));
-        }
         
         // Conversión de resultado a XML
         $xml_agents = $xml_getagentqueuesResponse->addChild('agents');
@@ -3419,95 +3347,6 @@ Privilege: Command
         return $xml_response;
     }
     
-    private function _listarColasAgente($agentlist)
-    {
-        /* Por ahora se asume que $sAgente es de la forma Agent/9000 y que 
-         * aparece de esta misma manera en el reporte de "queue show" 
-         *  5000 has 0 calls (max unlimited) in 'ringall' strategy (0s holdtime, 0s talktime), W:0, C:0, A:0, SL:0.0% within 60s
-         *     No Members
-         *     No Callers
-         *  
-         *  8001 has 0 calls (max unlimited) in 'ringall' strategy (0s holdtime, 0s talktime), W:0, C:0, A:0, SL:0.0% within 60s
-         *     Members: 
-         *        Agent/9000 (Unavailable) has taken no calls yet
-         *     No Callers
-         *  
-         *  8000 has 0 calls (max unlimited) in 'ringall' strategy (0s holdtime, 0s talktime), W:0, C:0, A:0, SL:0.0% within 60s
-         *     Members: 
-         *        Agent/9000 (Unavailable) has taken no calls yet
-         *     No Callers
-         *
-         */
-        $respuestaCola = $this->_ami->Command('queue show');
-        if (isset($respuestaCola['data'])) {
-            $listaColas = array();
-            $lineasRespuesta = explode("\n", $respuestaCola['data']);
-            $sColaActual = NULL;
-            foreach ($lineasRespuesta as $sLinea) {
-                $regs = NULL;
-                if (preg_match('/^(\d+) has \d+ calls/', $sLinea, $regs)) {
-                   // Se ha encontrado el inicio de una descripción de cola
-                    $sColaActual = $regs[1];
-                } elseif (preg_match('|^\s+(\w+/\d+)|', $sLinea, $regs)) {
-                    if (!is_null($sColaActual) && in_array($regs[1], $agentlist)) {
-                        // Se ha encontrado el agente en una cola en particular
-                        $listaColas[$regs[1]][] = $sColaActual;
-                    }
-                }
-            }
-            return $listaColas;
-        } else {
-            $this->_log->output('ERR: lost synch with Asterisk AMI ("queue show" response lacks "data").');
-            return NULL;
-        }
-    }
-
-    private function _listarAgentesLogoneadosCola($sCola)
-    {
-    	$respuestaCola = $this->_ami->Command('queue show '.$sCola);
-        if (isset($respuestaCola['data'])) {
-            $listaAgentes = array();
-            $lineasRespuesta = explode("\n", $respuestaCola['data']);
-            $bSeccionMiembros = FALSE;
-            foreach ($lineasRespuesta as $sLinea) {
-                $regs = NULL;
-                if (strpos($sLinea, 'Members:') !== FALSE)
-                    $bSeccionMiembros = TRUE;
-                elseif (strpos($sLinea, 'Callers') !== FALSE)
-                    $bSeccionMiembros = FALSE;
-                elseif (preg_match('|^\s+(\w+/\d+)\s+|', $sLinea, $regs)) {
-                	$listaAgentes[] = $regs[1];
-                }
-            }
-            return $listaAgentes;
-        } else {
-            $this->_log->output('ERR: lost synch with Asterisk AMI ("queue show" response lacks "data").');
-            return NULL;
-        }
-    }
-
-    private function _listarAgentesDinamicosCola($sCola)
-    {
-        $respuestaCola = $this->_ami->Command('database show QPENALTY/'.$sCola.'/agents');
-        if (isset($respuestaCola['data'])) {
-            $listaAgentes = array();
-            $lineasRespuesta = explode("\n", $respuestaCola['data']);
-            foreach ($lineasRespuesta as $sLinea) {
-                $regs = NULL;
-                if (preg_match('|/QPENALTY/\d+/agents/(\w)(\d+)|', $sLinea, $regs)) {
-                	switch ($regs[1]) {
-                	case 'I':  $listaAgentes[] = 'IAX2/'.$regs[2]; break;
-                    case 'S':  $listaAgentes[] = 'SIP/'.$regs[2]; break;
-                	}
-                }
-            }
-            return $listaAgentes;
-        } else {
-            $this->_log->output('ERR: lost synch with Asterisk AMI ("queue show" response lacks "data").');
-            return NULL;
-        }
-    }
-
     private function Request_eccpauth_getagentactivitysummary($comando)
     {
         // Fechas de inicio y fin

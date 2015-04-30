@@ -89,7 +89,9 @@ class AMIEventProcess extends TuberiaProcess
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente',
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
             'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante',
-            'pingAgente', 'dumpstatus') as $k)
+            'pingAgente', 'dumpstatus', 'agregarAgenteColasDinamicas',
+            'quitarAgenteColasDinamicas', 'listarTotalColasTrabajoAgente',
+            'infoSeguimientoAgentesCola') as $k)
             $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -262,6 +264,84 @@ class AMIEventProcess extends TuberiaProcess
         }
     }
 
+    private function _infoSeguimientoAgentesCola($queue, $agentsexclude = array())
+    {
+        $is = array();
+        foreach ($this->_listaAgentes as $a) {
+            if (!in_array($a->channel, $agentsexclude) &&
+                (in_array($queue, $a->listaColasAgente()) || in_array($queue, $a->listaColasDinamicas())) ) {
+                $is[$a->channel] = $a->resumenSeguimiento();
+            }
+        }
+        return $is;
+    }
+    
+    private function _agregarAgenteColasDinamicas($sAgente, $sExtension, $iTimeout)
+    {
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (is_null($a)) return 0;
+        
+        $diffcolas = $a->diferenciaColasDinamicas();
+        if (!is_array($diffcolas)) return 0;
+
+        // Colas a las que pertenece y no debe pertenecer
+        if (count($diffcolas[1]) > 0) {
+            if ($this->DEBUG) {
+                $this->_log->output('DEBUG: '.__METHOD__.' agente '.$sAgente.' debe ser '.
+                    'quitado de las colas ['.implode(' ', $diffcolas[1]).']');
+            }
+            $this->_tuberia->msg_CampaignProcess_asyncQueueRemove($sAgente, $diffcolas[1]);
+        }
+        
+        // Colas a las que no pertenece y debería pertenecer
+        $dyncolas = $a->listaColasDinamicas();
+        if (count($dyncolas) > 0) {
+            if ($this->DEBUG) {
+                $this->_log->output('DEBUG: '.__METHOD__.' agente '.$sAgente.' debe ser '.
+                    'agregado a las colas ['.implode(' ', $diffcolas[0]).']');
+            }
+
+            // Esto es equivalente a _agregarIntentoLoginAgente
+            $a->max_inactivo = $iTimeout;
+            $a->iniciarLoginAgente($sExtension);           
+            
+            $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
+                $diffcolas[0], ($a->num_pausas > 0));
+        }
+    
+        return count($dyncolas);
+    }
+    
+    private function _quitarAgenteColasDinamicas($sAgente)
+    {
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (is_null($a)) return 0;
+        
+        $colas = $a->listaColasAgente();
+        if (count($colas) > 0) {
+            if ($this->DEBUG) {
+                $this->_log->output('DEBUG: '.__METHOD__.' agente '.$sAgente.' debe ser '.
+                    'quitado de las colas ['.implode(' ', $colas).']');
+            }
+            $this->_tuberia->msg_CampaignProcess_asyncQueueRemove($sAgente, $colas);
+        }
+        return count($colas);
+    }
+
+    // Listar todas las colas de trabajo (las estáticas y dinámicas) para los agentes indicados
+    private function _listarTotalColasTrabajoAgente($ks)
+    {
+        $queuelist = array();
+        foreach ($ks as $s) {
+            $a = $this->_listaAgentes->buscar('agentchannel', $s);
+            if (!is_null($a)) { 
+                $queuelist[$s] = array_unique(array_merge($a->listaColasAgente(), $a->listaColasDinamicas()));
+            }
+        }
+        
+        return $queuelist;
+    }
+    
     private function _agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -1034,6 +1114,16 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_infoSeguimientoAgente'), $datos));
     }
 
+    public function rpc_infoSeguimientoAgentesCola($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
+            array($this, '_infoSeguimientoAgentesCola'), $datos));
+    }
+    
     public function rpc_reportarInfoLlamadaAtendida($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
@@ -1092,6 +1182,36 @@ class AMIEventProcess extends TuberiaProcess
         }
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_dumpstatus'), $datos));
+    }
+
+    public function rpc_agregarAgenteColasDinamicas($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
+            array($this, '_agregarAgenteColasDinamicas'), $datos));
+    }
+    
+    public function rpc_quitarAgenteColasDinamicas($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
+            array($this, '_quitarAgenteColasDinamicas'), $datos));
+    }
+    
+    public function rpc_listarTotalColasTrabajoAgente($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
+            array($this, '_listarTotalColasTrabajoAgente'), $datos));
     }
 
     /**************************************************************************/
@@ -2135,22 +2255,23 @@ Uniqueid: 1429642067.241008
             if (!is_null($a)) {
                 $a->asignarEstadoEnColas($estadoCola);
 
-                $diffcolas = $a->diferenciaColasDinamicas();
-                if (is_array($diffcolas)) {
-                    // Colas a las que no pertenece y debería pertenecer
-                    foreach ($diffcolas[0] as $cola) {
-                        $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
-                            'agregado a la cola '.$cola);
-                        $this->_ami->QueueAdd($cola, $sAgente);
-                        if ($a->num_pausas > 0)
-                            $this->_ami->QueuePause($cola, $sAgente, 'true');
-                    }
-
-                    // Colas a las que pertenece y no debe pertenecer
-                    foreach ($diffcolas[1] as $cola) {
-                        $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
-                            'quitado de la cola '.$cola);
-                        $this->_ami->QueueRemove($cola, $sAgente);
+                if ($a->estado_consola == 'logged-in') {
+                    $diffcolas = $a->diferenciaColasDinamicas();
+                    if (is_array($diffcolas)) {
+                        // Colas a las que no pertenece y debería pertenecer
+                        if (count($diffcolas[0]) > 0) {
+                            $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
+                                'agregado a las colas ['.implode(' ', $diffcolas[0]).']');
+                            $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
+                                $diffcolas[0], ($a->num_pausas > 0));
+                        }
+                            
+                        // Colas a las que pertenece y no debe pertenecer
+                        if (count($diffcolas[1]) > 0) {
+                            $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
+                                'quitado de las colas ['.implode(' ', $diffcolas[1]).']');
+                            $this->_tuberia->msg_CampaignProcess_asyncQueueRemove($sAgente, $diffcolas[1]);
+                        }
                     }
                 }
             } else {

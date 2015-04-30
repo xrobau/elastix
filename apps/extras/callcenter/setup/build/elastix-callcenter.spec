@@ -100,6 +100,17 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Apr 30 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: AMIEventProcess is now Single Source of Truth for queue
+  membership. On customer tests, it was observed that the blocking query to 
+  astdb takes longer and longer with increasing asterisk load. Since the event
+  handling process already contains queue membership information for each agent,
+  it is now possible to query information from it without querying astdb. This
+  speeds up handling of agentlogin/agentlogout. Additionally QueueAdd/QueueRemove
+  are now delegated to CampaignProcess since they take much longer under heavy
+  load.
+  SVN Rev[7031]
+
 * Wed Apr 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: fix for undocumented fwrite() behavior. According to
   http://php.net/manual/en/function.fwrite.php#96951 fwrite() returns 0, not 

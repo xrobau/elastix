@@ -443,7 +443,6 @@ class Agente
     public function diferenciaColasDinamicas()
     {
         if ($this->type == 'Agent') return NULL;
-        if ($this->estado_consola != 'logged-in') return NULL;
         $currcolas = $this->listaColasAgente();
         return array(
             array_diff($this->_colas_dinamicas, $currcolas), // colas a las cuales agregar agente
@@ -461,6 +460,12 @@ class Agente
     public function listaColasAgente()
     {
         return array_keys($this->_estado_agente_colas);
+    }
+    
+    // TODO: volver getter/setter
+    public function listaColasDinamicas()
+    {
+        return $this->_colas_dinamicas;
     }
 }
 ?>

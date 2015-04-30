@@ -113,7 +113,8 @@ class CampaignProcess extends TuberiaProcess
             'sqlupdatecalls', 'sqlinsertcurrentcalls', 'sqldeletecurrentcalls',
             'sqlupdatecurrentcalls', 'sqlupdatestatcampaign',
             'actualizarCanalRemoto', 'finalsql', 'verificarFinLlamadasAgendables',
-            'forzarLogoffAgente', 'agregarArchivoGrabacion') as $k)
+            'forzarLogoffAgente', 'asyncQueueAdd', 'asyncQueueRemove',
+            'agregarArchivoGrabacion') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde ECCPProcess
@@ -1481,6 +1482,24 @@ PETICION_LLAMADAS_AGENTE;
         call_user_func_array(array($this, '_forzarLogoffAgente'), $datos);
     }
     
+    public function msg_asyncQueueAdd($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_asyncQueueAdd'), $datos);
+    }
+    
+    public function msg_asyncQueueRemove($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_asyncQueueRemove'), $datos);
+    }
+    
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
     	$this->_log->output('INFO: recibido mensaje de finalización, se detienen campañas...');
@@ -1766,8 +1785,32 @@ PETICION_LLAMADAS_AGENTE;
         if ($type == 'Agent') {
             $this->_ami->Agentlogoff($number);
         } else {
-            $channel = $type.'/'.$number;
-            foreach ($queues as $q) $this->_ami->QueueRemove($q, $channel);
+            $this->_asyncQueueRemove($type.'/'.$number, $queues);
+        }
+    }
+    
+    private function _asyncQueueAdd($channel, $queues, $pause = FALSE)
+    {
+        foreach ($queues as $q) {
+            $r = $this->_ami->QueueAdd($q, $channel);
+            if ($r['Response'] != 'Success') {
+                $this->_log->output("ERR: falla al agregar $channel a cola $q: ".print_r($r, TRUE));
+            } elseif ($pause) {
+                $r = $this->_ami->QueuePause($q, $channel, 'true');
+                if ($r['Response'] != 'Success') {
+                    $this->_log->output("ERR: falla al poner en pausa a $channel en cola $q: ".print_r($r, TRUE));
+                }
+            }
+        }
+    }
+    
+    private function _asyncQueueRemove($channel, $queues)
+    {
+        foreach ($queues as $q) {
+            $r = $this->_ami->QueueRemove($q, $channel);
+            if ($r['Response'] != 'Success') {
+                $this->_log->output("ERR: falla al quitar $channel de cola $q: ".print_r($r, TRUE));
+            }
         }
     }
     

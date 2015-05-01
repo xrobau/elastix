@@ -275,12 +275,12 @@ class AMIEventProcess extends TuberiaProcess
         }
         return $is;
     }
-    
+
     private function _agregarAgenteColasDinamicas($sAgente, $sExtension, $iTimeout)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (is_null($a)) return 0;
-        
+
         $diffcolas = $a->diferenciaColasDinamicas();
         if (!is_array($diffcolas)) return 0;
 
@@ -292,7 +292,7 @@ class AMIEventProcess extends TuberiaProcess
             }
             $this->_tuberia->msg_CampaignProcess_asyncQueueRemove($sAgente, $diffcolas[1]);
         }
-        
+
         // Colas a las que no pertenece y debería pertenecer
         $dyncolas = $a->listaColasDinamicas();
         if (count($dyncolas) > 0) {
@@ -303,20 +303,20 @@ class AMIEventProcess extends TuberiaProcess
 
             // Esto es equivalente a _agregarIntentoLoginAgente
             $a->max_inactivo = $iTimeout;
-            $a->iniciarLoginAgente($sExtension);           
-            
+            $a->iniciarLoginAgente($sExtension);
+
             $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
                 $diffcolas[0], ($a->num_pausas > 0));
         }
-    
+
         return count($dyncolas);
     }
-    
+
     private function _quitarAgenteColasDinamicas($sAgente)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (is_null($a)) return 0;
-        
+
         $colas = $a->listaColasAgente();
         if (count($colas) > 0) {
             if ($this->DEBUG) {
@@ -334,14 +334,14 @@ class AMIEventProcess extends TuberiaProcess
         $queuelist = array();
         foreach ($ks as $s) {
             $a = $this->_listaAgentes->buscar('agentchannel', $s);
-            if (!is_null($a)) { 
+            if (!is_null($a)) {
                 $queuelist[$s] = array_unique(array_merge($a->listaColasAgente(), $a->listaColasDinamicas()));
             }
         }
-        
+
         return $queuelist;
     }
-    
+
     private function _agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -945,9 +945,9 @@ class AMIEventProcess extends TuberiaProcess
     private function _limpiarAgentesTimeout()
     {
         foreach ($this->_listaAgentes as $a) {
-            if ($a->estado_consola == 'logged-in' && is_null($a->llamada) && 
+            if ($a->estado_consola == 'logged-in' && is_null($a->llamada) &&
                 $a->num_pausas <= 0 && $a->timeout_inactivo) {
-                
+
                 $this->_log->output('INFO: deslogoneando a '.$a->channel.' debido a inactividad...');
                 $a->resetTimeout();
                 $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->listaColasAgente());
@@ -1123,7 +1123,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_infoSeguimientoAgentesCola'), $datos));
     }
-    
+
     public function rpc_reportarInfoLlamadaAtendida($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
@@ -1193,7 +1193,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_agregarAgenteColasDinamicas'), $datos));
     }
-    
+
     public function rpc_quitarAgenteColasDinamicas($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
@@ -1203,7 +1203,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_quitarAgenteColasDinamicas'), $datos));
     }
-    
+
     public function rpc_listarTotalColasTrabajoAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
@@ -1253,7 +1253,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tmp_actionid_queuestatus = posix_getpid().'-'.time();
         $this->_tmp_estadoAgenteCola = array();
         $this->_tmp_numLlamadasEnCola = array();
-        $this->_log->output("INFO: iniciando verificación de pertenencia a colas con QueueStatus...");
+        if ($this->DEBUG) $this->_log->output("DEBUG: iniciando verificación de pertenencia a colas con QueueStatus...");
         $this->_ami->QueueStatus($this->_tmp_actionid_queuestatus);
 
         // En msg_QueueStatusComplete se valida pertenencia a colas dinámicas
@@ -1408,7 +1408,7 @@ Uniqueid: 1429642067.241008
             break;
         }
     }
-    
+
     public function msg_Default($sEvent, $params, $sServer, $iPort)
     {
         if ($this->DEBUG) {
@@ -2265,7 +2265,7 @@ Uniqueid: 1429642067.241008
                             $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
                                 $diffcolas[0], ($a->num_pausas > 0));
                         }
-                            
+
                         // Colas a las que pertenece y no debe pertenecer
                         if (count($diffcolas[1]) > 0) {
                             $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
@@ -2280,8 +2280,8 @@ Uniqueid: 1429642067.241008
                 }
             }
         }
-        $this->_log->output("INFO: fin de verificación de pertenencia a colas con QueueStatus.");
-        $this->_tmp_estadoAgenteCola = NULL;        
+        if ($this->DEBUG) $this->_log->output("DEBUG: fin de verificación de pertenencia a colas con QueueStatus.");
+        $this->_tmp_estadoAgenteCola = NULL;
     }
 
     // En Asterisk 11 e inferior, este evento se emite sólo si eventmemberstatus

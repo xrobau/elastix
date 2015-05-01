@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Fri May  1 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: downgrade QueueStatus start/end messages to DEBUG.
+  SVN Rev[7034]
 - FIXED: Dialer: fix bug in incoming queue cleanup that causes an undefined
   index access in the queue array in CampaignProcess.
   SVN Rev[7033]

@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri May  1 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix bug in incoming queue cleanup that causes an undefined
+  index access in the queue array in CampaignProcess.
+  SVN Rev[7033]
+
 * Thu Apr 30 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: sometimes a failed call will report a Hangup on its channel
   before AMIEventProcess manages to receive the origination start message. This
@@ -108,7 +113,7 @@ fi
   both the origination message AND OriginateResponse are received.
   SVN Rev[7032]
 - CHANGED: Dialer: AMIEventProcess is now Single Source of Truth for queue
-  membership. On customer tests, it was observed that the blocking query to 
+  membership. On customer tests, it was observed that the blocking query to
   astdb takes longer and longer with increasing asterisk load. Since the event
   handling process already contains queue membership information for each agent,
   it is now possible to query information from it without querying astdb. This
@@ -119,14 +124,14 @@ fi
 
 * Wed Apr 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: fix for undocumented fwrite() behavior. According to
-  http://php.net/manual/en/function.fwrite.php#96951 fwrite() returns 0, not 
-  FALSE, when writing to a blocking socket and encountering an error that 
+  http://php.net/manual/en/function.fwrite.php#96951 fwrite() returns 0, not
+  FALSE, when writing to a blocking socket and encountering an error that
   prevents any data from being written. This behavior is not documented anywhere
   in the PHP manual and causes infinite loops unless taken into account.
   SVN Rev[7030]
 
 * Tue Apr 28 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dialer: remove astdb query in the middle of asterisk AMI event 
+- CHANGED: Dialer: remove astdb query in the middle of asterisk AMI event
   processing when handling PeerStatus. Instead use the queue membership cached
   in Agent objects and delegate the actual forced logoff to CampaignProcess.
   SVN Rev[7029]
@@ -147,7 +152,7 @@ fi
   SVN Rev[7025]
 
 * Thu Apr 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Dialer: add tracking of recording files associated with incoming 
+- CHANGED: Dialer: add tracking of recording files associated with incoming
   calls, by asking for the value of MIXMONITOR_FILENAME on the channel just
   after inserting the incoming call record.
   SVN Rev[7024]
@@ -156,7 +161,7 @@ fi
   SVN Rev[7023]
 - CHANGED: Dialer: add tracking of recording files associated with outgoing
   calls, by monitoring assignment to MIXMONITOR_FILENAME on tracked channels.
-  SVN Rev[7022] 
+  SVN Rev[7022]
 
 * Tue Apr 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: on OriginateRespose, only evaluate CallerID when CallerIDNum

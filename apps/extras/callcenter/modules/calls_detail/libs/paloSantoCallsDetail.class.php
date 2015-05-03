@@ -62,10 +62,10 @@ class paloSantoCallsDetail
             $condSQL[] = 'agent.number = ?';
             $paramSQL[] = $param['agent'];
         }
-        
+
         return array($condSQL, $paramSQL);
     }
-    
+
     private function _construirWhere_incoming($param)
     {
         list($condSQL, $paramSQL) = $this->_construirWhere($param);
@@ -82,6 +82,12 @@ class paloSantoCallsDetail
             $paramSQL[] = '%'.$param['phone'].'%';
         }
 
+        // Filtrar por ID de campaña entrante
+        if (isset($param['id_campaign_in']) && preg_match('/^\d+$/', $param['id_campaign_in'])) {
+            $condSQL[] = 'campaign_entry.id = ?';
+            $paramSQL[] = (int)$param['id_campaign_in'];
+        }
+
         // Fecha y hora de inicio y final del rango
         $sRegFecha = '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/';
         if (isset($param['date_start']) && preg_match($sRegFecha, $param['date_start'])) {
@@ -91,14 +97,14 @@ class paloSantoCallsDetail
         if (isset($param['date_end']) && preg_match($sRegFecha, $param['date_end'])) {
             $condSQL[] = 'call_entry.datetime_entry_queue <= ?';
             $paramSQL[] = $param['date_end'];
-        }        
+        }
 
         // Construir fragmento completo de sentencia SQL
         $where = array(implode(' AND ', $condSQL), $paramSQL);
         if ($where[0] != '') $where[0] = ' AND '.$where[0];
         return $where;
     }
-    
+
     private function _construirWhere_outgoing($param)
     {
         list($condSQL, $paramSQL) = $this->_construirWhere($param);
@@ -115,6 +121,12 @@ class paloSantoCallsDetail
             $paramSQL[] = '%'.$param['phone'].'%';
         }
 
+        // Filtrar por ID de campaña saliente
+        if (isset($param['id_campaign_out']) && preg_match('/^\d+$/', $param['id_campaign_out'])) {
+            $condSQL[] = 'campaign.id = ?';
+            $paramSQL[] = (int)$param['id_campaign_out'];
+        }
+
         // Fecha y hora de inicio y final del rango
         $sRegFecha = '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/';
         if (isset($param['date_start']) && preg_match($sRegFecha, $param['date_start'])) {
@@ -124,40 +136,40 @@ class paloSantoCallsDetail
         if (isset($param['date_end']) && preg_match($sRegFecha, $param['date_end'])) {
             $condSQL[] = 'calls.fecha_llamada <= ?';
             $paramSQL[] = $param['date_end'];
-        }        
+        }
 
         // Construir fragmento completo de sentencia SQL
         $where = array(implode(' AND ', $condSQL), $paramSQL);
         if ($where[0] != '') $where[0] = ' AND '.$where[0];
         return $where;
     }
-    
+
     /**
-     * Procedimiento para recuperar el detalle de llamadas realizadas a través 
+     * Procedimiento para recuperar el detalle de llamadas realizadas a través
      * del CallCenter.
      *
      * @param   mixed   $param  Lista de parámetros de filtrado:
-     *  date_start      Fecha y hora minima de la llamada, en formato 
-     *                  yyyy-mm-dd hh:mm:ss. Si se omite, se lista desde la 
+     *  date_start      Fecha y hora minima de la llamada, en formato
+     *                  yyyy-mm-dd hh:mm:ss. Si se omite, se lista desde la
      *                  primera llamada.
-     *  date_end        Fecha y hora máxima de la llamada, en formato 
-     *                  yyyy-mm-dd hh:mm:ss. Si se omite, se lista hasta la 
+     *  date_end        Fecha y hora máxima de la llamada, en formato
+     *                  yyyy-mm-dd hh:mm:ss. Si se omite, se lista hasta la
      *                  última llamada.
      *  calltype        Tipo de llamada. Se puede indicar "incoming" o "outgoing".
      *                  Si se omite, se recuperan llamadas de los dos tipos.
-     *  agent           Filtrar por número de agente a recuperar (9000 para 
+     *  agent           Filtrar por número de agente a recuperar (9000 para
      *                  Agent/9000). Si no se especifica, se recuperan llamadas
      *                  de todos los agentes.
-     *  queue           Filtrar por número de cola. Si no se especifica, se 
+     *  queue           Filtrar por número de cola. Si no se especifica, se
      *                  recuperan llamadas mandadas por todas las colas.
      *  phone           Filtrar por número telefónico que contenga el patrón
-     *                  numérico indicado. El patron 123 elige los números 
+     *                  numérico indicado. El patron 123 elige los números
      *                  44123887, 123847693, 999999123, etc. Si no se especifica,
      *                  se recuperan detalles sin importar el número conectado.
      * @param   mixed   $limit  Máximo número de CDRs a leer, o NULL para todos
      * @param   mixed   $offset Inicio de lista de CDRs, si se especifica $limit
      *
-     * @return  mixed   Arreglo de tuplas con los siguientes campos, en el 
+     * @return  mixed   Arreglo de tuplas con los siguientes campos, en el
      *                  siguiente orden, o NULL si falla la petición:
      *      0   número del agente que atendió la llamada
      *      1   nombre del agente que atendió la llamada
@@ -178,17 +190,25 @@ class paloSantoCallsDetail
             return NULL;
         }
 
+        /* FIXME: El LEFT JOIN con call_recording asume un máximo de 1 registro
+         * de grabación por llamada. Si hay más de 1 aparecerán registros
+         * duplicados. */
+
         $sPeticion_incoming = <<<SQL_INCOMING
 SELECT agent.number, agent.name, call_entry.datetime_init AS start_date,
-    call_entry.datetime_end AS end_date, call_entry.duration, 
+    call_entry.datetime_end AS end_date, call_entry.duration,
     call_entry.duration_wait, queue_call_entry.queue, 'Inbound' AS type,
     IF(contact.telefono IS NULL, call_entry.callerid, contact.telefono) AS telefono,
-    call_entry.transfer, call_entry.status
+    call_entry.transfer, call_entry.status, call_recording.recordingfile
 FROM (call_entry, queue_call_entry)
 LEFT JOIN contact
     ON contact.id = call_entry.id_contact
 LEFT JOIN agent
     ON agent.id = call_entry.id_agent
+LEFT JOIN campaign_entry
+    ON campaign_entry.id = call_entry.id_campaign
+LEFT JOIN call_recording
+    ON call_recording.id_call_incoming = call_entry.id
 WHERE call_entry.id_queue_call_entry = queue_call_entry.id
 SQL_INCOMING;
         list($sWhere_incoming, $param_incoming) = $this->_construirWhere_incoming($param);
@@ -196,13 +216,15 @@ SQL_INCOMING;
 
         $sPeticion_outgoing = <<<SQL_OUTGOING
 SELECT agent.number, agent.name, calls.start_time AS start_date,
-    calls.end_time AS end_date, calls.duration, 
+    calls.end_time AS end_date, calls.duration,
     calls.duration_wait, campaign.queue, 'Outbound' AS type,
     calls.phone AS telefono,
-    calls.transfer, calls.status
+    calls.transfer, calls.status, call_recording.recordingfile
 FROM (calls, campaign)
 LEFT JOIN agent
     ON agent.id = calls.id_agent
+LEFT JOIN call_recording
+    ON call_recording.id_call_outgoing = call_entry.id
 WHERE campaign.id = calls.id_campaign
 SQL_OUTGOING;
         list($sWhere_outgoing, $param_outgoing) = $this->_construirWhere_outgoing($param);
@@ -225,7 +247,7 @@ SQL_OUTGOING;
             $paramSQL = array_merge($param_incoming, $param_outgoing);
             break;
         }
-        $sPeticionSQL .= ' ORDER BY start_date, telefono';
+        $sPeticionSQL .= ' ORDER BY start_date DESC, telefono';
         if (!empty($limit)) {
             $sPeticionSQL .= " LIMIT ? OFFSET ?";
             array_push($paramSQL, $limit, $offset);
@@ -240,12 +262,12 @@ SQL_OUTGOING;
         }
         return $recordset;
     }
-    
+
     /**
      * Procedimiento para contar el total de registros en el detalle de llamadas
      * realizadas a través del CallCenter.
      *
-     * @param   mixed   $param  Lista de parámetros de filtrado. Idéntico a 
+     * @param   mixed   $param  Lista de parámetros de filtrado. Idéntico a
      *                          leerDetalleLlamadas.
      *
      * @return  mixed   NULL en caso de error, o cuenta de registros.
@@ -264,6 +286,8 @@ LEFT JOIN contact
     ON contact.id = call_entry.id_contact
 LEFT JOIN agent
     ON agent.id = call_entry.id_agent
+LEFT JOIN campaign_entry
+    ON campaign_entry.id = call_entry.id_campaign
 WHERE call_entry.id_queue_call_entry = queue_call_entry.id
 SQL_INCOMING;
         list($sWhere_incoming, $param_incoming) = $this->_construirWhere_incoming($param);
@@ -302,14 +326,14 @@ SQL_OUTGOING;
                 return NULL;
             }
         }
-        
+
         return $iNumRegistros;
     }
 
     /**
      * Procedimiento para obtener los agentes de CallCenter. A diferencia del
      * método en modules/agents/Agentes.class.php, este método lista también los
-     * agentes inactivos, junto con su estado. 
+     * agentes inactivos, junto con su estado.
      *
      * @return  mixed   NULL en caso de error, o lista de agentes
      */
@@ -320,6 +344,27 @@ SQL_OUTGOING;
             TRUE);
         if (!is_array($recordset)) {
             $this->errMsg = '(internal) Failed to fetch agents - '.$this->_DB->errMsg;
+            $recordset = NULL;
+        }
+        return $recordset;
+    }
+
+    /**
+     * Procedimiento para leer la lista de campañas del CallCenter. Las campañas
+     * se listan primero las activas, luego inactivas, luego terminadas, y luego
+     * por fecha de creación descendiente.
+     *
+     * @param unknown $type
+     */
+    function getCampaigns($type)
+    {
+        $recordset = $this->_DB->fetchTable(
+            'SELECT id, name, estatus '.
+            'FROM '.(($type == 'incoming') ? 'campaign_entry' : 'campaign').' '.
+            'ORDER BY estatus, datetime_init DESC',
+            TRUE);
+        if (!is_array($recordset)) {
+            $this->errMsg = '(internal) Failed to fetch campaigns - '.$this->_DB->errMsg;
             $recordset = NULL;
         }
         return $recordset;

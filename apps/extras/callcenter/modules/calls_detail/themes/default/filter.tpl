@@ -20,5 +20,18 @@
             <td width="12%" align="left" nowrap>{$queue.INPUT}</td>
             <td>&nbsp;</td>
         </tr>
+{if $INCOMING_CAMPAIGN or $OUTGOING_CAMPAIGN}
+        <tr>
+            {if $INCOMING_CAMPAIGN}
+            <td width="12%" align="right">{$incoming_campaign.LABEL}:</td>
+            <td width="12%" align="left" nowrap>{$incoming_campaign.INPUT}</td>
+            {/if}
+            {if $OUTGOING_CAMPAIGN}
+            <td width="12%" align="right">{$outgoing_campaign.LABEL}:</td>
+            <td width="12%" align="left" nowrap>{$outgoing_campaign.INPUT}</td>
+            {/if}
+            <td colspan="3">&nbsp;</td>
+        </tr>
+{/if}
 </table>
 

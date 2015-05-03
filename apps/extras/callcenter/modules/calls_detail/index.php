@@ -88,6 +88,8 @@ function _moduleContent(&$smarty, $module_name)
     $smarty->assign(array(
         "Filter"    =>  _tr('Filter'),
         "SHOW"      =>  _tr("Show"),
+        'INCOMING_CAMPAIGN' =>  0,
+        'OUTGOING_CAMPAIGN' =>  0,
     ));
 
     $bElastixNuevo = method_exists('paloSantoGrid','setURL');
@@ -100,7 +102,7 @@ function _moduleContent(&$smarty, $module_name)
     // Para poder consultar las colas activas
     $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
     $ampconfig = $pConfig->leer_configuracion(false);
-    $ampdsn = $ampconfig['AMPDBENGINE']['valor'] . "://" . $ampconfig['AMPDBUSER']['valor'] . 
+    $ampdsn = $ampconfig['AMPDBENGINE']['valor'] . "://" . $ampconfig['AMPDBUSER']['valor'] .
         ":" . $ampconfig['AMPDBPASS']['valor'] . "@" . $ampconfig['AMPDBHOST']['valor'] . "/asterisk";
     $oQueue = new paloQueue($ampdsn);
     $listaColas = $oQueue->getQueue();
@@ -114,14 +116,19 @@ function _moduleContent(&$smarty, $module_name)
     $oCallsDetail = new paloSantoCallsDetail($pDB);
     $listaAgentes = $oCallsDetail->getAgents(); // Para llenar el select de agentes
 
+    // Para poder consultar campañas entrantes y salientes
+    $campaignIn = $oCallsDetail->getCampaigns('incoming');
+    $campaignOut = $oCallsDetail->getCampaigns('outgoing');
+
     $urlVars = array('menu' => $module_name);
-    $arrFormElements = createFieldFilter($listaAgentes, $listaColas);
+    $arrFormElements = createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut);
     $oFilterForm = new paloForm($smarty, $arrFormElements);
 
     // Validar y aplicar las variables de filtro
     $paramLista = NULL;
     $paramFiltro = array();
-    foreach (array('date_start', 'date_end', 'calltype', 'agent', 'queue', 'phone') as $k)
+    foreach (array('date_start', 'date_end', 'calltype', 'agent', 'queue',
+        'phone', 'id_campaign_out', 'id_campaign_in') as $k)
         $paramFiltro[$k] = getParameter($k);
     if (!isset($paramFiltro['date_start'])) $paramFiltro['date_start'] = date("d M Y");
     if (!isset($paramFiltro['date_end'])) $paramFiltro['date_end'] = date("d M Y");
@@ -135,19 +142,23 @@ function _moduleContent(&$smarty, $module_name)
     } else {
         $urlVars = array_merge($urlVars, $paramFiltro);
         $paramLista = $paramFiltro;
-        $paramLista['date_start'] = translateDate($paramFiltro['date_start']) . " 00:00:00"; 
-        $paramLista['date_end'] = translateDate($paramFiltro['date_end']) . " 23:59:59"; 
+        $paramLista['date_start'] = translateDate($paramFiltro['date_start']) . " 00:00:00";
+        $paramLista['date_end'] = translateDate($paramFiltro['date_end']) . " 23:59:59";
     }
+    if (isset($paramFiltro['calltype']) && $paramFiltro['calltype'] == 'incoming')
+        $smarty->assign('INCOMING_CAMPAIGN', 1);
+    if (isset($paramFiltro['calltype']) && $paramFiltro['calltype'] == 'outgoing')
+        $smarty->assign('OUTGOING_CAMPAIGN', 1);
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $paramFiltro);
 
     // Inicio de objeto grilla y asignación de filtro
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->enableExport();   // enable export.
-    $oGrid->showFilter($htmlFilter); 
+    $oGrid->showFilter($htmlFilter);
     $bExportando = $bElastixNuevo
         ? $oGrid->isExportAction()
-        : ( (isset( $_GET['exportcsv'] ) && $_GET['exportcsv'] == 'yes') || 
-            (isset( $_GET['exportspreadsheet'] ) && $_GET['exportspreadsheet'] == 'yes') || 
+        : ( (isset( $_GET['exportcsv'] ) && $_GET['exportcsv'] == 'yes') ||
+            (isset( $_GET['exportspreadsheet'] ) && $_GET['exportspreadsheet'] == 'yes') ||
             (isset( $_GET['exportpdf'] ) && $_GET['exportpdf'] == 'yes')
           ) ;
 
@@ -179,7 +190,7 @@ function _moduleContent(&$smarty, $module_name)
                         $offset = $total - $total % $limit;
                     }
                 }
-    
+
                 // Si se quiere avanzar a la sgte. pagina
                 if (isset($_GET['nav']) && $_GET['nav']=="next") {
                     $offset = $_GET['start'] + $limit - 1;
@@ -190,7 +201,7 @@ function _moduleContent(&$smarty, $module_name)
                     $offset = $_GET['start'] - $limit - 1;
                 }
             }
-            
+
             // Ejecutar la consulta de los datos en el offset indicado
             $recordset = $oCallsDetail->leerDetalleLlamadas($paramLista, $limit, $offset);
             if (!is_array($recordset)) {
@@ -233,7 +244,7 @@ function _moduleContent(&$smarty, $module_name)
             }
         }
     }
-    
+
     $arrColumnas = array(_tr("No.Agent"), _tr("Agent"), _tr("Start Date"),
         _tr("Start Time"), _tr("End Date"), _tr("End Time"), _tr("Duration"),
         _tr("Duration Wait"), _tr("Queue"), _tr("Type"), _tr("Phone"),
@@ -244,13 +255,13 @@ function _moduleContent(&$smarty, $module_name)
         $oGrid->setData($arrData);
         $oGrid->setColumns($arrColumnas);
         $oGrid->setTitle(_tr("Calls Detail"));
-        $oGrid->pagingShow(true); 
+        $oGrid->pagingShow(true);
         $oGrid->setNameFile_Export(_tr("Calls Detail"));
-     
+
         return $oGrid->fetchGrid();
      } else {
         global $arrLang;
-     
+
         $url = construirURL($urlVars, array("nav", "start"));
         function _map_name($s) { return array('name' => $s); }
         $arrGrid = array("title"    => _tr("Calls Detail"),
@@ -281,7 +292,7 @@ function _moduleContent(&$smarty, $module_name)
     }
 }
 
-function createFieldFilter($listaAgentes, $listaColas)
+function createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut)
 {
     // Combo de agentes a partir de lista de agentes
     $comboAgentes = array('' => '('._tr('All Agents').')');
@@ -297,6 +308,20 @@ function createFieldFilter($listaAgentes, $listaColas)
     $comboColas = array('' => '('._tr('All Queues').')');
     foreach ($listaColas as $tuplaCola) {
         $comboColas[$tuplaCola[0]] = $tuplaCola[1];
+    }
+
+    // Combo de campañas entrantes
+    $comboCampaignIn = array('' => '('._tr('All Incoming Campaigns').')');
+    foreach ($campaignIn as $tuplaCampania) {
+        $comboCampaignIn[$tuplaCampania['id']] = $tuplaCampania['name'].
+            (($tuplaCampania['estatus'] != 'A') ? '('.$tuplaCampania['estatus'].')' : '');
+    }
+
+    // Combo de campañas salientes
+    $comboCampaignOut = array('' => '('._tr('All Outgoing Campaigns').')');
+    foreach ($campaignOut as $tuplaCampania) {
+        $comboCampaignOut[$tuplaCampania['id']] = $tuplaCampania['name'].
+        (($tuplaCampania['estatus'] != 'A') ? '('.$tuplaCampania['estatus'].')' : '');
     }
 
     $arrFormElements = array(
@@ -350,6 +375,22 @@ function createFieldFilter($listaAgentes, $listaColas)
             'REQUIRED'                  =>  'no',
             'INPUT_TYPE'                =>  'TEXT',
             'INPUT_EXTRA_PARAM'         =>  '',
+            'VALIDATION_TYPE'           =>  'ereg',
+            'VALIDATION_EXTRA_PARAM'    =>  '^[[:digit:]]+$',
+        ),
+        'id_campaign_in'    => array(
+            'LABEL'                     =>  _tr('Incoming Campaign'),
+            'REQUIRED'                  =>  'no',
+            'INPUT_TYPE'                =>  'SELECT',
+            'INPUT_EXTRA_PARAM'         =>  $comboCampaignIn,
+            'VALIDATION_TYPE'           =>  'ereg',
+            'VALIDATION_EXTRA_PARAM'    =>  '^[[:digit:]]+$',
+        ),
+        'id_campaign_out'   => array(
+            'LABEL'                     =>  _tr('Outgoing Campaign'),
+            'REQUIRED'                  =>  'no',
+            'INPUT_TYPE'                =>  'SELECT',
+            'INPUT_EXTRA_PARAM'         =>  $comboCampaignOut,
             'VALIDATION_TYPE'           =>  'ereg',
             'VALIDATION_EXTRA_PARAM'    =>  '^[[:digit:]]+$',
         ),

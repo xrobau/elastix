@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Mon May  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Form Preview: synchronize partially with CallCenterPRO. Fix invalid
+  HTML syntax.
+  SVN Rev[7038]
 - CHANGED: Calls Detail: implement access to the recording file associated with
   the call. For now, no basename transformation is performed on the file.
   SVN Rev[7036]

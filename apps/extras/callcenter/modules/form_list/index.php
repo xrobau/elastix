@@ -82,7 +82,6 @@ function listarFormularios($pDB, $smarty, $module_name, $local_templates_dir)
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->pagingShow(true);
     $oGrid->setLimit($limit);
-    $oGrid->addComboAction('cbo_estado', _tr('Status'), $cbo_estados, $cbo_estado, 'refresh', 'submit();');
     $oGrid->setColumns($arrColumns);
     $oGrid->setURL($url);
     $oGrid->setTitle(_tr('Form List'));
@@ -111,8 +110,33 @@ function listarFormularios($pDB, $smarty, $module_name, $local_templates_dir)
         );
     }
 
+    //FILTER
+    $_POST['cbo_estado'] = $cbo_estado;
+    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." = ".$cbo_estados[$cbo_estado], $_POST, array("cbo_estado" =>'all'),true);
+
+    $arrFormFilter = formFilter($cbo_estados);
+    $oFilterForm = new paloForm($smarty, $arrFormFilter);
+    $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
+    $oGrid->showFilter(trim($htmlFilter));
+
     $oGrid->setData($arrData);
     return $oGrid->fetchGrid();
+}
+
+function formFilter($estados)
+{
+    $arrFilter = array( 
+            'cbo_estado'    =>    array(
+                "LABEL"                => _tr('Status'),
+                "REQUIRED"               => "no",
+                "INPUT_TYPE"             => "SELECT",
+                "INPUT_EXTRA_PARAM"      => $estados,
+                "VALIDATION_TYPE"        => "text",
+                "VALIDATION_EXTRA_PARAM" => "",
+                "ONCHANGE"               => 'submit();',
+        ),
+    );
+    return $arrFilter;
 }
 
 function vistaPreviaFormulario($pDB, $smarty, $module_name, $local_templates_dir)

@@ -1,3 +1,4 @@
+{*
 <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
 {if !$FRAMEWORK_TIENE_TITULO_MODULO}
     <table width="100%">
@@ -22,4 +23,21 @@
         </tr>
     </table>
 </table>
+
+*}
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="tabForm">
+    <tr>
+        <td width="20%">{$form_nombre.LABEL}: <span  class="required" {$style_field}>*</span></td>
+        <td width="80%">{$form_nombre.INPUT}</td>
+    </tr>
+    <tr>
+        <td width="20%">{$form_description.LABEL}:</td>
+        <td width="80%">{$form_description.INPUT}</td>
+    </tr>
+</table>
+<div style='padding:5px'>
+    <fieldset >
+        {$formulario}
+    </fieldset>
+</div>
 

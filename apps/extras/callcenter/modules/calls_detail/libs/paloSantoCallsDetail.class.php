@@ -199,7 +199,7 @@ SELECT agent.number, agent.name, call_entry.datetime_init AS start_date,
     call_entry.datetime_end AS end_date, call_entry.duration,
     call_entry.duration_wait, queue_call_entry.queue, 'Inbound' AS type,
     IF(contact.telefono IS NULL, call_entry.callerid, contact.telefono) AS telefono,
-    call_entry.transfer, call_entry.status, call_recording.recordingfile
+    call_entry.transfer, call_entry.status, call_recording.id
 FROM (call_entry, queue_call_entry)
 LEFT JOIN contact
     ON contact.id = call_entry.id_contact
@@ -219,12 +219,12 @@ SELECT agent.number, agent.name, calls.start_time AS start_date,
     calls.end_time AS end_date, calls.duration,
     calls.duration_wait, campaign.queue, 'Outbound' AS type,
     calls.phone AS telefono,
-    calls.transfer, calls.status, call_recording.recordingfile
+    calls.transfer, calls.status, call_recording.id
 FROM (calls, campaign)
 LEFT JOIN agent
     ON agent.id = calls.id_agent
 LEFT JOIN call_recording
-    ON call_recording.id_call_outgoing = call_entry.id
+    ON call_recording.id_call_outgoing = calls.id
 WHERE campaign.id = calls.id_campaign
 SQL_OUTGOING;
         list($sWhere_outgoing, $param_outgoing) = $this->_construirWhere_outgoing($param);
@@ -368,6 +368,27 @@ SQL_OUTGOING;
             $recordset = NULL;
         }
         return $recordset;
+    }
+    
+    function getRecordingFilePath($id)
+    {
+        $tupla = $this->_DB->getFirstRowQuery(
+            'SELECT recordingfile FROM call_recording WHERE id = ?',
+            TRUE, array($id));
+        if (!is_array($tupla)) {
+            $this->errMsg = '(internal) Failed to fetch recording filename - '.$this->_DB->errMsg;
+            return NULL;
+        }
+        if (count($tupla) <= 0) return NULL;
+        
+        // TODO: volver configurable
+        $recordingpath = '/var/spool/asterisk/monitor';
+        if ($tupla['recordingfile']{0} != '/')
+            $tupla['recordingfile'] = $recordingpath.'/'.$tupla['recordingfile'];
+        return array(
+            $tupla['recordingfile'],            // Ruta de archivo real
+            basename($tupla['recordingfile'])   // TODO: renombrar según convención campaña
+        );
     }
 }
 ?>

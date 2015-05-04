@@ -23,12 +23,12 @@
 {if $INCOMING_CAMPAIGN or $OUTGOING_CAMPAIGN}
         <tr>
             {if $INCOMING_CAMPAIGN}
-            <td width="12%" align="right">{$incoming_campaign.LABEL}:</td>
-            <td width="12%" align="left" nowrap>{$incoming_campaign.INPUT}</td>
+            <td width="12%" align="right">{$id_campaign_in.LABEL}:</td>
+            <td width="12%" align="left" nowrap>{$id_campaign_in.INPUT}</td>
             {/if}
             {if $OUTGOING_CAMPAIGN}
-            <td width="12%" align="right">{$outgoing_campaign.LABEL}:</td>
-            <td width="12%" align="left" nowrap>{$outgoing_campaign.INPUT}</td>
+            <td width="12%" align="right">{$id_campaign_out.LABEL}:</td>
+            <td width="12%" align="left" nowrap>{$id_campaign_out.INPUT}</td>
             {/if}
             <td colspan="3">&nbsp;</td>
         </tr>

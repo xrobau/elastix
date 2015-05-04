@@ -34,41 +34,7 @@ require_once "libs/paloSantoConfig.class.php";
 require_once "libs/paloSantoQueue.class.php";
 require_once "libs/misc.lib.php";
 
-if (!function_exists('_tr')) {
-    function _tr($s)
-    {
-        global $arrLang;
-        return isset($arrLang[$s]) ? $arrLang[$s] : $s;
-    }
-}
-if (!function_exists('load_language_module')) {
-    function load_language_module($module_id, $ruta_base='')
-    {
-        $lang = get_language($ruta_base);
-        include_once $ruta_base."modules/$module_id/lang/en.lang";
-        $lang_file_module = $ruta_base."modules/$module_id/lang/$lang.lang";
-        if ($lang != 'en' && file_exists("$lang_file_module")) {
-            $arrLangEN = $arrLangModule;
-            include_once "$lang_file_module";
-            $arrLangModule = array_merge($arrLangEN, $arrLangModule);
-        }
-
-        global $arrLang;
-        global $arrLangModule;
-        $arrLang = array_merge($arrLang,$arrLangModule);
-    }
-}
-if (!function_exists('getParameter')) {
-    function getParameter($parameter)
-    {
-        if(isset($_POST[$parameter]))
-            return $_POST[$parameter];
-        else if(isset($_GET[$parameter]))
-            return $_GET[$parameter];
-        else
-            return null;
-    }
-}
+require_once "modules/agent_console/libs/elastix2.lib.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -84,6 +50,19 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir = (isset($arrConfig['templates_dir']))?$arrConfig['templates_dir']:'themes';
     $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
+    $pDB     = new paloDB($cadena_dsn);
+    $oCallsDetail = new paloSantoCallsDetail($pDB);
+    
+    switch (getParameter('action')) {
+    case 'download':
+        return downloadRecording($smarty, $module_name, $oCallsDetail);
+    default:
+        return reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_templates_dir);
+    }
+}
+
+function reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_templates_dir)
+{    
     // Cadenas estáticas de Smarty
     $smarty->assign(array(
         "Filter"    =>  _tr('Filter'),
@@ -112,8 +91,6 @@ function _moduleContent(&$smarty, $module_name)
     }
 
     // Para poder consultar los agentes de campañas
-    $pDB     = new paloDB($cadena_dsn);
-    $oCallsDetail = new paloSantoCallsDetail($pDB);
     $listaAgentes = $oCallsDetail->getAgents(); // Para llenar el select de agentes
 
     // Para poder consultar campañas entrantes y salientes
@@ -209,46 +186,57 @@ function _moduleContent(&$smarty, $module_name)
                 $smarty->assign("mb_message", $oCallsDetail->errMsg);
                 $total = 0;
             } else {
-                function _calls_detail_map_recordset($cdr)
-                {
-                    $mapaEstados = array(
-                        'abandonada'    =>  _tr('Abandoned'),
-                        'Abandoned'     =>  _tr('Abandoned'),
-                        'terminada'     =>  _tr('Success'),
-                        'Success'       =>  _tr('Success'),
-                        'fin-monitoreo' =>  _tr('End Monitor'),
-                        'Failure'       =>  _tr('Failure'),
-                        'NoAnswer'      =>  _tr('NoAnswer'),
-                        'OnQueue'       =>  _tr('OnQueue'),
-                        'Placing'       =>  _tr('Placing'),
-                        'Ringing'       =>  _tr('Ringing'),
-                        'ShortCall'     =>  _tr('ShortCall'),
-                    );
-                    return array(
+                $mapaEstados = array(
+                    'abandonada'    =>  _tr('Abandoned'),
+                    'Abandoned'     =>  _tr('Abandoned'),
+                    'terminada'     =>  _tr('Success'),
+                    'Success'       =>  _tr('Success'),
+                    'fin-monitoreo' =>  _tr('End Monitor'),
+                    'Failure'       =>  _tr('Failure'),
+                    'NoAnswer'      =>  _tr('NoAnswer'),
+                    'OnQueue'       =>  _tr('OnQueue'),
+                    'Placing'       =>  _tr('Placing'),
+                    'Ringing'       =>  _tr('Ringing'),
+                    'ShortCall'     =>  _tr('ShortCall'),
+                );
+                foreach ($recordset as $cdr) {
+                    $tupla = array(
                         $cdr[0],
                         htmlentities($cdr[1], ENT_COMPAT, "UTF-8"),
+                        /*
                         substr($cdr[2], 0, 10),     // asume yyyy-mm-dd hh:mm:ss
                         substr($cdr[2], 11, 8),     // asume yyyy-mm-dd hh:mm:ss
                         substr($cdr[3], 0, 10),     // asume yyyy-mm-dd hh:mm:ss
                         substr($cdr[3], 11, 8),     // asume yyyy-mm-dd hh:mm:ss
+                        */
+                        $cdr[2], $cdr[3],
                         is_null($cdr[4]) ? '-' : formatoSegundos($cdr[4]),
                         is_null($cdr[5]) ? '-' : formatoSegundos($cdr[5]),
                         $cdr[6],
                         _tr($cdr[7]),
                         $cdr[8],
                         $cdr[9],
-                        isset($mapaEstados[$cdr[10]]) ? $mapaEstados[$cdr[10]] : _tr($cdr[10]),
+                        isset($mapaEstados[$cdr[10]]) ? $mapaEstados[$cdr[10]] : _tr($cdr[10]),                        
                     );
+                    if (!$bExportando)
+                        $tupla[] = (is_null($cdr[11]) ? '' : '<a href="?menu='.$module_name.'&amp;action=download&amp;id='.$cdr[11].'&amp;rawmode=yes">'._tr('Download').'</a>');
+                    $arrData[] = $tupla;
                 }
-                $arrData = array_map('_calls_detail_map_recordset', $recordset);
             }
         }
     }
 
-    $arrColumnas = array(_tr("No.Agent"), _tr("Agent"), _tr("Start Date"),
-        _tr("Start Time"), _tr("End Date"), _tr("End Time"), _tr("Duration"),
+    $arrColumnas = array(_tr("No.Agent"), _tr("Agent"),
+        /* 
+        _tr("Start Date"), _tr("Start Time"),
+        _tr("End Date"), _tr("End Time"),
+        */
+        _tr('Start'), _tr('End'), 
+        _tr("Duration"),
         _tr("Duration Wait"), _tr("Queue"), _tr("Type"), _tr("Phone"),
         _tr("Transfer"), _tr("Status"));
+    if (!$bExportando)
+        $arrColumnas[] = _tr('Recording');
 
     if($bElastixNuevo) {
         $oGrid->setURL(construirURL($urlVars, array("nav", "start")));
@@ -292,6 +280,58 @@ function _moduleContent(&$smarty, $module_name)
     }
 }
 
+function downloadRecording($smarty, $module_name, $oCallsDetail)
+{
+    if (!isset($_GET['id'])) {
+        Header('Location: ?menu='.$module_name);
+        return;
+    }
+    
+    $path = $oCallsDetail->getRecordingFilePath($_GET['id']);
+    if (is_null($path)) {
+        if ($oCallsDetail->errMsg != '') {
+            Header('HTTP/1.1 503 Internal Server Error');
+            return $oCallsDetail->errMsg;
+        } else {
+            Header('HTTP/1.1 404 Not Found');
+            return 'Not Found';
+        }
+    } elseif (!file_exists($path[0])) {
+        Header('HTTP/1.1 404 Not Found');
+        return 'Not Found';        
+    }
+    
+    // Establecer Content-Type
+    $content_type = 'application/octet-stream';
+    $contentTypes = array(
+        'wav'   =>  'audio/wav',
+        'gsm'   =>  'audio/gsm',
+        'mp3'   =>  'audio/mpeg',
+    );
+    $extension = substr(strtolower($path[0]), -3);
+    if (isset($contentTypes[$extension])) {
+        $content_type = $contentTypes[$extension];
+    }
+
+    // Mandar el archivo
+    $fp = fopen($path[0], 'rb');
+    if (!$fp) {
+        Header('HTTP/1.1 503 Internal Server Error');
+        return 'Failed to open file';
+    }
+    header("Pragma: public");
+    header("Expires: 0");
+    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+    header("Cache-Control: public");
+    header("Content-Description: wav file");
+    header("Content-Type: $content_type");
+    header("Content-Disposition: attachment; filename={$path[1]}");
+    header("Content-Transfer-Encoding: binary");
+    header("Content-length: " . filesize($path[0]));
+    fpassthru($fp);
+    fclose($fp);
+}
+
 function createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut)
 {
     // Combo de agentes a partir de lista de agentes
@@ -313,15 +353,17 @@ function createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut
     // Combo de campañas entrantes
     $comboCampaignIn = array('' => '('._tr('All Incoming Campaigns').')');
     foreach ($campaignIn as $tuplaCampania) {
-        $comboCampaignIn[$tuplaCampania['id']] = $tuplaCampania['name'].
-            (($tuplaCampania['estatus'] != 'A') ? '('.$tuplaCampania['estatus'].')' : '');
+        $comboCampaignIn[$tuplaCampania['id']] =
+            (($tuplaCampania['estatus'] != 'A') ? '('.$tuplaCampania['estatus'].') ' : '').
+            $tuplaCampania['name'];
     }
 
     // Combo de campañas salientes
     $comboCampaignOut = array('' => '('._tr('All Outgoing Campaigns').')');
     foreach ($campaignOut as $tuplaCampania) {
-        $comboCampaignOut[$tuplaCampania['id']] = $tuplaCampania['name'].
-        (($tuplaCampania['estatus'] != 'A') ? '('.$tuplaCampania['estatus'].')' : '');
+        $comboCampaignOut[$tuplaCampania['id']] =        
+            (($tuplaCampania['estatus'] != 'A') ? '('.$tuplaCampania['estatus'].') ' : '').
+            $tuplaCampania['name'];
     }
 
     $arrFormElements = array(
@@ -385,6 +427,7 @@ function createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut
             'INPUT_EXTRA_PARAM'         =>  $comboCampaignIn,
             'VALIDATION_TYPE'           =>  'ereg',
             'VALIDATION_EXTRA_PARAM'    =>  '^[[:digit:]]+$',
+            'ONCHANGE'                  =>  'submit();',
         ),
         'id_campaign_out'   => array(
             'LABEL'                     =>  _tr('Outgoing Campaign'),
@@ -393,6 +436,7 @@ function createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut
             'INPUT_EXTRA_PARAM'         =>  $comboCampaignOut,
             'VALIDATION_TYPE'           =>  'ereg',
             'VALIDATION_EXTRA_PARAM'    =>  '^[[:digit:]]+$',
+            'ONCHANGE'                  =>  'submit();',
         ),
     );
     return $arrFormElements;

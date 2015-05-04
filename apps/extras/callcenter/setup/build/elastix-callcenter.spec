@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon May  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calls Detail: implement access to the recording file associated with
+  the call. For now, no basename transformation is performed on the file.
+  SVN Rev[7036]
+
 * Fri May  1 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: downgrade QueueStatus start/end messages to DEBUG.
   SVN Rev[7034]

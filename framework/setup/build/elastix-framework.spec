@@ -351,6 +351,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon May  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix invalid HTML syntax on datetime control.
+  SVN Rev[7037]
+
 * Mon Apr 27 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-9
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

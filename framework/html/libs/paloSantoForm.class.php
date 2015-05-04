@@ -392,8 +392,7 @@ class paloForm
                         $params = $json->encode(array_merge($defaultValues, $formValues));
                         $strInput = <<<DATETIME_PICKER_FIELD
 <input type="text" name="{$varName_escaped}" value="{$varValue_escaped}"
-    style="width: 10em; color: #840; background-color: #fafafa; border: 1px solid #999999; text-align: center">
-</input>
+    style="width: 10em; color: #840; background-color: #fafafa; border: 1px solid #999999; text-align: center" />
 <script type="text/javascript">
 $(function() {
     $("input[name={$varName}]").{$datewidget}({$params});

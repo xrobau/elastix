@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Tue May  5 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: ignore a queue membership start when another queue membership
+  update is already in progress.
+  SVN Rev[7041]
 - FIXED: Agents Monitoring, Incoming Calls Monitoring: in case of an EventSource
   error, reload after a timeout, not immediately. This prevents race conditions
   that prevent the browser from leaving the module.

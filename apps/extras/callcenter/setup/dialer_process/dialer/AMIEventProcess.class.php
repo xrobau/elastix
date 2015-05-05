@@ -1219,6 +1219,13 @@ class AMIEventProcess extends TuberiaProcess
     public function msg_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)
     {
+        if (!is_null($this->_tmp_actionid_queuestatus)) {
+            $this->_log->output('WARN: '.__METHOD__.': se ignora nueva lista '.
+                'de agentes porque ya hay una verificación de pertenencia a '.
+                'colas en progreso: '.$this->_tmp_actionid_queuestatus);
+            return;
+        }        
+        
         foreach ($datos[0] as $tupla) {
             // id type number name estatus
         	$sAgente = $tupla['type'].'/'.$tupla['number'];

@@ -59,7 +59,7 @@ function do_checkstatus()
 			 * se usó iniciamente, pero ese hash ya no es válido porque
 			 * el estado es volátil. */
 			event.target.close();
-			location.reload();
+			setTimeout(function() { location.reload(); }, 3000);
 		};
 	} else {
 		$.post('index.php?menu=' + module_name + '&rawmode=yes', params,

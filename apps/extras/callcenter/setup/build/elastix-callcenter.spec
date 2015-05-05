@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue May  5 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agents Monitoring, Incoming Calls Monitoring: in case of an EventSource
+  error, reload after a timeout, not immediately. This prevents race conditions
+  that prevent the browser from leaving the module.
+  SVN Rev[7040]
+
 * Mon May  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Form Preview: synchronize partially with CallCenterPRO. Fix invalid
   HTML syntax.

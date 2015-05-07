@@ -116,6 +116,9 @@ class Agente
     
     var $llamada_agendada = NULL;
 
+    // Timestamp de inicio de login, debe setearse a NULL al entrar a estado logged-in
+    private $_logging_inicio = NULL;
+
     function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
         $bEstatus, $sType = 'Agent')
     {
@@ -145,6 +148,8 @@ class Agente
             $s .= ("\tcolas dinámicas....[".implode(', ', $this->_colas_dinamicas))."]\n";
         $s .= ("\testado de colas....[".$this->_strestadocolas())."]\n";
         $s .= ("\testado_consola.....".$this->estado_consola)."\n";
+        if (!is_null($this->logging_inicio))
+            $s .= ("\tlogging_inicio.....".$this->logging_inicio)."\n";
         
         $s .= ("\tid_sesion..........".$this->_nul($this->id_sesion))."\n";
         $s .= ("\tid_break...........".$this->_nul($this->id_break))."\n";
@@ -211,6 +216,7 @@ class Agente
         case 'name':            return $this->_name;
         case 'estatus':         return $this->_estatus;
         case 'estado_consola':  return $this->_estado_consola;
+        case 'logging_inicio':  return $this->_logging_inicio;
         case 'id_sesion':       return $this->_id_sesion;
         case 'id_break':        return $this->_id_break;
         case 'id_audit_break':  return $this->_id_audit_break;
@@ -324,6 +330,7 @@ class Agente
         $this->_login_channel = NULL;
         $this->_extension = $sExtension;
         $this->_listaAgentes->agregarIndice('extension', $sExtension, $this);
+        $this->_logging_inicio = time();
     }
     
     // Se llama en OriginateResponse exitoso, o en Hangup antes de completar login
@@ -345,6 +352,7 @@ class Agente
             if (!is_null($this->_extension))
                 $this->_listaAgentes->removerIndice('extension', $this->_extension);
             $this->_extension = NULL;
+            $this->_logging_inicio = NULL;
         }
     }
     
@@ -353,6 +361,7 @@ class Agente
     {
     	$this->_estado_consola = 'logged-in';
         $this->resetTimeout();
+        $this->_logging_inicio = NULL;
     }
     
     // Se llama en Agentlogoff

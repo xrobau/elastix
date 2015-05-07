@@ -100,6 +100,16 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu May  7 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: make dynamic agent login conditions more strict. Check whether
+  agent already belongs to all dynamic queues, and transition directly to
+  logged-in state if so. This prevents agents waiting for QueueMemberAdded 
+  events that will never come. Check for stuck login agents and fail them after
+  5 minutes. Ignore queue membership additions for queues when not processing a
+  loginagent request. Ignore queue membership additions for queues outside the
+  set of dynamic queues.
+  SVN Rev[7042]
+
 * Tue May  5 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: ignore a queue membership start when another queue membership
   update is already in progress.

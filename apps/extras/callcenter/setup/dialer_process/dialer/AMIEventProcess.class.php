@@ -305,8 +305,21 @@ class AMIEventProcess extends TuberiaProcess
             $a->max_inactivo = $iTimeout;
             $a->iniciarLoginAgente($sExtension);
 
-            $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
-                $diffcolas[0], ($a->num_pausas > 0));
+            if (count($diffcolas[0]) > 0) {
+                $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
+                    $diffcolas[0], ($a->num_pausas > 0));
+            } else {
+                if ($a->estado_consola != 'logged-in') {
+                    $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
+                        ' ya pertenece a todas las colas ['.implode(' ', $dyncolas).
+                        '] - se entra a estado logged-in de inmediato.');
+                    $a->completarLoginAgente();
+                    $this->_tuberia->msg_ECCPProcess_AgentLogin(
+                        $sAgente,
+                        time(),
+                        $a->id_agent);
+                }                
+            }
         }
 
         return count($dyncolas);
@@ -951,6 +964,14 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_log->output('INFO: deslogoneando a '.$a->channel.' debido a inactividad...');
                 $a->resetTimeout();
                 $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->listaColasAgente());
+            }
+            if (!is_null($a->logging_inicio) && time() - $a->logging_inicio > 5 * 60) {
+                $this->_log->output('ERR: proceso de login trabado para '.$a->channel.', se indica fallo...');
+                $a->respuestaLoginAgente('Failure', NULL, NULL);
+                $this->_tuberia->msg_ECCPProcess_AgentLogin(
+                    $a->channel,
+                    time(),
+                    NULL);                
             }
         }
     }
@@ -1636,7 +1657,8 @@ Uniqueid: 1429642067.241008
                 ? '' : trim($params['CallerIDNum']);
         }
 
-        // Si el estado de la llamada es Failure, el canal probablemente ya no existe
+        // Si el estado de la llamada es Failure, el canal probablemente ya no
+        // existe. Sólo intervenir si CallerIDNum no está seteado.
         if ($params['Response'] != 'Failure' && empty($calleridnum)) {
             // Si la fuente de la llamada está en blanco, se asigna al número marcado
             $r = $this->_ami->GetVar($params['Channel'], 'CALLERID(num)');
@@ -1686,11 +1708,24 @@ Uniqueid: 1429642067.241008
 
         $a->actualizarEstadoEnCola($params['Queue'], $params['Status']);
         if ($a->estado_consola != 'logged-in') {
-            $a->completarLoginAgente();
-            $this->_tuberia->msg_ECCPProcess_AgentLogin(
-                $sAgente,
-                $params['local_timestamp_received'],
-                $a->id_agent);
+            if (!is_null($a->extension)) {
+                if (in_array($params['Queue'], $a->listaColasDinamicas())) {
+                    $a->completarLoginAgente();
+                    $this->_tuberia->msg_ECCPProcess_AgentLogin(
+                        $sAgente,
+                        $params['local_timestamp_received'],
+                        $a->id_agent);
+                } else {
+                    $this->_log->output('WARN: '.__METHOD__.': se ignora ingreso a '.
+                        'cola '.$params['Queue'].' de '.$sAgente.
+                        ' - cola no está en colas dinámicas.');
+                }
+            } else {
+                // $a->extension debió de setearse en $a->iniciarLoginAgente()
+                $this->_log->output('WARN: '.__METHOD__.': se ignora ingreso a '.
+                    'cola '.$params['Queue'].' de '.$sAgente.
+                    ' - no iniciado por requerimiento loginagente.');
+            }
         } else {
         	if ($this->DEBUG) {
         		$this->_log->output("DEBUG: ".__METHOD__.": AgentLogin($sAgente) duplicado (múltiples colas), ignorando");

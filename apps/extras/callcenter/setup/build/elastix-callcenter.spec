@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,7 +100,8 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
-* Fri May  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri May  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-9
+- Bump version for release.
 - CHANGED: Calls Detail: add field filter controls. Partially synchronize with
   CallCenterPRO.
   SVN Rev[7043]

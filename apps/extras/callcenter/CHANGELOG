@@ -1,3 +1,105 @@
+2.2.0-9 (SVN revision 7044)
+* CHANGED: Calls Detail: add field filter controls. Partially synchronize with
+  CallCenterPRO.
+* FIXED: Dialer: make dynamic agent login conditions more strict. Check whether
+  agent already belongs to all dynamic queues, and transition directly to
+  logged-in state if so. This prevents agents waiting for QueueMemberAdded 
+  events that will never come. Check for stuck login agents and fail them after
+  5 minutes. Ignore queue membership additions for queues when not processing a
+  loginagent request. Ignore queue membership additions for queues outside the
+  set of dynamic queues.
+* CHANGED: Dialer: ignore a queue membership start when another queue membership
+  update is already in progress.
+* FIXED: Agents Monitoring, Incoming Calls Monitoring: in case of an EventSource
+  error, reload after a timeout, not immediately. This prevents race conditions
+  that prevent the browser from leaving the module.
+* CHANGED: Form Preview: synchronize partially with CallCenterPRO. Fix invalid
+  HTML syntax.
+* CHANGED: Calls Detail: implement access to the recording file associated with
+  the call. For now, no basename transformation is performed on the file.
+* CHANGED: Dialer: downgrade QueueStatus start/end messages to DEBUG.
+* FIXED: Dialer: fix bug in incoming queue cleanup that causes an undefined
+  index access in the queue array in CampaignProcess.
+* CHANGED: Dialer: sometimes a failed call will report a Hangup on its channel
+  before AMIEventProcess manages to receive the origination start message. This
+  causes annoying messages about an originated call not found. Fix this by
+  setting a flag on the call object in this case, and keeping it around until
+  both the origination message AND OriginateResponse are received.
+* CHANGED: Dialer: AMIEventProcess is now Single Source of Truth for queue
+  membership. On customer tests, it was observed that the blocking query to
+  astdb takes longer and longer with increasing asterisk load. Since the event
+  handling process already contains queue membership information for each agent,
+  it is now possible to query information from it without querying astdb. This
+  speeds up handling of agentlogin/agentlogout. Additionally QueueAdd/QueueRemove
+  are now delegated to CampaignProcess since they take much longer under heavy
+  load.
+* CHANGED: Agent Console: fix for undocumented fwrite() behavior. According to
+  http://php.net/manual/en/function.fwrite.php#96951 fwrite() returns 0, not
+  FALSE, when writing to a blocking socket and encountering an error that
+  prevents any data from being written. This behavior is not documented anywhere
+  in the PHP manual and causes infinite loops unless taken into account.
+* CHANGED: Dialer: remove astdb query in the middle of asterisk AMI event
+  processing when handling PeerStatus. Instead use the queue membership cached
+  in Agent objects and delegate the actual forced logoff to CampaignProcess.
+* CHANGED: Dialer: clear agent list use by QueueStatus after enumeration. Check
+  that expected events arising from QueueStatus enumeration have an ActionID
+  and that our own value is non-null before processing.
+* CHANGED: Campaign Monitoring, Agents Monitoring, Incoming Calls Monitoring:
+  close (and reload if required) EventSource when getting an error. This should
+  prevent retries with obsolete state hash.
+* CHANGED: Campaign Monitoring, Agents Monitoring, Incoming Calls Monitoring:
+  raise SSE retry interval to 5000 ms.
+* CHANGED: Dialer: add tracking of recording files associated with incoming
+  calls, by asking for the value of MIXMONITOR_FILENAME on the channel just
+  after inserting the incoming call record.
+* CHANGED: Campaign Out, Campaign In: move edit link into the campaign name as
+  done in CallCenterPRO.
+* CHANGED: Dialer: add tracking of recording files associated with outgoing
+  calls, by monitoring assignment to MIXMONITOR_FILENAME on tracked channels.
+* CHANGED: Dialer: on OriginateRespose, only evaluate CallerID when CallerIDNum
+  is empty. This cuts down on unnecessary calls to AMI GetVar.
+* FIXED: Dialer: fix incorrect variable verification after GetVar call.
+* FIXED: Report Break: remove unnecessary <form> tag around grid filter which
+  leads to nested <form> tag.
+* FIXED: Dialer: Originate through Local@from-internal requires setting
+  CallerID in order to guarantee a nonempty src field in the CDR record. This
+  is the root cause behind various reports of empty src on dialer calls.
+* CHANGED: Dialer: do not attempt to fetch a caller-id from the channel of a
+  failed call in OriginateRespose. Also compare against possible value of
+  CallerIDNum and report any differences.
+* FIXED: Dialer: remove use of print_r which risks memory exhaustion by
+  recursive dumping of linked objects. Use dump function instead.
+* CHANGED: Dialer: perform consistency checks to diagnose when a logged-out
+  agent gets stuck with a call.
+* CHANGED: Agent Console: fix second use of jscalendar icon. Also enable month
+  and year selection on date field.
+* CHANGED: Agent Console: use framework calendar icon instead of jscalendar
+  icon which might be removed soon.
+* CHANGED: Agent Console - jQuery-1.11.2 migration: fix incorrect use of
+  attribute instead of property.
+* CHANGED: Campaign Out: change default value of max channels to 0, in order to
+  allow unlimited calls by default as allowed by SVN commit #6916.
+* CHANGED: Dialer: accept max channels value of 0 as equivalent to NULL, which
+  in turn is equivalent to unlimited simultaneous calls per campaign.
+* CHANGED: Queues: implement pagination. Use more of the PaloSantoGrid API and
+  synchronize partially with Call Center PRO.
+* CHANGED: Agent Console: implement a periodic ping to the server in an attempt
+  to keep the PHP session from expiring. The chosen interval is half the value
+  reported by session.gc_maxlifetime.
+* CHANGED: Dialer (ECCP): create new request refreshagents. This request causes
+  CampaignProcess to reload and send the updated agent status to AMIEventProcess
+  for it to add or remove queue members as required.
+* CHANGED: Dialer: count number of AMI events received, classified by event, and
+  dump this count in the dumpstatus handler. This count can help optimize AMI
+  event filters in order to improve performance.
+* CHANGED: Dialer: add tracking of queue membership by agent. For dynamic agents
+  this allows detection of changes in queue membership as saved by FreePBX in
+  order to update the in-memory membership in asterisk. This in turn enables
+  moving of live dynamic agents between queues once the Reload event is hooked.
+* CHANGED: Dialer (ECCP): create new request dumpstatus. This request causes
+  AMIEventProcess to dump its internal status to the log file. This request is
+  intended for debugging.
+
 2.2.0-8 (SVN revision 6836)
 * FIXED: Dialer (ECCP): implement optional filtering in the database_show AMI
   wrapper, and use it to cut down on the amount of data to parse for collecting

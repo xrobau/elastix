@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri May  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Calls Detail: add field filter controls. Partially synchronize with
+  CallCenterPRO.
+  SVN Rev[7043]
+
 * Thu May  7 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: make dynamic agent login conditions more strict. Check whether
   agent already belongs to all dynamic queues, and transition directly to

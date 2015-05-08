@@ -50,18 +50,17 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir = (isset($arrConfig['templates_dir']))?$arrConfig['templates_dir']:'themes';
     $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-    $pDB     = new paloDB($cadena_dsn);
-    $oCallsDetail = new paloSantoCallsDetail($pDB);
+    $pDB = new paloDB($cadena_dsn);
     
     switch (getParameter('action')) {
     case 'download':
-        return downloadRecording($smarty, $module_name, $oCallsDetail);
+        return downloadRecording($smarty, $module_name, $pDB);
     default:
-        return reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_templates_dir);
+        return reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir);
     }
 }
 
-function reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_templates_dir)
+function reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir)
 {    
     // Cadenas estáticas de Smarty
     $smarty->assign(array(
@@ -89,16 +88,38 @@ function reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_template
         $smarty->assign("mb_title", _tr("Error when connecting to database"));
         $smarty->assign("mb_message", $oQueue->errMsg);
     }
+    // Combo de colas a partir de lista de colas
+    $comboColas = array('' => '('._tr('All Queues').')');
+    foreach ($listaColas as $tuplaCola) {
+        $comboColas[$tuplaCola[0]] = $tuplaCola[1];
+    }
+    ksort($comboColas);
+
+    $callType = array(
+        ''          =>  '('._tr('Any Type').')',
+        'incoming'  =>  _tr('Inbound'),
+        'outgoing'  =>  _tr('Outbound'),
+    );
 
     // Para poder consultar los agentes de campañas
+    $oCallsDetail = new paloSantoCallsDetail($pDB);
     $listaAgentes = $oCallsDetail->getAgents(); // Para llenar el select de agentes
+    // Combo de agentes a partir de lista de agentes
+    $comboAgentes = array('' => '('._tr('All Agents').')');
+    foreach ($listaAgentes as $tuplaAgente) {
+        if (!isset($comboAgentes[$tuplaAgente['number']])) {
+            $sDesc = $tuplaAgente['number'].' - '.$tuplaAgente['name'];
+            if ($tuplaAgente['estatus'] != 'A') $sDesc .= ' ('.$tuplaAgente['estatus'].')';
+            $comboAgentes[$tuplaAgente['number']] = $sDesc;
+        }
+    }
 
     // Para poder consultar campañas entrantes y salientes
     $campaignIn = $oCallsDetail->getCampaigns('incoming');
     $campaignOut = $oCallsDetail->getCampaigns('outgoing');
 
     $urlVars = array('menu' => $module_name);
-    $arrFormElements = createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut);
+    $arrFormElements = createFieldFilter($comboAgentes, $comboColas, $callType, $campaignIn, $campaignOut);
     $oFilterForm = new paloForm($smarty, $arrFormElements);
 
     // Validar y aplicar las variables de filtro
@@ -203,12 +224,6 @@ function reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_template
                     $tupla = array(
                         $cdr[0],
                         htmlentities($cdr[1], ENT_COMPAT, "UTF-8"),
-                        /*
-                        substr($cdr[2], 0, 10),     // asume yyyy-mm-dd hh:mm:ss
-                        substr($cdr[2], 11, 8),     // asume yyyy-mm-dd hh:mm:ss
-                        substr($cdr[3], 0, 10),     // asume yyyy-mm-dd hh:mm:ss
-                        substr($cdr[3], 11, 8),     // asume yyyy-mm-dd hh:mm:ss
-                        */
                         $cdr[2], $cdr[3],
                         is_null($cdr[4]) ? '-' : formatoSegundos($cdr[4]),
                         is_null($cdr[5]) ? '-' : formatoSegundos($cdr[5]),
@@ -216,7 +231,7 @@ function reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_template
                         _tr($cdr[7]),
                         $cdr[8],
                         $cdr[9],
-                        isset($mapaEstados[$cdr[10]]) ? $mapaEstados[$cdr[10]] : _tr($cdr[10]),                        
+                        isset($mapaEstados[$cdr[10]]) ? $mapaEstados[$cdr[10]] : _tr($cdr[10]),
                     );
                     if (!$bExportando)
                         $tupla[] = (is_null($cdr[11]) ? '' : '<a href="?menu='.$module_name.'&amp;action=download&amp;id='.$cdr[11].'&amp;rawmode=yes">'._tr('Download').'</a>');
@@ -227,11 +242,7 @@ function reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_template
     }
 
     $arrColumnas = array(_tr("No.Agent"), _tr("Agent"),
-        /* 
-        _tr("Start Date"), _tr("Start Time"),
-        _tr("End Date"), _tr("End Time"),
-        */
-        _tr('Start'), _tr('End'), 
+        _tr('Start Time'), _tr('End Time'), 
         _tr("Duration"),
         _tr("Duration Wait"), _tr("Queue"), _tr("Type"), _tr("Phone"),
         _tr("Transfer"), _tr("Status"));
@@ -239,6 +250,23 @@ function reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_template
         $arrColumnas[] = _tr('Recording');
 
     if($bElastixNuevo) {
+        $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Start Date")." = ".$paramLista['date_start'].", "._tr("End Date")." = ".
+            $paramLista['date_end'], $paramLista, array('date_start' => date("d M Y"),'date_end' => date("d M Y")),true);
+        
+        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Phone")." = ".$paramLista['phone'], $_POST, array("fname" =>''));
+        
+        $paramLista['calltype'] = isset($callType[$paramLista['calltype']])?$paramLista['calltype'] : '';
+        $_POST['calltype']=$paramLista['calltype'];
+        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Call Type")." = ".$callType[$paramLista['calltype']], $_POST, array("calltype" => ''),true);
+        
+        $paramLista['queue'] = isset($comboColas[$paramLista['queue']]) ? $paramLista['queue'] : '';
+        $_POST['queue'] = $paramLista['queue'];
+        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Queue")." = ".$comboColas[$paramLista['queue']], $_POST, array("queue" => ''),true);
+        
+        $paramLista['agent'] = isset($comboAgentes[$paramLista['agent']]) ? $paramLista['agent'] : '';
+        $_POST['agent'] = $paramLista['agent'];
+        $oGrid->addFilterControl(_tr("Filter applied ")._tr("Agent")." = ".$comboAgentes[$paramLista['agent']], $_POST, array("agent" => ''),true);
+        
         $oGrid->setURL(construirURL($urlVars, array("nav", "start")));
         $oGrid->setData($arrData);
         $oGrid->setColumns($arrColumnas);
@@ -280,13 +308,14 @@ function reportCallsDetail($smarty, $module_name, $oCallsDetail, $local_template
     }
 }
 
-function downloadRecording($smarty, $module_name, $oCallsDetail)
+function downloadRecording($smarty, $module_name, $pDB)
 {
     if (!isset($_GET['id'])) {
         Header('Location: ?menu='.$module_name);
         return;
     }
     
+    $oCallsDetail = new paloSantoCallsDetail($pDB);    
     $path = $oCallsDetail->getRecordingFilePath($_GET['id']);
     if (is_null($path)) {
         if ($oCallsDetail->errMsg != '') {
@@ -332,24 +361,8 @@ function downloadRecording($smarty, $module_name, $oCallsDetail)
     fclose($fp);
 }
 
-function createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut)
+function createFieldFilter($comboAgentes, $comboColas, $arrCallType, $campaignIn, $campaignOut)
 {
-    // Combo de agentes a partir de lista de agentes
-    $comboAgentes = array('' => '('._tr('All Agents').')');
-    foreach ($listaAgentes as $tuplaAgente) {
-        if (!isset($comboAgentes[$tuplaAgente['number']])) {
-            $sDesc = $tuplaAgente['number'].' - '.$tuplaAgente['name'];
-            if ($tuplaAgente['estatus'] != 'A') $sDesc .= ' ('.$tuplaAgente['estatus'].')';
-            $comboAgentes[$tuplaAgente['number']] = $sDesc;
-        }
-    }
-
-    // Combo de colas a partir de lista de colas
-    $comboColas = array('' => '('._tr('All Queues').')');
-    foreach ($listaColas as $tuplaCola) {
-        $comboColas[$tuplaCola[0]] = $tuplaCola[1];
-    }
-
     // Combo de campañas entrantes
     $comboCampaignIn = array('' => '('._tr('All Incoming Campaigns').')');
     foreach ($campaignIn as $tuplaCampania) {
@@ -403,11 +416,7 @@ function createFieldFilter($listaAgentes, $listaColas, $campaignIn, $campaignOut
             'LABEL'                     =>  _tr('Type'),
             'REQUIRED'                  =>  'no',
             'INPUT_TYPE'                =>  'SELECT',
-            'INPUT_EXTRA_PARAM'         =>  array(
-                ''          =>  '('._tr('Any Type').')',
-                'incoming'  =>  _tr('Inbound'),
-                'outgoing'  =>  _tr('Outbound'),
-            ),
+            'INPUT_EXTRA_PARAM'         =>  $arrCallType,
             'VALIDATION_TYPE'           =>  'ereg',
             'VALIDATION_EXTRA_PARAM'    =>  '^(incoming|outgoing)?$',
             'ONCHANGE'                  =>  'submit();',

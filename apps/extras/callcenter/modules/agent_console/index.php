@@ -64,9 +64,6 @@ function _moduleContent(&$smarty, $module_name)
     $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['theme'];
     $smarty->assign("MODULE_NAME", $module_name);
 
-    // Incluir todas las bibliotecas y CSS necesarios
-    generarRutaJQueryModulo($smarty, $module_name);
-
     // Estado inicial de la consola del Call Center
     if (!isset($_SESSION['callcenter']) || 
         !is_array($_SESSION['callcenter']) || 

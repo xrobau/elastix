@@ -57,9 +57,6 @@ function _moduleContent(&$smarty, $module_name)
     $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['theme'];
     $smarty->assign("MODULE_NAME", $module_name);
 
-    // Incluir todas las bibliotecas y CSS necesarios
-    generarRutaJQueryModulo($smarty, $module_name);
-
     $sAction = '';
     $sContenido = '';
 

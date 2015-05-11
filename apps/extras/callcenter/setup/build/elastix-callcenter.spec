@@ -104,7 +104,7 @@ fi
 - DELETED: Agent Console, Campaign Monitoring: Elastix 2.4.0 already ships with
   jQuery 1.8.3 and jQueryUI 1.8.24. Therefore, the private copies are now
   obsolete.
-  SVN Rev[7045]
+  SVN Rev[7045], SVN Rev[7046]
 
 * Fri May  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-9
 - Bump version for release.

@@ -110,65 +110,20 @@ class ECCPServer extends MultiplexServer
         }
     }
 
-    function notificarEvento_AgentLogin($sAgente, $bExitoLogin)
+    /*
+     * Definición para propagar la notificación a todas las conexiones activas.
+     * Todas las notificaciones a propagar son métodos que empiezan con la
+     * cadena "notificarEvento_".
+     */
+    function __call($sMetodo, $args)
     {
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'notificarEvento_AgentLogin')) {
-                $oConn->notificarEvento_AgentLogin($sAgente, $bExitoLogin);
-            }
+        if (strpos($sMetodo, 'notificarEvento_') !== 0) {
+            $this->_oLog->output("ERR: no se reconoce método $sMetodo como una notificación");
+            return;
         }
-    }
-
-    function notificarEvento_AgentLogoff($sAgente)
-    {
         foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'notificarEvento_AgentLogoff')) {
-                $oConn->notificarEvento_AgentLogoff($sAgente);
-            }
-        }
-    }
-
-    function notificarEvento_AgentLinked($sAgente, $sRemChannel, $infoLlamada)
-    {
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'notificarEvento_AgentLinked')) {
-                $oConn->notificarEvento_AgentLinked($sAgente, $sRemChannel, $infoLlamada);
-            }
-        }
-    }
-
-    function notificarEvento_AgentUnlinked($sAgente, $infoLlamada)
-    {
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'notificarEvento_AgentUnlinked')) {
-                $oConn->notificarEvento_AgentUnlinked($sAgente, $infoLlamada);
-            }
-        }
-    }
-
-    function notificarEvento_PauseStart($sAgente, $infoPausa)
-    {
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'notificarEvento_PauseStart')) {
-                $oConn->notificarEvento_PauseStart($sAgente, $infoPausa);
-            }
-        }
-    }
-
-    function notificarEvento_PauseEnd($sAgente, $infoPausa)
-    {
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'notificarEvento_PauseEnd')) {
-                $oConn->notificarEvento_PauseEnd($sAgente, $infoPausa);
-            }
-        }
-    }
-    
-    function notificarEvento_CallProgress($infoProgreso)
-    {
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'notificarEvento_CallProgress')) {
-                $oConn->notificarEvento_CallProgress($infoProgreso);
+            if (method_exists($oConn, $sMetodo)) {
+                call_user_func_array(array($oConn, $sMetodo), $args);
             }
         }
     }

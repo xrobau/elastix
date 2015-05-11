@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Mon May 11 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: collapse notification method pattern into a single __call.
+  SVN Rev[7047]
 - DELETED: Agent Console, Campaign Monitoring: Elastix 2.4.0 already ships with
   jQuery 1.8.3 and jQueryUI 1.8.24. Therefore, the private copies are now
   obsolete.

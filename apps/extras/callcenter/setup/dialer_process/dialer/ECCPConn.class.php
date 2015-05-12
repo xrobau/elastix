@@ -827,7 +827,8 @@ LEER_CAMPANIA;
         $recordset = $this->_db->prepare('SELECT DISTINCT id_form FROM campaign_form WHERE id_campaign = ?');
         $recordset->execute(array($idCampania));
         $idxForm = $recordset->fetchAll(PDO::FETCH_COLUMN, 0);
-        
+        $recordset->closeCursor();
+
         // Leer los campos asociados a cada formulario
         $listaForm = $this->_leerCamposFormulario($idxForm);
         if (is_null($listaForm)) {
@@ -850,7 +851,7 @@ LEER_CAMPANIA;
             switch ($sKey) {
             case 'script':
                 /* El control de edición en la creación/modificación del script
-                 * manda a guardar texto con entidades de HTML a la base de 
+                 * manda a guardar texto con entidades de HTML a la base de
                  * datos. Para compatibilidad con campañas antiguas, se deshace
                  * la codificación de HTML aquí. */
                 $sValor = html_entity_decode($sValor, ENT_COMPAT, 'UTF-8');
@@ -933,7 +934,7 @@ LEER_CAMPANIA;
             switch ($sKey) {
             case 'script':
                 /* El control de edición en la creación/modificación del script
-                 * manda a guardar texto con entidades de HTML a la base de 
+                 * manda a guardar texto con entidades de HTML a la base de
                  * datos. Para compatibilidad con campañas antiguas, se deshace
                  * la codificación de HTML aquí. */
                 $sValor = html_entity_decode($sValor, ENT_COMPAT, 'UTF-8');
@@ -984,7 +985,8 @@ LEER_CAMPANIA;
                 'SELECT id, etiqueta AS label, value, tipo AS type, orden AS `order` '.
                 'FROM form_field WHERE id_form = ? ORDER BY `order`');
             $recordset->execute(array($idForm));
-        	$r = $recordset->fetchAll(PDO::FETCH_ASSOC);
+            $r = $recordset->fetchAll(PDO::FETCH_ASSOC);
+            $recordset->closeCursor();
             if (count($r) > 0) {
                 $listaForm[$idForm] = array();
                 foreach ($r as $tuplaCampo)
@@ -2268,6 +2270,7 @@ LISTA_EXTENSIONES;
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
             
+            $this->_eccpProcess->cargarInfoPausa($infoAgente);
             $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
         
@@ -2277,7 +2280,8 @@ LISTA_EXTENSIONES;
         foreach ($infoAgentes as $sAgente => $infoAgente) {
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
-        
+            
+            $this->_eccpProcess->cargarInfoPausa($infoAgente);
             $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
 
@@ -2331,19 +2335,12 @@ LISTA_EXTENSIONES;
             $xml_agent->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_linkstart']));
         if (isset($infoAgente['trunk']))
             $xml_agent->addChild('trunk', $infoAgente['trunk']);
-
         if (!is_null($infoAgente['id_break'])) {
             $xml_agent->addChild('pauseid', $infoAgente['id_break']);
-            $recordset = $this->_db->prepare(
-                'SELECT audit.datetime_init, break.name, break.id '.
-                'FROM audit, break WHERE audit.id_break = break.id AND audit.id = ?');
-            $recordset->execute(array($infoAgente['id_audit_break']));
-            $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
-            $recordset->closeCursor();
-            if ($tupla) {
-                $xml_agent->addChild('pausename', str_replace('&', '&amp;', $tupla['name']));
-                $xml_agent->addChild('pausestart', str_replace(date('Y-m-d '), '', $tupla['datetime_init']));
-            }
+            if (isset($infoAgente['pausename']))
+                $xml_agent->addChild('pausename', str_replace('&', '&amp;', $infoAgente['pausename']));
+            if (isset($infoAgente['pausestart']))
+                $xml_agent->addChild('pausestart', str_replace(date('Y-m-d '), '', $infoAgente['pausestart']));
         }
     }
 
@@ -3801,6 +3798,24 @@ LOG_CAMPANIA_SALIENTE;
             if (!is_null($valor)) $xml_callProgress->addChild($sKey, str_replace('&', '&amp;', $valor));
         }
         
+        $s = $xml_response->asXML();
+        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
+    }
+
+    function notificarEvento_QueueMembership($sAgente, $infoSeguimiento, $listaColas)
+    {
+        if (is_null($this->_sUsuarioECCP)) return;
+        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
+        
+        $xml_response = new SimpleXMLElement('<event />');
+        $xml_queueMembership = $xml_response->addChild('queuemembership');
+        
+        $xml_queueMembership->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
+        $this->_getcampaignstatus_setagent($xml_queueMembership, $infoSeguimiento);
+        $xml_agentQueues = $xml_queueMembership->addChild('queues');
+        foreach ($listaColas as $sCola) {
+            $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
+        }
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
     }

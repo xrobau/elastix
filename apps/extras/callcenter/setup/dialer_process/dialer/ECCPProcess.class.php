@@ -81,7 +81,8 @@ class ECCPProcess extends TuberiaProcess
         foreach (array('notificarProgresoLlamada') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('AgentLogin', 'AgentLogoff', 'AgentLinked',
-            'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada') as $k)
+            'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada',
+            'nuevaMembresiaCola') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -1058,6 +1059,37 @@ INFO_FORMULARIOS;
         }
         
         return $id_campaignlog;
+    }
+
+    public function msg_nuevaMembresiaCola($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+
+        call_user_func_array(array($this, '_nuevaMembresiaCola'), $datos);
+    }
+
+    private function _nuevaMembresiaCola($sAgente, $infoSeguimiento, $listaColas)
+    {
+        $this->cargarInfoPausa($infoSeguimiento);
+        $this->_multiplex->notificarEvento_QueueMembership($sAgente, $infoSeguimiento, $listaColas);
+    }
+
+    public function cargarInfoPausa(&$infoAgente)
+    {
+        if (!is_null($infoAgente['id_break'])) {
+            $recordset = $this->_db->prepare(
+                'SELECT audit.datetime_init, break.name, break.id '.
+                'FROM audit, break WHERE audit.id_break = break.id AND audit.id = ?');
+            $recordset->execute(array($infoAgente['id_audit_break']));
+            $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
+            $recordset->closeCursor();
+            if ($tupla) {
+                $infoAgente['pausename'] = $tupla['name'];
+                $infoAgente['pausestart'] = $tupla['datetime_init'];
+            }
+        }
     }
 }
 ?>

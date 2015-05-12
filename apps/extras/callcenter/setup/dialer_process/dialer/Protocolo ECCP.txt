@@ -829,6 +829,64 @@ Para una llamada saliente, se puede esperar esta secuencia de eventos:
     </callprogress>
 </event>
 
+
+Evento "queuemembership"
+
+Este evento se genera cuando se detecta que el conjunto de colas de atención a
+las que pertenece un agente ha cambiado. Para los agentes estáticos, el conjunto
+de colas de atención es el mismo que reporta Asterisk con el comando
+"queue show". Para agentes dinámicos, el conjunto de colas de atención es el que
+se almacena en la base de datos de Asterisk (astdb), y sólo es idéntico al
+conjunto reportado por "queue show" cuando el agente está logoneado. Para
+conveniencia de los reportes que consumen este evento, se incluye información
+del estado actual del agente afectado, en formato idéntico al disponible en
+el requerimiento "getcampaignstatus".
+
+Elementos informativos:
+* agentchannel: Canal del agente de la cola (normalmente Agent/NNNN)
+* status: Estado del agente. Puede ser 'online', 'offline', 'oncall', 'paused'
+  como se describe en la respuesta del requerimiento 'getagentstatus'
+* callid: ID en la base de datos de la llamada que atiende el agente. Sólo está
+  definido si el agente está logoneado y atendiendo alguna llamada.
+* callnumber: Número telefónico del cliente al que se conecta la llamada. Sólo
+  está definido si el agente está logoneado y atendiendo alguna llamada.
+* callclient: Canal asignado a la llamada del cliente atendido. Sólo está
+  definido si el agente está logoneado y atendiendo alguna llamada.
+* pausename: Nombre de la pausa en la que está el agente. Sólo está definido
+  si el agente está en pausa.
+* pauseid: ID de la pausa en la que está el agente. Sólo está definido si el 
+  agente está en pausa.
+* pausestart: Hora en la que inició la pausa, en formato HH:MM:SS de 24 horas.
+  Sólo está definido si el agente está en pausa.
+* dialstart: Hora en la que inició la marcación de la llamada que atiende el
+  agente. Sólo definido para campañas salientes, y si el agente está atendiendo
+  una llamada.
+* dialend: Hora en la que terminó la marcación de la llamada que atiende el
+  agente. Sólo definido para campañas salientes, y si el agente está atendiendo
+  una llamada.
+* queuestart: Hora en la que entró en la cola la llamada atendida por el agente.
+  Sólo definido si el agente está atendiendo una llamada.
+* linkstart: Hora en la que la llamada fue conectada con el agente. Sólo
+  definido si el agente está atendiendo una llamada.
+* trunk: Troncal a través de la cual se recibe llamada entrante, o se realiza
+  la llamada saliente. Sólo definido si el agente está atendiendo una llamada.
+* queues: Lista de colas a las cuales pertenece el agente. Este elemento 
+  contiene múltiples elementos 'queue', los cuales contienen el identificador
+  de la cola.
+
+Ejemplo:
+Al agregar o quitar el agente de una cola de atención:
+<event>
+    <queuemembership>
+        <agent_number>Agent/9000</agent_number>
+        <queues>
+            <queue>8001</queue>
+            <queue>8000</queue>
+        </queues>
+    </queuemembership>
+</event>
+
+
 Listado de requerimientos
 -------------------------
 Nota: Para facilitar la legibilidad del presente documento, se presentarán aquí 

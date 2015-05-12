@@ -100,6 +100,14 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue May 12 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): new event queuemembership has been created. This event
+  is fired whenever a monitored agent is added or removed from campaign queues
+  (not exactly the same as Asterisk queues). This is required for proper update
+  of the Campaign Monitoring report when performing queue membership.
+  modifications.
+  SVN Rev[7048]
+
 * Mon May 11 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: collapse notification method pattern into a single __call.
   SVN Rev[7047]

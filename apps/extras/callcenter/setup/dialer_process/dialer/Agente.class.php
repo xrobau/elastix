@@ -399,6 +399,24 @@ class Agente
         );
     }
     
+    public function resumenSeguimientoLlamada()
+    {
+        $r = $this->resumenSeguimiento();
+        if (!is_null($this->llamada)) {
+            // Agregar información básica sobre la llamada
+            $r['dialnumber'] = $this->llamada->phone;
+            $r['callid'] = $this->llamada->id_llamada;
+            if (!is_null($this->llamada->timestamp_originatestart))
+                $r['datetime_dialstart'] = date('Y-m-d H:i:s', $this->llamada->timestamp_originatestart);
+            if (!is_null($this->llamada->timestamp_originateend))
+                $r['datetime_dialend'] = date('Y-m-d H:i:s', $this->llamada->timestamp_originateend);
+            $r['datetime_enterqueue'] = date('Y-m-d H:i:s', $this->llamada->timestamp_enterqueue);
+            $r['datetime_linkstart'] = date('Y-m-d H:i:s', $this->llamada->timestamp_link);
+            if (!is_null($this->llamada->trunk)) $r['trunk'] = $this->llamada->trunk;
+        }
+        return $r;
+    }
+    
     public function asignarLlamadaAtendida($llamada, $uniqueid_agente)
     {
     	$this->_llamada = $llamada;
@@ -422,8 +440,15 @@ class Agente
 
     public function asignarEstadoEnColas($nuevoEstado)
     {
+        $k_viejo = array_keys($this->_estado_agente_colas);
+        $k_nuevo = array_keys($nuevoEstado);
+        $colas_agregadas = array_diff($k_nuevo, $k_viejo);
+        $colas_quitadas = array_diff($k_viejo, $k_nuevo);
+                
         $this->_estado_agente_colas = $nuevoEstado;
         asort($this->_estado_agente_colas);
+        
+        return (count($colas_agregadas) > 0 || count($colas_quitadas) > 0);
     }
     
     public function actualizarEstadoEnCola($queue, $status)
@@ -445,8 +470,13 @@ class Agente
     
     public function asignarColasDinamicas($lista)
     {
+        $colas_agregadas = array_diff($lista, $this->_colas_dinamicas);
+        $colas_quitadas = array_diff($this->_colas_dinamicas, $lista);
+        
         $this->_colas_dinamicas = $lista;
         sort($this->_colas_dinamicas);
+        
+        return (count($colas_agregadas) > 0 || count($colas_quitadas) > 0);
     }
     
     public function diferenciaColasDinamicas()
@@ -471,10 +501,17 @@ class Agente
         return array_keys($this->_estado_agente_colas);
     }
     
-    // TODO: volver getter/setter
     public function listaColasDinamicas()
     {
         return $this->_colas_dinamicas;
+    }
+    
+    public function nuevaMembresiaCola($tuberia)
+    {
+        $tuberia->msg_ECCPProcess_nuevaMembresiaCola(
+            $this->channel,
+            $this->resumenSeguimientoLlamada(),
+            $this->listaColasDinamicas());
     }
 }
 ?>

@@ -512,18 +512,8 @@ class AMIEventProcess extends TuberiaProcess
         if (!is_null($llamada->agente)) {
             $a = $llamada->agente;
             $sAgente = $a->channel;
-            $estadoCola[$sAgente] = $a->resumenSeguimiento();
-
-            // Agregar información básica sobre la llamada
-            $estadoCola[$sAgente]['dialnumber'] = $llamada->phone;
-            $estadoCola[$sAgente]['callid'] = $llamada->id_llamada;
-            if (!is_null($llamada->timestamp_originatestart))
-                $estadoCola[$sAgente]['datetime_dialstart'] = date('Y-m-d H:i:s', $llamada->timestamp_originatestart);
-            if (!is_null($llamada->timestamp_originateend))
-                $estadoCola[$sAgente]['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
-            $estadoCola[$sAgente]['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
-            $estadoCola[$sAgente]['datetime_linkstart'] = date('Y-m-d H:i:s', $llamada->timestamp_link);
-            if (!is_null($llamada->trunk)) $estadoCola[$sAgente]['trunk'] = $llamada->trunk;
+            assert('$llamada->agente === $a->llamada');
+            $estadoCola[$sAgente] = $a->resumenSeguimientoLlamada();
         } elseif (in_array($llamada->status, array('Placing', 'Ringing', 'OnQueue'))) {
             $callStatus = array(
                 'dialnumber'    =>  $llamada->phone,
@@ -1274,7 +1264,7 @@ class AMIEventProcess extends TuberiaProcess
             $dyn = array();
             if (isset($datos[1][$sAgente]))
                 $dyn = $datos[1][$sAgente];
-            $a->asignarColasDinamicas($dyn);
+            if ($a->asignarColasDinamicas($dyn)) $a->nuevaMembresiaCola($this->_tuberia);
         }
 
         // Iniciar actualización del estado de las colas activas
@@ -1707,6 +1697,12 @@ Uniqueid: 1429642067.241008
         }
 
         $a->actualizarEstadoEnCola($params['Queue'], $params['Status']);
+        
+        /* El cambio de membresía sólo se reporta para agentes estáticos, porque
+         * el de agentes dinámicos se reporta al refrescar membresía de agentes
+         * con el mensaje desde CampaignProcess. */
+        if ($a->type == 'Agent') $a->$a->nuevaMembresiaCola($this->_tuberia);($tuberia);
+
         if ($a->estado_consola != 'logged-in') {
             if (!is_null($a->extension)) {
                 if (in_array($params['Queue'], $a->listaColasDinamicas())) {
@@ -1754,6 +1750,12 @@ Uniqueid: 1429642067.241008
         }
 
         $a->quitarEstadoEnCola($params['Queue']);
+
+        /* El cambio de membresía sólo se reporta para agentes estáticos, porque
+         * el de agentes dinámicos se reporta al refrescar membresía de agentes
+         * con el mensaje desde CampaignProcess. */
+        if ($a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
+
         if ($a->estado_consola == 'logged-in') {
             if ($a->type == 'Agent') {
                 if ($this->DEBUG) {
@@ -2295,7 +2297,10 @@ Uniqueid: 1429642067.241008
         foreach ($this->_tmp_estadoAgenteCola as $sAgente => $estadoCola) {
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (!is_null($a)) {
-                $a->asignarEstadoEnColas($estadoCola);
+                
+                // Para agentes estáticos, cambio de membresía debe reportarse
+                $bCambioColas = $a->asignarEstadoEnColas($estadoCola);
+                if ($bCambioColas && $a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
 
                 if ($a->estado_consola == 'logged-in') {
                     $diffcolas = $a->diferenciaColasDinamicas();

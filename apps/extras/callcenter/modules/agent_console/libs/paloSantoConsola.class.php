@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |f
+  | Elastix version 0.5                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -89,11 +89,11 @@ class PaloSantoConsola
                 'SELECT md5_password FROM eccp_authorized_clients WHERE username = ?',
                 TRUE, array($sUsernameECCP));
             if (is_array($md5_passwd)) {
-            	if (count($md5_passwd) <= 0) {
-            		$dbConnCC->genQuery(
+                if (count($md5_passwd) <= 0) {
+                    $dbConnCC->genQuery(
                         'INSERT INTO eccp_authorized_clients (username, md5_password) VALUES(?, md5(?))',
                         array($sUsernameECCP, $sPasswordECCP));
-            	}
+                }
             }
 
             $oECCP = new ECCP();
@@ -101,10 +101,10 @@ class PaloSantoConsola
             // TODO: configurar credenciales
             $cr = $oECCP->connect("localhost", $sUsernameECCP, $sPasswordECCP);
             if (isset($cr->failure)) {
-            	throw new ECCPUnauthorizedException(_tr('Failed to authenticate to ECCP').': '.((string)$cr->failure->message));
+                throw new ECCPUnauthorizedException(_tr('Failed to authenticate to ECCP').': '.((string)$cr->failure->message));
             }
             if (!is_null($this->_agent)) {
-            	$oECCP->setAgentNumber($this->_agent);
+                $oECCP->setAgentNumber($this->_agent);
                 
                 /* Privilegio de localhost - se puede recuperar la clave del
                  * agente sin tener que pedirla explícitamente */                
@@ -135,23 +135,23 @@ class PaloSantoConsola
     // user,password para conexión en localhost.
     private function _leerConfigManager()
     {
-    	$sNombreArchivo = '/etc/asterisk/manager.conf';
+        $sNombreArchivo = '/etc/asterisk/manager.conf';
         if (!file_exists($sNombreArchivo)) {
-        	$this->_errMsg = "(internal) $sNombreArchivo no se encuentra.";
+            $this->_errMsg = "(internal) $sNombreArchivo no se encuentra.";
             return NULL;
         }
         if (!is_readable($sNombreArchivo)) {
             $this->_errMsg = "(internal) $sNombreArchivo no puede leerse por usuario de marcador.";
-            return NULL;        	
+            return NULL;
         }
         $infoConfig = parse_ini_file($sNombreArchivo, TRUE);
         if (is_array($infoConfig)) {
             foreach ($infoConfig as $login => $infoLogin) {
-            	if ($login != 'general') {
-            		if (isset($infoLogin['secret']) && isset($infoLogin['read']) && isset($infoLogin['write'])) {
-            			return array($login, $infoLogin['secret']);
-            		}
-            	}
+                if ($login != 'general') {
+                    if (isset($infoLogin['secret']) && isset($infoLogin['read']) && isset($infoLogin['write'])) {
+                        return array($login, $infoLogin['secret']);
+                    }
+                }
             }
         } else {
             $this->_errMsg = "(internal) $sNombreArchivo no puede parsearse correctamente.";
@@ -203,11 +203,11 @@ class PaloSantoConsola
 
     private function _formatoErrorECCP($x)
     {
-    	if (isset($x->failure)) {
-    		return (int)$x->failure->code.' - '.(string)$x->failure->message;
-    	} else {
-    		return '';
-    	}
+        if (isset($x->failure)) {
+            return (int)$x->failure->code.' - '.(string)$x->failure->message;
+        } else {
+            return '';
+        }
     }
 
     /**
@@ -366,7 +366,7 @@ LISTA_EXTENSIONES;
             return 'logging';   // No se recibieron eventos relevantes
         } catch (Exception $e) {
             $this->errMsg = '(internal) esperarResultadoLogin: '.$e->getMessage();
-        	return 'error';
+            return 'error';
         }
     }
 
@@ -412,7 +412,7 @@ LISTA_EXTENSIONES;
             $connStatus = $oECCP->getagentstatus();
             if (isset($connStatus->failure)) {
                 $this->errMsg = '(internal) getagentstatus: '.$this->_formatoErrorECCP($connStatus);
-            	return array('estadofinal' => 'error');
+                return array('estadofinal' => 'error');
             }
             
             $estado = array(
@@ -441,7 +441,7 @@ LISTA_EXTENSIONES;
             );
             
             if (!is_null($estado['pauseinfo'])) foreach (array('pausestart') as $k) {
-            	if (!is_null($estado['pauseinfo'][$k]) && preg_match('/^\d+:\d+:\d+$/', $estado['pauseinfo'][$k]))
+                if (!is_null($estado['pauseinfo'][$k]) && preg_match('/^\d+:\d+:\d+$/', $estado['pauseinfo'][$k]))
                     $estado['pauseinfo'][$k] = date('Y-m-d ').$estado['pauseinfo'][$k];
             }
             if (!is_null($estado['callinfo'])) foreach (array('dialstart', 'dialend', 'queuestart', 'linkstart') as $k) {
@@ -450,7 +450,7 @@ LISTA_EXTENSIONES;
             }
             
             if ($estado['status'] == 'offline') {
-            	$estado['estadofinal'] = is_null($estado['channel']) ? 'logged-out' : 'logging';
+                $estado['estadofinal'] = is_null($estado['channel']) ? 'logged-out' : 'logging';
             } elseif ($estado['extension'] != $sExtension && preg_match('|^Agent/(\d+)$|', $this->_agent, $regs)) {
                 $estado['estadofinal'] = 'mismatch';
                 $this->errMsg = _tr('Specified agent already connected to extension').
@@ -458,7 +458,7 @@ LISTA_EXTENSIONES;
             }
             return $estado;
         } catch (Exception $e) {
-        	$this->errMsg = '(internal) getagentstatus: '.$e->getMessage();
+            $this->errMsg = '(internal) getagentstatus: '.$e->getMessage();
             return array('estadofinal' => 'error');
         }
     }
@@ -489,18 +489,18 @@ LISTA_EXTENSIONES;
      */
     function colgarLlamada()
     {
-    	try {
+        try {
             $oECCP = $this->_obtenerConexion('ECCP');
-    		$respuesta = $oECCP->hangup();
+            $respuesta = $oECCP->hangup();
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to hangup call').' - '.$this->_formatoErrorECCP($respuesta);
                 return FALSE;
             }
             return TRUE;
-    	} catch (Exception $e) {
+        } catch (Exception $e) {
             $this->errMsg = '(internal) hangup: '.$e->getMessage();
-    		return FALSE;
-    	}
+            return FALSE;
+        }
     }
     
     /**
@@ -521,7 +521,7 @@ LISTA_EXTENSIONES;
             $listaPausas = array();
             foreach ($respuesta->pause as $xml_pause) {
                 if ($xml_pause->status == 'A')
-            	   $listaPausas[(int)$xml_pause['id']] = (string)$xml_pause->name.' - '.(string)$xml_pause->description;
+                   $listaPausas[(int)$xml_pause['id']] = (string)$xml_pause->name.' - '.(string)$xml_pause->description;
             }
             return $listaPausas;
         } catch (Exception $e) {
@@ -539,18 +539,18 @@ LISTA_EXTENSIONES;
      */
     function iniciarBreak($idBreak)
     {
-    	try {
-    		$oECCP = $this->_obtenerConexion('ECCP');
+        try {
+            $oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = $oECCP->pauseagent($idBreak);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to start break').' - '.$this->_formatoErrorECCP($respuesta);
-            	return FALSE;
+                return FALSE;
             }
             return TRUE;
-    	} catch (Exception $e) {
+        } catch (Exception $e) {
             $this->errMsg = '(internal) pauseagent: '.$e->getMessage();
-    		return FALSE;
-    	}
+            return FALSE;
+        }
     }
     
     /**
@@ -595,7 +595,7 @@ LISTA_EXTENSIONES;
     function leerInfoCampania($sCallType, $iCampaignId)
     {
         if ($sCallType == 'incomingqueue') {
-        	return array(
+            return array(
                 'queue'                     =>  $iCampaignId,
                 'type'                      =>  'incoming',
                 'startdate'                 =>  NULL,
@@ -630,7 +630,7 @@ LISTA_EXTENSIONES;
                             if (isset($xml_field->default_value))
                                 $descCampo['default_value'] = (string)$xml_field->default_value;
                             if (isset($xml_field->options)) foreach ($xml_field->options->value as $xml_option_value) {
-                            	$descCampo['options'][] = (string)$xml_option_value;
+                                $descCampo['options'][] = (string)$xml_option_value;
                             } 
                             $campos[(int)$xml_field['order']] = $descCampo;
                         }
@@ -669,8 +669,8 @@ LISTA_EXTENSIONES;
 
             $reporte = array();
             foreach ($respuesta->children() as $xml_node) {
-            	switch ($xml_node->getName()) {
-            	case 'call_attributes':
+                switch ($xml_node->getName()) {
+                case 'call_attributes':
                     $reporte['call_attributes'] = $this->_traducirCallAttributes($xml_node);
                     break;
                 case 'matching_contacts':
@@ -682,7 +682,7 @@ LISTA_EXTENSIONES;
                 default:
                     $reporte[$xml_node->getName()] = (string)$xml_node;
                     break;
-            	}
+                }
             }
             foreach (array('calltype', 'call_id', 'campaign_id', 'phone', 'status',
                 'uniqueid', 'datetime_join', 'datetime_linkstart', 'trunk', 'queue',
@@ -740,7 +740,7 @@ LISTA_EXTENSIONES;
             ksort($atributos);
             $reporte[(int)$xml_form['id']] = $atributos;
         }
-    	return $reporte;
+        return $reporte;
     }
     
     function leerScriptCola($queue)
@@ -880,6 +880,17 @@ LISTA_EXTENSIONES;
                     $evento['phone'] = (string)$evt->phone;
                     $evento['queue'] = isset($evt->queue) ? (string)$evt->queue : NULL;
                     break;
+                case 'queuemembership':
+                    foreach (array('status', 'callid', 'callnumber',
+                        'callchannel', 'dialstart', 'dialend', 'queuestart',
+                        'linkstart', 'pauseid', 'pausename', 'pausestart',
+                        'trunk') as $k) 
+                        $evento[$k] = isset($evt->$k) ? (string) $evt->$k : NULL;
+                    $evento['queues'] = array();
+                    foreach ($evt->queues->queue as $xml_q) {
+                        $evento['queues'][] = (string)$xml_q;
+                    }
+                    break;
                 }
                 $listaEventos[] = $evento;
             }
@@ -892,7 +903,7 @@ LISTA_EXTENSIONES;
     
     function listarEstadoMonitoreoAgentes()
     {
-    	try {
+        try {
             $oECCP = $this->_obtenerConexion('ECCP');
             $respuestaResumen = $oECCP->getagentactivitysummary();
             $resumenColas = array();
@@ -914,7 +925,7 @@ LISTA_EXTENSIONES;
                 }
                 $agenteColas[(string)$xml_queue->agent_number] = $colas;
             }
-            
+
             // Listar el estado de todos los agentes
             $estadosAgentes = $oECCP->getmultipleagentstatus($agentlist);
             $agenteEstado = array();
@@ -925,8 +936,7 @@ LISTA_EXTENSIONES;
             
             
             foreach ($respuestaResumen->agents->agent as $xml_agent) {
-            	// Averiguar el estado del agente
-                //$estadoAgente = $oECCP->getagentstatus((string)$xml_agent->agentchannel);
+                // Averiguar el estado del agente
                 $estadoAgente = $agenteEstado[(string)$xml_agent->agentchannel];
 
                 // Llenar plantilla con toda la información excepto el número de llamadas por cola
@@ -950,17 +960,17 @@ LISTA_EXTENSIONES;
                 
                 // Averiguar a qué colas pertenece el agente
                 foreach ($agenteColas[(string)$xml_agent->agentchannel] as $xml_queue) {
-                	$infoAgenteCola = $infoAgente;
+                    $infoAgenteCola = $infoAgente;
                     if (isset($xml_agent->callsummary->incoming->queue)) {
-                    	foreach ($xml_agent->callsummary->incoming->queue as $xml_queuestat) {
-                    		if ((string)$xml_queuestat['id'] == (string)$xml_queue) {
-                    			$infoAgenteCola['sec_calls'] += (int)$xml_queuestat->sec_calls;
+                        foreach ($xml_agent->callsummary->incoming->queue as $xml_queuestat) {
+                            if ((string)$xml_queuestat['id'] == (string)$xml_queue) {
+                                $infoAgenteCola['sec_calls'] += (int)$xml_queuestat->sec_calls;
                                 $infoAgenteCola['num_calls'] += (int)$xml_queuestat->num_calls;
-                    		}
+                            }
                             if (isset($estadoAgente->callinfo->queuenumber) &&
                                 (string)$estadoAgente->callinfo->queuenumber == (string)$xml_queuestat['id']) {
                             }
-                    	}
+                        }
                     }
                     if (isset($xml_agent->callsummary->outgoing->queue)) {
                         foreach ($xml_agent->callsummary->outgoing->queue as $xml_queuestat) {
@@ -978,26 +988,26 @@ LISTA_EXTENSIONES;
                 }
             }
             return $resumenColas;
-    	} catch (Exception $e) {
+        } catch (Exception $e) {
             $this->errMsg = '(internal) listarEstadoMonitoreoAgentes: '.$e->getMessage();
-    		return NULL;
-    	}
+            return NULL;
+        }
     }
     
     function leerVariablesCanalLlamadaActiva($sAgentNumber = NULL)
     {
-    	try {
-    		$oECCP = $this->_obtenerConexion('ECCP');
+        try {
+            $oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = $oECCP->getchanvars($sAgentNumber);
             $chanvars = array();
             foreach ($respuesta->chanvars->chanvar as $xml_chanvar) {
-            	$chanvars[(string)$xml_chanvar->label] = (string)$xml_chanvar->value;
+                $chanvars[(string)$xml_chanvar->label] = (string)$xml_chanvar->value;
             }
             return $chanvars;
-    	} catch (Exception $e) {
-    		$this->errMsg = '(internal) leerVariablesCanalLlamadaActiva'.$e->getMessage();
+        } catch (Exception $e) {
+            $this->errMsg = '(internal) leerVariablesCanalLlamadaActiva'.$e->getMessage();
             return NULL;
-    	}
+        }
     }
 
     function leerListaColasEntrantes()
@@ -1022,12 +1032,12 @@ LISTA_EXTENSIONES;
     
     function leerListaCampanias()
     {
-    	try {
-    		$oECCP = $this->_obtenerConexion('ECCP');
+        try {
+            $oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = $oECCP->getcampaignlist();
             $listaCampania = array();
             foreach ($respuesta->campaigns->campaign as $xml_campaign) {
-            	$listaCampania[] = array(
+                $listaCampania[] = array(
                     'id'        =>  (int)$xml_campaign->id,
                     'type'      =>  (string)$xml_campaign->type,
                     'name'      =>  (string)$xml_campaign->name,
@@ -1035,16 +1045,16 @@ LISTA_EXTENSIONES;
                 );
             }
             return $listaCampania;
-    	} catch (Exception $e) {
+        } catch (Exception $e) {
             $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
             return NULL;
-    	}
+        }
     }
     
     function leerEstadoCampania($sCallType, $iCampaignId, $datetime_start = NULL)
     {
-    	try {
-    		$oECCP = $this->_obtenerConexion('ECCP');
+        try {
+            $oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = ($sCallType == 'incomingqueue') 
                 ? $oECCP->getincomingqueuestatus($iCampaignId, $datetime_start)
                 : $oECCP->getcampaignstatus($sCallType, $iCampaignId, $datetime_start);
@@ -1063,7 +1073,7 @@ LISTA_EXTENSIONES;
                 switch ($xml_node->getName()) {
                 case 'statuscount':
                     foreach ($xml_node->children() as $xml_field) {
-                    	$reporte['statuscount'][$xml_field->getName()] = (int)$xml_field;
+                        $reporte['statuscount'][$xml_field->getName()] = (int)$xml_field;
                     }
                     ksort($reporte['statuscount']);
                     break;
@@ -1075,7 +1085,7 @@ LISTA_EXTENSIONES;
                     break;
                 case 'agents':
                     foreach ($xml_node->agent as $xml_agent) {
-                    	$sAgente = (string)$xml_agent->agentchannel;
+                        $sAgente = (string)$xml_agent->agentchannel;
                         $reporte['agents'][$sAgente] = array();
                         foreach (array('agentchannel', 'status', 'callid', 'callnumber',
                             'callchannel', 'dialstart', 'dialend', 'queuestart',
@@ -1089,7 +1099,7 @@ LISTA_EXTENSIONES;
                     break;
                 case 'activecalls':
                     foreach ($xml_node->activecall as $xml_activecall) {
-                    	$idCall = (int)$xml_activecall->callid;
+                        $idCall = (int)$xml_activecall->callid;
                         $reporte['activecalls'][$idCall] = array(
                             'callid'        =>  $idCall,
                             'callnumber'    =>  (string)$xml_activecall->callnumber,
@@ -1105,18 +1115,18 @@ LISTA_EXTENSIONES;
             }
             if (!isset($reporte['statuscount']['finished'])) {
                 $reporte['statuscount']['finished'] = $reporte['statuscount']['success'] - $iNumLlamadasAtendidas;
-            	ksort($reporte['statuscount']);
+                ksort($reporte['statuscount']);
             }
             return $reporte;
         } catch (Exception $e) {
             $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
             return NULL;
-    	}
+        }
     }
     
     function leerLogCampania($sCallType, $iCampaignId, $lastN = NULL, $idbefore = NULL)
     {
-    	try {
+        try {
             $oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = ($sCallType == 'incomingqueue') 
                 ? $oECCP->campaignlog('incoming', NULL, $iCampaignId, NULL, NULL, $lastN, $idbefore)
@@ -1138,20 +1148,20 @@ LISTA_EXTENSIONES;
                 }
             }
             return $reporte;
-    	} catch (Exception $e) {
+        } catch (Exception $e) {
             $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
             return NULL;
-    	}
+        }
     }
     
     function escucharProgresoLlamada($bHabilitar)
     {
-    	try {
-    		$oECCP = $this->_obtenerConexion('ECCP');
+        try {
+            $oECCP = $this->_obtenerConexion('ECCP');
             $respuesta = $oECCP->callprogress($bHabilitar);
         } catch (Exception $e) {
             $this->errMsg = '(internal) '.__METHOD__.': '.$e->getMessage();
-    	}
+        }
     }
 
 

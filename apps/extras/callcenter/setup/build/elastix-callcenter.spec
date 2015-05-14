@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu May 14 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: for static agents, queuemembership event must be fired with
+  list of actual membership, since there is no dynamic queuelist. Also fix typo.
+  SVN Rev[7050]
+
 * Wed May 13 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Monitoring: make use of the new queuemembership event.
   SVN Rev[7049]

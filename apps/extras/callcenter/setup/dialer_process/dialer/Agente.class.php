@@ -508,10 +508,13 @@ class Agente
     
     public function nuevaMembresiaCola($tuberia)
     {
+        $colasAtencion = ($this->type == 'Agent')
+            ? $this->listaColasAgente()
+            : $this->listaColasDinamicas();
         $tuberia->msg_ECCPProcess_nuevaMembresiaCola(
             $this->channel,
             $this->resumenSeguimientoLlamada(),
-            $this->listaColasDinamicas());
+            $colasAtencion);
     }
 }
 ?>

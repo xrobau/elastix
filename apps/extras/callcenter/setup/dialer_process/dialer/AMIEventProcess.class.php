@@ -1701,7 +1701,7 @@ Uniqueid: 1429642067.241008
         /* El cambio de membresía sólo se reporta para agentes estáticos, porque
          * el de agentes dinámicos se reporta al refrescar membresía de agentes
          * con el mensaje desde CampaignProcess. */
-        if ($a->type == 'Agent') $a->$a->nuevaMembresiaCola($this->_tuberia);($tuberia);
+        if ($a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
 
         if ($a->estado_consola != 'logged-in') {
             if (!is_null($a->extension)) {

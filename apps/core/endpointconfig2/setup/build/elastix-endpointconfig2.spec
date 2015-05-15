@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri May 15 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: fix generation of remote contact list for 
+  Akuvox/SimulNet style phones (LXP150/250).
+  SVN Rev[7051]
+
 * Tue Apr 21 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

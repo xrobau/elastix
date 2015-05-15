@@ -66,16 +66,8 @@ class Elastix extends Grandstream
     private function _handle_phonebook($id_endpoint, $addressBookType)
     {
         $userdata = $this->obtenerUsuarioElastix($id_endpoint);
-        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8" ?><ContactData/>');
+        $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8" ?><Directory/>');
 
-/*
-        $xml_group = $xml->addChild('Group');
-        $xml_group->addAttribute('Id', '1');
-        $xml_group->addAttribute('Name', 'Default');
-        $xml_group->addAttribute('Ring', 'Auto');
-        //$xml_group->addAttribute('Description', '');
-*/
-        
         $result = $this->listarAgendaElastix(is_null($userdata) ? NULL : $userdata['id_user'], $addressBookType);
         if (!is_array($result['contacts'])) {
             Header(($result["fc"] == "DBERROR")
@@ -89,31 +81,24 @@ class Elastix extends Grandstream
             'internal'  =>  array('Internal', 'Elastix Phonebook - Internal'),
             'external'  =>  array('External', 'Elastix Phonebook - External'),
         );
-        
-        $xml_group = $xml->addChild('Group');
-        $xml_group->addAttribute('Id', '1');
-        $xml_group->addAttribute('Name', $labels[$addressBookType][0]);
-        $xml_group->addAttribute('Ring', 'Auto');
-        $xml_group->addAttribute('Description', $labels[$addressBookType][1]);
+
+        $xml->addAttribute('Name', $labels[$addressBookType][1]);
         foreach ($result['contacts'] as $idx => $contact) {
-            $xml_contact = $xml_group->addChild('Contact');
+            $xml_contact = $xml->addChild('Contact');
             $xml_contact->addAttribute('Id', $idx + 1);
-            $xml_contact->addAttribute('Line', '0');
-            
-            $xml_contact->addAttribute('DisplayName', isset($contact['last_name'])
+
+            $xml_contact->addAttribute('Name', isset($contact['last_name'])
                 ? str_replace('&', '&amp;', $contact['name']).' '.str_replace('&', '&amp;', $contact['last_name'])
                 : str_replace('&', '&amp;', $contact['name']));
-        
+            
             $numlabels = array(
-                'work_phone'    =>  'OfficeNumber',
-                'cell_phone'    =>  'MobileNumber',
-                'home_phone'    =>  'OtherNumber');
+                'work_phone'    =>  'Office',
+                'cell_phone'    =>  'Mobile',
+                'home_phone'    =>  'Other');
             foreach ($numlabels as $k => $label) {
                 if (!empty($contact[$k]))
                     $xml_contact->addAttribute($label, str_replace('&', '&amp;', $contact[$k]));
             }
-            
-            $xml_contact->addAttribute('Ring', 'Auto');
         }
         
         header('Content-Type: text/xml');

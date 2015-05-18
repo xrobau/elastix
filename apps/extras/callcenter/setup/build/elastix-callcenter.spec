@@ -9,7 +9,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.4.0-7
+Prereq: elastix-framework >= 2.4.0-1
 Requires: asterisk
 Requires: freePBX
 Requires: php-mbstring
@@ -100,6 +100,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon May 18 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: After testing, it was shown that the elastix-framework version from
+  a recently-installed Elastix 2.4 is quite sufficient to run the CallCenter
+  modules. The minimum elastix-framework version can be lowered so users are not
+  forced to upgrade.
+  SVN Rev[7053]
+
 * Sun May 17 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: fix long-standing bug in which failure cause of failed calls
   is available but fired *after* the call object is removed from tracking by

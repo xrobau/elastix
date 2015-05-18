@@ -318,7 +318,7 @@ class AMIEventProcess extends TuberiaProcess
                         $sAgente,
                         time(),
                         $a->id_agent);
-                }                
+                }
             }
         }
 
@@ -924,13 +924,22 @@ class AMIEventProcess extends TuberiaProcess
     {
     	$iTimestamp = time();
         if ($iTimestamp - $this->_iTimestampVerificacionLlamadasViejas > 30) {
-        	// Remover llamadas viejas luego de 5 * 60 segundos de espera sin respuesta
             $listaLlamadasViejas = array();
+            $listaLlamadasSinFailureCause = array();
+
             foreach ($this->_listaLlamadas as $llamada) {
+                // Remover llamadas viejas luego de 5 * 60 segundos de espera sin respuesta
         		if (!is_null($llamada->timestamp_originatestart) &&
                     is_null($llamada->timestamp_originateend) &&
                     $iTimestamp - $llamada->timestamp_originatestart > 5 * 60) {
                     $listaLlamadasViejas[] = $llamada;
+                }
+
+                // Remover llamadas fallidas luego de 60 segundos sin razón de hangup
+                if (!is_null($llamada->timestamp_originateend) &&
+                    $llamada->status == 'Failure' &&
+                    $iTimestamp - $llamada->timestamp_originatestart > 60) {
+                    $listaLlamadasSinFailureCause[] = $llamada;
                 }
         	}
 
@@ -939,6 +948,14 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_log->output('ERR: '.__METHOD__.": llamada {$llamada->actionid} ".
                     "espera respuesta desde hace $iEspera segundos, se elimina.");
                 $llamada->llamadaFueOriginada($iTimestamp, NULL, NULL, 'Failure');
+            }
+
+            // Remover llamadas fallidas luego de 60 segundos sin razón de hangup
+            foreach ($listaLlamadasSinFailureCause as $llamada) {
+                $iEspera = $iTimestamp - $llamada->timestamp_originateend;
+                $this->_log->output('ERR: '.__METHOD__.": llamada {$llamada->actionid} ".
+                    "espera causa de fallo desde hace $iEspera segundos, se elimina.");
+                $this->_listaLlamadas->remover($llamada);
             }
 
             $this->_iTimestampVerificacionLlamadasViejas = $iTimestamp;
@@ -961,7 +978,7 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_tuberia->msg_ECCPProcess_AgentLogin(
                     $a->channel,
                     time(),
-                    NULL);                
+                    NULL);
             }
         }
     }
@@ -1235,8 +1252,8 @@ class AMIEventProcess extends TuberiaProcess
                 'de agentes porque ya hay una verificación de pertenencia a '.
                 'colas en progreso: '.$this->_tmp_actionid_queuestatus);
             return;
-        }        
-        
+        }
+
         foreach ($datos[0] as $tupla) {
             // id type number name estatus
         	$sAgente = $tupla['type'].'/'.$tupla['number'];
@@ -1697,7 +1714,7 @@ Uniqueid: 1429642067.241008
         }
 
         $a->actualizarEstadoEnCola($params['Queue'], $params['Status']);
-        
+
         /* El cambio de membresía sólo se reporta para agentes estáticos, porque
          * el de agentes dinámicos se reporta al refrescar membresía de agentes
          * con el mensaje desde CampaignProcess. */
@@ -2070,14 +2087,17 @@ Uniqueid: 1429642067.241008
              * que este sea el Hangup de un canal auxiliar que tiene información
              * de la falla de la llamada */
             $llamada = $this->_listaLlamadas->buscar('auxchannel', $params['Uniqueid']);
-            if (!is_null($llamada) && is_null($llamada->timestamp_originateend)) {
+            if (!is_null($llamada)) {
                 $llamada->AuxChannels[$params['Uniqueid']]['Hangup'] = $params;
                 $llamada->registerAuxChannels();
-                if ($this->DEBUG) {
-                    $this->_log->output(
-                        "DEBUG: ".__METHOD__.": Hangup de canal auxiliar de ".
-                        "llamada por fallo de Originate para llamada ".
-                        $llamada->uniqueid." canal auxiliar ".$params['Uniqueid']);
+                if (is_null($llamada->timestamp_link)) {
+                    if ($this->DEBUG) {
+                        $this->_log->output(
+                            "DEBUG: ".__METHOD__.": Hangup de canal auxiliar de ".
+                            "llamada por fallo de Originate para llamada ".
+                            $llamada->uniqueid." canal auxiliar ".$params['Uniqueid']);
+                    }
+                    $llamada->actualizarCausaFallo($params['Cause'], $params['Cause-txt']);
                 }
             }
         }
@@ -2096,19 +2116,10 @@ Uniqueid: 1429642067.241008
         if (is_null($llamada->timestamp_link)) {
             /* Si se detecta el Hangup antes del OriginateResponse, se marca
              * la llamada como fallida y se deja de monitorear. */
-            if (is_null($llamada->timestamp_originateend) &&
-                !is_null($llamada->timestamp_originatestart)) {
-                if ($this->DEBUG) {
-                    $this->_log->output("DEBUG: ".__METHOD__.": Hangup de llamada por fallo de Originate");
-                }
-                $llamada->llamadaFueOriginada($params['local_timestamp_received'],
-                    $params['Uniqueid'], $params['Channel'], 'Failure',
-                    $params['Cause'], $params['Cause-txt']);
-            } else {
-                $llamada->llamadaFinalizaSeguimiento(
-                    $params['local_timestamp_received'],
-                    $this->_config['dialer']['llamada_corta']);
-            }
+            $llamada->actualizarCausaFallo($params['Cause'], $params['Cause-txt']);
+            $llamada->llamadaFinalizaSeguimiento(
+                $params['local_timestamp_received'],
+                $this->_config['dialer']['llamada_corta']);
         } else {
             if ($llamada->status == 'OnHold') {
                 if ($this->DEBUG) {
@@ -2297,7 +2308,7 @@ Uniqueid: 1429642067.241008
         foreach ($this->_tmp_estadoAgenteCola as $sAgente => $estadoCola) {
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (!is_null($a)) {
-                
+
                 // Para agentes estáticos, cambio de membresía debe reportarse
                 $bCambioColas = $a->asignarEstadoEnColas($estadoCola);
                 if ($bCambioColas && $a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);

@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sun May 17 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix long-standing bug in which failure cause of failed calls
+  is available but fired *after* the call object is removed from tracking by
+  the OriginateResponse or Hangup handlers.
+  SVN Rev[7052]
+
 * Thu May 14 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: for static agents, queuemembership event must be fired with
   list of actual membership, since there is no dynamic queuelist. Also fix typo.
@@ -134,7 +140,7 @@ fi
 * Thu May  7 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: make dynamic agent login conditions more strict. Check whether
   agent already belongs to all dynamic queues, and transition directly to
-  logged-in state if so. This prevents agents waiting for QueueMemberAdded 
+  logged-in state if so. This prevents agents waiting for QueueMemberAdded
   events that will never come. Check for stuck login agents and fail them after
   5 minutes. Ignore queue membership additions for queues when not processing a
   loginagent request. Ignore queue membership additions for queues outside the

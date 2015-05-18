@@ -37,7 +37,7 @@ class Llamada
     private $_listaLlamadas;
 
     // Agente que está atendiendo la llamada, o NULL para llamada sin atender
-    var $agente = NULL;		 
+    var $agente = NULL;
 
     // Campaña a la que pertenece la llamada, o NULL para llamada entrante sin campaña
     var $campania = NULL;
@@ -47,47 +47,47 @@ class Llamada
 
     // Tipo de llamada, 'incoming', 'outgoing'
     private $_tipo_llamada;
-    
-    /* ID en la base de datos de la llamada, o NULL para llamada entrante sin 
-     * registrar. Esta propiedad es una de las propiedades indexables en 
+
+    /* ID en la base de datos de la llamada, o NULL para llamada entrante sin
+     * registrar. Esta propiedad es una de las propiedades indexables en
      * ListaLlamadas, junto con _tipo_llamada */
     private $_id_llamada = NULL;
-    
-    /* Cadena de marcado que se ha usado para la llamada saliente. Esta 
+
+    /* Cadena de marcado que se ha usado para la llamada saliente. Esta
      * propiedad es una de las propiedades indexables en ListaLlamadas. */
     private $_dialstring = NULL;
-    
-    /* Valor de Uniqueid proporcionado por Asterisk para la llamada. Esta 
+
+    /* Valor de Uniqueid proporcionado por Asterisk para la llamada. Esta
      * propiedad es una de las propiedades indexables en ListaLlamadas. */
     private $_uniqueid = NULL;
-    
-    /* Canal indicado por OriginateResponse o Join que puede usarse para 
+
+    /* Canal indicado por OriginateResponse o Join que puede usarse para
      * redirigir la llamada. Se usa para redirigir la llamada en caso de llamada
-     * agendada, y puede que también sirva para manipular en caso de hold y 
-     * transferencia. Esta propiedad es una de las propiedades indexables en 
+     * agendada, y puede que también sirva para manipular en caso de hold y
+     * transferencia. Esta propiedad es una de las propiedades indexables en
      * ListaLlamadas. */
     private $_channel = NULL;
     private $_actualchannel = NULL;
 
-    /* Cadena usada en Originate para el valor de ActionID, para identificar 
-     * esta llamada al recibir el OriginateResponse, en el caso de troncal 
+    /* Cadena usada en Originate para el valor de ActionID, para identificar
+     * esta llamada al recibir el OriginateResponse, en el caso de troncal
      * específica (sin usar plan de marcado). Esta propiedad es una de las
      * propiedades indexables en ListaLlamadas. */
     private $_actionid = NULL;
 
-    /* Estimación de troncal de la llamada, obtenida a partir de Channel de 
+    /* Estimación de troncal de la llamada, obtenida a partir de Channel de
      * OriginateResponse o Join. Se usa para llamadas entrantes. */
     private $_trunk = NULL;
 
     /* Estado de la llamada. Para llamadas salientes, el estado puede ser:
-     * NULL     Estado inicial, llamada recién ha sido avisada 
+     * NULL     Estado inicial, llamada recién ha sido avisada
      * Placing  Se ha iniciado Originate para esta llamada. En este estado debe
-     *          de tenerse un valor para timestamp_originate_start, que se 
+     *          de tenerse un valor para timestamp_originate_start, que se
      *          supone fue escrito por CampaignProcess.
-     * Ringing  Se ha recibido OriginateResponse para esta llamada. En este 
-     *          estado debe de tenerse un valor para timestamp_originate_end. 
+     * Ringing  Se ha recibido OriginateResponse para esta llamada. En este
+     *          estado debe de tenerse un valor para timestamp_originate_end.
      *          Si no se ha recibido ya Link para la llamada, se escribe Ringing
-     *          en la base de datos. 
+     *          en la base de datos.
      * OnQueue  Se ha recibido Join para esta llamada. En este estado debe de
      *          tenerse un valor para timestamp_enterqueue. Si no se ha recibido
      *          ya Link para la llamada, se escribe OnQueue en la base de datos.
@@ -104,20 +104,20 @@ class Llamada
      *          - Llamada falla de inmediato el Originate
      *          - Llamada ha pasado demasiado tiempo en estado Placing
      *          - Se ha recibido OriginateResponse fallido
-     *          - Se ha recibido OriginateResponse exitoso, pero se había recibido 
+     *          - Se ha recibido OriginateResponse exitoso, pero se había recibido
      *            previamente un Hangup sobre la misma llamada.
      * ShortCall La llamada ha sido correctamente conectada en Link, pero luego
      *          se cuelga en un tiempo menor al indicado en la configuración
      *          de llamada corta.
      * NoAnswer La llamada fue colgada sin ser conectada antes de entrar a la cola
      * Abandoned La llamada fue colgada sin ser conectada luego de entrar a la cola
-     * 
-     * Puede ocurrir que se reciban los eventos Join y Link antes que 
+     *
+     * Puede ocurrir que se reciban los eventos Join y Link antes que
      * OriginateResponse. Entonces se siguen las reglas detalladas arriba para
      * la escritura del estado. Los timestamps siempre se escriben al llegar
      * el respectivo mensaje.
-     * 
-     * Para llamadas entrantes, los estados válidos son: 
+     *
+     * Para llamadas entrantes, los estados válidos son:
      * OnQueue  Se escribe 'en-cola' en la base de datos
      * Success  Se escribe 'activa' en la base de datos
      * OnHold   Se escribe 'hold' en la base de datos
@@ -129,26 +129,26 @@ class Llamada
     /* Canal completo del lado de agente. Para agentes estáticos (Agent/xxxx)
      * este valor es idéntico al Agent/xxxx del agente asignado. Para agentes
      * dinámicos, es de la forma (SIP|IAX2)/xxxx-zzzz . Este valor es requerido
-     * para realizar la transferencia asistida. */ 
+     * para realizar la transferencia asistida. */
     private $_agentchannel = NULL;
-    
+
     var $phone;     // Número marcado para llamada saliente o Caller-ID para llamada entrante
     var $id_current_call;   // ID del registro correspondiente en current_call[_entry]
-    var $request_hold = FALSE;  // Se asigna a VERDADERO al invocar requerimiento hold, y se verifica en Unlink 
-    
+    var $request_hold = FALSE;  // Se asigna a VERDADERO al invocar requerimiento hold, y se verifica en Unlink
+
     // Timestamps correspondientes a diversos eventos de la llamada
     private $_timestamp_originatestart = NULL;   // Inicio de Originate en CampaignProcess
     private $_timestamp_originateend = NULL;     // Recepción de OriginateResponse
     var $timestamp_enterqueue = NULL;       // Recepción de Join
     var $timestamp_link = NULL;             // Recepción de primer Link
     var $timestamp_hangup = NULL;           // Recepción de Hangup
-    
+
     // Lista de canales auxiliares asociados a la llamada.
     var $AuxChannels = array();
 
     // ID de la cola de campaña entrante. Sólo para llamadas entrantes
     var $id_queue_call_entry = NULL;
-    
+
     private $_queuenumber = NULL;
 
     // Referencia al agente agendado
@@ -156,12 +156,18 @@ class Llamada
 
     // Actualizaciones pendientes en la base de datos por faltar id_llamada
     private $_actualizacionesPendientes = array();
-    
+
     /* Esta bandera indica si se ha señalado final de procesamiento de la
      * llamada, y por lo tanto, candidata a ser quitada del seguimiento, cuando
-     * todavía no ha llegado el aviso del inicio de Originate. */ 
+     * todavía no ha llegado el aviso del inicio de Originate. */
     private $_stillborn = FALSE;
-    
+
+    /* Código y texto de causa de fallo al marcar llamada. Una llamada fallida
+     * sólo puede quitarse de la lista de llamadas cuando se tiene un valor de
+     * fallo válido. */
+    private $_failure_cause = NULL;
+    private $_failure_cause_txt = NULL;
+
     // Este constructor sólo debe invocarse desde ListaLlamadas::nuevaLlamada()
     function __construct(ListaLlamadas $lista, $tipo_llamada, $tuberia, $log)
     {
@@ -170,11 +176,11 @@ class Llamada
         $this->_tuberia = $tuberia;
         $this->_log = $log;
     }
-    
+
     private function _nul($i) { return is_null($i) ? '(ninguno)' : "$i"; }
     private function _nultime($i) { return is_null($i) ? '----/--/-- --:--:--' : date('Y/m/d H:i:s', $i); }
     private function _agentecorto($a) { return is_null($a) ? '(ninguno)' : $a->__toString(); }
-    
+
     public function __toString()
     {
         return "ID=".($this->id_llamada).
@@ -183,7 +189,7 @@ class Llamada
             " channel=".($this->channel).
             " actualchannel=".($this->actualchannel);
     }
-    
+
     public function dump($log)
     {
         $s = "----- LLAMADA -----\n";
@@ -197,6 +203,10 @@ class Llamada
         $s .= "\tagentchannel.................".$this->_nul($this->agentchannel)."\n";
         $s .= "\ttrunk........................".$this->_nul($this->trunk)."\n";
         $s .= "\tstatus.......................".$this->_nul($this->status)."\n";
+        if (!is_null($this->failure_cause))
+            $s .= "\tfailure_cause................".$this->_nul($this->failure_cause)."\n";
+        if (!is_null($this->failure_cause_txt))
+            $s .= "\tfailure_cause_txt............".$this->_nul($this->failure_cause_txt)."\n";
         $s .= "\tactionid.....................".$this->_nul($this->actionid)."\n";
         $s .= "\tid_current_call..............".$this->_nul($this->id_current_call)."\n";
         $s .= "\tduration.....................".$this->_nul($this->duration)."\n";
@@ -209,19 +219,19 @@ class Llamada
         $s .= "\tduration_wait................".$this->_nul($this->duration_wait)."\n";
         $s .= "\tduration_answer..............".$this->_nul($this->duration_answer)."\n";
         $s .= "\tesperando_contestar..........".($this->esperando_contestar ? 'SI' : 'NO')."\n";
-        $s .= "\trequest_hold.................".($this->request_hold ? 'SI' : 'NO')."\n";        
+        $s .= "\trequest_hold.................".($this->request_hold ? 'SI' : 'NO')."\n";
         $s .= "\tid_queue_call_entry..........".$this->_nul($this->id_queue_call_entry)."\n";
         $s .= "\t_queuenumber.................".$this->_nul($this->_queuenumber)."\n";
         $s .= "\tagente.......................".$this->_agentecorto($this->agente)."\n";
         $s .= "\tagente_agendado..............".$this->_agentecorto($this->agente_agendado)."\n";
         $s .= "\tcampania.....................".(is_null($this->campania) ? '(ninguna)' : $this->campania->__toString())."\n";
-        
+
         $s .= "\tAuxChannels..................".print_r($this->AuxChannels, TRUE)."\n";
         $s .= "\t_actualizacionesPendientes...".print_r($this->_actualizacionesPendientes, TRUE)."\n";
 
         $log->output($s);
     }
-    
+
     public function __get($s)
     {
         switch ($s) {
@@ -237,13 +247,15 @@ class Llamada
         case 'status':          return $this->_status;
         case 'actionid':        return $this->_actionid;
         case 'stillborn':       return $this->_stillborn;
+        case 'failure_cause':   return $this->_failure_cause;
+        case 'failure_cause_txt':return $this->_failure_cause_txt;
         case 'timestamp_originatestart':return $this->_timestamp_originatestart;
         case 'timestamp_originateend':  return $this->_timestamp_originateend;
-        case 'duration':        return (!is_null($this->timestamp_link) && !is_null($this->timestamp_hangup)) 
+        case 'duration':        return (!is_null($this->timestamp_link) && !is_null($this->timestamp_hangup))
                                         ? $this->timestamp_hangup - $this->timestamp_link : NULL;
-        case 'duration_wait':   return (!is_null($this->timestamp_link) && !is_null($this->timestamp_enterqueue)) 
+        case 'duration_wait':   return (!is_null($this->timestamp_link) && !is_null($this->timestamp_enterqueue))
                                         ? $this->timestamp_link - $this->timestamp_enterqueue : NULL;
-        case 'duration_answer': return (!is_null($this->timestamp_link) && !is_null($this->timestamp_originatestart)) 
+        case 'duration_answer': return (!is_null($this->timestamp_link) && !is_null($this->timestamp_originatestart))
                                         ? $this->timestamp_link - $this->timestamp_originatestart : NULL;
         case 'esperando_contestar':
                                 return (!is_null($this->timestamp_originatestart) && is_null($this->timestamp_originateend));
@@ -252,7 +264,7 @@ class Llamada
             die(__METHOD__.' - propiedad no implementada: '.$s."\n");
         }
     }
-    
+
     public function __set($s, $v)
     {
         switch ($s) {
@@ -261,8 +273,8 @@ class Llamada
                 $this->_tipo_llamada = (string)$v;
             break;
         case 'status':
-            if (in_array($v, array('Placing', 'Ringing', 'OnQueue', 'Success', 
-                'OnHold', 'Hangup', 'Failure', 'ShortCall', 'NoAnswer', 
+            if (in_array($v, array('Placing', 'Ringing', 'OnQueue', 'Success',
+                'OnHold', 'Hangup', 'Failure', 'ShortCall', 'NoAnswer',
                 'Abandoned')))
                 $this->_status = (string)$v;
             break;
@@ -274,21 +286,21 @@ class Llamada
                     $this->_listaLlamadas->removerIndice($sIndice, $this->_id_llamada);
                 $this->_id_llamada = $v;
                 $this->_listaLlamadas->agregarIndice($sIndice, $this->_id_llamada, $this);
-                
+
                 // Si la llamada era entrante, entonces puede que hayan actualizaciones pendientes
                 if (count($this->_actualizacionesPendientes) > 0) {
                     if (isset($this->_actualizacionesPendientes['sqlupdatecalls'])) {
                         $this->_log->output('INFO: '.__METHOD__.': ya se tiene ID de llamada, actualizando call_entry...');
                     	$paramActualizar = $this->_actualizacionesPendientes['sqlupdatecalls'];
                         unset($this->_actualizacionesPendientes['sqlupdatecalls']);
-                        
+
                         $paramActualizar['id'] = $this->id_llamada;
                         $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
 
                         // Lanzar evento ECCP en ECCPProcess
-                        $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada, 
+                        $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada,
                             is_null($this->campania) ? NULL : $this->campania->id,
-                            $this->id_llamada, $this->agente->channel, 
+                            $this->id_llamada, $this->agente->channel,
                             is_null($this->actualchannel) ? $this->channel : $this->actualchannel,
                             date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent'],
                             $this->trunk, $this->_queuenumber);
@@ -298,7 +310,7 @@ class Llamada
                         $paramInsertarCC = $this->_actualizacionesPendientes['sqlinsertcurrentcalls'];
                         unset($this->_actualizacionesPendientes['sqlinsertcurrentcalls']);
 
-                        $paramInsertarCC[($this->tipo_llamada == 'incoming') ? 'id_call_entry' : 'id_call'] = 
+                        $paramInsertarCC[($this->tipo_llamada == 'incoming') ? 'id_call_entry' : 'id_call'] =
                             $this->id_llamada;
                         $this->_tuberia->msg_CampaignProcess_sqlinsertcurrentcalls($paramInsertarCC);
                     }
@@ -333,14 +345,14 @@ class Llamada
                     $this->_listaLlamadas->removerIndice('channel', $this->_channel);
                 $this->_channel = $v;
                 $this->_listaLlamadas->agregarIndice('channel', $this->_channel, $this);
-                
+
                 // El valor de trunk es derivado de channel
                 $regs = NULL;
                 if (preg_match('/^(.+)-[0-9a-fA-F]+$/', $this->_channel, $regs)) {
                 	$this->_trunk = $regs[1];
-                    
+
                 }
-                
+
                 // Si el canal de la llamada no es Local, es el actualchannel
                 if (strpos($this->_channel, 'Local/') !== 0) {
                 	$this->actualchannel = $v;
@@ -354,9 +366,9 @@ class Llamada
                     $this->_listaLlamadas->removerIndice('actualchannel', $this->_actualchannel);
                 $this->_actualchannel = $v;
                 $this->_listaLlamadas->agregarIndice('actualchannel', $this->_actualchannel, $this);
-                
+
                 // El valor de trunk es derivado de channel
-                if ((is_null($this->_trunk) || strpos($this->_trunk, 'Local/') === 0) 
+                if ((is_null($this->_trunk) || strpos($this->_trunk, 'Local/') === 0)
                     && strpos($v, 'Local/') !== 0) {
                     $this->_trunk = NULL;
                     $regs = NULL;
@@ -374,7 +386,7 @@ class Llamada
                     $this->_listaLlamadas->removerIndice('uniqueid', $this->_uniqueid);
                 $this->_uniqueid = $v;
                 $this->_listaLlamadas->agregarIndice('uniqueid', $this->_uniqueid, $this);
-                
+
                 // Actualizar el Uniqueid en la base de datos
                 if (!is_null($this->_id_llamada)) {
                 	$paramActualizar = array(
@@ -399,9 +411,11 @@ class Llamada
             $this->_timestamp_originatestart = $v;
             if ($this->_stillborn && !is_null($this->timestamp_originateend)) {
                 /* Esta asignación se hace al recibir el evento avisoInicioOriginate.
-                 * Por lo tanto, si la llamada ya recibió el Hangup, se la debe 
+                 * Por lo tanto, si la llamada ya recibió el Hangup, se la debe
                  * quitar de la lista de seguimiento. */
-                $this->_listaLlamadas->remover($this);
+                if (!($this->_status == 'Failure' && is_null($this->_failure_cause))) {
+                    $this->_listaLlamadas->remover($this);
+                }
             }
             break;
         default:
@@ -409,19 +423,19 @@ class Llamada
             die(__METHOD__.' - propiedad no implementada: '.$s."\n");
         }
     }
-    
+
     public function registerAuxChannels()
     {
     	foreach (array_keys($this->AuxChannels) as $k)
             $this->_listaLlamadas->agregarIndice('auxchannel', $k, $this);
     }
-    
+
     public function unregisterAuxChannels()
     {
         foreach (array_keys($this->AuxChannels) as $k)
             $this->_listaLlamadas->removerIndice('auxchannel', $k);
     }
-    
+
     public function resumenLlamada()
     {
     	$resumen = array(
@@ -441,12 +455,48 @@ class Llamada
         if ($this->tipo_llamada == 'outgoing') {
         	$resumen['datetime_dialstart'] = date('Y-m-d H:i:s', $this->timestamp_originatestart);
             $resumen['datetime_dialstart'] = date('Y-m-d H:i:s', $this->timestamp_originateend);
-        }        
+        }
         return $resumen;
     }
-    
-    public function llamadaFueOriginada($timestamp, $uniqueid, $channel, 
-        $sStatus, $iCause = NULL, $sCauseTxt = NULL)
+
+    public function actualizarCausaFallo($iCause, $sCauseTxt)
+    {
+        // Una llamada entrante no tiene las columnas para guardar failure_cause
+        if ($this->tipo_llamada == 'incoming') return;
+
+        // Una causa de colgado de 0 no sirve.
+        if (!is_null($iCause) && $iCause == 0) return;
+/*
+        if (is_null($iCause)) foreach ($this->AuxChannels as $eventosAuxiliares) {
+            if (isset($eventosAuxiliares['Hangup']) && $eventosAuxiliares['Hangup']['Cause'] != 0) {
+                $iCause = $eventosAuxiliares['Hangup']['Cause'];
+                $sCauseTxt = $eventosAuxiliares['Hangup']['Cause-txt'];
+            }
+        }
+*/
+        if (!is_null($iCause)) {
+            $this->_failure_cause = $iCause;
+            $this->_failure_cause_txt = $sCauseTxt;
+            $paramActualizar = array(
+                'tipo_llamada'      =>  $this->tipo_llamada,
+                'id_campaign'       =>  $this->campania->id,
+                'id'                =>  $this->id_llamada,
+                'failure_cause'     =>  $iCause,
+                'failure_cause_txt' =>  $sCauseTxt,
+            );
+
+            // Actualizar asíncronamente las propiedades de la llamada
+            $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
+
+            if (!is_null($this->timestamp_hangup) &&
+                !($this->_stillborn && is_null($this->_timestamp_originatestart))) {
+                $this->_listaLlamadas->remover($this);
+            }
+        }
+    }
+
+    public function llamadaFueOriginada($timestamp, $uniqueid, $channel,
+        $sStatus)
     {
         $this->_timestamp_originateend = $timestamp;
         if (is_null($this->channel)) $this->channel = $channel;
@@ -471,41 +521,25 @@ class Llamada
             'tipo_llamada'  =>  $this->tipo_llamada,
             'id_campaign'   =>  $this->campania->id,
             'id'            =>  $this->id_llamada,
-            
+
             'status'        =>  $this->status,
             'Uniqueid'      =>  $this->uniqueid,
             'fecha_llamada' =>  date('Y-m-d H:i:s', $this->timestamp_originateend),
             'inc_retries'   =>  ($sStatus == 'Failure') ? 1 : 0,
         );
-        
+
         /* En caso de fallo de Originate, y si se tienen canales auxiliares, el
          * Hangup registrado en el canal auxiliar puede tener la causa del fallo
          */
         $iSegundosEspera = $this->timestamp_originateend - $this->timestamp_originatestart;
         if ($sStatus == 'Failure') {
-            // Una causa de colgado de 0 no sirve.
-            if (!is_null($iCause) && $iCause == 0) {
-            	$iCause = NULL; $sCauseTxt = NULL;
-            }
-            
-            if (is_null($iCause)) foreach ($this->AuxChannels as $eventosAuxiliares) {
-                if (isset($eventosAuxiliares['Hangup']) && $eventosAuxiliares['Hangup']['Cause'] != 0) {
-                    $iCause = $eventosAuxiliares['Hangup']['Cause'];
-                    $sCauseTxt = $eventosAuxiliares['Hangup']['Cause-txt'];
-                }
-            }
-            if (!is_null($iCause)) {
-                $paramActualizar['failure_cause'] = $iCause;
-                $paramActualizar['failure_cause_txt'] = $sCauseTxt;
-            }
-            
             $this->campania->agregarTiempoContestar($iSegundosEspera);
 
             if (!is_null($this->agente_agendado)) {
                 $a = $this->agente_agendado;
                 $this->agente_agendado = NULL;
                 $a->llamada_agendada = NULL;
-                
+
                 /* Se debe quitar la reservación únicamente si no hay más
                  * llamadas agendadas para este agente. Si se cumple esto,
                  * CampaignProcess lanzará el evento quitarReservaAgente
@@ -513,16 +547,20 @@ class Llamada
                 $this->_tuberia->msg_CampaignProcess_verificarFinLlamadasAgendables(
                     $a->channel, $this->campania->id, $a->resumenSeguimiento());
             }
-            
-            // Remover llamada que no se pudo colocar si ya se recibió avisoInicioOriginate
-            if (!($this->_stillborn && is_null($this->timestamp_originatestart)))
-                $this->_listaLlamadas->remover($this);                    
+
+            /* Remover llamada que no se pudo colocar si ya se recibió
+             * avisoInicioOriginate, y si se tiene una causa de fallo válida. */
+            if (!($this->_stillborn && is_null($this->timestamp_originatestart))) {
+                if (!is_null($this->failure_cause)) {
+                    $this->_listaLlamadas->remover($this);
+                }
+            }
         } else {
             // Verificar si Onnewchannel procesó pata equivocada
             if ($this->uniqueid != $uniqueid) {
                 $this->_log->output("ERR: se procesó pata equivocada en evento Newchannel ".
                     "anterior, pata procesada es {$this->uniqueid}, ".
-                    "pata real es {$uniqueid}");      
+                    "pata real es {$uniqueid}");
 
                 $this->unregisterAuxChannels();
                 $this->AuxChannels = array();
@@ -532,7 +570,7 @@ class Llamada
 
             /*
             if ($this->DEBUG) {
-                $this->_log->output("DEBUG: llamada colocada luego de $iSegundosEspera s. de espera."); 
+                $this->_log->output("DEBUG: llamada colocada luego de $iSegundosEspera s. de espera.");
             }
             */
             if ($this->_stillborn) {
@@ -540,10 +578,10 @@ class Llamada
                 if (!is_null($this->timestamp_originatestart)) $this->_listaLlamadas->remover($this);
             }
         }
-        
+
         // Actualizar asíncronamente las propiedades de la llamada
         $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
-        
+
         // Notificar el progreso de la llamada
         $paramProgreso = array(
             'datetime_entry'    =>  $paramActualizar['fecha_llamada'],
@@ -560,7 +598,7 @@ class Llamada
         }
         $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
     }
-    
+
     public function llamadaEntraEnCola($timestamp, $channel, $sQueueNumber)
     {
         $this->timestamp_enterqueue = $timestamp;
@@ -568,22 +606,22 @@ class Llamada
         if (is_null($this->channel)) $this->channel = $channel;
         if (is_null($this->status) || in_array($this->status, array('Placing', 'Ringing')))
             $this->status = 'OnQueue';
-        
+
         if ($this->tipo_llamada == 'outgoing') {
             // Preparar propiedades a actualizar en DB
             $paramActualizar = array(
                 'tipo_llamada'          =>  $this->tipo_llamada,
                 'id_campaign'           =>  $this->campania->id,
                 'id'                    =>  $this->id_llamada,
-                
+
                 'status'                =>  $this->status,
                 'datetime_entry_queue'  =>  date('Y-m-d H:i:s', $this->timestamp_enterqueue),
                 'trunk'                 =>  $this->trunk,
-                
+
                 // OJO: si se pasa en un futuro "channel", verificar en incoming
             );
             $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
-            
+
             // Notificar el progreso de la llamada
             $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada(array(
                 'datetime_entry'        =>  $paramActualizar['datetime_entry_queue'],
@@ -602,20 +640,20 @@ class Llamada
                 'datetime_entry_queue'  =>  date('Y-m-d H:i:s', $this->timestamp_enterqueue),
                 'status'                =>  'en-cola',
                 'uniqueid'              =>  $this->uniqueid,
-                
+
                 // Un trunk NULL ocurre en caso de Channel Local/XXX@yyyy-zzzz
                 'trunk'                 =>  is_null($this->trunk) ? '' : $this->trunk,
-                
+
                 // El siguiente código asume que la llamada entrante no tiene canales auxiliares
                 'channel'               =>  $channel,
             );
             $this->_tuberia->msg_CampaignProcess_sqlinsertcalls($paramInsertar);
-            
-            // La notificación de progreso se realiza en CampaignProcess ANTES 
+
+            // La notificación de progreso se realiza en CampaignProcess ANTES
             // de devolver el ID de inserción.
         }
     }
-    
+
     public function llamadaEnlazadaAgente($timestamp, $agent, $sRemChannel,
         $uniqueid_agente, $sAgentChannel)
     {
@@ -623,7 +661,7 @@ class Llamada
         $this->agente->asignarLlamadaAtendida($this, $uniqueid_agente);
         $this->agente_agendado = NULL;
         $this->agente->llamada_agendada = NULL;
-    	
+
         $this->_agentchannel = $sAgentChannel;
         $this->status = 'Success';
         $this->timestamp_link = $timestamp;
@@ -638,11 +676,11 @@ class Llamada
         */
 
         // El canal verdadero es más util que Local/XXX para las operaciones
-        if (strpos($sRemChannel, 'Local/') === 0 && !is_null($this->channel) 
+        if (strpos($sRemChannel, 'Local/') === 0 && !is_null($this->channel)
             && $sRemChannel != $this->channel) {
             $sRemChannel = $this->channel;
         }
-        if (strpos($sRemChannel, 'Local/') === 0 && !is_null($this->actualchannel) 
+        if (strpos($sRemChannel, 'Local/') === 0 && !is_null($this->actualchannel)
             && $sRemChannel != $this->actualchannel) {
             $sRemChannel = $this->actualchannel;
         }
@@ -650,13 +688,13 @@ class Llamada
         $paramActualizar = array(
             'tipo_llamada'          =>  $this->tipo_llamada,
             'id_campaign'           =>  is_null($this->campania) ? NULL : $this->campania->id,
-            
+
             'id_agent'              =>  is_null($this->agente) ? NULL : $this->agente->id_agent,
             'duration_wait'         =>  $this->duration_wait,
         );
         $paramInsertarCC = array(
             'tipo_llamada'      =>  $this->tipo_llamada,
-            
+
             'uniqueid'          =>  $this->uniqueid,
             'ChannelClient'     =>  $sRemChannel,
         );
@@ -681,19 +719,19 @@ class Llamada
         if (!is_null($this->id_llamada)) {
             // Ya se tiene el ID de la llamada
             $paramActualizar['id'] = $this->id_llamada;
-            $paramInsertarCC[($this->tipo_llamada == 'incoming') ? 'id_call_entry' : 'id_call'] = 
+            $paramInsertarCC[($this->tipo_llamada == 'incoming') ? 'id_call_entry' : 'id_call'] =
                 $this->id_llamada;
             $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
             $this->_tuberia->msg_CampaignProcess_sqlinsertcurrentcalls($paramInsertarCC);
-    
+
             // Lanzar evento ECCP en ECCPProcess
-            $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada, 
-                is_null($this->campania) ? NULL : $this->campania->id, 
-                $this->id_llamada, $this->agente->channel, $sRemChannel, 
+            $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada,
+                is_null($this->campania) ? NULL : $this->campania->id,
+                $this->id_llamada, $this->agente->channel, $sRemChannel,
                 date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent'],
                 $this->trunk, $this->_queuenumber);
         } else {
-        	/* En el caso de llamadas entrantes, puede ocurrir que el evento 
+        	/* En el caso de llamadas entrantes, puede ocurrir que el evento
              * Link se reciba ANTES de haber recibido el ID de inserción en
              * call_entry. Entonces no se puede mandar a actualizar hasta tener
              * este ID, ni tampoco lanzar el evento AgentLinked. Se delegan las
@@ -715,7 +753,7 @@ class Llamada
             $this->dump($this->_log);
         }
     }
-    
+
     public function llamadaRegresaHold($iTimestamp, $uniqueid_nuevo = NULL, $sAgentChannel = NULL)
     {
         if (is_null($uniqueid_nuevo)) $uniqueid_nuevo = $this->_uniqueid;
@@ -726,12 +764,12 @@ class Llamada
             $this->_listaLlamadas->agregarIndice('uniqueid', $this->_uniqueid, $this);
         }
         if (!is_null($sAgentChannel)) $this->_agentchannel = $sAgentChannel;
-        
+
         if (!is_null($this->agente)) {
             $a = $this->agente;
             $this->_tuberia->msg_ECCPProcess_marcarFinalHold(
                 $iTimestamp, $a->channel,
-                $this->resumenLlamada(), 
+                $this->resumenLlamada(),
                 $a->resumenSeguimiento());
             $a->clearHold();
         }
@@ -773,7 +811,7 @@ class Llamada
             $this->_tuberia->msg_CampaignProcess_sqlupdatecurrentcalls($paramActualizar);
         }
     }
-    
+
     public function llamadaFinalizaSeguimiento($timestamp, $iUmbralLlamadaCorta)
     {
         if (is_null($this->id_llamada)) {
@@ -785,7 +823,7 @@ class Llamada
         $this->_agentchannel = NULL;
         if ($this->tipo_llamada == 'outgoing' && is_null($this->timestamp_originatestart))
             $this->_stillborn = TRUE;
-        
+
         // Mandar a borrar el registro de current_calls
         if (!is_null($this->id_current_call)) {
             $this->_tuberia->msg_CampaignProcess_sqldeletecurrentcalls(array(
@@ -868,9 +906,9 @@ class Llamada
 
             if (!is_null($this->agente)) {
                 $this->_tuberia->msg_ECCPProcess_AgentUnlinked(
-                    $this->agente->channel, $this->tipo_llamada, 
+                    $this->agente->channel, $this->tipo_llamada,
                     is_null($this->campania) ? NULL : $this->campania->id,
-                    $this->id_llamada, $this->phone, 
+                    $this->id_llamada, $this->phone,
                     date('Y-m-d H:i:s', $this->timestamp_hangup),
                     $this->duration, ($this->status == 'ShortCall'),
                     $paramProgreso);
@@ -879,7 +917,7 @@ class Llamada
                 $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
             }
         }
-        
+
         if (!is_null($this->agente_agendado)) {
             // Sacar de pausa al agente cuya llamada ha terminado
             $a = $this->agente_agendado;
@@ -908,11 +946,19 @@ class Llamada
                     $a->channel, $this->campania->id, $a->resumenSeguimiento());
             }
         }
-    
-        // Se espera que la llamada sea removida al manejar OriginateResponse
-        if (!$this->_stillborn) $this->_listaLlamadas->remover($this);
+
+        /* Para las llamadas exitosas, ya se ha recibido OriginateResponse y
+         * por lo tanto, ya se tiene timestamp_originateend. Si no está, la
+         * llamada ha fallado antes de que el OriginateResponse reciba Failure,
+         * y se tiene que delegar el quitado de la llamada hasta ese momento, o
+         * incluso más tarde si la causa del fallo es desconocida. */
+        if (!$this->_stillborn &&
+            !($this->tipo_llamada == 'outgoing' && (is_null($this->timestamp_originateend) || is_null($this->timestamp_originatestart))) &&
+            !($this->status == 'Failure' && is_null($this->failure_cause))) {
+            $this->_listaLlamadas->remover($this);
+        }
     }
-    
+
     public function agregarArchivoGrabacion($uniqueid, $channel, $recordingfile)
     {
         $this->_tuberia->msg_CampaignProcess_agregarArchivoGrabacion(

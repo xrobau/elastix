@@ -789,23 +789,15 @@ class ECCPConn extends MultiplexConn
             $sTipoCampania = (string)$comando->campaign_type;
         }
 
-        switch ($sTipoCampania) {
-        case 'incoming':
-            return $this->_leerInfoCampaniaXML_incoming($idCampania);
-        case 'outgoing':
-            return $this->_leerInfoCampaniaXML_outgoing($idCampania);
-        default:
+        if (!in_array($sTipoCampania, array('incoming', 'outgoing')))
             return $this->_generarRespuestaFallo(400, 'Bad request');
-        }
-    }
-    
-    private function _leerInfoCampaniaXML_outgoing($idCampania)
-    {
+
         $xml_response = new SimpleXMLElement('<response />');
         $xml_GetCampaignInfoResponse = $xml_response->addChild('getcampaigninfo_response');
 
-        // Leer la información de la campaña saliente
-        $sPeticionSQL = <<<LEER_CAMPANIA
+        switch ($sTipoCampania) {
+        case 'outgoing':
+            $sql_campania = <<<LEER_CAMPANIA
 SELECT name, 'outgoing' AS type, datetime_init AS startdate, datetime_end AS enddate,
     daytime_init AS working_time_starttime, daytime_end AS working_time_endtime, 
     queue, retries, trunk, context, max_canales AS maxchan, estatus AS status,
@@ -815,19 +807,44 @@ LEFT JOIN campaign_external_url
     ON campaign.id_url = campaign_external_url.id AND campaign_external_url.active = 1 
 WHERE campaign.id = ?
 LEER_CAMPANIA;
-        $recordset = $this->_db->prepare($sPeticionSQL);
+            $sql_forms = 'SELECT DISTINCT id_form FROM campaign_form WHERE id_campaign = ?';
+            break;
+        case 'incoming':
+            $sql_campania = <<<LEER_CAMPANIA
+SELECT name, 'incoming' AS type, datetime_init AS startdate, datetime_end AS enddate,
+    daytime_init AS working_time_starttime, daytime_end AS working_time_endtime,
+    queue, campaign_entry.estatus AS status, campaign_entry.script, id_form,
+    urltemplate, opentype AS urlopentype
+FROM (campaign_entry, queue_call_entry)
+LEFT JOIN campaign_external_url
+    ON campaign_entry.id_url = campaign_external_url.id AND campaign_external_url.active = 1
+WHERE campaign_entry.id = ? AND campaign_entry.id_queue_call_entry = queue_call_entry.id
+LEER_CAMPANIA;
+            $sql_forms = 'SELECT DISTINCT id_form FROM campaign_form_entry WHERE id_campaign = ?';
+            break;
+        }
+
+        // Leer la información de la campaña
+        $recordset = $this->_db->prepare($sql_campania);
         $recordset->execute(array($idCampania));
-        $tuplaCampania = $recordset->fetch(PDO::FETCH_ASSOC); $recordset->closeCursor();
+        $tuplaCampania = $recordset->fetch(PDO::FETCH_ASSOC);
+        $recordset->closeCursor();
         if (!$tuplaCampania) {
             $this->_agregarRespuestaFallo($xml_GetCampaignInfoResponse, 404, 'Campaign not found');
             return $xml_response;
         }
 
         // Leer la lista de formularios asociados a esta campaña
-        $recordset = $this->_db->prepare('SELECT DISTINCT id_form FROM campaign_form WHERE id_campaign = ?');
+        $recordset = $this->_db->prepare($sql_forms);
         $recordset->execute(array($idCampania));
         $idxForm = $recordset->fetchAll(PDO::FETCH_COLUMN, 0);
-        $recordset->closeCursor();
+
+        // Se agrega posible formulario asociado en tabla campaign_entry
+        if (isset($tuplaCampania['id_form']) &&
+            !is_null($tuplaCampania['id_form']) &&
+            !in_array($tuplaCampania['id_form'], $idxForm))
+            $idxForm[] = $tuplaCampania['id_form'];
+        unset($tuplaCampania['id_form']);
 
         // Leer los campos asociados a cada formulario
         $listaForm = $this->_leerCamposFormulario($idxForm);
@@ -861,7 +878,7 @@ LEER_CAMPANIA;
                 $sValor = $descEstados[$sValor];
                 $xml_GetCampaignInfoResponse->addChild($sKey, str_replace('&', '&amp;', $sValor));
                 break;
-            case 'trunk':
+            case 'trunk':   // Sólo para campañas salientes
                 // Pasar al caso default si el valor no es nulo
                 if (is_null($sValor)) break;
             default:
@@ -878,86 +895,7 @@ LEER_CAMPANIA;
 
         return $xml_response;
     }
-    
-    private function _leerInfoCampaniaXML_incoming($idCampania)
-    {
-        $xml_response = new SimpleXMLElement('<response />');
-        $xml_GetCampaignInfoResponse = $xml_response->addChild('getcampaigninfo_response');
 
-        // Leer la información de la campaña entrante
-        $sPeticionSQL = <<<LEER_CAMPANIA
-SELECT name, 'incoming' AS type, datetime_init AS startdate, datetime_end AS enddate,
-    daytime_init AS working_time_starttime, daytime_end AS working_time_endtime,
-    queue, campaign_entry.estatus AS status, campaign_entry.script, id_form, 
-    urltemplate, opentype AS urlopentype
-FROM (campaign_entry, queue_call_entry)
-LEFT JOIN campaign_external_url
-    ON campaign_entry.id_url = campaign_external_url.id AND campaign_external_url.active = 1 
-WHERE campaign_entry.id = ? AND campaign_entry.id_queue_call_entry = queue_call_entry.id
-LEER_CAMPANIA;
-        $recordset = $this->_db->prepare($sPeticionSQL);
-        $recordset->execute(array($idCampania));
-        $tuplaCampania = $recordset->fetch(PDO::FETCH_ASSOC); $recordset->closeCursor();
-        if (!$tuplaCampania) {
-            $this->_agregarRespuestaFallo($xml_GetCampaignInfoResponse, 404, 'Campaign not found');
-            return $xml_response;
-        }
-
-        // Leer la lista de formularios asociados a esta campaña
-        $recordset = $this->_db->prepare('SELECT DISTINCT id_form FROM campaign_form_entry WHERE id_campaign = ?');
-        $recordset->execute(array($idCampania));
-        $idxForm = $recordset->fetchAll(PDO::FETCH_COLUMN, 0);
-
-        if (!is_null($tuplaCampania['id_form']) && !in_array($tuplaCampania['id_form'], $idxForm))
-            $idxForm[] = $tuplaCampania['id_form'];
-        unset($tuplaCampania['id_form']);
-        
-        // Leer los campos asociados a cada formulario
-        $listaForm = $this->_leerCamposFormulario($idxForm);
-        if (is_null($listaForm)) {
-            $this->_agregarRespuestaFallo($xml_GetCampaignInfoResponse, 500, 'Cannot read campaign info (formfields)');
-            return $xml_response;
-        }
-        $listaNombresForm = $this->_leerInfoFormulario($idxForm);
-        if (is_null($listaNombresForm)) {
-            $this->_agregarRespuestaFallo($xml_GetCampaignInfoResponse, 500, 'Cannot read campaign info (formnames)');
-            return $xml_response;
-        }
-
-        // Construir la respuesta con la información del campo
-        $descEstados = array(
-            'A' =>  'active',
-            'I' =>  'inactive',
-            'T' =>  'finished',
-        );
-        foreach ($tuplaCampania as $sKey => $sValor) {
-            switch ($sKey) {
-            case 'script':
-                /* El control de edición en la creación/modificación del script
-                 * manda a guardar texto con entidades de HTML a la base de
-                 * datos. Para compatibilidad con campañas antiguas, se deshace
-                 * la codificación de HTML aquí. */
-                $sValor = html_entity_decode($sValor, ENT_COMPAT, 'UTF-8');
-                $xml_GetCampaignInfoResponse->addChild($sKey, str_replace('&', '&amp;', $sValor));
-                break;
-            case 'status':
-                $sValor = $descEstados[$sValor];
-                // Cae al siguiente caso
-            default:
-                $xml_GetCampaignInfoResponse->addChild($sKey, str_replace('&', '&amp;', $sValor));
-                break;
-            }
-        }
-
-        // Construir la información de los formularios
-        $xml_Forms = $xml_GetCampaignInfoResponse->addChild('forms');
-        foreach ($listaForm as $idForm => $listaCampos) {
-            $this->_agregarCamposFormulario($xml_Forms, $idForm, $listaCampos, $listaNombresForm[$idForm]);
-        }
-
-        return $xml_response;
-    }
-    
     private function _leerInfoFormulario($idxForm)
     {
         $listaForm = array();

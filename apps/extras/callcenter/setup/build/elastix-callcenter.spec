@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Mon May 18 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): factor out common elements in incoming/outgoing
+  campaign information into a single method.
+  SVN Rev[7054]
 - CHANGED: After testing, it was shown that the elastix-framework version from
   a recently-installed Elastix 2.4 is quite sufficient to run the CallCenter
   modules. The minimum elastix-framework version can be lowered so users are not

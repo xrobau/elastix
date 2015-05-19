@@ -2128,8 +2128,8 @@ LISTA_EXTENSIONES;
             $sFechaInicio = (string)$comando->datetime_start;
             if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sFechaInicio))
                 return $this->_generarRespuestaFallo(400, 'Bad request - invalid start date');
+            $sFechaInicio .= ' 00:00:00';
         }
-        $sFechaInicio .= ' 00:00:00';
 
         // Leer resumen de llamadas completadas desde la base de datos
         switch ($sTipoCampania) {
@@ -2173,8 +2173,8 @@ LISTA_EXTENSIONES;
             $sFechaInicio = (string)$comando->datetime_start;
             if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $sFechaInicio))
                 return $this->_generarRespuestaFallo(400, 'Bad request - invalid start date');
+            $sFechaInicio .= ' 00:00:00';
         }
-        $sFechaInicio .= ' 00:00:00';
         
         // Leer resumen de llamadas completadas sin campaña desde la base de datos
         $statusCampania_DB = $this->_leerResumenColaEntrante($sCola, $sFechaInicio);

@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue May 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): fix getcampaignstatus request bug that caused a failure
+  to report the pending call count when not specifying a start date.
+  SVN Rev[7056]
+
 * Mon May 18 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): factor out common elements in incoming/outgoing
   campaign information into a single method.

@@ -444,7 +444,7 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     header("Content-Type: " . $contentTypes[$extension]);
     header("Content-Disposition: attachment; filename=" . $file);
     header("Content-Transfer-Encoding: binary");
-    header("Content-length: " . filesize($path));
+    header("Content-length: " . filesize($ok_path));
     fpassthru($fp);
     fclose($fp);
 }

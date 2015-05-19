@@ -277,6 +277,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue May 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: when replacing recording path with date directories, use
+  filesize() on the replaced path, not the original path. Fixes Elastix 
+  bug #2228.
+  SVN Rev[7055] 
+
 * Sun Apr  5 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: pbxadmin: comment out styles that affect the entire page. These
   styles mess up several themes, including blackmin.

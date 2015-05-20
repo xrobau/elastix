@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Tue May 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add AMI commands for MixMonitor control and SIP NOTIFY.
+  SVN Rev[7057]
 - FIXED: Dialer (ECCP): fix getcampaignstatus request bug that caused a failure
   to report the pending call count when not specifying a start date.
   SVN Rev[7056]

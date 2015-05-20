@@ -40,9 +40,9 @@ class AMIClientConn extends MultiplexConn
     private $port;
     private $_listaEventos = array();   // Eventos pendientes por procesar
     private $_response = NULL;          // Respuesta recibida del último comando
-    
+
     public $cuentaEventos = array();    // Cuenta de eventos recibidos
-    
+
    /**
     * Event Handlers
     *
@@ -56,7 +56,7 @@ class AMIClientConn extends MultiplexConn
         $this->oLogger = $oMainLog;
         $this->multiplexSrv = $dialSrv;
     }
-    
+
     // Datos a mandar a escribir apenas se inicia la conexión
     function procesarInicial() {}
 
@@ -68,9 +68,9 @@ class AMIClientConn extends MultiplexConn
         // Encontrar los paquetes y determinar longitud de búfer procesado
         $listaPaquetes = $this->encontrarPaquetes($sDatos);
         $iLongFinal = strlen($sDatos);
-        
+
         /* Paquetes Event se van a la lista de eventos. El paquete Response se
-         * guarda individualmente. */ 
+         * guarda individualmente. */
         foreach ($listaPaquetes as $paquete) {
         	if (isset($paquete['Event'])) {
                 $e = strtolower($paquete['Event']);
@@ -125,7 +125,7 @@ class AMIClientConn extends MultiplexConn
     private function encontrarPaquetes(&$sDatos)
     {
         $lineas = $this->dividirLineas($sDatos);
-    
+
         $listaPaquetes = array();
         $paquete = array();
         $bIncompleto = FALSE;
@@ -134,8 +134,8 @@ class AMIClientConn extends MultiplexConn
             $s = array_shift($lineas);
             $iLongPaquete += strlen($s);
             if (substr($s, strlen($s) - 1, 1) != "\n") {
-                /* A la última línea le falta el salto de línea - búfer termina en 
-                   medio de la línea */            
+                /* A la última línea le falta el salto de línea - búfer termina en
+                   medio de la línea */
                 $bIncompleto = TRUE;
             } else {
                 $s = trim($s);  // Remover salto de línea al final
@@ -170,11 +170,11 @@ class AMIClientConn extends MultiplexConn
                 }
             }
         }
-    
+
         return $listaPaquetes;
     }
-    
-    
+
+
     // Procesar cierre de la conexión
     function procesarCierre()
     {
@@ -191,7 +191,7 @@ class AMIClientConn extends MultiplexConn
     	$paquete = array_shift($this->_listaEventos);
         $this->process_event($paquete);
     }
-    
+
     // Implementación de send_request para compatibilidad con phpagi-asmanager
     private function send_request($action, $parameters=array())
     {
@@ -222,7 +222,7 @@ class AMIClientConn extends MultiplexConn
         	return NULL;
         }
     }
-    
+
     function connect($server, $username, $secret)
     {
     	// Determinar servidor y puerto a usar
@@ -234,7 +234,7 @@ class AMIClientConn extends MultiplexConn
         }
         $this->server = $server;
         $this->port = $iPuerto;
-        
+
         // Iniciar la conexión
         $errno = $errstr = NULL;
         $sUrlConexion = "tcp://$server:$iPuerto";
@@ -243,7 +243,7 @@ class AMIClientConn extends MultiplexConn
             $this->oLogger->output("ERR: no se puede conectar a puerto AMI en $sUrlConexion: ($errno) $errstr");
         	return FALSE;
         }
-        
+
         // Leer la cabecera de Asterisk
         $str = fgets($hConn);
         if ($str == false) {
@@ -251,7 +251,7 @@ class AMIClientConn extends MultiplexConn
             return false;
         }
         //$this->oLogger->output("DEBUG: cabecera recibida es: $str");
-        
+
         // Registrar el socket con el objeto de conexiones
         $this->multiplexSrv->agregarNuevaConexion($this, $hConn);
 
@@ -264,7 +264,7 @@ class AMIClientConn extends MultiplexConn
         }
         return true;
     }
-    
+
     function disconnect()
     {
         $this->logoff();
@@ -298,7 +298,7 @@ class AMIClientConn extends MultiplexConn
 
     /**
      * Initiate an attended transfer
-     * 
+     *
      * @param string $channel The transferer channel's name
      * @param string $exten The extension to transfer to
      * @param string $context The context to transfer to
@@ -457,10 +457,57 @@ class AMIClientConn extends MultiplexConn
     * @param string $actionid message matching variable
     */
     function MailboxStatus($mailbox, $actionid=NULL)
-    {   
+    {
       $parameters = array('Mailbox'=>$mailbox);
       if($actionid) $parameters['ActionID'] = $actionid;
       return $this->send_request('MailboxStatus', $parameters);
+    }
+
+    /**
+     * Record a call and mix the audio during the recording. Use of StopMixMonitor
+     * is required to guarantee the audio file is available for processing
+     * during dialplan execution.
+     *
+     * @param string $channel   Used to specify the channel to record
+     * @param string $file      Is the name of the file created in the monitor
+     *                          spool directory. Defaults to the same name as the
+     *                          channel (with slashes replaced with dashes). This
+     *                          argument is optional if you specify to record
+     *                          unidirectional audio with either the r(filename)
+     *                          or t(filename) options in the options field. If
+     *                          neither MIXMONITOR_FILENAME or this parameter is
+     *                          set, the mixed stream won't be recorded.
+     * @param string $options   Options that apply to the MixMonitor in the same
+     *                          way as they would apply if invoked from the
+     *                          MixMonitor application. For a list of available
+     *                          options, see the documentation for the mixmonitor
+     *                          application.
+     * @param string $actionid  ActionID for this transaction. Will be returned.
+     *
+     */
+    function MixMonitor($channel, $file=NULL, $options=NULL, $actionid=NULL)
+    {
+      $parameters = array('Channel'=>$channel);
+      if($file) $parameters['File'] = $file;
+      if($options) $parameters['Options'] = $options;
+      if($actionid) $parameters['ActionID'] = $actionid;
+      return $this->send_request('MixMonitor', $parameters);
+    }
+
+    /**
+     * Mute / unMute a Mixmonitor recording.
+     *
+     * @link https://wiki.asterisk.org/wiki/display/AST/ManagerAction_MixMonitorMute
+     * @param string $channel   Used to specify the channel to mute.
+     * @param boolean $state    Turn mute on or off : 1 to turn on, 0 to turn off.
+     * @param string $direction Which part of the recording to mute: read, write or both (from channel, to channel or both channels).
+     * @param string $actionid  ActionID for this transaction. Will be returned.
+     */
+    function MixMonitorMute($channel, $state, $direction='read', $actionid=NULL)
+    {
+      $parameters = array('Channel'=>$channel, 'State'=>($state ? 'true' : 'false'), 'Direction'=>$direction);
+      if($actionid) $parameters['ActionID'] = $actionid;
+      return $this->send_request('MixMonitorMute', $parameters);
     }
 
    /**
@@ -520,7 +567,7 @@ class AMIClientConn extends MultiplexConn
       if($actionid) $parameters['ActionID'] = $actionid;
 
       return $this->send_request('Originate', $parameters);
-    }   
+    }
 
    /**
     * List parked calls
@@ -657,6 +704,44 @@ class AMIClientConn extends MultiplexConn
       return $this->send_request('SetVar', array('Channel'=>$channel, 'Variable'=>$variable, 'Value'=>$value));
     }
 
+    /**
+     * Send a SIP notify.
+     *
+     * @param string $channel   Peer to receive the notify.
+     * @param mixed $variable   Associative array of variables for SIP headers
+     * @param string $actionid  ActionID for this transaction. Will be returned.
+     */
+    function SIPnotify($channel, $variable, $actionid=NULL)
+    {
+      $parameters = array('Channel'=>$channel);
+      if (is_array($variable))
+      {
+        /* Each key specifies a SIP header and is encoded as key=value. The
+         * 'Content' key is a special case in that it specifies the body of the
+         * SIP NOTIFY, and also that it must be encoded as multiple Content=
+         * tokens, one per line. The double-quote, backslash, bracket and
+         * parentheses characters are special and must be escaped. Additionally
+         * the comma is escaped if it appears in the value. */
+        $vl = array();
+        $escapelist = "[](),\"\\";
+        foreach($variable as $k => $v)
+        {
+          if($k == 'Content')
+          {
+            // This will cause \n between lines to be reassembled as \r\n
+            foreach(preg_split("/\r?\n/", $v) as $s)
+              $vl[] = addcslashes($k, $escapelist).'='.addcslashes($s, $escapelist);
+          }
+          else
+            $vl[] = addcslashes($k, $escapelist).'='.addcslashes($v, $escapelist);
+        }
+        $variable = implode(',', $vl);
+      }
+      $parameters['Variable'] = $variable;
+      if($actionid) $parameters['ActionID'] = $actionid;
+      return $this->send_request('SIPnotify', $parameters);
+    }
+
    /**
     * Channel Status
     *
@@ -671,13 +756,33 @@ class AMIClientConn extends MultiplexConn
       return $this->send_request('Status', $parameters);
     }
 
-   /**
+    /**
+     * Record a call and mix the audio during the recording. Use of StopMixMonitor
+     * is required to guarantee the audio file is available for processing
+     * during dialplan execution.
+     *
+     * @param string $channel   The name of the channel monitored.
+     * @param string $mixmonitorid If a valid ID is provided (returned from earlier
+     *                          MixMonitor), then this command will stop only that
+     *                          specific MixMonitor.
+     * @param string $actionid  ActionID for this transaction. Will be returned.
+     *
+     */
+    function StopMixMonitor($channel, $mixmonitorid=NULL, $actionid=NULL)
+    {
+      $parameters = array('Channel'=>$channel);
+      if($mixmonitorid) $parameters['MixMonitorID'] = $mixmonitorid;
+      if($actionid) $parameters['ActionID'] = $actionid;
+      return $this->send_request('StopMixMonitor', $parameters);
+    }
+
+    /**
     * Stop monitoring a channel
     *
     * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+StopMonitor
     * @param string $channel
     */
-    function StopMontor($channel)
+    function StopMonitor($channel)
     {
       return $this->send_request('StopMonitor', array('Channel'=>$channel));
     }
@@ -756,13 +861,13 @@ class AMIClientConn extends MultiplexConn
     * Agent Logoff
     *
     * @link http://www.voip-info.org/wiki/index.php?page=Asterisk+Manager+API+AgentLogoff
-    * @param Agent: Agent ID of the agent to login 
+    * @param Agent: Agent ID of the agent to login
     */
     function Agentlogoff($agent)
     {
       return $this->send_request('Agentlogoff', array('Agent'=>$agent));
     }
-    
+
     function Hold()
     {
       return $this->send_request('Hold',array());
@@ -854,13 +959,13 @@ class AMIClientConn extends MultiplexConn
     {
       $ret = false;
       $e = strtolower($parameters['Event']);
-      //$this->log("Got event.. $e");       
+      //$this->log("Got event.. $e");
 
       $handler = '';
       if(isset($this->event_handlers[$e])) $handler = $this->event_handlers[$e];
       elseif(isset($this->event_handlers['*'])) $handler = $this->event_handlers['*'];
 
-      if ((is_array($handler) && count($handler) >= 2 && is_object($handler[0]) && 
+      if ((is_array($handler) && count($handler) >= 2 && is_object($handler[0]) &&
         method_exists($handler[0], $handler[1])) || function_exists($handler))
       {
         //$this->log("Execute handler $handler");
@@ -881,10 +986,10 @@ class AMIClientConn extends MultiplexConn
         if (!is_null($family)) $c .= ' '.$family;
         if (!is_null($keytree)) $c .= ' '.$keytree;
         $r = $this->command($c);
-        
+
         $data = explode("\n",$r["data"]);
         $db = array();
-        
+
         foreach ($data as $line) {
             $temp = explode(":",$line);
             if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);
@@ -892,19 +997,19 @@ class AMIClientConn extends MultiplexConn
         return $db;
     }
 
-    function database_showkey($key) 
-    {  
-        $r = $this->command("database showkey $key");     
+    function database_showkey($key)
+    {
+        $r = $this->command("database showkey $key");
         $data = explode("\n",$r["data"]);
         $db = array();
-        
+
         foreach ($data as $line) {
             $temp = explode(":",$line);
-            if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);        
+            if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);
         }
         return $db;
     }
-    
+
     /** Add an entry to the asterisk database
      * @param string $family    The family name to use
      * @param string $key       The key name to use
@@ -915,7 +1020,7 @@ class AMIClientConn extends MultiplexConn
         $r = $this->command("database put ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key)." ".$value);
         return (bool)strstr($r["data"], "success");
     }
-    
+
     /** Get an entry from the asterisk database
      * @param string $family    The family name to use
      * @param string $key       The key name to use
@@ -932,7 +1037,7 @@ class AMIClientConn extends MultiplexConn
         }
         return false;
     }
-    
+
     /** Delete an entry from the asterisk database
      * @param string $family    The family name to use
      * @param string $key       The key name to use
@@ -943,7 +1048,7 @@ class AMIClientConn extends MultiplexConn
         return (bool)strstr($r["data"], "removed");
     }
 
-    /** 
+    /**
      * Fetch core settings from the running Asterisk server.
      * Only available in Asterisk 1.6.0 and later.
      *
@@ -953,10 +1058,10 @@ class AMIClientConn extends MultiplexConn
     {
         return $this->send_request('CoreSettings');
     }
-    
+
     /**
      * Fetch core status from the running Asterisk server.
-     * 
+     *
      * @return array Response with requested data, if successful
      */
     function CoreStatus()

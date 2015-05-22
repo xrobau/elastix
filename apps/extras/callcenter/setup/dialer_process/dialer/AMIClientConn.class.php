@@ -188,8 +188,12 @@ class AMIClientConn extends MultiplexConn
     // Procesar un solo paquete de la cola de paquetes
     function procesarPaquete()
     {
-    	$paquete = array_shift($this->_listaEventos);
-        $this->process_event($paquete);
+        // Intentar manejar paquetes hasta que uno sea aceptado
+        $manejado = FALSE;
+        while (count($this->_listaEventos) > 0 && !$manejado) {
+            $paquete = array_shift($this->_listaEventos);
+            $manejado = $this->process_event($paquete);
+        }
     }
 
     // Implementación de send_request para compatibilidad con phpagi-asmanager
@@ -955,11 +959,10 @@ class AMIClientConn extends MultiplexConn
     * @param array $parameters
     * @return mixed result of event handler or false if no handler was found
     */
-    function process_event($parameters)
+    private function process_event($parameters)
     {
       $ret = false;
       $e = strtolower($parameters['Event']);
-      //$this->log("Got event.. $e");
 
       $handler = '';
       if(isset($this->event_handlers[$e])) $handler = $this->event_handlers[$e];
@@ -968,13 +971,9 @@ class AMIClientConn extends MultiplexConn
       if ((is_array($handler) && count($handler) >= 2 && is_object($handler[0]) &&
         method_exists($handler[0], $handler[1])) || function_exists($handler))
       {
-        //$this->log("Execute handler $handler");
         $ret = call_user_func($handler, $e, $parameters, $this->server, $this->port);
+        $ret = ($ret !== 'AMI_EVENT_DISCARD');
       }
-      /*
-      else
-        $this->log("No event handler for event '$e'");
-      */
       return $ret;
     }
 

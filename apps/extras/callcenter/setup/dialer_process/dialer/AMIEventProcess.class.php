@@ -1441,6 +1441,8 @@ Uniqueid: 1429642067.241008
                 }
             }
             break;
+        default:
+            return 'AMI_EVENT_DISCARD';
         }
     }
 
@@ -1452,6 +1454,7 @@ Uniqueid: 1429642067.241008
                 "\n$sEvent: => ".print_r($params, TRUE)
                 );
         }
+        return 'AMI_EVENT_DISCARD';
     }
 
     public function msg_Newchannel($sEvent, $params, $sServer, $iPort)

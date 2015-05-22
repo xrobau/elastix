@@ -100,6 +100,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri May 22 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: instead of always processing one AMI event at a time, events
+  are now consumed until one is found whose handler exists and does not return
+  the special string "AMI_EVENT_DISCARD". The msg_Default and msg_VarSet handlers
+  make use of this string.
+  SVN Rev[7058]
+
 * Tue May 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: add AMI commands for MixMonitor control and SIP NOTIFY.
   SVN Rev[7057]

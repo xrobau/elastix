@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Fri May 22 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): transform the handling of ECCP requests into a form
+  that can easily be translated into a message delegation to worker processes.
+  SVN Rev[7059]
 - CHANGED: Dialer: instead of always processing one AMI event at a time, events
   are now consumed until one is found whose handler exists and does not return
   the special string "AMI_EVENT_DISCARD". The msg_Default and msg_VarSet handlers

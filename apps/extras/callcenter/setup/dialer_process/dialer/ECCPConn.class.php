@@ -46,13 +46,10 @@ class ECCPConn extends MultiplexConn
     // Estado de la conexión
     private $_sUsuarioECCP  = NULL; // Nombre de usuario para cliente logoneado, o NULL si no logoneado
     private $_sAppCookie = NULL;    // Cadena a usar como cookie de la aplicación
+    private $_sAgenteFiltrado = NULL;   // Si != NULL, eventos sólo se despachan si el agente coincide con este valor
+    private $_bProgresoLlamada = FALSE; // Si VERDADERO, cliente está interesado en eventos de progreso de llamada
+
     private $_bFinalizando = FALSE;
-
-    // Si != NULL, eventos sólo se despachan si el agente coincide con este valor
-    private $_sAgenteFiltrado = NULL;
-
-    // Si VERDADERO, cliente está interesado en eventos de progreso de llamada
-    private $_bProgresoLlamada = FALSE;
 
     /* Lista de atributos de funciones (decorator). Actualmente se usa para
      * abstraer la autenticación sin tener que repetirla para cada función
@@ -129,110 +126,46 @@ class ECCPConn extends MultiplexConn
     function procesarPaquete()
     {
         $request = array_shift($this->_listaReq);
-        $response = NULL;
-        if (is_object($request)) {
-            // Petición es un request, procesar
-            if (count($request) != 1) {
-                // La petición debe tener al menos un elemento hijo
-                $response = $this->_generarRespuestaFallo(400, 'Bad request');
-            } elseif (!isset($request['id'])) {
-                // La petición debe tener un identificador
-                $response = $this->_generarRespuestaFallo(400, 'Bad request');
-            } else {
-                if (is_null($this->_db)) {
-                    // Todavía no se ha restaurado la conexión a la base de datos
-                    $response = $this->_generarRespuestaFallo(500, 'Server error - database failure');
-                } else {
-                    if ($this->DEBUG) {
-                    	$iTimestampRecibido = (double)$request['received'];
-                        $proc_start = microtime(TRUE);
-                        $this->_log->output('DEBUG: '.__METHOD__.': retraso '.
-                            '(sec) hasta procesar: '.($proc_start - $iTimestampRecibido));
-                    }
+        if (isset($request['request'])) {
 
-                    // Se procede normalmente...
-                    $comando = NULL;
-                    foreach ($request->children() as $c) $comando = $c;
-                    $iTimestampInicio = microtime(TRUE);
-                    $sRequerimiento = (string)$comando->getName();
-                    if ($this->DEBUG) {
-                        $this->_log->output('DEBUG: '.__METHOD__.': procesando requerimiento '.
-                            $sRequerimiento.' params: '.print_r($comando, TRUE));
-                    }
-                    if (!isset($this->_peticionesAttr[$sRequerimiento])) {
-                        $this->_log->output('ERR: (interno) no existe implementación para método: '.$sRequerimiento);
-                        $response = $this->_generarRespuestaFallo(501, 'Not Implemented');
-                    } else {
-                        $sMetodoImplementacion = $this->_peticionesAttr[$sRequerimiento]['method'];
-                        
-                        // Autenticación según las decoraciones de la petición
-                        
-                        // Verificación de usuario ECCP válido
-                        if (is_null($response) && 
-                            ($this->_peticionesAttr[$sRequerimiento]['eccpauth'] || 
-                            $this->_peticionesAttr[$sRequerimiento]['agentauth'])) {
-                            if (is_null($this->_sUsuarioECCP))
-                                $response = $this->_generarRespuestaFallo(401, 'Unauthorized');
-                        }
-                        try {
-                            // Verificación de que agente existe y tiene contraseña válida
-                            if (is_null($response) && $this->_peticionesAttr[$sRequerimiento]['agentauth']) {
-                                // Verificar que agente está presente
-                                if (!isset($comando->agent_number)) { 
-                                    $response = $this->_generarRespuestaFallo(400, 'Bad request');
-                                } else {
-                                    $sAgente = (string)$comando->agent_number;
-                                    
-                                    $xml_response = new SimpleXMLElement('<response />');
-                                    $xml_reqresponse = $xml_response->addChild($sRequerimiento.'_response');
+            $connvars = array(
+                'appcookie'     =>  $this->_sAppCookie,
+                'usuarioeccp'   =>  $this->_sUsuarioECCP,
+            );
 
-                                    // El siguiente código asume formato Agent/9000
-                                    if (is_null($this->_parseAgent($sAgente))) {
-                                        $this->_agregarRespuestaFallo($xml_reqresponse, 417, 'Invalid agent number');
-                                        $response = $xml_response;
-                                    } else {
-                                        // Verificar que el agente sea válido en el sistema
-                                        $listaAgentes = $this->_listarAgentes();
-                                        if (!in_array($sAgente, array_keys($listaAgentes))) {
-                                            $this->_agregarRespuestaFallo($xml_reqresponse, 404, 'Specified agent not found');
-                                            $response = $xml_response;
-                                        } elseif (!$this->_hashValidoAgenteECCP($comando)) {
-                                        	$this->_agregarRespuestaFallo($xml_reqresponse, 401, 'Unauthorized agent');
-                                            $response = $xml_response;
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            // Verificaciones realizadas, ejecutar método
-                            if (is_null($response)) {
-                            	$response = $this->$sMetodoImplementacion($comando);
-                            }
-                        } catch (PDOException $e) {
-                        	$response = $this->_generarRespuestaFallo(503, 'Internal server error - database failure');
-                            $this->_log->output('ERR: '.__METHOD__.
-                                ': no se puede realizar operación de base de datos: '.
-                                implode(' - ', $e->errorInfo));
-                            $this->_log->output("ERR: traza de pila: \n".$e->getTraceAsString());
-                            if ($e->errorInfo[0] == 'HY000' && $e->errorInfo[1] == 2006) {
-                                // Códigos correspondientes a pérdida de conexión de base de datos
-                                $this->_log->output('WARN: '.__METHOD__.
-                                    ': conexión a DB parece ser inválida, se cierra...');
-                                $this->multiplexSrv->setDBConn(NULL);
-                            }
-                        }
-                    }
-                    
-                    $iTimestampFinal = microtime(TRUE);
-                    if ($this->DEBUG || (($iTimestampFinal - $iTimestampInicio) >= 1.0)) {
-                        $this->_log->output('DEBUG: '.__METHOD__.': requerimiento '.
-                            $comando->getName().' procesado luego de (sec): '.
-                            ($iTimestampFinal - $iTimestampInicio));
-                    }
+            /* La función _simulacion_worker simula el envío de un mensaje con
+             * la petición y las variables actuales de conexión al worker en un
+             * nuevo proceso con una instancia de la clase ECCPConn. El valor
+             * devuelto por _simulacion_worker realmente debería ser recibido
+             * en un manejador de mensaje enviado por el worker.
+             * 
+             * TODO: modelar asociación entre esta conexión (una de múltiples
+             * en ECCPProcess) y el worker que termina manejando la petición. 
+             * TODO: funciones de acceso a DB que son provistas por ECCPProcess
+             * para consumo de ECCPConn y de los eventos recibidos desde
+             * AMIEventProcess deben ser duplicadas porque se ejecutan en
+             * procesos distintos. En una fase futura, en caso necesario, se
+             * requiere un worker dedicado exclusivamente a los accesos de DB
+             * necesarios para los eventos recibidos de AMIEventProcess. No se
+             * puede usar el mismo pool de workers que para las peticiones ECCP
+             * porque no se garantizaría el orden de atención de eventos. */
+            list($s, $nuevos_valores) = $this->_simulacion_worker($request, $connvars);
+
+            if (!is_null($nuevos_valores)) {
+                foreach ($nuevos_valores as $k => $v) {
+                    if ($k == 'usuarioeccp')
+                        $this->_sUsuarioECCP = $v;
+                    if ($k == 'appcookie')
+                        $this->_sAppCookie = $v;
+                    if ($k == 'agentefiltrado')
+                        $this->_sAgenteFiltrado = $v;
+                    if ($k == 'progresollamada')
+                        $this->_bProgresoLlamada = $v;
+                    if ($k == 'finalizando')
+                        $this->_bFinalizando = $v;
                 }
-                $response->addAttribute('id', (string)$request['id']);
             }
-            $s = $response->asXML();
+
             $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
             if ($this->_bFinalizando) $this->multiplexSrv->marcarCerrado($this->sKey);
         } else {
@@ -243,7 +176,133 @@ class ECCPConn extends MultiplexConn
             $this->multiplexSrv->marcarCerrado($this->sKey);
         }
     }
-    
+
+    private function _simulacion_worker(&$request, &$connvars)
+    {
+        $response = NULL;
+        
+        $t = $request['received'];
+        $request = simplexml_load_string($request['request']);
+        $request->addAttribute('received', $t);
+        
+        $nuevos_valores = NULL;
+        
+        // Petición es un request, procesar
+        if (count($request) != 1) {
+            // La petición debe tener al menos un elemento hijo
+            $response = $this->_generarRespuestaFallo(400, 'Bad request');
+        } elseif (!isset($request['id'])) {
+            // La petición debe tener un identificador
+            $response = $this->_generarRespuestaFallo(400, 'Bad request');
+        } else {
+            if (is_null($this->_db)) {
+                // Todavía no se ha restaurado la conexión a la base de datos
+                $response = $this->_generarRespuestaFallo(500, 'Server error - database failure');
+            } else {
+                if ($this->DEBUG) {
+                    $iTimestampRecibido = (double)$request['received'];
+                    $proc_start = microtime(TRUE);
+                    $this->_log->output('DEBUG: '.__METHOD__.': retraso '.
+                        '(sec) hasta procesar: '.($proc_start - $iTimestampRecibido));
+                }
+        
+                // Se procede normalmente...
+                $comando = NULL;
+                foreach ($request->children() as $c) $comando = $c;
+        
+                // Hack para no agregar parámetro a todas las peticiones
+                if (!is_null($connvars['appcookie']))
+                    $comando->addAttribute('appcookie', $connvars['appcookie']);
+        
+                $iTimestampInicio = microtime(TRUE);
+                $sRequerimiento = (string)$comando->getName();
+                if ($this->DEBUG) {
+                    $this->_log->output('DEBUG: '.__METHOD__.': procesando requerimiento '.
+                        $sRequerimiento.' params: '.print_r($comando, TRUE));
+                }
+                if (!isset($this->_peticionesAttr[$sRequerimiento])) {
+                    $this->_log->output('ERR: (interno) no existe implementación para método: '.$sRequerimiento);
+                    $response = $this->_generarRespuestaFallo(501, 'Not Implemented');
+                } else {
+                    $sMetodoImplementacion = $this->_peticionesAttr[$sRequerimiento]['method'];
+        
+                    // Autenticación según las decoraciones de la petición
+        
+                    // Verificación de usuario ECCP válido
+                    if (is_null($response) &&
+                        ($this->_peticionesAttr[$sRequerimiento]['eccpauth'] ||
+                            $this->_peticionesAttr[$sRequerimiento]['agentauth'])) {
+                                if (is_null($connvars['usuarioeccp']))
+                                    $response = $this->_generarRespuestaFallo(401, 'Unauthorized');
+                    }
+                    try {
+                        // Verificación de que agente existe y tiene contraseña válida
+                        if (is_null($response) && $this->_peticionesAttr[$sRequerimiento]['agentauth']) {
+                            // Verificar que agente está presente
+                            if (!isset($comando->agent_number)) {
+                                $response = $this->_generarRespuestaFallo(400, 'Bad request');
+                            } else {
+                                $sAgente = (string)$comando->agent_number;
+
+                                $xml_response = new SimpleXMLElement('<response />');
+                                $xml_reqresponse = $xml_response->addChild($sRequerimiento.'_response');
+
+                                // El siguiente código asume formato Agent/9000
+                                if (is_null($this->_parseAgent($sAgente))) {
+                                    $this->_agregarRespuestaFallo($xml_reqresponse, 417, 'Invalid agent number');
+                                    $response = $xml_response;
+                                } else {
+                                    // Verificar que el agente sea válido en el sistema
+                                    $listaAgentes = $this->_listarAgentes();
+                                    if (!in_array($sAgente, array_keys($listaAgentes))) {
+                                        $this->_agregarRespuestaFallo($xml_reqresponse, 404, 'Specified agent not found');
+                                        $response = $xml_response;
+                                    } elseif (!$this->_hashValidoAgenteECCP($comando, $comando['appcookie'])) {
+                                        $this->_agregarRespuestaFallo($xml_reqresponse, 401, 'Unauthorized agent');
+                                        $response = $xml_response;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Verificaciones realizadas, ejecutar método
+                        if (is_null($response)) {
+                            $response = $this->$sMetodoImplementacion($comando);
+                            if (is_array($response)) {
+                                $nuevos_valores = $response['nuevos_valores'];
+                                $response = $response['response'];
+                            }
+                        }
+                    } catch (PDOException $e) {
+                        $response = $this->_generarRespuestaFallo(503, 'Internal server error - database failure');
+                        $this->_log->output('ERR: '.__METHOD__.
+                            ': no se puede realizar operación de base de datos: '.
+                            implode(' - ', $e->errorInfo));
+                        $this->_log->output("ERR: traza de pila: \n".$e->getTraceAsString());
+                        if ($e->errorInfo[0] == 'HY000' && $e->errorInfo[1] == 2006) {
+                            // Códigos correspondientes a pérdida de conexión de base de datos
+                            $this->_log->output('WARN: '.__METHOD__.
+                                ': conexión a DB parece ser inválida, se cierra...');
+                            $this->multiplexSrv->setDBConn(NULL);
+                        }
+                    }
+                }
+        
+                $iTimestampFinal = microtime(TRUE);
+                if ($this->DEBUG || (($iTimestampFinal - $iTimestampInicio) >= 1.0)) {
+                    $this->_log->output('DEBUG: '.__METHOD__.': requerimiento '.
+                        $comando->getName().' procesado luego de (sec): '.
+                        ($iTimestampFinal - $iTimestampInicio));
+                }
+            }
+            $response->addAttribute('id', (string)$request['id']);
+        }
+
+        $s = $response->asXML();
+
+        return array($s, $nuevos_valores);
+    }
+
     // Función que construye una respuesta de petición incorrecta
     private function _generarRespuestaFallo($iCodigo, $sMensaje, $idPeticion = NULL)
     {
@@ -284,9 +343,15 @@ class ECCPConn extends MultiplexConn
         $r = xml_parse($this->_parser, $data);
         while (!is_null($this->_iPosFinal)) {
             if ($this->_sTipoDoc == 'request') {
+                /*
                 $request = simplexml_load_string(substr($this->_bufferXML, 0, $this->_iPosFinal));
                 $request->addAttribute('received', microtime(TRUE));
                 $this->_listaReq[] = $request;
+                */
+                $this->_listaReq[] = array(
+                    'request'   =>  substr($this->_bufferXML, 0, $this->_iPosFinal),
+                    'received'  =>  microtime(TRUE),
+                );
             } else {
                 $this->_listaReq[] = array(
                     'errorcode'     =>  -1,
@@ -375,10 +440,14 @@ class ECCPConn extends MultiplexConn
             return $xml_response;
         }
         
-        $this->_sAgenteFiltrado = $sAgente;
         $xml_filterbyagentResponse->addChild('success');
 
-        return $xml_response;
+        return array(
+            'response'          =>  $xml_response,
+            'nuevos_valores'    =>  array(
+                'agentefiltrado'    =>  $sAgente,
+            ),
+        );
     }
 
     /**
@@ -421,18 +490,23 @@ class ECCPConn extends MultiplexConn
         $tupla = $recordset->fetch(); $recordset->closeCursor();
         if ($tupla['N'] > 0) {
             // Usuario autorizado
-            $this->_sUsuarioECCP = $comando->username;
             $xml_status = $xml_loginResponse->addChild('success');
             
             // Generar una cadena de hash para cookie de aplicación
             $sAppCookie = md5(posix_getpid().time().mt_rand());
             $xml_loginResponse->addChild('app_cookie', $sAppCookie);
-            $this->_sAppCookie = $sAppCookie;
+            return array(
+                'response'          =>  $xml_response,
+                'nuevos_valores'    =>  array(
+                    'usuarioeccp'   =>  $comando->username,
+                    'appcookie'     =>  $sAppCookie,
+                ),
+            );
         } else {
             // Usuario no existe, o clave incorrecta
             $this->_agregarRespuestaFallo($xml_loginResponse, 401, 'Invalid username or password');
+            return $xml_response;
         }
-        return $xml_response;
     }
     
     /**
@@ -447,18 +521,22 @@ class ECCPConn extends MultiplexConn
      */
     private function Request_logout($comando)
     {
-        $this->_sUsuarioECCP = NULL;
-        $this->_sAppCookie = NULL;
         $xml_response = new SimpleXMLElement('<response />');
         $xml_loginResponse = $xml_response->addChild('logout_response');
         $xml_status = $xml_loginResponse->addChild('success');
-        $this->_bFinalizando = TRUE;
-        return $xml_response;
+        return array(
+            'response'          =>  $xml_response,
+            'nuevos_valores'    =>  array(
+                'usuarioeccp'   =>  NULL,
+                'appcookie'     =>  NULL,
+                'finalizando'   =>  TRUE,
+            ),
+        );
     }
 
     // Revisar si el comando indicado tiene un hash válido. El comando debe de
     // tener los campos agent_number y agent_hash
-    private function _hashValidoAgenteECCP($comando)
+    private function _hashValidoAgenteECCP($comando, $appcookie)
     {
         if (!isset($comando->agent_number) || !isset($comando->agent_hash))
             return FALSE;
@@ -480,7 +558,7 @@ class ECCPConn extends MultiplexConn
         if (is_null($sClaveECCPAgente)) return TRUE;
         
         // Calcular el hash que debió haber enviado el cliente
-        $sHashEsperado = md5($this->_sAppCookie.$sAgente.$sClaveECCPAgente);
+        $sHashEsperado = md5($appcookie.$sAgente.$sClaveECCPAgente);
         return ($sHashEsperado == $sHashCliente);
     }
 
@@ -1386,7 +1464,7 @@ LEER_CAMPANIA;
         }
         
         // Verificar el hash del agente
-        if (!$this->_hashValidoAgenteECCP($comando)) {
+        if (!$this->_hashValidoAgenteECCP($comando, $comando['appcookie'])) {
             return $this->Response_LoginAgentResponse('logged-out', 401, 'Unauthorized agent');
         }
 
@@ -1633,7 +1711,7 @@ LISTA_EXTENSIONES;
         }
 
         // Verificar el hash del agente
-        if (!$this->_hashValidoAgenteECCP($comando)) {
+        if (!$this->_hashValidoAgenteECCP($comando, $comando['appcookie'])) {
             return $this->Response_LogoutAgentResponse('logged-out', 401, 'Unauthorized agent');
         }
 
@@ -3493,9 +3571,13 @@ LEER_ULTIMA_SESION;
         $xml_response = new SimpleXMLElement('<response />');
         $xml_callprogress = $xml_response->addChild('callprogress_response');
 
-        $this->_bProgresoLlamada = ((int)$comando->enable != 0);
         $xml_callprogress->addChild('success');
-        return $xml_response;
+        return array(
+            'response'          =>  $xml_response,
+            'nuevos_valores'    =>  array(
+                'progresollamada'   =>  ((int)$comando->enable != 0),
+            ),
+        );
     }
 
     private function Request_eccpauth_campaignlog($comando)

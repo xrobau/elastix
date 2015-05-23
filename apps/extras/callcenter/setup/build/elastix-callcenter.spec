@@ -101,6 +101,12 @@ fi
 
 %changelog
 * Sat May 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: unify handling of static and dynamic processes. Static
+  processes are now read from a separate list, instead of having their slots
+  filled with NULL. In this way, all tasks are either unset or set with the
+  process PID. Two methods for handling and spawning dynamic processes are
+  introduced for future commits.
+  SVN Rev[7062]
 - CHANGED: Dialer: allow spawning of processes from a classname that differs
   from the actual name of the process. This is required to spawn multiple
   uniquely-named processes from the same worker process class.

@@ -34,6 +34,12 @@ class HubProcess extends AbstractProcess
     private $_hub;      // Hub de mensajes entre todos los procesos
     private $_tareas;   // Lista de tareas, nombreClase => PID
 
+    // Estas tareas deben estar siempre en ejecución
+    private $_tareasFijas = array('AMIEventProcess', 'CampaignProcess', 'ECCPProcess');
+
+    // Contador para garantizar unicidad de nombre de tarea dinámica
+    private $_dynProcessCounter = 0;
+
     // Último instante en que se verificó que los procesos estaban activos
     private $_iTimestampVerificacionProcesos = NULL;
 
@@ -41,11 +47,7 @@ class HubProcess extends AbstractProcess
     {
     	$this->_log =& $oMainLog;
         $this->_config =& $infoConfig;
-        $this->_tareas = array(
-            'AMIEventProcess'   =>  NULL,
-            'CampaignProcess'   =>  NULL,
-            'ECCPProcess'       =>  NULL,
-        );
+        $this->_tareas = array();
         $this->_hub = new HubServer($this->_log);
 
         return TRUE;
@@ -58,16 +60,18 @@ class HubProcess extends AbstractProcess
         $bTareaActiva = FALSE;
 
         // Si está definido el PID del proceso, se verifica si se ejecuta.
-        if (!is_null($this->_tareas[$sTarea])) {
+        if (isset($this->_tareas[$sTarea])) {
             $iStatus = NULL;
             $iPidDevuelto = pcntl_waitpid($this->_tareas[$sTarea], $iStatus, WNOHANG);
             if ($iPidDevuelto > 0) {
-                $this->_log->output("WARN: $sTarea (PID=$iPidDevuelto) ha terminado inesperadamente (status=$iStatus), se agenda reinicio...");
+                if (in_array($sTarea, $this->_tareasFijas)) {
+                    $this->_log->output("WARN: $sTarea (PID=$iPidDevuelto) ha terminado inesperadamente (status=$iStatus), se agenda reinicio...");
+                }
                 $iErrCode = pcntl_wifexited($iStatus) ? pcntl_wexitstatus($iStatus) : 255;
                 $iRcvSignal = pcntl_wifsignaled($iStatus) ? pcntl_wtermsig($iStatus) : 0;
                 if ($iRcvSignal != 0) { $this->_log->output("WARN: $sTarea terminó debido a señal $iRcvSignal..."); }
                 if ($iErrCode != 0) { $this->_log->output("WARN: $sTarea devolvió código de error $iErrCode..."); }
-                $this->_tareas[$sTarea] = NULL;
+                unset($this->_tareas[$sTarea]);
 
                 // Quitar la tubería del proceso que ha terminado
                 $this->_hub->quitarTuberia($sTarea);
@@ -88,9 +92,10 @@ class HubProcess extends AbstractProcess
             foreach (array_keys($this->_tareas) as $sTarea) {
                 // Si está definido el PID del proceso, se verifica si se ejecuta.
                 $this->_revisarTareaActiva($sTarea);
-
+            }
+            foreach ($this->_tareasFijas as $sTarea) {
                 // Si no está definido el PID del proceso, se intenta iniciar
-                if (is_null($this->_tareas[$sTarea])) {
+                if (!isset($this->_tareas[$sTarea])) {
                     $this->_tareas[$sTarea] = $this->_iniciarTarea($sTarea);
                     $bHayNuevasTareas = TRUE;
                 }
@@ -119,13 +124,7 @@ class HubProcess extends AbstractProcess
             // Mandar la señal a todos los procesos controlados
             $this->_log->output("PID = ".posix_getpid().", se ha recibido señal #$gsNombreSignal, ".
                 (($gsNombreSignal == SIGHUP) ? 'cambiando logs' : 'terminando')."...");
-            foreach (array_keys($this->_tareas) as $sTarea) {
-                if (!is_null($this->_tareas[$sTarea])) {
-                    $this->_log->output("Propagando señal #$gsNombreSignal to $sTarea...");
-                    posix_kill($this->_tareas[$sTarea], $gsNombreSignal);
-                    $this->_log->output("Completada propagación de señal a $sTarea");
-                }
-            }
+            $this->_propagarSIG($gsNombreSignal);
         }
     }
 
@@ -226,6 +225,28 @@ class HubProcess extends AbstractProcess
         return $iPidProceso;
     }
 
+    private function _revisarTareasDinamicasActivas($sNombreClase, $min_workers)
+    {
+        $bHayNuevasTareas = FALSE;
+
+        $i = 0;
+        foreach (array_keys($this->_tareas) as $sTarea)
+            if (strpos($sTarea, $sNombreClase.'-') === 0) $i++;
+        for (; $i < $min_workers; $i++) {
+            $this->_iniciarTareaDinamica($sNombreClase);
+            $bHayNuevasTareas = TRUE;
+        }
+        return $bHayNuevasTareas;
+    }
+
+    private function _iniciarTareaDinamica($sNombreClase)
+    {
+        $sTarea = $sNombreClase.'-'.$this->_dynProcessCounter;
+        $this->_dynProcessCounter++;
+        $this->_tareas[$sTarea] = $this->_iniciarTareaClase($sTarea, $sNombreClase);
+        return $sTarea;
+    }
+
     public function limpiezaDemonio($signum)
     {
         // Propagar la señal si no es NULL
@@ -249,14 +270,7 @@ class HubProcess extends AbstractProcess
             else $this->_hub->procesarActividad(1);
         }
 
-        // Propagar la señal recibida o sintetizada
-        foreach (array_keys($this->_tareas) as $sTarea) {
-            if (!is_null($this->_tareas[$sTarea])) {
-                $this->_log->output("Propagando señal #$signum to $sTarea...");
-                posix_kill($this->_tareas[$sTarea], $signum);
-                $this->_log->output("Completada propagación de señal a $sTarea");
-            }
-        }
+        $this->_propagarSIG($signum);
 
         $this->_log->output('INFO: esperando a que todas las tareas terminen...');
         $bTodosTerminaron = FALSE;
@@ -278,6 +292,16 @@ class HubProcess extends AbstractProcess
 
         // Mandar a cerrar todas las conexiones activas
         $this->_hub->finalizarServidor();
+    }
+
+    // Propagar la señal recibida o sintetizada
+    private function _propagarSIG($signum)
+    {
+        foreach (array_keys($this->_tareas) as $sTarea) {
+            $this->_log->output("Propagando señal #$signum a $sTarea...");
+            posix_kill($this->_tareas[$sTarea], $signum);
+            $this->_log->output("Completada propagación de señal a $sTarea");
+        }
     }
 }
 ?>

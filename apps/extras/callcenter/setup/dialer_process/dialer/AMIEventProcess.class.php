@@ -82,17 +82,17 @@ class AMIEventProcess extends TuberiaProcess
             'contarLlamadasEsperandoRespuesta', 'agentesAgendables') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "rpc_$k"));
 
-        // Registro de manejadores de eventos desde ECCPProcess
+        // Registro de manejadores de eventos desde ECCPWorkerProcess
         foreach (array('idNuevaSesionAgente', 'idNuevoBreakAgente',
             'quitarBreakAgente', 'idNuevoHoldAgente', 'quitarHoldAgente') as $k)
-            $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "msg_$k"));
+            $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente',
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
             'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante',
             'pingAgente', 'dumpstatus', 'agregarAgenteColasDinamicas',
             'quitarAgenteColasDinamicas', 'listarTotalColasTrabajoAgente',
             'infoSeguimientoAgentesCola') as $k)
-            $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "rpc_$k"));
+            $this->_tuberia->registrarManejador('*', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
         $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));

@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat May 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: internal messages previously sent from ECCPProcess to
+  AMIEventProcess are now accepted from anyone. This is required to accept
+  multiple message sources from the various ECCP workers.
+  SVN Rev[7060]
+
 * Fri May 22 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): transform the handling of ECCP requests into a form
   that can easily be translated into a message delegation to worker processes.

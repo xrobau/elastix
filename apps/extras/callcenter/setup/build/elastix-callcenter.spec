@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Sat May 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): separate activities to perform with the ECCP results
+  into a separate method. This method will end up in a future class,
+  ECCPProxyConn.
+  SVN Rev[7064]
 - CHANGED: Dialer: introduce support for message inspectos in HubServer. A
   message inspector, once registered, can read and modify messages before being
   routed to their destination, including changing the destination. This support

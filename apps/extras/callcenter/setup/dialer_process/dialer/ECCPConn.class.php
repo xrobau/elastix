@@ -61,7 +61,7 @@ class ECCPConn extends MultiplexConn
         $this->_log = $oMainLog;
         $this->_tuberia = $tuberia;
         $this->_resetParser();
-        
+
         // Recolectar atributos de los requerimientos
         foreach (get_class_methods(get_class($this)) as $sMetodo) {
         	$regs = NULL;
@@ -76,7 +76,7 @@ class ECCPConn extends MultiplexConn
                     if (preg_match("/^(.*){$decorator}_(.+)$/", $sRequerimiento, $regs)) {
                     	$atributos[$decorator] = TRUE;
                         $sRequerimiento = $regs[1].$regs[2];
-                    }                	
+                    }
                 }
                 $this->_peticionesAttr[$sRequerimiento] = $atributos;
         	}
@@ -92,7 +92,7 @@ class ECCPConn extends MultiplexConn
     {
         $this->_db = $dbConn;
     }
-    
+
     function setProcess($proc)
     {
     	$this->_eccpProcess = $proc;
@@ -107,7 +107,7 @@ class ECCPConn extends MultiplexConn
         $this->parsearPaquetesXML($sDatos);
         return strlen($sDatos);
     }
-    
+
     // Procesar cierre de la conexión
     function procesarCierre()
     {
@@ -116,12 +116,12 @@ class ECCPConn extends MultiplexConn
             $this->_parser = NULL;
         }
     }
-    
+
     // Preguntar si hay paquetes pendientes de procesar
     function hayPaquetes() {
         return (count($this->_listaReq) > 0);
     }
-    
+
     // Procesar un solo paquete de la cola de paquetes
     function procesarPaquete()
     {
@@ -133,14 +133,14 @@ class ECCPConn extends MultiplexConn
                 'usuarioeccp'   =>  $this->_sUsuarioECCP,
             );
 
-            /* La función _simulacion_worker simula el envío de un mensaje con
+            /* La función do_eccprequest simula el envío de un mensaje con
              * la petición y las variables actuales de conexión al worker en un
              * nuevo proceso con una instancia de la clase ECCPConn. El valor
              * devuelto por _simulacion_worker realmente debería ser recibido
              * en un manejador de mensaje enviado por el worker.
-             * 
+             *
              * TODO: modelar asociación entre esta conexión (una de múltiples
-             * en ECCPProcess) y el worker que termina manejando la petición. 
+             * en ECCPProcess) y el worker que termina manejando la petición.
              * TODO: funciones de acceso a DB que son provistas por ECCPProcess
              * para consumo de ECCPConn y de los eventos recibidos desde
              * AMIEventProcess deben ser duplicadas porque se ejecutan en
@@ -149,25 +149,9 @@ class ECCPConn extends MultiplexConn
              * necesarios para los eventos recibidos de AMIEventProcess. No se
              * puede usar el mismo pool de workers que para las peticiones ECCP
              * porque no se garantizaría el orden de atención de eventos. */
-            list($s, $nuevos_valores) = $this->_simulacion_worker($request, $connvars);
+            list($s, $nuevos_valores) = $this->do_eccprequest($request, $connvars);
 
-            if (!is_null($nuevos_valores)) {
-                foreach ($nuevos_valores as $k => $v) {
-                    if ($k == 'usuarioeccp')
-                        $this->_sUsuarioECCP = $v;
-                    if ($k == 'appcookie')
-                        $this->_sAppCookie = $v;
-                    if ($k == 'agentefiltrado')
-                        $this->_sAgenteFiltrado = $v;
-                    if ($k == 'progresollamada')
-                        $this->_bProgresoLlamada = $v;
-                    if ($k == 'finalizando')
-                        $this->_bFinalizando = $v;
-                }
-            }
-
-            $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-            if ($this->_bFinalizando) $this->multiplexSrv->marcarCerrado($this->sKey);
+            $this->do_eccpresponse($s, $nuevos_valores);
         } else {
             // Marcador de error, se cierra la conexión
             $r = $this->_generarRespuestaFallo(400, 'Bad request');
@@ -177,16 +161,16 @@ class ECCPConn extends MultiplexConn
         }
     }
 
-    private function _simulacion_worker(&$request, &$connvars)
+    public function do_eccprequest(&$request, &$connvars)
     {
         $response = NULL;
-        
+
         $t = $request['received'];
         $request = simplexml_load_string($request['request']);
         $request->addAttribute('received', $t);
-        
+
         $nuevos_valores = NULL;
-        
+
         // Petición es un request, procesar
         if (count($request) != 1) {
             // La petición debe tener al menos un elemento hijo
@@ -205,15 +189,15 @@ class ECCPConn extends MultiplexConn
                     $this->_log->output('DEBUG: '.__METHOD__.': retraso '.
                         '(sec) hasta procesar: '.($proc_start - $iTimestampRecibido));
                 }
-        
+
                 // Se procede normalmente...
                 $comando = NULL;
                 foreach ($request->children() as $c) $comando = $c;
-        
+
                 // Hack para no agregar parámetro a todas las peticiones
                 if (!is_null($connvars['appcookie']))
                     $comando->addAttribute('appcookie', $connvars['appcookie']);
-        
+
                 $iTimestampInicio = microtime(TRUE);
                 $sRequerimiento = (string)$comando->getName();
                 if ($this->DEBUG) {
@@ -225,9 +209,9 @@ class ECCPConn extends MultiplexConn
                     $response = $this->_generarRespuestaFallo(501, 'Not Implemented');
                 } else {
                     $sMetodoImplementacion = $this->_peticionesAttr[$sRequerimiento]['method'];
-        
+
                     // Autenticación según las decoraciones de la petición
-        
+
                     // Verificación de usuario ECCP válido
                     if (is_null($response) &&
                         ($this->_peticionesAttr[$sRequerimiento]['eccpauth'] ||
@@ -287,7 +271,7 @@ class ECCPConn extends MultiplexConn
                         }
                     }
                 }
-        
+
                 $iTimestampFinal = microtime(TRUE);
                 if ($this->DEBUG || (($iTimestampFinal - $iTimestampInicio) >= 1.0)) {
                     $this->_log->output('DEBUG: '.__METHOD__.': requerimiento '.
@@ -303,6 +287,27 @@ class ECCPConn extends MultiplexConn
         return array($s, $nuevos_valores);
     }
 
+    function do_eccpresponse(&$s, &$nuevos_valores)
+    {
+        if (!is_null($nuevos_valores)) {
+            foreach ($nuevos_valores as $k => $v) {
+                if ($k == 'usuarioeccp')
+                    $this->_sUsuarioECCP = $v;
+                if ($k == 'appcookie')
+                    $this->_sAppCookie = $v;
+                if ($k == 'agentefiltrado')
+                    $this->_sAgenteFiltrado = $v;
+                if ($k == 'progresollamada')
+                    $this->_bProgresoLlamada = $v;
+                if ($k == 'finalizando')
+                    $this->_bFinalizando = $v;
+            }
+        }
+
+        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
+        if ($this->_bFinalizando) $this->multiplexSrv->marcarCerrado($this->sKey);
+    }
+
     // Función que construye una respuesta de petición incorrecta
     private function _generarRespuestaFallo($iCodigo, $sMensaje, $idPeticion = NULL)
     {
@@ -312,22 +317,22 @@ class ECCPConn extends MultiplexConn
         $this->_agregarRespuestaFallo($x, $iCodigo, $sMensaje);
         return $x;
     }
-    
+
     // Agregar etiqueta failure a la respuesta indicada
     private function _agregarRespuestaFallo($x, $iCodigo, $sMensaje)
     {
         $failureTag = $x->addChild("failure");
         $failureTag->addChild("code", $iCodigo);
         $failureTag->addChild("message", str_replace('&', '&amp;', $sMensaje));
-    } 
-    
-    // Procedimiento a llamar cuando se finaliza la conexión en cierre normal 
+    }
+
+    // Procedimiento a llamar cuando se finaliza la conexión en cierre normal
     // del programa.
     function finalizarConexion()
     {
         // Mandar a cerrar la conexión en sí
         $this->multiplexSrv->marcarCerrado($this->sKey);
-        
+
         if (!is_null($this->_parser)) {
             xml_parser_free($this->_parser);
             $this->_parser = NULL;
@@ -376,7 +381,7 @@ class ECCPConn extends MultiplexConn
         }
         return $r;
     }
-    
+
     // Resetear el parseador, para iniciarlo, o luego de parsear un paquete
     private function _resetParser()
     {
@@ -410,12 +415,12 @@ class ECCPConn extends MultiplexConn
         return preg_match('#^(Agent|SIP|IAX2)/(\d+)$#', $sAgente, $regs)
             ? array('type' => $regs[1], 'number' => $regs[2]) : NULL;
     }
-    
+
     private function Request_getrequestlist($comando)
     {
         $xml_response = new SimpleXMLElement('<response />');
         $xml_getRequestListResponse = $xml_response->addChild('getrequestlist_response');
-        
+
         $xml_requests = $xml_getRequestListResponse->addChild('requests');
         foreach (array_keys($this->_peticionesAttr) as $sPeticion)
             $xml_requests->addChild('request', $sPeticion);
@@ -425,7 +430,7 @@ class ECCPConn extends MultiplexConn
     private function Request_eccpauth_filterbyagent($comando)
     {
         // Verificar que agente está presente
-        if (!isset($comando->agent_number)) 
+        if (!isset($comando->agent_number))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
@@ -439,7 +444,7 @@ class ECCPConn extends MultiplexConn
             $this->_agregarRespuestaFallo($xml_filterbyagentResponse, 417, 'Invalid agent number');
             return $xml_response;
         }
-        
+
         $xml_filterbyagentResponse->addChild('success');
 
         return array(
@@ -451,16 +456,16 @@ class ECCPConn extends MultiplexConn
     }
 
     /**
-     * Procedimiento que implementa el login del cliente del protocolo. No se 
+     * Procedimiento que implementa el login del cliente del protocolo. No se
      * debe mandar ningún evento ni obedecer ningún otro requerimiento hasta que
      * se haya usado este comando para logonearse exitosamente
-     * 
+     *
      * @param   object   $comando    Comando de login
      *      <login>
      *          <username>alice</username>
      *          <password>[md5hash]</password> <!-- md5hash es hash md5 de passwd -->
      *      </login>
-     * 
+     *
      * @return  object  Respuesta codificada como un SimpleXMLObject
      *      <login_response>
      *          <success /> | <failure>mensaje</failure>
@@ -469,9 +474,9 @@ class ECCPConn extends MultiplexConn
     private function Request_login($comando)
     {
         // Verificar que usuario y clave están presentes
-        if (!isset($comando->username) || !isset($comando->password)) 
+        if (!isset($comando->username) || !isset($comando->password))
             return $this->_generarRespuestaFallo(400, 'Bad request');
-        
+
         $xml_response = new SimpleXMLElement('<response />');
         $xml_loginResponse = $xml_response->addChild('login_response');
 
@@ -479,9 +484,9 @@ class ECCPConn extends MultiplexConn
          * del password, que el password en texto plano, en una conexión sin
          * encriptar, ya que en ambos casos se puede recoger con un sniffer.
          * Por ahora se acepta el password con o sin hash. */
-        /* TODO: se puede almacenar cuál agente(s) está autorizado a atender en 
+        /* TODO: se puede almacenar cuál agente(s) está autorizado a atender en
          * la tabla eccp_authorized_clients */
-        $sPeticionSQL = 
+        $sPeticionSQL =
             'SELECT COUNT(*) AS N FROM eccp_authorized_clients '.
             'WHERE username = ? AND (md5_password = ? OR md5_password = md5(?))';
         $paramSQL = array($comando->username, $comando->password, $comando->password);
@@ -491,7 +496,7 @@ class ECCPConn extends MultiplexConn
         if ($tupla['N'] > 0) {
             // Usuario autorizado
             $xml_status = $xml_loginResponse->addChild('success');
-            
+
             // Generar una cadena de hash para cookie de aplicación
             $sAppCookie = md5(posix_getpid().time().mt_rand());
             $xml_loginResponse->addChild('app_cookie', $sAppCookie);
@@ -508,15 +513,15 @@ class ECCPConn extends MultiplexConn
             return $xml_response;
         }
     }
-    
+
     /**
-     * Procedimiento que implementa el logout del cliente del protocolo. Luego 
+     * Procedimiento que implementa el logout del cliente del protocolo. Luego
      * de este requerimiento, se espera que se cierre la conexión.
-     * 
+     *
      * @param   object   $comando    Comando de logout
      *      <logout />
-     * 
-     * @return  object  Respuesta codificada como un SimpleXMLObject  
+     *
+     * @return  object  Respuesta codificada como un SimpleXMLObject
      *      <logout_response />
      */
     private function Request_logout($comando)
@@ -553,10 +558,10 @@ class ECCPConn extends MultiplexConn
             return FALSE;
         }
         $sClaveECCPAgente = $tuplaAgente['eccp_password'];
-        
+
         // Para pruebas, se acepta a agente sin password
         if (is_null($sClaveECCPAgente)) return TRUE;
-        
+
         // Calcular el hash que debió haber enviado el cliente
         $sHashEsperado = md5($appcookie.$sAgente.$sClaveECCPAgente);
         return ($sHashEsperado == $sHashCliente);
@@ -565,31 +570,31 @@ class ECCPConn extends MultiplexConn
     private function Request_eccpauth_getqueuescript($comando)
     {
         // Verificar que queue está presente
-        if (!isset($comando->queue)) 
+        if (!isset($comando->queue))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $queue = (int)$comando->queue;
-        
+
         $xml_response = new SimpleXMLElement('<response />');
         $xml_GetQueueScriptResponse = $xml_response->addChild('getqueuescript_response');
-        
+
         // Leer la información del script de la cola. El ORDER BY estatus hace
         // que se devuelva A y luego I.
         $recordset = $this->_db->prepare(
             'SELECT script FROM queue_call_entry '.
             'WHERE queue = ? ORDER BY estatus LIMIT 0,1');
         $recordset->execute(array($queue));
-        $tupla = $recordset->fetch(); $recordset->closeCursor(); 
+        $tupla = $recordset->fetch(); $recordset->closeCursor();
         if (!$tupla) {
             $this->_agregarRespuestaFallo($xml_GetQueueScriptResponse, 404, 'Queue not found in incoming queues');
             return $xml_response;
         }
-        $xml_GetQueueScriptResponse->addChild('script', str_replace('&', '&amp;', $tupla['script']));        
+        $xml_GetQueueScriptResponse->addChild('script', str_replace('&', '&amp;', $tupla['script']));
         return $xml_response;
     }
 
     private function Request_eccpauth_getcampaignlist($comando)
     {
-        // Tipo de campaña 
+        // Tipo de campaña
         $sTipoCampania = NULL;
         if (isset($comando->campaign_type)) {
             $sTipoCampania = (string)$comando->campaign_type;
@@ -606,7 +611,7 @@ class ECCPConn extends MultiplexConn
         if (isset($comando->filtername)) {
             $sNombreContiene = (string)$comando->filtername;
         }
-        
+
         // Filtro por status
         $sEstado = NULL;
         if (isset($comando->status)) {
@@ -619,7 +624,7 @@ class ECCPConn extends MultiplexConn
                 return $this->_generarRespuestaFallo(400, 'Bad request - invalid status');
             $sEstado = $listaEstadosConocidos[$sEstado];
         }
-        
+
         // Fechas de inicio y fin
         $sFechaInicio = $sFechaFin = NULL;
         if (isset($comando->datetime_start)) {
@@ -637,7 +642,7 @@ class ECCPConn extends MultiplexConn
             $sFechaInicio = $sFechaFin;
             $sFechaFin = $t;
         }
-        
+
         // Offset y límite
         $iOffset = NULL; $iLimite = NULL;
         if (isset($comando->limit)) {
@@ -664,7 +669,7 @@ class ECCPConn extends MultiplexConn
                 $sPeticionSQL = "SELECT 'outgoing' AS campaign_type, id, name, estatus AS status FROM campaign";
                 break;
             }
-            
+
             $listaWhere = array();
             if (!is_null($sNombreContiene)) {
                 $listaWhere[] = 'name LIKE ?';
@@ -682,14 +687,14 @@ class ECCPConn extends MultiplexConn
                 $listaWhere[] = 'datetime_init < ?';
                 $paramSQL[] = $sFechaFin;
             }
-            
+
             if (count($listaWhere) > 0) {
                 $sPeticionSQL .= ' WHERE '.implode(' AND ', $listaWhere);
             }
-            
+
             $listaSQL[] = $sPeticionSQL;
         }
-        
+
         // Preparar UNION SQL
         if (count($listaSQL) > 0)
             $sPeticionSQL = '('.implode(') UNION (', $listaSQL).')';
@@ -701,7 +706,7 @@ class ECCPConn extends MultiplexConn
             $paramSQL[] = $iLimite;
             $paramSQL[] = $iOffset;
         }
-        
+
         $recordset = $this->_db->prepare($sPeticionSQL);
         $recordset->execute($paramSQL);
 
@@ -768,9 +773,9 @@ class ECCPConn extends MultiplexConn
     private function Request_eccpauth_getcampaignqueuewait($comando)
     {
         // Verificar que id y tipo está presente
-        if (!isset($comando->campaign_id)) 
+        if (!isset($comando->campaign_id))
             return $this->_generarRespuestaFallo(400, 'Bad request');
-        if (!isset($comando->campaign_type)) 
+        if (!isset($comando->campaign_type))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $idCampania = (int)$comando->campaign_id;
         $sTipoCampania = (string)$comando->campaign_type;
@@ -826,17 +831,17 @@ class ECCPConn extends MultiplexConn
     }
 
     /**
-     * Procedimiento que implementa la lectura de la información estática de 
+     * Procedimiento que implementa la lectura de la información estática de
      * una campaña entrante o saliente. Por información estática se entiende la
      * información que no cambia a medida que se progresa con las llamadas
      * asociadas a la campaña.
-     * 
+     *
      * @param   object  $comando    Comando
      *      <getcampaigninfo>
      *          <campaign_type>outgoing|incoming</campaign_type> <!-- Opcional, por omisión es outgoing -->
      *          <campaign_id>123</campaign_id>
      *      </getcampaigninfo>
-     * 
+     *
      * @return  object  Respuesta codificada como un SimpleXMLObject
      *      <getcampaigninfo_response>
      *          <name>Nombre de la campaña</name>
@@ -854,12 +859,12 @@ class ECCPConn extends MultiplexConn
      *          <script>Texto a usar como script de la campaña</script>
      *          <form id="2">...</form>
      *          <form id="3">...</form>
-     *      </getcampaigninfo_response> 
+     *      </getcampaigninfo_response>
      */
     private function Request_eccpauth_getcampaigninfo($comando)
     {
         // Verificar que id y tipo está presente
-        if (!isset($comando->campaign_id)) 
+        if (!isset($comando->campaign_id))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $idCampania = (int)$comando->campaign_id;
         $sTipoCampania = 'outgoing';
@@ -877,12 +882,12 @@ class ECCPConn extends MultiplexConn
         case 'outgoing':
             $sql_campania = <<<LEER_CAMPANIA
 SELECT name, 'outgoing' AS type, datetime_init AS startdate, datetime_end AS enddate,
-    daytime_init AS working_time_starttime, daytime_end AS working_time_endtime, 
+    daytime_init AS working_time_starttime, daytime_end AS working_time_endtime,
     queue, retries, trunk, context, max_canales AS maxchan, estatus AS status,
     script, urltemplate, opentype AS urlopentype
-FROM campaign 
+FROM campaign
 LEFT JOIN campaign_external_url
-    ON campaign.id_url = campaign_external_url.id AND campaign_external_url.active = 1 
+    ON campaign.id_url = campaign_external_url.id AND campaign_external_url.active = 1
 WHERE campaign.id = ?
 LEER_CAMPANIA;
             $sql_forms = 'SELECT DISTINCT id_form FROM campaign_form WHERE id_campaign = ?';
@@ -992,7 +997,7 @@ LEER_CAMPANIA;
         }
         return $listaForm;
     }
-    
+
     private function _leerCamposFormulario($idxForm)
     {
         $listaForm = array();
@@ -1011,7 +1016,7 @@ LEER_CAMPANIA;
         }
         return $listaForm;
     }
-    
+
     private function _agregarCamposFormulario(&$xml_GetCampaignInfoResponse, $idForm, &$listaCampos, &$nombresForm)
     {
         $xml_Form = $xml_GetCampaignInfoResponse->addChild('form');
@@ -1028,16 +1033,16 @@ LEER_CAMPANIA;
             $xml_Field->addAttribute('id', $tuplaCampo['id']);
             $xml_Field->addChild('label', str_replace('&', '&amp;', $tuplaCampo['label']));
             $xml_Field->addChild('type', str_replace('&', '&amp;', $tuplaCampo['type']));
-            
+
             // TODO: permitir especificar longitud de la entrada
-            if (!in_array($tuplaCampo['type'], array('LABEL', 'DATE'))) 
+            if (!in_array($tuplaCampo['type'], array('LABEL', 'DATE')))
                 $xml_Field->addChild('maxsize', 250);
-            
+
             if ($tuplaCampo['type'] == 'LIST') {
                 // OJO: PRIMERA FORMA ANORMAL!!!
                 // La implementación actual del código de formulario
                 // agrega una coma de más al final de la lista
-                if (strlen($tuplaCampo['value']) > 0 && 
+                if (strlen($tuplaCampo['value']) > 0 &&
                     substr($tuplaCampo['value'], strlen($tuplaCampo['value']) - 1, 1) == ',') {
                     $tuplaCampo['value'] = substr($tuplaCampo['value'], 0, strlen($tuplaCampo['value']) - 1);
                 }
@@ -1046,12 +1051,12 @@ LEER_CAMPANIA;
                     $xml_Values->addChild('value', str_replace('&', '&amp;', $sValor));
                 }
             } else {
-                // Usar el valor 'value' como valor por omisión. 
-                // TODO: (2011-02-02) soporte de formulario para valor por 
-                // omisión todavía no está implementado en agent_console o en 
+                // Usar el valor 'value' como valor por omisión.
+                // TODO: (2011-02-02) soporte de formulario para valor por
+                // omisión todavía no está implementado en agent_console o en
                 // definición de formulario en interfaz web
                 $sDefVal = trim($tuplaCampo['value']);
-                if ($sDefVal != '') 
+                if ($sDefVal != '')
                     $xml_Field->addChild('default_value', str_replace('&', '&amp;', $sDefVal));
             }
         }
@@ -1068,12 +1073,12 @@ LEER_CAMPANIA;
             return $this->_generarRespuestaFallo(400, 'Bad request');
 
         // El ID de campaña es opcional para campañas entrantes
-        if (!isset($comando->campaign_id) && $sTipoCampania == 'outgoing') 
+        if (!isset($comando->campaign_id) && $sTipoCampania == 'outgoing')
             return $this->_generarRespuestaFallo(400, 'Bad request');
-        $idCampania = isset($comando->campaign_id) ? (int)$comando->campaign_id : NULL; 
+        $idCampania = isset($comando->campaign_id) ? (int)$comando->campaign_id : NULL;
 
         // Verificar que id de llamada está presente
-        if (!isset($comando->call_id)) 
+        if (!isset($comando->call_id))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $idLlamada = (int)$comando->call_id;
 
@@ -1095,7 +1100,7 @@ LEER_CAMPANIA;
         $this->_construirRespuestaCallInfo($infoLlamada, $xml_GetCallInfoResponse);
         return $xml_response;
     }
-    
+
     // Compartido entre getcallinfo y evento agentlinked
     private function _construirRespuestaCallInfo($infoLlamada, $xml_GetCallInfoResponse)
     {
@@ -1105,7 +1110,7 @@ LEER_CAMPANIA;
                 $xml_callAttrlist = $xml_GetCallInfoResponse->addChild($sKey);
                 foreach ($valor as $tuplaAttr) {
                     $xml_callAttr = $xml_callAttrlist->addChild('attribute');
-                    $xml_callAttr->addChild('label', str_replace('&', '&amp;', $tuplaAttr['label'])); 
+                    $xml_callAttr->addChild('label', str_replace('&', '&amp;', $tuplaAttr['label']));
                     $xml_callAttr->addChild('value', str_replace('&', '&amp;', $tuplaAttr['value']));
                     $xml_callAttr->addChild('order', str_replace('&', '&amp;', $tuplaAttr['order']));
                 }
@@ -1117,7 +1122,7 @@ LEER_CAMPANIA;
                     $xml_callAttrlist->addAttribute('id', $id_contact);
                     foreach ($tuplaContact as $tuplaAttr) {
                         $xml_callAttr = $xml_callAttrlist->addChild('attribute');
-                        $xml_callAttr->addChild('label', str_replace('&', '&amp;', $tuplaAttr['label'])); 
+                        $xml_callAttr->addChild('label', str_replace('&', '&amp;', $tuplaAttr['label']));
                         $xml_callAttr->addChild('value', str_replace('&', '&amp;', $tuplaAttr['value']));
                         $xml_callAttr->addChild('order', str_replace('&', '&amp;', $tuplaAttr['order']));
                     }
@@ -1148,15 +1153,15 @@ LEER_CAMPANIA;
         switch ($sTipoCampania) {
         case 'incoming':
             $sDescCampania = 'entrante';
-            $sPeticionSQL = 
+            $sPeticionSQL =
                 'SELECT CONCAT(agent.type,"/",agent.number) AS agentchannel FROM call_entry, agent '.
                 'WHERE call_entry.id_agent = agent.id AND call_entry.id = ?';
             break;
         case 'outgoing':
             $sDescCampania = 'saliente';
-            $sPeticionSQL = 
+            $sPeticionSQL =
                 'SELECT CONCAT(agent.type,"/",agent.number) AS agentchannel FROM calls, agent '.
-                'WHERE calls.id_agent = agent.id AND calls.id = ?'; 
+                'WHERE calls.id_agent = agent.id AND calls.id = ?';
             break;
         default:
             return NULL;
@@ -1170,12 +1175,12 @@ LEER_CAMPANIA;
     private function Request_agentauth_setcontact($comando)
     {
         // Verificar que id de llamada está presente
-        if (!isset($comando->call_id)) 
+        if (!isset($comando->call_id))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $idLlamada = (int)$comando->call_id;
 
         // Verificar que id de contacto está presente
-        if (!isset($comando->contact_id)) 
+        if (!isset($comando->contact_id))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $idContacto = (int)$comando->contact_id;
 
@@ -1195,7 +1200,7 @@ LEER_CAMPANIA;
                 $bExito = FALSE;
             }
         }
-        
+
         // Verificar que el agente declarado realmente atendió esta llamada
         if ($bExito) {
             $sAgenteLlamada = $this->_leerAgenteLlamada('incoming', $idLlamada);
@@ -1216,7 +1221,7 @@ LEER_CAMPANIA;
                 $bExito = FALSE;
             }
         }
-        
+
         if ($bExito) {
             $sth = $this->_db->prepare('UPDATE call_entry SET id_contact = ? WHERE id = ?');
             $sth->execute(array($idContacto, $idLlamada));
@@ -1229,13 +1234,13 @@ LEER_CAMPANIA;
         return $xml_response;
     }
 
-    /*    
+    /*
     private function Request_eccpauth_dial($comando)
     {
         return $this->_generarRespuestaFallo(501, 'Not Implemented');
     }
     */
-    
+
     private function Request_agentauth_saveformdata($comando)
     {
         // Si no hay un tipo de campaña, se asume saliente
@@ -1247,21 +1252,21 @@ LEER_CAMPANIA;
             return $this->_generarRespuestaFallo(400, 'Bad request');
 
         // Verificar que id de llamada está presente
-        if (!isset($comando->call_id)) 
+        if (!isset($comando->call_id))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $idLlamada = (int)$comando->call_id;
 
         // Verificar que elemento forms está presente
-        if (!isset($comando->forms)) 
+        if (!isset($comando->forms))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $infoDatos = array();
         foreach ($comando->forms->form as $xml_form) {
             $idForm = (int)$xml_form['id'];
-            
+
             // No se permiten IDs duplicados de formulario
             if (isset($infoDatos[$idForm]))
                 return $this->_generarRespuestaFallo(400, 'Bad request');
-            
+
             $infoDatos[$idForm] = array();
             foreach ($xml_form->field as $xml_field) {
                 $idField = (int)$xml_field['id'];
@@ -1288,14 +1293,14 @@ LEER_CAMPANIA;
             $recordset = $this->_db->prepare(($sTipoCampania == 'incoming')
                 ? 'SELECT COUNT(*) FROM form_data_recolected_entry WHERE id_call_entry = ? AND id_form_field = ?'
                 : 'SELECT COUNT(*) FROM form_data_recolected WHERE id_calls = ? AND id_form_field = ?');
-            $sth_insert = $this->_db->prepare(($sTipoCampania == 'incoming') 
+            $sth_insert = $this->_db->prepare(($sTipoCampania == 'incoming')
                 ? 'INSERT INTO form_data_recolected_entry (value, id_call_entry, id_form_field) VALUES (?, ?, ?)'
                 : 'INSERT INTO form_data_recolected (value, id_calls, id_form_field) VALUES (?, ?, ?)');
-            $sth_update = $this->_db->prepare(($sTipoCampania == 'incoming') 
+            $sth_update = $this->_db->prepare(($sTipoCampania == 'incoming')
                 ? 'UPDATE form_data_recolected_entry SET value = ? WHERE id_call_entry = ? AND id_form_field = ?'
                 : 'UPDATE form_data_recolected SET value = ? WHERE id_calls = ? AND id_form_field = ?');
-            
-            /* Validación básica de los valores a guardar, combinada con 
+
+            /* Validación básica de los valores a guardar, combinada con
              * generación de las sentencias SQL para almacenar */
             $bDatosValidos = TRUE;
             foreach ($infoDatos as $idForm => $infoDatosForm) {
@@ -1310,37 +1315,37 @@ LEER_CAMPANIA;
                     if (!$bDatosValidos) break;
 
                     $infoCampo = $infoFormulario[$idForm][$idField];
-                    if ($infoCampo['type'] == 'LABEL') continue; 
-                    
+                    if ($infoCampo['type'] == 'LABEL') continue;
+
                     // TODO: extraer máxima longitud de base de datos
                     if (strlen($sValor) > 250) {
                         $bDatosValidos = FALSE;
                         $this->_agregarRespuestaFallo($xml_saveFormDataResponse, 413, 'Form value too large: '.$idForm.' - '.$idField);
-                    
+
                     // Validar que el campo de fecha tenga valor correcto
-                    } elseif ($infoCampo['type'] == 'DATE' && 
+                    } elseif ($infoCampo['type'] == 'DATE' &&
                         $sValor != '' && !(preg_match('/^\d{4}-\d{2}-\d{2}$/', $sValor) || preg_match('/^\d{4}-\d{2}-\d{2} d{2}:\d{2}:\d{2}$/', $sValor))) {
                         $bDatosValidos = FALSE;
-                        $this->_agregarRespuestaFallo($xml_saveFormDataResponse, 406, 
+                        $this->_agregarRespuestaFallo($xml_saveFormDataResponse, 406,
                             'Date format not acceptable, must be yyyy-mm-dd or yyyy-mm-dd hh:mm:ss: '.$idForm.' - '.$idField);
                     } else {
                         if ($infoCampo['type'] == 'LIST') {
                             // OJO: PRIMERA FORMA ANORMAL!!!
                             // La implementación actual del código de formulario
                             // agrega una coma de más al final de la lista
-                            if (strlen($infoCampo['value']) > 0 && 
+                            if (strlen($infoCampo['value']) > 0 &&
                                 substr($infoCampo['value'], strlen($infoCampo['value']) - 1, 1) == ',') {
                                 $infoCampo['value'] = substr($infoCampo['value'], 0, strlen($infoCampo['value']) - 1);
                             }
                             if (!in_array($sValor, explode(',', $infoCampo['value']))) {
                                 $bDatosValidos = FALSE;
-                                $this->_agregarRespuestaFallo($xml_saveFormDataResponse, 406, 
+                                $this->_agregarRespuestaFallo($xml_saveFormDataResponse, 406,
                                     'Value not in list of accepted values: '.$idForm.' - '.$idField);
                             }
-                        }                       
+                        }
                     }
                     if (!$bDatosValidos) break;
-                    
+
                     // En este punto este valor es válido y se puede generar SQL
                     if (!$recordset->execute(array($idLlamada, $idField))) {
                         $bDatosValidos = FALSE;
@@ -1357,7 +1362,7 @@ LEER_CAMPANIA;
                 }
                 if (!$bDatosValidos) break;
             }
-            
+
             // Se procede a guardar los datos del formulario
             if ($bDatosValidos) {
                 foreach ($listaSQL as $infoSQL) {
@@ -1365,7 +1370,7 @@ LEER_CAMPANIA;
                     $infoSQL[0]->closeCursor();
                 }
             }
-            
+
             if ($bDatosValidos) {
                 $xml_saveFormDataResponse->addChild('success');
             }
@@ -1401,31 +1406,31 @@ LEER_CAMPANIA;
      * debe de esperar el evento LoginAgent que indica que se ha completado
      * exitosamente el login del agente, y que empezará a recibir llamadas de la
      * campaña asociada a las colas del agente.
-     * 
+     *
      * Implementación: las tareas a hacer para iniciar el login del agente son:
      * 1) Verificar si el agente existe en el sistema. Si no existe, se devuelve
      *    error sin hacer otra operación.
      * 2) Verificar si la extensión indicada es válida. Si no existe, se devuelve
-     *    error sin hacer otra operación. 
+     *    error sin hacer otra operación.
      * 3) Verificar si el agente ya está logoneado. Si ya está logoneado, entonces
-     *    se debe verificar si está logoneado en la extensión indicada en el 
-     *    parámetro. Si es la misma extensión se devuelve éxito sin hacer nada 
-     *    más. Si no es la misma extensión, se devuelve error informando la 
+     *    se debe verificar si está logoneado en la extensión indicada en el
+     *    parámetro. Si es la misma extensión se devuelve éxito sin hacer nada
+     *    más. Si no es la misma extensión, se devuelve error informando la
      *    situación.
      * 4) Para agente no logoneado, se inicia un Originate entre la extensión
-     *    y el canal de Agent/XXXX. Como Action-Id, se indica la cadena 
+     *    y el canal de Agent/XXXX. Como Action-Id, se indica la cadena
      *    "ECCP:1.0:<PID>:AgentLogin:<canaldeagente>"
      *    para distinguir este login de los logines a colas por otros motivos.
      * Para el resto del procesamiento se debe ver el método OnAgentlogin
-     * en la clase DialerProcess. 
-     * 
+     * en la clase DialerProcess.
+     *
      * @param   object   $comando    Comando de login
      *      <loginagent>
      *          <agent_number>Agent/9000</agent_number>
      *          <password>xxx</password> <!-- se ignora en implementación actual -->
      *          <extension>1064</extension>
      *      </loginagent>
-     * 
+     *
      * @return  object  Respuesta codificada como un SimpleXMLObject
      *      <loginagent_response>
      *          <status>logged-out|logging|logged-in</status>
@@ -1438,7 +1443,7 @@ LEER_CAMPANIA;
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
         // Verificar que agente y extensión están presentes
-        if (!isset($comando->agent_number) || !isset($comando->extension)) 
+        if (!isset($comando->agent_number) || !isset($comando->extension))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
         $sExtension = (string)$comando->extension;
@@ -1462,7 +1467,7 @@ LEER_CAMPANIA;
         } elseif (!in_array($sExtension, array_keys($listaExtensiones))) {
             return $this->Response_LoginAgentResponse('logged-out', 404, 'Specified extension not found');
         }
-        
+
         // Verificar el hash del agente
         if (!$this->_hashValidoAgenteECCP($comando, $comando['appcookie'])) {
             return $this->Response_LoginAgentResponse('logged-out', 401, 'Unauthorized agent');
@@ -1477,7 +1482,7 @@ LEER_CAMPANIA;
              * con la extensión que se ha pedido, porque no se tiene la
              * información de estado del agente (Uniqueid, id_sesion, etc)
              * hasta que se implemente la recolección de tales variables
-             * a partir de Asterisk y la base de datos call_center. La 
+             * a partir de Asterisk y la base de datos call_center. La
              * excepción es si el programa ya hace seguimiento del agente
              * indicado. */
         	if ($infoSeguimiento['extension'] == $listaExtensiones[$sExtension]) {
@@ -1493,7 +1498,7 @@ LEER_CAMPANIA;
         } else {
             // No hay canal de login. Se inicia login a través de Originate
             $r = $this->_loginAgente($listaExtensiones[$sExtension], $sAgente, $iTimeout);
-            return $this->Response_LoginAgentResponse('logging');            
+            return $this->Response_LoginAgentResponse('logging');
         }
     }
 
@@ -1504,18 +1509,18 @@ LEER_CAMPANIA;
         $xml_loginAgentResponse = $xml_response->addChild('loginagent_response');
 
         $xml_loginAgentResponse->addChild('status', $status);
-        if (!is_null($msg)) 
+        if (!is_null($msg))
             $this->_agregarRespuestaFallo($xml_loginAgentResponse, $iCodigo, $msg);
-            
-        return $xml_response;           
+
+        return $xml_response;
     }
-    
+
     // TODO: encontrar manera elegante de tener una sola definición
     private function _abrirConexionFreePBX()
     {
         $sNombreConfig = '/etc/amportal.conf';  // TODO: vale la pena poner esto en config?
 
-        // De algunas pruebas se desprende que parse_ini_file no puede parsear 
+        // De algunas pruebas se desprende que parse_ini_file no puede parsear
         // /etc/amportal.conf, de forma que se debe abrir directamente.
         $dbParams = array();
         $hConfig = fopen($sNombreConfig, 'r');
@@ -1529,7 +1534,7 @@ LEER_CAMPANIA;
             $sLinea = trim($sLinea);
             if ($sLinea == '') continue;
             if ($sLinea{0} == '#') continue;
-            
+
             $regs = NULL;
             if (preg_match('/^([[:alpha:]]+)[[:space:]]*=[[:space:]]*(.*)$/', $sLinea, $regs)) switch ($regs[1]) {
             case 'AMPDBHOST':
@@ -1541,7 +1546,7 @@ LEER_CAMPANIA;
             }
         }
         fclose($hConfig); unset($hConfig);
-        
+
         // Abrir la conexión a la base de datos, si se tienen todos los parámetros
         if (count($dbParams) < 4) {
             $this->_log->output('ERR: archivo '.$sNombreConfig.
@@ -1555,7 +1560,7 @@ LEER_CAMPANIA;
             return NULL;
         }
         try {
-            $dbConn = new PDO("mysql:host={$dbParams['AMPDBHOST']};dbname=asterisk", 
+            $dbConn = new PDO("mysql:host={$dbParams['AMPDBHOST']};dbname=asterisk",
                 $dbParams['AMPDBUSER'], $dbParams['AMPDBPASS']);
             $dbConn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $dbConn->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
@@ -1564,22 +1569,22 @@ LEER_CAMPANIA;
             $this->_log->output("ERR: no se puede conectar a DB de FreePBX - ".
                 $e->getMessage());
         	return NULL;
-        }        
+        }
     }
 
     /**
      * Método que lista todas las extensiones SIP e IAX que están definidas en
-     * el sistema. Estas extensiones pueden ser usadas por el agente para 
-     * logonearse en el sistema. La lista se devuelve de la forma 
+     * el sistema. Estas extensiones pueden ser usadas por el agente para
+     * logonearse en el sistema. La lista se devuelve de la forma
      * (1000 => 'SIP/1000'), ...
      *
      * @return  mixed   La lista de extensiones.
      */
     private function _listarExtensiones()
     {
-        // TODO: verificar si esta manera de consultar funciona para todo 
-        // FreePBX. Debe de poder identificarse extensiones sin asumir una 
-        // tecnología en particular. 
+        // TODO: verificar si esta manera de consultar funciona para todo
+        // FreePBX. Debe de poder identificarse extensiones sin asumir una
+        // tecnología en particular.
         $oDB = $this->_abrirConexionFreePBX();
         if (is_null($oDB)) return NULL;
         try {
@@ -1595,7 +1600,7 @@ LISTA_EXTENSIONES;
                 $sTecnologia = NULL;
                 if ($tupla['iax'] > 0) $sTecnologia = 'IAX2/';
                 if ($tupla['sip'] > 0) $sTecnologia = 'SIP/';
-                
+
                 // Cómo identifico las otras tecnologías?
                 if (!is_null($sTecnologia)) {
                     $listaExtensiones[$tupla['extension']] = $sTecnologia.$tupla['extension'];
@@ -1672,22 +1677,22 @@ LISTA_EXTENSIONES;
     /**
      * Procedimiento que implementa el logoff de un agente estático al estilo
      * Agent/9000.
-     * 
+     *
      * Implementación: las tareas a hacer para iniciar el login del agente son:
      * 1) Verificar si el agente existe en el sistema. Si no existe, se devuelve
      *    error sin hacer otra operación.
      * 2) El logoff sólo está implementado para agentes de tipo Agent/9000. Si
-     *    se especifica otro tipo de agente, se rechaza con error de no 
+     *    se especifica otro tipo de agente, se rechaza con error de no
      *    implementado. De otro modo, se recoge el número de agente (9000)
      * 3) Se ejecuta el comando de AMI Agentlogoff() con el número de agente
      * Para el resto del procesamiento se debe ver el método OnAgentlogoff en
      * la clase DialerProcess.
-     * 
+     *
      * @param   object   $comando    Comando de logout
      *      <logoutagent>
      *          <agent_number>Agent/9000</agent_number>
      *      </logoutagent>
-     * 
+     *
      * @return  object  Respuesta codificada como un SimpleXMLObject
      *      <logoutagent_response>
      *          <status>logged-out</status>
@@ -1700,7 +1705,7 @@ LISTA_EXTENSIONES;
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
         // Verificar que agente está presentes
-        if (!isset($comando->agent_number)) 
+        if (!isset($comando->agent_number))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
@@ -1718,16 +1723,16 @@ LISTA_EXTENSIONES;
         // Canal que hizo el logoneo hacia la cola
         $infoAgente = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
 
-        /* Ejecutar Agentlogoff. Esto asume que el agente está de la forma 
-         * Agent/9000. La actualización de las bases de datos de auditoría y 
+        /* Ejecutar Agentlogoff. Esto asume que el agente está de la forma
+         * Agent/9000. La actualización de las bases de datos de auditoría y
          * breaks se delega a los manejadores de eventos */
         $agentFields = $this->_parseAgent($sAgente);
         if ($agentFields['type'] == 'Agent') {
             $r = $this->_ami->Agentlogoff($agentFields['number']);
-            
+
             /* Si el agente todavía no ha introducido la clave, el Agentlogoff
              * anterior no tiene efecto, así que se manda a colgar el canal
-             * directamente. 
+             * directamente.
              */
             if (!is_null($infoAgente) && $infoAgente['estado_consola'] == 'logging') {
                 $sCanalExt = $infoAgente['login_channel'];
@@ -1739,7 +1744,7 @@ LISTA_EXTENSIONES;
             if (!is_null($infoAgente['clientchannel'])) {
                 $this->_ami->Hangup($infoAgente['clientchannel']);
             }
- 
+
             // AMIEventProcess sabe de qué colas hay que quitar al agente
             $this->_tuberia->AMIEventProcess_quitarAgenteColasDinamicas($sAgente);
         }
@@ -1754,8 +1759,8 @@ LISTA_EXTENSIONES;
 
         $xml_loginAgentResponse->addChild('status', $status);
         if (!is_null($msg))
-            $this->_agregarRespuestaFallo($xml_loginAgentResponse, $iCodigo, $msg);                
-        return $xml_response;           
+            $this->_agregarRespuestaFallo($xml_loginAgentResponse, $iCodigo, $msg);
+        return $xml_response;
     }
 
     private function Request_agentauth_pauseagent($comando)
@@ -1783,7 +1788,7 @@ LISTA_EXTENSIONES;
             $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 417, 'Agent currenty not logged in');
             return $xml_response;
         }
-        if (!is_null($infoSeguimiento['id_break'])) { 
+        if (!is_null($infoSeguimiento['id_break'])) {
             if ($infoSeguimiento['id_break'] != $idBreak) {
                 // Agente ya estaba en otro break
                 $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 417, 'Agent already in incompatible break');
@@ -1805,7 +1810,7 @@ LISTA_EXTENSIONES;
             return $xml_response;
         }
 
-        // Ejecutar la pausa a través del AMI. 
+        // Ejecutar la pausa a través del AMI.
         /* TODO: puede haber una carrera si dos o más conexiones intentan hacer
          * que el mismo agente entre en break al mismo tiempo.
          */
@@ -1819,7 +1824,7 @@ LISTA_EXTENSIONES;
             }
         }
         $iTimestampInicioPausa = time();
-        
+
         // Mandar a escribir el inicio de la pausa a la base de datos
         $idAuditBreak = $this->_eccpProcess->marcarInicioBreakAgente(
             $infoSeguimiento['id_agent'], $idBreak, $iTimestampInicioPausa);
@@ -1830,7 +1835,7 @@ LISTA_EXTENSIONES;
             $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 500, 'Unable to start agent break');
             return $xml_response;
         }
-        
+
         // Notificar éxito en inicio de break
         $this->_tuberia->msg_AMIEventProcess_idNuevoBreakAgente($sAgente, $idBreak, $idAuditBreak);
         $this->multiplexSrv->notificarEvento_PauseStart($sAgente, array(
@@ -1840,7 +1845,7 @@ LISTA_EXTENSIONES;
             'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
         ));
 
-        $xml_pauseAgentResponse->addChild('success');        
+        $xml_pauseAgentResponse->addChild('success');
         return $xml_response;
     }
 
@@ -1853,7 +1858,7 @@ LISTA_EXTENSIONES;
         $r = $this->_tuberia->AMIEventProcess_pingAgente($sAgente);
         if (!$r)
     	   $this->_agregarRespuestaFallo($xml_pingAgentResponse, 404, 'Specified agent not found');
-        else $xml_pingAgentResponse->addChild('success');        
+        else $xml_pingAgentResponse->addChild('success');
         return $xml_response;
     }
 
@@ -1900,24 +1905,24 @@ LISTA_EXTENSIONES;
             $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 500, 'Unable to write stop of agent break');
             return $xml_response;
         }
-        
+
         $xml_unpauseAgentResponse->addChild('success');
-        
-        $this->_eccpProcess->lanzarEventoPauseEnd($sAgente, 
+
+        $this->_eccpProcess->lanzarEventoPauseEnd($sAgente,
             $infoSeguimiento['id_audit_break'], 'break');
 
         return $xml_response;
     }
 
     /**
-     * Procedimiento que implementa la verificación del estado de un agente 
+     * Procedimiento que implementa la verificación del estado de un agente
      * estático al estilo Agent/9000.
-     * 
+     *
      * @param   object   $comando    Comando
      *      <getagentstatus>
      *          <agent_number>Agent/9000</agent_number>
      *      </getagentstatus>
-     * 
+     *
      * @return  object  Respuesta codificada como un SimpleXMLObject
      *      <getagentstatus_response>
      *          <status>offline|online|oncall|paused</status>
@@ -1934,7 +1939,7 @@ LISTA_EXTENSIONES;
         $iTimestampInicio = microtime(TRUE);
 
         // Verificar que agente está presentes
-        if (!isset($comando->agent_number)) 
+        if (!isset($comando->agent_number))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
@@ -1955,7 +1960,7 @@ LISTA_EXTENSIONES;
             $this->_agregarRespuestaFallo($xml_getAgentStatusResponse, 404, 'Invalid agent number');
             return $xml_response;
         }
-        
+
         // Canal que hizo el logoneo hacia la cola
         $sExtension = NULL;
         $sCanalExt = $infoSeguimiento['login_channel'];
@@ -1967,7 +1972,7 @@ LISTA_EXTENSIONES;
                 $sExtension = $regs[1];
             }
         }
-        
+
         // Reportar los estados conocidos
         $sAgentStatus = NULL;
         if ($infoSeguimiento['num_pausas'] > 0) {
@@ -1993,7 +1998,7 @@ LISTA_EXTENSIONES;
         // Reportar el estado de hold, si aplica
         if ($infoSeguimiento['estado_consola'] == 'logged-in')
             $xml_getAgentStatusResponse->addChild('onhold', is_null($infoSeguimiento['id_hold']) ? 0 : 1);
-        
+
         // Reportar los estados de break, si aplica
         if (!is_null($infoSeguimiento['id_break'])) {
             $xml_pauseInfo = $xml_getAgentStatusResponse->addChild('pauseinfo');
@@ -2032,27 +2037,27 @@ LISTA_EXTENSIONES;
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
-    
+
         // Verificar que agente está presente
         if (!isset($comando->agents))
             return $this->_generarRespuestaFallo(400, 'Bad request');
-    
+
         $xml_response = new SimpleXMLElement('<response />');
         $xml_getAgentStatusResponse = $xml_response->addChild('getmultipleagentstatus_response');
-    
+
         $agentlist = array();
         foreach ($comando->agents->agent_number as $agent_number) {
             $sAgente = (string)$agent_number;
-    
+
             // El siguiente código asume formato Agent/9000
             if (is_null($this->_parseAgent($sAgente))) {
                 $this->_agregarRespuestaFallo($xml_getAgentStatusResponse, 417, 'Invalid agent number');
                 return $xml_response;
             }
-    
+
             $agentlist[] = $sAgente;
         }
-    
+
         // Verificar que todos los agentes existen en el sistema
         $listaAgentes = $this->_listarAgentes();
         $agentesExtras = array_diff($agentlist, array_keys($listaAgentes));
@@ -2060,7 +2065,7 @@ LISTA_EXTENSIONES;
             $this->_agregarRespuestaFallo($xml_getAgentStatusResponse, 404, 'Specified agent not found');
             return $xml_response;
         }
-    
+
         $is = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($agentlist);
         foreach ($is as $sAgente => $infoSeguimiento) {
             if (is_null($infoSeguimiento)) {
@@ -2070,13 +2075,13 @@ LISTA_EXTENSIONES;
             }
         }
         $il = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($agentlist);
-        
+
         // Conversión a XML
         $xml_agents = $xml_getAgentStatusResponse->addChild('agents');
         foreach ($agentlist as $sAgente) {
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
-            
+
             $infoSeguimiento = $is[$sAgente];
 
             // Canal que hizo el logoneo hacia la cola
@@ -2090,7 +2095,7 @@ LISTA_EXTENSIONES;
                     $sExtension = $regs[1];
                 }
             }
-            
+
             // Reportar los estados conocidos
             $sAgentStatus = NULL;
             if ($infoSeguimiento['num_pausas'] > 0) {
@@ -2107,23 +2112,23 @@ LISTA_EXTENSIONES;
                 if (!is_null($sCanalExt)) $xml_agent->addChild('channel', str_replace('&', '&amp;', $sCanalExt));
                 if (!is_null($sExtension)) $xml_agent->addChild('extension', $sExtension);
             }
-            
+
             // Reportar el canal remoto al cual está conectado el agente
             if (!is_null($infoSeguimiento['clientchannel'])) {
                 $xml_agent->addChild('remote_channel', $infoSeguimiento['clientchannel']);
             }
-            
+
             // Reportar el estado de hold, si aplica
             if ($infoSeguimiento['estado_consola'] == 'logged-in')
                 $xml_agent->addChild('onhold', is_null($infoSeguimiento['id_hold']) ? 0 : 1);
-            
+
             // Por ahora no se reporta el estado de break
-            
+
             $infoLlamada = $il[$sAgente];
             if (!is_null($infoLlamada)) {
                 $this->_agregarCallInfo($xml_agent, $infoLlamada);
             }
-            
+
             if (!is_null($sAgentStatus)) {
                 if ($sAgentStatus != 'offline' && is_null($sExtension)) {
                     $this->_log->output("ERR: (internal) estado inconsistente (status=$sAgentStatus extension=null) para agente $sAgente\n".
@@ -2137,7 +2142,7 @@ LISTA_EXTENSIONES;
 
         return $xml_response;
     }
-    
+
     private function _agregarCallInfo($xml_getAgentStatusResponse, &$infoLlamada)
     {
         $xml_callInfo = $xml_getAgentStatusResponse->addChild('callinfo');
@@ -2155,7 +2160,7 @@ LISTA_EXTENSIONES;
         if (!is_null($infoLlamada['queuenumber']))
             $xml_callInfo->addChild('queuenumber', $infoLlamada['queuenumber']);
     }
-    
+
     private function Request_agentauth_hangup($comando)
     {
         if (is_null($this->_ami))
@@ -2185,14 +2190,14 @@ LISTA_EXTENSIONES;
         $xml_hangupResponse->addChild('success');
         return $xml_response;
     }
-    
+
     private function Request_eccpauth_getcampaignstatus($comando)
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
         // Verificar que id y tipo está presente
-        if (!isset($comando->campaign_id)) 
+        if (!isset($comando->campaign_id))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $idCampania = (int)$comando->campaign_id;
         $sTipoCampania = 'outgoing';
@@ -2230,7 +2235,7 @@ LISTA_EXTENSIONES;
 
         // Leer información de las llamadas en curso para la campaña
         $statusCampania_AMI = $this->_tuberia->AMIEventProcess_reportarInfoLlamadasCampania($sTipoCampania, $idCampania);
-        
+
         $this->_getcampaignstatus_format($xml_statusresponse, $statusCampania_DB, $statusCampania_AMI);
         return $xml_response;
     }
@@ -2241,7 +2246,7 @@ LISTA_EXTENSIONES;
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
         // Verificar que id y tipo está presente
-        if (!isset($comando->queue)) 
+        if (!isset($comando->queue))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sCola = (string)$comando->queue;
 
@@ -2253,7 +2258,7 @@ LISTA_EXTENSIONES;
                 return $this->_generarRespuestaFallo(400, 'Bad request - invalid start date');
             $sFechaInicio .= ' 00:00:00';
         }
-        
+
         // Leer resumen de llamadas completadas sin campaña desde la base de datos
         $statusCampania_DB = $this->_leerResumenColaEntrante($sCola, $sFechaInicio);
 
@@ -2266,7 +2271,7 @@ LISTA_EXTENSIONES;
 
         // Leer información de las llamadas en curso para la campaña
         $statusCampania_AMI = $this->_tuberia->AMIEventProcess_reportarInfoLlamadasColaEntrante($sCola);
-        
+
         $this->_getcampaignstatus_format($xml_statusresponse, $statusCampania_DB, $statusCampania_AMI);
         return $xml_response;
     }
@@ -2278,25 +2283,25 @@ LISTA_EXTENSIONES;
         $xml_statusCount->addChild('total', array_sum($statusCampania_DB['status']));
         foreach ($statusCampania_DB['status'] as $statusKey => $statusCount)
             $xml_statusCount->addChild(strtolower($statusKey), $statusCount);
-            
+
         // Estado de los agentes
         $xml_agents = $xml_statusresponse->addChild('agents');
         foreach ($statusCampania_AMI['queuestatus'] as $sAgente => $infoAgente) {
             // Este código asume agentes de formato Agent/9000
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
-            
+
             $this->_eccpProcess->cargarInfoPausa($infoAgente);
             $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
-        
+
         // Estado de los agentes logoneados en la cola, sin llamada en atención
         $infoAgentes = $this->_tuberia->AMIEventProcess_infoSeguimientoAgentesCola(
             $statusCampania_DB['queue'], array_keys($statusCampania_AMI['queuestatus']));
         foreach ($infoAgentes as $sAgente => $infoAgente) {
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
-            
+
             $this->_eccpProcess->cargarInfoPausa($infoAgente);
             $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
@@ -2317,7 +2322,7 @@ LISTA_EXTENSIONES;
             if (isset($infoLlamada['trunk']))
                 $xml_activecall->addChild('trunk', $infoLlamada['trunk']);
         }
-        
+
         // Contadores para estadísticas
         $xml_stats = $xml_statusresponse->addChild('stats');
         foreach ($statusCampania_DB['stat'] as $statKey => $statCount)
@@ -2374,7 +2379,7 @@ LISTA_EXTENSIONES;
     {
         // Leer la información en el propio registro de la campaña
         $sPeticionSQL = <<<LEER_RESUMEN_CAMPANIA
-SELECT id, name, datetime_init, datetime_end, daytime_init, daytime_end, 
+SELECT id, name, datetime_init, datetime_end, daytime_init, daytime_end,
     retries, trunk, queue, estatus
 FROM campaign WHERE id = ?
 LEER_RESUMEN_CAMPANIA;
@@ -2404,7 +2409,7 @@ CLASIFICAR_LLAMADAS;
             'Failure'   =>  0,  // No se puede conectar llamada
             'ShortCall' =>  0,  // Llamada conectada pero duración es muy corta
             'NoAnswer'  =>  0,  // Llamada estaba Ringing pero no entró a cola
-            'Abandoned' =>  0,  // Llamada estaba OnQueue pero no habían agentes            
+            'Abandoned' =>  0,  // Llamada estaba OnQueue pero no habían agentes
         );
         foreach ($recordset as $tuplaStatus) {
             if (is_null($tuplaStatus['status']))
@@ -2432,9 +2437,9 @@ LEER_STATS_CAMPANIA;
     {
         // Leer la información en el propio registro de la campaña
         $sPeticionSQL = <<<LEER_RESUMEN_CAMPANIA
-SELECT ce.id, ce.name, ce.datetime_init, ce.datetime_end, ce.daytime_init, 
-    ce.daytime_end, qce.queue, ce.estatus 
-FROM campaign_entry ce, queue_call_entry qce 
+SELECT ce.id, ce.name, ce.datetime_init, ce.datetime_end, ce.daytime_init,
+    ce.daytime_end, qce.queue, ce.estatus
+FROM campaign_entry ce, queue_call_entry qce
 WHERE ce.id = ? AND ce.id_queue_call_entry = qce.id
 LEER_RESUMEN_CAMPANIA;
         $recordset = $this->_db->prepare($sPeticionSQL);
@@ -2465,13 +2470,13 @@ CLASIFICAR_LLAMADAS;
             //'NoAnswer'  =>  0,  // Llamada estaba Ringing pero no entró a cola
             'Abandoned' =>  0,  // Llamada estaba OnQueue pero no habían agentes
             'Finished'  =>  0,  // Llamada ha terminado luego de ser conectada a agente
-            'LostTrack' =>  0,  // Programa fue terminado mientras la llamada estaba activa            
+            'LostTrack' =>  0,  // Programa fue terminado mientras la llamada estaba activa
         );
         $mapaEstados = array(
             'en-cola'       =>  'OnQueue',
             'activa'        =>  'Success',
             'hold'          =>  'OnHold',
-            'abandonada'    =>  'Abandoned',             
+            'abandonada'    =>  'Abandoned',
             'terminada'     =>  'Finished',
             'fin-monitoreo' =>  'LostTrack',
         );
@@ -2501,7 +2506,7 @@ LEER_STATS_CAMPANIA;
         $tupla['queue'] = $sCola;
 
         // Leer la clasificación por estado de las llamadas de la campaña
-        $sPeticionSQL = 
+        $sPeticionSQL =
             'SELECT COUNT(*) AS n, status FROM call_entry, queue_call_entry '.
             'WHERE call_entry.id_campaign IS NULL '.
                 'AND call_entry.id_queue_call_entry = queue_call_entry.id '.
@@ -2524,13 +2529,13 @@ LEER_STATS_CAMPANIA;
             //'NoAnswer'  =>  0,  // Llamada estaba Ringing pero no entró a cola
             'Abandoned' =>  0,  // Llamada estaba OnQueue pero no habían agentes
             'Finished'  =>  0,  // Llamada ha terminado luego de ser conectada a agente
-            'LostTrack' =>  0,  // Programa fue terminado mientras la llamada estaba activa            
+            'LostTrack' =>  0,  // Programa fue terminado mientras la llamada estaba activa
         );
         $mapaEstados = array(
             'en-cola'       =>  'OnQueue',
             'activa'        =>  'Success',
             'hold'          =>  'OnHold',
-            'abandonada'    =>  'Abandoned',             
+            'abandonada'    =>  'Abandoned',
             'terminada'     =>  'Finished',
             'fin-monitoreo' =>  'LostTrack',
         );
@@ -2584,20 +2589,20 @@ LEER_STATS_CAMPANIA;
         $horario = NULL;
         $sNuevoTelefono = NULL;
         $sNuevoNombre = NULL;
-        
+
         // Verificar si se debe usar el mismo agente (requiere contexto especial)
         if (isset($comando->sameagent) && (int)$comando->sameagent != 0)
             $bMismoAgente = TRUE;
-        
+
         // Verificar si se debe usar un nuevo teléfono
         if (isset($comando->newphone)) $sNuevoTelefono = (string)$comando->newphone;
-        
+
         // Verificar si se debe usar un nuevo nombre de contacto
         if (isset($comando->newcontactname)) $sNuevoNombre = (string)$comando->newcontactname;
-        
+
         // Verificar que se tiene un horario establecido
         if (isset($comando->schedule)) {
-            if (isset($comando->schedule->date_init) && isset($comando->schedule->date_end) && 
+            if (isset($comando->schedule->date_init) && isset($comando->schedule->date_end) &&
                 isset($comando->schedule->time_init) && isset($comando->schedule->time_end)) {
                 $horario = array(
                     'date_init' =>  (string)$comando->schedule->date_init,
@@ -2618,7 +2623,7 @@ LEER_STATS_CAMPANIA;
 
         // Ejecutar el agendamiento de la llamada
         $errcode = $errdesc = NULL;
-        $bExito = $this->_agendarLlamadaAgente($sAgente, $horario, 
+        $bExito = $this->_agendarLlamadaAgente($sAgente, $horario,
             $bMismoAgente, $sNuevoTelefono, $sNuevoNombre, $errcode, $errdesc);
         if (!$bExito) {
             $this->_agregarRespuestaFallo($xml_scheduleResponse, $errcode, $errdesc);
@@ -2632,7 +2637,7 @@ LEER_STATS_CAMPANIA;
     /**
      * Procedimiento que crea una nueva llamada agendada en base a la llamada
      * que está atendiendo el agente indicado por el parámetro.
-     * 
+     *
      * @param   string  $sAgente        Agente en formato Agent/9000
      * @param   mixed   $horario        Arreglo que define el horario como sigue:
      *          date_init               Fecha en inicio de horario en formato YYYY-MM-DD
@@ -2646,10 +2651,10 @@ LEER_STATS_CAMPANIA;
      *                                  Si VERDADERO, se requiere $horario.
      * @param   mixed   $sNuevoTelefono Teléfono nuevo al cual marcar llamada, o NULL para mismo anterior
      * @param   mixed   $sNuevoNombre   Nombre del nuevo contacto para llamada, o NULL para mismo anterior
-     * 
+     *
      * @return bool VERDADERO en caso de éxito, FALSO en caso de error
      */
-    function _agendarLlamadaAgente($sAgente, $horario, $bMismoAgente, 
+    function _agendarLlamadaAgente($sAgente, $horario, $bMismoAgente,
         $sNuevoTelefono, $sNuevoNombre, &$errcode, &$errdesc)
     {
         $errcode = 0; $errdesc = 'Success';
@@ -2680,14 +2685,14 @@ LEER_STATS_CAMPANIA;
                 $errcode = 400; $errdesc = 'Bad request: invalid time_end';
                 return FALSE;
             }
-            
+
             // Ordenamiento correcto
             if ($horario['date_init'] > $horario['date_end']) {
                 $t = $horario['date_init'];
                 $horario['date_init'] = $horario['date_end'];
                 $horario['date_end'] = $t;
             }
-            
+
             // Fecha debe estar en el futuro
             if ($horario['date_init'] < date('Y-m-d')) {
                 $this->_log->output('ERR: al agendar llamada: fecha de inicio anterior a fecha actual');
@@ -2710,10 +2715,10 @@ LEER_STATS_CAMPANIA;
             $errcode = 417; $errdesc = 'Not in outgoing call';
             return FALSE;
         }
-        
+
         // Leer toda la información de la campaña y la cola
         $sqlLlamadaCampania = <<<SQL_LLAMADA_CAMPANIA_AGENDAMIENTO
-SELECT campaign.datetime_init, campaign.datetime_end, campaign.daytime_init, 
+SELECT campaign.datetime_init, campaign.datetime_end, campaign.daytime_init,
     campaign.daytime_end, calls.id_campaign, calls.phone
 FROM campaign, calls
 WHERE campaign.id = calls.id_campaign AND calls.id = ?
@@ -2722,10 +2727,10 @@ SQL_LLAMADA_CAMPANIA_AGENDAMIENTO;
         $recordset->execute(array($infoLlamada['callid']));
         $tuplaCampania = $recordset->fetch(PDO::FETCH_ASSOC);
         $recordset->closeCursor();
-        
+
         // Validar que el rango de fecha y hora requerido es compatible con campaña
         if (is_array($horario)) {
-            if (!($tuplaCampania['datetime_init'] <= $horario['date_init'] && 
+            if (!($tuplaCampania['datetime_init'] <= $horario['date_init'] &&
                 $horario['date_end'] <= $tuplaCampania['datetime_end'])) {
                 $errcode = 417; $errdesc = 'Supplied date range outside campaign range';
                 return FALSE;
@@ -2745,12 +2750,12 @@ SQL_LLAMADA_CAMPANIA_AGENDAMIENTO;
             is_null($horario) ? NULL : $horario['date_init'],
             is_null($horario) ? NULL : $horario['date_end'],
             is_null($horario) ? NULL : $horario['time_init'],
-            is_null($horario) ? NULL : $horario['time_end'],            
+            is_null($horario) ? NULL : $horario['time_end'],
         );
 
         // Leer los atributos a heredar de la llamada, para (opcionalmente) modificarlos
         $sqlLlamadaAtributos = <<<SQL_LLAMADA_ATRIBUTOS_AGENDAMIENTO
-SELECT column_number, columna, value FROM call_attribute 
+SELECT column_number, columna, value FROM call_attribute
 WHERE id_call = ?
 ORDER BY column_number
 SQL_LLAMADA_ATRIBUTOS_AGENDAMIENTO;
@@ -2759,7 +2764,7 @@ SQL_LLAMADA_ATRIBUTOS_AGENDAMIENTO;
         $attrLlamada = array();
         foreach ($recordset as $tupla) {
         	$attrLlamada[$tupla['column_number']] = array($tupla['columna'], $tupla['value']);
-        }        
+        }
         if (!is_null($sNuevoNombre)) {
             // Columnas de propiedades se numeran desde 1
             if (!isset($attrLlamada[1])) $attrLlamada[1] = array('Campo1', $sNuevoNombre);
@@ -2777,11 +2782,11 @@ SQL_LLAMADA_FORM_STATIC;
         foreach ($recordset as $tupla) {
             $formLlamada[$tupla['id_form_field']] = $tupla['value'];
         }
-        
+
         // Validar que no exista una llamada por agendar al mismo número
         $sqlExistenciaLlamadaPrevia = <<<SQL_LLAMADA_PREVIA
-SELECT COUNT(*) FROM calls 
-WHERE id_campaign = ? AND phone = ? AND date_init = ? AND date_end = ? 
+SELECT COUNT(*) FROM calls
+WHERE id_campaign = ? AND phone = ? AND date_init = ? AND date_end = ?
     AND time_init = ? AND time_end = ?
 SQL_LLAMADA_PREVIA;
         $recordset = $this->_db->prepare($sqlExistenciaLlamadaPrevia);
@@ -2792,11 +2797,11 @@ SQL_LLAMADA_PREVIA;
             $errcode = 417; $errdesc = 'Found duplicate scheduled call';
             return FALSE;
         }
-        
+
         try {
             // Inicio de transacción
             $this->_db->beginTransaction();
-    
+
             // Agregar agente a agendar, si es necesario, e insertar
             $paramNuevaLlamadaSQL[] = $bMismoAgente ? $sAgente : NULL;
             $sqlInsertarLlamadaAgendada = <<<SQL_INSERTAR_AGENDAMIENTO
@@ -2806,7 +2811,7 @@ SQL_INSERTAR_AGENDAMIENTO;
             $sth = $this->_db->prepare($sqlInsertarLlamadaAgendada);
             $sth->execute($paramNuevaLlamadaSQL);
             $idNuevaLlamada = $this->_db->lastInsertId();
-            
+
             // Insertar atributos para la nueva llamada
             $sth = $this->_db->prepare(
                 'INSERT INTO call_attribute (columna, value, column_number, id_call) '.
@@ -2817,7 +2822,7 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $tuplaAttr[] = $idNuevaLlamada; // Debería ser posición 3
                 $sth->execute($tuplaAttr);
             }
-            
+
             // Insertar valores de formularios
             $sth = $this->_db->prepare(
                 'INSERT INTO form_data_recolected (value, id_form_field, id_calls) '.
@@ -2825,7 +2830,7 @@ SQL_INSERTAR_AGENDAMIENTO;
             foreach ($formLlamada as $id_ff => $value) {
                 $sth->execute(array($value, $id_ff, $idNuevaLlamada));
             }
-            
+
             // Final de transacción
             $this->_db->commit();
             return TRUE;
@@ -2836,7 +2841,7 @@ SQL_INSERTAR_AGENDAMIENTO;
             $errcode = 500; $errdesc = 'Failed to insert scheduled call';
         	$this->_db->rollBack();
             return FALSE;
-        }        
+        }
     }
 
     private function Request_agentauth_transfercall($comando)
@@ -2847,7 +2852,7 @@ SQL_INSERTAR_AGENDAMIENTO;
         $sAgente = (string)$comando->agent_number;
 
         // Verificar que número de extensión está presente
-        if (!isset($comando->extension)) 
+        if (!isset($comando->extension))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sExtension = (string)$comando->extension;
         if (!ctype_digit($sExtension))
@@ -2882,7 +2887,7 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         // Mandar a transferir la llamada usando el canal Agent/9000
         $r = $this->_ami->Redirect(
-            $sCanalRemoto,      // channel 
+            $sCanalRemoto,      // channel
             '',                 // extrachannel
             $sExtension,        // exten
             'from-internal',    // context
@@ -2908,7 +2913,7 @@ SQL_INSERTAR_AGENDAMIENTO;
         $sAgente = (string)$comando->agent_number;
 
         // Verificar que número de extensión está presente
-        if (!isset($comando->extension)) 
+        if (!isset($comando->extension))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sExtension = (string)$comando->extension;
         if (!ctype_digit($sExtension))
@@ -2949,7 +2954,7 @@ SQL_INSERTAR_AGENDAMIENTO;
 
     private function _registrarTransferencia($infoLlamada, $sExtension)
     {
-    	$sth = $this->_db->prepare( 
+    	$sth = $this->_db->prepare(
             'UPDATE '.(($infoLlamada['calltype'] == 'incoming') ? 'call_entry' : 'calls').
             ' SET transfer = ? WHERE id = ?');
         $sth->execute(array($sExtension, $infoLlamada['callid']));
@@ -2966,7 +2971,7 @@ SQL_INSERTAR_AGENDAMIENTO;
         $xml_holdResponse = $xml_response->addChild('hold_response');
 
         /* Verificar si existe una extensión de parqueo. Por omisión el FreePBX
-         * de Elastix NO HABILITA soporte de extensión de parqueo */ 
+         * de Elastix NO HABILITA soporte de extensión de parqueo */
         $sExtParqueo = $this->_leerConfigExtensionParqueo();
         if (is_null($sExtParqueo)) {
             $this->_agregarRespuestaFallo($xml_holdResponse, 500, 'Parked call extension is disabled');
@@ -3019,7 +3024,7 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $this->_eccpProcess->marcarFinalBreakAgente(
                     $infoSeguimiento['id_audit_hold'], $iTimestampFinalPausa);
                 $bHoldQuitado = TRUE;
-                
+
                 // TODO: evento OnHangup debería revisar info_hold de todos los
                 // agentes para eliminar los holds y pausas de las llamadas que
                 // han colgado.
@@ -3028,7 +3033,7 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         // En este punto, $infoLlamada tiene la información para iniciar hold
 
-        // Ejecutar la pausa a través del AMI. 
+        // Ejecutar la pausa a través del AMI.
         /* TODO: puede haber una carrera si dos o más conexiones intentan hacer
          * que el mismo agente entre en break al mismo tiempo.
          */
@@ -3037,13 +3042,13 @@ SQL_INSERTAR_AGENDAMIENTO;
             if ($r['Response'] != 'Success') {
                 $this->_log->output('ERR: '.__METHOD__.' (internal) no se puede poner al agente en pausa: '.
                     $sAgente.' - '.$r['Message']);
-                
+
                 $this->_agregarRespuestaFallo($xml_holdResponse, 500, 'Unable to start agent hold');
                 return $xml_response;
             }
         }
         $iTimestampInicioPausa = time();
-        
+
         // Mandar a escribir el inicio de la pausa a la base de datos
         $idAuditHold = $this->_eccpProcess->marcarInicioBreakAgente(
             $infoSeguimiento['id_agent'], $idHold, $iTimestampInicioPausa);
@@ -3054,10 +3059,10 @@ SQL_INSERTAR_AGENDAMIENTO;
             $this->_agregarRespuestaFallo($xml_holdResponse, 500, 'Unable to start agent hold');
             return $xml_response;
         }
-        
+
         // Notificar éxito en inicio de break
         $this->_tuberia->msg_AMIEventProcess_idNuevoHoldAgente($sAgente, $idHold, $idAuditHold);
-        
+
         // Marcar en calls y current_calls el estado de hold
         try {
         	$this->_db->beginTransaction();
@@ -3074,7 +3079,7 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $sth = $this->_db->prepare('UPDATE calls set status = ? WHERE id = ?');
                 $sth->execute(array('OnHold', $infoLlamada['callid']));
             }
-            
+
             // Notificar progreso de la llamada
             $paramProgreso = array(
                 'datetime_entry'    =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
@@ -3088,17 +3093,17 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $paramProgreso['id_call_outgoing'] = $infoLlamada['callid'];
             }
             $this->_eccpProcess->notificarProgresoLlamada($paramProgreso);
-            
+
             $this->_db->commit();
         } catch (PDOException $e) {
         	$this->_db->rollBack();
             $this->_log->output('ERR: '.__METHOD__. ": no se puede actualizar estado de hold en DB: ".
                 implode(' - ', $e->errorInfo));
         }
-        
+
         // Ejecutar realmente la redirección al hold
         $r = $this->_ami->Redirect(
-            $infoSeguimiento['clientchannel'], // channel 
+            $infoSeguimiento['clientchannel'], // channel
             '',                             // extrachannel
             $sExtParqueo,                   // exten
             'from-internal',                // context
@@ -3134,7 +3139,7 @@ SQL_INSERTAR_AGENDAMIENTO;
         $xml_unholdResponse = $xml_response->addChild('unhold_response');
 
         /* Verificar si existe una extensión de parqueo. Por omisión el FreePBX
-         * de Elastix NO HABILITA soporte de extensión de parqueo */ 
+         * de Elastix NO HABILITA soporte de extensión de parqueo */
         $sExtParqueo = $this->_leerConfigExtensionParqueo();
         if (is_null($sExtParqueo)) {
             $this->_agregarRespuestaFallo($xml_unholdResponse, 500, 'Parked call extension is disabled');
@@ -3163,7 +3168,7 @@ SQL_INSERTAR_AGENDAMIENTO;
             $this->_agregarRespuestaFallo($xml_unholdResponse, 417, 'Agent not in call');
             return $xml_response;
         }
-        
+
         // Si el agente no estaba en hold, se devuelve éxito sin hacer nada más
         if (is_null($infoSeguimiento['id_audit_hold'])) {
             $xml_unholdResponse->addChild('success');
@@ -3180,7 +3185,7 @@ SQL_INSERTAR_AGENDAMIENTO;
                     "\tContext      =>  from-internal\n".
                     "\tActionID     =>  $sActionID");
             }
-            
+
             // Sacar la llamada del parqueo y redirigirla al agente pausado
             $r = $this->_ami->Originate(
                 $sAgente,               // channel
@@ -3205,9 +3210,9 @@ SQL_INSERTAR_AGENDAMIENTO;
         return $xml_response;
     }
 
-    /* Leer el estado de /etc/asterisk/features_general_additional.conf y 
-     * obtener la extensión de parqueo configurada. Devuelve NULL en caso de 
-     * error o si la  característica de extensión de parqueo no está 
+    /* Leer el estado de /etc/asterisk/features_general_additional.conf y
+     * obtener la extensión de parqueo configurada. Devuelve NULL en caso de
+     * error o si la  característica de extensión de parqueo no está
      * configurada, o la extensión numérica en caso contrario. */
     private function _leerConfigExtensionParqueo()
     {
@@ -3218,21 +3223,21 @@ SQL_INSERTAR_AGENDAMIENTO;
         }
         if (!is_readable($sNombreArchivo)) {
             $this->_log->output("WARN: $sNombreArchivo no puede leerse por usuario de marcador.");
-            return NULL;            
+            return NULL;
         }
         $infoConfig = parse_ini_file($sNombreArchivo, TRUE);
         if (is_array($infoConfig)) {
             $sExtensionParqueo = isset($infoConfig['parkext']) ? $infoConfig['parkext'] : '';
             return (preg_match('/^\d+$/', $sExtensionParqueo)) ? $sExtensionParqueo : NULL;
         } else {
-            $this->_log->output("ERR: $sNombreArchivo no puede parsearse correctamente.");          
+            $this->_log->output("ERR: $sNombreArchivo no puede parsearse correctamente.");
         }
         return NULL;
     }
 
     /* Ejecutar el comando adecuado según la versión de Asterisk para listar las
-     * extensiones de llamadas parqueadas. Se devuelve el número de extensión 
-     * que contiene el canal que se ha pasado como parámetro, o NULL si ha 
+     * extensiones de llamadas parqueadas. Se devuelve el número de extensión
+     * que contiene el canal que se ha pasado como parámetro, o NULL si ha
      * ocurrido un problema o si no se encuentra el canal. */
     private function _buscarExtensionParqueo($sCanal)
     {
@@ -3242,15 +3247,15 @@ SQL_INSERTAR_AGENDAMIENTO;
             array_push($versionMinima, 0);
         while (count($versionMinima) > count($asteriskVersion))
             array_push($asteriskVersion, 0);
-        $sComandoParqueo = ($asteriskVersion >= $versionMinima) 
-            ? 'parkedcalls show' 
+        $sComandoParqueo = ($asteriskVersion >= $versionMinima)
+            ? 'parkedcalls show'
             : 'show parkedcalls';
         $r = $this->_ami->Command($sComandoParqueo);
         if (!isset($r['data'])) return NULL;
 
 /*
 Privilege: Command
- Num                   Channel (Context         Extension    Pri ) Timeout 
+ Num                   Channel (Context         Extension    Pri ) Timeout
 *** Parking lot: default
 71                 SIP/1065-00000014 (from-internal   s            1   )     38s
 ---
@@ -3271,7 +3276,7 @@ Privilege: Command
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
 
         // Verificar que agente está presente
-        if (!isset($comando->agent_number)) 
+        if (!isset($comando->agent_number))
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
@@ -3293,7 +3298,7 @@ Privilege: Command
             $this->_agregarRespuestaFallo($xml_getagentqueuesResponse, 404, 'Specified agent not found');
             return $xml_response;
         }
-        
+
         // Reportar las colas a las que el agente está suscrito o puede suscribirse
         $listaColas = $this->_tuberia->AMIEventProcess_listarTotalColasTrabajoAgente(array($sAgente));
         $xml_agentQueues = $xml_getagentqueuesResponse->addChild('queues');
@@ -3308,18 +3313,18 @@ Privilege: Command
     {
         if (is_null($this->_ami))
             return $this->_generarRespuestaFallo(500, 'No AMI connection');
-        
+
         // Verificar que agente está presente
         if (!isset($comando->agents))
             return $this->_generarRespuestaFallo(400, 'Bad request');
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_getagentqueuesResponse = $xml_response->addChild('getmultipleagentqueues_response');
-        
+
         $agentlist = array();
         foreach ($comando->agents->agent_number as $agent_number) {
             $sAgente = (string)$agent_number;
-            
+
             // El siguiente código asume formato Agent/9000
             $agentFields = $this->_parseAgent($sAgente);
             if (is_null($agentFields)) {
@@ -3327,7 +3332,7 @@ Privilege: Command
                 return $xml_response;
             }
             $agentFields['queues'] = array();
-            
+
             $agentlist[$sAgente] = $agentFields;
         }
 
@@ -3338,14 +3343,14 @@ Privilege: Command
             $this->_agregarRespuestaFallo($xml_getagentqueuesResponse, 404, 'Specified agent not found');
             return $xml_response;
         }
-        
+
         // Acumular las colas estáticas y dinámicas para cada agente
         $listaColas = $this->_tuberia->AMIEventProcess_listarTotalColasTrabajoAgente(array_keys($agentlist));
         foreach ($listaColas as $sAgente => $queuelist) {
             if (isset($agentlist[$sAgente])) $agentlist[$sAgente]['queues'] = $queuelist;
         }
         unset($listaColas);
-        
+
         // Conversión de resultado a XML
         $xml_agents = $xml_getagentqueuesResponse->addChild('agents');
         foreach (array_keys($agentlist) as $sAgente) {
@@ -3356,10 +3361,10 @@ Privilege: Command
                 $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
             }
         }
-        
+
         return $xml_response;
     }
-    
+
     private function Request_eccpauth_getagentactivitysummary($comando)
     {
         // Fechas de inicio y fin
@@ -3379,7 +3384,7 @@ Privilege: Command
             $sFechaInicio = $sFechaFin;
             $sFechaFin = $t;
         }
-        
+
         $xml_response = new SimpleXMLElement('<response />');
         $xml_getagentactivitysummaryResponse = $xml_response->addChild('getagentactivitysummary_response');
 
@@ -3387,8 +3392,8 @@ Privilege: Command
         $sPeticionSQL = <<<LEER_AGENTE_AUDIT
 SELECT agent.id, agent.type, agent.number, agent.name, SUM(TIME_TO_SEC(duration)) AS total_login_time
 FROM agent
-LEFT JOIN audit 
-    ON agent.id = audit.id_agent AND audit.id_break IS NULL 
+LEFT JOIN audit
+    ON agent.id = audit.id_agent AND audit.id_break IS NULL
     AND audit.datetime_init BETWEEN ? AND ?
 WHERE estatus = 'A' GROUP BY agent.id
 LEER_AGENTE_AUDIT;
@@ -3423,15 +3428,15 @@ LEER_HISTORIAL_ATENCION;
             $historialAtencion[$id_agent][$tupla['campaign_type']][] = $tupla;
         }
         $recordset_sumallamadasAgente->closeCursor();
-        
+
         $sPeticionSQL_ultimasesionAgente = <<<LEER_ULTIMA_SESION
 SELECT a.id_agent, a.datetime_init, a.datetime_end
 FROM audit a
 LEFT OUTER JOIN audit b
-	ON b.id_break IS NULL 
-	AND a.id_agent = b.id_agent 
-	AND ((a.datetime_init < b.datetime_init) 
-		OR (a.datetime_init = b.datetime_init AND a.id < b.id)) 
+	ON b.id_break IS NULL
+	AND a.id_agent = b.id_agent
+	AND ((a.datetime_init < b.datetime_init)
+		OR (a.datetime_init = b.datetime_init AND a.id < b.id))
 	AND b.datetime_init BETWEEN ? AND ?
 WHERE a.id_break IS NULL
 	AND a.datetime_init BETWEEN ? AND ?
@@ -3452,10 +3457,10 @@ LEER_ULTIMA_SESION;
 SELECT a.id_agent, a.datetime_init, a.datetime_end
 FROM audit a
 LEFT OUTER JOIN audit b
-    ON b.id_break IS NOT NULL 
-    AND a.id_agent = b.id_agent 
-    AND ((a.datetime_init < b.datetime_init) 
-        OR (a.datetime_init = b.datetime_init AND a.id < b.id)) 
+    ON b.id_break IS NOT NULL
+    AND a.id_agent = b.id_agent
+    AND ((a.datetime_init < b.datetime_init)
+        OR (a.datetime_init = b.datetime_init AND a.id < b.id))
     AND b.datetime_init BETWEEN ? AND ?
 WHERE a.id_break IS NOT NULL
     AND a.datetime_init BETWEEN ? AND ?
@@ -3471,7 +3476,7 @@ LEER_ULTIMA_SESION;
             $ultimapausa[$tupla['id_agent']] = $tupla;
         }
         $recordset_ultimapausaAgente->closeCursor();
-        
+
         // Construir el árbol de salida, y consultar el historial de atención de llamadas
         $xml_agents = $xml_getagentactivitysummaryResponse->addChild('agents');
         foreach ($listaAgentes as $infoAgente) {
@@ -3485,7 +3490,7 @@ LEER_ULTIMA_SESION;
                 if (isset($historialAtencion[$infoAgente['id']][$k]))
                     $listaResumen[$k] = $historialAtencion[$infoAgente['id']][$k];
             }
-            
+
             $xml_callsummary = $xml_agent->addChild('callsummary');
             foreach (array('incoming', 'outgoing') as $k) {
             	if (!isset($listaResumen[$k])) $listaResumen[$k] = array();
@@ -3497,7 +3502,7 @@ LEER_ULTIMA_SESION;
                     $xml_queue->addChild('num_calls', $queuesummary['num_calls']);
                 }
             }
-            
+
             // Información sobre inicio y final de sesión más reciente del agente
             if (isset($ultimasesion[$infoAgente['id']])) {
                 $xml_agent->addChild('lastsessionstart', $ultimasesion[$infoAgente['id']]['datetime_init']);
@@ -3599,7 +3604,7 @@ LEER_ULTIMA_SESION;
             $sFechaInicio = $sFechaFin;
             $sFechaFin = $t;
         }
-        
+
         // Verificar que id y tipo está presente
         $idCampania = $sCola = NULL;
         if (!isset($comando->campaign_type))
@@ -3627,9 +3632,9 @@ LEER_ULTIMA_SESION;
 
         if ($sTipoCampania == 'incoming') {
     	   $sPeticionSQL_leerLog = <<<LOG_CAMPANIA_ENTRANTE
-SELECT call_progress_log.id, call_progress_log.datetime_entry, 
+SELECT call_progress_log.id, call_progress_log.datetime_entry,
     call_entry.callerid AS phone, queue_call_entry.queue,
-    "incoming" AS campaign_type, call_progress_log.id_campaign_incoming AS campaign_id, 
+    "incoming" AS campaign_type, call_progress_log.id_campaign_incoming AS campaign_id,
     call_progress_log.id_call_incoming AS call_id, call_progress_log.new_status,
     call_progress_log.retry, call_progress_log.uniqueid, call_progress_log.trunk,
     call_progress_log.duration,
@@ -3675,17 +3680,17 @@ LOG_CAMPANIA_SALIENTE;
         	$sPeticionSQL_leerLog .= ' DESC LIMIT ?';
             $paramSQL[] = $iUltimosN;
         }
-        
+
         $sth = $this->_db->prepare($sPeticionSQL_leerLog);
         $sth->execute($paramSQL);
         $xml_logentries = $xml_campaignlogResponse->addChild('logentries');
         $recordset = $sth->fetchAll(PDO::FETCH_ASSOC);
-        
+
         if (!is_null($iUltimosN)) {
         	// Ya que se pidió el orden inverso, se invierte el orden
             $recordset = array_reverse($recordset);
         }
-        
+
         //while ($tupla = $sth->fetch(PDO::FETCH_ASSOC)) {
         foreach ($recordset as $tupla) {
             $xml_logentry = $xml_logentries->addChild('logentry');
@@ -3715,14 +3720,14 @@ LOG_CAMPANIA_SALIENTE;
     }
 
     /***************************** EVENTOS *****************************/
-    
+
     function notificarEvento_AgentLogin($sAgente, $bExitoLogin)
     {
         if (is_null($this->_sUsuarioECCP)) return;
         if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
 
         $xml_response = new SimpleXMLElement('<event />');
-        $xml_agentLoggedIn = $bExitoLogin 
+        $xml_agentLoggedIn = $bExitoLogin
             ? $xml_response->addChild('agentloggedin')
             : $xml_response->addChild('agentfailedlogin');
         $xml_agentLoggedIn->addChild('agent', str_replace('&', '&amp;', $sAgente));
@@ -3743,7 +3748,7 @@ LOG_CAMPANIA_SALIENTE;
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
     }
-    
+
     function notificarEvento_AgentLinked($sAgente, $sRemChannel, $infoLlamada)
     {
         if (is_null($this->_sUsuarioECCP)) return;
@@ -3754,11 +3759,11 @@ LOG_CAMPANIA_SALIENTE;
         $infoLlamada['agent_number'] = $sAgente;
         $infoLlamada['remote_channel'] = $sRemChannel;
         $this->_construirRespuestaCallInfo($infoLlamada, $xml_agentLinked);
-        
+
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
     }
-    
+
     function notificarEvento_AgentUnlinked($sAgente, $infoLlamada)
     {
         if (is_null($this->_sUsuarioECCP)) return;
@@ -3770,11 +3775,11 @@ LOG_CAMPANIA_SALIENTE;
         foreach ($infoLlamada as $sKey => $valor) {
             if (!is_null($valor)) $xml_agentLinked->addChild($sKey, str_replace('&', '&amp;', $valor));
         }
-        
+
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
     }
-    
+
     function notificarEvento_PauseStart($sAgente, $infoPausa)
     {
         if (is_null($this->_sUsuarioECCP)) return;
@@ -3786,11 +3791,11 @@ LOG_CAMPANIA_SALIENTE;
         foreach ($infoPausa as $sKey => $valor) {
             if (!is_null($valor)) $xml_agentLinked->addChild($sKey, str_replace('&', '&amp;', $valor));
         }
-        
+
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
     }
-    
+
     function notificarEvento_PauseEnd($sAgente, $infoPausa)
     {
         if (is_null($this->_sUsuarioECCP)) return;
@@ -3802,22 +3807,22 @@ LOG_CAMPANIA_SALIENTE;
         foreach ($infoPausa as $sKey => $valor) {
             if (!is_null($valor)) $xml_agentLinked->addChild($sKey, str_replace('&', '&amp;', $valor));
         }
-        
+
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
     }
-    
+
     function notificarEvento_CallProgress($infoProgreso)
     {
     	if (is_null($this->_sUsuarioECCP)) return;
         if (!$this->_bProgresoLlamada) return;
-        
+
         $xml_response = new SimpleXMLElement('<event />');
         $xml_callProgress = $xml_response->addChild('callprogress');
         foreach ($infoProgreso as $sKey => $valor) {
             if (!is_null($valor)) $xml_callProgress->addChild($sKey, str_replace('&', '&amp;', $valor));
         }
-        
+
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
     }
@@ -3826,10 +3831,10 @@ LOG_CAMPANIA_SALIENTE;
     {
         if (is_null($this->_sUsuarioECCP)) return;
         if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
-        
+
         $xml_response = new SimpleXMLElement('<event />');
         $xml_queueMembership = $xml_response->addChild('queuemembership');
-        
+
         $xml_queueMembership->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
         $this->_getcampaignstatus_setagent($xml_queueMembership, $infoSeguimiento);
         $xml_agentQueues = $xml_queueMembership->addChild('queues');

@@ -33,7 +33,7 @@ class HubProcess extends AbstractProcess
     private $_config;   // Información de configuración copiada del archivo
     private $_hub;      // Hub de mensajes entre todos los procesos
     private $_tareas;   // Lista de tareas, nombreClase => PID
-    
+
     // Último instante en que se verificó que los procesos estaban activos
     private $_iTimestampVerificacionProcesos = NULL;
 
@@ -47,11 +47,11 @@ class HubProcess extends AbstractProcess
             'ECCPProcess'       =>  NULL,
         );
         $this->_hub = new HubServer($this->_log);
-        
+
         return TRUE;
     }
-    
-    /* Verificar si la tarea indicada sigue activa. Devuelve VERDADERO si la 
+
+    /* Verificar si la tarea indicada sigue activa. Devuelve VERDADERO si la
      * tarea sigue corriendo, FALSO si inactiva o si se detecta que terminó. */
     private function _revisarTareaActiva($sTarea)
     {
@@ -68,17 +68,17 @@ class HubProcess extends AbstractProcess
                 if ($iRcvSignal != 0) { $this->_log->output("WARN: $sTarea terminó debido a señal $iRcvSignal..."); }
                 if ($iErrCode != 0) { $this->_log->output("WARN: $sTarea devolvió código de error $iErrCode..."); }
                 $this->_tareas[$sTarea] = NULL;
-                
+
                 // Quitar la tubería del proceso que ha terminado
                 $this->_hub->quitarTuberia($sTarea);
             } else {
             	$bTareaActiva = TRUE;
             }
         }
-        
+
         return $bTareaActiva;
     }
-    
+
     public function procedimientoDemonio()
     {
         $bHayNuevasTareas = FALSE;
@@ -88,7 +88,7 @@ class HubProcess extends AbstractProcess
             foreach (array_keys($this->_tareas) as $sTarea) {
                 // Si está definido el PID del proceso, se verifica si se ejecuta.
                 $this->_revisarTareaActiva($sTarea);
-                
+
                 // Si no está definido el PID del proceso, se intenta iniciar
                 if (is_null($this->_tareas[$sTarea])) {
                     $this->_tareas[$sTarea] = $this->_iniciarTarea($sTarea);
@@ -97,20 +97,20 @@ class HubProcess extends AbstractProcess
             }
             $this->_iTimestampVerificacionProcesos = time();
         }
-        
+
         // Registrar el multiplex con todas las conexiones nuevas
         if ($bHayNuevasTareas) $this->_hub->registrarMultiplexPadre();
-        
+
         $this->propagarSIGHUP();
-        
+
         // Rutear todos los mensajes pendientes entre tareas
         if ($this->_hub->procesarPaquetes())
             $this->_hub->procesarActividad(0);
         else $this->_hub->procesarActividad(1);
-        
+
         return TRUE;
     }
-    
+
     public function propagarSIGHUP()
     {
         global $gsNombreSignal;
@@ -125,20 +125,25 @@ class HubProcess extends AbstractProcess
                     posix_kill($this->_tareas[$sTarea], $gsNombreSignal);
                     $this->_log->output("Completada propagación de señal a $sTarea");
                 }
-            }           
+            }
         }
     }
-    
-    /* Iniciar una tarea específica en un proceso separado. Para el proceso 
+
+    /* Iniciar una tarea específica en un proceso separado. Para el proceso
      * padre, devuelve el PID del proceso hijo. */
     private function _iniciarTarea($sNombreTarea)
+    {
+        return $this->_iniciarTareaClase($sNombreTarea, $sNombreTarea);
+    }
+
+    private function _iniciarTareaClase($sNombreTarea, $sNombreClase)
     {
         global $gsNombreSignal;
 
         // Verificar que el nombre de la clase que implementa el proceso es válido
-        if (!class_exists($sNombreTarea)) {
-            $this->_log->output("FATAL: (internal) Invalid process classname '$sNombreTarea'");
-            die("(internal) Invalid process classname '$sNombreTarea'\n");    
+        if (!class_exists($sNombreClase)) {
+            $this->_log->output("FATAL: (internal) Invalid process classname '$sNombreClase'");
+            die("(internal) Invalid process classname '$sNombreClase'\n");
         }
 
         // Nueva tubería con el nombre de la tarea
@@ -151,23 +156,23 @@ class HubProcess extends AbstractProcess
             if ($iPidProceso == 0) {
                 $this->_log->prefijo($sNombreTarea);
                 $this->_log->output("iniciando proceso...");
-    
+
                 // Instalar los manejadores de señal para el proceso hijo
                 pcntl_signal(SIGTERM, 'manejadorPrimarioSignal');
                 pcntl_signal(SIGQUIT, 'manejadorPrimarioSignal');
                 pcntl_signal(SIGINT, 'manejadorPrimarioSignal');
                 pcntl_signal(SIGHUP, 'manejadorPrimarioSignal');
-    
+
                 // Elegir la tarea que debe de ejecutarse
                 $oProceso = NULL;
                 try {
-                    $oProceso = new $sNombreTarea($oTuberia);
+                    $oProceso = new $sNombreClase($oTuberia);
                     if (!($oProceso instanceof TuberiaProcess)) throw new Exception('Not a subclass of TuberiaProcess!');
                 } catch (Exception $ex) {
                     $this->_log->output("ERR: al crear $sNombreTarea - excepción no manejada: ".$ex->getMessage());
-                    die("ERR: al instanciar $sNombreTarea - ".$ex->getMessage()."\n");
+                    die("ERR: al crear $sNombreTarea - ".$ex->getMessage()."\n");
                 }
-                
+
                 // Realizar inicialización adicional de la tarea
                 try {
                     $bContinuar = $oProceso->inicioPostDemonio($this->_config, $this->_log);
@@ -176,7 +181,7 @@ class HubProcess extends AbstractProcess
                     $bContinuar = FALSE;
                     $this->_log->output("ERR: al inicializar $sNombreTarea - excepción no manejada: ".$ex->getMessage());
                 }
-                
+
                 // Continuar la tarea hasta que se finalice
                 while ($bContinuar) {
                     // Ejecutar el procedimiento de trabajo del demonio
@@ -188,9 +193,9 @@ class HubProcess extends AbstractProcess
                             $this->_log->output("ERR: al ejecutar $sNombreTarea - excepción no manejada: ".$ex->getMessage());
                         }
                     }
-                    
+
                     // Revisar si existe señal que indique finalización del programa
-                    if (!is_null($gsNombreSignal)) {                    
+                    if (!is_null($gsNombreSignal)) {
                         if (in_array($gsNombreSignal, array(SIGTERM, SIGINT, SIGQUIT))) {
                             $this->_log->output("PID = ".posix_getpid().", proceso recibió señal $gsNombreSignal, terminando...");
                             $bContinuar = FALSE;
@@ -202,7 +207,7 @@ class HubProcess extends AbstractProcess
                         }
                     }
                 }
-    
+
                 // Indicar al módulo de trabajo por qué se está finalizando
                 try {
                     $oProceso->limpiezaDemonio($gsNombreSignal);
@@ -211,7 +216,7 @@ class HubProcess extends AbstractProcess
                 }
                 $this->_log->output("PID = ".posix_getpid().", proceso terminó normalmente.");
                 $this->_log->close();
-    
+
                 exit(0);   // Finalizar el proceso hijo
             }
         } else {
@@ -220,7 +225,7 @@ class HubProcess extends AbstractProcess
         }
         return $iPidProceso;
     }
-    
+
     public function limpiezaDemonio($signum)
     {
         // Propagar la señal si no es NULL
@@ -231,7 +236,7 @@ class HubProcess extends AbstractProcess
         	$signum = SIGTERM;
             $this->_log->output("Término normal del programa, se terminará procesos hijos...");
         }
-        
+
         // Avisar a todos los procesos que se terminará el programa
         $this->_log->output('INFO: avisando de finalización a todos los procesos...');
         $this->_hub->enviarFinalizacion();
@@ -242,7 +247,7 @@ class HubProcess extends AbstractProcess
             if ($this->_hub->procesarPaquetes())
                 $this->_hub->procesarActividad(0);
             else $this->_hub->procesarActividad(1);
-        }        
+        }
 
         // Propagar la señal recibida o sintetizada
         foreach (array_keys($this->_tareas) as $sTarea) {
@@ -252,7 +257,7 @@ class HubProcess extends AbstractProcess
                 $this->_log->output("Completada propagación de señal a $sTarea");
             }
         }
-        
+
         $this->_log->output('INFO: esperando a que todas las tareas terminen...');
         $bTodosTerminaron = FALSE;
         do {
@@ -270,7 +275,7 @@ class HubProcess extends AbstractProcess
                 $this->_hub->procesarActividad();
         } while (!$bTodosTerminaron);
         $this->_log->output('INFO: todas las tareas han terminado.');
-    	
+
         // Mandar a cerrar todas las conexiones activas
         $this->_hub->finalizarServidor();
     }

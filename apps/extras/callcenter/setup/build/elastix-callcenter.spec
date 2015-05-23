@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Sat May 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: allow spawning of processes from a classname that differs
+  from the actual name of the process. This is required to spawn multiple
+  uniquely-named processes from the same worker process class.
+  SVN Rev[7061]
 - CHANGED: Dialer: internal messages previously sent from ECCPProcess to
   AMIEventProcess are now accepted from anyone. This is required to accept
   multiple message sources from the various ECCP workers.

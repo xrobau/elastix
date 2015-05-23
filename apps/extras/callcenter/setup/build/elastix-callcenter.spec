@@ -101,6 +101,12 @@ fi
 
 %changelog
 * Sat May 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: introduce support for message inspectos in HubServer. A
+  message inspector, once registered, can read and modify messages before being
+  routed to their destination, including changing the destination. This support
+  is required for handling a message to a destination class with no specific
+  destination, such as ECCP worker processes.
+  SVN Rev[7063]
 - CHANGED: Dialer: unify handling of static and dynamic processes. Static
   processes are now read from a separate list, instead of having their slots
   filled with NULL. In this way, all tasks are either unset or set with the

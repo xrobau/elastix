@@ -38,6 +38,7 @@ class HubServer extends MultiplexServer
 {
     private $_tuberias = array();   // Lista de tuberías, una por cada proceso
     private $_iNumFinalizados = 0;
+    private $_inspectores = array();    // Lista de inspectores de mensajes
 
     function __construct(&$oLog)
     {
@@ -51,7 +52,7 @@ class HubServer extends MultiplexServer
         $this->_tuberias[$sFuente] = $t;
         return $t;
     }
-    
+
     // Remover una tubería de un proceso que ha terminado
     function quitarTuberia($sFuente)
     {
@@ -60,7 +61,7 @@ class HubServer extends MultiplexServer
             unset($this->_tuberias[$sFuente]);
     	}
     }
-    
+
     // Registrar el multiplex con las tuberías luego del fork()
     function registrarMultiplexPadre()
     {
@@ -69,17 +70,32 @@ class HubServer extends MultiplexServer
             $t->registrarManejador('*', '*', array($this, 'rutearMensaje'));
         }
     }
-    
+
+    // Registrar un inspector de mensajes ruteados
+    function registrarInspectorMsg($msgH)
+    {
+        if (!($msgH instanceof iRoutedMessageHook)) {
+            $this->_log->output("FATAL: ".__METHOD__." (internal) not an instance of iRoutedMessageHook");
+            die(__METHOD__." (internal) not an instance of iRoutedMessageHook\n");
+        }
+        $this->_inspectores[] = $msgH;
+    }
+
     // Rutear el mensaje recibido de una fuente a un destino específico
     function rutearMensaje($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
+        // Proveer oportunidad para que el inspector tome acción según el mensaje
+        foreach ($this->_inspectores as $msgH) {
+            $msgH->inspeccionarMensaje($sFuente, $sDestino, $sNombreMensaje, $datos);
+        }
+
     	if (!isset($this->_tuberias[$sDestino])) {
     		$this->_oLog->output('ERR: '.__METHOD__." - no se encuentra destino para $sNombreMensaje($sFuente-->$sDestino)");
             return;
     	}
         $this->_tuberias[$sDestino]->enviarMensajeDesdeFuente($sFuente, $sDestino, $sNombreMensaje, $datos);
     }
-    
+
     // Mandar mensaje de término del programa
     function enviarFinalizacion()
     {
@@ -88,13 +104,13 @@ class HubServer extends MultiplexServer
             $t->enviarMensajeDesdeFuente('HubProcess', $k, 'finalizando', NULL);
         }
     }
-    
+
     function msg_finalizacionTerminada($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
     	$this->_oLog->output("INFO: $sFuente indica que ya terminó de prepararse para finalización.");
         $this->_iNumFinalizados++;
     }
-    
+
     function numFinalizados() { return $this->_iNumFinalizados; }
 }
 ?>

@@ -149,9 +149,9 @@ class ECCPConn extends MultiplexConn
              * necesarios para los eventos recibidos de AMIEventProcess. No se
              * puede usar el mismo pool de workers que para las peticiones ECCP
              * porque no se garantizaría el orden de atención de eventos. */
-            list($s, $nuevos_valores) = $this->do_eccprequest($request, $connvars);
+            list($s, $nuevos_valores, $eventos) = $this->do_eccprequest($request, $connvars);
 
-            $this->do_eccpresponse($s, $nuevos_valores);
+            $this->do_eccpresponse($s, $nuevos_valores, $eventos);
         } else {
             // Marcador de error, se cierra la conexión
             $r = $this->_generarRespuestaFallo(400, 'Bad request');
@@ -170,6 +170,7 @@ class ECCPConn extends MultiplexConn
         $request->addAttribute('received', $t);
 
         $nuevos_valores = NULL;
+        $eventos = NULL;
 
         // Petición es un request, procesar
         if (count($request) != 1) {
@@ -253,7 +254,10 @@ class ECCPConn extends MultiplexConn
                         if (is_null($response)) {
                             $response = $this->$sMetodoImplementacion($comando);
                             if (is_array($response)) {
-                                $nuevos_valores = $response['nuevos_valores'];
+                                if (isset($response['nuevos_valores']))
+                                    $nuevos_valores = $response['nuevos_valores'];
+                                if (isset($response['eventos']))
+                                    $eventos = $response['eventos'];
                                 $response = $response['response'];
                             }
                         }
@@ -284,10 +288,10 @@ class ECCPConn extends MultiplexConn
 
         $s = $response->asXML();
 
-        return array($s, $nuevos_valores);
+        return array($s, $nuevos_valores, $eventos);
     }
 
-    function do_eccpresponse(&$s, &$nuevos_valores)
+    function do_eccpresponse(&$s, &$nuevos_valores, &$eventos)
     {
         if (!is_null($nuevos_valores)) {
             foreach ($nuevos_valores as $k => $v) {
@@ -301,6 +305,13 @@ class ECCPConn extends MultiplexConn
                     $this->_bProgresoLlamada = $v;
                 if ($k == 'finalizando')
                     $this->_bFinalizando = $v;
+            }
+        }
+
+        // TODO: esto debería estar en ECCPProcess
+        if (!is_null($eventos)) {
+            foreach ($eventos as $ev) {
+                call_user_func_array(array($this->multiplexSrv, 'notificarEvento_'.$ev[0]), $ev[1]);
             }
         }
 
@@ -1838,15 +1849,19 @@ LISTA_EXTENSIONES;
 
         // Notificar éxito en inicio de break
         $this->_tuberia->msg_AMIEventProcess_idNuevoBreakAgente($sAgente, $idBreak, $idAuditBreak);
-        $this->multiplexSrv->notificarEvento_PauseStart($sAgente, array(
-            'pause_class'   =>  'break',
-            'pause_type'    =>  $idBreak,
-            'pause_name'    =>  $tupla['name'],
-            'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
-        ));
 
         $xml_pauseAgentResponse->addChild('success');
-        return $xml_response;
+        return array(
+            'response'  =>  $xml_response,
+            'eventos'   =>  array(
+                array('PauseStart', array($sAgente, array(
+                    'pause_class'   =>  'break',
+                    'pause_type'    =>  $idBreak,
+                    'pause_name'    =>  $tupla['name'],
+                    'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
+                ))),
+            ),
+        );
     }
 
     private function Request_agentauth_pingagent($comando)
@@ -3119,13 +3134,16 @@ SQL_INSERTAR_AGENDAMIENTO;
         }
 
         // Notificar a ECCP el inicio de la pausa de hold
-        $this->multiplexSrv->notificarEvento_PauseStart($sAgente, array(
-            'pause_class'   =>  'hold',
-            'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
-        ));
-
         $xml_holdResponse->addChild('success');
-        return $xml_response;
+        return array(
+            'response'  =>  $xml_response,
+            'eventos'   =>  array(
+                array('PauseStart', array($sAgente, array(
+                    'pause_class'   =>  'hold',
+                    'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
+                ))),
+            ),
+        );
     }
 
     private function Request_agentauth_unhold($comando)

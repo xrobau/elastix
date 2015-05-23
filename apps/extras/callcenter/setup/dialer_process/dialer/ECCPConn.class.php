@@ -308,12 +308,9 @@ class ECCPConn extends MultiplexConn
             }
         }
 
-        // TODO: esto debería estar en ECCPProcess
-        if (!is_null($eventos)) {
-            foreach ($eventos as $ev) {
-                call_user_func_array(array($this->multiplexSrv, 'notificarEvento_'.$ev[0]), $ev[1]);
-            }
-        }
+        /* TODO: ECCPProcess debe lanzar los eventos directamente ANTES de
+         * llamar a do_eccpresponse() sin pasar por aquí  */
+        if (!is_null($eventos)) $this->_eccpProcess->_lanzarEventos($eventos);
 
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
         if ($this->_bFinalizando) $this->multiplexSrv->marcarCerrado($this->sKey);
@@ -1923,10 +1920,13 @@ LISTA_EXTENSIONES;
 
         $xml_unpauseAgentResponse->addChild('success');
 
-        $this->_eccpProcess->lanzarEventoPauseEnd($sAgente,
+        $ev = $this->_eccpProcess->construirEventoPauseEnd($sAgente,
             $infoSeguimiento['id_audit_break'], 'break');
 
-        return $xml_response;
+        return array(
+            'response'  =>  $xml_response,
+            'eventos'   =>  array($ev),
+        );
     }
 
     /**
@@ -3078,6 +3078,8 @@ SQL_INSERTAR_AGENDAMIENTO;
         // Notificar éxito en inicio de break
         $this->_tuberia->msg_AMIEventProcess_idNuevoHoldAgente($sAgente, $idHold, $idAuditHold);
 
+        $eventos = array();
+
         // Marcar en calls y current_calls el estado de hold
         try {
         	$this->_db->beginTransaction();
@@ -3107,7 +3109,8 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $paramProgreso['id_campaign_outgoing'] = $infoLlamada['campaign_id'];
                 $paramProgreso['id_call_outgoing'] = $infoLlamada['callid'];
             }
-            $this->_eccpProcess->notificarProgresoLlamada($paramProgreso);
+            list($id_campaignlog, $ev) = $this->_eccpProcess->construirEventoProgresoLlamada($paramProgreso);
+            $eventos[] = $ev;
 
             $this->_db->commit();
         } catch (PDOException $e) {
@@ -3134,15 +3137,20 @@ SQL_INSERTAR_AGENDAMIENTO;
         }
 
         // Notificar a ECCP el inicio de la pausa de hold
+        $eventos[] = array(
+            'PauseStart',
+            array(
+                $sAgente,
+                array(
+                    'pause_class'   =>  'hold',
+                    'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
+                )
+            )
+        );
         $xml_holdResponse->addChild('success');
         return array(
             'response'  =>  $xml_response,
-            'eventos'   =>  array(
-                array('PauseStart', array($sAgente, array(
-                    'pause_class'   =>  'hold',
-                    'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
-                ))),
-            ),
+            'eventos'   =>  $eventos,
         );
     }
 

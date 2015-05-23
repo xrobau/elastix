@@ -43,8 +43,8 @@ class ECCPProcess extends TuberiaProcess
     // Estimación de la versión de Asterisk que se usa
     private $_asteriskVersion = array(1, 4, 0, 0);
 
-    /* Si se pone a VERDADERO, el programa intenta finalizar y no deben 
-     * aceptarse conexiones nuevas. Todas las conexiones existentes serán 
+    /* Si se pone a VERDADERO, el programa intenta finalizar y no deben
+     * aceptarse conexiones nuevas. Todas las conexiones existentes serán
      * desconectadas. */
     private $_finalizandoPrograma = FALSE;
 
@@ -63,7 +63,7 @@ class ECCPProcess extends TuberiaProcess
         $this->_dsn = $this->_interpretarConfiguracion($infoConfig);
         if (!$this->_iniciarConexionDB()) return FALSE;
         $this->_multiplex->setDBConn($this->_db);
-        
+
         // Leer el resto de la configuración desde la base de datos
         try {
             $this->_configDB = new ConfigDB($this->_db, $this->_log);
@@ -76,7 +76,7 @@ class ECCPProcess extends TuberiaProcess
 
         // Iniciar la conexión Asterisk
         if (!$this->_iniciarConexionAMI()) return FALSE;
-        
+
         // Registro de manejadores de eventos
         foreach (array('notificarProgresoLlamada') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
@@ -94,7 +94,7 @@ class ECCPProcess extends TuberiaProcess
         $this->_multiplex->setDEBUG($this->_configDB->dialer_debug);
         return $this->_multiplex->escuchaActiva();
     }
-    
+
     private function _interpretarConfiguracion($infoConfig)
     {
         $dbHost = 'localhost';
@@ -135,7 +135,7 @@ class ECCPProcess extends TuberiaProcess
      * incompletas, y luego se intenta reparar para cada agente. Se asume que
      * este método se invoca ANTES de empezar a escuchar peticiones ECCP, y que
      * la base de datos es modificada únicamente por este proceso, y no por
-     * otras copias concurrentes del dialer (lo cual no está soportado 
+     * otras copias concurrentes del dialer (lo cual no está soportado
      * actualmente).
      */
     private function _repararAuditoriasIncompletas()
@@ -174,13 +174,13 @@ LISTA_AUDITORIAS_AGENTE;
         $recordset->execute(array($idAgente));
         $listaAudits = $recordset->fetchAll(PDO::FETCH_ASSOC);
         $recordset->closeCursor();
-        
+
         foreach ($listaAudits as $auditIncompleto) {
-        	/* Se intenta examinar la base de datos para obtener la fecha 
+        	/* Se intenta examinar la base de datos para obtener la fecha
              * máxima para la cual hay evidencia de actividad entre el inicio
              * de este registro y el inicio del siguiente registro. */
             $this->_log->output("INFO:\tSesión ID={$auditIncompleto['id']} iniciada en {$auditIncompleto['datetime_init']}");
-            
+
             $sFechaSiguienteSesion = NULL;
             $idUltimoBreak = NULL;
             $sFechaInicioBreak = NULL;
@@ -201,8 +201,8 @@ LISTA_AUDITORIAS_AGENTE;
             	$this->_log->output("INFO:\tSiguiente sesión iniciada en {$tupla['datetime_init']}");
                 $sFechaSiguienteSesion = $tupla['datetime_init'];
             }
-            
-            /* La sesión sólo puede extenderse hasta el final de la pausa antes de 
+
+            /* La sesión sólo puede extenderse hasta el final de la pausa antes de
              * la siguiente sesión, o la fecha actual */
             $recordset = $this->_db->prepare(
                 'SELECT id, datetime_init, datetime_end FROM audit WHERE id_agent = ? '.
@@ -221,9 +221,9 @@ LISTA_AUDITORIAS_AGENTE;
                 $sFechaInicioBreak = $tupla['datetime_init'];
                 $sFechaFinalBreak = $tupla['datetime_end'];
             }
-            
+
             /* La sesión sólo puede extenderse hasta el final de la última llamada
-             * atendida antes de la siguiente sesión, si existe, o hasta la fecha 
+             * atendida antes de la siguiente sesión, si existe, o hasta la fecha
              * actual */
             $recordset = $this->_db->prepare(
                 'SELECT start_time, end_time FROM calls '.
@@ -259,7 +259,7 @@ LISTA_AUDITORIAS_AGENTE;
                 if (is_null($sFechaFinalLlamada) || $sFechaFinalLlamada < $tupla['datetime_end'])
                     $sFechaFinalLlamada = $tupla['datetime_end'];
             }
-            
+
             /* De entre todas las fecha recogidas, se elige la más reciente como
              * la fecha de final de auditoría. Esto incluye a la fecha de inicio
              * de auditoría, con lo que una auditoría sin otros indicios quedará
@@ -273,7 +273,7 @@ LISTA_AUDITORIAS_AGENTE;
                 $sFechaFinal = $sFechaInicioLlamada;
             if (!is_null($sFechaFinalLlamada) && $sFechaFinalLlamada > $sFechaFinal)
                 $sFechaFinal = $sFechaFinalLlamada;
-            
+
             $this->_log->output("INFO:\t\\--> Fecha estimada de final de sesión es $sFechaFinal, se actualiza...");
             $sth = $this->_db->prepare(
                 'UPDATE audit SET datetime_end = ?, duration = TIMEDIFF(?, datetime_init) WHERE id = ?');
@@ -337,13 +337,13 @@ LISTA_AUDITORIAS_AGENTE;
                 $this->_multiplex->procesarActividad(0);
             else $this->_multiplex->procesarActividad(1);
         }
-        
+
     	return TRUE;
     }
-    
+
     public function limpiezaDemonio($signum)
     {
-    	
+
         // Mandar a cerrar todas las conexiones activas
         $this->_multiplex->finalizarServidor();
 
@@ -370,7 +370,7 @@ LISTA_AUDITORIAS_AGENTE;
 
         $this->_log->output('INFO: Iniciando sesión de control de Asterisk...');
         if (!$astman->connect(
-                $this->_configDB->asterisk_asthost, 
+                $this->_configDB->asterisk_asthost,
                 $this->_configDB->asterisk_astuser,
                 $this->_configDB->asterisk_astpass)) {
             $this->_log->output("FATAL: no se puede conectar a Asterisk Manager");
@@ -410,7 +410,7 @@ LISTA_AUDITORIAS_AGENTE;
             $this->_iTimestampUltimaRevisionConfig = $iTimestamp;
         }
     }
-    
+
     private function _stdManejoExcepcionDB($e, $s)
     {
         $this->_log->output('ERR: '.__METHOD__. ": $s: ".implode(' - ', $e->errorInfo));
@@ -423,7 +423,7 @@ LISTA_AUDITORIAS_AGENTE;
             $this->_multiplex->setDBConn(NULL);
         }
     }
-    
+
     /**
      * Método para marcar en las tablas de auditoría que el agente ha iniciado
      * la sesión. Esta implementación verifica si el agente ya ha sido marcado
@@ -442,7 +442,7 @@ LISTA_AUDITORIAS_AGENTE;
             // Verificación de sesión activa
             $sPeticionExiste = <<<SQL_EXISTE_AUDIT
 SELECT id FROM audit
-WHERE id_agent = ? AND datetime_init >= ? AND datetime_end IS NULL 
+WHERE id_agent = ? AND datetime_init >= ? AND datetime_end IS NULL
     AND duration IS NULL AND id_break IS NULL
 ORDER BY datetime_init DESC
 SQL_EXISTE_AUDIT;
@@ -450,7 +450,7 @@ SQL_EXISTE_AUDIT;
             $recordset->execute(array($idAgente, date('Y-m-d H:i:s', $this->_iTimestampInicioProceso)));
             $tupla = $recordset->fetch();
             $recordset->closeCursor();
-            
+
             // Se indica éxito de inmediato si ya hay una sesión
             $idAudit = NULL;
             if ($tupla) {
@@ -465,7 +465,7 @@ SQL_EXISTE_AUDIT;
                 $sth->execute(array($idAgente, $sTimeStamp));
                 $idAudit = $this->_db->lastInsertId();
             }
-    
+
             return $idAudit;
         } catch (PDOException $e) {
             $this->_stdManejoExcepcionDB($e, 'no se puede registrar inicio de sesión de agente');
@@ -487,7 +487,7 @@ SQL_EXISTE_AUDIT;
     {
         // Quitar posibles pausas sobre el agente
         $this->_ami->QueuePause(NULL, $sAgente, 'false');
-        
+
         if (!is_null($idAuditBreak))
             $this->marcarFinalBreakAgente($idAuditBreak, $iTimestampLogout);
         $sTimeStamp = date('Y-m-d H:i:s', $iTimestampLogout);
@@ -518,7 +518,7 @@ SQL_EXISTE_AUDIT;
         	return NULL;
         }
     }
-    
+
 
     /**
      * Método para marcar en las tablas de auditoría que el agente ha terminado
@@ -544,13 +544,13 @@ SQL_EXISTE_AUDIT;
 
     /**
      * Procedimiento que consulta toda la información de la base de datos sobre
-     * una llamada de campaña. Se usa para el evento agentlinked, así como para 
+     * una llamada de campaña. Se usa para el evento agentlinked, así como para
      * el requerimiento getcallinfo.
-     * 
+     *
      * @param   string  $sTipoLlamada   Uno de 'incoming', 'outgoing'
      * @param   integer $idCampania     ID de la campaña, puede ser NULL para incoming
      * @param   integer $idLlamada      ID de la llamada dentro de la campaña
-     *    
+     *
      */
     function leerInfoLlamada($sTipoLlamada, $idCampania, $idLlamada)
     {
@@ -566,19 +566,19 @@ SQL_EXISTE_AUDIT;
 
     // Leer la información de una llamada saliente. La información incluye lo
     // almacenado en la tabla calls, más los atributos asociados a la llamada
-    // en la tabla call_attribute, y los datos ya recogidos en las tablas 
+    // en la tabla call_attribute, y los datos ya recogidos en las tablas
     // form_data_recolected y form_field
     private function _leerInfoLlamadaOutgoing($idCampania, $idLlamada)
     {
         // Leer información de la llamada principal
         $sPeticionSQL = <<<INFO_LLAMADA
-SELECT 'outgoing' AS calltype, calls.id AS call_id, id_campaign AS campaign_id, phone, status, uniqueid, 
-    duration, datetime_originate, fecha_llamada AS datetime_originateresponse, 
-    datetime_entry_queue AS datetime_join, start_time AS datetime_linkstart, 
+SELECT 'outgoing' AS calltype, calls.id AS call_id, id_campaign AS campaign_id, phone, status, uniqueid,
+    duration, datetime_originate, fecha_llamada AS datetime_originateresponse,
+    datetime_entry_queue AS datetime_join, start_time AS datetime_linkstart,
     end_time AS datetime_linkend, retries, failure_cause, failure_cause_txt,
     agent.number AS agent_number, trunk
-FROM (calls) 
-LEFT JOIN agent ON agent.id = calls.id_agent 
+FROM (calls)
+LEFT JOIN agent ON agent.id = calls.id_agent
 WHERE id_campaign = ? AND calls.id = ?
 INFO_LLAMADA;
         $recordset = $this->_db->prepare($sPeticionSQL);
@@ -604,7 +604,7 @@ INFO_ATRIBUTOS;
 
         // Leer información de los datos recogidos vía formularios
         $sPeticionSQL = <<<INFO_FORMULARIOS
-SELECT form_field.id_form, form_field.id, form_field.etiqueta AS label, 
+SELECT form_field.id_form, form_field.id, form_field.etiqueta AS label,
     form_data_recolected.value
 FROM form_data_recolected, form_field
 WHERE form_data_recolected.id_calls = ?
@@ -635,8 +635,8 @@ INFO_FORMULARIOS;
         // Leer información de la llamada principal
         $sPeticionSQL = <<<INFO_LLAMADA
 SELECT 'incoming' AS calltype, call_entry.id AS call_id, id_campaign AS campaign_id,
-    callerid AS phone, status, uniqueid, duration, datetime_entry_queue AS datetime_join, 
-    datetime_init AS datetime_linkstart, datetime_end AS datetime_linkend, 
+    callerid AS phone, status, uniqueid, duration, datetime_entry_queue AS datetime_join,
+    datetime_init AS datetime_linkstart, datetime_end AS datetime_linkend,
     trunk, queue, id_contact, agent.number AS agent_number
 FROM (call_entry, queue_call_entry)
 LEFT JOIN agent ON agent.id = call_entry.id_agent
@@ -730,7 +730,7 @@ INFO_ATRIBUTOS;
         // Leer información de los datos recogidos vía formularios
         $idCampaniaTupla = $tuplaLlamada['campaign_id'];
         $sPeticionSQL = <<<INFO_FORMULARIOS
-SELECT form_field.id_form, form_field.id, form_field.etiqueta AS label, 
+SELECT form_field.id_form, form_field.id, form_field.etiqueta AS label,
     form_data_recolected_entry.value
 FROM form_data_recolected_entry, form_field
 WHERE form_data_recolected_entry.id_call_entry = ?
@@ -754,8 +754,8 @@ INFO_FORMULARIOS;
     }
 
     /**************************************************************************/
-    
-    public function msg_AgentLogin($sFuente, $sDestino, $sNombreMensaje, 
+
+    public function msg_AgentLogin($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -769,7 +769,7 @@ INFO_FORMULARIOS;
         } else {
             // Si el agente está en pausa, se la quita ahora
             $this->_ami->QueuePause(NULL, $sAgente, 'false');
-        
+
         	$id_sesion = $this->_marcarInicioSesionAgente($id_agent, $iTimestampLogin);
             if (!is_null($id_sesion)) {
                 $this->_tuberia->msg_AMIEventProcess_idNuevaSesionAgente($sAgente, $id_sesion);
@@ -780,7 +780,7 @@ INFO_FORMULARIOS;
         }
     }
 
-    public function msg_AgentLogoff($sFuente, $sDestino, $sNombreMensaje, 
+    public function msg_AgentLogoff($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -788,22 +788,25 @@ INFO_FORMULARIOS;
         }
 
         list($sAgente, $iTimestampLogout, $id_agent, $id_sesion, $id_break, $id_hold) = $datos;
-        
+
+        $eventos = array();
+
         // Escribir la información de auditoría en la base de datos
         if (!is_null($id_hold)) {
             // TODO: ¿Qué ocurre con la posible llamada parqueada?
             $this->marcarFinalBreakAgente($id_hold, $iTimestampLogout);
-            $this->lanzarEventoPauseEnd($sAgente, $id_hold, 'hold');
+            $eventos[] = $this->construirEventoPauseEnd($sAgente, $id_hold, 'hold');
         }
         $this->_marcarFinalSesionAgente($sAgente, $iTimestampLogout, $id_sesion, $id_break);
         if (!is_null($id_break))
-            $this->lanzarEventoPauseEnd($sAgente, $id_break, 'break');
+            $eventos[] = $this->construirEventoPauseEnd($sAgente, $id_break, 'break');
 
         // Notificar a todas las conexiones abiertas
-        $this->_multiplex->notificarEvento_AgentLogoff($sAgente);
+        $eventos[] = array('AgentLogoff', array($sAgente));
+        $this->_lanzarEventos($eventos);
     }
 
-    public function lanzarEventoPauseEnd($sAgente, $id_audit_break, $pause_class)
+    public function construirEventoPauseEnd($sAgente, $id_audit_break, $pause_class)
     {
         try {
             // Obtener inicio, fin y duración de break para lanzar evento
@@ -826,13 +829,14 @@ INFO_FORMULARIOS;
             	$paramsEvento['pause_type'] = $tuplaBreak['break_id'];
                 $paramsEvento['pause_name'] = $tuplaBreak['break_name'];
             }
-            $this->_multiplex->notificarEvento_PauseEnd($sAgente, $paramsEvento);
+            return array('PauseEnd', array($sAgente, $paramsEvento));
         } catch (PDOException $e) {
             $this->_stdManejoExcepcionDB($e, 'no se puede leer final de break de agente');
+            return NULL;
         }
     }
 
-    public function msg_AgentLinked($sFuente, $sDestino, $sNombreMensaje, 
+    public function msg_AgentLinked($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -843,7 +847,7 @@ INFO_FORMULARIOS;
             $sFechaLink, $id_agent, $trunk, $queue) = $datos;
         try {
         	$infoLlamada = $this->leerInfoLlamada($sTipoLlamada, $idCampania, $idLlamada);
-            /* Ya que la escritura a la base de datos es asíncrona, puede 
+            /* Ya que la escritura a la base de datos es asíncrona, puede
              * ocurrir que se lea la llamada en el estado OnQueue y sin fecha
              * de linkstart. */
             if ($infoLlamada['calltype'] == 'incoming')
@@ -870,14 +874,14 @@ INFO_FORMULARIOS;
                 if (!is_null($idCampania)) $paramProgreso['id_campaign_incoming'] = $idCampania;
             }
 
-            $infoLlamada['campaignlog_id'] = $this->notificarProgresoLlamada($paramProgreso); 
+            $infoLlamada['campaignlog_id'] = $this->_notificarProgresoLlamada($paramProgreso);
             $this->_multiplex->notificarEvento_AgentLinked($sChannel, $sRemChannel, $infoLlamada);
         } catch (PDOException $e) {
         	$this->_stdManejoExcepcionDB($e, 'no se puede leer información de llamada para AgentLinked');
-        }   	
+        }
     }
 
-    public function msg_AgentUnlinked($sFuente, $sDestino, $sNombreMensaje, 
+    public function msg_AgentUnlinked($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -886,7 +890,7 @@ INFO_FORMULARIOS;
 
         list($sAgente, $sTipoLlamada, $idCampaign, $idLlamada, $sPhone,
             $sFechaFin, $iDuracion, $bShortFlag, $paramProgreso) = $datos;
-        $campaignlog_id = $this->notificarProgresoLlamada($paramProgreso);
+        $campaignlog_id = $this->_notificarProgresoLlamada($paramProgreso);
         $this->_multiplex->notificarEvento_AgentUnlinked($sAgente, array(
             'calltype'      =>  $sTipoLlamada,
             'campaign_id'   =>  $idCampaign,
@@ -908,7 +912,7 @@ INFO_FORMULARIOS;
 
         call_user_func_array(array($this, 'marcarFinalHold'), $datos);
     }
-    
+
     public function marcarFinalHold($iTimestampFinalPausa, $sAgente, $infoLlamada, $infoSeguimiento)
     {
         // Quitar la pausa del agente si es necesario
@@ -920,7 +924,7 @@ INFO_FORMULARIOS;
                     $sAgente.' - '.$r['Message']);
             }
         }
-        
+
         // Actualizar las tablas de calls y current_calls
         try {
             $this->_db->beginTransaction();
@@ -942,10 +946,11 @@ INFO_FORMULARIOS;
             $this->_db->rollBack();
             $this->_stdManejoExcepcionDB($e, 'no se puede actualizar información de llamada para final de HOLD');
         }
-        
+
         // Auditoría del fin del hold
         $this->marcarFinalBreakAgente($infoSeguimiento['id_audit_hold'], $iTimestampFinalPausa);
-        $this->lanzarEventoPauseEnd($sAgente, $infoSeguimiento['id_audit_hold'], 'hold');
+        $eventos[] = $this->construirEventoPauseEnd($sAgente, $infoSeguimiento['id_audit_hold'], 'hold');
+        $this->_lanzarEventos($eventos);
     }
 
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
@@ -955,20 +960,29 @@ INFO_FORMULARIOS;
         $this->_multiplex->finalizarConexionesECCP();
         $this->_tuberia->msg_HubProcess_finalizacionTerminada();
     }
-    
+
     public function msg_notificarProgresoLlamada($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
 
-        call_user_func_array(array($this, 'notificarProgresoLlamada'), $datos);
+        call_user_func_array(array($this, '_notificarProgresoLlamada'), $datos);
     }
-    
-    public function notificarProgresoLlamada($prop)
+
+    private function _notificarProgresoLlamada($prop)
+    {
+        list($id_campaignlog, $ev) = $this->construirEventoProgresoLlamada($prop);
+        $eventos = array($ev);
+        $this->_lanzarEventos($eventos);
+        return $id_campaignlog;
+    }
+
+    public function construirEventoProgresoLlamada($prop)
     {
         $id_campaignlog = NULL;
-        
+        $ev = NULL;
+
         if (isset($prop['id_call_incoming'])) $sColLlamada = 'id_call_incoming';
         elseif (isset($prop['id_call_outgoing'])) $sColLlamada = 'id_call_outgoing';
         else {
@@ -976,7 +990,7 @@ INFO_FORMULARIOS;
             return NULL;
         }
         try {
-            /* Se leen las propiedades del último log de la llamada, o NULL si no 
+            /* Se leen las propiedades del último log de la llamada, o NULL si no
              * hay cambio de estado previo. */
             $recordset = $this->_db->prepare(
                 "SELECT retry, uniqueid, trunk, id_agent, duration ".
@@ -1003,7 +1017,7 @@ INFO_FORMULARIOS;
                 $tuplaAnterior['duration'] = NULL;
             }
             $tuplaAnterior = array_merge($tuplaAnterior, $prop);
-            
+
             // Escribir los valores nuevos en un nuevo registro
             unset($tuplaAnterior['queue']);
             $columnas = array_keys($tuplaAnterior);
@@ -1014,16 +1028,16 @@ INFO_FORMULARIOS;
                 implode(', ', array_fill(0, count($columnas), '?')).')';
             $sth = $this->_db->prepare($sPeticionSQL);
             $sth->execute($paramSQL);
-            
+
             $id_campaignlog = $tuplaAnterior['id'] = $this->_db->lastInsertId();
 
-            /* Emitir el evento a las conexiones ECCP. Para mantener la 
-             * consistencia con el resto del API, se quitan los valores de 
+            /* Emitir el evento a las conexiones ECCP. Para mantener la
+             * consistencia con el resto del API, se quitan los valores de
              * id_call_* y id_campaign_*, y se sintetiza tipo_llamada. */
             if (!in_array($tuplaAnterior['new_status'], array('Success', 'Hangup', 'ShortCall'))) {
                 // Todavía no se soporta emitir agente conectado para OnHold/OffHold
                 unset($tuplaAnterior['id_agent']);
-                
+
                 if (isset($tuplaAnterior['id_call_outgoing'])) {
                     $tuplaAnterior['campaign_type'] = 'outgoing';
                     $tuplaAnterior['campaign_id'] = $tuplaAnterior['id_campaign_outgoing'];
@@ -1038,10 +1052,10 @@ INFO_FORMULARIOS;
                     unset($tuplaAnterior['id_call_incoming']);
                     unset($tuplaAnterior['id_campaign_incoming']);
                 }
-                
+
                 // Agregar el teléfono callerid o marcado
                 $recordset = $this->_db->prepare(
-                    ($tuplaAnterior['campaign_type'] == 'outgoing') 
+                    ($tuplaAnterior['campaign_type'] == 'outgoing')
                         ?   'SELECT calls.phone, campaign.queue FROM calls, campaign '.
                             'WHERE calls.id_campaign = campaign.id AND calls.id = ?'
                         :   'SELECT call_entry.callerid AS phone, queue_call_entry.queue '.
@@ -1052,13 +1066,13 @@ INFO_FORMULARIOS;
                 $recordset->closeCursor();
                 $tuplaAnterior['phone'] = $tuplaNumero['phone'];
                 $tuplaAnterior['queue'] = $tuplaNumero['queue'];
-                $this->_multiplex->notificarEvento_CallProgress($tuplaAnterior);
+                $ev = array('CallProgress', array($tuplaAnterior));
             }
         } catch (PDOException $e) {
         	$this->_stdManejoExcepcionDB($e, 'no se puede escribir bitácora de estado de llamada');
         }
-        
-        return $id_campaignlog;
+
+        return array($id_campaignlog, $ev);
     }
 
     public function msg_nuevaMembresiaCola($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
@@ -1089,6 +1103,18 @@ INFO_FORMULARIOS;
                 $infoAgente['pausename'] = $tupla['name'];
                 $infoAgente['pausestart'] = $tupla['datetime_init'];
             }
+        }
+    }
+
+    // TODO: este evento es público sólo hasta completar migración a workers
+    public function _lanzarEventos(&$eventos)
+    {
+        foreach ($eventos as $ev) {
+            if (!is_null($ev)) call_user_func_array(
+                array(
+                    $this->_multiplex,
+                    'notificarEvento_'.$ev[0]),
+                $ev[1]);
         }
     }
 }

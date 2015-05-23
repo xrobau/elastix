@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Sat May 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): events provided by ECCPProcess that fire events
+  internally are now reworked to return required events instead, in order to
+  return them as part of a response.
+  SVN Rev[7066]
 - CHANGED: Dialer (ECCP): add support for specifying events to fire as part of
   a ECCP response. Test it by firing the pausestart events through it. This is
   required to allow the worker process to specify these events to fire.

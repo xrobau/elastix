@@ -27,12 +27,15 @@
   +----------------------------------------------------------------------+
   $Id: DialerProcess.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
 
+require_once 'ECCPHelper.lib.php';
+
 class ECCPConn extends MultiplexConn
 {
     public $DEBUG = FALSE;
 
     private $_log;
     private $_ami;
+    private $_astVersion;
     private $_db;
     private $_tuberia;
     private $_listaReq = array();    // Lista de requerimientos pendientes
@@ -83,9 +86,10 @@ class ECCPConn extends MultiplexConn
         }
     }
 
-    function setAstConn($astConn)
+    function setAstConn($astConn, $astVersion)
     {
         $this->_ami = $astConn;
+        $this->_astVersion = $astVersion;
     }
 
     function setDbConn($dbConn)
@@ -1091,7 +1095,7 @@ LEER_CAMPANIA;
         $idLlamada = (int)$comando->call_id;
 
         // Ejecutar la llamada y verificar la respuesta...
-        $infoLlamada = $this->_eccpProcess->leerInfoLlamada($sTipoCampania, $idCampania, $idLlamada);
+        $infoLlamada = leerInfoLlamada($this->_db, $sTipoCampania, $idCampania, $idLlamada);
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_GetCallInfoResponse = $xml_response->addChild('getcallinfo_response');
@@ -1771,6 +1775,21 @@ LISTA_EXTENSIONES;
         return $xml_response;
     }
 
+    private function _marcarInicioBreakAgente($idAgente, $idBreak, $iTimestampInicio)
+    {
+        // Ingreso de sesión del agente
+        $sTimeStamp = date('Y-m-d H:i:s', $iTimestampInicio);
+        try {
+            $sth = $this->_db->prepare(
+                    'INSERT INTO audit (id_agent, id_break, datetime_init) VALUES (?, ?, ?)');
+            $sth->execute(array($idAgente, $idBreak, $sTimeStamp));
+            return $this->_db->lastInsertId();
+        } catch (PDOException $e) {
+            $this->_stdManejoExcepcionDB($e, 'no se puede registrar inicio de sesión de agente');
+            return NULL;
+        }
+    }
+
     private function Request_agentauth_pauseagent($comando)
     {
         if (is_null($this->_ami))
@@ -1834,7 +1853,7 @@ LISTA_EXTENSIONES;
         $iTimestampInicioPausa = time();
 
         // Mandar a escribir el inicio de la pausa a la base de datos
-        $idAuditBreak = $this->_eccpProcess->marcarInicioBreakAgente(
+        $idAuditBreak = $this->_marcarInicioBreakAgente(
             $infoSeguimiento['id_agent'], $idBreak, $iTimestampInicioPausa);
         if (is_null($idAuditBreak)) {
             if ($infoSeguimiento['num_pausas'] == 0) {
@@ -1912,15 +1931,12 @@ LISTA_EXTENSIONES;
         }
         $iTimestampFinalPausa = time();
         $this->_tuberia->msg_AMIEventProcess_quitarBreakAgente($sAgente);
-        if (!$this->_eccpProcess->marcarFinalBreakAgente(
-            $infoSeguimiento['id_audit_break'], $iTimestampFinalPausa)) {
-            $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 500, 'Unable to write stop of agent break');
-            return $xml_response;
-        }
+        marcarFinalBreakAgente($this->_db,
+            $infoSeguimiento['id_audit_break'], $iTimestampFinalPausa);
 
         $xml_unpauseAgentResponse->addChild('success');
 
-        $ev = $this->_eccpProcess->construirEventoPauseEnd($sAgente,
+        $ev = construirEventoPauseEnd($this->_db, $sAgente,
             $infoSeguimiento['id_audit_break'], 'break');
 
         return array(
@@ -2306,7 +2322,7 @@ LISTA_EXTENSIONES;
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
 
-            $this->_eccpProcess->cargarInfoPausa($infoAgente);
+            cargarInfoPausa($this->_db, $infoAgente);
             $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
 
@@ -2317,7 +2333,7 @@ LISTA_EXTENSIONES;
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
 
-            $this->_eccpProcess->cargarInfoPausa($infoAgente);
+            cargarInfoPausa($this->_db, $infoAgente);
             $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
 
@@ -3036,7 +3052,7 @@ SQL_INSERTAR_AGENDAMIENTO;
                 // hold anterior y se marca en la base de datos.
                 $iTimestampFinalPausa = time();
                 $this->_tuberia->msg_AMIEventProcess_quitarHoldAgente($sAgente);
-                $this->_eccpProcess->marcarFinalBreakAgente(
+                marcarFinalBreakAgente($this->_db,
                     $infoSeguimiento['id_audit_hold'], $iTimestampFinalPausa);
                 $bHoldQuitado = TRUE;
 
@@ -3065,7 +3081,7 @@ SQL_INSERTAR_AGENDAMIENTO;
         $iTimestampInicioPausa = time();
 
         // Mandar a escribir el inicio de la pausa a la base de datos
-        $idAuditHold = $this->_eccpProcess->marcarInicioBreakAgente(
+        $idAuditHold = $this->_marcarInicioBreakAgente(
             $infoSeguimiento['id_agent'], $idHold, $iTimestampInicioPausa);
         if (is_null($idAuditHold)) {
             if ($infoSeguimiento['num_pausas'] == 0) {
@@ -3109,7 +3125,7 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $paramProgreso['id_campaign_outgoing'] = $infoLlamada['campaign_id'];
                 $paramProgreso['id_call_outgoing'] = $infoLlamada['callid'];
             }
-            list($id_campaignlog, $ev) = $this->_eccpProcess->construirEventoProgresoLlamada($paramProgreso);
+            list($id_campaignlog, $ev) = construirEventoProgresoLlamada($this->_db, $paramProgreso);
             $eventos[] = $ev;
 
             $this->_db->commit();
@@ -3131,9 +3147,10 @@ SQL_INSERTAR_AGENDAMIENTO;
                 "ERR: ".__METHOD__."al iniciar hold: no se puede ejecutar hold ".
                 "(Redirect {$infoSeguimiento['clientchannel']} --> {$sExtParqueo}) - {$r['Message']}");
             $this->_tuberia->msg_AMIEventProcess_quitarHoldAgente($sAgente);
-            $this->_eccpProcess->marcarFinalBreakAgente(
+            marcarFinalBreakAgente($this->_db,
                 $infoSeguimiento['id_audit_hold'], $iTimestampInicioPausa);
-            return FALSE;
+            $this->_agregarRespuestaFallo($xml_holdResponse, 500, 'Unable to start agent hold');
+            return $xml_response;
         }
 
         // Notificar a ECCP el inicio de la pausa de hold
@@ -3268,12 +3285,12 @@ SQL_INSERTAR_AGENDAMIENTO;
     private function _buscarExtensionParqueo($sCanal)
     {
         $versionMinima = array(1, 6, 0);
-        $asteriskVersion = $this->_eccpProcess->getAsteriskVersion();
-        while (count($versionMinima) < count($asteriskVersion))
+
+        while (count($versionMinima) < count($this->_astVersion))
             array_push($versionMinima, 0);
-        while (count($versionMinima) > count($asteriskVersion))
-            array_push($asteriskVersion, 0);
-        $sComandoParqueo = ($asteriskVersion >= $versionMinima)
+        while (count($versionMinima) > count($this->_astVersion))
+            array_push($this->_astVersion, 0);
+        $sComandoParqueo = ($this->_astVersion >= $versionMinima)
             ? 'parkedcalls show'
             : 'show parkedcalls';
         $r = $this->_ami->Command($sComandoParqueo);

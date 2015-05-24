@@ -34,8 +34,9 @@ class ECCPServer extends MultiplexServer
     private $_tuberia = NULL;
     private $_dbConn = NULL;        // Conexión a la base de datos
     private $_astConn = NULL;       // Conexión a Asterisk
+    private $_astVersion = NULL;    // Versión de Asterisk
     private $_eccpProcess = NULL;   // Proceso ECCPProcess que tiene rutinas de auditoría
-    
+
     // Constructor con objeto adicional de tubería
     function __construct($sUrlSocket, &$oLog, $tuberia)
     {
@@ -53,16 +54,17 @@ class ECCPServer extends MultiplexServer
         }
     }
 
-    function setAstConn($astConn)
+    function setAstConn($astConn, $astVersion)
     {
         $this->_astConn = $astConn;
+        $this->_astVersion = $astVersion;
         foreach ($this->_listaConn as &$oConn) {
             if (method_exists($oConn, 'setAstConn')) {
-                $oConn->setAstConn($this->_astConn);
+                $oConn->setAstConn($this->_astConn, $this->_astVersion);
             }
         }
     }
-    
+
     function setProcess($proc)
     {
         $this->_eccpProcess = $proc;
@@ -72,7 +74,7 @@ class ECCPServer extends MultiplexServer
             }
         }
     }
-    
+
     function setDEBUG($d)
     {
         $this->DEBUG = (bool)$d;
@@ -80,7 +82,7 @@ class ECCPServer extends MultiplexServer
             $oConn->DEBUG = $this->DEBUG;
         }
     }
-    
+
     function dbValido() { return !is_null($this->_dbConn); }
 
     /* Para una nueva conexión, siempre se instancia un ECCPConn */
@@ -91,7 +93,7 @@ class ECCPServer extends MultiplexServer
         $oNuevaConn->sKey = $sKey;
         $this->_listaConn[$sKey] = $oNuevaConn;
         $this->_listaConn[$sKey]->setDbConn($this->_dbConn);
-        $this->_listaConn[$sKey]->setAstConn($this->_astConn);
+        $this->_listaConn[$sKey]->setAstConn($this->_astConn, $this->_astVersion);
         $this->_listaConn[$sKey]->setProcess($this->_eccpProcess);
         $this->_listaConn[$sKey]->DEBUG = $this->DEBUG;
         $this->_listaConn[$sKey]->procesarInicial();

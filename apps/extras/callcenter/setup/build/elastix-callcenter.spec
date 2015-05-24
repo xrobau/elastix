@@ -101,6 +101,11 @@ fi
 
 %changelog
 * Sat May 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): move all of the methods provided by ECCPProcess class
+  for use of ECCPConn class into a library, included by both classes. This cuts
+  loose the dependency between the two classes in order to run them on different
+  processes.
+  SVN Rev[7067]
 - CHANGED: Dialer (ECCP): events provided by ECCPProcess that fire events
   internally are now reworked to return required events instead, in order to
   return them as part of a response.

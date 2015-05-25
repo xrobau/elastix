@@ -27,7 +27,9 @@
   +----------------------------------------------------------------------+
   $Id: DialerProcess.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
 
-class HubProcess extends AbstractProcess
+define('MIN_ECCP_WORKERS', 2);  // Número mínimo de ECCPWorkerProcess a mantener
+
+class HubProcess extends AbstractProcess implements iRoutedMessageHook
 {
     private $_log;      // Log abierto por framework de demonio
     private $_config;   // Información de configuración copiada del archivo
@@ -40,6 +42,12 @@ class HubProcess extends AbstractProcess
     // Contador para garantizar unicidad de nombre de tarea dinámica
     private $_dynProcessCounter = 0;
 
+    // Instante en que se marcó como ocupada cada tarea dinámica
+    private $_instanteTareaOcupada = array();
+
+    // Lista de tareas dinámicas que avisaron que atendieron su última petición
+    private $_tareasUltimaPeticion = array();
+
     // Último instante en que se verificó que los procesos estaban activos
     private $_iTimestampVerificacionProcesos = NULL;
 
@@ -49,7 +57,7 @@ class HubProcess extends AbstractProcess
         $this->_config =& $infoConfig;
         $this->_tareas = array();
         $this->_hub = new HubServer($this->_log);
-
+        $this->_hub->registrarInspectorMsg($this);
         return TRUE;
     }
 
@@ -72,6 +80,8 @@ class HubProcess extends AbstractProcess
                 if ($iRcvSignal != 0) { $this->_log->output("WARN: $sTarea terminó debido a señal $iRcvSignal..."); }
                 if ($iErrCode != 0) { $this->_log->output("WARN: $sTarea devolvió código de error $iErrCode..."); }
                 unset($this->_tareas[$sTarea]);
+                unset($this->_instanteTareaOcupada[$sTarea]);
+                $this->_tareasUltimaPeticion = array_diff($this->_tareasUltimaPeticion, array($sTarea));
 
                 // Quitar la tubería del proceso que ha terminado
                 $this->_hub->quitarTuberia($sTarea);
@@ -100,6 +110,8 @@ class HubProcess extends AbstractProcess
                     $bHayNuevasTareas = TRUE;
                 }
             }
+            if ($this->_revisarTareasDinamicasActivas('ECCPWorkerProcess', MIN_ECCP_WORKERS))
+                $bHayNuevasTareas = TRUE;
             $this->_iTimestampVerificacionProcesos = time();
         }
 
@@ -245,6 +257,52 @@ class HubProcess extends AbstractProcess
         $this->_dynProcessCounter++;
         $this->_tareas[$sTarea] = $this->_iniciarTareaClase($sTarea, $sNombreClase);
         return $sTarea;
+    }
+
+    // Por interfaz iRoutedMessageHook
+    public function inspeccionarMensaje(&$sFuente, &$sDestino, &$sNombreMensaje, &$datos)
+    {
+        if ($sFuente == 'ECCPProcess' && $sDestino == 'ECCPWorkerProcess') {
+            /* Al manejar ECCP, ECCPProcess requiere que el requerimiento lo maneje
+             * una instancia de ECCPWorkerProcess, pero no puede saber cuál.
+             * Aquí debe elegirse la instancia, y una vez elegida, asignar el
+             * estado de ocupado hasta que mande una respuesta. Si es necesario,
+             * debe de crearse un nuevo proceso. */
+            $sTareaElegida = NULL;
+            foreach (array_keys($this->_tareas) as $sTarea) {
+                if ($this->_revisarTareaActiva($sTarea) &&
+                    strpos($sTarea, 'ECCPWorkerProcess-') === 0 &&
+                    !isset($this->_instanteTareaOcupada[$sTarea]) &&
+                    !in_array($sTarea, $this->_tareasUltimaPeticion)) {
+                    $sTareaElegida = $sTarea;
+                    break;
+                }
+            }
+
+            // Iniciar nuevo proceso si no hay tarea elegida
+            if (is_null($sTareaElegida)) {
+                $sTarea = $this->_iniciarTareaDinamica('ECCPWorkerProcess');
+                $this->_hub->registrarMultiplexPadre();
+                $sTareaElegida = $sTarea;
+            }
+
+            $this->_instanteTareaOcupada[$sTareaElegida] = microtime(TRUE);
+            $sDestino = $sTareaElegida;
+        } elseif (strpos($sFuente, 'ECCPWorkerProcess-') === 0 && $sDestino == 'ECCPProcess'
+                && $sNombreMensaje == 'eccpresponse') {
+            /* Al mandar la respuesta asíncrona desde un ECCPWorkerProcess, se
+             * debe de limpiar el estado de ocupado para esa instancia en
+             * particular. */
+            unset($this->_instanteTareaOcupada[$sFuente]);
+
+            /* El ECCPWorkerProcess manda como primer parámetro una bandera que
+             * indica si finaliza por haber atendido su última petición. Si es
+             * así, se lo agrega a la lista negra de procesos que terminan. */
+            $bUltimaPeticion = array_shift($datos);
+            if ($bUltimaPeticion) {
+                $this->_tareasUltimaPeticion[] = $sFuente;
+            }
+        }
     }
 
     public function limpiezaDemonio($signum)

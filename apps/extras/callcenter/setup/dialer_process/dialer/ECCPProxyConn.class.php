@@ -29,12 +29,7 @@
 
 class ECCPProxyConn extends MultiplexConn
 {
-    public $DEBUG = FALSE;
-
     private $_log;
-    private $_ami;
-    private $_astVersion;
-    private $_db;
     private $_tuberia;
     private $_listaReq = array();    // Lista de requerimientos pendientes
     private $_parser = NULL;        // Parser expat para separar los paquetes
@@ -42,7 +37,6 @@ class ECCPProxyConn extends MultiplexConn
     private $_sTipoDoc = NULL;      // Tipo de paquete. Sólo se acepta 'request'
     private $_bufferXML = '';       // Datos pendientes que no forman un paquete completo
     private $_iNestLevel = 0;       // Al llegar a cero, se tiene fin de paquete
-    private $_eccpProcess = NULL;   // TODO: ECCPProcess debe lanzar eventos directamente
 
     // Estado de la conexión
     private $_sUsuarioECCP  = NULL; // Nombre de usuario para cliente logoneado, o NULL si no logoneado
@@ -57,22 +51,6 @@ class ECCPProxyConn extends MultiplexConn
         $this->_log = $oMainLog;
         $this->_tuberia = $tuberia;
         $this->_resetParser();
-    }
-
-    function setAstConn($astConn, $astVersion)
-    {
-        $this->_ami = $astConn;
-        $this->_astVersion = $astVersion;
-    }
-
-    function setDbConn($dbConn)
-    {
-        $this->_db = $dbConn;
-    }
-
-    function setProcess($proc)
-    {
-        $this->_eccpProcess = $proc;
     }
 
     // Datos a mandar a escribir apenas se inicia la conexión
@@ -110,31 +88,12 @@ class ECCPProxyConn extends MultiplexConn
                 'usuarioeccp'   =>  $this->_sUsuarioECCP,
             );
 
-            // Simular worker en otro proceso
-            $eccpworker = new ECCPConn($this->_log, $this->_tuberia);
-            $eccpworker->setAstConn($this->_ami, $this->_astVersion);
-            $eccpworker->setDbConn($this->_db);
-            $eccpworker->DEBUG = $this->DEBUG;
-
-            /* La función do_eccprequest simula el envío de un mensaje con
-             * la petición y las variables actuales de conexión al worker en un
-             * nuevo proceso con una instancia de la clase ECCPConn. El valor
-             * devuelto por _simulacion_worker realmente debería ser recibido
-             * en un manejador de mensaje enviado por el worker.
-             *
-             * TODO: modelar asociación entre esta conexión (una de múltiples
-             * en ECCPProcess) y el worker que termina manejando la petición.
-             * TODO: funciones de acceso a DB que son provistas por ECCPProcess
-             * para consumo de ECCPConn y de los eventos recibidos desde
-             * AMIEventProcess deben ser duplicadas porque se ejecutan en
-             * procesos distintos. En una fase futura, en caso necesario, se
-             * requiere un worker dedicado exclusivamente a los accesos de DB
-             * necesarios para los eventos recibidos de AMIEventProcess. No se
-             * puede usar el mismo pool de workers que para las peticiones ECCP
-            * porque no se garantizaría el orden de atención de eventos. */
-            list($s, $nuevos_valores, $eventos) = $eccpworker->do_eccprequest($request, $connvars);
-
-            $this->do_eccpresponse($s, $nuevos_valores, $eventos);
+            /* TODO: En una fase futura, en caso necesario, se requiere un
+             * worker dedicado exclusivamente a los accesos de DB necesarios
+             * para los eventos recibidos de AMIEventProcess. No se puede usar
+             * el mismo pool de workers que para las peticiones ECCP porque no
+             * se garantizaría el orden de atención de eventos. */
+            $this->_tuberia->msg_ECCPWorkerProcess_eccprequest($this->sKey, $request, $connvars);
         } else {
             // Marcador de error, se cierra la conexión
             $r = $this->_generarRespuestaFallo(400, 'Bad request');
@@ -144,7 +103,7 @@ class ECCPProxyConn extends MultiplexConn
         }
     }
 
-    function do_eccpresponse(&$s, &$nuevos_valores, &$eventos)
+    function do_eccpresponse(&$s, &$nuevos_valores)
     {
         if (!is_null($nuevos_valores)) {
             foreach ($nuevos_valores as $k => $v) {
@@ -160,10 +119,6 @@ class ECCPProxyConn extends MultiplexConn
                     $this->_bFinalizando = $v;
             }
         }
-
-        /* TODO: ECCPProcess debe lanzar los eventos directamente ANTES de
-         * llamar a do_eccpresponse() sin pasar por aquí  */
-        if (!is_null($eventos)) $this->_eccpProcess->_lanzarEventos($eventos);
 
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
         if ($this->_bFinalizando) $this->multiplexSrv->marcarCerrado($this->sKey);
@@ -244,8 +199,8 @@ class ECCPProxyConn extends MultiplexConn
         if (!is_null($this->_parser)) xml_parser_free($this->_parser);
         $this->_parser = xml_parser_create('UTF-8');
         xml_set_element_handler ($this->_parser,
-        array($this, 'xmlStartHandler'),
-        array($this, 'xmlEndHandler'));
+            array($this, 'xmlStartHandler'),
+            array($this, 'xmlEndHandler'));
         xml_parser_set_option($this->_parser, XML_OPTION_CASE_FOLDING, 0);
     }
 

@@ -101,6 +101,13 @@ fi
 
 %changelog
 * Sun May 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): switch to a prefork process model for ECCP requests.
+  The ECCPConn object is now hosted in a separate process, of which there are at
+  least two, and more will be spawned if all previous processes are blocked on
+  requests. This eliminates blocking delays caused by serialization of ECCP
+  requests on a single process. The serialization of database access due to ECCP
+  events remains to be fixed.
+  SVN Rev[7070]
 - CHANGED: Dialer (ECCP): introduce new class ECCPProxyConn. This class contains
   the portion of connection information that will be shared in a single process,
   and contains the packet parsing logic, moved from ECCPConn. This separation is

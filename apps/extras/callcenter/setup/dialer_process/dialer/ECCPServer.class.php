@@ -32,10 +32,6 @@ class ECCPServer extends MultiplexServer
     private $DEBUG = FALSE;
 
     private $_tuberia = NULL;
-    private $_dbConn = NULL;        // Conexión a la base de datos
-    private $_astConn = NULL;       // Conexión a Asterisk
-    private $_astVersion = NULL;    // Versión de Asterisk
-    private $_eccpProcess = NULL;   // Proceso ECCPProcess que tiene rutinas de auditoría
 
     // Constructor con objeto adicional de tubería
     function __construct($sUrlSocket, &$oLog, $tuberia)
@@ -44,47 +40,6 @@ class ECCPServer extends MultiplexServer
         $this->_tuberia = $tuberia;
     }
 
-    function setDbConn($dbConn)
-    {
-        $this->_dbConn = $dbConn;
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'setDbConn')) {
-                $oConn->setDbConn($this->_dbConn);
-            }
-        }
-    }
-
-    function setAstConn($astConn, $astVersion)
-    {
-        $this->_astConn = $astConn;
-        $this->_astVersion = $astVersion;
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'setAstConn')) {
-                $oConn->setAstConn($this->_astConn, $this->_astVersion);
-            }
-        }
-    }
-
-    function setProcess($proc)
-    {
-        $this->_eccpProcess = $proc;
-        foreach ($this->_listaConn as &$oConn) {
-            if (method_exists($oConn, 'setProcess')) {
-                $oConn->setProcess($this->_eccpProcess);
-            }
-        }
-    }
-
-    function setDEBUG($d)
-    {
-        $this->DEBUG = (bool)$d;
-        foreach ($this->_listaConn as &$oConn) {
-            $oConn->DEBUG = $this->DEBUG;
-        }
-    }
-
-    function dbValido() { return !is_null($this->_dbConn); }
-
     /* Para una nueva conexión, siempre se instancia un ECCPConn */
     function procesarInicial($sKey)
     {
@@ -92,9 +47,6 @@ class ECCPServer extends MultiplexServer
         $oNuevaConn->multiplexSrv = $this;
         $oNuevaConn->sKey = $sKey;
         $this->_listaConn[$sKey] = $oNuevaConn;
-        $this->_listaConn[$sKey]->setDbConn($this->_dbConn);
-        $this->_listaConn[$sKey]->setAstConn($this->_astConn, $this->_astVersion);
-        $this->_listaConn[$sKey]->setProcess($this->_eccpProcess);
         $this->_listaConn[$sKey]->DEBUG = $this->DEBUG;
         $this->_listaConn[$sKey]->procesarInicial();
     }
@@ -110,6 +62,11 @@ class ECCPServer extends MultiplexServer
             	$oConn->finalizarConexion();
             }
         }
+    }
+
+    function getConn($sKey)
+    {
+        return isset($this->_listaConn[$sKey]) ? $this->_listaConn[$sKey] : NULL;
     }
 
     /*

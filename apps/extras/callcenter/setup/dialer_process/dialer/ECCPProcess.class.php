@@ -53,7 +53,6 @@ class ECCPProcess extends TuberiaProcess
     {
     	$this->_log = $oMainLog;
         $this->_multiplex = new ECCPServer('tcp://0.0.0.0:20005', $this->_log, $this->_tuberia);
-        $this->_multiplex->setProcess($this);
         $this->_tuberia->registrarMultiplexHijo($this->_multiplex);
         $this->_tuberia->setLog($this->_log);
         $this->_iTimestampInicioProceso = time();
@@ -61,7 +60,6 @@ class ECCPProcess extends TuberiaProcess
         // Interpretar la configuración del demonio
         $this->_dsn = $this->_interpretarConfiguracion($infoConfig);
         if (!$this->_iniciarConexionDB()) return FALSE;
-        $this->_multiplex->setDBConn($this->_db);
 
         // Leer el resto de la configuración desde la base de datos
         try {
@@ -83,6 +81,8 @@ class ECCPProcess extends TuberiaProcess
             'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada',
             'nuevaMembresiaCola') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
+        foreach (array('eccpresponse') as $k)
+            $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
         $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
@@ -90,7 +90,6 @@ class ECCPProcess extends TuberiaProcess
         $this->DEBUG = $this->_configDB->dialer_debug;
 
         // Se ha tenido éxito si se están escuchando conexiones
-        $this->_multiplex->setDEBUG($this->_configDB->dialer_debug);
         return $this->_multiplex->escuchaActiva();
     }
 
@@ -286,9 +285,6 @@ LISTA_AUDITORIAS_AGENTE;
     public function procedimientoDemonio()
     {
         // Verificar posible desconexión de la base de datos
-        if (!$this->_multiplex->dbValido()) {
-        	$this->_db = NULL;
-        }
         if (is_null($this->_db)) {
             $this->_log->output('INFO: intentando volver a abrir conexión a DB...');
             if (!$this->_iniciarConexionDB()) {
@@ -297,14 +293,12 @@ LISTA_AUDITORIAS_AGENTE;
             } else {
             	$this->_log->output('INFO: conexión a DB restaurada, se reinicia operación normal.');
                 $this->_configDB->setDBConn($this->_db);
-                $this->_multiplex->setDBConn($this->_db);
             }
         }
 
         // Verificar si la conexión AMI sigue siendo válida
         if (!is_null($this->_ami) && is_null($this->_ami->sKey)) {
             $this->_ami = NULL;
-            $this->_multiplex->setAstConn(NULL);
         }
         if (is_null($this->_ami) && !$this->_finalizandoPrograma) {
             if (!$this->_iniciarConexionAMI()) {
@@ -362,10 +356,8 @@ LISTA_AUDITORIAS_AGENTE;
             $this->_log->output('INFO: Desconectando de sesión previa de Asterisk...');
             $this->_ami->disconnect();
             $this->_ami = NULL;
-            $this->_multiplex->setAstConn(NULL, NULL);
         }
         $astman = new AMIClientConn($this->_multiplex, $this->_log);
-        //$this->_momentoUltimaConnAsterisk = time();
 
         $this->_log->output('INFO: Iniciando sesión de control de Asterisk...');
         if (!$astman->connect(
@@ -375,6 +367,8 @@ LISTA_AUDITORIAS_AGENTE;
             $this->_log->output("FATAL: no se puede conectar a Asterisk Manager");
             return FALSE;
         } else {
+            // TODO: mover detección de versión de Asterisk a ECCPWorkerProcess
+            /*
             // Averiguar la versión de Asterisk que se usa
             $astVersion = array(1, 4, 0, 0);
             $r = $astman->CoreSettings(); // Sólo disponible en Asterisk >= 1.6.0
@@ -384,10 +378,9 @@ LISTA_AUDITORIAS_AGENTE;
             } else {
                 $this->_log->output("INFO: no hay soporte CoreSettings en Asterisk Manager, se asume Asterisk 1.4.x.");
             }
-
+            */
             // ECCPProcess no tiene manejadores de eventos AMI
 
-            $this->_multiplex->setAstConn($astman, $astVersion);
             $this->_ami = $astman;
             return TRUE;
         }
@@ -402,7 +395,6 @@ LISTA_AUDITORIAS_AGENTE;
             if (count($listaVarCambiadas) > 0) {
                 if (in_array('dialer_debug', $listaVarCambiadas)) {
                     $this->DEBUG = $this->_configDB->dialer_debug;
-                    $this->_multiplex->setDEBUG($this->_configDB->dialer_debug);
                 }
                 $this->_configDB->limpiarCambios();
             }
@@ -419,7 +411,6 @@ LISTA_AUDITORIAS_AGENTE;
             $this->_log->output('WARN: '.__METHOD__.
                 ': conexión a DB parece ser inválida, se cierra...');
             $this->_db = NULL;
-            $this->_multiplex->setDBConn(NULL);
         }
     }
 
@@ -722,8 +713,25 @@ SQL_EXISTE_AUDIT;
         }
     }
 
-    // TODO: este evento es público sólo hasta completar migración a workers
-    public function _lanzarEventos(&$eventos)
+    public function msg_eccpresponse($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+
+        list($sKey, $s, $nuevos_valores, $eventos) = $datos;
+
+        if (!is_null($eventos)) $this->_lanzarEventos($eventos);
+
+        $oConn = $this->_multiplex->getConn($sKey);
+        if (is_null($oConn)) {
+            $this->_log->output("ERR: ".__METHOD__." ECCP connection $sKey no longer present, cannot deliver ECCP response.");
+            return;
+        }
+        $oConn->do_eccpresponse($s, $nuevos_valores);
+    }
+
+    private function _lanzarEventos(&$eventos)
     {
         foreach ($eventos as $ev) {
             if (!is_null($ev)) call_user_func_array(

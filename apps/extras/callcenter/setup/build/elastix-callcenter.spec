@@ -100,6 +100,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sun May 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): introduce new class ECCPProxyConn. This class contains
+  the portion of connection information that will be shared in a single process,
+  and contains the packet parsing logic, moved from ECCPConn. This separation is
+  required for hosting ECCPConn in a separate process.
+  SVN Rev[7068]
+
 * Sat May 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): move all of the methods provided by ECCPProcess class
   for use of ECCPConn class into a library, included by both classes. This cuts

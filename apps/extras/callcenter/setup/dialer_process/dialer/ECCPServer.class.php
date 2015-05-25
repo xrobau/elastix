@@ -88,7 +88,7 @@ class ECCPServer extends MultiplexServer
     /* Para una nueva conexión, siempre se instancia un ECCPConn */
     function procesarInicial($sKey)
     {
-        $oNuevaConn = new ECCPConn($this->_oLog, $this->_tuberia);
+        $oNuevaConn = new ECCPProxyConn($this->_oLog, $this->_tuberia);
         $oNuevaConn->multiplexSrv = $this;
         $oNuevaConn->sKey = $sKey;
         $this->_listaConn[$sKey] = $oNuevaConn;

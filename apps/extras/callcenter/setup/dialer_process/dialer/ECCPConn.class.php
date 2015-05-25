@@ -29,7 +29,7 @@
 
 require_once 'ECCPHelper.lib.php';
 
-class ECCPConn extends MultiplexConn
+class ECCPConn
 {
     public $DEBUG = FALSE;
 
@@ -38,21 +38,6 @@ class ECCPConn extends MultiplexConn
     private $_astVersion;
     private $_db;
     private $_tuberia;
-    private $_listaReq = array();    // Lista de requerimientos pendientes
-    private $_parser = NULL;        // Parser expat para separar los paquetes
-    private $_iPosFinal = NULL;     // Posición de parser para el paquete parseado
-    private $_sTipoDoc = NULL;      // Tipo de paquete. Sólo se acepta 'request'
-    private $_bufferXML = '';       // Datos pendientes que no forman un paquete completo
-    private $_iNestLevel = 0;       // Al llegar a cero, se tiene fin de paquete
-    private $_eccpProcess = NULL;   // Proceso ECCPProcess que tiene rutinas de auditoría
-
-    // Estado de la conexión
-    private $_sUsuarioECCP  = NULL; // Nombre de usuario para cliente logoneado, o NULL si no logoneado
-    private $_sAppCookie = NULL;    // Cadena a usar como cookie de la aplicación
-    private $_sAgenteFiltrado = NULL;   // Si != NULL, eventos sólo se despachan si el agente coincide con este valor
-    private $_bProgresoLlamada = FALSE; // Si VERDADERO, cliente está interesado en eventos de progreso de llamada
-
-    private $_bFinalizando = FALSE;
 
     /* Lista de atributos de funciones (decorator). Actualmente se usa para
      * abstraer la autenticación sin tener que repetirla para cada función
@@ -63,7 +48,6 @@ class ECCPConn extends MultiplexConn
     {
         $this->_log = $oMainLog;
         $this->_tuberia = $tuberia;
-        $this->_resetParser();
 
         // Recolectar atributos de los requerimientos
         foreach (get_class_methods(get_class($this)) as $sMetodo) {
@@ -95,74 +79,6 @@ class ECCPConn extends MultiplexConn
     function setDbConn($dbConn)
     {
         $this->_db = $dbConn;
-    }
-
-    function setProcess($proc)
-    {
-    	$this->_eccpProcess = $proc;
-    }
-
-    // Datos a mandar a escribir apenas se inicia la conexión
-    function procesarInicial() {}
-
-    // Separar flujo de datos en paquetes, devuelve número de bytes de paquetes aceptados
-    function parsearPaquetes($sDatos)
-    {
-        $this->parsearPaquetesXML($sDatos);
-        return strlen($sDatos);
-    }
-
-    // Procesar cierre de la conexión
-    function procesarCierre()
-    {
-        if (!is_null($this->_parser)) {
-            xml_parser_free($this->_parser);
-            $this->_parser = NULL;
-        }
-    }
-
-    // Preguntar si hay paquetes pendientes de procesar
-    function hayPaquetes() {
-        return (count($this->_listaReq) > 0);
-    }
-
-    // Procesar un solo paquete de la cola de paquetes
-    function procesarPaquete()
-    {
-        $request = array_shift($this->_listaReq);
-        if (isset($request['request'])) {
-
-            $connvars = array(
-                'appcookie'     =>  $this->_sAppCookie,
-                'usuarioeccp'   =>  $this->_sUsuarioECCP,
-            );
-
-            /* La función do_eccprequest simula el envío de un mensaje con
-             * la petición y las variables actuales de conexión al worker en un
-             * nuevo proceso con una instancia de la clase ECCPConn. El valor
-             * devuelto por _simulacion_worker realmente debería ser recibido
-             * en un manejador de mensaje enviado por el worker.
-             *
-             * TODO: modelar asociación entre esta conexión (una de múltiples
-             * en ECCPProcess) y el worker que termina manejando la petición.
-             * TODO: funciones de acceso a DB que son provistas por ECCPProcess
-             * para consumo de ECCPConn y de los eventos recibidos desde
-             * AMIEventProcess deben ser duplicadas porque se ejecutan en
-             * procesos distintos. En una fase futura, en caso necesario, se
-             * requiere un worker dedicado exclusivamente a los accesos de DB
-             * necesarios para los eventos recibidos de AMIEventProcess. No se
-             * puede usar el mismo pool de workers que para las peticiones ECCP
-             * porque no se garantizaría el orden de atención de eventos. */
-            list($s, $nuevos_valores, $eventos) = $this->do_eccprequest($request, $connvars);
-
-            $this->do_eccpresponse($s, $nuevos_valores, $eventos);
-        } else {
-            // Marcador de error, se cierra la conexión
-            $r = $this->_generarRespuestaFallo(400, 'Bad request');
-            $s = $r->asXML();
-            $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-            $this->multiplexSrv->marcarCerrado($this->sKey);
-        }
     }
 
     public function do_eccprequest(&$request, &$connvars)
@@ -295,31 +211,6 @@ class ECCPConn extends MultiplexConn
         return array($s, $nuevos_valores, $eventos);
     }
 
-    function do_eccpresponse(&$s, &$nuevos_valores, &$eventos)
-    {
-        if (!is_null($nuevos_valores)) {
-            foreach ($nuevos_valores as $k => $v) {
-                if ($k == 'usuarioeccp')
-                    $this->_sUsuarioECCP = $v;
-                if ($k == 'appcookie')
-                    $this->_sAppCookie = $v;
-                if ($k == 'agentefiltrado')
-                    $this->_sAgenteFiltrado = $v;
-                if ($k == 'progresollamada')
-                    $this->_bProgresoLlamada = $v;
-                if ($k == 'finalizando')
-                    $this->_bFinalizando = $v;
-            }
-        }
-
-        /* TODO: ECCPProcess debe lanzar los eventos directamente ANTES de
-         * llamar a do_eccpresponse() sin pasar por aquí  */
-        if (!is_null($eventos)) $this->_eccpProcess->_lanzarEventos($eventos);
-
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-        if ($this->_bFinalizando) $this->multiplexSrv->marcarCerrado($this->sKey);
-    }
-
     // Función que construye una respuesta de petición incorrecta
     private function _generarRespuestaFallo($iCodigo, $sMensaje, $idPeticion = NULL)
     {
@@ -337,89 +228,6 @@ class ECCPConn extends MultiplexConn
         $failureTag->addChild("code", $iCodigo);
         $failureTag->addChild("message", str_replace('&', '&amp;', $sMensaje));
     }
-
-    // Procedimiento a llamar cuando se finaliza la conexión en cierre normal
-    // del programa.
-    function finalizarConexion()
-    {
-        // Mandar a cerrar la conexión en sí
-        $this->multiplexSrv->marcarCerrado($this->sKey);
-
-        if (!is_null($this->_parser)) {
-            xml_parser_free($this->_parser);
-            $this->_parser = NULL;
-        }
-    }
-
-    // Implementación de parser expat: inicio
-
-    // Parsear y separar tantos paquetes XML como sean posibles
-    private function parsearPaquetesXML($data)
-    {
-        $this->_bufferXML .= $data;
-        $r = xml_parse($this->_parser, $data);
-        while (!is_null($this->_iPosFinal)) {
-            if ($this->_sTipoDoc == 'request') {
-                /*
-                $request = simplexml_load_string(substr($this->_bufferXML, 0, $this->_iPosFinal));
-                $request->addAttribute('received', microtime(TRUE));
-                $this->_listaReq[] = $request;
-                */
-                $this->_listaReq[] = array(
-                    'request'   =>  substr($this->_bufferXML, 0, $this->_iPosFinal),
-                    'received'  =>  microtime(TRUE),
-                );
-            } else {
-                $this->_listaReq[] = array(
-                    'errorcode'     =>  -1,
-                    'errorstring'   =>  "Unrecognized packet type: {$this->_sTipoDoc}",
-                    'errorline'     =>  xml_get_current_line_number($this->_parser),
-                    'errorpos'      =>  xml_get_current_column_number($this->_parser),
-                );
-            }
-            $this->_bufferXML = ltrim(substr($this->_bufferXML, $this->_iPosFinal));
-            $this->_iPosFinal = NULL;
-            $this->_resetParser();
-            if ($this->_bufferXML != '')
-                $r = xml_parse($this->_parser, $this->_bufferXML);
-        }
-        if (!$r) {
-            $this->_listaReq[] = array(
-                'errorcode'     =>  xml_get_error_code($this->_parser),
-                'errorstring'   =>  xml_error_string(xml_get_error_code($this->_parser)),
-                'errorline'     =>  xml_get_current_line_number($this->_parser),
-                'errorpos'      =>  xml_get_current_column_number($this->_parser),
-            );
-        }
-        return $r;
-    }
-
-    // Resetear el parseador, para iniciarlo, o luego de parsear un paquete
-    private function _resetParser()
-    {
-        if (!is_null($this->_parser)) xml_parser_free($this->_parser);
-        $this->_parser = xml_parser_create('UTF-8');
-        xml_set_element_handler ($this->_parser,
-            array($this, 'xmlStartHandler'),
-            array($this, 'xmlEndHandler'));
-        xml_parser_set_option($this->_parser, XML_OPTION_CASE_FOLDING, 0);
-    }
-
-    function xmlStartHandler($parser, $name, $attribs)
-    {
-        $this->_iNestLevel++;
-    }
-
-    function xmlEndHandler($parser, $name)
-    {
-        $this->_iNestLevel--;
-        if ($this->_iNestLevel == 0) {
-            $this->_iPosFinal = xml_get_current_byte_index($parser);
-            $this->_sTipoDoc = $name;
-        }
-    }
-
-    // Implementación de parser expat: final
 
     private function _parseAgent($sAgente)
     {
@@ -2685,7 +2493,7 @@ LEER_STATS_CAMPANIA;
      *
      * @return bool VERDADERO en caso de éxito, FALSO en caso de error
      */
-    function _agendarLlamadaAgente($sAgente, $horario, $bMismoAgente,
+    private function _agendarLlamadaAgente($sAgente, $horario, $bMismoAgente,
         $sNuevoTelefono, $sNuevoNombre, &$errcode, &$errdesc)
     {
         $errcode = 0; $errdesc = 'Success';
@@ -3734,7 +3542,6 @@ LOG_CAMPANIA_SALIENTE;
             $recordset = array_reverse($recordset);
         }
 
-        //while ($tupla = $sth->fetch(PDO::FETCH_ASSOC)) {
         foreach ($recordset as $tupla) {
             $xml_logentry = $xml_logentries->addChild('logentry');
         	foreach ($tupla as $k => $v) if (!is_null($v)) {
@@ -3762,130 +3569,5 @@ LOG_CAMPANIA_SALIENTE;
         return $xml_response;
     }
 
-    /***************************** EVENTOS *****************************/
-
-    function notificarEvento_AgentLogin($sAgente, $bExitoLogin)
-    {
-        if (is_null($this->_sUsuarioECCP)) return;
-        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
-
-        $xml_response = new SimpleXMLElement('<event />');
-        $xml_agentLoggedIn = $bExitoLogin
-            ? $xml_response->addChild('agentloggedin')
-            : $xml_response->addChild('agentfailedlogin');
-        $xml_agentLoggedIn->addChild('agent', str_replace('&', '&amp;', $sAgente));
-
-        $s = $xml_response->asXML();
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-    }
-
-    function notificarEvento_AgentLogoff($sAgente)
-    {
-        if (is_null($this->_sUsuarioECCP)) return;
-        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
-
-        $xml_response = new SimpleXMLElement('<event />');
-        $xml_agentLoggedIn = $xml_response->addChild('agentloggedout');
-        $xml_agentLoggedIn->addChild('agent', str_replace('&', '&amp;', $sAgente));
-
-        $s = $xml_response->asXML();
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-    }
-
-    function notificarEvento_AgentLinked($sAgente, $sRemChannel, $infoLlamada)
-    {
-        if (is_null($this->_sUsuarioECCP)) return;
-        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
-
-        $xml_response = new SimpleXMLElement('<event />');
-        $xml_agentLinked = $xml_response->addChild('agentlinked');
-        $infoLlamada['agent_number'] = $sAgente;
-        $infoLlamada['remote_channel'] = $sRemChannel;
-        $this->_construirRespuestaCallInfo($infoLlamada, $xml_agentLinked);
-
-        $s = $xml_response->asXML();
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-    }
-
-    function notificarEvento_AgentUnlinked($sAgente, $infoLlamada)
-    {
-        if (is_null($this->_sUsuarioECCP)) return;
-        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
-
-        $xml_response = new SimpleXMLElement('<event />');
-        $xml_agentLinked = $xml_response->addChild('agentunlinked');
-        $infoLlamada['agent_number'] = $sAgente;
-        foreach ($infoLlamada as $sKey => $valor) {
-            if (!is_null($valor)) $xml_agentLinked->addChild($sKey, str_replace('&', '&amp;', $valor));
-        }
-
-        $s = $xml_response->asXML();
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-    }
-
-    function notificarEvento_PauseStart($sAgente, $infoPausa)
-    {
-        if (is_null($this->_sUsuarioECCP)) return;
-        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
-
-        $xml_response = new SimpleXMLElement('<event />');
-        $xml_agentLinked = $xml_response->addChild('pausestart');
-        $infoPausa['agent_number'] = $sAgente;
-        foreach ($infoPausa as $sKey => $valor) {
-            if (!is_null($valor)) $xml_agentLinked->addChild($sKey, str_replace('&', '&amp;', $valor));
-        }
-
-        $s = $xml_response->asXML();
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-    }
-
-    function notificarEvento_PauseEnd($sAgente, $infoPausa)
-    {
-        if (is_null($this->_sUsuarioECCP)) return;
-        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
-
-        $xml_response = new SimpleXMLElement('<event />');
-        $xml_agentLinked = $xml_response->addChild('pauseend');
-        $infoPausa['agent_number'] = $sAgente;
-        foreach ($infoPausa as $sKey => $valor) {
-            if (!is_null($valor)) $xml_agentLinked->addChild($sKey, str_replace('&', '&amp;', $valor));
-        }
-
-        $s = $xml_response->asXML();
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-    }
-
-    function notificarEvento_CallProgress($infoProgreso)
-    {
-    	if (is_null($this->_sUsuarioECCP)) return;
-        if (!$this->_bProgresoLlamada) return;
-
-        $xml_response = new SimpleXMLElement('<event />');
-        $xml_callProgress = $xml_response->addChild('callprogress');
-        foreach ($infoProgreso as $sKey => $valor) {
-            if (!is_null($valor)) $xml_callProgress->addChild($sKey, str_replace('&', '&amp;', $valor));
-        }
-
-        $s = $xml_response->asXML();
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-    }
-
-    function notificarEvento_QueueMembership($sAgente, $infoSeguimiento, $listaColas)
-    {
-        if (is_null($this->_sUsuarioECCP)) return;
-        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
-
-        $xml_response = new SimpleXMLElement('<event />');
-        $xml_queueMembership = $xml_response->addChild('queuemembership');
-
-        $xml_queueMembership->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
-        $this->_getcampaignstatus_setagent($xml_queueMembership, $infoSeguimiento);
-        $xml_agentQueues = $xml_queueMembership->addChild('queues');
-        foreach ($listaColas as $sCola) {
-            $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
-        }
-        $s = $xml_response->asXML();
-        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
-    }
 }
 ?>

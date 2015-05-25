@@ -100,6 +100,15 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon May 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): put execution of QueueAdd/QueueRemove back in
+  ECCPConn. After the migration to the prefork model, it is not longer necessary
+  to worry about blocking other requests while executing QueueAdd or
+  QueueRemove. So bring back the queue manipulation for dynamic login into
+  ECCPConn. CampaignProcess no longer has to deal with blocks while logging in
+  agents, and simultaneous logins may now happen in parallel.
+  SVN Rev[7071]
+
 * Sun May 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): switch to a prefork process model for ECCP requests.
   The ECCPConn object is now hosted in a separate process, of which there are at

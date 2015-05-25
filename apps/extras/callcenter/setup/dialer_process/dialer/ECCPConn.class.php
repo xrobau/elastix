@@ -1480,15 +1480,32 @@ LISTA_EXTENSIONES;
         } else {
             /*
              * Las colas dinámicas a las que debe pertenecer el agente las sabe
-             * AMIEventProcess. Si pertenece a al menos una, AMIEventProcess le
-             * manda la orden a CampaignProcess para que empiece a agregar el
-             * agente a las colas. El AMIEventProcess hace entonces el equivalente
-             * a agregarIntentoLoginAgente.
+             * AMIEventProcess. Si pertenece a al menos una, se quita al agente
+             * de todas las colas actuales, y a continuación se lo ingresa a
+             * todas las colas dinámicas reportadas por AMIEventProcess.
              */
-            $c = $this->_tuberia->AMIEventProcess_agregarAgenteColasDinamicas($sAgente, $sExtension, $iTimeout);
-            if ($c <= 0) {
+            $listaColas = $this->_tuberia->AMIEventProcess_listarTotalColasTrabajoAgente(array($sAgente));
+            if (count($listaColas[$sAgente][1]) <= 0) {
                 // Este agente no tiene colas asociadas
                 $this->_log->output('WARN: agente dinámico '.$sAgente.' no es miembro dinámico de ninguna cola, no se puede realizar login.');
+            } else {
+                $this->_tuberia->AMIEventProcess_agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout);
+
+                $bIngresoCola = FALSE;
+                foreach ($listaColas[$sAgente][0] as $cola) {
+                    // Lo saco de todas las colas ...
+                    $r = $this->_ami->QueueRemove($cola, $sAgente);
+                }
+                foreach ($listaColas[$sAgente][1] as $cola) {
+                    // Para volverlos a agregar aqui.
+                    $r = $this->_ami->QueueAdd($cola, $sAgente);
+                    if ($r['Response'] != 'Success') {
+                        $this->_log->output('WARN: '.__METHOD__.': falla al ingresar agente '.
+                            $sAgente.' a cola '.$cola.': '.print_r($r, TRUE));
+                    } else $bIngresoCola = TRUE;
+                }
+                if (!$bIngresoCola)
+                    $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
             }
         }
         return $r;
@@ -1566,7 +1583,10 @@ LISTA_EXTENSIONES;
             }
 
             // AMIEventProcess sabe de qué colas hay que quitar al agente
-            $this->_tuberia->AMIEventProcess_quitarAgenteColasDinamicas($sAgente);
+            $listaColas = $this->_tuberia->AMIEventProcess_listarTotalColasTrabajoAgente(array($sAgente));
+            foreach ($listaColas[$sAgente][0] as $cola) {
+                $r = $this->_ami->QueueRemove($cola, $sAgente);
+            }
         }
         return $this->Response_LogoutAgentResponse('logged-out');
     }
@@ -3153,8 +3173,12 @@ Privilege: Command
         // Reportar las colas a las que el agente está suscrito o puede suscribirse
         $listaColas = $this->_tuberia->AMIEventProcess_listarTotalColasTrabajoAgente(array($sAgente));
         $xml_agentQueues = $xml_getagentqueuesResponse->addChild('queues');
-        if (is_array($listaColas) && isset($listaColas[$sAgente])) foreach ($listaColas[$sAgente] as $sCola) {
-            $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
+        if (is_array($listaColas) && isset($listaColas[$sAgente])) {
+            // $listaColas[$sAgente][0] son colas suscritas actualmente
+            // $listaColas[$sAgente][1] son colas dinámicas a las que puede suscribirse
+            foreach (array_unique(array_merge($listaColas[$sAgente][0], $listaColas[$sAgente][1])) as $sCola) {        
+                $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
+            }
         }
 
         return $xml_response;
@@ -3198,7 +3222,11 @@ Privilege: Command
         // Acumular las colas estáticas y dinámicas para cada agente
         $listaColas = $this->_tuberia->AMIEventProcess_listarTotalColasTrabajoAgente(array_keys($agentlist));
         foreach ($listaColas as $sAgente => $queuelist) {
-            if (isset($agentlist[$sAgente])) $agentlist[$sAgente]['queues'] = $queuelist;
+            if (isset($agentlist[$sAgente])) {
+                // $queuelist[0] son colas suscritas actualmente
+                // $queuelist[1] son colas dinámicas a las que puede suscribirse
+                $agentlist[$sAgente]['queues'] = array_unique(array_merge($queuelist[0], $queuelist[1]));
+            }
         }
         unset($listaColas);
 

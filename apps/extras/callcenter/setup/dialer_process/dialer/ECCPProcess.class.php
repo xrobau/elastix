@@ -367,18 +367,6 @@ LISTA_AUDITORIAS_AGENTE;
             $this->_log->output("FATAL: no se puede conectar a Asterisk Manager");
             return FALSE;
         } else {
-            // TODO: mover detección de versión de Asterisk a ECCPWorkerProcess
-            /*
-            // Averiguar la versión de Asterisk que se usa
-            $astVersion = array(1, 4, 0, 0);
-            $r = $astman->CoreSettings(); // Sólo disponible en Asterisk >= 1.6.0
-            if ($r['Response'] == 'Success' && isset($r['AsteriskVersion'])) {
-                $astVersion = explode('.', $r['AsteriskVersion']);
-                $this->_log->output("INFO: CoreSettings reporta Asterisk ".implode('.', $astVersion));
-            } else {
-                $this->_log->output("INFO: no hay soporte CoreSettings en Asterisk Manager, se asume Asterisk 1.4.x.");
-            }
-            */
             // ECCPProcess no tiene manejadores de eventos AMI
 
             $this->_ami = $astman;

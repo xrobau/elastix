@@ -323,7 +323,7 @@ class ECCPConn
             return array(
                 'response'          =>  $xml_response,
                 'nuevos_valores'    =>  array(
-                    'usuarioeccp'   =>  $comando->username,
+                    'usuarioeccp'   =>  (string)$comando->username,
                     'appcookie'     =>  $sAppCookie,
                 ),
             );

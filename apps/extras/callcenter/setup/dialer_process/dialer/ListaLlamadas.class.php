@@ -43,6 +43,7 @@ class ListaLlamadas implements IteratorAggregate
         'actionid'              =>  array(),
         'auxchannel'            =>  array(),
     );
+    private $_idcurrentcall_retrasado = array();
 
     function __construct($tuberia, $log)
     {
@@ -91,6 +92,14 @@ class ListaLlamadas implements IteratorAggregate
     {
     	foreach (array_keys($this->_llamadas) as $k) {
     		if ($this->_llamadas[$k] === $obj) {
+
+    		    /* Se almacena el ID de llamada (si está disponible) para toda
+    		     * llamada que esté todavía esperando un ID de current_call al
+    		     * momento de ser removida. */
+    		    if ($obj->waiting_id_current_call) {
+    		        $this->_idcurrentcall_retrasado[$obj->tipo_llamada][] = $obj->id_llamada; 
+    		    }
+
                 unset($this->_llamadas[$k]);
                 if (isset($this->_indices['id_llamada_saliente'][$obj->id_llamada]))
                     unset($this->_indices['id_llamada_saliente'][$obj->id_llamada]);
@@ -112,6 +121,27 @@ class ListaLlamadas implements IteratorAggregate
     			break;
     		}
     	}
+    }
+    
+    /**
+     * Procedimiento que busca el tipo e ID de una llamada entre las llamadas
+     * previamente removidas, para verificar si fue removida antes de que
+     * supiera su ID de current_call. Si se encuentra este tipo e ID de llamada,
+     * se lo quita.
+     * 
+     * @param string    $t      Tipo de llamada
+     * @param int       $id     ID de llamada
+     * 
+     * @return  bool    VERDADERO si la llamada fue removida sin id de current_call
+     */
+    function remover_llamada_sin_idcurrentcall($t, $id)
+    {
+        if (isset($this->_idcurrentcall_retrasado[$t]) &&
+            in_array($id, $this->_idcurrentcall_retrasado[$t])) {
+            $this->_idcurrentcall_retrasado[$t] = array_diff($this->_idcurrentcall_retrasado[$t], array($id));
+            return TRUE;
+        }
+        return FALSE;
     }
     
     function dump($log)

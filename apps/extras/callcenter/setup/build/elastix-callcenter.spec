@@ -101,9 +101,13 @@ fi
 
 %changelog
 * Tue May 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: track IDs of calls that were untracked before knowing the
+  assigned ID on the current_calls table. This prevents most messages about not
+  being able to find a call on the msg_idcurrentcall message handler.
+  SVN Rev[7074] 
 - FIXED: Dialer (ECCP): fix leftovers from the prefork migration that cause
   exceptions when events are received by ECCPProxyConn.
-  SVN Rev[7072]
+  SVN Rev[7073]
 
 * Mon May 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): put execution of QueueAdd/QueueRemove back in
@@ -112,7 +116,7 @@ fi
   QueueRemove. So bring back the queue manipulation for dynamic login into
   ECCPConn. CampaignProcess no longer has to deal with blocks while logging in
   agents, and simultaneous logins may now happen in parallel.
-  SVN Rev[7071]
+  SVN Rev[7072]
 
 * Sun May 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): switch to a prefork process model for ECCP requests.

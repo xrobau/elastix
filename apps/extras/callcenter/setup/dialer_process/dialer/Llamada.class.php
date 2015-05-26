@@ -133,7 +133,8 @@ class Llamada
     private $_agentchannel = NULL;
 
     var $phone;     // Número marcado para llamada saliente o Caller-ID para llamada entrante
-    var $id_current_call;   // ID del registro correspondiente en current_call[_entry]
+    private $_id_current_call;   // ID del registro correspondiente en current_call[_entry]
+    private $_waiting_id_current_call = FALSE;  // Se pone a VERDADERO cuando se espera el id_current_call
     var $request_hold = FALSE;  // Se asigna a VERDADERO al invocar requerimiento hold, y se verifica en Unlink
 
     // Timestamps correspondientes a diversos eventos de la llamada
@@ -208,6 +209,7 @@ class Llamada
         if (!is_null($this->failure_cause_txt))
             $s .= "\tfailure_cause_txt............".$this->_nul($this->failure_cause_txt)."\n";
         $s .= "\tactionid.....................".$this->_nul($this->actionid)."\n";
+        if ($this->_waiting_id_current_call) $s .= "\tESPERANDO id_current_call\n";
         $s .= "\tid_current_call..............".$this->_nul($this->id_current_call)."\n";
         $s .= "\tduration.....................".$this->_nul($this->duration)."\n";
         if ($this->_stillborn) $s .= "\tSTILLBORN\n";
@@ -259,6 +261,10 @@ class Llamada
                                         ? $this->timestamp_link - $this->timestamp_originatestart : NULL;
         case 'esperando_contestar':
                                 return (!is_null($this->timestamp_originatestart) && is_null($this->timestamp_originateend));
+        case 'id_current_call':
+                                return $this->_id_current_call;
+        case 'waiting_id_current_call':
+                                return $this->_waiting_id_current_call;
         default:
             $this->_log->output('ERR: '.__METHOD__.' - propiedad no implementada: '.$s);
             die(__METHOD__.' - propiedad no implementada: '.$s."\n");
@@ -313,6 +319,7 @@ class Llamada
                         $paramInsertarCC[($this->tipo_llamada == 'incoming') ? 'id_call_entry' : 'id_call'] =
                             $this->id_llamada;
                         $this->_tuberia->msg_CampaignProcess_sqlinsertcurrentcalls($paramInsertarCC);
+                        $this->_waiting_id_current_call = TRUE;
                     }
                     if (count($this->_actualizacionesPendientes) > 0) {
                     	$this->_log->output('ERR: '.__METHOD__.': actualización pendiente no implementada');
@@ -417,6 +424,10 @@ class Llamada
                     $this->_listaLlamadas->remover($this);
                 }
             }
+            break;
+        case 'id_current_call':
+            $this->_id_current_call = (int)$v;
+            $this->_waiting_id_current_call = FALSE;
             break;
         default:
             $this->_log->output('ERR: '.__METHOD__.' - propiedad no implementada: '.$s);
@@ -723,6 +734,7 @@ class Llamada
                 $this->id_llamada;
             $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
             $this->_tuberia->msg_CampaignProcess_sqlinsertcurrentcalls($paramInsertarCC);
+            $this->_waiting_id_current_call = TRUE;
 
             // Lanzar evento ECCP en ECCPProcess
             $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada,
@@ -833,7 +845,7 @@ class Llamada
         } elseif (isset($this->_actualizacionesPendientes['sqlinsertcurrentcalls'])) {
             unset($this->_actualizacionesPendientes['sqlinsertcurrentcalls']);
         }
-        $this->id_current_call = NULL;
+        $this->_id_current_call = NULL;
 
         $paramActualizar = array(
             'tipo_llamada'          =>  $this->tipo_llamada,

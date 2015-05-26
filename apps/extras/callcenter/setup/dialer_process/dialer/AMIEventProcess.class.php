@@ -739,7 +739,17 @@ class AMIEventProcess extends TuberiaProcess
         elseif ($tipo_llamada == 'incoming')
             $llamada = $this->_listaLlamadas->buscar('id_llamada_entrante', $id_call);
         if (is_null($llamada)) {
-        	$this->_log->output('ERR: '.__METHOD__." no se encuentra llamada con tipo=$tipo_llamada id=$id_call");
+            if ($this->_listaLlamadas->remover_llamada_sin_idcurrentcall($tipo_llamada, $id_call)) {
+                if ($this->DEBUG) {
+                    $this->_log->output('DEBUG: '.__METHOD__." la llamada se cerró antes de conocer su id_current_call.");
+                }
+                $this->_tuberia->msg_CampaignProcess_sqldeletecurrentcalls(array(
+                    'tipo_llamada'  =>  $tipo_llamada,
+                    'id'            =>  $id_current_call,
+                ));
+            } else {
+        	    $this->_log->output('ERR: '.__METHOD__." no se encuentra llamada con tipo=$tipo_llamada id=$id_call");
+            }
         } else {
         	$llamada->id_current_call = (int)$id_current_call;
         }

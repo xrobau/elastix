@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue May 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): fix leftovers from the prefork migration that cause
+  exceptions when events are received by ECCPProxyConn.
+  SVN Rev[7072]
+
 * Mon May 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): put execution of QueueAdd/QueueRemove back in
   ECCPConn. After the migration to the prefork model, it is not longer necessary

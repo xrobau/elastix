@@ -259,7 +259,7 @@ class ECCPProxyConn extends MultiplexConn
         $xml_agentLinked = $xml_response->addChild('agentlinked');
         $infoLlamada['agent_number'] = $sAgente;
         $infoLlamada['remote_channel'] = $sRemChannel;
-        $this->_construirRespuestaCallInfo($infoLlamada, $xml_agentLinked);
+        ECCPConn::construirRespuestaCallInfo($infoLlamada, $xml_agentLinked);
 
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
@@ -337,7 +337,7 @@ class ECCPProxyConn extends MultiplexConn
         $xml_queueMembership = $xml_response->addChild('queuemembership');
 
         $xml_queueMembership->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
-        $this->_getcampaignstatus_setagent($xml_queueMembership, $infoSeguimiento);
+        ECCPConn::getcampaignstatus_setagent($xml_queueMembership, $infoSeguimiento);
         $xml_agentQueues = $xml_queueMembership->addChild('queues');
         foreach ($listaColas as $sCola) {
             $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));

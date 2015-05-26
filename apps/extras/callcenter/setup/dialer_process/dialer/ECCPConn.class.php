@@ -917,12 +917,12 @@ LEER_CAMPANIA;
         }
 
         // Armar la respuesta XML
-        $this->_construirRespuestaCallInfo($infoLlamada, $xml_GetCallInfoResponse);
+        self::construirRespuestaCallInfo($infoLlamada, $xml_GetCallInfoResponse);
         return $xml_response;
     }
 
     // Compartido entre getcallinfo y evento agentlinked
-    private function _construirRespuestaCallInfo($infoLlamada, $xml_GetCallInfoResponse)
+    static function construirRespuestaCallInfo($infoLlamada, $xml_GetCallInfoResponse)
     {
         foreach ($infoLlamada as $sKey => $valor) {
             switch ($sKey) {
@@ -2151,7 +2151,7 @@ LISTA_EXTENSIONES;
             $xml_agent->addChild('agentchannel', $sAgente);
 
             cargarInfoPausa($this->_db, $infoAgente);
-            $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
+            self::getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
 
         // Estado de los agentes logoneados en la cola, sin llamada en atención
@@ -2162,7 +2162,7 @@ LISTA_EXTENSIONES;
             $xml_agent->addChild('agentchannel', $sAgente);
 
             cargarInfoPausa($this->_db, $infoAgente);
-            $this->_getcampaignstatus_setagent($xml_agent, $infoAgente);
+            self::getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
 
         // Estado de las llamadas pendientes de enlazar
@@ -2188,7 +2188,7 @@ LISTA_EXTENSIONES;
             $xml_stats->addChild(strtolower($statKey), $statCount);
     }
 
-    private function _getcampaignstatus_setagent($xml_agent, $infoAgente)
+    static function getcampaignstatus_setagent($xml_agent, $infoAgente)
     {
         if ($infoAgente['num_pausas'] > 0) {
             $xml_agent->addChild('status', 'paused');

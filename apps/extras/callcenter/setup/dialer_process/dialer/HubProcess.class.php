@@ -42,8 +42,8 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
     // Contador para garantizar unicidad de nombre de tarea dinámica
     private $_dynProcessCounter = 0;
 
-    // Instante en que se marcó como ocupada cada tarea dinámica
-    private $_instanteTareaOcupada = array();
+    // Conexión debido a la cual se marcó como ocupada cada tarea dinámica
+    private $_conexionTareaOcupada = array();
 
     // Lista de tareas dinámicas que avisaron que atendieron su última petición
     private $_tareasUltimaPeticion = array();
@@ -79,8 +79,8 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
                 $iRcvSignal = pcntl_wifsignaled($iStatus) ? pcntl_wtermsig($iStatus) : 0;
                 if ($iRcvSignal != 0) { $this->_log->output("WARN: $sTarea terminó debido a señal $iRcvSignal..."); }
                 if ($iErrCode != 0) { $this->_log->output("WARN: $sTarea devolvió código de error $iErrCode..."); }
+                $this->_manejarCaidaECCPWorker($sTarea);
                 unset($this->_tareas[$sTarea]);
-                unset($this->_instanteTareaOcupada[$sTarea]);
                 $this->_tareasUltimaPeticion = array_diff($this->_tareasUltimaPeticion, array($sTarea));
 
                 // Quitar la tubería del proceso que ha terminado
@@ -272,7 +272,7 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
             foreach (array_keys($this->_tareas) as $sTarea) {
                 if ($this->_revisarTareaActiva($sTarea) &&
                     strpos($sTarea, 'ECCPWorkerProcess-') === 0 &&
-                    !isset($this->_instanteTareaOcupada[$sTarea]) &&
+                    !isset($this->_conexionTareaOcupada[$sTarea]) &&
                     !in_array($sTarea, $this->_tareasUltimaPeticion)) {
                     $sTareaElegida = $sTarea;
                     break;
@@ -286,14 +286,15 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
                 $sTareaElegida = $sTarea;
             }
 
-            $this->_instanteTareaOcupada[$sTareaElegida] = microtime(TRUE);
+            // El primer parámetro es la conexión proxy
+            $this->_conexionTareaOcupada[$sTareaElegida] = $datos[0];
             $sDestino = $sTareaElegida;
         } elseif (strpos($sFuente, 'ECCPWorkerProcess-') === 0 && $sDestino == 'ECCPProcess'
                 && $sNombreMensaje == 'eccpresponse') {
             /* Al mandar la respuesta asíncrona desde un ECCPWorkerProcess, se
              * debe de limpiar el estado de ocupado para esa instancia en
              * particular. */
-            unset($this->_instanteTareaOcupada[$sFuente]);
+            unset($this->_conexionTareaOcupada[$sFuente]);
 
             /* El ECCPWorkerProcess manda como primer parámetro una bandera que
              * indica si finaliza por haber atendido su última petición. Si es
@@ -302,6 +303,35 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
             if ($bUltimaPeticion) {
                 $this->_tareasUltimaPeticion[] = $sFuente;
             }
+        }
+    }
+
+    private function _manejarCaidaECCPWorker($sTarea)
+    {
+        if (isset($this->_conexionTareaOcupada[$sTarea])) {
+            $this->_log->output("WARN: tarea $sTarea con PID=".
+                $this->_tareas[$sTarea]." ha terminado mientras procesaba una ".
+                "petición ECCP para la conexión ".$this->_conexionTareaOcupada[$sTarea]);
+            $sCrashMsg = <<<XML_CRASH_MSG
+<?xml version="1.0"?>
+<response><failure><code>503</code><message>Internal server error - worker crash while handling request</message></failure></response>
+XML_CRASH_MSG;
+            $this->_hub->rutearMensaje(
+                $sTarea,
+                'ECCPProcess',
+                'eccpresponse',
+                microtime(TRUE),
+                array(
+                    TRUE,
+                    $this->_conexionTareaOcupada[$sTarea],
+                    $sCrashMsg,
+                    array(
+                        'usuarioeccp'   =>  NULL,
+                        'appcookie'     =>  NULL,
+                        'finalizando'   =>  TRUE,
+                    ),
+                    NULL,
+                ));
         }
     }
 

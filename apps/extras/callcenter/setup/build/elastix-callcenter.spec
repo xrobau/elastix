@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed May 27 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: make ECCP request handling more robust in the event of an
+  unhandled worker process crash or exception while handling a request. This
+  prevents the ECCP client from waiting forever for a response.
+  SVN Rev[7075]
+
 * Tue May 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: track IDs of calls that were untracked before knowing the
   assigned ID on the current_calls table. This prevents most messages about not

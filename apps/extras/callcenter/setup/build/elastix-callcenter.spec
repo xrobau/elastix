@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu May 28 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): collapse two near-identical SQL queries into a single
+  function called by both clients.
+  SVN Rev[7076]
+
 * Wed May 27 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: make ECCP request handling more robust in the event of an
   unhandled worker process crash or exception while handling a request. This

@@ -88,26 +88,7 @@ INFO_ATRIBUTOS;
     $tuplaLlamada['call_attributes'] = $recordset->fetchAll(PDO::FETCH_ASSOC);
 
     // Leer información de los datos recogidos vía formularios
-    $sPeticionSQL = <<<INFO_FORMULARIOS
-SELECT form_field.id_form, form_field.id, form_field.etiqueta AS label,
-    form_data_recolected.value
-FROM form_data_recolected, form_field
-WHERE form_data_recolected.id_calls = ?
-    AND form_data_recolected.id_form_field = form_field.id
-ORDER BY form_field.id_form, form_field.orden
-INFO_FORMULARIOS;
-    $recordset = $db->prepare($sPeticionSQL);
-    $recordset->execute(array($idLlamada));
-    $datosFormularios = $recordset->fetchAll(PDO::FETCH_ASSOC);
-
-    $tuplaLlamada['call_survey'] = array();
-    foreach ($datosFormularios as $tuplaFormulario) {
-        $tuplaLlamada['call_survey'][$tuplaFormulario['id_form']][] = array(
-            'id'    => $tuplaFormulario['id'],
-            'label' => $tuplaFormulario['label'],
-            'value' => $tuplaFormulario['value'],
-        );
-    }
+    $tuplaLlamada['call_survey'] = leerDatosRecogidosFormularios($db, 'outgoing', $idLlamada);
 
     return $tuplaLlamada;
 }
@@ -213,29 +194,47 @@ INFO_ATRIBUTOS;
     }
 
     // Leer información de los datos recogidos vía formularios
-    $idCampaniaTupla = $tuplaLlamada['campaign_id'];
+    $tuplaLlamada['call_survey'] = leerDatosRecogidosFormularios($db, 'incoming', $idLlamada);
+
+    return $tuplaLlamada;
+}
+
+function leerDatosRecogidosFormularios($db, $sTipoLlamada, $idLlamada)
+{
+    switch ($sTipoLlamada) {
+    case 'incoming':
+        $fdr_tabla = 'form_data_recolected_entry';
+        $fdr_campo = 'id_call_entry';
+        break;
+    case 'outgoing':
+        $fdr_tabla = 'form_data_recolected';
+        $fdr_campo = 'id_calls';
+        break;
+    }
+
+    // Leer información de los datos recogidos vía formularios
     $sPeticionSQL = <<<INFO_FORMULARIOS
 SELECT form_field.id_form, form_field.id, form_field.etiqueta AS label,
-    form_data_recolected_entry.value
-FROM form_data_recolected_entry, form_field
-WHERE form_data_recolected_entry.id_call_entry = ?
-    AND form_data_recolected_entry.id_form_field = form_field.id
+    $fdr_tabla.value
+FROM $fdr_tabla, form_field
+WHERE $fdr_tabla.$fdr_campo = ?
+    AND $fdr_tabla.id_form_field = form_field.id
 ORDER BY form_field.id_form, form_field.orden
 INFO_FORMULARIOS;
     $recordset = $db->prepare($sPeticionSQL);
     $recordset->execute(array($idLlamada));
     $datosFormularios = $recordset->fetchAll(PDO::FETCH_ASSOC);
 
-    $tuplaLlamada['call_survey'] = array();
+    $call_survey = array();
     foreach ($datosFormularios as $tuplaFormulario) {
-        $tuplaLlamada['call_survey'][$tuplaFormulario['id_form']][] = array(
+        $call_survey[$tuplaFormulario['id_form']][] = array(
             'id'    => $tuplaFormulario['id'],
             'label' => $tuplaFormulario['label'],
             'value' => $tuplaFormulario['value'],
         );
     }
 
-    return $tuplaLlamada;
+    return $call_survey;
 }
 
 /**

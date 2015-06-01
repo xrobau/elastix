@@ -1372,20 +1372,6 @@ PETICION_LLAMADAS_AGENTE;
     private function _construirCadenaVariables($listaVar)
     {
         // "ID_CAMPAIGN={$infoCampania->id}|ID_CALL={$tupla->id}|NUMBER={$tupla->phone}|QUEUE={$infoCampania->queue}|CONTEXT={$infoCampania->context}",
-/*
-        $versionMinima = array(1, 6, 0);
-        while (count($versionMinima) < count($this->_asteriskVersion))
-            array_push($versionMinima, 0);
-        while (count($versionMinima) > count($this->_asteriskVersion))
-            array_push($this->_asteriskVersion, 0);
-        $sSeparador = ($this->_asteriskVersion >= $versionMinima) ? ',' : '|';
-        $sCadenaVar = '';
-        foreach ($listaVar as $sKey => $sVal) {
-            if ($sCadenaVar != '') $sCadenaVar .= $sSeparador;
-            $sCadenaVar .= "{$sKey}={$sVal}";
-        }
-        return $sCadenaVar;
-*/
         $lista = array();
         foreach ($listaVar as $sKey => $sVal) {
             $lista[] = "{$sKey}={$sVal}";

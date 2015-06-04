@@ -101,6 +101,10 @@ fi
 
 %changelog
 * Thu Jun  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: reject channel in OriginateResponse if it happens to be the
+  same as the scheduled agent. Then, assign remote channel in Link if it happens
+  to be NULL at that time. Partial synchronization with CallCenterPRO.
+  SVN Rev[7083]
 - CHANGED: Dialer: use campaign type to build message field names before
   notification. Partial synchronization with CallCenterPRO.
   SVN Rev[7082]

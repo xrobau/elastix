@@ -526,7 +526,13 @@ class Llamada
         $sStatus)
     {
         $this->_timestamp_originateend = $timestamp;
-        if (is_null($this->channel)) $this->channel = $channel;
+
+        /* No se acepta un canal NULL ni el mismo canal del agente (para
+         * llamadas manuales). */
+        if (is_null($this->channel) && !is_null($channel) &&
+            (is_null($this->agente_agendado) || $this->agente_agendado->channel != $channel)) {
+            $this->channel = $channel;
+        }
 
         if ($uniqueid == '<null>') $uniqueid = NULL;
         if ($sStatus == 'Success') $sStatus = 'Ringing';
@@ -697,6 +703,11 @@ class Llamada
             $this->_log->output("DEBUG: llamadaEnlazadaAgente: llamada  => ".print_r($this, TRUE));
         }
         */
+
+        /* Si a estas alturas no se tiene un channel, se usa $sRemChannel. Esto
+         * puede ocurrir si el canal fue rechazado en OriginateResponse porque
+         * era el canal del agente de llamada manual. */
+        if (is_null($this->channel)) $this->channel = $sRemChannel;
 
         // El canal verdadero es más util que Local/XXX para las operaciones
         if (strpos($sRemChannel, 'Local/') === 0 && !is_null($this->channel)

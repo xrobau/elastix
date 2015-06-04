@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Thu Jun  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): use campaign type to build column and table names.
+  Partial synchronization with CallCenterPRO.
 - FIXED: Dialer (ECCP): do not blindly append Agent type to the actual agent
   number. Use the real agent type from the table instead.
   SVN Rev[7079]

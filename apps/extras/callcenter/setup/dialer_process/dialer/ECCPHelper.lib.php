@@ -293,25 +293,30 @@ function construirEventoProgresoLlamada($db, $prop)
     $id_campaignlog = NULL;
     $ev = NULL;
 
-    if (isset($prop['id_call_incoming'])) $sColLlamada = 'id_call_incoming';
-    elseif (isset($prop['id_call_outgoing'])) $sColLlamada = 'id_call_outgoing';
+    $campaign_type = NULL;
+    foreach (array('incoming', 'outgoing') as $ct) {
+        if (isset($prop['id_call_'.$ct])) {
+            $campaign_type = $ct;
+            break;
+        }
+    }
 
     /* Se leen las propiedades del último log de la llamada, o NULL si no
      * hay cambio de estado previo. */
     $recordset = $db->prepare(
-            "SELECT retry, uniqueid, trunk, id_agent, duration ".
-            "FROM call_progress_log WHERE $sColLlamada = ? ".
-            "ORDER BY datetime_entry DESC, id DESC LIMIT 0,1");
-    $recordset->execute(array($prop[$sColLlamada]));
+        "SELECT retry, uniqueid, trunk, id_agent, duration ".
+        "FROM call_progress_log WHERE id_call_{$campaign_type} = ? ".
+        "ORDER BY datetime_entry DESC, id DESC LIMIT 0,1");
+    $recordset->execute(array($prop['id_call_'.$campaign_type]));
     $tuplaAnterior = $recordset->fetch(PDO::FETCH_ASSOC);
     $recordset->closeCursor();
     if (!is_array($tuplaAnterior) || count($tuplaAnterior) <= 0) {
         $tuplaAnterior = array(
-                        'retry'             =>  0,
-                        'uniqueid'          =>  NULL,
-                        'trunk'             =>  NULL,
-                        'id_agent'          =>  NULL,
-                        'duration'          =>  NULL,
+            'retry'             =>  0,
+            'uniqueid'          =>  NULL,
+            'trunk'             =>  NULL,
+            'id_agent'          =>  NULL,
+            'duration'          =>  NULL,
         );
     }
 
@@ -344,29 +349,25 @@ function construirEventoProgresoLlamada($db, $prop)
         // Todavía no se soporta emitir agente conectado para OnHold/OffHold
         unset($tuplaAnterior['id_agent']);
 
-        if (isset($tuplaAnterior['id_call_outgoing'])) {
-            $tuplaAnterior['campaign_type'] = 'outgoing';
-            $tuplaAnterior['campaign_id'] = $tuplaAnterior['id_campaign_outgoing'];
-            $tuplaAnterior['call_id'] = $tuplaAnterior['id_call_outgoing'];
-            unset($tuplaAnterior['id_call_outgoing']);
-            unset($tuplaAnterior['id_campaign_outgoing']);
-        } elseif (isset($tuplaAnterior['id_call_incoming'])) {
-            $tuplaAnterior['campaign_type'] = 'incoming';
-            if (isset($tuplaAnterior['id_campaign_incoming']))
-                $tuplaAnterior['campaign_id'] = $tuplaAnterior['id_campaign_incoming'];
-            $tuplaAnterior['call_id'] = $tuplaAnterior['id_call_incoming'];
-            unset($tuplaAnterior['id_call_incoming']);
-            unset($tuplaAnterior['id_campaign_incoming']);
-        }
+        $tuplaAnterior['campaign_type'] = $campaign_type;
+        if (isset($tuplaAnterior['id_campaign_'.$campaign_type]))
+            $tuplaAnterior['campaign_id'] = $tuplaAnterior['id_campaign_'.$campaign_type];
+        $tuplaAnterior['call_id'] = $tuplaAnterior['id_call_'.$campaign_type];
+        unset($tuplaAnterior['id_campaign_'.$campaign_type]);
+        unset($tuplaAnterior['id_call_'.$campaign_type]);
 
         // Agregar el teléfono callerid o marcado
-        $recordset = $db->prepare(
-                ($tuplaAnterior['campaign_type'] == 'outgoing')
-                ?   'SELECT calls.phone, campaign.queue FROM calls, campaign '.
-                'WHERE calls.id_campaign = campaign.id AND calls.id = ?'
-                :   'SELECT call_entry.callerid AS phone, queue_call_entry.queue '.
+        $sql = array(
+            'outgoing'  =>
+                'SELECT calls.phone, queue_call_entry.queue '.
+                'FROM calls, campaign, queue_call_entry '.
+                'WHERE queue_call_entry.id = campaign.id_queue_call_entry AND calls.id_campaign = campaign.id AND calls.id = ?',
+            'incoming'  =>
+                'SELECT call_entry.callerid AS phone, queue_call_entry.queue '.
                 'FROM call_entry, queue_call_entry '.
-                'WHERE call_entry.id_queue_call_entry = queue_call_entry.id AND call_entry.id = ?');
+                'WHERE call_entry.id_queue_call_entry = queue_call_entry.id AND call_entry.id = ?',
+        );
+        $recordset = $db->prepare($sql[$tuplaAnterior['campaign_type']]);
         $recordset->execute(array($tuplaAnterior['call_id']));
         $tuplaNumero = $recordset->fetch(PDO::FETCH_ASSOC);
         $recordset->closeCursor();
@@ -377,5 +378,4 @@ function construirEventoProgresoLlamada($db, $prop)
 
     return array($id_campaignlog, $ev);
 }
-
 ?>

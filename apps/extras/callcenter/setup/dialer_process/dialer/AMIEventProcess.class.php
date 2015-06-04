@@ -1454,6 +1454,8 @@ Uniqueid: 1429642067.241008
             [Dialstring] => 1065
         )
         */
+        if (isset($params['SubEvent']) && $params['SubEvent'] == 'End')
+            return FALSE;
 
         $srcUniqueId = $destUniqueID = NULL;
         if (isset($params['SrcUniqueID']))

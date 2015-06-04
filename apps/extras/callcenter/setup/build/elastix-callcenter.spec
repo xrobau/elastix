@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Thu Jun  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: do not hardcode from-internal in new channel recognition.
+  SVN Rev[7084]
 - CHANGED: Dialer: reject channel in OriginateResponse if it happens to be the
   same as the scheduled agent. Then, assign remote channel in Link if it happens
   to be NULL at that time. Partial synchronization with CallCenterPRO.

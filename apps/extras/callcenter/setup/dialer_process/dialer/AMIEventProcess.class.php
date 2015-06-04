@@ -537,14 +537,15 @@ class AMIEventProcess extends TuberiaProcess
 
     private function _nuevasCampanias($listaCampaniasAvisar)
     {
+        // TODO: purgar campañas salientes fuera de horario
         // Nuevas campañas salientes
         foreach ($listaCampaniasAvisar['outgoing'] as $id => $tupla) {
-        	if (!isset($this->_campaniasSalientes[$id])) {
+            if (!isset($this->_campaniasSalientes[$id])) {
                 $this->_campaniasSalientes[$id] = new Campania($this->_tuberia, $this->_log);
                 $this->_campaniasSalientes[$id]->tiempoContestarOmision(
                     $this->_config['dialer']['tiempo_contestar']);
                 if ($this->DEBUG) {
-                	$this->_log->output('DEBUG: '.__METHOD__.': nueva campaña saliente: '.print_r($tupla, 1));
+                    $this->_log->output('DEBUG: '.__METHOD__.': nueva campaña saliente: '.print_r($tupla, 1));
                 }
             }
             $c = $this->_campaniasSalientes[$id];
@@ -637,13 +638,6 @@ class AMIEventProcess extends TuberiaProcess
             }
         }
 
-        /*
-        if ($this->DEBUG) {
-            // Desactivado porque rellena demasiado el log
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($this->_campaniasSalientes, 1));
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($this->_colasEntrantes, 1));
-        }
-        */
     	return TRUE;
     }
 
@@ -873,7 +867,7 @@ class AMIEventProcess extends TuberiaProcess
 
             foreach ($this->_listaLlamadas as $llamada) {
                 // Remover llamadas viejas luego de 5 * 60 segundos de espera sin respuesta
-        		if (!is_null($llamada->timestamp_originatestart) &&
+                if (!is_null($llamada->timestamp_originatestart) &&
                     is_null($llamada->timestamp_originateend) &&
                     $iTimestamp - $llamada->timestamp_originatestart > 5 * 60) {
                     $listaLlamadasViejas[] = $llamada;
@@ -885,7 +879,7 @@ class AMIEventProcess extends TuberiaProcess
                     $iTimestamp - $llamada->timestamp_originatestart > 60) {
                     $listaLlamadasSinFailureCause[] = $llamada;
                 }
-        	}
+            }
 
             foreach ($listaLlamadasViejas as $llamada) {
             	$iEspera = $iTimestamp - $llamada->timestamp_originatestart;
@@ -1391,7 +1385,7 @@ Uniqueid: 1429642067.241008
         }
         $regs = NULL;
         if (isset($params['Channel']) &&
-            preg_match('#^(Local/.+@from-internal)-[\dabcdef]+(,|;)(1|2)$#', $params['Channel'], $regs)) {
+            preg_match('#^(Local/.+@[[:alnum:]-]+)-[\dabcdef]+(,|;)(1|2)$#', $params['Channel'], $regs)) {
             if ($this->DEBUG) {
                 $this->_log->output("DEBUG: ".__METHOD__.": se ha creado pata {$regs[3]} de llamada {$regs[1]}");
             }
@@ -2329,8 +2323,8 @@ Uniqueid: 1429642067.241008
         $this->_log->output("Versión detectada de Asterisk............".implode('.', $this->_asteriskVersion));
         $this->_log->output("Timestamp de arranque de Asterisk........".$this->_asteriskStartTime);
         $this->_log->output("Última verificación de llamadas viejas...".date('Y-m-d H:i:s', $this->_iTimestampVerificacionLlamadasViejas));
-        $this->_log->output("\n\nLista de campañas salientes:\n");
 
+        $this->_log->output("\n\nLista de campañas salientes:\n");
         foreach ($this->_campaniasSalientes as $c)
             $c->dump($this->_log);
 

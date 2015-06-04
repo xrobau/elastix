@@ -1766,33 +1766,7 @@ Uniqueid: 1429642067.241008
         $llamada = NULL;
 
         // Recuperar el agente local y el canal remoto
-        $regs = NULL;
-        $sAgentNum = NULL;
-        $sChannel = NULL;
-        $sAgentChannel = NULL;
-        $sRemChannel = NULL;
-        if (preg_match('|^Agent/(\d+)$|', $params['Channel1'], $regs)) {
-            $sAgentNum = $regs[1];
-            $sChannel = $sAgentChannel = $params['Channel1'];
-            $sRemChannel = $params['Channel2'];
-        } elseif (  preg_match('|^(SIP/(\d+))\-\w+$|',  $params['Channel1'], $regs) ||
-                    preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel1'], $regs)) {
-            $sAgentNum   = $regs[2];
-            $sChannel    = $regs[1];
-            $sRemChannel = $params['Channel2'];
-            $sAgentChannel = $params['Channel1'];
-        }
-        if (preg_match('|^Agent/(\d+)$|', $params['Channel2'], $regs)) {
-            $sAgentNum = $regs[1];
-            $sChannel = $sAgentChannel = $params['Channel2'];
-            $sRemChannel = $params['Channel1'];
-        } elseif(   preg_match('|^(SIP/(\d+))\-\w+$|', $params['Channel2'], $regs) ||
-                    preg_match('|^(IAX2/(\d+))\-\w+$|', $params['Channel2'], $regs)) {
-            $sAgentNum = $regs[2];
-            $sChannel  = $regs[1];
-            $sRemChannel = $params['Channel1']; // Remote Channel
-            $sAgentChannel = $params['Channel2'];
-        }
+        list($sAgentNum, $sAgentChannel, $sChannel, $sRemChannel) = $this->_identificarCanalAgenteLink($params);
 
         if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid1']);
         if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid2']);
@@ -1921,6 +1895,52 @@ Uniqueid: 1429642067.241008
         }
 
         return FALSE;
+    }
+
+    private function _identificarCanalAgenteLink(&$params)
+    {
+        $regs = NULL;
+
+        // Se asume que el posible canal de agente es de la forma TECH/dddd
+        // En particular, el regexp a continuación NO MATCHEA Local/xxx@from-internal
+        $regexp_channel = '|^([[:alnum:]]+/(\d+))(\-\w+)?$|';
+        $r1 = NULL;
+        if (preg_match($regexp_channel, $params['Channel1'], $regs)) $r1 = $regs;
+        $r2 = NULL;
+        if (preg_match($regexp_channel, $params['Channel2'], $regs)) $r2 = $regs;
+
+        // Casos fáciles de decidir
+        if (is_null($r1) && is_null($r2)) return array(NULL, NULL, NULL, NULL);
+        if (is_null($r2)) return array($r1[2], $r1[0], $r1[1], $params['Channel2']);
+        if (is_null($r1)) return array($r2[2], $r2[0], $r2[1], $params['Channel1']);
+
+        /* Ambos lados parecen canales normales. Si uno de los dos no es un
+         * agente conocido, es el canal remoto. */
+        $a1 = $this->_listaAgentes->buscar('agentchannel', $r1[1]);
+        $a2 = $this->_listaAgentes->buscar('agentchannel', $r2[1]);
+        if (is_null($a1) && is_null($a2)) return array(NULL, NULL, NULL, NULL);
+        if (is_null($a2)) return array($r1[2], $r1[0], $r1[1], $params['Channel2']);
+        if (is_null($a1)) return array($r2[2], $r2[0], $r2[1], $params['Channel1']);
+
+        /* Ambos lados son agentes conocidos. Si uno de los dos NO está logoneado,
+         * está haciendo el papel de canal remoto. */
+        if ($a1->estado_consola != 'logged-in' && $a2->estado_consola != 'logged-in')
+            return array(NULL, NULL, NULL, NULL);
+        if ($a2->estado_consola != 'logged-in')
+            return array($r1[2], $r1[0], $r1[1], $params['Channel2']);
+        if ($a1->estado_consola != 'logged-in')
+            return array($r2[2], $r2[0], $r2[1], $params['Channel1']);
+
+        /* Ambos lados son agentes logoneados (????). Se da preferencia al tipo 
+         * Agent. Si ambos son Agent (¿cómo se llamaron entre sí?) se da preferencia
+         * al canal 1. */
+        $this->_log->output('WARN: '.__METHOD__.': llamada entre dos agentes logoneados '.
+            $r1[1].' y '.$r2[1]);
+        if ($a1->type == 'Agent') return array($r1[2], $r1[0], $r1[1], $params['Channel2']);
+        if ($a2->type == 'Agent') return array($r2[2], $r2[0], $r2[1], $params['Channel1']);
+
+        /* Ambos son de tipo dinámico y logoneados. Se da preferencia al primero. */
+        return array($r1[2], $r1[0], $r1[1], $params['Channel2']);
     }
 
     public function msg_Unlink($sEvent, $params, $sServer, $iPort)

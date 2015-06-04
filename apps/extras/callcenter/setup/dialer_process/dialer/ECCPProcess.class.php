@@ -482,17 +482,17 @@ SQL_EXISTE_AUDIT;
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
-    	list($sAgente, $iTimestampLogin, $id_agent) = $datos;
+        list($sAgente, $iTimestampLogin, $id_agent) = $datos;
 
-    	try {
+        try {
             if (is_null($id_agent)) {
-            	// Ha fallado un intento de login
+                // Ha fallado un intento de login
                 $this->_multiplex->notificarEvento_AgentLogin($sAgente, NULL, FALSE);
             } else {
                 // Si el agente está en pausa, se la quita ahora
                 $this->_ami->QueuePause(NULL, $sAgente, 'false');
 
-            	$id_sesion = $this->_marcarInicioSesionAgente($id_agent, $iTimestampLogin);
+                $id_sesion = $this->_marcarInicioSesionAgente($id_agent, $iTimestampLogin);
                 if (!is_null($id_sesion)) {
                     $this->_tuberia->msg_AMIEventProcess_idNuevaSesionAgente($sAgente, $id_sesion);
 
@@ -500,9 +500,9 @@ SQL_EXISTE_AUDIT;
                     $this->_multiplex->notificarEvento_AgentLogin($sAgente, TRUE);
                 }
             }
-    	} catch (PDOException $e) {
-    	    $this->_stdManejoExcepcionDB($e, 'no se puede registrar inicio de sesión de agente');
-    	}
+        } catch (PDOException $e) {
+            $this->_stdManejoExcepcionDB($e, 'no se puede registrar inicio de sesión de agente');
+        }
     }
 
     public function msg_AgentLogoff($sFuente, $sDestino, $sNombreMensaje,
@@ -552,10 +552,7 @@ SQL_EXISTE_AUDIT;
             /* Ya que la escritura a la base de datos es asíncrona, puede
              * ocurrir que se lea la llamada en el estado OnQueue y sin fecha
              * de linkstart. */
-            if ($infoLlamada['calltype'] == 'incoming')
-                $infoLlamada['status'] = 'activa';
-            if ($infoLlamada['calltype'] == 'outgoing')
-                $infoLlamada['status'] = 'Success';
+            $infoLlamada['status'] = ($infoLlamada['calltype'] == 'incoming') ? 'activa' : 'Success';
             if (!isset($infoLlamada['queue']) && !is_null($queue))
                 $infoLlamada['queue'] = $queue;
             $infoLlamada['datetime_linkstart'] = $sFechaLink;
@@ -568,13 +565,8 @@ SQL_EXISTE_AUDIT;
                 'new_status'        =>  'Success',
                 'id_agent'          =>  $id_agent,
             );
-            if ($sTipoLlamada == 'outgoing') {
-                $paramProgreso['id_call_outgoing'] = $idLlamada;
-                $paramProgreso['id_campaign_outgoing'] = $idCampania;
-            } else {
-                $paramProgreso['id_call_incoming'] = $idLlamada;
-                if (!is_null($idCampania)) $paramProgreso['id_campaign_incoming'] = $idCampania;
-            }
+            $paramProgreso['id_call_'.$sTipoLlamada] = $idLlamada;
+            if (!is_null($idCampania)) $paramProgreso['id_campaign_'.$sTipoLlamada] = $idCampania;
 
             $infoLlamada['campaignlog_id'] = $this->_notificarProgresoLlamada($paramProgreso);
             $this->_multiplex->notificarEvento_AgentLinked($sChannel, $sRemChannel, $infoLlamada);
@@ -590,7 +582,7 @@ SQL_EXISTE_AUDIT;
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
         list($sAgente, $sTipoLlamada, $idCampaign, $idLlamada, $sPhone,
-                $sFechaFin, $iDuracion, $bShortFlag, $paramProgreso) = $datos;
+            $sFechaFin, $iDuracion, $bShortFlag, $paramProgreso) = $datos;
 
         try {
             $campaignlog_id = $this->_notificarProgresoLlamada($paramProgreso);
@@ -636,7 +628,7 @@ SQL_EXISTE_AUDIT;
                 $sth->execute(array('N', $infoLlamada['currentcallid']));
                 $sth = $this->_db->prepare('UPDATE call_entry set status = ? WHERE id = ?');
                 $sth->execute(array('activa', $infoLlamada['callid']));
-            } else {
+            } elseif ($infoLlamada['calltype'] == 'outgoing') {
                 $sth = $this->_db->prepare(
                     'UPDATE current_calls SET hold = ? WHERE id = ?');
                 $sth->execute(array('N', $infoLlamada['currentcallid']));

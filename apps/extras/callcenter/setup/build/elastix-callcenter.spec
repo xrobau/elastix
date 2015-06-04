@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Jun  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): do not blindly append Agent type to the actual agent
+  number. Use the real agent type from the table instead.
+  SVN Rev[7079]
+
 * Thu May 28 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): collapse two near-identical SQL queries into a single
   function called by both clients.

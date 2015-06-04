@@ -1542,26 +1542,11 @@ Uniqueid: 1429642067.241008
 
     private function _asignarCanalRemotoReal(&$params, $llamada)
     {
-        $llamada->actualchannel = $params['Destination'];
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 ': capturado canal remoto real: '.$params['Destination']);
         }
-
-        // Notificar el progreso de la llamada
-        $paramProgreso = array(
-            'datetime_entry'=>  date('Y-m-d H:i:s', $params['local_timestamp_received']),
-            'new_status'    =>  'Dialing',
-            'trunk'         =>  $llamada->trunk,
-        );
-        if ($llamada->tipo_llamada == 'outgoing') {
-            $paramProgreso['id_call_outgoing'] = $llamada->id_llamada;
-            $paramProgreso['id_campaign_outgoing'] = $llamada->campania->id;
-        } else {
-            $paramProgreso['id_call_incoming'] = $llamada->id_llamada;
-            if (!is_null($llamada->campania)) $paramProgreso['id_campaign_incoming'] = $llamada->campania->id;
-        }
-        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+        $llamada->llamadaIniciaDial($params['local_timestamp_received'], $params['Destination']);
     }
 
     public function msg_OriginateResponse($sEvent, $params, $sServer, $iPort)

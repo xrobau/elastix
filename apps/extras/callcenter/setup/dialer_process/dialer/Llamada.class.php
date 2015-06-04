@@ -506,6 +506,22 @@ class Llamada
         }
     }
 
+    public function llamadaIniciaDial($timestamp, $destination)
+    {
+        $this->actualchannel = $destination;
+
+        // Notificar el progreso de la llamada
+        $paramProgreso = array(
+            'datetime_entry'=>  date('Y-m-d H:i:s', $timestamp),
+            'new_status'    =>  'Dialing',
+            'trunk'         =>  $this->trunk,
+        );
+        $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
+        if (!is_null($this->campania))
+            $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
+        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+    }
+
     public function llamadaFueOriginada($timestamp, $uniqueid, $channel,
         $sStatus)
     {

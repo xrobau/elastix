@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Thu Jun  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: use campaign type to build message field names before
+  notification. Partial synchronization with CallCenterPRO.
+  SVN Rev[7082]
 - CHANGED: Dialer: move call progress notification for new channel into class.
   With this, all call progress notifications are now contained inside class.
   SVN Rev[7081]

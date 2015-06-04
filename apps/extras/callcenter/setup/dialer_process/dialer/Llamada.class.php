@@ -616,13 +616,9 @@ class Llamada
             'uniqueid'          =>  $paramActualizar['Uniqueid'],
         );
         if (!is_null($this->_trunk)) $paramProgreso['trunk'] = $this->_trunk;
-        if ($this->tipo_llamada == 'outgoing') {
-            $paramProgreso['id_call_outgoing'] = $this->id_llamada;
-            $paramProgreso['id_campaign_outgoing'] = $this->campania->id;
-        } else {
-            $paramProgreso['id_call_incoming'] = $this->id_llamada;
-            if (!is_null($this->campania)) $paramProgreso['id_campaign_incoming'] = $this->campania->id;
-        }
+        $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
+        if (!is_null($this->campania))
+            $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
         $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
     }
 
@@ -657,7 +653,7 @@ class Llamada
                 'new_status'            =>  'OnQueue',
                 'trunk'                 =>  $this->trunk,
             ));
-        } else {
+        } elseif ($this->tipo_llamada == 'incoming') {
         	// Preparar propiedades a insertar en DB
             $paramInsertar = array(
                 'tipo_llamada'          =>  $this->tipo_llamada,
@@ -820,13 +816,9 @@ class Llamada
                 'uniqueid'          =>  $this->_uniqueid,
                 'new_status'        =>  'OffHold',
             );
-            if ($this->tipo_llamada == 'outgoing') {
-                $paramProgreso['id_call_outgoing'] = $this->id_llamada;
-                $paramProgreso['id_campaign_outgoing'] = $this->campania->id;
-            } else {
-                $paramProgreso['id_call_incoming'] = $this->id_llamada;
-                if (!is_null($this->campania)) $paramProgreso['id_campaign_incoming'] = $this->campania->id;
-            }
+            $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
+            if (!is_null($this->campania))
+                $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
             $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
         }
         if (!is_null($this->id_current_call)) {
@@ -904,7 +896,7 @@ class Llamada
         	// Llamada fue enlazada normalmente
             $paramActualizar['duration'] = $this->duration;
             $paramProgreso['duration'] = $this->duration;
-            if ($this->tipo_llamada == 'outgoing') {
+            if ($this->tipo_llamada != 'incoming') {
                 $paramActualizar['end_time'] = date('Y-m-d H:i:s', $this->timestamp_hangup);
                 if ($this->duration <= $iUmbralLlamadaCorta) {
                 	$this->status = 'ShortCall';
@@ -923,13 +915,8 @@ class Llamada
         }
         if (!is_null($this->id_llamada)) {
             $paramActualizar['id'] = $this->id_llamada;
-            if ($this->tipo_llamada == 'outgoing') {
-                $paramProgreso['id_call_outgoing'] = $this->id_llamada;
-                $paramProgreso['id_campaign_outgoing'] = $this->campania->id;
-            } else {
-                $paramProgreso['id_call_incoming'] = $this->id_llamada;
-                if (!is_null($this->campania)) $paramProgreso['id_campaign_incoming'] = $this->campania->id;
-            }
+            $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
+            if (!is_null($this->campania)) $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
             $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
 
             if (!is_null($this->agente)) {

@@ -1521,10 +1521,17 @@ PETICION_LLAMADAS_AGENTE;
         // Porción que identifica la tabla a modificar
         $tipo_llamada = $paramInsertar['tipo_llamada'];
         unset($paramInsertar['tipo_llamada']);
-        if ($tipo_llamada == 'outgoing') {
+        switch ($tipo_llamada) {
+        case 'outgoing':
             $sqlTabla = 'INSERT INTO calls ';
-        } else {
+            break;
+        case 'incoming':
             $sqlTabla = 'INSERT INTO call_entry ';
+            break;
+        default:
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramInsertar, TRUE));
+            return;
         }
 
         // Recoger el canal para llamada entrante
@@ -1599,13 +1606,21 @@ PETICION_LLAMADAS_AGENTE;
     // Procedimiento que actualiza una sola llamada de la tabla calls o call_entry
     private function _sqlupdatecalls($paramActualizar)
     {
-    	// Porción que identifica la tabla a modificar
-        if ($paramActualizar['tipo_llamada'] == 'outgoing') {
-    		$sqlTabla = 'UPDATE calls SET ';
-    	} else {
-    		$sqlTabla = 'UPDATE call_entry SET ';
-    	}
+        // Porción que identifica la tabla a modificar
+        $tipo_llamada = $paramActualizar['tipo_llamada'];
         unset($paramActualizar['tipo_llamada']);
+        switch ($tipo_llamada) {
+        case 'outgoing':
+            $sqlTabla = 'UPDATE calls SET ';
+            break;
+        case 'incoming':
+            $sqlTabla = 'UPDATE call_entry SET ';
+            break;
+        default:
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramActualizar, TRUE));
+            return;
+        }
 
         // Porción que identifica la tupla a modificar
         $sqlWhere = array();
@@ -1631,7 +1646,7 @@ PETICION_LLAMADAS_AGENTE;
         if (isset($paramActualizar['inc_retries'])) {
             $sqlCampos[] = 'retries = retries + ?';
             $paramCampos[] = $paramActualizar['inc_retries'];
-        	unset($paramActualizar['inc_retries']);
+            unset($paramActualizar['inc_retries']);
         }
         foreach ($paramActualizar as $k => $v) {
         	$sqlCampos[] = "$k = ?";
@@ -1651,10 +1666,17 @@ PETICION_LLAMADAS_AGENTE;
         // Porción que identifica la tabla a modificar
         $tipo_llamada = $paramInsertar['tipo_llamada'];
         unset($paramInsertar['tipo_llamada']);
-        if ($tipo_llamada == 'outgoing') {
+        switch ($tipo_llamada) {
+        case 'outgoing':
             $sqlTabla = 'INSERT INTO current_calls ';
-        } else {
+            break;
+        case 'incoming':
             $sqlTabla = 'INSERT INTO current_call_entry ';
+            break;
+        default:
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramInsertar, TRUE));
+            return;
         }
 
     	$sqlCampos = array();
@@ -1682,10 +1704,17 @@ PETICION_LLAMADAS_AGENTE;
     private function _sqlupdatecurrentcalls($paramActualizar)
     {
         // Porción que identifica la tabla a modificar
-        if ($paramActualizar['tipo_llamada'] == 'outgoing') {
+        switch ($paramActualizar['tipo_llamada']) {
+        case 'outgoing':
             $sqlTabla = 'UPDATE current_calls SET ';
-        } else {
+            break;
+        case 'incoming':
             $sqlTabla = 'UPDATE current_call_entry SET ';
+            break;
+        default:
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramActualizar, TRUE));
+            return;
         }
         unset($paramActualizar['tipo_llamada']);
 
@@ -1823,7 +1852,7 @@ PETICION_LLAMADAS_AGENTE;
             $recordingfile = substr($recordingfile, strlen($sDirBaseMonitor));
 
         // Se asume que el archivo está completo con extensión
-        $field = ($tipo_llamada == 'outgoing') ? 'id_call_outgoing' : 'id_call_incoming';
+        $field = 'id_call_'.$tipo_llamada;
         $recordset = $this->_db->prepare("SELECT COUNT(*) AS N FROM call_recording WHERE {$field} = ? AND recordingfile = ?");
         $recordset->execute(array($id_llamada, $recordingfile));
         $iNumDuplicados = $recordset->fetch(PDO::FETCH_COLUMN, 0);

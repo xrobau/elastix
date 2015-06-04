@@ -893,7 +893,7 @@ LEER_CAMPANIA;
             return $this->_generarRespuestaFallo(400, 'Bad request');
 
         // El ID de campaña es opcional para campañas entrantes
-        if (!isset($comando->campaign_id) && $sTipoCampania == 'outgoing')
+        if (!isset($comando->campaign_id) && $sTipoCampania != 'incoming')
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $idCampania = isset($comando->campaign_id) ? (int)$comando->campaign_id : NULL;
 
@@ -1640,7 +1640,7 @@ LISTA_EXTENSIONES;
             return $xml_response;
         }
         if ($infoSeguimiento['estado_consola'] != 'logged-in') {
-            $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 417, 'Agent currenty not logged in');
+            $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 417, 'Agent currently not logged in');
             return $xml_response;
         }
         if (!is_null($infoSeguimiento['id_break'])) {
@@ -1738,7 +1738,7 @@ LISTA_EXTENSIONES;
             return $xml_response;
         }
         if ($infoSeguimiento['estado_consola'] != 'logged-in') {
-            $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 417, 'Agent currenty not logged in');
+            $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 417, 'Agent currently not logged in');
             return $xml_response;
         }
         if (is_null($infoSeguimiento['id_break'])) {
@@ -2440,7 +2440,7 @@ LEER_STATS_CAMPANIA;
             return $xml_response;
         }
         if ($infoSeguimiento['estado_consola'] != 'logged-in') {
-            $this->_agregarRespuestaFallo($xml_scheduleResponse, 417, 'Agent currenty not logged in');
+            $this->_agregarRespuestaFallo($xml_scheduleResponse, 417, 'Agent currently not logged in');
             return $xml_response;
         }
 
@@ -2850,7 +2850,7 @@ SQL_INSERTAR_AGENDAMIENTO;
             return $xml_response;
         }
         if ($infoSeguimiento['estado_consola'] != 'logged-in') {
-            $this->_agregarRespuestaFallo($xml_holdResponse, 417, 'Agent currenty not logged in');
+            $this->_agregarRespuestaFallo($xml_holdResponse, 417, 'Agent currently not logged in');
             return $xml_response;
         }
         $sCanalRemoto = $infoSeguimiento['clientchannel'];
@@ -3024,7 +3024,7 @@ SQL_INSERTAR_AGENDAMIENTO;
             return $xml_response;
         }
         if ($infoSeguimiento['estado_consola'] != 'logged-in') {
-            $this->_agregarRespuestaFallo($xml_unholdResponse, 417, 'Agent currenty not logged in');
+            $this->_agregarRespuestaFallo($xml_unholdResponse, 417, 'Agent currently not logged in');
             return $xml_response;
         }
         $sCanalRemoto = $infoSeguimiento['clientchannel'];
@@ -3416,7 +3416,7 @@ LEER_ULTIMA_SESION;
             return $xml_response;
         }
         if ($infoSeguimiento['estado_consola'] != 'logged-in') {
-            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 417, 'Agent currenty not logged in');
+            $this->_agregarRespuestaFallo($xml_getchanvarsResponse, 417, 'Agent currently not logged in');
             return $xml_response;
         }
         $sCanalRemoto = $infoSeguimiento['clientchannel'];

@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Thu Jun  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: forward Bridge with Bridgestate=Unlink to the Unlink handler.
+  SVN Rev[7086]
 - CHANGED: Dialer: do not handle Dial events that signal the end of Dial app.
   SVN Rev[7085]
 - CHANGED: Dialer: do not hardcode from-internal in new channel recognition.

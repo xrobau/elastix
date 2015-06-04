@@ -1759,6 +1759,10 @@ Uniqueid: 1429642067.241008
                 );
         }
 
+        // Asterisk 11 no emite evento Unlink sino Bridge con Bridgestate=Unlink
+        if (isset($params['Bridgestate']) && $params['Bridgestate'] == 'Unlink')
+            return $this->msg_Unlink($sEvent, $params, $sServer, $iPort);
+
         $llamada = NULL;
 
         // Recuperar el agente local y el canal remoto

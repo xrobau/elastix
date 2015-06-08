@@ -32,6 +32,7 @@ $arrLangModule=array(
 "Queue" => "Cola",
 "Entered" => "Entrantes",
 "Answered" => "Respondidas",
+"Finished" => "Terminadas",
 "Abandoned" => "Abandonadas",
 "Waiting calls" => "Llamadas en espera",
 "Without monitoring" => "Sin monitoreo",

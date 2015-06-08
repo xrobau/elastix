@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Jun  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Incoming Calls Monitoring: display additional column for count of
+  incoming calls assigned to agents but not finished. Fixes Elastix bug #2268.
+  SVN Rev[7090]
+
 * Thu Jun  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: make agent channel discrimination more robust. As a side effect
   this removes hardcoding of Agent/SIP/IAX2 channel types.

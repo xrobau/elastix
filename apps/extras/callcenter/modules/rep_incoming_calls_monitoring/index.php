@@ -33,7 +33,7 @@ require_once "libs/misc.lib.php";
 require_once "libs/paloSantoGrid.class.php";
 
 global $keylist;
-$keylist = array('total', 'finished', 'abandoned', 'onqueue', 'losttrack');
+$keylist = array('onqueue', 'abandoned', 'success', 'finished', 'losttrack', 'total');
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -85,6 +85,20 @@ function _moduleContent(&$smarty, $module_name)
     return $sContenido;
 }
 
+function manejarMonitoreo_HTML_estiloestado($k)
+{
+    switch ($k) {
+    case 'total':
+        return 'font-weight: bold;';
+    case 'abandoned':
+        return 'color: #ff0000;';
+    case 'success':
+        return 'color: #008800;';
+    default:
+        return '';
+    }
+}
+
 function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola)
 {
     global $arrLang;
@@ -108,14 +122,14 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
         
         $tupla = array($sQueue);
         foreach ($keylist as $k) {
-            $tupla[] = '<span id="'.$jsonKey.'-'.$k.'">'.$jsonRow[$k].'</span>';
+            $tupla[] = '<span style="'.manejarMonitoreo_HTML_estiloestado($k).'" id="'.$jsonKey.'-'.$k.'">'.$jsonRow[$k].'</span>';
             if (!isset($tuplaTotal[$k])) $tuplaTotal[$k] = 0;
             $tuplaTotal[$k] += $jsonRow[$k];
         }
         $arrData[] = $tupla;
     }
     $tupla = array('<b>'.strtoupper(_tr('Total')).'</b>');
-    foreach ($keylist as $k) $tupla[] = '<b><span id="total-'.$k.'">'.$tuplaTotal[$k].'</span></b>';
+    foreach ($keylist as $k) $tupla[] = '<b><span style="'.manejarMonitoreo_HTML_estiloestado($k).'" id="total-'.$k.'">'.$tuplaTotal[$k].'</span></b>';
     $arrData[] = $tupla;
 
     // Extraer la información que el navegador va a usar para actualizar
@@ -142,11 +156,13 @@ JSON_INITIALIZE;
         'url'       =>  array('menu' => $module_name),
         'columns'   =>  array(
             array('name'    =>  _tr('Queue')),
-            array('name'    =>  _tr('Entered')),
-            array('name'    =>  _tr('Answered')),
-            array('name'    =>  _tr('Abandoned')),
+
             array('name'    =>  _tr('Waiting calls')),
+            array('name'    =>  _tr('Abandoned')),
+            array('name'    =>  _tr('Answered')),
+            array('name'    =>  _tr('Finished')),
             array('name'    =>  _tr('Without monitoring')),
+            array('name'    =>  _tr('Entered')),
         ),
     ), $arrData, $arrLang).
     $sJsonInitialize;
@@ -178,14 +194,14 @@ function agregarInformacionColaCampania($oPaloConsola, $sFechaHoy, $tuplaCampani
     // Leer la cola para la campaña e iniciar fila de cola si no existe
     $infoCampania = $oPaloConsola->leerInfoCampania($tuplaCampania['type'], $tuplaCampania['id']);
     if (!isset($infoColas[$infoCampania['queue']])) {
-    	$infoColas[$infoCampania['queue']] = array();
+        $infoColas[$infoCampania['queue']] = array();
         foreach ($keylist as $k) $infoColas[$infoCampania['queue']][$k] = 0;
     }
-    
+
     // Leer estado real de campaña y sumarlo a la cola correspondiente
     $estadoCampania = $oPaloConsola->leerEstadoCampania($tuplaCampania['type'], $tuplaCampania['id'], $sFechaHoy);
     foreach ($keylist as $k) {
-    	$infoColas[$infoCampania['queue']][$k] += $estadoCampania['statuscount'][$k];
+        $infoColas[$infoCampania['queue']][$k] += $estadoCampania['statuscount'][$k];
     }
 }
 
@@ -336,6 +352,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         $jsonKey = 'queue-'.$sCallQueue;
                         if ($estadoMonitor[$sCallQueue]['onqueue'] > 0)
                             $estadoMonitor[$sCallQueue]['onqueue']--;
+                        $estadoMonitor[$sCallQueue]['success']++;
 
                         // Estado en la estructura JSON
                         $jsonData[$jsonKey] = $estadoMonitor[$sCallQueue];
@@ -353,6 +370,8 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                                     
                     if (isset($estadoMonitor[$sCallQueue])) {
                         $jsonKey = 'queue-'.$sCallQueue;
+                        if ($estadoMonitor[$sCallQueue]['success'] > 0)
+                            $estadoMonitor[$sCallQueue]['success']--;
                         $estadoMonitor[$sCallQueue]['finished']++;
                         
                         // Estado en la estructura JSON

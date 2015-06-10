@@ -83,8 +83,8 @@ function _moduleContent(&$smarty, $module_name)
 function _debug($s)
 {
     if (! AGENT_CONSOLE_DEBUG_LOG) return;
-    
-	$sAgent = '(unset)';
+
+    $sAgent = '(unset)';
     if (isset($_SESSION['callcenter']) && isset($_SESSION['callcenter']['agente']))
         $sAgent = $_SESSION['callcenter']['agente'];
     file_put_contents('/tmp/debug-callcenter-agentconsole.txt',
@@ -823,23 +823,27 @@ function manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantill
 // Se usa $infoLlamada['call_survey'] , $infoCampania['forms']
 function manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania)
 {
+    $nforms = 0;
+    $smarty->assign('BTN_GUARDAR_FORMULARIOS', _tr('Save data'));
+
     // Se puebla current_value con los valores recogidos previamente, si existen
     if (isset($infoCampania['forms']) && is_array($infoCampania['forms'])) {
+        $nforms += count($infoCampania['forms']);
         foreach ($infoCampania['forms'] as $idForm => $tuplaForm) {
-        	foreach ($tuplaForm['fields'] as $idxCampo => $tuplaCampo) {
-        		if (isset($infoLlamada['call_survey'][$idForm]) && 
-                    isset($infoLlamada['call_survey'][$idForm][$tuplaCampo['id']]))
+            if (isset($infoLlamada['call_survey'][$idForm])) foreach ($tuplaForm['fields'] as $idxCampo => $tuplaCampo) {
+                if (isset($infoLlamada['call_survey'][$idForm][$tuplaCampo['id']])) {
                     $infoCampania['forms'][$idForm]['fields'][$idxCampo]['current_value'] = 
-                        $infoLlamada['call_survey'][$idForm][$tuplaCampo['id']]['value']; 
-        	}
+                        $infoLlamada['call_survey'][$idForm][$tuplaCampo['id']]['value'];
+                } 
+            }
         }
-        $smarty->assign(array(
-            'FORMS'                     => $infoCampania['forms'],
-            'BTN_GUARDAR_FORMULARIOS'   =>  _tr('Save data'),
-            ));
+        $smarty->assign('FORMS', $infoCampania['forms']);
+    }
+
+    if ($nforms > 0) {
         return $smarty->fetch("$sDirLocalPlantillas/agent_console_formulario.tpl");
     } else {
-    	return _tr('No forms available for this call');
+        return _tr('No forms available for this call');
     }
 }
 
@@ -1029,11 +1033,13 @@ function manejarSesionActiva_saveForms($oPaloConsola, $estado)
             'message'   =>  _tr('Invalid or incomplete form data'),
         );
     } else {
+        $bExito = TRUE;
+
         $formInfo = array();
         foreach ($formdata as $tupladata) {
-        	$regs = NULL;
+            $regs = NULL;
             if (preg_match('/^field-(\d+)-(\d+)$/', $tupladata[0], $regs)) {
-            	$formInfo[$regs[1]][$regs[2]] = $tupladata[1];
+                $formInfo[$regs[1]][$regs[2]] = $tupladata[1];
                 $_SESSION['callcenter']['ultimo_callsurvey']['call_survey'][$regs[1]][$regs[2]] = array(
                     'label' =>  '', // TODO: asignar desde formulario de campaña
                     'value' =>  $tupladata[1],
@@ -1041,13 +1047,15 @@ function manejarSesionActiva_saveForms($oPaloConsola, $estado)
             }
         }
 
-        $bExito = $oPaloConsola->guardarDatosFormularios(
-            $_SESSION['callcenter']['ultimo_calltype'], //$estado['callinfo']['calltype'],
-            $_SESSION['callcenter']['ultimo_callid'], //$estado['callinfo']['callid'],
-            $formInfo);
-        if (!$bExito) {
-            $respuesta['action'] = 'error';
-            $respuesta['message'] = _tr('Error while saving form data').' - '.$oPaloConsola->errMsg;
+        if ($bExito && count($formInfo) > 0) {
+            $bExito = $oPaloConsola->guardarDatosFormularios(
+                $_SESSION['callcenter']['ultimo_calltype'],
+                $_SESSION['callcenter']['ultimo_callid'],
+                $formInfo);
+            if (!$bExito) {
+                $respuesta['action'] = 'error';
+                $respuesta['message'] = _tr('Error while saving form data').' - '.$oPaloConsola->errMsg;
+            }
         }
     }
     $json = new Services_JSON();

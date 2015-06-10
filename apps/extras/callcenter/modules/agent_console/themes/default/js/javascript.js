@@ -33,9 +33,9 @@ var externalurl = null;
 var externalurl_title = null;
 
 $(document).ready(function() {
-	$('#elastix-callcenter-error-message').hide();
-	$('#elastix-callcenter-info-message').hide();
-	$('#elastix-callcenter-agendar-llamada-error-message').hide();
+    $('#elastix-callcenter-error-message').hide();
+    $('#elastix-callcenter-info-message').hide();
+    $('#elastix-callcenter-agendar-llamada-error-message').hide();
 
     $('#label_extension_callback').hide();
     $('#input_extension_callback').hide();
@@ -679,8 +679,8 @@ function manejarRespuestaStatus(respuesta)
 			estadoCliente.calltype = respuesta[i].calltype;
 			estadoCliente.campaign_id = respuesta[i].campaign_id;
 			estadoCliente.callid = respuesta[i].callid;
-	        $('#btn_hangup').button('enable');
-	        $('#btn_transfer').button('enable');
+			$('#btn_hangup').button('enable');
+			$('#btn_transfer').button('enable');
 			$('#elastix-callcenter-cronometro').text(respuesta[i].cronometro);
 			$('#elastix-callcenter-llamada-info')
 				.empty()

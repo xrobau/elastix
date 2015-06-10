@@ -30,7 +30,7 @@ $Id: ECCPWorkerProcess.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
 /* Número máximo de peticiones que serán atendidas por proceso. Ya que se crean
  * procesos adicionales en condiciones de tráfico pesado, esto garantiza que los
  * procesos no permanecerán indefinidamente en ejecución. */
-define('MAX_PETICIONES_ATENDIDAS', 512);
+define('MAX_PETICIONES_ATENDIDAS', 16384);
 
 class ECCPWorkerProcess extends TuberiaProcess
 {

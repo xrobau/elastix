@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Sat Jun 13 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: add styles to resize handles to make them visible.
+  SVN Rev[7095]
 - CHANGED: Agent Console: reorganize layout to group all information on the call
   in a single screen. Resizable panes implemented using jquery-layout from
   http://layout.jquery-dev.com/index.cfm . Partial synchronization with

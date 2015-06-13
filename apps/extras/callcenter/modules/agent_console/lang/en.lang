@@ -121,5 +121,10 @@ $arrLangModule = array(
 'Attended transfer' => 'Attended transfer',
 'Password' => 'Password',
 'Callback Extension' => 'Callback Extension',
+'Agent ' => 'Agent ',
+' Logged in' => ' Logged in',
+'Call' => 'Call',
+'Information' => 'Information',
+'Script' => 'Script',
 );
 ?>

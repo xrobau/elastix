@@ -27,7 +27,7 @@
     selected=$FIELD.current_value}
 {elseif $FIELD.type eq "DATE"}
 {* Depende de ejecutar datepicker sobre .elastix-callcenter-field-date *}
-<input 
+<input
     type="text"
     name="field-{$ID_FORM}-{$FIELD.id}"
     id="field-{$ID_FORM}-{$FIELD.id}"
@@ -43,7 +43,7 @@
     maxlength="{$FIELD.maxsize}"
     class="elastix-callcenter-field ui-widget-content ui-corner-all">{if $FIELD.current_value == ''}{$FIELD.default_value|escape:"html"}{else}{$FIELD.current_value|escape:"html"}{/if}</textarea>
 {else}
-<input 
+<input
     type="text"
     name="field-{$ID_FORM}-{$FIELD.id}"
     id="field-{$ID_FORM}-{$FIELD.id}"
@@ -59,5 +59,3 @@
    </div>
 {/foreach}{* from=$FORMS *}
 </div>{* elastix-callcenter-cejillas-formulario *}
-<hr/>
-<button id="btn_guardar_formularios">{$BTN_GUARDAR_FORMULARIOS}</button>

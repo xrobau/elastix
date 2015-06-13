@@ -48,10 +48,12 @@ $(document).ready(function() {
     $('#btn_vtigercrm').button();
     $('#btn_logout').button();
     $('#btn_confirmar_contacto').button();
+    $('#btn_confirmar_contacto').click(do_confirm_contact);
     $('#btn_agendar_llamada').button();
     $('#schedule_same_agent').button();
     $('#schedule_radio').buttonset();
     $('#transfer_type_radio').buttonset();
+    $('#btn_guardar_formularios').button();
     $('#schedule_date').hide();
     $('#elastix-callcenter-cejillas-contenido').tabs({
     	add:	function (event, ui) {
@@ -61,13 +63,17 @@ $(document).ready(function() {
     	}
     });
 
+    if ($('#elastix-callcenter-llamada-paneles').length > 0) {
+        $('#elastix-callcenter-llamada-paneles').layout({west: { size: 300 }});
+        $('#elastix-callcenter-llamada-paneles-izq').layout({south: { size: 250 }});
+    }
+
     // Operaciones que deben de repetirse al obtener formulario vía AJAX
     apply_form_styles();
 
     $('#submit_agent_login').click(do_login);
     $('#btn_logout').click(do_logout);
     $('#btn_hangup').click(do_hangup);
-    $('#btn_confirmar_contacto').click(do_confirm_contact);
 
     // El siguiente código se ejecuta al hacer click en el botón de break
     $('#btn_togglebreak').click(function() {
@@ -78,6 +84,9 @@ $(document).ready(function() {
     		$('#elastix-callcenter-seleccion-break').dialog('open');
     	}
     });
+
+    // Botón para guardar formularios
+    $('#btn_guardar_formularios').click(do_save_forms);
 
     $('#btn_transfer').click(function() {
 		$('#elastix-callcenter-seleccion-transfer').dialog('open');
@@ -163,9 +172,6 @@ function apply_form_styles()
     	changeYear:		true,
     	dateFormat:		'yy-mm-dd'
     });
-    $('#btn_guardar_formularios')
-    	.button()
-    	.click(do_save_forms);
 }
 
 // Inicializar estado del cliente al refrescar la página
@@ -226,9 +232,13 @@ function apply_ui_styles(uidata)
     if (uidata.no_call) {
         $('#btn_hangup').button('disable');
         $('#btn_transfer').button('disable');
+        $('#btn_agendar_llamada').button('disable');
     }
     if (!uidata.can_confirm_contact) {
     	$('#btn_confirmar_contacto').button('disable');
+    }
+    if (!uidata.can_save_formdata) {
+        $('#btn_guardar_formularios').button('disable');
     }
     schedule_call_error_msg_missing_date = uidata.schedule_call_error_msg_missing_date;
     $('#elastix-callcenter-seleccion-break').dialog({
@@ -265,8 +275,8 @@ function apply_ui_styles(uidata)
     });
     $('#elastix-callcenter-agendar-llamada').dialog({
         autoOpen: false,
-        width: 500,
-        height: 300,
+        width: 700,
+        height: 350,
         modal: true,
         buttons: [
             {
@@ -656,7 +666,7 @@ function manejarRespuestaStatus(respuesta)
 			$('#btn_togglebreak')
 				.removeClass('elastix-callcenter-boton-break')
 				.addClass('elastix-callcenter-boton-unbreak')
-				.text(respuesta[i].txt_btn_break);
+				.children('span').text(respuesta[i].txt_btn_break);
 			break;
 		case 'breakexit':
 			// El agente ha salido del break
@@ -664,7 +674,7 @@ function manejarRespuestaStatus(respuesta)
 			$('#btn_togglebreak')
 				.removeClass('elastix-callcenter-boton-unbreak')
 				.addClass('elastix-callcenter-boton-break')
-				.text(respuesta[i].txt_btn_break);
+				.children('span').text(respuesta[i].txt_btn_break);
 			break;
 		case 'holdenter':
 			estadoCliente.onhold = true;
@@ -696,35 +706,20 @@ function manejarRespuestaStatus(respuesta)
 			$('#schedule_new_phone').val(respuesta[i].txt_contacto_telefono);
 
 			// Preparar y mostrar la barra correspondiente
-			$('#elastix-callcenter-cejillas-contenido')
-				.removeClass('elastix-callcenter-cejillas-contenido-barra-oculta')
-				.addClass('elastix-callcenter-cejillas-contenido-barra-visible');
 			if (respuesta[i].calltype == 'incoming') {
-				$('#elastix-callcenter-barra-llamada-saliente').hide();
-				$('#llamada_entrante_contacto_id').empty();
-				for (var k in respuesta[i].lista_contactos) {
-					// El código comentado no funciona en IE6
-					/*
-					var option_contacto = document.createElement('option');
-					option_contacto.text = respuesta[i].lista_contactos[k];
-					option_contacto.value = k;
-					*/
-					option_contacto = '<option value="' + k + '">' + respuesta[i].lista_contactos[k] + '</option>';
-					$('#llamada_entrante_contacto_id').append($(option_contacto));
-				}
+				$('#btn_confirmar_contacto').button();
 				if (respuesta[i].puede_confirmar_contacto)
 					$('#btn_confirmar_contacto').button('enable');
 				else $('#btn_confirmar_contacto').button('disable');
-				$('#elastix-callcenter-barra-llamada-entrante').show();
+				$('#btn_confirmar_contacto').click(do_confirm_contact);
 			} else if (respuesta[i].calltype == 'outgoing') {
-				$('#elastix-callcenter-barra-llamada-entrante').hide();
-
 				$('#llamada_saliente_nombres').text(respuesta[i].txt_contacto_nombres);
 				$('#schedule_new_name').val(respuesta[i].txt_contacto_nombres);
-				$('#elastix-callcenter-barra-llamada-saliente').show();
+				$('#btn_agendar_llamada').button('enable');
 			}
 
 			apply_form_styles();
+		    $('#btn_guardar_formularios').button('enable');
 			abrir_url_externo(respuesta[i].urlopentype, respuesta[i].url);
 			break;
 		case 'agentunlinked':
@@ -735,19 +730,12 @@ function manejarRespuestaStatus(respuesta)
 
 			$('#btn_hangup').button('disable');
 	        $('#btn_transfer').button('disable');
+	        $('#btn_agendar_llamada').button('disable');
 	        $('#elastix-callcenter-cronometro').text('00:00:00');
 
 	        // Vaciar las áreas para la llamada
 			$('#elastix-callcenter-llamada-info').empty();
 			$('#elastix-callcenter-llamada-script').empty();
-			//$('#elastix-callcenter-llamada-form').empty();
-
-	        // Ocultar las barras
-	        $('#elastix-callcenter-barra-llamada-entrante').hide();
-	        $('#elastix-callcenter-barra-llamada-saliente').hide();
-			$('#elastix-callcenter-cejillas-contenido')
-				.removeClass('elastix-callcenter-cejillas-contenido-barra-visible')
-				.addClass('elastix-callcenter-cejillas-contenido-barra-oculta');
 			break;
 		}
 	}

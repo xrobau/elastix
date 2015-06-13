@@ -100,6 +100,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Jun 13 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: reorganize layout to group all information on the call
+  in a single screen. Resizable panes implemented using jquery-layout from
+  http://layout.jquery-dev.com/index.cfm . Partial synchronization with
+  CallCenterPRO.
+  SVN Rev[7094]
+
 * Mon Jun  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Incoming Calls Monitoring: display additional column for count of
   incoming calls assigned to agents but not finished. Fixes Elastix bug #2268.
@@ -147,7 +154,7 @@ fi
 - FIXED: Dialer: track IDs of calls that were untracked before knowing the
   assigned ID on the current_calls table. This prevents most messages about not
   being able to find a call on the msg_idcurrentcall message handler.
-  SVN Rev[7074] 
+  SVN Rev[7074]
 - FIXED: Dialer (ECCP): fix leftovers from the prefork migration that cause
   exceptions when events are received by ECCPProxyConn.
   SVN Rev[7073]

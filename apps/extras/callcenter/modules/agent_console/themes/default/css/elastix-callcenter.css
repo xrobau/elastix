@@ -116,7 +116,7 @@
 
 #elastix-callcenter-llamada-paneles {
     position: relative;
-    height: 349pt;
+    height: 32em;
     padding: 0;
 }
 #elastix-callcenter-llamada-paneles > div {
@@ -124,7 +124,7 @@
 }
 #elastix-callcenter-llamada-paneles > div fieldset {
     margin: 0;
-    padding-top: 0.25em;
+    padding-top: 1.25em;
     padding-bottom: 0.5em;
     padding-left: 0.5em;
     padding-right: 0.5em;
@@ -143,29 +143,13 @@
     left: 0.5em;
     right: 0.5em;
 }
-#elastix-callcenter-llamada-info {
-    overflow: auto;
-    position: absolute;
-    top: 0.25em;
-    left: 0.5em;
-    right: 0.5em;
-    bottom: 0.5em;
-}
 
-#elastix-callcenter-llamada-script {
+#elastix-callcenter-llamada-paneles > div > fieldset > div,
+#elastix-callcenter-llamada-paneles > div#elastix-callcenter-llamada-paneles-izq  > div > fieldset > div {
     overflow: auto;
     position: absolute;
-    top: 0.25em;
+    top: 1.25em;
+    bottom: 0.5em;
     left: 0.5em;
     right: 0.5em;
-    bottom: 0.5em;
-}
-
-#elastix-callcenter-llamada-form {
-    overflow: auto;
-    position: absolute;
-    top: 0.25em;
-    left: 0.5em;
-    right: 0.5em;
-    bottom: 0.5em;
 }

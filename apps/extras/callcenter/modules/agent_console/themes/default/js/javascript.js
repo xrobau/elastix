@@ -64,8 +64,8 @@ $(document).ready(function() {
     });
 
     if ($('#elastix-callcenter-llamada-paneles').length > 0) {
-        $('#elastix-callcenter-llamada-paneles').layout({west: { size: 300 }});
-        $('#elastix-callcenter-llamada-paneles-izq').layout({south: { size: 250 }});
+        $('#elastix-callcenter-llamada-paneles').layout({fxName: 'none', west: { size: 300 }});
+        $('#elastix-callcenter-llamada-paneles-izq').layout({fxName: 'none', south: { size: 250 }});
     }
 
     // Operaciones que deben de repetirse al obtener formulario vía AJAX

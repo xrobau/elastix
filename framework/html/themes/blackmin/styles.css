@@ -83,7 +83,7 @@ input
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     font-size: 1em;
-/*    min-height: 22px;*/
+    min-height: 1.5em;
 }
 textarea
 {
@@ -115,8 +115,7 @@ select
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     font-size: 1em;
-/*    min-height: 26px;*/
-
+    min-height: 1.8em;
 }
 
 input.button, input.submit
@@ -126,6 +125,7 @@ input.button, input.submit
     background-repeat: repeat-x;
     background-position: bottom;
     color: #444444;
+    min-height: 1.85em;
 }
 input:focus, textarea:focus, select:focus
 {

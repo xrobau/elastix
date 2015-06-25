@@ -801,7 +801,8 @@ PETICION_LLAMADAS;
 UPDATE calls SET status = ?, datetime_originate = ?, fecha_llamada = NULL,
     datetime_entry_queue = NULL, start_time = NULL, end_time = NULL,
     duration_wait = NULL, duration = NULL, failure_cause = NULL,
-    failure_cause_txt = NULL, uniqueid = NULL, id_agent = NULL
+    failure_cause_txt = NULL, uniqueid = NULL, id_agent = NULL,
+    retries = retries + 1
 WHERE id_campaign = ? AND id = ?
 SQL_LLAMADA_COLOCADA;
         $sth = $this->_db->prepare($sPeticionLlamadaColocada);

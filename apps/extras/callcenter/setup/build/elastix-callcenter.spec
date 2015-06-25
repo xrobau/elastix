@@ -100,6 +100,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Jun 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: stop trying to decide when to increment retry count in
+  Llamada.class.php. Instead, just increment it unconditionally on every
+  Originate. This rule is simpler to follow and more robust. This fixes reports
+  of double increment reported by some users.
+  SVN Rev[7099]
+
 * Sat Jun 13 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: add styles to resize handles to make them visible.
   SVN Rev[7095]

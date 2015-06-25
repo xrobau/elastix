@@ -558,7 +558,6 @@ class Llamada
             'status'        =>  $this->status,
             'Uniqueid'      =>  $this->uniqueid,
             'fecha_llamada' =>  date('Y-m-d H:i:s', $this->timestamp_originateend),
-            'inc_retries'   =>  ($sStatus == 'Failure') ? 1 : 0,
         );
 
         /* En caso de fallo de Originate, y si se tienen canales auxiliares, el
@@ -742,7 +741,6 @@ class Llamada
         } else {
             $paramActualizar['status'] = $this->status;
             $paramActualizar['start_time'] = date('Y-m-d H:i:s', $this->timestamp_link);
-        	$paramActualizar['inc_retries'] = 1;
             $paramInsertarCC['fecha_inicio'] = date('Y-m-d H:i:s', $this->timestamp_link);
             $paramInsertarCC['queue'] = $this->campania->queue;
             $paramInsertarCC['agentnum'] = $this->agente->number;
@@ -881,10 +879,8 @@ class Llamada
         	if ($this->tipo_llamada == 'outgoing') {
                 if (!$this->_stillborn) {
                     $this->campania->agregarTiempoContestar($this->timestamp_hangup - $this->timestamp_originatestart);
-                    $paramActualizar['inc_retries'] = 1;
         	    } else {
         	        $this->campania->agregarTiempoContestar(0);
-        	        // Se espera que inc_retries se actualice al manejar OriginateResponse
         	    }
             }
             if (is_null($this->timestamp_enterqueue)) {

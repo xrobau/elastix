@@ -3,14 +3,14 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.4.0-15
+Prereq: elastix-framework >= 2.5.0-2
 Prereq: chkconfig, php-soap
 Requires: yum
 
@@ -131,6 +131,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Jun 29 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+- ADDED: Addons - commercial-addons.repo: New repo Iperfex has been added to the addons repo.
+
 * Fri Feb 13 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

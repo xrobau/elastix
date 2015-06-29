@@ -11,3 +11,10 @@ name=Loway Research Yum Repository
 baseurl=http://yum.loway.ch/RPMS
 gpgcheck=0
 enabled=1
+
+[iperfex]
+name=IPERFEX RPMs repository
+baseurl=http://packages.iperfex.com/centos/$releasever/$basearch/
+gpgkey=http://packages.iperfex.com/RPM-GPG-KEY-iperfex-repository
+enabled=1
+gpgcheck=1

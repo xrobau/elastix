@@ -100,6 +100,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Jul  3 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: add migration of call_recording table to InnoDB engine.
+  SVN Rev[7111]
+
 * Thu Jun 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: stop trying to decide when to increment retry count in
   Llamada.class.php. Instead, just increment it unconditionally on every

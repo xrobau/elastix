@@ -117,9 +117,9 @@ CREATE TABLE IF NOT EXISTS `calls` (
   `time_init`   time,
   `time_end`    time,
 
-  /* 2009-05-07: If not NULL, this is a record of a call to be handled later 
-     by a specific agent. This indicates the agent that should handle the call. 
-     Format Agent/XXXX 
+  /* 2009-05-07: If not NULL, this is a record of a call to be handled later
+     by a specific agent. This indicates the agent that should handle the call.
+     Format Agent/XXXX
    */
   `agent`       varchar(32),
 
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `calls` (
 
   /* 2012-12-07: Store trunk used to route outgoing call */
   `trunk`               varchar(20),
-  
+
   PRIMARY KEY  (`id`),
   KEY `id_campaign` (`id_campaign`),
   KEY `calls_ibfk_2` (`id_agent`),
@@ -161,13 +161,13 @@ CREATE TABLE IF NOT EXISTS `campaign` (
   `script` text NOT NULL,
   `estatus` varchar(1) NOT NULL default 'A',
   `id_url`  int unsigned,
-  
+
   PRIMARY KEY  (`id`),
   FOREIGN KEY (id_url)  REFERENCES campaign_external_url(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Upgrade from old length, if it applies */
-ALTER TABLE campaign 
+ALTER TABLE campaign
 CHANGE COLUMN trunk
 trunk varchar(255);
 
@@ -442,7 +442,7 @@ CREATE TABLE IF NOT EXISTS `campaign_external_url` (
     `description`   varchar(64)     NOT NULL,
     `active`        boolean         NOT NULL    DEFAULT 1,
     `opentype`      varchar(16)     NOT NULL    DEFAULT 'window', /* window iframe jsonp */
-    
+
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -457,14 +457,14 @@ CREATE TABLE IF NOT EXISTS `call_progress_log` (
     `id_call_incoming`      int(10) unsigned,
     `id_campaign_outgoing`  int(10) unsigned,
     `id_call_outgoing`      int(10) unsigned,
-    
+
     `new_status`        varchar(32) NOT NULL,
     `retry`             int(10) unsigned,
     `uniqueid`          varchar(32),
     `trunk`             varchar(20),
     `id_agent`          int(10) unsigned,
     `duration`          int(10) unsigned,
-    
+
     PRIMARY KEY (`id`),
     CONSTRAINT `call_progress_log_ibfk_1` FOREIGN KEY (`id_call_incoming`) REFERENCES `call_entry` (`id`),
     CONSTRAINT `call_progress_log_ibfk_2` FOREIGN KEY (`id_call_outgoing`) REFERENCES `calls` (`id`),
@@ -477,7 +477,7 @@ CREATE TABLE IF NOT EXISTS `call_progress_log` (
 
 --
 -- Table structure for table `call_recording`
--- 
+--
 CREATE TABLE IF NOT EXISTS `call_recording` (
     `id` int(10) unsigned NOT NULL auto_increment,
 
@@ -491,7 +491,7 @@ CREATE TABLE IF NOT EXISTS `call_recording` (
     PRIMARY KEY (`id`),
     CONSTRAINT `call_recording_ibfk_1` FOREIGN KEY (`id_call_incoming`) REFERENCES `call_entry` (`id`),
     CONSTRAINT `call_recording_ibfk_2` FOREIGN KEY (`id_call_outgoing`) REFERENCES `calls` (`id`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 /* Procedimiento que agrega soporte para DNC (DO NOT CALL) y quita la columna agent.queue */
@@ -503,25 +503,25 @@ CREATE PROCEDURE temp_actualizar_campos_2008_09_09 ()
     MODIFIES SQL DATA
 BEGIN
 	DECLARE l_existe_columna tinyint(1);
-	
+
 	SET l_existe_columna = 0;
 
 	/* Verificar existencia de columna agent.queue que debe eliminarse */
-	SELECT COUNT(*) INTO l_existe_columna 
-	FROM INFORMATION_SCHEMA.COLUMNS 
-	WHERE TABLE_SCHEMA = 'call_center' 
-		AND TABLE_NAME = 'agent' 
+	SELECT COUNT(*) INTO l_existe_columna
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE TABLE_SCHEMA = 'call_center'
+		AND TABLE_NAME = 'agent'
 		AND COLUMN_NAME = 'queue';
 	IF l_existe_columna > 0 THEN
 		ALTER TABLE agent
 		DROP COLUMN queue;
 	END IF;
-	
+
 	/* Verificar existencia de columna calls.dnc que debe agregarse */
-	SELECT COUNT(*) INTO l_existe_columna 
-	FROM INFORMATION_SCHEMA.COLUMNS 
-	WHERE TABLE_SCHEMA = 'call_center' 
-		AND TABLE_NAME = 'calls' 
+	SELECT COUNT(*) INTO l_existe_columna
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE TABLE_SCHEMA = 'call_center'
+		AND TABLE_NAME = 'calls'
 		AND COLUMN_NAME = 'dnc';
 	IF l_existe_columna = 0 THEN
 		ALTER TABLE calls
@@ -543,14 +543,14 @@ CREATE PROCEDURE temp_campania_entrante_2008_12_05 ()
     MODIFIES SQL DATA
 BEGIN
 	DECLARE l_existe_columna tinyint(1);
-	
+
 	SET l_existe_columna = 0;
 
 	/* Verificar existencia de columna call_entry.id_campaign que debe agregarse */
-	SELECT COUNT(*) INTO l_existe_columna 
-	FROM INFORMATION_SCHEMA.COLUMNS 
-	WHERE TABLE_SCHEMA = 'call_center' 
-		AND TABLE_NAME = 'call_entry' 
+	SELECT COUNT(*) INTO l_existe_columna
+	FROM INFORMATION_SCHEMA.COLUMNS
+	WHERE TABLE_SCHEMA = 'call_center'
+		AND TABLE_NAME = 'call_entry'
 		AND COLUMN_NAME = 'id_campaign';
 	IF l_existe_columna = 0 THEN
         ALTER TABLE call_entry
@@ -574,14 +574,14 @@ CREATE PROCEDURE temp_llamadas_agendadas_2009_02_20 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
     /* Verificar existencia de columna calls.date_init que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'calls' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'calls'
         AND COLUMN_NAME = 'date_init';
     IF l_existe_columna = 0 THEN
         ALTER TABLE calls
@@ -606,13 +606,13 @@ CREATE PROCEDURE temp_calls_agent_2009_05_07 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'calls' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'calls'
         AND COLUMN_NAME = 'agent';
     IF l_existe_columna = 0 THEN
         ALTER TABLE calls
@@ -635,14 +635,14 @@ CREATE PROCEDURE temp_campania_entrante_trunk_2009_06_04 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
     /* Verificar existencia de columna call_entry.trunk que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'call_entry' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'call_entry'
         AND COLUMN_NAME = 'trunk';
     IF l_existe_columna = 0 THEN
         ALTER TABLE call_entry
@@ -664,18 +664,18 @@ CREATE PROCEDURE temp_calls_failure_cause_2010_06_11 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
     /* Verificar existencia de columna calls.failure_cause que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'calls' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'calls'
         AND COLUMN_NAME = 'failure_cause';
     IF l_existe_columna = 0 THEN
-		ALTER TABLE calls 
-		ADD COLUMN failure_cause int(10) unsigned default null, 
+		ALTER TABLE calls
+		ADD COLUMN failure_cause int(10) unsigned default null,
 		ADD COLUMN failure_cause_txt varchar(32) default null;
     END IF;
 END;
@@ -694,14 +694,14 @@ CREATE PROCEDURE temp_calls_datetime_originate_2010_06_18 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
     /* Verificar existencia de columna call_entry.trunk que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'calls' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'calls'
         AND COLUMN_NAME = 'datetime_originate';
     IF l_existe_columna = 0 THEN
         ALTER TABLE calls ADD COLUMN datetime_originate datetime default NULL;
@@ -722,14 +722,14 @@ CREATE PROCEDURE temp_agent_eccp_password_2011_02_14 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
     /* Verificar existencia de columna agent.eccp_password que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'agent' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'agent'
         AND COLUMN_NAME = 'eccp_password';
     IF l_existe_columna = 0 THEN
         ALTER TABLE agent ADD COLUMN eccp_password varchar(128) default NULL;
@@ -750,14 +750,14 @@ CREATE PROCEDURE temp_campaign_external_url_2012_01_23 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
     /* Verificar existencia de columna campaign.id_url que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'campaign' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'campaign'
         AND COLUMN_NAME = 'id_url';
     IF l_existe_columna = 0 THEN
         ALTER TABLE campaign
@@ -766,10 +766,10 @@ BEGIN
     END IF;
 
     /* Verificar existencia de columna campaign_entry.id_url que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'campaign_entry' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'campaign_entry'
         AND COLUMN_NAME = 'id_url';
     IF l_existe_columna = 0 THEN
         ALTER TABLE campaign_entry
@@ -792,14 +792,14 @@ CREATE PROCEDURE temp_campania_saliente_trunk_2012_12_07 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
     /* Verificar existencia de columna calls.trunk que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'calls' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'calls'
         AND COLUMN_NAME = 'trunk';
     IF l_existe_columna = 0 THEN
         ALTER TABLE calls
@@ -821,14 +821,14 @@ CREATE PROCEDURE temp_agente_tipo_2012_12_26 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_columna tinyint(1);
-    
+
     SET l_existe_columna = 0;
 
     /* Verificar existencia de columna agent.type que debe agregarse */
-    SELECT COUNT(*) INTO l_existe_columna 
-    FROM INFORMATION_SCHEMA.COLUMNS 
-    WHERE TABLE_SCHEMA = 'call_center' 
-        AND TABLE_NAME = 'agent' 
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'agent'
         AND COLUMN_NAME = 'type';
     IF l_existe_columna = 0 THEN
         ALTER TABLE agent
@@ -851,11 +851,11 @@ CREATE PROCEDURE temp_indice_agent_calls_2014_09_08 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_indice tinyint(1);
-    
+
     SET l_existe_indice = 0;
 
     /* Verificar existencia de índices que deben agregarse */
-    SELECT COUNT(*) INTO l_existe_indice 
+    SELECT COUNT(*) INTO l_existe_indice
     FROM INFORMATION_SCHEMA.STATISTICS
     WHERE TABLE_SCHEMA = 'call_center'
         AND TABLE_NAME = 'audit'
@@ -884,11 +884,11 @@ CREATE PROCEDURE temp_indice_dont_call_2014_09_16 ()
     MODIFIES SQL DATA
 BEGIN
     DECLARE l_existe_indice tinyint(1);
-    
+
     SET l_existe_indice = 0;
 
     /* Verificar existencia de índices que deben agregarse */
-    SELECT COUNT(*) INTO l_existe_indice 
+    SELECT COUNT(*) INTO l_existe_indice
     FROM INFORMATION_SCHEMA.STATISTICS
     WHERE TABLE_SCHEMA = 'call_center'
         AND TABLE_NAME = 'dont_call'
@@ -902,6 +902,37 @@ DELIMITER ; ++
 
 CALL temp_indice_dont_call_2014_09_16();
 DROP PROCEDURE IF EXISTS temp_indice_dont_call_2014_09_16;
+
+
+/* Procedimiento para migrar tabla call_recording a formato InnoDB */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_engine_call_recording_2015_07_13 ++
+CREATE PROCEDURE temp_engine_call_recording_2015_07_13 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_engine varchar(64);
+
+    SET l_engine = '';
+
+    /* Verificar motor de tabla */
+    SELECT ENGINE INTO l_engine
+    FROM INFORMATION_SCHEMA.TABLES
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'call_recording';
+    IF l_engine = 'MyISAM' THEN
+        ALTER TABLE call_recording ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ALTER TABLE call_recording ADD FOREIGN KEY (id_call_incoming) REFERENCES call_entry(id);
+        ALTER TABLE call_recording ADD FOREIGN KEY (id_call_outgoing) REFERENCES calls(id);
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_engine_call_recording_2015_07_13();
+DROP PROCEDURE IF EXISTS temp_engine_call_recording_2015_07_13;
+
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

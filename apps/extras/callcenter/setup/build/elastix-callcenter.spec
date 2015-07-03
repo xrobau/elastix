@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,7 +100,8 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
-* Fri Jul  3 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Jul  3 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-10
+- Bump version for release.
 - CHANGED: add migration of call_recording table to InnoDB engine.
   SVN Rev[7111]
 

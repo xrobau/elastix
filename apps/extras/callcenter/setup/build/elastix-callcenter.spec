@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Jul  7 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix copy-paste error from synchronization with ccPRO that
+  causes SQL errors on call progress events.
+  SVN Rev[7113]
+
 * Fri Jul  3 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-10
 - Bump version for release.
 - CHANGED: add migration of call_recording table to InnoDB engine.

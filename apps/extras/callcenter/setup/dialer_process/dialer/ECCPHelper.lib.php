@@ -359,9 +359,9 @@ function construirEventoProgresoLlamada($db, $prop)
         // Agregar el teléfono callerid o marcado
         $sql = array(
             'outgoing'  =>
-                'SELECT calls.phone, queue_call_entry.queue '.
-                'FROM calls, campaign, queue_call_entry '.
-                'WHERE queue_call_entry.id = campaign.id_queue_call_entry AND calls.id_campaign = campaign.id AND calls.id = ?',
+                'SELECT calls.phone, campaign.queue '.
+                'FROM calls, campaign '.
+                'WHERE calls.id_campaign = campaign.id AND calls.id = ?',
             'incoming'  =>
                 'SELECT call_entry.callerid AS phone, queue_call_entry.queue '.
                 'FROM call_entry, queue_call_entry '.

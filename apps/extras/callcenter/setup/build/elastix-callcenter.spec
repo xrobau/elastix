@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 10
+Release: 11
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,7 +100,8 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
-* Tue Jul  7 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Tue Jul  7 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-11
+- Bump version for release
 - FIXED: Agent Console: fix tab add/remove for jQueryUI-1.11.4
   SVN Rev[7114]
 - FIXED: Dialer: fix copy-paste error from synchronization with ccPRO that

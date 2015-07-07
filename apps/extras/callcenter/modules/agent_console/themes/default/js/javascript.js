@@ -29,7 +29,6 @@ var timer = null;
 var evtSource = null;
 
 // Copia del URL a cargar al agregar la nueva cejilla
-var externalurl = null;
 var externalurl_title = null;
 
 $(document).ready(function() {
@@ -55,13 +54,7 @@ $(document).ready(function() {
     $('#transfer_type_radio').buttonset();
     $('#btn_guardar_formularios').button();
     $('#schedule_date').hide();
-    $('#elastix-callcenter-cejillas-contenido').tabs({
-    	add:	function (event, ui) {
-    		if (externalurl != null)
-    			$(ui.panel).append("<iframe scrolling=\"auto\" height=\"450\" frameborder=\"0\" width=\"100%\" src=\"" + externalurl + "\" />");
-    		externalurl = null;
-    	}
-    });
+    $('#elastix-callcenter-cejillas-contenido').tabs();
 
     if ($('#elastix-callcenter-llamada-paneles').length > 0) {
         $('#elastix-callcenter-llamada-paneles').layout({fxName: 'none', west: { size: 300 }});
@@ -766,9 +759,20 @@ function abrir_url_externo(urlopentype, url)
 	if (urlopentype != null) {
 		switch (urlopentype) {
 		case 'iframe':
-			externalurl = url;
-			$('#elastix-callcenter-cejillas-contenido').tabs('remove', 3);
-			$('#elastix-callcenter-cejillas-contenido').tabs('add', '#tabs-externalurl', externalurl_title);
+		    // Se quita la cejilla anterior. Se asume que se agregó con índice 1
+		    $('#elastix-callcenter-cejillas-contenido').find('.ui-tabs-nav li:eq(1)').remove();
+		    $('#tabs-externalurl').remove();
+
+		    // Se agrega la nueva cejilla, si existe
+		    if (url != null) {
+		        $('#elastix-callcenter-cejillas-contenido').append(
+		            '<div id="tabs-externalurl"><iframe scrolling="auto" height="450" frameborder="0" width="100%" src="' + url + '" /></div>');
+		        $('<li><a href="#tabs-externalurl">'+externalurl_title+'</a></li>')
+		            .appendTo('#elastix-callcenter-cejillas-contenido .ui-tabs-nav');
+		    }
+
+		    // Aplicar cambios
+		    $('#elastix-callcenter-cejillas-contenido').tabs('refresh');
 			break;
 		case 'jsonp':
 			$.ajax(url, {

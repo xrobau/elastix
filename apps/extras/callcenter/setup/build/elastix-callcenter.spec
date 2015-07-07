@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Tue Jul  7 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fix tab add/remove for jQueryUI-1.11.4
+  SVN Rev[7114]
 - FIXED: Dialer: fix copy-paste error from synchronization with ccPRO that
   causes SQL errors on call progress events.
   SVN Rev[7113]

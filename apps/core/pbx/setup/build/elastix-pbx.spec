@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX
 Name:    elastix-%{modname}
 Version: 3.0.0
-Release: 13
+Release: 14
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -378,6 +378,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jul 07 2015 Luis Abarca <labarca@palosanto.com> 3.0.0-14
+- CHANGED: pbx - Build/elastix-pbx.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Jul  3 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Trunks: use consistent name for key name of outbound dial prefix. Part
   of fix for Elastix bug #2250.

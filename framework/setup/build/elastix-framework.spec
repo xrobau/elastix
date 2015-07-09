@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 3.0.0
-Release: 12
+Release: 13
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -399,6 +399,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Jul 07 2015 Luis Abarca <labarca@palosanto.com> 3.0.0-13
+- CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
+  SVN history. Bump Release in specfile.
+  SVN Rev[6777]
+
 * Fri Jul  3 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: add missing organization code for astdb update for call
   waiting. Fixes Elastix bug #2012.
@@ -432,6 +437,12 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Nov 21 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-12
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6777]
+
+* Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 
+- FIXED: trunk - framework: The information about the version of Elastix 3 its
+  now updated.
+  SVN Rev[6775]
 
 * Mon Nov 10 2014 Luis Abarca <labarca@palosanto.com> 3.0.0-11
 - CHANGED: Framework - Build/elastix-framework.spec: Update specfile with latest

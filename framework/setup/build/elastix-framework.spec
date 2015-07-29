@@ -23,6 +23,7 @@ Conflicts: elastix-pbx <= 2.2.0-16
 Conflicts: elastix-fax <= 2.2.0-5
 Conflicts: elastix-email_admin <= 2.3.0-8
 Conflicts: elastix-developer <= 2.3.0-4
+Conflicts: elastix-addons <= 2.4.0-8
 Conflicts: kernel-module-dahdi
 Conflicts: kernel-module-rhino
 Conflicts: kernel-module-wanpipe
@@ -351,6 +352,12 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Jul 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: javascript method showPopupElastix has been replaced by
+  method showPopupCloudLogin. Now elastix-framework must be marked as conflicting
+  with older versions of elastix-addons which used the removed method.
+  SVN Rev[7117]
+
 * Mon May  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix invalid HTML syntax on datetime control.
   SVN Rev[7037]
@@ -394,13 +401,13 @@ rm -rf $RPM_BUILD_ROOT
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 
-* Fri Apr 17 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Fri Apr 17 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
   Framework: restore image in elastixneo theme. The callcenterPRO module makes
   use of it.
   SVN Rev[7008]
 
 * Thu Apr 16 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGED: Framework: stop testing for elastixneo theme in Sticky Note 
+- CHANGED: Framework: stop testing for elastixneo theme in Sticky Note
   implementation. Instead use the control that contains the theme name.
   SVN Rev[7006]
 
@@ -409,7 +416,7 @@ rm -rf $RPM_BUILD_ROOT
   SVN Rev[7005]
 
 * Mon Apr 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGED: Framework: further tweak to grid support in order to fix double 
+- CHANGED: Framework: further tweak to grid support in order to fix double
   borders.
   SVN Rev[7004]
 

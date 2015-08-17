@@ -314,8 +314,8 @@ function downloadRecording($smarty, $module_name, $pDB)
         Header('Location: ?menu='.$module_name);
         return;
     }
-    
-    $oCallsDetail = new paloSantoCallsDetail($pDB);    
+
+    $oCallsDetail = new paloSantoCallsDetail($pDB);
     $path = $oCallsDetail->getRecordingFilePath($_GET['id']);
     if (is_null($path)) {
         if ($oCallsDetail->errMsg != '') {
@@ -326,14 +326,25 @@ function downloadRecording($smarty, $module_name, $pDB)
             return 'Not Found';
         }
     } elseif (!file_exists($path[0])) {
-        Header('HTTP/1.1 404 Not Found');
-        return 'Not Found';        
+        if (substr($path[0], -6) == '.wav49') {
+            // Archivo .wav49 realmente tiene extensión .WAV
+            $path[0] = substr($path[0], 0, strlen($path[0]) - 6).'.WAV';
+            $path[1] = substr($path[1], 0, strlen($path[1]) - 6).'.WAV';
+            if (!file_exists($path[0])) {
+                Header('HTTP/1.1 404 Not Found');
+                return 'Not Found';
+            }
+        } else {
+            Header('HTTP/1.1 404 Not Found');
+            return 'Not Found';
+        }
     }
-    
+
     // Establecer Content-Type
     $content_type = 'application/octet-stream';
     $contentTypes = array(
         'wav'   =>  'audio/wav',
+        'WAV'   =>  'audio/wav', // realmente es GSM envuelto en RIFF
         'gsm'   =>  'audio/gsm',
         'mp3'   =>  'audio/mpeg',
     );
@@ -374,7 +385,7 @@ function createFieldFilter($comboAgentes, $comboColas, $arrCallType, $campaignIn
     // Combo de campañas salientes
     $comboCampaignOut = array('' => '('._tr('All Outgoing Campaigns').')');
     foreach ($campaignOut as $tuplaCampania) {
-        $comboCampaignOut[$tuplaCampania['id']] =        
+        $comboCampaignOut[$tuplaCampania['id']] =
             (($tuplaCampania['estatus'] != 'A') ? '('.$tuplaCampania['estatus'].') ' : '').
             $tuplaCampania['name'];
     }

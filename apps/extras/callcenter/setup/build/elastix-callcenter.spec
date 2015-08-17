@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Aug 17 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calls Details: fix special case where file appears in monitor format
+  as .wav49 but is written to directory as .WAV. Ported from CallCenterPRO.
+  SVN Rev[7118]
+
 * Tue Jul  7 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-11
 - Bump version for release
 - FIXED: Agent Console: fix tab add/remove for jQueryUI-1.11.4

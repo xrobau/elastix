@@ -1352,12 +1352,18 @@ Variable: MIXMONITOR_FILENAME
 Value: /var/spool/asterisk/monitor/2015/04/21/out-5528733168-5528733168-20150421-134747-1429642067.241009.wav
 Uniqueid: 1429642067.241008
              */
-            foreach (array('channel', 'actualchannel', 'auxchannel') as $idx) {
+            $llamada = NULL;
+            if (is_null($llamada)) foreach (array('channel', 'actualchannel') as $idx) {
                 $llamada = $this->_listaLlamadas->buscar($idx, $params['Channel']);
-                if (!is_null($llamada)) {
-                    $llamada->agregarArchivoGrabacion($params['Uniqueid'], $params['Channel'], $params['Value']);
-                    break;
-                }
+                if (!is_null($llamada)) break;
+            }
+            if (is_null($llamada)) foreach (array('auxchannel') as $idx) {
+                $llamada = $this->_listaLlamadas->buscar($idx, $params['Uniqueid']);
+                if (!is_null($llamada)) break;
+            }
+            if (!is_null($llamada)) {
+                $llamada->agregarArchivoGrabacion($params['Uniqueid'], $params['Channel'], $params['Value']);
+                break;
             }
             break;
         default:
@@ -1932,7 +1938,7 @@ Uniqueid: 1429642067.241008
         if ($a1->estado_consola != 'logged-in')
             return array($r2[2], $r2[0], $r2[1], $params['Channel1']);
 
-        /* Ambos lados son agentes logoneados (????). Se da preferencia al tipo 
+        /* Ambos lados son agentes logoneados (????). Se da preferencia al tipo
          * Agent. Si ambos son Agent (¿cómo se llamaron entre sí?) se da preferencia
          * al canal 1. */
         $this->_log->output('WARN: '.__METHOD__.': llamada entre dos agentes logoneados '.

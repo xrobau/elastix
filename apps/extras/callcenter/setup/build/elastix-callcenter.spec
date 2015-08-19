@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Aug 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fixed incorrect use of Channel instead of Uniqueid on lookup by
+  auxchannel. This fixes failure to pick up the recording filename when
+  recording by outbound route.
+  SVN Rev[7119]
 * Mon Aug 17 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Calls Details: fix special case where file appears in monitor format
   as .wav49 but is written to directory as .WAV. Ported from CallCenterPRO.

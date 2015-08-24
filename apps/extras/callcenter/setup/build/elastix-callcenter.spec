@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Aug 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fixed incorrect jQuery selector that resulted in an
+  External URL tab being inserted in the Forms tablist.
+  SVN Rev[7120]
+
 * Wed Aug 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: fixed incorrect use of Channel instead of Uniqueid on lookup by
   auxchannel. This fixes failure to pick up the recording filename when

@@ -768,7 +768,7 @@ function abrir_url_externo(urlopentype, url)
 		        $('#elastix-callcenter-cejillas-contenido').append(
 		            '<div id="tabs-externalurl"><iframe scrolling="auto" height="450" frameborder="0" width="100%" src="' + url + '" /></div>');
 		        $('<li><a href="#tabs-externalurl">'+externalurl_title+'</a></li>')
-		            .appendTo('#elastix-callcenter-cejillas-contenido .ui-tabs-nav');
+		            .appendTo('#elastix-callcenter-cejillas-contenido > .ui-tabs-nav');
 		    }
 
 		    // Aplicar cambios

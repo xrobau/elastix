@@ -100,6 +100,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Aug 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign In, Campaign Out: increase timeout to 3600s for CSV download.
+  SVN Rev[7121]
+
 * Mon Aug 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: fixed incorrect jQuery selector that resulted in an
   External URL tab being inserted in the Forms tablist.

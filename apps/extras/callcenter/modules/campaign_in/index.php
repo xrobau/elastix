@@ -34,7 +34,7 @@ function _moduleContent(&$smarty, $module_name)
     $script_dir=dirname($_SERVER['SCRIPT_FILENAME']);
 
     load_language_module($module_name);
-    
+
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
     global $arrConf;
@@ -118,8 +118,8 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 
     // Validar el filtro por estado de actividad de la campaña
     $estados = array(
-        "all" => _tr('All'), 
-        "A" => _tr('Active'), 
+        "all" => _tr('All'),
+        "A" => _tr('Active'),
         "I" => _tr('Inactive')
     );
     $sEstado = 'A';
@@ -179,7 +179,7 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
     $oGrid->setWidth("99%");
     $oGrid->setIcon("images/list.png");
     $oGrid->setURL($url);
-    $oGrid->setColumns(array('', _tr('Campaign Name'), _tr('Range Date'), 
+    $oGrid->setColumns(array('', _tr('Campaign Name'), _tr('Range Date'),
         _tr('Schedule per Day'), _tr('Queue'), _tr('Completed Calls'),
         _tr('Average Time'), _tr('Status'), _tr('Options')));
     $_POST['cbo_estado']=$sEstado;
@@ -190,7 +190,7 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
         'estados'                       =>  $estados,
         'estado_sel'                    =>  $sEstado,
     ));
-    
+
     $oGrid->addNew("?menu=$module_name&action=new_campaign", _tr('Create New Campaign'), TRUE);
     $oGrid->addComboAction('status_campaing_sel', _tr("Change Status"), array(
         'activate'      =>  _tr('Activate'),
@@ -250,9 +250,9 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
     // Obtener y conectarse a base de datos de FreePBX
     $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
     $arrConfig = $pConfig->leer_configuracion(false);
-    $dsn = $arrConfig['AMPDBENGINE']['valor'] . "://" . 
-        $arrConfig['AMPDBUSER']['valor'] . ":" . 
-        $arrConfig['AMPDBPASS']['valor'] . "@" . 
+    $dsn = $arrConfig['AMPDBENGINE']['valor'] . "://" .
+        $arrConfig['AMPDBUSER']['valor'] . ":" .
+        $arrConfig['AMPDBPASS']['valor'] . "@" .
         $arrConfig['AMPDBHOST']['valor'] . "/asterisk";
     $oDB = new paloDB($dsn);
 
@@ -267,7 +267,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
         $colasEntrantes = array();
         foreach ($arr_call_entry as $row) $colasEntrantes[] = $row[0];
         foreach($arrQueues as $rowQueue) {
-            if (in_array($rowQueue[0], $colasEntrantes)) 
+            if (in_array($rowQueue[0], $colasEntrantes))
                 $arrDataQueues[$rowQueue[0]] = $rowQueue[1];
         }
         ksort($arrDataQueues);
@@ -278,7 +278,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
     ) + $oCamp->getExternalUrls();
 
     // Cargar la información de todos los formularios creados y activos
-    $oDataForm = new paloSantoDataForm($pDB); 
+    $oDataForm = new paloSantoDataForm($pDB);
     $arrDataForm = $oDataForm->getFormularios(NULL,'A');
 
     // Impedir mostrar el formulario si no se han definido colas o no
@@ -300,7 +300,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
         $smarty->assign('label_manage_queues', _tr('Manage Queues'));
         $smarty->assign('label_manage_forms',  _tr('Manage Forms'));
         $smarty->assign('label_manage_external_url', _tr('Manage External URLs'));
-        
+
         // Definición del formulario de nueva campaña
         $smarty->assign("REQUIRED_FIELD", _tr('Required field'));
         $smarty->assign("CANCEL", _tr('Cancel'));
@@ -389,7 +389,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                 $iFechaIni = strtotime($_POST['fecha_ini']);
                 $iFechaFin = strtotime($_POST['fecha_fin']);
                 $iHoraIni =  strtotime($time_ini);
-                $iHoraFin =  strtotime($time_fin); 
+                $iHoraFin =  strtotime($time_fin);
                 if ($iFechaIni == -1 || $iFechaIni === FALSE) {
                     $smarty->assign("mb_title", _tr('Validation Error'));
                     $smarty->assign("mb_message", _tr('Unable to parse start date specification'));
@@ -433,7 +433,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                                             NULL,
                                             ($_POST['external_url'] == '') ? NULL : (int)$_POST['external_url']);
                         }
-                        
+
                         // Introducir o actualizar formularios
                         if ($bExito) {
                             if ($bDoCreate) {
@@ -461,7 +461,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
 
     $smarty->assign('icon', 'images/kfaxview.png');
     $contenidoModulo = $oForm->fetchForm(
-        "$local_templates_dir/new.tpl", 
+        "$local_templates_dir/new.tpl",
         is_null($id_campaign) ? _tr('New Campaign') : _tr('Edit Campaign').' "'.$_POST['nombre'].'"',
         $_POST);
     return $contenidoModulo;
@@ -616,24 +616,24 @@ function getFormCampaign($arrDataQueues, $arrSelectForm, $arrSelectFormElegidos,
 function adaptar_formato_rte($strText) {
     //returns safe code for preloading in the RTE
     $tmpString = $strText;
-    
+
     //convert all types of single quotes
     $tmpString = str_replace(chr(145), chr(39), $tmpString);
     $tmpString = str_replace(chr(146), chr(39), $tmpString);
     $tmpString = str_replace("'", "&#39;", $tmpString);
-    
+
     //convert all types of double quotes
     $tmpString = str_replace(chr(147), chr(34), $tmpString);
     $tmpString = str_replace(chr(148), chr(34), $tmpString);
 //  $tmpString = str_replace("\"", "\"", $tmpString);
-    
+
     //replace carriage returns & line feeds
     $tmpString = str_replace(chr(10), " ", $tmpString);
     $tmpString = str_replace(chr(13), " ", $tmpString);
 
         //replace comillas dobles por una
         $tmpString = str_replace("\"", "'", $tmpString);
-    
+
     return $tmpString;
 }
 
@@ -645,7 +645,7 @@ function csv_replace($s)
 function displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir)
 {
     $sDatosCSV = '';
-            
+
     $id_campaign = NULL;
     if (isset($_GET['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_GET['id_campaign']))
         $id_campaign = $_GET['id_campaign'];
@@ -653,6 +653,9 @@ function displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir)
         Header("Location: ?menu=$module_name");
         return '';
     }
+
+    // Se puede tardar mucho tiempo en la descarga
+    ini_set('max_execution_time', 3600);
 
     // Leer los datos de la campaña, si es necesario
     $oCamp = new paloSantoIncomingCampaign($pDB);
@@ -686,12 +689,12 @@ function displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir)
             foreach (array_keys($datosCampania['FORMS']) as $id_form) {
                 $lineaCSV = array_merge($lineaCSV, array_map('csv_replace', $datosCampania['FORMS'][$id_form]['LABEL']));
                 $lineaEspaciador = array_merge(
-                    $lineaEspaciador, 
+                    $lineaEspaciador,
                     array_fill(0, count($datosCampania['FORMS'][$id_form]['LABEL']), '"FORMULARIO"')); // TODO: internacionalizar
             }
             $sDatosCSV .= join(',', $lineaEspaciador)."\r\n";
             $sDatosCSV .= join(',', $lineaCSV)."\r\n";
-            
+
             // Datos del archivo CSV
             foreach ($datosCampania['BASE']['DATA'] as $tuplaDatos) {
                 $lineaCSV = array();
@@ -699,7 +702,7 @@ function displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir)
                 // Datos base de la campaña. Se recoge el primer elemento para id.
                 $id_call = array_shift($tuplaDatos);
                 $lineaCSV = array_merge($lineaCSV, array_map('csv_replace', $tuplaDatos));
-                
+
                 // Datos de los formularios de la campaña
                 foreach (array_keys($datosCampania['FORMS']) as $id_form) {
                     $dataList = NULL;
@@ -710,7 +713,7 @@ function displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir)
                     }
                     $lineaCSV = array_merge($lineaCSV, array_map('csv_replace', $dataList));
                 }
-                
+
                 $sDatosCSV .= join(',', $lineaCSV)."\r\n";
             }
         }

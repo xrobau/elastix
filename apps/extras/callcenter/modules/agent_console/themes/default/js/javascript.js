@@ -759,15 +759,15 @@ function abrir_url_externo(urlopentype, url)
 	if (urlopentype != null) {
 		switch (urlopentype) {
 		case 'iframe':
-		    // Se quita la cejilla anterior. Se asume que se agregó con índice 1
-		    $('#elastix-callcenter-cejillas-contenido').find('.ui-tabs-nav li:eq(1)').remove();
+		    // Se quita la cejilla anterior. Se asume que se fue marcada con clase .externalurl
+		    $('#elastix-callcenter-cejillas-contenido').find('.ui-tabs-nav li.tab-externalurl').remove();
 		    $('#tabs-externalurl').remove();
 
 		    // Se agrega la nueva cejilla, si existe
 		    if (url != null) {
 		        $('#elastix-callcenter-cejillas-contenido').append(
 		            '<div id="tabs-externalurl"><iframe scrolling="auto" height="450" frameborder="0" width="100%" src="' + url + '" /></div>');
-		        $('<li><a href="#tabs-externalurl">'+externalurl_title+'</a></li>')
+		        $('<li class="tab-externalurl"><a href="#tabs-externalurl">'+externalurl_title+'</a></li>')
 		            .appendTo('#elastix-callcenter-cejillas-contenido > .ui-tabs-nav');
 		    }
 

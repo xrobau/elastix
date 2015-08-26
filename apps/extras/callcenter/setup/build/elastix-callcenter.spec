@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Aug 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: make addition and removal of External URL tab
+  independent of its position in the tab control.
+  SVN Rev[7122]
+
 * Tue Aug 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Campaign In, Campaign Out: increase timeout to 3600s for CSV download.
   SVN Rev[7121]

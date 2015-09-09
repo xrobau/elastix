@@ -66,7 +66,7 @@ function _moduleContent(&$smarty, $module_name)
     $script_dir=dirname($_SERVER['SCRIPT_FILENAME']);
 
     load_language_module($module_name);
-    
+
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
     global $arrConf;
@@ -116,7 +116,7 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     if (!in_array($sTipoLlamada, array_keys($comboTipos))) $sTipoLlamada = 'E';
     $_POST['tipo'] = $sTipoLlamada; // Para llenar el formulario
     $smarty->assign('TIPO', $_POST['tipo']);
-    
+
     // Estado de la llamada
     $comboEstados = array(
         'T' =>  _tr('All'),
@@ -130,7 +130,7 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     if (!in_array($sEstadoLlamada, array_keys($comboEstados))) $sEstadoLlamada = 'E';
     $_POST['estado'] = $sEstadoLlamada; // Para llenar el formulario
     $smarty->assign('ESTADO', $_POST['estado']);
-    
+
     // Rango de fechas
     $sFechaInicial = $sFechaFinal = date('Y-m-d');
     if (isset($_GET['fecha_ini'])) $sFechaInicial = date('Y-m-d', strtotime($_GET['fecha_ini']));
@@ -153,13 +153,13 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
         $arrCalls = array();
     }
 
-    // Lista de colas a elegir para gráfico. Sólo se elige de las colas devueltas 
+    // Lista de colas a elegir para gráfico. Sólo se elige de las colas devueltas
     // por la lista de datos.
     $listaColas = array_keys($arrCalls);
     $comboColas = array(
         ''  =>  _tr('All'),
     );
-    if (count($listaColas) > 0) 
+    if (count($listaColas) > 0)
         $comboColas += array_combine($listaColas, $listaColas);
     $sColaElegida = NULL;
     if (isset($_GET['queue'])) $sColaElegida = $_GET['queue'];
@@ -188,7 +188,7 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
         0   =>  array('name' => _tr('Hour')),
     );
     $arrTodos = array_fill(0, 24, 0);
-    foreach ($arrCalls as $sQueue => $hist)    
+    foreach ($arrCalls as $sQueue => $hist)
     if (empty($sColaElegida) || $sColaElegida == $sQueue){
         $arrCols[] = array('name' => $sQueue);
         $iTotalCola = 0;
@@ -224,7 +224,7 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->showFilter(
         $oForm->fetchForm(
-            "$local_templates_dir/filter-graphic-calls.tpl", 
+            "$local_templates_dir/filter-graphic-calls.tpl",
             NULL,
             $_POST)
     );
@@ -239,8 +239,8 @@ function listHistogram($pDB, $smarty, $module_name, $local_templates_dir)
         return $oGrid->fetchGridCSV($arrGrid, $arrData);
     } else {
         $bExportando =
-              ( (isset( $_GET['exportcsv'] ) && $_GET['exportcsv'] == 'yes') || 
-                (isset( $_GET['exportspreadsheet'] ) && $_GET['exportspreadsheet'] == 'yes') || 
+              ( (isset( $_GET['exportcsv'] ) && $_GET['exportcsv'] == 'yes') ||
+                (isset( $_GET['exportspreadsheet'] ) && $_GET['exportspreadsheet'] == 'yes') ||
                 (isset( $_GET['exportpdf'] ) && $_GET['exportpdf'] == 'yes')
               ) ;
         $sContenido = $oGrid->fetchGrid($arrGrid, $arrData, $arrLang);
@@ -302,14 +302,13 @@ function getFormFilter($arrDataTipo, $arrDataEstado, $arrDataQueues)
 
 function graphHistogram($pDB, $smarty, $module_name, $local_templates_dir)
 {
-    include ("libs/jpgraph/jpgraph.php");
-    include ("libs/jpgraph/jpgraph_line.php");
+    require_once 'libs/paloSantoGraphImage.lib.php';
 
     // Tipo de llamada Entrante o Saliente
     if (!isset($_GET['tipo'])) return '';
     $sTipoLlamada = $_GET['tipo'];
     if (!in_array($sTipoLlamada, array('E', 'S'))) return '';
-    
+
     // Fechas inicial y final del rango
     if (!isset($_GET['fecha_ini'])) return '';
     if (!isset($_GET['fecha_fin'])) return '';
@@ -337,7 +336,7 @@ function graphHistogram($pDB, $smarty, $module_name, $local_templates_dir)
     $graphdata = array();
     if ($sQueue != '') {
         $graphdata['todas'] = $arrCalls['todas'][$sQueue];  // Por definición, siempre existe
-        $graphdata['exitosas'] = isset($arrCalls['exitosas'][$sQueue]) 
+        $graphdata['exitosas'] = isset($arrCalls['exitosas'][$sQueue])
             ? $arrCalls['exitosas'][$sQueue]
             : $listaVacia;
         $graphdata['abandonadas'] = isset($arrCalls['abandonadas'][$sQueue])
@@ -347,9 +346,9 @@ function graphHistogram($pDB, $smarty, $module_name, $local_templates_dir)
         $graphdata['todas'] = $listaVacia;
         $graphdata['exitosas'] = $listaVacia;
         $graphdata['abandonadas'] = $listaVacia;
-        
+
         foreach (array('todas', 'exitosas', 'abandonadas') as $k) {
-            foreach ($arrCalls[$k] as $sQueue => $hist) 
+            foreach ($arrCalls[$k] as $sQueue => $hist)
                 $graphdata[$k] = array_map('sumar', $graphdata[$k], $hist);
         }
     }

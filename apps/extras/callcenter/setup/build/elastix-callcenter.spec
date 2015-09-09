@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Sep  9 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Graphic Calls: recent Elastix framework no longer embeds jpgraph. This
+  breaks the graphic_calls module unless fixed by requiring the Elastix graphic
+  library that already knows about the change.
+  SVN Rev[7123]
+
 * Wed Aug 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: make addition and removal of External URL tab
   independent of its position in the tab control.

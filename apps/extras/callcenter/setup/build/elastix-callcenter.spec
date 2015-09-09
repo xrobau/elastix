@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Wed Sep  9 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): factorize reading of call attributes as a new method.
+  Ported from CallCenterPRO.
+  SVN Rev[7124]
 - FIXED: Graphic Calls: recent Elastix framework no longer embeds jpgraph. This
   breaks the graphic_calls module unless fixed by requiring the Elastix graphic
   library that already knows about the change.

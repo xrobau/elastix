@@ -75,15 +75,7 @@ INFO_LLAMADA;
     }
 
     // Leer información de los atributos de la llamada
-    $sPeticionSQL = <<<INFO_ATRIBUTOS
-SELECT columna AS `label`, value, column_number AS `order`
-FROM call_attribute
-WHERE id_call = ?
-ORDER BY column_number
-INFO_ATRIBUTOS;
-    $recordset = $db->prepare($sPeticionSQL);
-    $recordset->execute(array($idLlamada));
-    $tuplaLlamada['call_attributes'] = $recordset->fetchAll(PDO::FETCH_ASSOC);
+    $tuplaLlamada['call_attributes'] = leerAtributosContacto($db, 'outgoing', $idLlamada);
 
     // Leer información de los datos recogidos vía formularios
     $tuplaLlamada['call_survey'] = leerDatosRecogidosFormularios($db, 'outgoing', $idLlamada);
@@ -120,40 +112,7 @@ INFO_LLAMADA;
     unset($tuplaLlamada['id_contact']);
     $tuplaLlamada['call_attributes'] = array();
     if (!is_null($idContact)) {
-        $sPeticionSQL = <<<INFO_ATRIBUTOS
-SELECT name AS first_name, apellido AS last_name, telefono AS phone, cedula_ruc, origen AS contact_source
-FROM contact WHERE id = ?
-INFO_ATRIBUTOS;
-        $recordset = $db->prepare($sPeticionSQL);
-        $recordset->execute(array($idContact));
-        $atributosLlamada = $recordset->fetch(PDO::FETCH_ASSOC); $recordset->closeCursor();
-        $tuplaLlamada['call_attributes'] = array(
-            array(
-                'label' =>  'first_name',
-                'value' =>  $atributosLlamada['first_name'],
-                'order' =>  1,
-            ),
-            array(
-                'label' =>  'last_name',
-                'value' =>  $atributosLlamada['last_name'],
-                'order' =>  2,
-            ),
-            array(
-                'label' =>  'phone',
-                'value' =>  $atributosLlamada['phone'],
-                'order' =>  3,
-            ),
-            array(
-                'label' =>  'cedula_ruc',
-                'value' =>  $atributosLlamada['cedula_ruc'],
-                'order' =>  4,
-            ),
-            array(
-                'label' =>  'contact_source',
-                'value' =>  $atributosLlamada['contact_source'],
-                'order' =>  5,
-            ),
-        );
+        $tuplaLlamada['call_attributes'] = leerAtributosContacto($db, 'incoming', $idContact);
     }
 
     // Leer información de todos los contactos que coincidan en callerid
@@ -193,6 +152,51 @@ INFO_ATRIBUTOS;
     $tuplaLlamada['call_survey'] = leerDatosRecogidosFormularios($db, 'incoming', $idLlamada);
 
     return $tuplaLlamada;
+}
+
+function leerAtributosContacto($db, $sTipoLlamada, $idContacto)
+{
+    $r = array();
+
+    switch ($sTipoLlamada) {
+    case 'outgoing':
+        $sPeticionSQL = <<<INFO_ATRIBUTOS
+SELECT columna AS `label`, value, column_number AS `order`
+FROM call_attribute WHERE id_call = ?
+ORDER BY column_number
+INFO_ATRIBUTOS;
+        break;
+    case 'incoming':
+        $sPeticionSQL = NULL;
+        break;
+    }
+
+    if (!is_null($sPeticionSQL)) {
+        $recordset = $db->prepare($sPeticionSQL);
+        $recordset->execute(array($idContacto));
+        $r = $recordset->fetchAll(PDO::FETCH_ASSOC);
+        $recordset->closeCursor();
+    }
+
+    // Caso especial: llamadas entrantes
+    if ($sTipoLlamada == 'incoming') {
+        $sPeticionSQL = <<<INFO_ATRIBUTOS
+SELECT name AS first_name, apellido AS last_name, telefono AS phone, cedula_ruc, origen AS contact_source
+FROM contact WHERE id = ?
+INFO_ATRIBUTOS;
+        $recordset = $db->prepare($sPeticionSQL);
+        $recordset->execute(array($idContacto));
+        $atributosLlamada = $recordset->fetch(PDO::FETCH_ASSOC);
+        $recordset->closeCursor();
+        foreach ($atributosLlamada as $k => $v) {
+            $r[] = array(
+                'label' =>  $k,
+                'value' =>  $v,
+                'order' =>  count($r) + 1,
+            );
+        }
+    }
+    return $r;
 }
 
 function leerDatosRecogidosFormularios($db, $sTipoLlamada, $idLlamada)

@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Wed Sep  9 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: prevent ID collision when removing incoming/outgoing call.
+  Ported from CallCenterPRO.
+  SVN Rev[7127]
 - FIXED: Dialer: do not use id_llamada_* for calls other than incoming/outgoing.
   Ported from CallCenterPRO.
   SVN Rev[7126]

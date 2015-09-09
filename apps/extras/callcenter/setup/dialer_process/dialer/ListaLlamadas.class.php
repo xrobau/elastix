@@ -50,9 +50,9 @@ class ListaLlamadas implements IteratorAggregate
     	$this->_tuberia = $tuberia;
         $this->_log = $log;
     }
-    
+
     function numLlamadas() { return count($this->_llamadas); }
-    
+
     function nuevaLlamada($tipo_llamada)
     {
         if (!in_array($tipo_llamada, array('incoming', 'outgoing')))
@@ -61,18 +61,18 @@ class ListaLlamadas implements IteratorAggregate
         $this->_llamadas[] = $o;
         return $o;
     }
-    
+
     function getIterator() {
         return new ArrayIterator($this->_llamadas);
     }
-    
+
     function agregarIndice($sIndice, $key, Llamada $obj)
     {
         if (!isset($this->_indices[$sIndice]))
             die(__METHOD__.' - índice no implementado: '.$sIndice);
     	$this->_indices[$sIndice][$key] = $obj;
     }
-    
+
     function removerIndice($sIndice, $key)
     {
         if (!isset($this->_indices[$sIndice]))
@@ -84,10 +84,10 @@ class ListaLlamadas implements IteratorAggregate
     {
         if (!isset($this->_indices[$sIndice]))
             die(__METHOD__.' - índice no implementado: '.$sIndice);
-        return isset($this->_indices[$sIndice][$key]) 
+        return isset($this->_indices[$sIndice][$key])
             ? $this->_indices[$sIndice][$key] : NULL;
     }
-    
+
     function remover(Llamada $obj)
     {
     	foreach (array_keys($this->_llamadas) as $k) {
@@ -97,13 +97,13 @@ class ListaLlamadas implements IteratorAggregate
     		     * llamada que esté todavía esperando un ID de current_call al
     		     * momento de ser removida. */
     		    if ($obj->waiting_id_current_call) {
-    		        $this->_idcurrentcall_retrasado[$obj->tipo_llamada][] = $obj->id_llamada; 
+    		        $this->_idcurrentcall_retrasado[$obj->tipo_llamada][] = $obj->id_llamada;
     		    }
 
                 unset($this->_llamadas[$k]);
-                if (isset($this->_indices['id_llamada_saliente'][$obj->id_llamada]))
+                if ($obj->tipo_llamada == 'outgoing' && isset($this->_indices['id_llamada_saliente'][$obj->id_llamada]))
                     unset($this->_indices['id_llamada_saliente'][$obj->id_llamada]);
-                if (isset($this->_indices['id_llamada_entrante'][$obj->id_llamada]))
+                if ($obj->tipo_llamada == 'incoming' && isset($this->_indices['id_llamada_entrante'][$obj->id_llamada]))
                     unset($this->_indices['id_llamada_entrante'][$obj->id_llamada]);
                 if (isset($this->_indices['dialstring'][$obj->dialstring]))
                     unset($this->_indices['dialstring'][$obj->dialstring]);
@@ -115,23 +115,23 @@ class ListaLlamadas implements IteratorAggregate
                     unset($this->_indices['uniqueid'][$obj->uniqueid]);
                 if (isset($this->_indices['actionid'][$obj->actionid]))
                     unset($this->_indices['actionid'][$obj->actionid]);
-                    
+
                 foreach (array_keys($obj->AuxChannels) as $k)
                     unset($this->_indices['auxchannel'][$k]);
     			break;
     		}
     	}
     }
-    
+
     /**
      * Procedimiento que busca el tipo e ID de una llamada entre las llamadas
      * previamente removidas, para verificar si fue removida antes de que
      * supiera su ID de current_call. Si se encuentra este tipo e ID de llamada,
      * se lo quita.
-     * 
+     *
      * @param string    $t      Tipo de llamada
      * @param int       $id     ID de llamada
-     * 
+     *
      * @return  bool    VERDADERO si la llamada fue removida sin id de current_call
      */
     function remover_llamada_sin_idcurrentcall($t, $id)
@@ -143,11 +143,11 @@ class ListaLlamadas implements IteratorAggregate
         }
         return FALSE;
     }
-    
+
     function dump($log)
     {
         foreach ($this->_llamadas as &$llamada) $llamada->dump($log);
-        
+
     }
 }
 ?>

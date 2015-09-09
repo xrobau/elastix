@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Wed Sep  9 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): factorize names of form tables by calltype into a new
+  method. Ported from CallCenterPRO.
+  SVN Rev[7125]
 - CHANGED: Dialer (ECCP): factorize reading of call attributes as a new method.
   Ported from CallCenterPRO.
   SVN Rev[7124]

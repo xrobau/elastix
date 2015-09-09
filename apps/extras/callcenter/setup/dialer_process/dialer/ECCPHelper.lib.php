@@ -199,7 +199,7 @@ INFO_ATRIBUTOS;
     return $r;
 }
 
-function leerDatosRecogidosFormularios($db, $sTipoLlamada, $idLlamada)
+function nombresCamposFormulariosEstaticos($sTipoLlamada)
 {
     switch ($sTipoLlamada) {
     case 'incoming':
@@ -211,6 +211,12 @@ function leerDatosRecogidosFormularios($db, $sTipoLlamada, $idLlamada)
         $fdr_campo = 'id_calls';
         break;
     }
+    return array($fdr_tabla, $fdr_campo);
+}
+
+function leerDatosRecogidosFormularios($db, $sTipoLlamada, $idLlamada)
+{
+    list($fdr_tabla, $fdr_campo) = nombresCamposFormulariosEstaticos($sTipoLlamada);
 
     // Leer información de los datos recogidos vía formularios
     $sPeticionSQL = <<<INFO_FORMULARIOS

@@ -1110,15 +1110,11 @@ LEER_CAMPANIA;
             $this->_agregarRespuestaFallo($xml_saveFormDataResponse, 500, 'Cannot read form information');
         } else {
             $listaSQL = array();
-            $recordset = $this->_db->prepare(($sTipoCampania == 'incoming')
-                ? 'SELECT COUNT(*) FROM form_data_recolected_entry WHERE id_call_entry = ? AND id_form_field = ?'
-                : 'SELECT COUNT(*) FROM form_data_recolected WHERE id_calls = ? AND id_form_field = ?');
-            $sth_insert = $this->_db->prepare(($sTipoCampania == 'incoming')
-                ? 'INSERT INTO form_data_recolected_entry (value, id_call_entry, id_form_field) VALUES (?, ?, ?)'
-                : 'INSERT INTO form_data_recolected (value, id_calls, id_form_field) VALUES (?, ?, ?)');
-            $sth_update = $this->_db->prepare(($sTipoCampania == 'incoming')
-                ? 'UPDATE form_data_recolected_entry SET value = ? WHERE id_call_entry = ? AND id_form_field = ?'
-                : 'UPDATE form_data_recolected SET value = ? WHERE id_calls = ? AND id_form_field = ?');
+            list($fdr_tabla, $fdr_campo) = nombresCamposFormulariosEstaticos($sTipoCampania);
+            $recordset = $this->_db->prepare("SELECT COUNT(*) FROM $fdr_tabla WHERE $fdr_campo = ? AND id_form_field = ?");
+            $sth_insert = $this->_db->prepare("INSERT INTO $fdr_tabla (value, $fdr_campo, id_form_field) VALUES (?, ?, ?)");
+            $sth_update = $this->_db->prepare("UPDATE $fdr_tabla SET value = ? WHERE $fdr_campo = ? AND id_form_field = ?");
+
 
             /* Validación básica de los valores a guardar, combinada con
              * generación de las sentencias SQL para almacenar */
@@ -3176,7 +3172,7 @@ Privilege: Command
         if (is_array($listaColas) && isset($listaColas[$sAgente])) {
             // $listaColas[$sAgente][0] son colas suscritas actualmente
             // $listaColas[$sAgente][1] son colas dinámicas a las que puede suscribirse
-            foreach (array_unique(array_merge($listaColas[$sAgente][0], $listaColas[$sAgente][1])) as $sCola) {        
+            foreach (array_unique(array_merge($listaColas[$sAgente][0], $listaColas[$sAgente][1])) as $sCola) {
                 $xml_agentQueues->addChild('queue', str_replace('&', '&amp;', $sCola));
             }
         }

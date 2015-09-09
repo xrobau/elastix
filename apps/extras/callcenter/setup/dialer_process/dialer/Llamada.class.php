@@ -287,11 +287,17 @@ class Llamada
         case 'id_llamada':
             $v = (int)$v;
             if (is_null($this->_id_llamada) || $this->_id_llamada != $v) {
-            	$sIndice = ($this->_tipo_llamada == 'incoming') ? 'id_llamada_entrante' : 'id_llamada_saliente';
-                if (!is_null($this->_id_llamada))
-                    $this->_listaLlamadas->removerIndice($sIndice, $this->_id_llamada);
+                /* El índice id_llamada_* se usa únicamente para manejar
+                 * actualización a la tabla obsoleta current_call[_entry]
+                 * y no se usa para otros tipos de llamadas, como por ejemplo
+                 * manualdialing */
+                if (in_array($this->_tipo_llamada, array('incoming', 'outgoing'))) {
+                    $sIndice = ($this->_tipo_llamada == 'incoming') ? 'id_llamada_entrante' : 'id_llamada_saliente';
+                    if (!is_null($this->_id_llamada))
+                        $this->_listaLlamadas->removerIndice($sIndice, $this->_id_llamada);
+                    $this->_listaLlamadas->agregarIndice($sIndice, $v, $this);
+                }
                 $this->_id_llamada = $v;
-                $this->_listaLlamadas->agregarIndice($sIndice, $this->_id_llamada, $this);
 
                 // Si la llamada era entrante, entonces puede que hayan actualizaciones pendientes
                 if (count($this->_actualizacionesPendientes) > 0) {

@@ -101,6 +101,11 @@ fi
 
 %changelog
 * Wed Sep  9 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: do not overwrite Failure state with Placing state. This could
+  happen if a call is originated but immediately fails before CampaignProcess
+  sends the signal that call is expected to be Placing. Ported from
+  CallCenterPRO.
+  SVN Rev[7128]
 - FIXED: Dialer: prevent ID collision when removing incoming/outgoing call.
   Ported from CallCenterPRO.
   SVN Rev[7127]

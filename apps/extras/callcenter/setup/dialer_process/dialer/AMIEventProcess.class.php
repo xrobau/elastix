@@ -707,7 +707,14 @@ class AMIEventProcess extends TuberiaProcess
                 }
             } else {
             	$llamada->timestamp_originatestart = $iTimestampInicioOriginate;
-                $llamada->status = 'Placing';
+                /* Una llamada recién creada empieza con status == NULL. Si antes
+                 * de eso se recibió OriginateResponse(Failure) entonces se seteó
+                 * a Failure el estado. No se debe sobreescribir este Failure
+                 * para que se pueda limpiar la llamada en caso de que no se
+                 * reciba nunca un Hangup. */
+                if (is_null($llamada->status)) {
+                    $llamada->status = 'Placing';
+                }
             }
         }
     }

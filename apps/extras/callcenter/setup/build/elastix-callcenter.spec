@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Thu Sep 10 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): use Agent/NNNN as hangup channel if required for
+  static agents. Ported from CallCenterPRO.
+  SVN Rev[7132]
 - CHANGED: Dialer: unlink scheduled call from scheduled agent on failure. Ported
   from CallCenterPro.
   SVN Rev[7131]

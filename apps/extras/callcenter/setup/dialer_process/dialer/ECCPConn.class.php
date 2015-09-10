@@ -2028,13 +2028,23 @@ LISTA_EXTENSIONES;
         $xml_response = new SimpleXMLElement('<response />');
         $xml_hangupResponse = $xml_response->addChild('hangup_response');
 
+        // El siguiente código asume formato Agent/9000
+        $agentFields = $this->_parseAgent($sAgente);
+        if (is_null($agentFields)) {
+            $this->_agregarRespuestaFallo($xml_hangupResponse, 417, 'Invalid agent number');
+            return $xml_response;
+        }
+
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
         if (!is_null($infoLlamada)) $hangchannel = $infoLlamada['agentchannel'];
         if (is_null($hangchannel)) {
             // Verificar si la llamada manual está en proceso de marcado
             $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAgendada($sAgente);
             if (!is_null($infoLlamada) && in_array($infoLlamada['status'], array('Placing', 'Ringing'))) {
-                $hangchannel = $infoLlamada['channel'];
+                /* Para agentes estáticos, el canal de agente se puede usar
+                 * directamente para abortar. Los agentes dinámicos requieren
+                 * el canal. */
+                $hangchannel = ($agentFields['type'] == 'Agent') ? $sAgente : $infoLlamada['channel'];
             }
         }
 

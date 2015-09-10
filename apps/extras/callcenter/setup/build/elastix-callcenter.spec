@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Thu Sep 10 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): report on scheduled call. Ported from CallCenterPRO.
+  SVN Rev[7130]
 - CHANGED: Dialer (ECCP): implement hangup of call not yet connected to agent.
   Ported from CallCenterPRO.
   SVN Rev[7129]

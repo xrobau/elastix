@@ -41,9 +41,9 @@ define('AST_DEVICE_ONHOLD',     8);
 class Agente
 {
     private $_listaAgentes;
-    
-    /* Referencia a la llamada atendida por el agente, o NULL si no atiende. 
-     * Para entrar y salir de hold se requiere [incoming/outgoing, canal cliente, 
+
+    /* Referencia a la llamada atendida por el agente, o NULL si no atiende.
+     * Para entrar y salir de hold se requiere [incoming/outgoing, canal cliente,
      * id call, id current call ]*/
     private $_llamada = NULL;
 
@@ -54,66 +54,66 @@ class Agente
     private $_estatus = NULL;
     private $_type = NULL;
 
-    /*  Estado de la consola. Los valores posibles son 
+    /*  Estado de la consola. Los valores posibles son
         logged-out  No hay agente logoneado
         logging     Agente intenta autenticarse con la llamada
         logged-in   Agente fue autenticado y está logoneado en consola
      */
     private $_estado_consola = 'logged-out';
-    
+
     /* El número de la extensión interna que se logonea al agente. En estado
-       logout la extensión es NULL. Se supone que el canal debería contener 
+       logout la extensión es NULL. Se supone que el canal debería contener
        como prefijo a esta cadena. Formato esperado SIP/1064.
      */
     private $_extension = NULL;
-    
+
     /* El ID de la sesión de auditoría iniciada para este agente */
     private $_id_sesion = NULL;
-    
+
     /* El ID del break en que se encuentre el agente, o NULL si no está en break */
     private $_id_break = NULL;
-    
+
     /* El ID de la sesión de auditoría correspondiente al break del agente */
     private $_id_audit_break = NULL;
-    
+
     /* El ID del hold en que se encuentra el agente, o NULL si no está en hold */
     private $_id_hold = NULL;
-    
+
     /* El ID de la sesión de auditoría correspondiente al hold del agente */
     private $_id_audit_hold = NULL;
-    
+
     /* El Uniqueid de la llamada que se usó para iniciar el login de agente */
     private $_Uniqueid = NULL;
 
     /* El canal que se usó para el login del agente */
     private $_login_channel = NULL;
-    
-    /* El Uniqueid de la llamada por parte del canal del agente que se contrapone 
+
+    /* El Uniqueid de la llamada por parte del canal del agente que se contrapone
      * al Uniqueid de la llamada generada o recibida. Para llamadas salientes
      * es sólo informativo, pero es esencial registrarlo para llamadas entrantes.
      * Sólo este Uniqueid recibe un Hangup cuando una llamada es transferida.
      */
     private $_UniqueidAgente = NULL;
-    
+
     /* VERDADERO si el agente ha sido reservado para agendamiento */
     private $_reservado = FALSE;
-    
-    /* Cuenta de pausas del agente. El agente debe estar pausado si distinto de 
+
+    /* Cuenta de pausas del agente. El agente debe estar pausado si distinto de
      * cero. Por ahora se usa para break y para hold. */
     private $_num_pausas = 0;
 
     /* Si no es NULL, máximo intervalo de inactividad, en segundos */
     private $_max_inactivo = NULL;
-    
+
     /* Timestamp de la última actividad del agente */
     private $_ultima_actividad;
 
     /* Estado del agente en todas las colas a la que pertenece */
     private $_estado_agente_colas = array();
-    
+
     /* Sólo agentes dinámicos: lista de colas dinámicas a las que debe pertenecer */
     private $_colas_dinamicas = array();
-    
+
     var $llamada_agendada = NULL;
 
     // Timestamp de inicio de login, debe setearse a NULL al entrar a estado logged-in
@@ -132,9 +132,9 @@ class Agente
         // Se setea vía interfaz pública para invocar __set()
         $this->number = $iNumero;
     }
-    
+
     private function _nul($i) { return is_null($i) ? '(ninguno)' : "$i"; }
-    
+
     public function dump($log)
     {
         $s = "----- AGENTE -----\n";
@@ -150,7 +150,7 @@ class Agente
         $s .= ("\testado_consola.....".$this->estado_consola)."\n";
         if (!is_null($this->logging_inicio))
             $s .= ("\tlogging_inicio.....".$this->logging_inicio)."\n";
-        
+
         $s .= ("\tid_sesion..........".$this->_nul($this->id_sesion))."\n";
         $s .= ("\tid_break...........".$this->_nul($this->id_break))."\n";
         $s .= ("\tid_audit_break.....".$this->_nul($this->id_audit_break))."\n";
@@ -169,10 +169,14 @@ class Agente
         $s .= ("\tllamada............".(is_null($this->_llamada)
             ? '(ninguna)'
             : $this->_llamada->__toString()
-            ));
+            ))."\n";
+        $s .= ("\tllamada_agendada...".(is_null($this->llamada_agendada)
+            ? '(ninguna)'
+            : $this->llamada_agendada->__toString()
+        ));
         $log->output($s);
     }
-    
+
     public function __toString()
     {
         return 'ID='.$this->id_agent.
@@ -180,7 +184,7 @@ class Agente
             ' number='.$this->_nul($this->number).
             ' '.$this->name;
     }
-    
+
     private function _strestadocolas()
     {
         // El estado de la cola sólo es usable si eventmemberstatus está activo
@@ -205,7 +209,7 @@ class Agente
         */
         return implode(', ', array_keys($this->_estado_agente_colas));
     }
-    
+
     public function __get($s)
     {
         switch ($s) {
@@ -236,7 +240,7 @@ class Agente
             die(__METHOD__.' - propiedad no implementada: '.$s);
         }
     }
-    
+
     public function __set($s, $v)
     {
         switch ($s) {
@@ -245,13 +249,13 @@ class Agente
         case 'name':            $this->_name = (string)$v; break;
         case 'estatus':         $this->_estatus = (bool)$v; break;
         case 'max_inactivo':    $this->_max_inactivo = is_null($v) ? NULL : (int)$v; break;
-        case 'number':          
+        case 'number':
             if (ctype_digit("$v")) {
                 $v = (string)$v;
                 $sCanalViejo = $this->channel;
                 $this->_number = $v;
                 $sCanalNuevo = $this->channel;
-                
+
                 if (!is_null($sCanalViejo))
                     $this->_listaAgentes->removerIndice('agentchannel', $sCanalViejo);
                 $this->_listaAgentes->agregarIndice('agentchannel', $sCanalNuevo, $this);
@@ -272,9 +276,9 @@ class Agente
             die(__METHOD__.' - propiedad no implementada: '.$s);
         }
     }
-    
+
     public function resetTimeout() { $this->_ultima_actividad = time(); }
-    
+
     public function setBreak($id_break, $id_audit_break)
     {
     	if (!is_null($id_break) && !is_null($id_audit_break)) {
@@ -286,7 +290,7 @@ class Agente
     	}
         $this->resetTimeout();
     }
-    
+
     public function clearBreak()
     {
         $this->_id_break = NULL;
@@ -308,7 +312,7 @@ class Agente
         }
         $this->resetTimeout();
     }
-    
+
     public function clearHold()
     {
         $this->_id_hold = NULL;
@@ -320,7 +324,7 @@ class Agente
         }
         $this->resetTimeout();
     }
-    
+
     public function iniciarLoginAgente($sExtension)
     {
     	$this->_estado_consola = 'logged-out';
@@ -332,7 +336,7 @@ class Agente
         $this->_listaAgentes->agregarIndice('extension', $sExtension, $this);
         $this->_logging_inicio = time();
     }
-    
+
     // Se llama en OriginateResponse exitoso, o en Hangup antes de completar login
     public function respuestaLoginAgente($response, $uniqueid, $channel)
     {
@@ -355,7 +359,7 @@ class Agente
             $this->_logging_inicio = NULL;
         }
     }
-    
+
     // Se llama en Agentlogin al confirmar que agente está logoneado
     public function completarLoginAgente()
     {
@@ -363,7 +367,7 @@ class Agente
         $this->resetTimeout();
         $this->_logging_inicio = NULL;
     }
-    
+
     // Se llama en Agentlogoff
     public function terminarLoginAgente()
     {
@@ -381,7 +385,7 @@ class Agente
         $this->_id_sesion = NULL;
         $this->resetTimeout();
     }
-    
+
     public function resumenSeguimiento()
     {
         return array(
@@ -398,7 +402,7 @@ class Agente
             'clientchannel'     =>  is_null($this->llamada) ? NULL : $this->llamada->actualchannel,
         );
     }
-    
+
     public function resumenSeguimientoLlamada()
     {
         $r = $this->resumenSeguimiento();
@@ -416,7 +420,7 @@ class Agente
         }
         return $r;
     }
-    
+
     public function asignarLlamadaAtendida($llamada, $uniqueid_agente)
     {
     	$this->_llamada = $llamada;
@@ -427,7 +431,7 @@ class Agente
         $this->_listaAgentes->agregarIndice('uniqueidlink', $uniqueid_agente, $this);
         $this->resetTimeout();
     }
-    
+
     public function quitarLlamadaAtendida()
     {
         $this->_llamada = NULL;
@@ -444,41 +448,41 @@ class Agente
         $k_nuevo = array_keys($nuevoEstado);
         $colas_agregadas = array_diff($k_nuevo, $k_viejo);
         $colas_quitadas = array_diff($k_viejo, $k_nuevo);
-                
+
         $this->_estado_agente_colas = $nuevoEstado;
         asort($this->_estado_agente_colas);
-        
+
         return (count($colas_agregadas) > 0 || count($colas_quitadas) > 0);
     }
-    
+
     public function actualizarEstadoEnCola($queue, $status)
     {
         $this->_estado_agente_colas[$queue] = $status;
     }
-    
+
     public function quitarEstadoEnCola($queue)
     {
         unset($this->_estado_agente_colas[$queue]);
     }
-    
+
     // El estado de la cola sólo es usable si eventmemberstatus está activo
     // para la cola en cuestión. Excepto que siempre se sabe si está o no en cola.
     public function estadoEnCola($queue)
     {
         return isset($this->_estado_agente_colas[$queue]) ? AST_DEVICE_NOTINQUEUE : $this->_estado_agente_colas[$queue];
     }
-    
+
     public function asignarColasDinamicas($lista)
     {
         $colas_agregadas = array_diff($lista, $this->_colas_dinamicas);
         $colas_quitadas = array_diff($this->_colas_dinamicas, $lista);
-        
+
         $this->_colas_dinamicas = $lista;
         sort($this->_colas_dinamicas);
-        
+
         return (count($colas_agregadas) > 0 || count($colas_quitadas) > 0);
     }
-    
+
     public function diferenciaColasDinamicas()
     {
         if ($this->type == 'Agent') return NULL;
@@ -488,24 +492,24 @@ class Agente
             array_diff($currcolas, $this->_colas_dinamicas), // colas de las cuales quitar agente
         );
     }
-    
+
     public function hayColasDinamicasLogoneadas()
     {
         $currcolas = array_keys($this->_estado_agente_colas);
         return (count(array_intersect($currcolas, $this->_colas_dinamicas)) > 0);
     }
-    
+
     // Colas a las cuales pertenece actualmente el agente
     public function listaColasAgente()
     {
         return array_keys($this->_estado_agente_colas);
     }
-    
+
     public function listaColasDinamicas()
     {
         return $this->_colas_dinamicas;
     }
-    
+
     public function nuevaMembresiaCola($tuberia)
     {
         $colasAtencion = ($this->type == 'Agent')

@@ -961,7 +961,6 @@ class Llamada
                     $a->channel, $this->campania->id, $a->resumenSeguimiento());
             }
         }
-        $this->agente_agendado = NULL;
         if (!is_null($this->agente)) {
             $a = $this->agente;
             $this->agente->llamada_agendada = NULL;
@@ -976,7 +975,15 @@ class Llamada
                 $this->_tuberia->msg_CampaignProcess_verificarFinLlamadasAgendables(
                     $a->channel, $this->campania->id, $a->resumenSeguimiento());
             }
+        } elseif (!is_null($this->agente_agendado)) {
+            /* Si la llamada agendada falla se requiere desconectar al agente
+             * agendado para que esté libre para el siguiente intento. Esto es
+             * necesario para poder reportar correctamente el progreso de una
+             * llamada manual. */
+            $this->agente_agendado->llamada_agendada = NULL;
+            $this->agente_agendado->quitarLlamadaAtendida();
         }
+        $this->agente_agendado = NULL;
 
         /* Para las llamadas exitosas, ya se ha recibido OriginateResponse y
          * por lo tanto, ya se tiene timestamp_originateend. Si no está, la

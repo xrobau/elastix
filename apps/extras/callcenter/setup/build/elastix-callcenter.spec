@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Sep 10 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): implement hangup of call not yet connected to agent.
+  Ported from CallCenterPRO.
+  SVN Rev[7129]
+
 * Wed Sep  9 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: do not overwrite Failure state with Placing state. This could
   happen if a call is originated but immediately fails before CampaignProcess

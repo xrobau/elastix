@@ -2023,21 +2023,31 @@ LISTA_EXTENSIONES;
 
         // Verificar que agente está presentes
         $sAgente = (string)$comando->agent_number;
+        $hangchannel = NULL;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_hangupResponse = $xml_response->addChild('hangup_response');
 
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
-        if (is_null($infoLlamada) || is_null($infoLlamada['agentchannel'])) {
+        if (!is_null($infoLlamada)) $hangchannel = $infoLlamada['agentchannel'];
+        if (is_null($hangchannel)) {
+            // Verificar si la llamada manual está en proceso de marcado
+            $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAgendada($sAgente);
+            if (!is_null($infoLlamada) && in_array($infoLlamada['status'], array('Placing', 'Ringing'))) {
+                $hangchannel = $infoLlamada['channel'];
+            }
+        }
+
+        if (is_null($hangchannel)) {
             $this->_agregarRespuestaFallo($xml_hangupResponse, 417, 'Agent not in call');
             return $xml_response;
         }
 
         // Mandar a colgar la llamada usando el canal Agent/9000
-        $r = $this->_ami->Hangup($infoLlamada['agentchannel']);
+        $r = $this->_ami->Hangup($hangchannel);
         if ($r['Response'] != 'Success') {
             $this->_log->output('ERR: No se puede colgar la llamada para '.$sAgente.
-                ' ('.$infoLlamada['agentchannel'].') - '.$r['Message']);
+                ' ('.$hangchannel.') - '.$r['Message']);
             $this->_agregarRespuestaFallo($xml_hangupResponse, 500, 'Cannot hangup agent call');
             return $xml_response;
         }

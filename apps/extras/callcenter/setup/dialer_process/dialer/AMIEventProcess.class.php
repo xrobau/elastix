@@ -90,7 +90,7 @@ class AMIEventProcess extends TuberiaProcess
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
             'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante',
             'pingAgente', 'dumpstatus', 'listarTotalColasTrabajoAgente',
-            'infoSeguimientoAgentesCola') as $k)
+            'infoSeguimientoAgentesCola', 'reportarInfoLlamadaAgendada') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -390,6 +390,24 @@ class AMIEventProcess extends TuberiaProcess
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (is_null($a) || is_null($a->llamada)) return NULL;
             return $a->llamada->resumenLlamada();
+        }
+    }
+
+    private function _reportarInfoLlamadaAgendada($sAgente)
+    {
+        if (is_array($sAgente)) {
+            $il = array();
+            foreach ($sAgente as $s) {
+                $a = $this->_listaAgentes->buscar('agentchannel', $s);
+                $il[$s] = (is_null($a) || is_null($a->llamada_agendada))
+                    ? NULL
+                    : $a->llamada_agendada->resumenLlamada();
+            }
+            return $il;
+        } else {
+            $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+            if (is_null($a) || is_null($a->llamada_agendada)) return NULL;
+            return $a->llamada_agendada->resumenLlamada();
         }
     }
 
@@ -1106,6 +1124,16 @@ class AMIEventProcess extends TuberiaProcess
         }
         $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
             array($this, '_reportarInfoLlamadaAtendida'), $datos));
+    }
+
+    public function rpc_reportarInfoLlamadaAgendada($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, call_user_func_array(
+            array($this, '_reportarInfoLlamadaAgendada'), $datos));
     }
 
     public function rpc_reportarInfoLlamadasCampania($sFuente, $sDestino,

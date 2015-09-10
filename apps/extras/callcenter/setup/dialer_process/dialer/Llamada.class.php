@@ -465,6 +465,9 @@ class Llamada
             'datetime_linkstart'    => date('Y-m-d H:i:s', $this->timestamp_link),
             'queuenumber'           =>  $this->_queuenumber,
             'agentchannel'          =>  $this->_agentchannel,
+            'status'                =>  $this->_status,
+            'channel'               =>  $this->channel,
+            'actualchannel'         =>  $this->actualchannel,
         );
         if (is_null($resumen['queuenumber']) && !is_null($this->campania)) {
         	$resumen['queuenumber'] = $this->campania->queue;

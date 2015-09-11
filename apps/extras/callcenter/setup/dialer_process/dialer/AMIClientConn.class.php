@@ -341,6 +341,19 @@ class AMIClientConn extends MultiplexConn
       return $this->send_request('Command', $parameters);
     }
 
+    /**
+     * List status of all active channels
+     *
+     * @param string $actionid
+     */
+    function CoreShowChannels($actionid=NULL)
+    {
+      if($actionid)
+        return $this->send_request('CoreShowChannels', array('ActionID'=>$actionid));
+      else
+        return $this->send_request('CoreShowChannels');
+    }
+
    /**
     * Enable/Disable sending of events to this manager
     *
@@ -514,15 +527,15 @@ class AMIClientConn extends MultiplexConn
       return $this->send_request('MixMonitorMute', $parameters);
     }
 
-   /**
-    * Monitor a channel
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Monitor
-    * @param string $channel
-    * @param string $file
-    * @param string $format
-    * @param boolean $mix
-    */
+    /**
+     * Monitor a channel
+     *
+     * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Monitor
+     * @param string $channel
+     * @param string $file
+     * @param string $format
+     * @param boolean $mix
+     */
     function Monitor($channel, $file=NULL, $format=NULL, $mix=NULL)
     {
       $parameters = array('Channel'=>$channel);
@@ -604,11 +617,13 @@ class AMIClientConn extends MultiplexConn
     * @param string $queue
     * @param string $interface
     * @param integer $penalty
+    * @param string $membername
     */
-    function QueueAdd($queue, $interface, $penalty=0)
+    function QueueAdd($queue, $interface, $penalty=0, $membername=NULL)
     {
       $parameters = array('Queue'=>$queue, 'Interface'=>$interface, 'Paused'=>'false');
       if($penalty) $parameters['Penalty'] = $penalty;
+      if(!is_null($membername)) $parameters['MemberName'] = (string)$membername;
       return $this->send_request('QueueAdd', $parameters);
     }
 
@@ -746,13 +761,13 @@ class AMIClientConn extends MultiplexConn
       return $this->send_request('SIPnotify', $parameters);
     }
 
-   /**
-    * Channel Status
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Status
-    * @param string $channel
-    * @param string $actionid message matching variable
-    */
+    /**
+     * Channel Status
+     *
+     * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Status
+     * @param string $channel
+     * @param string $actionid message matching variable
+     */
     function Status($channel, $actionid=NULL)
     {
       $parameters = array('Channel'=>$channel);

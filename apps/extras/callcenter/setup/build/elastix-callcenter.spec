@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Sep 11 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add new AMI command CoreShowChannels. Add optional parameter
+  membername for QueueAdd command.
+  SVN Rev[7133]
+
 * Thu Sep 10 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): use Agent/NNNN as hangup channel if required for
   static agents. Ported from CallCenterPRO.

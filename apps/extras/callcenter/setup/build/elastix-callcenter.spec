@@ -101,6 +101,16 @@ fi
 
 %changelog
 * Fri Sep 11 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: complete rewrite of prediction class. This rewrite
+  reimplements the queue analysis using AMI enumeration events instead of
+  parsing the output of "queue show" and "core show channels". This rewrite
+  deliberately omits an equivalent of "agent show" in order to abstract itself
+  from the Agent/XXXX implementation detail. Additionally this rewrite lifts a
+  restriction that prevented the querying of the talk time on a non-Agent member
+  by filtering the CoreShowChannel events by AppQueue. The restriction on
+  SIP/IAX2 for dynamic agents is also lifted. Finally, this rewrite allows
+  setting a MemberName for a dynamic queue member without breaking the parsing.
+  SVN Rev[7136]
 - CHANGED: Dialer: use strtolower for remove_event_handler as done in
   add_event_handler.
   SVN Rev[7135]

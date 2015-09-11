@@ -539,16 +539,25 @@ PETICION_CAMPANIAS_ENTRANTES;
                 count($listaCampaniasAvisar['incoming_queue_old']) == 0))
                 $this->_tuberia->AMIEventProcess_nuevasCampanias($listaCampaniasAvisar);
 
+            // Se recogen todas las colas referenciadas por las campañas
+            $queueout = array();
+            foreach ($listaCampanias['outgoing'] as $tuplaCampania) {
+                $queueout[] = $tuplaCampania['queue'];
+            }
+            $queueout = array_unique($queueout);
+            $oPredictor = new Predictor($this->_ami);
+            $oPredictor->examinarColas($queueout);
+
             // Generar las llamadas para todas las campañas salientes activas
             foreach ($listaCampanias['outgoing'] as $tuplaCampania) {
-            	$this->_actualizarLlamadasCampania($tuplaCampania);
+            	$this->_actualizarLlamadasCampania($tuplaCampania, $oPredictor);
             }
 
             $this->_iTimestampUltimaRevisionCampanias = $iTimestamp;
         }
     }
 
-    private function _actualizarLlamadasCampania($infoCampania)
+    private function _actualizarLlamadasCampania($infoCampania, $oPredictor)
     {
         $iTimeoutOriginate = $this->_configDB->dialer_timeout_originate;
         if (is_null($iTimeoutOriginate) || $iTimeoutOriginate <= 0)
@@ -569,35 +578,32 @@ PETICION_CAMPANIAS_ENTRANTES;
         if (!is_null($iNumLlamadasColocar) && $iNumLlamadasColocar <= 0)
             $iNumLlamadasColocar = NULL;
 
-        $oPredictor = new Predictivo($this->_ami);
 
         // Listar todas las llamadas agendables para la campaña
         $listaLlamadasAgendadas = $this->_actualizarLlamadasAgendables($infoCampania, $datosTrunk);
-
-        // Parámetros requeridos para predicción de colocación de llamadas
-        $oPredictor->setPromedioDuracion($infoCampania['queue'], $infoCampania['promedio']);
-        $oPredictor->setDesviacionDuracion($infoCampania['queue'], $infoCampania['desviacion']);
-        $oPredictor->setProbabilidadAtencion($infoCampania['queue'], $this->_configDB->dialer_qos);
-
-        // Calcular el tiempo que se tarda desde Originate hasta Link con agente.
-        $oPredictor->setTiempoContestar($infoCampania['queue'], $this->_leerTiempoContestar($infoCampania['id']));
 
         // Averiguar cuantas llamadas se pueden hacer (por predicción), y tomar
         // el menor valor de entre máx campaña y predictivo.
         if ($this->DEBUG) {
         	$this->_log->output('DEBUG: '.__METHOD__.' verificando agentes libres...');
         }
-        $resumenPrediccion = $oPredictor->predecirNumeroLlamadas(
-            $infoCampania['queue'],
-            $this->_configDB->dialer_predictivo && ($infoCampania['num_completadas'] >= MIN_MUESTRAS));
+
+        // Parámetros requeridos para predicción de colocación de llamadas
+        $resumenPrediccion = ($this->_configDB->dialer_predictivo && ($infoCampania['num_completadas'] >= MIN_MUESTRAS))
+            ? $oPredictor->predecirNumeroLlamadas($infoCampania['queue'],
+                $this->_configDB->dialer_qos,
+                $infoCampania['promedio'],
+                $this->_leerTiempoContestar($infoCampania['id']))
+            : $oPredictor->predecirNumeroLlamadas($infoCampania['queue']);
         if ($this->DEBUG) {
-        	$this->_log->output('DEBUG: '.__METHOD__." (campania {$infoCampania['id']} ".
+            $this->_log->output('DEBUG: '.__METHOD__." (campania {$infoCampania['id']} ".
                 "cola {$infoCampania['queue']}): resumen de predicción:\n".
-                    "\tagentes libres.........: {$resumenPrediccion[0]}\n".
-                    "\tagentes por desocuparse: {$resumenPrediccion[1]}\n".
-                    "\tclientes en espera.....: {$resumenPrediccion[2]}");
+                    "\tagentes libres.........: {$resumenPrediccion['AGENTES_LIBRES']}\n".
+                    "\tagentes por desocuparse: {$resumenPrediccion['AGENTES_POR_DESOCUPAR']}\n".
+                    "\tclientes en espera.....: {$resumenPrediccion['CLIENTES_ESPERA']}");
         }
-        $iMaxPredecidos = $resumenPrediccion[0] + $resumenPrediccion[1] - $resumenPrediccion[2];
+        $iMaxPredecidos = $resumenPrediccion['AGENTES_LIBRES'] + $resumenPrediccion['AGENTES_POR_DESOCUPAR'] - $resumenPrediccion['CLIENTES_ESPERA'];
+
         if ($iMaxPredecidos < 0) $iMaxPredecidos = 0;
         if (is_null($iNumLlamadasColocar) || $iNumLlamadasColocar > $iMaxPredecidos)
             $iNumLlamadasColocar = $iMaxPredecidos;

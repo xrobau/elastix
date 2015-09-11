@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Fri Sep 11 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: use strtolower for remove_event_handler as done in
+  add_event_handler.
+  SVN Rev[7135]
 - CHANGED: Dialer: add new optional parameter queue for QueueStatus command.
   SVN Rev[7134]
 - CHANGED: Dialer: add new AMI command CoreShowChannels. Add optional parameter

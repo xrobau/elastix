@@ -965,6 +965,7 @@ class AMIClientConn extends MultiplexConn
 
     function remove_event_handler($event)
     {
+        $event = strtolower($event);
     	if (isset($this->event_handlers[$event])) {
     		unset($this->event_handlers[$event]);
     	}

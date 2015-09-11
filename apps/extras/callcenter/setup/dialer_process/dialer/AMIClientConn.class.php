@@ -671,10 +671,13 @@ class AMIClientConn extends MultiplexConn
     * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+QueueStatus
     * @param string $actionid message matching variable
     */
-    function QueueStatus($actionid=NULL)
+    function QueueStatus($queue=NULL, $actionid=NULL)
     {
-      if($actionid)
-        return $this->send_request('QueueStatus', array('ActionID'=>$actionid));
+      $parameters = array();
+      if($queue) $parameters['Queue'] = $queue;
+      if($actionid) $parameters['ActionID'] = $actionid;
+      if(count($parameters) > 0)
+        return $this->send_request('QueueStatus', $parameters);
       else
         return $this->send_request('QueueStatus');
     }

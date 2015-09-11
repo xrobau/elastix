@@ -1243,7 +1243,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tmp_estadoAgenteCola = array();
         $this->_tmp_numLlamadasEnCola = array();
         if ($this->DEBUG) $this->_log->output("DEBUG: iniciando verificación de pertenencia a colas con QueueStatus...");
-        $this->_ami->QueueStatus($this->_tmp_actionid_queuestatus);
+        $this->_ami->QueueStatus(NULL, $this->_tmp_actionid_queuestatus);
 
         // En msg_QueueStatusComplete se valida pertenencia a colas dinámicas
     }

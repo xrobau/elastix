@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Fri Sep 11 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add new optional parameter queue for QueueStatus command.
+  SVN Rev[7134]
 - CHANGED: Dialer: add new AMI command CoreShowChannels. Add optional parameter
   membername for QueueAdd command.
   SVN Rev[7133]

@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Fri Sep 11 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: use dynamic agent name as MemberName in queue.
+  SVN Rev[7137]
 - CHANGED: Dialer: complete rewrite of prediction class. This rewrite
   reimplements the queue analysis using AMI enumeration events instead of
   parsing the output of "queue show" and "core show channels". This rewrite

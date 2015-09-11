@@ -1313,7 +1313,7 @@ LEER_CAMPANIA;
         	}
         } else {
             // No hay canal de login. Se inicia login a través de Originate
-            $r = $this->_loginAgente($listaExtensiones[$sExtension], $sAgente, $iTimeout);
+            $r = $this->_loginAgente($listaExtensiones[$sExtension], $sAgente, $infoSeguimiento['name'], $iTimeout);
             return $this->Response_LoginAgentResponse('logging');
         }
     }
@@ -1450,11 +1450,12 @@ LISTA_EXTENSIONES;
      *
      * @param   string  Extensión que está usando el agente, como "SIP/1064"
      * @param   string  Cadena del agente que se está logoneando: "Agent/9000"
+     * @param   string  Nombre del agente
      * @param   int     NULL si no aplica timeout, o máxima inactividad en segundos
      *
      * @return  VERDADERO en éxito, FALSE en error
      */
-    private function _loginAgente($sExtension, $sAgente, $iTimeout)
+    private function _loginAgente($sExtension, $sAgente, $name, $iTimeout)
     {
         $r = NULL;
         $agentFields = $this->_parseAgent($sAgente);
@@ -1494,7 +1495,7 @@ LISTA_EXTENSIONES;
                 }
                 foreach ($listaColas[$sAgente][1] as $cola) {
                     // Para volverlos a agregar aqui.
-                    $r = $this->_ami->QueueAdd($cola, $sAgente);
+                    $r = $this->_ami->QueueAdd($cola, $sAgente, 0, $name);
                     if ($r['Response'] != 'Success') {
                         $this->_log->output('WARN: '.__METHOD__.': falla al ingresar agente '.
                             $sAgente.' a cola '.$cola.': '.print_r($r, TRUE));

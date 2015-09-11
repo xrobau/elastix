@@ -2295,7 +2295,7 @@ Uniqueid: 1429642067.241008
                             $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
                                 'agregado a las colas ['.implode(' ', $diffcolas[0]).']');
                             $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
-                                $diffcolas[0], ($a->num_pausas > 0));
+                                $diffcolas[0], $a->name, ($a->num_pausas > 0));
                         }
 
                         // Colas a las que pertenece y no debe pertenecer

@@ -390,6 +390,7 @@ class Agente
     {
         return array(
             'id_agent'          =>  $this->id_agent,
+            'name'              =>  $this->name,
             'estado_consola'    =>  $this->estado_consola,
             'id_break'          =>  $this->id_break,
             'id_audit_break'    =>  $this->id_audit_break,

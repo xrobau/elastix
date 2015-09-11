@@ -1824,10 +1824,10 @@ PETICION_LLAMADAS_AGENTE;
         }
     }
 
-    private function _asyncQueueAdd($channel, $queues, $pause = FALSE)
+    private function _asyncQueueAdd($channel, $queues, $name, $pause = FALSE)
     {
         foreach ($queues as $q) {
-            $r = $this->_ami->QueueAdd($q, $channel);
+            $r = $this->_ami->QueueAdd($q, $channel, 0, $name);
             if ($r['Response'] != 'Success') {
                 $this->_log->output("ERR: falla al agregar $channel a cola $q: ".print_r($r, TRUE));
             } elseif ($pause) {

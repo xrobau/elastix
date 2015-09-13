@@ -464,14 +464,12 @@ function manejarLogin_checkLogin()
 // Procedimiento para decidir qué acción tomar en el estado de sesión activa
 function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
 {
-    $sAction = '';
     $sContenido = '';
+    $json_method = NULL;
 
     $sAction = getParameter('action');
-    if (!in_array($sAction, array('', 'checkStatus', 'agentLogout', 'hangup',
-        'break', 'unbreak', 'transfer', 'confirm_contact', 'schedule',
-        'saveforms', 'ping')))
-        $sAction = '';
+    $json_method = (is_null($sAction) || !function_exists('manejarSesionActiva_'.$sAction))
+        ? NULL : 'manejarSesionActiva_'.$sAction;
 
     // Se verifica si el agente sigue logoneado en la cola de Asterisk
     $sAgente = $_SESSION['callcenter']['agente'];
@@ -484,47 +482,10 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
         $_SESSION['callcenter'] = generarEstadoInicial();
     }
 
-    switch ($sAction) {
-    case 'checkStatus':
-        $sContenido = manejarSesionActiva_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado);
-        break;
-    case 'hangup':
-        $sContenido = manejarSesionActiva_hangup($oPaloConsola);
-        break;
-    case 'agentLogout':
-        $sContenido = manejarSesionActiva_agentLogout($oPaloConsola);
-        break;
-    case 'break':
-        $sContenido = manejarSesionActiva_agentBreak($oPaloConsola);
-        break;
-    case 'unbreak':
-        $sContenido = manejarSesionActiva_agentUnBreak($oPaloConsola);
-        break;
-    case 'transfer':
-        $sContenido = manejarSesionActiva_agentTransfer($oPaloConsola);
-        break;
-    case 'confirm_contact':
-        $sContenido = manejarSesionActiva_confirmContact($oPaloConsola, $estado);
-        break;
-    case 'schedule':
-        $sContenido = manejarSesionActiva_scheduleCall($oPaloConsola);
-        break;
-    case 'saveforms':
-        $sContenido = manejarSesionActiva_saveForms($oPaloConsola, $estado);
-        break;
-    case 'ping':
-        $gc_maxlifetime = ini_get('session.gc_maxlifetime');
-        if ($gc_maxlifetime == "") $gc_maxlifetime = 10 * 60;
-        $gc_maxlifetime = (int)$gc_maxlifetime;
-
-        $json = new Services_JSON();
-        Header('Content-Type: application/json');
-        $sContenido = $json->encode(array(
-            'statusResponse'    =>  'OK',
-            'gc_maxlifetime'    =>  $gc_maxlifetime,
-        ));
-        break;
-    default:
+    if (!is_null($json_method)) {
+        $sContenido = call_user_func_array($json_method,
+            array($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado));
+    } else {
         if ($estado['estadofinal'] != 'logged-in') {
             // Para agente no logoneado, se redirecciona a la página de login
             Header('Location: ?menu='.$module_name);
@@ -532,7 +493,6 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
         } else {
             $sContenido = manejarSesionActiva_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado);
         }
-        break;
     }
     $oPaloConsola->desconectarTodo();
 
@@ -682,8 +642,8 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
                 (($iDuracionLlamada - ($iDuracionLlamada % 60)) / 60) % 60,
                 $iDuracionLlamada % 60),
 
-            'CONTENIDO_LLAMADA_INFORMACION' =>  manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
-            'CONTENIDO_LLAMADA_FORMULARIO'  =>  manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
+            'CONTENIDO_LLAMADA_INFORMACION' =>  _manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
+            'CONTENIDO_LLAMADA_FORMULARIO'  =>  _manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
             'CONTENIDO_LLAMADA_SCRIPT'      =>  $infoCampania['script'],
         ));
         $estadoInicial['timer_seconds'] = $iDuracionLlamada;
@@ -703,7 +663,7 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
         $smarty->assign(array(
             'CONTENIDO_LLAMADA_FORMULARIO'  =>  is_null($_SESSION['callcenter']['ultimo_calltype'])
                 ? ''
-                : manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas,
+                : _manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas,
                         $_SESSION['callcenter']['ultimo_callsurvey'],
                         $_SESSION['callcenter']['ultimo_campaignform']),
         ));
@@ -729,7 +689,7 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
     return $smarty->fetch("$sDirLocalPlantillas/agent_console.tpl");
 }
 
-function manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania)
+function _manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania)
 {
     $atributos = array();
     foreach ($infoLlamada['call_attributes'] as $iOrden => $atributo) {
@@ -830,7 +790,7 @@ function manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantill
 }
 
 // Se usa $infoLlamada['call_survey'] , $infoCampania['forms']
-function manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania)
+function _manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania)
 {
     $nforms = 0;
 
@@ -855,7 +815,21 @@ function manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantilla
     }
 }
 
-function manejarSesionActiva_agentLogout($oPaloConsola)
+function manejarSesionActiva_ping($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
+{
+    $gc_maxlifetime = ini_get('session.gc_maxlifetime');
+    if ($gc_maxlifetime == "") $gc_maxlifetime = 10 * 60;
+    $gc_maxlifetime = (int)$gc_maxlifetime;
+
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode(array(
+        'statusResponse'    =>  'OK',
+        'gc_maxlifetime'    =>  $gc_maxlifetime,
+    ));
+}
+
+function manejarSesionActiva_agentLogout($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array(
         'action'    =>  'logged-out',   // logged-out error
@@ -879,7 +853,7 @@ function manejarSesionActiva_agentLogout($oPaloConsola)
     return $json->encode($respuesta);
 }
 
-function manejarSesionActiva_hangup($oPaloConsola)
+function manejarSesionActiva_hangup($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array(
         'action'    =>  'hangup',
@@ -896,7 +870,7 @@ function manejarSesionActiva_hangup($oPaloConsola)
     return $json->encode($respuesta);
 }
 
-function manejarSesionActiva_agentBreak($oPaloConsola)
+function manejarSesionActiva_break($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array(
         'action'    =>  'break',
@@ -919,7 +893,7 @@ function manejarSesionActiva_agentBreak($oPaloConsola)
     return $json->encode($respuesta);
 }
 
-function manejarSesionActiva_agentUnBreak($oPaloConsola)
+function manejarSesionActiva_unbreak($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array(
         'action'    =>  'unbreak',
@@ -936,7 +910,7 @@ function manejarSesionActiva_agentUnBreak($oPaloConsola)
     return $json->encode($respuesta);
 }
 
-function manejarSesionActiva_agentTransfer($oPaloConsola)
+function manejarSesionActiva_transfer($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array(
         'action'    =>  'transfer',
@@ -959,7 +933,7 @@ function manejarSesionActiva_agentTransfer($oPaloConsola)
     return $json->encode($respuesta);
 }
 
-function manejarSesionActiva_confirmContact($oPaloConsola, $estado)
+function manejarSesionActiva_confirm_contact($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array(
         'action'    =>  'confirmed',
@@ -985,7 +959,7 @@ function manejarSesionActiva_confirmContact($oPaloConsola, $estado)
     return $json->encode($respuesta);
 }
 
-function manejarSesionActiva_scheduleCall($oPaloConsola)
+function manejarSesionActiva_schedule($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array(
         'action'    =>  'scheduled',
@@ -1027,7 +1001,7 @@ function manejarSesionActiva_scheduleCall($oPaloConsola)
     return $json->encode($respuesta);
 }
 
-function manejarSesionActiva_saveForms($oPaloConsola, $estado)
+function manejarSesionActiva_saveforms($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
     $respuesta = array(
         'action'    =>  'saved',
@@ -1515,8 +1489,8 @@ function construirRespuesta_agentlinked($smarty, $sDirLocalPlantillas,
 
         'txt_contacto_telefono' =>  $callinfo['callnumber'],
         'cronometro'            =>  sprintf('%02d:%02d:%02d', ($iDuracionLlamada - ($iDuracionLlamada % 3600)) / 3600, (($iDuracionLlamada - ($iDuracionLlamada % 60)) / 60) % 60, $iDuracionLlamada % 60),
-        'llamada_informacion'   =>  manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
-        'llamada_formulario'    =>  manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
+        'llamada_informacion'   =>  _manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
+        'llamada_formulario'    =>  _manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas, $infoLlamada, $infoCampania),
         'llamada_script'        =>  $infoCampania['script'],
         'urlopentype'           =>  isset($infoCampania['urlopentype']) ? $infoCampania['urlopentype'] : NULL,
         'url'                   =>  NULL,

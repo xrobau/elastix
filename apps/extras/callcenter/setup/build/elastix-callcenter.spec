@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sun Sep 13 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: dispatch JSON methods using function_exists instead of
+  switch block. Preparation for console plugins.
+  SVN Rev[7138]
+
 * Fri Sep 11 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: use dynamic agent name as MemberName in queue.
   SVN Rev[7137]

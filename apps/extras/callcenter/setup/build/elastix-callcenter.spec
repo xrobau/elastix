@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Mon Sep 14 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: lookup by uniqueid too when assiging recording filename.
+  Ported from CallCenterPRO.
+  SVN Rev[7141]
 - FIXED: Agent Console: remove unnecessary HTML escaping that breaks URLs on
   contact information.
   SVN Rev[7140]

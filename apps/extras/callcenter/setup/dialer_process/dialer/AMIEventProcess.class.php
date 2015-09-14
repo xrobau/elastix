@@ -1392,7 +1392,7 @@ Uniqueid: 1429642067.241008
                 $llamada = $this->_listaLlamadas->buscar($idx, $params['Channel']);
                 if (!is_null($llamada)) break;
             }
-            if (is_null($llamada)) foreach (array('auxchannel') as $idx) {
+            if (is_null($llamada)) foreach (array('uniqueid', 'auxchannel') as $idx) {
                 $llamada = $this->_listaLlamadas->buscar($idx, $params['Uniqueid']);
                 if (!is_null($llamada)) break;
             }

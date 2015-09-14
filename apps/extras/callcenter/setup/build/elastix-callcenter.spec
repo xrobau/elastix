@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Mon Sep 14 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: remove unnecessary HTML escaping that breaks URLs on
+  contact information.
+  SVN Rev[7140]
 - CHANGED: Dialer: warn if queue snapshot for prediction could be stale.
   SVN Rev[7139]
 

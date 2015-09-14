@@ -30,8 +30,8 @@
     {/if}
     {foreach from=$ATRIBUTOS_LLAMADA item=ATRIBUTO }
         <tr>
-           <td><label>{$ATRIBUTO.label|escape:"html"}: </label></td>
-           <td>{$ATRIBUTO.value|escape:"html"}</td>
+            <td><label>{$ATRIBUTO.label|escape:"html"}: </label></td>
+            <td>{$ATRIBUTO.value}</td>{* No se escapa valor del atributo porque podría ser URLs *}
         </tr>
     {/foreach}
     </tbody>

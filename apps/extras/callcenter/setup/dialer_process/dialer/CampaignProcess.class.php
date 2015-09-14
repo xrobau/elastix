@@ -29,6 +29,7 @@
 
 // Número mínimo de muestras para poder confiar en predicciones de marcador
 define('MIN_MUESTRAS', 10);
+define('INTERVALO_REVISION_CAMPANIAS', 3);
 
 class CampaignProcess extends TuberiaProcess
 {
@@ -418,7 +419,7 @@ class CampaignProcess extends TuberiaProcess
     {
         // Revisar las campañas cada 3 segundos
         $iTimestamp = time();
-        if ($iTimestamp - $this->_iTimestampUltimaRevisionCampanias > 3) {
+        if ($iTimestamp - $this->_iTimestampUltimaRevisionCampanias >= INTERVALO_REVISION_CAMPANIAS) {
             $sFecha = date('Y-m-d', $iTimestamp);
             $sHora = date('H:i:s', $iTimestamp);
             $listaCampanias = array(
@@ -589,6 +590,11 @@ PETICION_CAMPANIAS_ENTRANTES;
         }
 
         // Parámetros requeridos para predicción de colocación de llamadas
+        $iRetrasoPrediccion = microtime(TRUE) - $oPredictor->timestamp_examen;
+        if ($iRetrasoPrediccion >= 1.5 * INTERVALO_REVISION_CAMPANIAS) {
+            $this->_log->output('WARN: '.__METHOD__." (campania {$infoCampania['id']} ".
+                "cola {$infoCampania['queue']}) evaluada luego de ".$iRetrasoPrediccion." segundos.");
+        }
         $resumenPrediccion = ($this->_configDB->dialer_predictivo && ($infoCampania['num_completadas'] >= MIN_MUESTRAS))
             ? $oPredictor->predecirNumeroLlamadas($infoCampania['queue'],
                 $this->_configDB->dialer_qos,

@@ -100,6 +100,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Sep 14 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: warn if queue snapshot for prediction could be stale.
+  SVN Rev[7139]
+
 * Sun Sep 13 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: dispatch JSON methods using function_exists instead of
   switch block. Preparation for console plugins.

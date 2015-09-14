@@ -45,6 +45,7 @@ class Predictor
     private $_infoColas = array();          // Información de colas examinadas
     private $_tmp_actionid = NULL;
     private $_enum_complete = TRUE;
+    var $timestamp_examen = 0;
 
     function __construct($astman)
     {
@@ -76,6 +77,7 @@ class Predictor
         foreach ($evlist as $k)
             $this->_astConn->remove_event_handler($k);
         $this->_tmp_actionid = NULL;
+        $this->timestamp_examen = microtime(TRUE);
     }
 
     private function _esperarEnumeracion()
@@ -140,10 +142,12 @@ BridgedUniqueID: 1441991139.3
         if (is_null($this->_tmp_actionid)) return;
         if ($params['ActionID'] != $this->_tmp_actionid) return;
 
-        $this->_infoColas[$params['Queue']] = array(
-            'members'   =>  array(),
-            'callers'   =>  0,
-        );
+        if (!isset($this->_infoColas[$params['Queue']])) {
+            $this->_infoColas[$params['Queue']] = array(
+                'members'   =>  array(),
+                'callers'   =>  0,
+            );
+        }
     }
 
     function msg_QueueMember($sEvent, $params, $sServer, $iPort)

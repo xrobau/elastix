@@ -231,8 +231,10 @@ class ECCPConn
 
     private function _parseAgent($sAgente)
     {
-    	$regs = NULL;
-        return preg_match('#^(Agent|SIP|IAX2)/(\d+)$#', $sAgente, $regs)
+        // Se puede expandir para acomodar más tecnologías
+        $regexp = '#^(\w+)/(\w+)$#';
+        $regs = NULL;
+        return preg_match($regexp, $sAgente, $regs)
             ? array('type' => $regs[1], 'number' => $regs[2]) : NULL;
     }
 
@@ -1398,29 +1400,14 @@ LEER_CAMPANIA;
      */
     private function _listarExtensiones()
     {
-        // TODO: verificar si esta manera de consultar funciona para todo
-        // FreePBX. Debe de poder identificarse extensiones sin asumir una
-        // tecnología en particular.
         $oDB = $this->_abrirConexionFreePBX();
         if (is_null($oDB)) return NULL;
         try {
-            $sPeticion = <<<LISTA_EXTENSIONES
-SELECT extension,
-    (SELECT COUNT(*) FROM iax WHERE iax.id = users.extension) AS iax,
-    (SELECT COUNT(*) FROM sip WHERE sip.id = users.extension) AS sip
-FROM users ORDER BY extension
-LISTA_EXTENSIONES;
+            $sPeticion = 'SELECT user AS extension, dial from devices ORDER BY user';
             $recordset = $oDB->query($sPeticion);
             $listaExtensiones = array();
             foreach ($recordset as $tupla) {
-                $sTecnologia = NULL;
-                if ($tupla['iax'] > 0) $sTecnologia = 'IAX2/';
-                if ($tupla['sip'] > 0) $sTecnologia = 'SIP/';
-
-                // Cómo identifico las otras tecnologías?
-                if (!is_null($sTecnologia)) {
-                    $listaExtensiones[$tupla['extension']] = $sTecnologia.$tupla['extension'];
-                }
+                $listaExtensiones[$tupla['extension']] = $tupla['dial'];
             }
         } catch (PDOException $e) {
         	$this->_log->output('ERR: (internal) Cannot list extensions - '.$e->getMessage());

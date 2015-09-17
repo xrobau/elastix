@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Sep 17 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): remove restriction of SIP/IAX2 as extensions to use
+  for login. Ported from CallCenterPRO.
+  SVN Rev[7142]
+
 * Mon Sep 14 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: lookup by uniqueid too when assiging recording filename.
   Ported from CallCenterPRO.

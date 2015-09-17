@@ -82,7 +82,7 @@ class PaloSantoConsola
 
             $sUsernameECCP = 'agentconsole';
             $sPasswordECCP = 'agentconsole';
-            
+
             // Verificar si existe la contraseña de ECCP, e insertar si necesario
             $dbConnCC = $this->_obtenerConexion('call_center');
             $md5_passwd = $dbConnCC->getFirstRowQuery(
@@ -97,7 +97,7 @@ class PaloSantoConsola
             }
 
             $oECCP = new ECCP();
-            
+
             // TODO: configurar credenciales
             $cr = $oECCP->connect("localhost", $sUsernameECCP, $sPasswordECCP);
             if (isset($cr->failure)) {
@@ -105,11 +105,11 @@ class PaloSantoConsola
             }
             if (!is_null($this->_agent)) {
                 $oECCP->setAgentNumber($this->_agent);
-                
+
                 /* Privilegio de localhost - se puede recuperar la clave del
-                 * agente sin tener que pedirla explícitamente */                
+                 * agente sin tener que pedirla explícitamente */
                 $tupla = $dbConnCC->getFirstRowQuery(
-                        "SELECT eccp_password FROM agent WHERE CONCAT(type,'/',number) = ? AND estatus='A'", 
+                        "SELECT eccp_password FROM agent WHERE CONCAT(type,'/',number) = ? AND estatus='A'",
                     FALSE, array($this->_agent));
                 if (!is_array($tupla))
                     throw new ECCPConnFailedException(_tr('Failed to retrieve agent password'));
@@ -118,20 +118,20 @@ class PaloSantoConsola
                 if (is_null($tupla[0]))
                     throw new ECCPUnauthorizedException(_tr('Agent not authorized for ECCP - ECCP password not set'));
                 $oECCP->setAgentPass($tupla[0]);
-                
+
                 // Filtrar los eventos sólo para el agente actual
                 $oECCP->filterbyagent();
             }
-               
+
             $this->_eccp = $oECCP;
             return $this->_eccp;
             break;
-        }        
+        }
         return NULL;
     }
 
-    // Leer el estado de /etc/asterisk/manager.conf y obtener el primer usuario 
-    // que puede usar el dialer. Devuelve NULL en caso de error, o tupla 
+    // Leer el estado de /etc/asterisk/manager.conf y obtener el primer usuario
+    // que puede usar el dialer. Devuelve NULL en caso de error, o tupla
     // user,password para conexión en localhost.
     private function _leerConfigManager()
     {
@@ -179,8 +179,8 @@ class PaloSantoConsola
 
     /**
      * Método que desconecta todas las conexiones a bases de datos y a Asterisk,
-     * pero mantiene la conexión activa a ECCP. El uso esperado es 
-     * inmediatamente antes de la espera larga de la interfaz web, donde no 
+     * pero mantiene la conexión activa a ECCP. El uso esperado es
+     * inmediatamente antes de la espera larga de la interfaz web, donde no
      * se esperan futuras consultas a la base de datos.
      *
      * @return  null
@@ -212,45 +212,31 @@ class PaloSantoConsola
 
     /**
      * Método que lista todas las extensiones SIP e IAX que están definidas en
-     * el sistema. Estas extensiones pueden ser usadas por el agente para 
-     * logonearse en el sistema. La lista se devuelve de la forma 
+     * el sistema. Estas extensiones pueden ser usadas por el agente para
+     * logonearse en el sistema. La lista se devuelve de la forma
      * (1000 => 'SIP/1000'), ...
      *
      * @return  mixed   La lista de extensiones.
      */
     function listarExtensiones()
     {
-        // TODO: verificar si esta manera de consultar funciona para todo 
-        // FreePBX. Debe de poder identificarse extensiones sin asumir una 
-        // tecnología en particular. 
+        // TODO: esto duplica a ECCPConn::_listarExtensiones en dialer
         $oDB = $this->_obtenerConexion('asterisk');
-        $sPeticion = <<<LISTA_EXTENSIONES
-SELECT extension,
-    (SELECT COUNT(*) FROM iax WHERE iax.id = users.extension) AS iax,
-    (SELECT COUNT(*) FROM sip WHERE sip.id = users.extension) AS sip
-FROM users ORDER BY extension
-LISTA_EXTENSIONES;
+        $sPeticion = 'SELECT user AS extension, dial from devices ORDER BY user';
         $recordset = $oDB->fetchTable($sPeticion, TRUE);
         if (!is_array($recordset)) die('(internal) Cannot list extensions - '.$oDB->errMsg);
 
         $listaExtensiones = array();
         foreach ($recordset as $tupla) {
-            $sTecnologia = NULL;
-            if ($tupla['iax'] > 0) $sTecnologia = 'IAX2/';
-            if ($tupla['sip'] > 0) $sTecnologia = 'SIP/';
-            
-            // Cómo identifico las otras tecnologías?
-            if (!is_null($sTecnologia)) {
-                $listaExtensiones[$tupla['extension']] = $sTecnologia.$tupla['extension'];
-            }
+            $listaExtensiones[$tupla['extension']] = $tupla['dial'];
         }
         return $listaExtensiones;
     }
-    
+
     /**
      * Método que lista todos los agentes registrados en la base de datos. La
      * lista se devuelve de la forma ('Agent/9000' => 'Over 9000!!!'), ...
-     * 
+     *
      * @param   string  $agenttype  Tipo de agente a listar
      *      NULL    todos los agentes
      *      'static'    Sólo los agentes Agent/XXXX (estáticos)
@@ -269,45 +255,45 @@ LISTA_EXTENSIONES;
             "WHERE ".implode(' AND ', $listaWhere)." ORDER BY number";
         $recordset = $oDB->fetchTable($sPeticion, TRUE);
         if (!is_array($recordset)) die('(internal) Cannot list agents - '.$oDB->errMsg);
-        
+
         $listaAgentes = array();
         foreach ($recordset as $tupla) {
             $listaAgentes[$tupla['number']] = $tupla['number'].' - '.$tupla['name'];
-        }        
+        }
         return $listaAgentes;
     }
 
     /** Método para autenticar la extensión callback con su respectiva contraseña en la tabla agent.
-      *      
+      *
       * @param string  $sExtensionCallback: Extensión que está usando el agente, como "SIP/250"
       * @param string  $sPassword: Contraseña de la extensión para hacer login al Callcenter en el modo Callback.
       *
       * @return VERDADERO en éxito, FALSE en error
       */
     function autenticar($sExtensionCallback, $sPassword)
-    {   
-        $oDB = $this->_obtenerConexion('call_center');      
-    
+    {
+        $oDB = $this->_obtenerConexion('call_center');
+
         $sPeticion = "SELECT count(*) as cont
-                  FROM agent 
-                  WHERE CONCAT(type,'/',number) = ? 
+                  FROM agent
+                  WHERE CONCAT(type,'/',number) = ?
                   AND password = ?
-                  AND estatus = 'A' 
+                  AND estatus = 'A'
                   ORDER BY number";
             $recordset = $oDB->fetchTable($sPeticion, TRUE, array($sExtensionCallback, $sPassword));
             if (!is_array($recordset)) die('(internal) Cannot execute query - '.$oDB->errMsg);
-          
+
         if($recordset[0]['cont']==1){
             return true;
         }else{
             $this->errMsg = "Wrong password.";
-            return false;    
+            return false;
         }
-    } 
+    }
 
     /**
      * Método para iniciar el login del agente con la extensión y el número de
-     * agente que se indican. 
+     * agente que se indican.
      *
      * @param   string  Extensión que está usando el agente, como "SIP/1064"
      * @param   string  Número del agente que se está logoneando: "9000"
@@ -319,7 +305,7 @@ LISTA_EXTENSIONES;
         // Leer el valor del timeout del agente por inactividad
         $oDB = $this->_obtenerConexion('call_center');
         $tupla = $oDB->getFirstRowQuery(
-            'SELECT config_value FROM valor_config WHERE config_key = ?', 
+            'SELECT config_value FROM valor_config WHERE config_key = ?',
             TRUE, array('dialer.timeout_inactivity'));
         if (!is_array($tupla) || count($tupla) <= 0)
             $iTimeoutMin = 15;
@@ -342,10 +328,10 @@ LISTA_EXTENSIONES;
     }
 
     /**
-     * Método para esperar 1 segundo por el resultado del login del agente 
+     * Método para esperar 1 segundo por el resultado del login del agente
      * asociado con esta consola de agente. Se asume que previamente se ha
      * iniciado un login de agente con la función loginAgente().
-     * 
+     *
      * @return  string  Uno de logged-in logging logged-out mismatch error
      */
     function esperarResultadoLogin()
@@ -372,7 +358,7 @@ LISTA_EXTENSIONES;
 
     /**
      * Método para terminar el login de un agente cuyo número se indica. Esta
-     * operación también termina cualquier pausa en la que esté puesto el 
+     * operación también termina cualquier pausa en la que esté puesto el
      * agente.
      *
      * @param   string  Número del agente que se está logoneando: "9000"
@@ -396,13 +382,13 @@ LISTA_EXTENSIONES;
     }
 
     /**
-     * Método para verificar el estado de logoneo de agente a través de 
+     * Método para verificar el estado de logoneo de agente a través de
      * 'agent show online'. Este método es el principal mecanismo para mantener
      * la sesión activa del agente en el navegador.
      *
      * @param   string  Número del agente que se está logoneando: "9000"
      * @param   string  Extensión que está usando el agente, como "SIP/1064"
-     * 
+     *
      * @return  string  Uno de logged-in logging logged-out mismatch error
      */
     function estadoAgenteLogoneado($sExtension)
@@ -414,7 +400,7 @@ LISTA_EXTENSIONES;
                 $this->errMsg = '(internal) getagentstatus: '.$this->_formatoErrorECCP($connStatus);
                 return array('estadofinal' => 'error');
             }
-            
+
             $estado = array(
                 'estadofinal'       =>  'logged-in',    // A modificar por condiciones
                 'status'            =>  (string)$connStatus->status,
@@ -439,7 +425,7 @@ LISTA_EXTENSIONES;
                     'linkstart'     =>  (string)$connStatus->callinfo->linkstart,
                 ) : NULL,
             );
-            
+
             if (!is_null($estado['pauseinfo'])) foreach (array('pausestart') as $k) {
                 if (!is_null($estado['pauseinfo'][$k]) && preg_match('/^\d+:\d+:\d+$/', $estado['pauseinfo'][$k]))
                     $estado['pauseinfo'][$k] = date('Y-m-d ').$estado['pauseinfo'][$k];
@@ -448,7 +434,7 @@ LISTA_EXTENSIONES;
                 if (!is_null($estado['callinfo'][$k]) && preg_match('/^\d+:\d+:\d+$/', $estado['callinfo'][$k]))
                     $estado['callinfo'][$k] = date('Y-m-d ').$estado['callinfo'][$k];
             }
-            
+
             if ($estado['status'] == 'offline') {
                 $estado['estadofinal'] = is_null($estado['channel']) ? 'logged-out' : 'logging';
             } elseif ($estado['extension'] != $sExtension && preg_match('|^Agent/(\d+)$|', $this->_agent, $regs)) {
@@ -462,10 +448,10 @@ LISTA_EXTENSIONES;
             return array('estadofinal' => 'error');
         }
     }
-    
+
     /**
      * Método para calcular un intervalo razonable de espera durante una petición
-     * larga de AJAX. 
+     * larga de AJAX.
      *
      * @return  integer     El valor en segundos recomendado según el navegador.
      */
@@ -480,11 +466,11 @@ LISTA_EXTENSIONES;
 */
         return $iTimeoutPoll;
     }
-    
+
 
     /**
      * Método para mandar a ejecutar el colgado de la llamada activa.
-     * 
+     *
      * @return  bool  TRUE para llamada colgada, o FALSE si error
      */
     function colgarLlamada()
@@ -502,11 +488,11 @@ LISTA_EXTENSIONES;
             return FALSE;
         }
     }
-    
+
     /**
      * Método para listar los breaks conocidos en el sistema.
-     * 
-     * @return NULL en caso de éxito, o lista en la forma 
+     *
+     * @return NULL en caso de éxito, o lista en la forma
      *      array([breakid]=>"breakname - breakdesc")
      */
     function listarBreaks()
@@ -529,13 +515,13 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     /**
      * Método para iniciar el break del agente actualmente logoneado
-     * 
+     *
      * @param   int $idBreak    ID del break a usar para el agente
-     * 
-     * @return  TRUE en caso de éxito, FALSE en caso de error. 
+     *
+     * @return  TRUE en caso de éxito, FALSE en caso de error.
      */
     function iniciarBreak($idBreak)
     {
@@ -552,11 +538,11 @@ LISTA_EXTENSIONES;
             return FALSE;
         }
     }
-    
+
     /**
      * Método para terminar el break del agente actualmente logoneado
-     * 
-     * @return  TRUE en caso de éxito, FALSE en caso de error. 
+     *
+     * @return  TRUE en caso de éxito, FALSE en caso de error.
      */
     function terminarBreak()
     {
@@ -573,13 +559,13 @@ LISTA_EXTENSIONES;
             return FALSE;
         }
     }
-    
+
     function transferirLlamada($sTransferExt, $bAtxfer = FALSE)
     {
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $respuesta = $bAtxfer 
-                ? $oECCP->atxfercall($sTransferExt) 
+            $respuesta = $bAtxfer
+                ? $oECCP->atxfercall($sTransferExt)
                 : $oECCP->transfercall($sTransferExt);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to transfer call').' - '.$this->_formatoErrorECCP($respuesta);
@@ -591,7 +577,7 @@ LISTA_EXTENSIONES;
             return FALSE;
         }
     }
-    
+
     function leerInfoCampania($sCallType, $iCampaignId)
     {
         if ($sCallType == 'incomingqueue') {
@@ -631,7 +617,7 @@ LISTA_EXTENSIONES;
                                 $descCampo['default_value'] = (string)$xml_field->default_value;
                             if (isset($xml_field->options)) foreach ($xml_field->options->value as $xml_option_value) {
                                 $descCampo['options'][] = (string)$xml_option_value;
-                            } 
+                            }
                             $campos[(int)$xml_field['order']] = $descCampo;
                         }
                         ksort($campos);
@@ -645,8 +631,8 @@ LISTA_EXTENSIONES;
                     break;
                 }
             }
-            foreach (array('name', 'type', 'startdate', 'enddate', 
-                'working_time_starttime', 'working_time_endtime', 'queue', 
+            foreach (array('name', 'type', 'startdate', 'enddate',
+                'working_time_starttime', 'working_time_endtime', 'queue',
                 'retries', 'context', 'maxchan', 'status', 'script', 'forms',
                 'urltemplate', 'urlopentype') as $k)
                 if (!isset($reporte[$k]) || $reporte[$k] == '') $reporte[$k] = NULL;
@@ -656,7 +642,7 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     function leerInfoLlamada($sCallType, $iCampaignId, $iCallId)
     {
         try {
@@ -686,7 +672,7 @@ LISTA_EXTENSIONES;
             }
             foreach (array('calltype', 'call_id', 'campaign_id', 'phone', 'status',
                 'uniqueid', 'datetime_join', 'datetime_linkstart', 'trunk', 'queue',
-                'agent_number', 'datetime_originate', 'datetime_originateresponse', 
+                'agent_number', 'datetime_originate', 'datetime_originateresponse',
                 'retries', 'call_attributes', 'matching_contacts', 'call_survey') as $k)
                 if (!isset($reporte[$k])) $reporte[$k] = NULL;
             return $reporte;
@@ -695,7 +681,7 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     private function _traducirCallAttributes($xml_node)
     {
         $reporte = array();
@@ -708,7 +694,7 @@ LISTA_EXTENSIONES;
         ksort($reporte);
         return $reporte;
     }
-    
+
     private function _traducirMatchingContacts($xml_node)
     {
         $reporte = array();
@@ -725,7 +711,7 @@ LISTA_EXTENSIONES;
         }
         return $reporte;
     }
-    
+
     private function _traducirCallSurvey($xml_node)
     {
         $reporte = array();
@@ -742,7 +728,7 @@ LISTA_EXTENSIONES;
         }
         return $reporte;
     }
-    
+
     function leerScriptCola($queue)
     {
         try {
@@ -758,7 +744,7 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     function confirmarContacto($idCall, $idContact)
     {
         try {
@@ -774,7 +760,7 @@ LISTA_EXTENSIONES;
             return FALSE;
         }
     }
-    
+
     function agendarLlamada($schedule, $sameagent, $newphone, $newcontactname)
     {
         try {
@@ -790,7 +776,7 @@ LISTA_EXTENSIONES;
             return FALSE;
         }
     }
-    
+
     function guardarDatosFormularios($sTipoLlamada, $idLlamada, $datosForm)
     {
         try {
@@ -806,7 +792,7 @@ LISTA_EXTENSIONES;
             return FALSE;
         }
     }
-    
+
     function esperarEventoSesionActiva()
     {
         $this->errMsg = '';
@@ -840,7 +826,7 @@ LISTA_EXTENSIONES;
                     $evento['datetime_linkstart'] = (string)$evt->datetime_linkstart;
                     $evento['trunk'] = isset($evt->trunk) ? (string)$evt->trunk : NULL;
                     $evento['retries'] = isset($evt->retries) ? (int)$evt->retries : NULL;
-                    $evento['datetime_originateresponse'] = isset($evt->datetime_originateresponse) ? (string)$evt->datetime_originateresponse : NULL;                    
+                    $evento['datetime_originateresponse'] = isset($evt->datetime_originateresponse) ? (string)$evt->datetime_originateresponse : NULL;
                     $evento['datetime_originate'] = isset($evt->datetime_originate) ? (string)$evt->datetime_originate : NULL;
                     $evento['call_attributes'] = isset($evt->call_attributes) ? $this->_traducirCallAttributes($evt->call_attributes) : NULL;
                     $evento['matching_contacts'] = isset($evt->matching_contacts) ? $this->_traducirMatchingContacts($evt->matching_contacts) : NULL;
@@ -884,7 +870,7 @@ LISTA_EXTENSIONES;
                     foreach (array('status', 'callid', 'callnumber',
                         'callchannel', 'dialstart', 'dialend', 'queuestart',
                         'linkstart', 'pauseid', 'pausename', 'pausestart',
-                        'trunk') as $k) 
+                        'trunk') as $k)
                         $evento[$k] = isset($evt->$k) ? (string) $evt->$k : NULL;
                     $evento['queues'] = array();
                     foreach ($evt->queues->queue as $xml_q) {
@@ -900,7 +886,7 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     function listarEstadoMonitoreoAgentes()
     {
         try {
@@ -913,7 +899,7 @@ LISTA_EXTENSIONES;
             foreach ($respuestaResumen->agents->agent as $xml_agent) {
                 $agentlist[] = (string)$xml_agent->agentchannel;
             }
-            
+
             // Listar las colas a la que pertenecen todos los agentes
             $pertenenciaColas = $oECCP->getmultipleagentqueues($agentlist);
             $agenteColas = array();
@@ -933,8 +919,8 @@ LISTA_EXTENSIONES;
             foreach ($estadosAgentes->agents->agent as $xml_agent) {
                 $agenteEstado[(string)$xml_agent->agent_number] = $xml_agent;
             }
-            
-            
+
+
             foreach ($respuestaResumen->agents->agent as $xml_agent) {
                 // Averiguar el estado del agente
                 $estadoAgente = $agenteEstado[(string)$xml_agent->agentchannel];
@@ -957,7 +943,7 @@ LISTA_EXTENSIONES;
                     'lastpauseend'          =>  isset($xml_agent->lastpauseend) ? (string)$xml_agent->lastpauseend : NULL,
                     'linkstart'             =>  NULL,
                 );
-                
+
                 // Averiguar a qué colas pertenece el agente
                 foreach ($agenteColas[(string)$xml_agent->agentchannel] as $xml_queue) {
                     $infoAgenteCola = $infoAgente;
@@ -980,11 +966,11 @@ LISTA_EXTENSIONES;
                             }
                         }
                     }
-                    if (isset($estadoAgente->callinfo->queuenumber) && 
+                    if (isset($estadoAgente->callinfo->queuenumber) &&
                         (string)$estadoAgente->callinfo->queuenumber == (string)$xml_queue) {
                         $infoAgenteCola['linkstart'] = $linkstart;
                     }
-                    $resumenColas[(string)$xml_queue][(string)$xml_agent->agentchannel] = $infoAgenteCola; 
+                    $resumenColas[(string)$xml_queue][(string)$xml_agent->agentchannel] = $infoAgenteCola;
                 }
             }
             return $resumenColas;
@@ -993,7 +979,7 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     function leerVariablesCanalLlamadaActiva($sAgentNumber = NULL)
     {
         try {
@@ -1029,7 +1015,7 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     function leerListaCampanias()
     {
         try {
@@ -1050,19 +1036,19 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     function leerEstadoCampania($sCallType, $iCampaignId, $datetime_start = NULL)
     {
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $respuesta = ($sCallType == 'incomingqueue') 
+            $respuesta = ($sCallType == 'incomingqueue')
                 ? $oECCP->getincomingqueuestatus($iCampaignId, $datetime_start)
                 : $oECCP->getcampaignstatus($sCallType, $iCampaignId, $datetime_start);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to read campaign information').' - '.$this->_formatoErrorECCP($respuesta);
                 return NULL;
             }
-            
+
             $reporte = array(
                 'statuscount'   =>  array(),
                 'activecalls'   =>  array(),
@@ -1090,8 +1076,8 @@ LISTA_EXTENSIONES;
                         foreach (array('agentchannel', 'status', 'callid', 'callnumber',
                             'callchannel', 'dialstart', 'dialend', 'queuestart',
                             'linkstart', 'pauseid', 'pausename', 'pausestart',
-                            'trunk') as $k) 
-                            $reporte['agents'][$sAgente][$k] = 
+                            'trunk') as $k)
+                            $reporte['agents'][$sAgente][$k] =
                                 isset($xml_agent->$k) ? (string) $xml_agent->$k : NULL;
                         if (isset($xml_agent->callnumber)) $iNumLlamadasAtendidas++;
                     }
@@ -1123,19 +1109,19 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     function leerLogCampania($sCallType, $iCampaignId, $lastN = NULL, $idbefore = NULL)
     {
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $respuesta = ($sCallType == 'incomingqueue') 
+            $respuesta = ($sCallType == 'incomingqueue')
                 ? $oECCP->campaignlog('incoming', NULL, $iCampaignId, NULL, NULL, $lastN, $idbefore)
                 : $oECCP->campaignlog($sCallType, $iCampaignId, NULL, NULL, NULL, $lastN, $idbefore);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to read campaign log').' - '.$this->_formatoErrorECCP($respuesta);
                 return NULL;
             }
-            
+
             $reporte = array();
             if (isset($respuesta->logentries->logentry)) {
                 foreach ($respuesta->logentries->logentry as $xml_logentry) {
@@ -1153,7 +1139,7 @@ LISTA_EXTENSIONES;
             return NULL;
         }
     }
-    
+
     function escucharProgresoLlamada($bHabilitar)
     {
         try {
@@ -1176,7 +1162,7 @@ LISTA_EXTENSIONES;
             return FALSE;
         }
     }
-    
+
 }
 
 ?>

@@ -49,7 +49,7 @@ class Endpoint(BaseEndpoint):
 
     def probeModel(self):
         '''Probe specific model of the Atcom phone
-        
+
         To probe for the specific model, a telnet session is started. If the
         first thing the phone asks is 'Password:', it is an AT320. Otherwise,
         we log in with the default credentials, and check the prompt. The default
@@ -114,18 +114,18 @@ class Endpoint(BaseEndpoint):
                 logging.error('Endpoint %s@%s connection failure - %s' %
                     (self._vendorname, self._ip, str(e)))
                 return False
-        
+
         if sModel != None: self._saveModel(sModel)
-    
+
     def updateLocalConfig(self):
         '''Configuration for ATCOM endpoints
-        
+
         For model AT320, it is necessary to connect to the phone via telnet, and
-        issue a series of commands to set the registration address. 
-        
+        issue a series of commands to set the registration address.
+
         For models AT530 and later, a file should be created in the /tftpboot
         directory, named atcXXXXXXXXXXXX.cfg where XXXXXXXXXXXX is the lowercase
-        MAC address of the phone Ethernet interface. This file contains the phone 
+        MAC address of the phone Ethernet interface. This file contains the phone
         connection parameters. There is a version string at the beginning of the
         file, which must be set to a value greater than the version string stored
         in the phone. To fetch the current version string, it is necessary to
@@ -136,7 +136,7 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s has no accounts to configure' %
                 (self._vendorname, self._ip))
             return False
-        
+
         if self._model in ('AT800'):
             r = self._updateLocalConfig_AT800()
         elif self._model == 'AT320':
@@ -147,7 +147,7 @@ class Endpoint(BaseEndpoint):
             self._unregister()
             self._setConfigured()
         return r
-    
+
     def _updateLocalConfig_AT320(self):
         try:
             telnet = telnetlib.Telnet()
@@ -161,13 +161,13 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s failed to telnet - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        
+
         try:
             # Attempt to login into admin telnet
             telnet.read_until('Password:', 10)
             if self._telnet_username != None: telnet.write(self._telnet_username.encode() + '\r\n')
             if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
-            
+
             # Wait for either prompt or password prompt
             idx, m, text = telnet.expect([r'Password:', r'P:\\>'], 10)
             if idx == 0:
@@ -176,17 +176,17 @@ class Endpoint(BaseEndpoint):
                 return False
             else:
                 # Unfortunately, the brain-damaged telnet implementation of the
-                # AT320 is unable to cope with receiving all of the required 
-                # commands at once in a single network packet. If this is 
+                # AT320 is unable to cope with receiving all of the required
+                # commands at once in a single network packet. If this is
                 # attempted, the AT320 will only answer to the first command and
-                # discard all the others. To work around this, a queue of 
-                # commands is created, so that they can be spoon-fed to the 
-                # phone one by one, checking between them whether the phone is 
+                # discard all the others. To work around this, a queue of
+                # commands is created, so that they can be spoon-fed to the
+                # phone one by one, checking between them whether the phone is
                 # ready for the next command.
-                
+
                 # This phone model supports a single account
                 extension = self._accounts[0]
-                
+
                 # Program phone parameters
                 telnetQueue = [
                     'set codec1 2',                     # g711u
@@ -209,7 +209,7 @@ class Endpoint(BaseEndpoint):
                         'set serviceaddr ' + self._serverip,
                         'set localport 4569'
                         ]
-                
+
                 # Program network parameters
                 if self._dhcp:
                     telnetQueue += ['set iptype 1']
@@ -233,7 +233,7 @@ class Endpoint(BaseEndpoint):
                         telnetQueue += ['set dns2 0.0.0.0']
 
                 telnetQueue += ['set sntpip ' + self._serverip, 'write']
-                
+
                 # Write all of the commands
                 for cmd in telnetQueue:
                     telnet.write(cmd + '\r\n')
@@ -250,30 +250,30 @@ class Endpoint(BaseEndpoint):
                 (self._vendorname, self._ip, str(e)))
             return False
         return True
-    
+
     def _updateLocalConfig_AT530(self):
         ''' Local configuration for AT530 and later
         The AT530 and later uses a web server that only understands HTTP/1.1, not
-        HTTP/1.0. Additionally, the server needs the Connection: keep-alive 
+        HTTP/1.0. Additionally, the server needs the Connection: keep-alive
         header (even though keep-alive is supposed to be the HTTP/1.1 default),
         and all of the requests must be performed on the same TCP connection, if
-        at all possible. Failure to follow these rules will result in truncated 
+        at all possible. Failure to follow these rules will result in truncated
         output.
-        
-        In some versions of the AT610 firmware, if the phone has been already 
-        configured before, and an attempt is made to fetch the config.txt to 
-        query the current version number, the request will hang for a very long 
+
+        In some versions of the AT610 firmware, if the phone has been already
+        configured before, and an attempt is made to fetch the config.txt to
+        query the current version number, the request will hang for a very long
         time (more than 5 minutes). Since all we need is the version number, not
-        the complete configuration, we attempt to fetch some known pages that 
+        the complete configuration, we attempt to fetch some known pages that
         expose the current version number, which do not hang, before falling back
         to the config.txt file.
-        
-        Additionally, in old versions of the AT610 firmware (2011 or earlier), 
-        the phone will sometimes refuse to apply a configuration file, even 
-        though it has a version number greater than the one announced by the 
-        phone. This problem occurs intermittently and is a known firmware bug. 
+
+        Additionally, in old versions of the AT610 firmware (2011 or earlier),
+        the phone will sometimes refuse to apply a configuration file, even
+        though it has a version number greater than the one announced by the
+        phone. This problem occurs intermittently and is a known firmware bug.
         The only solution for this bug is a firmware update.
-        
+
         Very old versions of the AT530 firmware use a slightly different config
         format from the newer versions. Old firmware can be identified because
         it exposes the nonce in /right.htm instead of /.
@@ -286,14 +286,14 @@ class Endpoint(BaseEndpoint):
         configVersion = t[:1] + '.' + t[1:]
         logging.info('Endpoint %s@%s new config version is %s' %
             (self._vendorname, self._ip, configVersion))
-        
+
         # Need to calculate lowercase version of MAC address without colons
         sConfigFile = 'atc' + (self._mac.replace(':', '').lower()) + '.cfg'
         self._writeAtcom530Template(configVersion, sConfigFile, 'Atcom_local_530_v' + str(self._firmware) + '.tpl')
-        
+
         # Force download of new configuration followed by reboot
         return self._transferConfig2Phone(sConfigFile)
-    
+
     def _transferConfig2Phone(self, sConfigFile):
         '''Transfer configuration file to Atcom phone (AT530 or later) '''
         try:
@@ -328,9 +328,9 @@ class Endpoint(BaseEndpoint):
                 if 'failed' in text:
                     logging.error('Endpoint %s@%s failed to retrieve new config' % (self._vendorname, self._ip))
                     return False
-                
+
                 # Write all of the commands
-                telnetQueue = [                    
+                telnetQueue = [
                     'save',
                     'reload'
                 ]
@@ -348,15 +348,18 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s connection failure - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-    
-    def _fetchOldConfigVersion(self):
+
+    def _fetchOldConfigVersion(self, customList = None):
         '''Open connection to web interface to fetch current configuration '''
         # Try next URL where config version might be found
-        listaConfigVersion = (
-            '/autoprovision.htm',    # AT610
-            '/autoupdate.htm',       # AT530
-            '/config.txt'            # Placed last because it is prone to hangs on AT610
-        )
+        if customList == None:
+            listaConfigVersion = (
+                '/autoprovision.htm',    # AT610
+                '/autoupdate.htm',       # AT530
+                '/config.txt'            # Placed last because it is prone to hangs on AT610
+            )
+        else:
+            listaConfigVersion = customList
         htmlres = self._fetchAtcomAuthenticatedPage(listaConfigVersion)
         if htmlres == None: return None
         resource, htmlbody = htmlres
@@ -370,60 +373,92 @@ class Endpoint(BaseEndpoint):
                 (self._vendorname, self._ip))
             print htmlbody
             return None
+        if resource == '/config.txt':
+            return m.group(1)
         return m.group(2)
+
+    def _setupAtcomAuthentication(self):
+        http = httplib.HTTPConnection(self._ip)
+
+        noncesources = ('/', '/right.htm')
+        for noncesource in noncesources:
+            http.request('GET', noncesource, None, {'Connection' : 'keep-alive'})
+            resp = http.getresponse()
+            htmlbody = resp.read()
+            if not resp.status in (200, 404):
+                logging.error('Endpoint %s@%s failed to fetch nonce for HTTP configuration - got response code %s' %
+                    (self._vendorname, self._ip, resp.status))
+                http.close()
+                return (None, None)
+            elif resp.status == 200:
+                m = re.search(r'<input type="hidden" name="nonce" value="([0-9a-zA-Z]+)">', htmlbody)
+                if m != None: break
+        if m == None:
+            logging.error('Endpoint %s@%s failed to locate nonce in HTTP response' %
+                (self._vendorname, self._ip))
+            http.close()
+            return (None, None)
+        nonce = m.group(1)
+
+        # Identify firmware
+        if noncesource == '/right.htm': self._firmware = 1 # Old firmware
+
+        # Simulate POST to allow fetching rest of content
+        extraheaders = {
+            'Connection' : 'keep-alive',
+            'Cookie' : 'auth=' + nonce,
+            'Content-Type' : 'application/x-www-form-urlencoded'
+        }
+        postvars = {
+            'encoded'   :   self._http_username + ':' +
+                md5.new(':'.join((self._http_username, self._http_password, nonce))).hexdigest(),
+            'nonce'     :   nonce,
+            'goto'      :   'Logon',
+            'URL'       :   '/'
+        }
+        postdata = urllib.urlencode(postvars)
+        http.request('POST', noncesource, postdata, extraheaders)
+        resp = http.getresponse()
+        if resp.status != 200:
+            logging.error('Endpoint %s@%s failed to fetch login result - got response code %s' %
+                (self._vendorname, self._ip, resp.status))
+            http.close()
+            return (None, None)
+        htmlbody = resp.read()
+        return (http, nonce)
+
+    def _cleanupAtcomAuthentication(self, http, nonce):
+        # Got page, log out of HTTP interface
+        extraheaders = {
+            'Connection' : 'keep-alive',
+            'Cookie' : 'auth=' + nonce,
+            'Content-Type' : 'application/x-www-form-urlencoded'
+        }
+        http.request('POST', '/LogOut.htm', 'DefaultLogout=Logout', extraheaders)
+        resp = http.getresponse()
+        htmlbody = resp.read()
+        if resp.status != 200:
+            logging.error('Endpoint %s@%s failed to logout from phone - got response code %s' %
+                (self._vendorname, self._ip, resp.status))
+            http.close()
+            return False
+        else:
+            if 'No Post Handler' in htmlbody:
+                logging.warning(
+                    'Endpoint %s@%s phone lacks handler for LogOut.htm - HTTP '\
+                    'login might only work a limited number of times.' %
+                    (self._vendorname, self._ip))
+
+        http.close()
+        return True
 
     def _fetchAtcomAuthenticatedPage(self, urlsProbe):
         '''Fetch the first page from the list of URLs under authentication '''
         htmlres = None
         try:
-            http = httplib.HTTPConnection(self._ip)
-    
-            noncesources = ('/', '/right.htm')
-            for noncesource in noncesources:
-                http.request('GET', noncesource, None, {'Connection' : 'keep-alive'})
-                resp = http.getresponse()
-                htmlbody = resp.read()
-                if not resp.status in (200, 404):
-                    logging.error('Endpoint %s@%s failed to fetch nonce for HTTP configuration - got response code %s' %
-                        (self._vendorname, self._ip, resp.status))
-                    http.close()
-                    return None
-                elif resp.status == 200:
-                    m = re.search(r'<input type="hidden" name="nonce" value="([0-9a-zA-Z]+)">', htmlbody)
-                    if m != None: break
-            if m == None:
-                logging.error('Endpoint %s@%s failed to locate nonce in HTTP response' %
-                    (self._vendorname, self._ip))
-                http.close()
-                return None
-            nonce = m.group(1)
-            
-            # Identify firmware
-            if noncesource == '/right.htm': self._firmware = 1 # Old firmware
-            
-            # Simulate POST to allow fetching rest of content
-            extraheaders = {
-                'Connection' : 'keep-alive',
-                'Cookie' : 'auth=' + nonce,
-                'Content-Type' : 'application/x-www-form-urlencoded'
-            }
-            postvars = {
-                'encoded'   :   self._http_username + ':' + 
-                    md5.new(':'.join((self._http_username, self._http_password, nonce))).hexdigest(),
-                'nonce'     :   nonce,
-                'goto'      :   'Logon',
-                'URL'       :   '/'
-            }
-            postdata = urllib.urlencode(postvars)
-            http.request('POST', noncesource, postdata, extraheaders)
-            resp = http.getresponse()
-            if resp.status != 200:
-                logging.error('Endpoint %s@%s failed to fetch login result - got response code %s' %
-                    (self._vendorname, self._ip, resp.status))
-                http.close()
-                return None
-            htmlbody = resp.read()
-            
+            http, nonce = self._setupAtcomAuthentication()
+            if http == None: return None
+
             for resource in urlsProbe:
                 http.request('GET', resource, None, {'Connection' : 'keep-alive', 'Cookie' : 'auth=' + nonce})
                 resp = http.getresponse()
@@ -436,38 +471,19 @@ class Endpoint(BaseEndpoint):
                         (self._vendorname, self._ip, resp.status))
                     http.close()
                     return None
-            
-            # Got page, log out of HTTP interface
-            extraheaders = {
-                'Connection' : 'keep-alive',
-                'Cookie' : 'auth=' + nonce,
-                'Content-Type' : 'application/x-www-form-urlencoded'
-            }
-            http.request('POST', '/LogOut.htm', 'DefaultLogout=Logout', extraheaders)
-            resp = http.getresponse()
-            htmlbody = resp.read()
-            if resp.status != 200:
-                logging.error('Endpoint %s@%s failed to logout from phone - got response code %s' %
-                    (self._vendorname, self._ip, resp.status))
-                http.close()
+
+            if not self._cleanupAtcomAuthentication(http, nonce):
                 return None
-            else:
-                if 'No Post Handler' in htmlbody:
-                    logging.warning(
-                        'Endpoint %s@%s phone lacks handler for LogOut.htm - HTTP '\
-                        'login might only work a limited number of times.' %
-                        (self._vendorname, self._ip))
-    
-            http.close()        
+
             return htmlres
         except socket.error, e:
             logging.error('Endpoint %s@%s failed to connect - %s' %
                     (self._vendorname, self._ip, str(e)))
             return None
-    
+
     def _writeAtcom530Template(self, configVersion, sConfigFile, sTemplate):
         sConfigPath = self._tftpdir + '/' + sConfigFile
-        
+
         # This code assumes all Atcoms support at most 1 iax2 account
         vars = self._prepareVarList()
         vars.update({
@@ -489,13 +505,13 @@ class Endpoint(BaseEndpoint):
         ''' Local configuration for AT800
         The AT800 uses a XML configuration file. For this phone, it is enough
         to generate the XML content, then POST it through a special URL on the
-        phone, with no authentication. If successful, the phone reboots 
+        phone, with no authentication. If successful, the phone reboots
         immediately.
         '''
         xmlcontent = self._getAtcom800Template()
         try:
             status = True
-            
+
             boundary = '------------------ENDPOINTCONFIG'
             postdata = '--' + boundary + '\r\n' +\
                 'Content-Disposition: form-data; name="configfile"; filename="config.xml"\r\n' +\

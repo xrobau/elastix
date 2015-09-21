@@ -71,6 +71,9 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
                     else:
                         self._saveModel('VI2006')
 
+    def isModelV2(self):
+        return (self._model in ('X3', 'X3P', 'X5', 'X5P', 'C400', 'C400P', 'C600', 'C600P'))
+
     def updateLocalConfig(self):
         '''Configuration for Fanvil endpoints
 
@@ -84,7 +87,7 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
                 (self._vendorname, self._ip))
             return False
 
-        if self._model in ('X3', 'X3P'):
+        if self.isModelV2():
             configVersion = self._fetchOldConfigVersion(('/config.txt',))
         else:
             configVersion = self._fetchOldConfigVersion()
@@ -107,7 +110,7 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
             return False
 
     def _transferConfig2Phone(self, sConfigFile):
-        if not self._model in ('X3', 'X3P'):
+        if not self.isModelV2():
             return parent._transferConfig2Phone(sConfigFile)
 
         try:

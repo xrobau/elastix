@@ -155,6 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Sep 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: introduce new Fanvil models X5, C400, C600.
+  SVN Rev[7148]
+
 * Sun Sep 20 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: update help files as part 3 of changes by
   Bob Fryer.

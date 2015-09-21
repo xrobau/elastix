@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Sun Sep 20 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: update help files as part 3 of changes by
+  Bob Fryer.
+  SVN Rev[7147]
 - CHANGED: Endpoint Configurator: add Cisco SPA manufacturer and models as part
   2 of changes by Bob Fryer.
   SVN Rev[7146]

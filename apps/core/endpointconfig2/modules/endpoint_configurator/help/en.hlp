@@ -38,29 +38,29 @@ to the Elastix server as their telephony server.</p>
 <p>The following are terms used in the rest of this document:</p>
 <dl>
 <dt>Endpoint</dt>
-<dd>An endpoint is a hardware device or software that implements at least one 
-telephony technology stack (such as SIP or IAX2) and is capable of placing and 
-receiving VoIP calls on behalf of an end user. This is most often a VoIP phone. 
-In order to place and receive calls, the endpoint must be configured with a 
+<dd>An endpoint is a hardware device or software that implements at least one
+telephony technology stack (such as SIP or IAX2) and is capable of placing and
+receiving VoIP calls on behalf of an end user. This is most often a VoIP phone.
+In order to place and receive calls, the endpoint must be configured with a
 telephony proxy server, and at least one telephony account on this proxy server.
-An endpoint may support more than one account, and possibly more than one VoIP 
+An endpoint may support more than one account, and possibly more than one VoIP
 technology.</dd>
 
 <dt>Account</dt>
-<dd>An account is an authentication/authorization record created on a telephony 
+<dd>An account is an authentication/authorization record created on a telephony
 server for the purpose of routing calls. The bare minimum information to configure
-an account is the VoIP technology used to talk with the phone, an account name, 
+an account is the VoIP technology used to talk with the phone, an account name,
 and a shared secret. Frequently the account also has a Display Name, a friendly
 string that describes the account. On single-tenant setups, the account name may
 be the same as the extension that should be dialed to reach this account. On
-multi-tenant setups (such as Elastix 3), the account name must necessarily 
+multi-tenant setups (such as Elastix 3), the account name must necessarily
 contain disambiguating information beyond (or instead of) the extension to dial.</dd>
 
 <dt>Telephony server</dt>
-<dd>A telephony server is a computer server that runs a telephony PBX or 
+<dd>A telephony server is a computer server that runs a telephony PBX or
 switching software (such as Asterisk). The telephony server is responsible for
-routing calls between extensions and outside sources (such as VoIP and PSTN 
-telephony trunks). This routing involves resolving a dialed number from an 
+routing calls between extensions and outside sources (such as VoIP and PSTN
+telephony trunks). This routing involves resolving a dialed number from an
 endpoint, or entered through an IVR, into an existing account to which the call
 should be bridged. For the purposes of this module, the Elastix server plays the
 role of the telephony server.</dd>
@@ -91,7 +91,7 @@ sending properties in addition to the available IP, such as the address of a
 TFTP server from which configuration files may be downloaded. If the Elastix
 server is the DHCP server for the network, it will point the TFTP server at itself.
 However, frequently the DHCP server is a different server and not under the control
-of Elastix. This results in the TFTP directory configuration being absent, or 
+of Elastix. This results in the TFTP directory configuration being absent, or
 reused for purposes other than phone provisioning. An endpoint supports static
 provisioning if the way the endpoint is configured allows the phone to ignore
 absent or invalid server configuration from DHCP, and always fetch the configuration
@@ -117,7 +117,7 @@ the following columns:
 <li>Selection checkbox. By selecting this, the endpoint is marked for subsequent
 configuration or removal from the list. The header contains a global checkbox
 that will check/uncheck all endpoints.</li>
-<li>Endpoint status. This displays the status of the endpoint as one or more 
+<li>Endpoint status. This displays the status of the endpoint as one or more
 icons. The available flags are as follows:
     <ul>
         <li>Scroll icon: the endpoint has not been scanned, but rather defined in an upload.</li>
@@ -129,12 +129,12 @@ icons. The available flags are as follows:
 the database and uploaded files are considered to refer to the same endpoint if
 they reference the same MAC address.</li>
 <li>Current IP. If the endpoint was detected through a scan, this field will show
-the IP at which the endpoint was found. This field is a link to the HTTP 
+the IP at which the endpoint was found. This field is a link to the HTTP
 configuration interface (if supported) of the phone.</li>
 <li>Manufacturer. This displays the detected manufacturer of the endpoint.</li>
 <li>Model. This displays the detected model of the endpoint. Since automatic model
 detection is not (yet) implemented for some manufacturers, this field allows the
-user to correct the model via a drop-down list. Accurate model detection is 
+user to correct the model via a drop-down list. Accurate model detection is
 required for many other features (such as account assignment) to work.</li>
 <li>Options. This link displays a modal dialog on which common options for the
 endpoint can be manually configured.</li>
@@ -154,7 +154,7 @@ button.</dd>
 
 <dt><img src="../../images/endpoint.png"/>Endpoint configuration toolbar button</dt>
 <dd>Clicking on this icon will start applying the configuration for all selected
-endpoints (all endpoints for which the checkbox is set). When applying the 
+endpoints (all endpoints for which the checkbox is set). When applying the
 configuration, the toolbar will change to a progress bar. As endpoints are
 configured, the progress bar will update, and the toolbar will revert to the
 default state when the configuration is done. During configuration, a log is
@@ -174,7 +174,7 @@ any way.</dd>
 
 <dt><img src="../../images/download2.png"/>Download toolbar button</dt>
 <dd>Clicking on this icon will display a list of links to download the list of
-endpoints stored on the database, in three different formats. The supported 
+endpoints stored on the database, in three different formats. The supported
 formats are:
 <ul>
 <li>CSV (Legacy). This is the format used by the old Endpoint Configurator.</li>
@@ -186,7 +186,7 @@ and uses indentation to group multiple accounts and properties per endpoint.</li
 
 <dt><img src="../modules/{$node_id}/images/upload.png" border="0" />Upload toolbar button</dt>
 <dd>Clicking on this icon will display a small dialog in which the user may specify
-an endpoint list file to upload to the server. The file format is automatically 
+an endpoint list file to upload to the server. The file format is automatically
 detected.</dd>
 
 </dl>
@@ -204,7 +204,7 @@ are various flags that indicate known capabilities for the model.</p>
 
 <p>The Accounts screen enables assignment of the existing accounts on the system to
 the selected endpoint. The screen contains two panels with account entries and
-an additional panel of properties that appears when one of the accounts for the 
+an additional panel of properties that appears when one of the accounts for the
 endpoint is selected. The left panel contains all of the accounts with supported
 technologies not assigned to any endpoint. The top right panel contains all of
 the accounts assigned to the endpoint, of which the first one will be used as the
@@ -230,7 +230,7 @@ that may be required to configure a phone with non-default passwords.</p>
 <img src="../modules/{$node_id}/images/hlp_dialog_custom.png" />
 
 <p>The Custom Parameters screen allows setting of model-specific parameters not
-otherwise supported by the interface. Unlike any parameters entered in the 
+otherwise supported by the interface. Unlike any parameters entered in the
 Accounts screen, these parameters apply to the endpoint as a whole, rather than
 a specific account.</p>
 
@@ -242,7 +242,7 @@ endpoints:</p>
 <li>Plug all of your endpoints into the same LAN as the Elastix server.</li>
 <li>On the interface, check the network specification next to the Scan button, and
 fix it if required. Then, click on the Scan button.</li>
-<li>The endpoint listing will grow or update in real time as endpoints are 
+<li>The endpoint listing will grow or update in real time as endpoints are
 detected. Press the "Cancel" button at any time to stop scanning, or wait until
 the entire network has been scanned.</li>
 <li>For each detected endpoint to be configured, check whether the model has been
@@ -251,12 +251,12 @@ set before accounts can be assigned.</li>
 <li>Display the configuration dialog for each endpoint to configure, and assign
 accounts as required.</li>
 <li>Select all of the endpoints with the checkbox at the header row in order to
-configure all of the detected endpoints. Otherwise, individually select the 
+configure all of the detected endpoints. Otherwise, individually select the
 endpoints to be configured.</li>
 <li>Click on the Endpoint configuration toolbar button. The configuration process
 will start and the progress bar will be displayed.</li>
 <li>If all endpoints were correctly configured, a message will pop up at the top
-of the module indicating so. Otherwise, it is recommended to review the 
+of the module indicating so. Otherwise, it is recommended to review the
 configuration log by clicking on the Configuration Log toolbar button.</li>
 </ol>
 
@@ -269,7 +269,7 @@ tools. The initial and final steps are similar to the manual configuration:</p>
 <li>Plug all of your endpoints into the same LAN as the Elastix server.</li>
 <li>On the interface, check the network specification next to the Scan button, and
 fix it if required. Then, click on the Scan button.</li>
-<li>The endpoint listing will grow or update in real time as endpoints are 
+<li>The endpoint listing will grow or update in real time as endpoints are
 detected. Press the "Cancel" button at any time to stop scanning, or wait until
 the entire network has been scanned.</li>
 <li>Click on the Download toolbar button. This will display a menu with possible
@@ -285,12 +285,12 @@ Otherwise the file will be rejected on upload.</li>
 which the modified file must be specified.</li>
 <li>Check whether the upload was successful.</li>
 <li>Select all of the endpoints with the checkbox at the header row in order to
-configure all of the detected endpoints. Otherwise, individually select the 
+configure all of the detected endpoints. Otherwise, individually select the
 endpoints to be configured.</li>
 <li>Click on the Endpoint configuration toolbar button. The configuration process
 will start and the progress bar will be displayed.</li>
 <li>If all endpoints were correctly configured, a message will pop up at the top
-of the module indicating so. Otherwise, it is recommended to review the 
+of the module indicating so. Otherwise, it is recommended to review the
 configuration log by clicking on the Configuration Log toolbar button.</li>
 </ol>
 
@@ -354,7 +354,7 @@ Grandstream,GXP1405,00:0B:82:3C:47:85,1071,,,,,,,
 
 <h4><a id="format_xml">XML</a></h4>
 
-<p>This format is an XML document. The topmost element is the "endpoints" element, 
+<p>This format is an XML document. The topmost element is the "endpoints" element,
 which contains one or more "endpoint" elements. The "endpoint" element contains
 the following elements:</p>
 <dl>
@@ -377,7 +377,7 @@ a "value" element for its value. The configuration uses these standard propertie
 
 <dl>
 <dt>dhcp</dt>
-<dd>Set to 1 (default) to use DHCP, or 0 to use the 5 next properties for network 
+<dd>Set to 1 (default) to use DHCP, or 0 to use the 5 next properties for network
 configuration.</dd>
 <dt>static_ip</dt>
 <dd>If dhcp is set to 0, specifies the IPv4 address.</dd>
@@ -390,22 +390,22 @@ configuration.</dd>
 <dt>static_dns2</dt>
 <dd>If dhcp is set to 0, specifies second DNS address</dd>
 <dt>http_username</dt>
-<dd>For models that require it, specifies the HTTP username to use during 
+<dd>For models that require it, specifies the HTTP username to use during
 configuration, if set to other than the default.</dd>
 <dt>http_password</dt>
-<dd>For models that require it, specifies the HTTP password to use during 
+<dd>For models that require it, specifies the HTTP password to use during
 configuration, if set to other than the default.</dd>
 <dt>telnet_username</dt>
-<dd>For models that require it, specifies the Telnet username to use during 
+<dd>For models that require it, specifies the Telnet username to use during
 configuration, if set to other than the default.</dd>
 <dt>telnet_password</dt>
-<dd>For models that require it, specifies the Telnet password to use during 
+<dd>For models that require it, specifies the Telnet password to use during
 configuration, if set to other than the default.</dd>
 <dt>ssh_username</dt>
-<dd>For models that require it, specifies the SSH username to use during 
+<dd>For models that require it, specifies the SSH username to use during
 configuration, if set to other than the default.</dd>
 <dt>ssh_password</dt>
-<dd>For models that require it, specifies the SSH username to use during 
+<dd>For models that require it, specifies the SSH username to use during
 configuration, if set to other than the default.</dd>
 </dl>
 
@@ -413,7 +413,7 @@ configuration, if set to other than the default.</dd>
 element contains the following elements:</p>
 <dl>
 <dt>tech</dt>
-<dd>(Required) The VoIP technology used for the account. Currently supported 
+<dd>(Required) The VoIP technology used for the account. Currently supported
 technologies are 'sip' and 'iax2'.</dd>
 <dt>accountname</dt>
 <dd>(Required) Account name to link to this endpoint.</dd>
@@ -546,31 +546,35 @@ Remote reboot supported. </li>
 <li>Atcom: AT320,AT530,AT610,AT620,AT640,AT800. Part of the Atcom family. Remote reboot
 and static provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
 <li>Atlinks: Temporis IP800. Part of the Yealink family. Remote reboot
-and static provisioning supported. Can be linked to the Elastix internal and 
+and static provisioning supported. Can be linked to the Elastix internal and
 external agendas. Supports the following extra endpoint properties: bridge, timezone, language.</li>
 <li>AudioCodes: 310HD,320HD. Remote reboot and static provisioning supported. Supports the following
 extra endpoint properties: language, timezone.</li>
 <li>Cisco: 7690,7906,7931,7940,7960,7961,7970,7971. Partially supported - support has been tested with
 7960. Remote reboot is partially supported. Static IP is NOT supported. Can be linked to the
-Elastix internal and external agendas.  
+Elastix internal and external agendas.
 </li>
-<li>Damall: D-3310. Remote reboot and static provisioning supported. Supports the following extra 
+<li>Damall: D-3310. Remote reboot and static provisioning supported. Supports the following extra
 endpoint properties: bridge, timezone.</li>
 <li>Digium: D40,D50,D70. Remote reboot is supported on newer firmware, partially supported
-on older firmware. Static IP is NOT supported. This manufacturer requires the propietary 
+on older firmware. Static IP is NOT supported. This manufacturer requires the propietary
 DPMA module for Asterisk to be installed (not included with this module). Due to the nature
 of DPMA, static provisioning is enabled by default.</li>
 <li>Elastix: LXP100,LXP200. See Grandstream support for details.</li>
 <li>Escene: ES620. Remote reboot and static provisioning supported.</li>
-<li>Fanvil: C56,C58,C60,C62. Part of the Atcom family. Remote reboot and static 
+<li>Fanvil: C56,C58,C60,C62. Part of the Atcom family. Remote reboot and static
 provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
 <li>Grandstream: BT200,HT386,GXP280,GXP1400,GXP1405,GXP1450,GXP2000,GXP2020,GXP2100,GXP2120,GXP2200,GXV3140,GXV3175.
  Remote reboot supported. Static provisioning supported for BT200, GXP140x (and Elastix),
  GXP1450, and GXV series, unsupported in all others. Can be linked to the Elastix internal and
  external agendas. Supports the following extra endpoint properties: timezone, language.</li>
-<li>LG-ERICSSON: IP8802. Remote reboot and static provisioning supported. Supports the 
+<li>LG-ERICSSON: IP8802. Remote reboot and static provisioning supported. Supports the
 following extra endpoint properties: timezone.</li>
-<li>Linksys: SPA841,SPA921,SPA922,SPA941,SPA942,SPA962. Untested. Remote reboot supported.</li>
+<li>CiscoSPA : SPA501G,SPA502G,SPA504G,SPA508G,SPA509G,SPA512G,SPA514G,SPA525G2,SPA301G,SPA303G.
+Remote reboot supported. Supports the following extra endpoint properties : timezone, daylightrule, daylightenable.
+Make sure Firmware is 7.4.7 or better.</li>
+<li>Linksys: SPA841,SPA921,SPA922,SPA941,SPA942,SPA962. Remote reboot supported.
+Supports the following extra endpoint properties : timezone, daylightrule, daylightenable.</li>
 <li>Polycom: IP 301,IP 330/320,IP 430,IP 501,IP 550,IP 601,IP 650,SoundStation IP 4000,VSX7000A.
 Model detection is NOT supported. Static IP is NOT supported. Remote reboot supported.
 Can be linked to the Elastix internal and external agendas.</li>
@@ -578,14 +582,14 @@ Can be linked to the Elastix internal and external agendas.</li>
 its XML configuration applies the changes immediately. Quirk: if the "no autoprovisioning"
 dialog is displayed before configuration, there is no known way to dismiss this dialog
 remotely, even after configuration succeeded.</li>
-<li>Snom: 300,320,360,710,720,760,821,870,m9. Remote reboot and static provisioning supported. 
+<li>Snom: 300,320,360,710,720,760,821,870,m9. Remote reboot and static provisioning supported.
 Supports the following extra endpoint properties: bridge, timezone, language.</li>
-<li>VOPTech: VI2006,VI2007,VI2008. Part of the Atcom family. Remote reboot and static 
+<li>VOPTech: VI2006,VI2007,VI2008. Part of the Atcom family. Remote reboot and static
 provisioning supported. Supports the following extra endpoint properties: bridge, timezone.</li>
 <li>Xorcom: XP0100P,XP0120P. Untested. Remote reboot supported.</li>
 <li>Yealink: SIP-T20/T20P,SIP-T22/T22P,SIP-T26/T26P,SIP-T28/T28P,SIP-T38G,VP530.
 Remote reboot and static provisioning supported. Can be linked to the
-Elastix internal and external agendas. Supports the following extra 
+Elastix internal and external agendas. Supports the following extra
 endpoint properties: bridge, timezone.</li>
 <li>Zultys: ZIP2x1,ZIP2x2. Static IP NOT supported. Untested.</li>
 </ul>

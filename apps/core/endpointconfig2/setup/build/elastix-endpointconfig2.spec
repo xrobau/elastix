@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Sun Sep 20 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: add Cisco SPA manufacturer and models as part
+  2 of changes by Bob Fryer.
+  SVN Rev[7146]
 - CHANGED: Endpoint Configurator: update Linksys support as part 1 of changes
   by Bob Fryer.
   SVN Rev[7145]

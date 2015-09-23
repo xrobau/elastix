@@ -84,6 +84,9 @@
 			<div id="elastix-callcenter-cejillas-contenido">
 			   <ul>
                    <li><a href="#elastix-callcenter-llamada-paneles">{$TAB_LLAMADA}</a></li>
+                   {foreach from=$CUSTOM_PANELS item=HTML_PANEL}
+                   <li><a href="#tabs-{$HTML_PANEL.panelname}">{$HTML_PANEL.title}</a></li>
+                   {/foreach}
 			   </ul>
                 <div id="elastix-callcenter-llamada-paneles">
                     <div id="elastix-callcenter-llamada-paneles-izq" class="ui-layout-west">
@@ -92,6 +95,11 @@
                     </div>
                     <div class="ui-layout-center"><fieldset class="ui-widget-content ui-corner-all"><legend><b>{$TAB_LLAMADA_FORM}</b></legend><div id="elastix-callcenter-llamada-form">{$CONTENIDO_LLAMADA_FORMULARIO}</div></fieldset></div>
                 </div>
+                {foreach from=$CUSTOM_PANELS item=HTML_PANEL}
+                <div id="tabs-{$HTML_PANEL.panelname}">
+                    {$HTML_PANEL.content}
+                </div>
+                {/foreach}
 			</div>{* elastix-callcenter-cejillas-contenido *}
 		</div>{* elastix-callcenter-contenido *}
 	</div>

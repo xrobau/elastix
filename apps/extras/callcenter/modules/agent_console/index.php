@@ -467,9 +467,22 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
     $sContenido = '';
     $json_method = NULL;
 
-    $sAction = getParameter('action');
-    $json_method = (is_null($sAction) || !function_exists('manejarSesionActiva_'.$sAction))
-        ? NULL : 'manejarSesionActiva_'.$sAction;
+    // Construir lista de todos los paneles conocidos
+    $listpanels = array();
+    foreach (scandir("modules/$module_name/panels/") as $panelname) {
+        if ($panelname != '.' && $panelname != '..' && is_dir("modules/$module_name/panels/$panelname")) {
+            $listpanels[] = $panelname;
+        }
+    }
+
+    // Carga de todas las funciones auxiliares de los diálogos
+    foreach ($listpanels as $panelname) {
+        if (file_exists("modules/$module_name/panels/$panelname/index.php")) {
+            if (file_exists("modules/$module_name/panels/$panelname/lang/en.lang"))
+                load_language_module("$module_name/panels/$panelname");
+            require_once "modules/$module_name/panels/$panelname/index.php";
+        }
+    }
 
     // Se verifica si el agente sigue logoneado en la cola de Asterisk
     $sAgente = $_SESSION['callcenter']['agente'];
@@ -480,27 +493,59 @@ function manejarSesionActiva($module_name, &$smarty, $sDirLocalPlantillas)
         // Se marca el final de la sesión del agente en las tablas de auditoría
         $oPaloConsola->logoutAgente();
         $_SESSION['callcenter'] = generarEstadoInicial();
-    }
 
-    if (!is_null($json_method)) {
-        $sContenido = call_user_func_array($json_method,
-            array($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado));
+        // Para agente no logoneado, se redirecciona a la página de login
+        Header('Location: ?menu='.$module_name);
+        $sContenido = '';
     } else {
-        if ($estado['estadofinal'] != 'logged-in') {
-            // Para agente no logoneado, se redirecciona a la página de login
-            Header('Location: ?menu='.$module_name);
-            $sContenido = '';
-        } else {
-            $sContenido = manejarSesionActiva_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado);
+        $h = 'manejarSesionActiva_HTML';
+        if (isset($_REQUEST['action'])) {
+            $h = NULL;
+
+            $regs = NULL;
+            if (preg_match('/^(\w+)_(.*)$/', $_REQUEST['action'], $regs)) {
+                $classname = 'Panel_'.ucfirst($regs[1]);
+                $methodname = 'handleJSON_'.$regs[2];
+
+                if (method_exists($classname, $methodname)) {
+                    $h = array($classname, $methodname);
+                }
+            }
+            if (is_null($h) && function_exists('manejarSesionActiva_'.$_REQUEST['action']))
+                $h = 'manejarSesionActiva_'.$_REQUEST['action'];
+            if (is_null($h))
+                $h = 'manejarSesionActiva_unimplemented';
         }
+        $sContenido = call_user_func($h, $module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola, $estado, $listpanels);
     }
     $oPaloConsola->desconectarTodo();
 
     return $sContenido;
 }
 
-function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
+function manejarSesionActiva_unimplemented($module_name, &$smarty, $sDirLocalPlantillas, $oPaloConsola, $estado)
 {
+    $json = new Services_JSON();
+    Header('Content-Type: application/json');
+    return $json->encode(array(
+        'status'    =>  'error',
+        'message'   =>  _tr('Unimplemented method'),
+    ));
+}
+
+function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, $oPaloConsola, $estado, $listpanels)
+{
+    // Incluir bibliotecas javascript de paneles
+    $listaLibsJS_modulo = explode("\n", $smarty->get_template_vars('HEADER_MODULES'));
+    foreach ($listpanels as $panelname) {
+        foreach (scandir("modules/$module_name/panels/$panelname/js") as $jslib) {
+            if ($jslib != '.' && $jslib != '..') {
+                array_push($listaLibsJS_modulo, "<script type='text/javascript' src='modules/$module_name/panels/$panelname/js/$jslib'></script>");
+            }
+        }
+    }
+    $smarty->assign('HEADER_MODULES', implode("\n", $listaLibsJS_modulo));
+
     $bInactivarBotonColgar = FALSE;
     $bPuedeConfirmarContacto = FALSE;
 
@@ -685,6 +730,23 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
             )),
         'INITIAL_CLIENT_STATE'  =>  $json->encode($estadoInicial),
     ));
+
+    // Se invoca la preparación de las plantillas de cada panel
+    $tpath = explode('/', $sDirLocalPlantillas);
+    array_pop($tpath); array_pop($tpath);
+    $tpath = implode('/', $tpath).'/panels';
+    $htmlpanels = array();
+    foreach ($listpanels as $panelname) {
+        // No hay soporte de namespace en PHP 5.1, se simula con una clase
+        $classname = 'Panel_'.ucfirst($panelname);
+        if (class_exists($classname) && method_exists($classname, 'templateContent')) {
+            $tc = call_user_func(array($classname, 'templateContent'), $module_name,
+                $smarty, $tpath.'/'.$panelname.'/tpl', $oPaloConsola, $estado);
+            $tc['panelname'] = $panelname;
+            $htmlpanels[] = $tc;
+        }
+    }
+    $smarty->assign('CUSTOM_PANELS', $htmlpanels);
 
     return $smarty->fetch("$sDirLocalPlantillas/agent_console.tpl");
 }

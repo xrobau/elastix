@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Sep 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: implemented a standard API for adding custom panels
+  to the active agent console.
+  SVN Rev[7149]
+
 * Thu Sep 17 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: remove restriction of SIP/IAX2 as extensions to use
   for static agents. Ported from CallCenterPRO.

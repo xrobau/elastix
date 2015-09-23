@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 11
+Release: 12
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,7 +100,8 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
-* Wed Sep 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Wed Sep 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-12
+- Bump version for release
 - CHANGED: Agent Console: implemented a standard API for adding custom panels
   to the active agent console.
   SVN Rev[7149]

@@ -39,10 +39,9 @@ function _moduleContent(&$smarty, $module_name)
     global $arrConf;
     global $arrLang;
     global $arrConfig;
-  
+
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloMonitorCampania.class.php";
 
     // Se fusiona la configuración del módulo con la configuración global
     $arrConf = array_merge($arrConf, $arrConfModule);
@@ -131,12 +130,12 @@ function manejarMonitoreo_getCampaigns($module_name, $smarty, $sDirLocalPlantill
     if (!is_array($listaCampanias)) {
     	$respuesta['status'] = 'error';
         $respuesta['message'] = $oPaloConsola->errMsg;
-    } 
+    }
     $listaColas = $oPaloConsola->leerListaColasEntrantes();
     if (!is_array($listaColas)) {
         $respuesta['status'] = 'error';
         $respuesta['message'] = $oPaloConsola->errMsg;
-    } 
+    }
     if (is_array($listaCampanias) && is_array($listaColas)) {
         foreach ($listaColas as $q) {
         	$listaCampanias[] = array(
@@ -146,9 +145,9 @@ function manejarMonitoreo_getCampaigns($module_name, $smarty, $sDirLocalPlantill
                 'status'    =>  $q['status'],
             );
         }
-        
-        
-        /* Para la visualización se requiere que primero se muestren las campañas 
+
+
+        /* Para la visualización se requiere que primero se muestren las campañas
          * activas, con el ID mayor primero (probablemente la campaña más reciente)
          * seguido de las campañas inactivas, y luego las terminadas */
         if (!function_exists('manejarMonitoreo_getCampaigns_sort')) {
@@ -165,7 +164,7 @@ function manejarMonitoreo_getCampaigns($module_name, $smarty, $sDirLocalPlantill
         }
         usort($listaCampanias, 'manejarMonitoreo_getCampaigns_sort');
         $respuesta['campaigns'] = array();
-        foreach ($listaCampanias as $c) { 
+        foreach ($listaCampanias as $c) {
             $respuesta['campaigns'][] = array(
                 'id_campaign'   => $c['id'],
                 'desc_campaign' => '('._tr($c['type']).') '.$c['name'],
@@ -186,7 +185,7 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
         'message'   =>  '(no message)',
     );
     $estadoCliente = array();
-    
+
     $sTipoCampania = getParameter('campaigntype');
     $sIdCampania = getParameter('campaignid');
     if (is_null($sTipoCampania) || !in_array($sTipoCampania, array('incoming', 'outgoing', 'incomingqueue'))) {
@@ -223,41 +222,41 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
     if ($respuesta['status'] == 'success') {
     	$respuesta['campaigndata'] = array(
             'startdate'                 =>
-                is_null($infoCampania['startdate']) 
+                is_null($infoCampania['startdate'])
                 ? _tr('N/A') : $infoCampania['startdate'],
             'enddate'                   =>
-                is_null($infoCampania['enddate']) 
+                is_null($infoCampania['enddate'])
                 ? _tr('N/A') : $infoCampania['enddate'],
             'working_time_starttime'    =>
-                is_null($infoCampania['working_time_starttime']) 
+                is_null($infoCampania['working_time_starttime'])
                 ? _tr('N/A') : $infoCampania['working_time_starttime'],
             'working_time_endtime'      =>
-                is_null($infoCampania['working_time_endtime']) 
+                is_null($infoCampania['working_time_endtime'])
                 ? _tr('N/A') : $infoCampania['working_time_endtime'],
             'queue'                     =>  $infoCampania['queue'],
-            'retries'                   => 
+            'retries'                   =>
                 is_null($infoCampania['retries'])
                 ? _tr('N/A') : (int)$infoCampania['retries'],
         );
-        
+
         // Traducción de estado de las llamadas no conectadas
         $estadoCampaniaLlamadas = array();
         foreach ($estadoCampania['activecalls'] as $activecall) {
             $estadoCampaniaLlamadas[] = formatoLlamadaNoConectada($activecall);
         }
-        
+
         // Traducción de estado de los agentes
         $estadoCampaniaAgentes = array();
         foreach ($estadoCampania['agents'] as $agent) {
             $estadoCampaniaAgentes[] = formatoAgente($agent);
         }
-        
+
         // Traducción de log de la campaña
         $logFinalCampania = array();
         foreach ($logCampania as $entradaLog) {
         	$logFinalCampania[] = formatoLogCampania($entradaLog);
         }
-        
+
         // Se arma la respuesta JSON y el estado final del cliente
         $respuesta = array_merge($respuesta, crearRespuestaVacia());
         $respuesta['statuscount']['update'] = $estadoCampania['statuscount'];
@@ -274,10 +273,10 @@ function manejarMonitoreo_getCampaignDetail($module_name, $smarty, $sDirLocalPla
             'agents'        =>  $estadoCampania['agents'],
             'stats'         =>  $estadoCampania['stats'],
         );
-        
+
         $respuesta['estadoClienteHash'] = generarEstadoHash($module_name, $estadoCliente);
     }
-    
+
     $json = new Services_JSON();
     Header('Content-Type: application/json');
     return $json->encode($respuesta);
@@ -289,7 +288,7 @@ function manejarMonitoreo_loadPreviousLogEntries($module_name, $smarty, $sDirLoc
         'status'    =>  'success',
         'message'   =>  '(no message)',
     );
-	
+
     $sTipoCampania = getParameter('campaigntype');
     $sIdCampania = getParameter('campaignid');
     $idBefore = getParameter('beforeid');
@@ -313,11 +312,11 @@ function manejarMonitoreo_loadPreviousLogEntries($module_name, $smarty, $sDirLoc
             foreach ($logCampania as $entradaLog) {
                 $logFinalCampania[] = formatoLogCampania($entradaLog);
             }
-            
+
             $respuesta['log'] = $logFinalCampania;
         }
     }
-        
+
     $json = new Services_JSON();
     Header('Content-Type: application/json');
     return $json->encode($respuesta);
@@ -326,16 +325,16 @@ function manejarMonitoreo_loadPreviousLogEntries($module_name, $smarty, $sDirLoc
 function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas)
 {
     $respuesta = array();
-    
+
     ignore_user_abort(true);
     set_time_limit(0);
 
     // Estado del lado del cliente
     $estadoHash = getParameter('clientstatehash');
     if (!is_null($estadoHash)) {
-        $estadoCliente = isset($_SESSION[$module_name]['estadoCliente']) 
-            ? $_SESSION[$module_name]['estadoCliente'] 
-            : array();        
+        $estadoCliente = isset($_SESSION[$module_name]['estadoCliente'])
+            ? $_SESSION[$module_name]['estadoCliente']
+            : array();
     } else {
         $estadoCliente = getParameter('clientstate');
         if (!is_array($estadoCliente)) return;
@@ -343,14 +342,14 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
     // Modo a funcionar: Long-Polling, o Server-sent Events
     $sModoEventos = getParameter('serverevents');
-    $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
+    $bSSE = (!is_null($sModoEventos) && $sModoEventos);
     if ($bSSE) {
         Header('Content-Type: text/event-stream');
         printflush("retry: 5000\n");
     } else {
         Header('Content-Type: application/json');
     }
-    
+
     // Verificar hash correcto
     if (!is_null($estadoHash) && $estadoHash != $_SESSION[$module_name]['estadoClienteHash']) {
         $respuesta['estadoClienteHash'] = 'mismatch';
@@ -360,7 +359,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     }
 
     $oPaloConsola = new PaloSantoConsola();
-	
+
     // Estado del lado del servidor
     $estadoCampania = $oPaloConsola->leerEstadoCampania($estadoCliente['campaigntype'], $estadoCliente['campaignid']);
     if (!is_array($estadoCampania)) {
@@ -372,7 +371,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
     // Acumular inmediatamente las filas que son distintas en estado
     $respuesta = crearRespuestaVacia();
-    
+
     // Cuenta de estados
     foreach (array_keys($estadoCliente['statuscount']) as $k) {
         // Actualización de valores de contadores
@@ -381,7 +380,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             $estadoCliente['statuscount'][$k] = $estadoCampania['statuscount'][$k];
     	}
     }
-    
+
     // Estado de llamadas no conectadas
     foreach (array_keys($estadoCliente['activecalls']) as $k) {
     	// Llamadas que cambiaron de estado o ya no están sin agente
@@ -402,7 +401,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             $estadoCliente['activecalls'][$k] = $estadoCampania['activecalls'][$k];
         }
     }
-    
+
     // Estado de agentes de campaña
     foreach (array_keys($estadoCliente['agents']) as $k) {
     	// Agentes que cambiaron de estado o desaparecieron (???)
@@ -430,11 +429,11 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
     do {
         $oPaloConsola->desconectarEspera();
-        
+
         // Se inicia espera larga con el navegador...
         $iTimestampInicio = time();
-        
-        while (connection_status() == CONNECTION_NORMAL && esRespuestaVacia($respuesta) 
+
+        while (connection_status() == CONNECTION_NORMAL && esRespuestaVacia($respuesta)
             && time() - $iTimestampInicio <  $iTimeoutPoll) {
 
             session_commit();
@@ -450,7 +449,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             /* Si el navegador elige otra campaña mientras se espera la primera
              * campaña, entonces esta espera es inválida, y el navegador ya ha
              * iniciado otra sesión comet. */
-            if (isset($_SESSION[$module_name]) && 
+            if (isset($_SESSION[$module_name]) &&
                 !($estadoCliente['campaigntype'] === $_SESSION[$module_name]['estadoCliente']['campaigntype'] &&
                  $estadoCliente['campaignid'] === $_SESSION[$module_name]['estadoCliente']['campaignid'])) {
                 $respuesta['estadoClienteHash'] = 'invalidated';
@@ -458,7 +457,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                 $oPaloConsola->desconectarTodo();
                 return;
             }
-            
+
             $iTimestampActual = time();
             foreach ($listaEventos as $evento) {
                 $sCanalAgente = isset($evento['agent_number']) ? $evento['agent_number'] : NULL;
@@ -474,7 +473,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
                         $estadoCliente['agents'][$sCanalAgente]['linkstart'] = NULL;
                         $estadoCliente['agents'][$sCanalAgente]['trunk'] = NULL;
-                        
+
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
                     break;
@@ -489,7 +488,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
                         $estadoCliente['agents'][$sCanalAgente]['linkstart'] = NULL;
                         $estadoCliente['agents'][$sCanalAgente]['trunk'] = NULL;
-                        
+
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
                     break;
@@ -502,12 +501,12 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         if ($evento['call_type'] == 'incoming' && $evento['new_status'] == 'OnQueue') {
                         	agregarContadorLlamada('total', $estadoCliente, $respuesta);
                         }
-                        
+
                         if (in_array($evento['new_status'], array('Failure', 'Abandoned', 'NoAnswer'))) {
                             if (isset($estadoCliente['activecalls'][$callid])) {
                                 restarContadorLlamada($estadoCliente['activecalls'][$callid]['callstatus'], $estadoCliente, $respuesta);
                                 agregarContadorLlamada($evento['new_status'], $estadoCliente, $respuesta);
-                                
+
                                 // Quitar de las llamadas que esperan un agente
                                 $respuesta['activecalls']['remove'][] = array('callid' => $callid);
                                 unset($estadoCliente['activecalls'][$callid]);
@@ -517,11 +516,11 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         } else {
                             if (isset($estadoCliente['activecalls'][$callid])) {
                                 restarContadorLlamada($estadoCliente['activecalls'][$callid]['callstatus'], $estadoCliente, $respuesta);
-                            	
+
                                 $estadoCliente['activecalls'][$callid]['callstatus'] = $evento['new_status'];
                                 $estadoCliente['activecalls'][$callid]['trunk'] = $evento['trunk'];
                                 if ($evento['new_status'] == 'OnQueue')
-                                    $estadoCliente['activecalls'][$callid]['queuestart'] = $evento['datetime_entry'];                                
+                                    $estadoCliente['activecalls'][$callid]['queuestart'] = $evento['datetime_entry'];
                                 $respuesta['activecalls']['update'][] =
                                     formatoLlamadaNoConectada($estadoCliente['activecalls'][$callid]);
                             } else {
@@ -564,7 +563,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         // Agente ha entrado en pausa
                         $estadoCliente['agents'][$sCanalAgente]['status'] = 'paused';
                         $estadoCliente['agents'][$sCanalAgente]['pausestart'] = $evento['pause_start'];
-                        
+
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
                     break;
@@ -574,7 +573,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         $estadoCliente['agents'][$sCanalAgente]['status'] =
                             is_null($estadoCliente['agents'][$sCanalAgente]['linkstart']) ? 'online' : 'oncall';
                         $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
-                        
+
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
                     break;
@@ -586,7 +585,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         $respuesta['activecalls']['remove'][] = array('callid' => $estadoCliente['activecalls'][$callid]['callid']);
                         unset($estadoCliente['activecalls'][$callid]);
                     }
-                
+
                     // Si el agente es uno de los de la campaña, modificar
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
                         $estadoCliente['agents'][$sCanalAgente]['status'] = is_null($estadoCliente['agents'][$sCanalAgente]['pausestart']) ? 'oncall' : 'paused';
@@ -597,7 +596,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
-                    
+
                     if (esEventoParaCampania($estadoCliente, $evento)) {
                         $respuesta['log'][] = formatoLogCampania(array(
                             'id'                =>  $evento['campaignlog_id'],
@@ -623,7 +622,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
                         /* Es posible que se reciba un evento agentunlinked luego
                          * del evento agentloggedout si el agente se desconecta con
-                         * una llamada activa. */ 
+                         * una llamada activa. */
                         if ($estadoCliente['agents'][$sCanalAgente]['status'] != 'offline') {
                             $estadoCliente['agents'][$sCanalAgente]['status'] =
                                 is_null($estadoCliente['agents'][$sCanalAgente]['pausestart']) ? 'online' : 'paused';
@@ -635,7 +634,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
-                    
+
                     if (esEventoParaCampania($estadoCliente, $evento)) {
                         $respuesta['log'][] = formatoLogCampania(array(
                             'id'                =>  $evento['campaignlog_id'],
@@ -652,7 +651,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                             'agentchannel'      =>  $sCanalAgente,
                             'duration'          =>  $evento['duration'],
                         ));
-                        
+
                         if ($evento['call_type'] == 'incoming') {
                         	restarContadorLlamada('Success', $estadoCliente, $respuesta);
                             agregarContadorLlamada('Finished', $estadoCliente, $respuesta);
@@ -676,7 +675,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                     }
                     break;
                 case 'queuemembership':
-                    if (in_array($estadoCliente['queue'], $evento['queues']) && 
+                    if (in_array($estadoCliente['queue'], $evento['queues']) &&
                         !isset($estadoCliente['agents'][$sCanalAgente])) {
                         // Este nuevo agente acaba de ingresar a la cola de campañas
                         $estadoCliente['agents'][$sCanalAgente] = array(
@@ -687,12 +686,12 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                             'linkstart', 'pauseid', 'pausename', 'pausestart',
                             'trunk') as $k)
                             $estadoCliente['agents'][$sCanalAgente][$k] = $evento[$k];
-                        
+
                         $respuesta['agents']['add'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     } elseif (!in_array($estadoCliente['queue'], $evento['queues']) &&
                         isset($estadoCliente['agents'][$sCanalAgente])) {
-                        
-                        // El agente mencionado deja de pertenecer a la cola de campañas                        
+
+                        // El agente mencionado deja de pertenecer a la cola de campañas
                         $respuesta['agents']['remove'][] = array('agent' => $estadoCliente['agents'][$sCanalAgente]['agentchannel']);
                         unset($estadoCliente['agents'][$sCanalAgente]);
                     }
@@ -704,7 +703,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
         $estadoHash = generarEstadoHash($module_name, $estadoCliente);
         $respuesta['estadoClienteHash'] = $estadoHash;
         jsonflush($bSSE, $respuesta);
-        
+
         $respuesta = crearRespuestaVacia();
 
     } while ($bSSE && connection_status() == CONNECTION_NORMAL);
@@ -767,11 +766,11 @@ function agregarContadorLlamada($new_status, &$estadoCliente, &$respuesta)
 function formatoLlamadaNoConectada($activecall)
 {
     $sFechaHoy = date('Y-m-d');
-    $sDesde = (!is_null($activecall['queuestart'])) 
+    $sDesde = (!is_null($activecall['queuestart']))
         ? $activecall['queuestart'] : $activecall['dialstart'];
     if (strpos($sDesde, $sFechaHoy) === 0)
         $sDesde = substr($sDesde, strlen($sFechaHoy) + 1);
-    $sEstado = ($activecall['callstatus'] == 'placing' && !is_null($activecall['trunk'])) 
+    $sEstado = ($activecall['callstatus'] == 'placing' && !is_null($activecall['trunk']))
         ? _tr('dialing') : _tr($activecall['callstatus']);
     return array(
         'callid'        =>  $activecall['callid'],
@@ -819,9 +818,9 @@ function formatoLogCampania($entradaLog)
     );
     $sMensaje = $listaMsg[$entradaLog['new_status']];
     foreach ($entradaLog as $k => $v) {
-        if ($k == 'duration') $v = sprintf('%02d:%02d:%02d', 
-                ($v - ($v % 3600)) / 3600, 
-                (($v - ($v % 60)) / 60) % 60, 
+        if ($k == 'duration') $v = sprintf('%02d:%02d:%02d',
+                ($v - ($v % 3600)) / 3600,
+                (($v - ($v % 60)) / 60) % 60,
                 $v % 60);
         $sMensaje = str_replace('{'.$k.'}', $v, $sMensaje);
     }
@@ -840,7 +839,7 @@ function modificarReferenciasLibreriasJS($smarty)
 
     /* Las referencias a Ember.js y Handlebars se reordenan para que Handlebars
      * aparezca antes que Ember.js.
-     */ 
+     */
     $sEmberRef = $sHandleBarsRef = NULL;
     foreach (array_keys($listaLibsJS_modulo) as $k) {
     	if (strpos($listaLibsJS_modulo[$k], 'themes/default/js/handlebars-') !== FALSE) {

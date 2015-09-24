@@ -101,9 +101,12 @@ fi
 
 %changelog
 * Thu Sep 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Monitoring: removed dead code that references the old
+  dialer prediction class that no longer exists.
+  SVN Rev[7153]
 - CHANGED: Dialer (ECCP): implement initial version of mixmonitormute and
   mixmonitorunmute ECCP requests.
-  SVN Rev[7150]
+  SVN Rev[7151]
 
 * Wed Sep 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-12
 - Bump version for release

@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Sep 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): implement initial version of mixmonitormute and
+  mixmonitorunmute ECCP requests.
+  SVN Rev[7150]
+
 * Wed Sep 23 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-12
 - Bump version for release
 - CHANGED: Agent Console: implemented a standard API for adding custom panels

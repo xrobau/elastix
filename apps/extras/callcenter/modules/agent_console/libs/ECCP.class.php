@@ -59,7 +59,7 @@ class ECCP
     private $_agentPass = '';
 
     /**
-     * Procedimiento que inicia la conexión y el login al servidor ECCP. 
+     * Procedimiento que inicia la conexión y el login al servidor ECCP.
      *
      * @param   string  $server     Servidor al cual conectarse. Puede opcionalmente
      *                              indicar el puerto como localhost:20005
@@ -84,7 +84,7 @@ class ECCP
         $sUrlConexion = "tcp://$server:$iPuerto";
         $this->_hConn = @stream_socket_client($sUrlConexion, $errno, $errstr);
         if (!$this->_hConn) throw new ECCPConnFailedException("$sUrlConexion: ($errno) $errstr", $errno);
-        
+
         return $this->login($username, $secret);
     }
 
@@ -119,9 +119,9 @@ class ECCP
             throw new ECCPBadRequestException((string)$xml_response->failure->message, (int)$xml_response->failure->code);
         return $xml_response;
     }
-    
+
     /**
-     * Procedimiento para recibir eventos o respuestas del servidor ECCP. 
+     * Procedimiento para recibir eventos o respuestas del servidor ECCP.
      * Este método leerá datos hasta que se haya visto alguna respuesta, o hasta
      * que el timeout opcional haya expirado.
      *
@@ -130,7 +130,7 @@ class ECCP
      *                              Si se especifica 0, se regresa de inmediato luego
      *                              de una sola verificación de datos.
      *
-     * @return  mixed   Objeto SimpleXMLElement que representa los datos de la 
+     * @return  mixed   Objeto SimpleXMLElement que representa los datos de la
      *                  respuesta, o NULL si timeout.
      *
      * @throws  ECCPIOException
@@ -203,7 +203,7 @@ class ECCP
         }
         return $r;
     }
-    
+
     // Resetear el parseador, para iniciarlo, o luego de parsear un paquete
     private function _resetParser()
     {
@@ -233,11 +233,11 @@ class ECCP
 
     private function agentHash($agent_number, $agent_pass)
     {
-        return md5($this->_sAppCookie.$agent_number.$agent_pass);	
+        return md5($this->_sAppCookie.$agent_number.$agent_pass);
     }
 
     // Requerimientos conocidos del protocolo ECCP
-    
+
     public function login($username, $password)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -246,10 +246,10 @@ class ECCP
         $xml_cmdRequest->addChild('password', md5($password));
         $xml_response = $this->send_request($xml_request);
         if (isset($xml_response->login_response->app_cookie))
-            $this->_sAppCookie = $xml_response->login_response->app_cookie; 
+            $this->_sAppCookie = $xml_response->login_response->app_cookie;
         return $xml_response->login_response;
     }
-    
+
     public function logout()
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -257,7 +257,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return TRUE;
     }
-    
+
     public function loginagent($extension, $password = NULL, $timeout = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -292,6 +292,26 @@ class ECCP
         return $xml_response->getagentstatus_response;
     }
 
+    public function mixmonitormute()
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('mixmonitormute');
+        $xml_cmdRequest->addChild('agent_number', $this->_agentNumber);
+        $xml_cmdRequest->addChild('agent_hash', $this->agentHash($this->_agentNumber, $this->_agentPass));
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->mixmonitormute_response;
+    }
+
+    public function mixmonitorunmute()
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('mixmonitorunmute');
+        $xml_cmdRequest->addChild('agent_number', $this->_agentNumber);
+        $xml_cmdRequest->addChild('agent_hash', $this->agentHash($this->_agentNumber, $this->_agentPass));
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->mixmonitorunmute_response;
+    }
+
     public function getmultipleagentstatus($agentlist)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -301,7 +321,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getmultipleagentstatus_response;
     }
-    
+
     public function getcampaigninfo($campaign_type, $campaign_id)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -332,7 +352,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getcallinfo_response;
     }
-    
+
     public function setcontact($call_id, $contact_id)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -344,7 +364,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->setcontact_response;
     }
-    
+
     public function saveformdata($campaign_type, $call_id, $formdata)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -367,7 +387,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->saveformdata_response;
     }
-    
+
     public function getpauses()
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -375,7 +395,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getpauses_response;
     }
-    
+
     public function pauseagent($pause_type)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -416,7 +436,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->hold_response;
     }
-    
+
     public function unhold()
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -426,7 +446,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->unhold_response;
     }
-     
+
     public function transfercall($extension)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -498,7 +518,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->schedulecall_response;
     }
-    
+
     public function filterbyagent()
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -507,7 +527,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->filterbyagent_response;
     }
-    
+
     public function removefilterbyagent()
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -517,8 +537,8 @@ class ECCP
         return $xml_response->filterbyagent_response;
     }
 
-    public function getcampaignlist($campaign_type = NULL, $status = NULL, 
-        $filtername = NULL, $datetime_start = NULL, $datetime_end = NULL, 
+    public function getcampaignlist($campaign_type = NULL, $status = NULL,
+        $filtername = NULL, $datetime_start = NULL, $datetime_end = NULL,
         $offset = NULL, $limit = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -559,7 +579,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getagentqueues_response;
     }
-    
+
     public function getmultipleagentqueues($agentlist)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -569,7 +589,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getmultipleagentqueues_response;
     }
-    
+
     public function getagentactivitysummary($datetime_start = NULL, $datetime_end = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");
@@ -591,7 +611,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getchanvars_response;
     }
-    
+
     public function campaignlog($campaign_type, $campaign_id = NULL, $queue = NULL,
         $datetime_start = NULL, $datetime_end = NULL, $lastN = NULL, $idbefore = 0)
     {
@@ -615,7 +635,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->campaignlog_response;
     }
-    
+
     public function callprogress($enable)
     {
         $xml_request = new SimpleXMLElement('<request />');
@@ -623,7 +643,7 @@ class ECCP
         $xml_cmdRequest->addChild('enable', $enable ? 1 : 0);
         $xml_response = $this->send_request($xml_request);
         return $xml_response->callprogress_response;
-    } 
+    }
 
     public function getincomingqueuestatus($queue, $datetime_start = NULL)
     {
@@ -643,7 +663,7 @@ class ECCP
         $xml_response = $this->send_request($xml_request);
         return $xml_response->getincomingqueuelist_response;
     }
-    
+
     public function pingagent()
     {
         $xml_request = new SimpleXMLElement("<request />");

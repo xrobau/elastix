@@ -2004,6 +2004,83 @@ LEER_CAMPANIA;
             $xml_callInfo->addChild('queuenumber', $infoLlamada['queuenumber']);
     }
 
+    private function Request_agentauth_mixmonitormute($comando)
+    {
+       if (is_null($this->_ami))
+            return $this->_generarRespuestaFallo(500, 'No AMI connection');
+
+        // Verificar que agente está presente
+        if (!isset($comando->agent_number))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+        $sAgente = (string)$comando->agent_number;
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_mixmonitormuteResponse = $xml_response->addChild('mixmonitormute_response');
+
+        // El siguiente código asume formato Agent/9000
+        if (is_null($this->_parseAgent($sAgente))) {
+            $this->_agregarRespuestaFallo($xml_mixmonitormuteResponse, 404, 'Invalid agent number');
+            return $xml_response;
+        }
+
+        $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
+
+        if (is_null($infoLlamada) || is_null($infoLlamada['agentchannel'])) {
+            $this->_agregarRespuestaFallo($xml_mixmonitormuteResponse, 417, 'Agent not in call');
+            return $xml_response;
+        }
+
+
+        $r = $this->_ami->MixMonitorMute($infoLlamada['channel'], true);
+        if ($r['Response'] != 'Success') {
+            $this->_log->output('ERR: No se puede callar la grabacion para '.$sAgente.
+                ' ('.$infoLlamada['channel'].') - '.$r['Message']);
+            $this->_agregarRespuestaFallo($xml_mixmonitormuteResponse, 500, 'Cannot mute agent call');
+            return $xml_response;
+        }
+
+        $xml_mixmonitormuteResponse->addChild('success');
+        return $xml_response;
+    }
+
+    private function Request_agentauth_mixmonitorunmute($comando)
+    {
+       if (is_null($this->_ami))
+            return $this->_generarRespuestaFallo(500, 'No AMI connection');
+
+        // Verificar que agente está presente
+        if (!isset($comando->agent_number))
+            return $this->_generarRespuestaFallo(400, 'Bad request');
+        $sAgente = (string)$comando->agent_number;
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_mixmonitorunmuteResponse = $xml_response->addChild('mixmonitorunmute_response');
+
+        // El siguiente código asume formato Agent/9000
+        if (is_null($this->_parseAgent($sAgente))) {
+            $this->_agregarRespuestaFallo($xml_mixmonitorunmuteResponse, 404, 'Invalid agent number');
+            return $xml_response;
+        }
+
+        $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
+
+        if (is_null($infoLlamada) || is_null($infoLlamada['agentchannel'])) {
+            $this->_agregarRespuestaFallo($xml_mixmonitorunmuteResponse, 417, 'Agent not in call');
+            return $xml_response;
+        }
+
+        $r = $this->_ami->MixMonitorMute($infoLlamada['channel'], false);
+        if ($r['Response'] != 'Success') {
+            $this->_log->output('ERR: No se puede restaurar la grabacion para '.$sAgente.
+                ' ('.$infoLlamada['channel'].') - '.$r['Message']);
+            $this->_agregarRespuestaFallo($xml_mixmonitorunmuteResponse, 500, 'Cannot unmute agent call');
+            return $xml_response;
+        }
+
+        $xml_mixmonitorunmuteResponse->addChild('success');
+        return $xml_response;
+    }
+
     private function Request_agentauth_hangup($comando)
     {
         if (is_null($this->_ami))

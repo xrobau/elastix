@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 12
+Release: 13
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,7 +100,8 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
-* Thu Sep 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Sep 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-13
+- Bump version for release
 - FIXED: Campaign Monitoring: removed dead code that references the old
   dialer prediction class that no longer exists.
   SVN Rev[7153]

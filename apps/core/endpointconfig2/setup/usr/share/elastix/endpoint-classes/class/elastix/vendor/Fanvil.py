@@ -52,7 +52,7 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
             # Fanvil returns /title.htm as the normal case
             if resource == '/title.htm':
                 # C56/C56P</span>
-                m = re.search(r'((C|X)\d+)(/\w+)?</span>', htmlbody)
+                m = re.search(r'((C|X|D)\d+)(/\w+)?</span>', htmlbody)
                 if m != None:
                     self._saveModel(m.group(1))
                     return
@@ -72,7 +72,7 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
                         self._saveModel('VI2006')
 
     def isModelV2(self):
-        return (self._model in ('X3', 'X3P', 'X5', 'X5P', 'C400', 'C400P', 'C600', 'C600P'))
+        return (self._model in ('X3', 'X3P', 'X5', 'X5P', 'C400', 'C400P', 'C600', 'C600P', 'D900'))
 
     def updateLocalConfig(self):
         '''Configuration for Fanvil endpoints

@@ -155,6 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Sep 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: introduce new Fanvil model D900.
+  SVN Rev[7155]
+
 * Mon Sep 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: introduce new Fanvil models X5, C400, C600.
   SVN Rev[7148]

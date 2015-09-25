@@ -6,7 +6,8 @@ INSERT INTO `model` (`max_accounts`, `static_ip_supported`, `dynamic_ip_supporte
 (2, 1, 1, 1, "X3", "X3/X3P", (SELECT `id` FROM manufacturer WHERE `name` = "Fanvil")),
 (6, 1, 1, 1, "X5", "X5/X5P", (SELECT `id` FROM manufacturer WHERE `name` = "Fanvil")),
 (6, 1, 1, 1, "C400", "C400/C400P", (SELECT `id` FROM manufacturer WHERE `name` = "Fanvil")),
-(6, 1, 1, 1, "C600", "C600/C600P", (SELECT `id` FROM manufacturer WHERE `name` = "Fanvil"));
+(6, 1, 1, 1, "C600", "C600/C600P", (SELECT `id` FROM manufacturer WHERE `name` = "Fanvil")),
+(6, 1, 1, 1, "D900", "D900", (SELECT `id` FROM manufacturer WHERE `name` = "Fanvil"));
 
 INSERT INTO `model_properties` (`property_key`, `property_value`, `id_model`) VALUES
 ("max_sip_accounts", "2", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "X3")),
@@ -24,7 +25,11 @@ INSERT INTO `model_properties` (`property_key`, `property_value`, `id_model`) VA
 ("max_sip_accounts", "6", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "C600")),
 ("max_iax2_accounts", "0", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "C600")),
 ("http_username", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "C600")),
-("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "C600"));
+("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "C600")),
+("max_sip_accounts", "6", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "D900")),
+("max_iax2_accounts", "0", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "D900")),
+("http_username", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "D900")),
+("http_password", "admin", (SELECT model.id FROM manufacturer, model WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = "Fanvil" AND model.name = "D900"));
 
 /* Creación del fabricante Cisco SPA */
 INSERT INTO `manufacturer` (`name`, `description`) VALUES ('CiscoSPA', 'CiscoSPA');

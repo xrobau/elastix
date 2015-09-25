@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports 
 Name:    elastix-reports
 Version: 2.5.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -93,6 +93,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Mon Mar  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-reports does not directly require php-tcpdf. Instead it is
   indirectly referenced through paloSantoPDF from framework.

@@ -3,7 +3,7 @@
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -155,6 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
+- CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Fri Sep 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: introduce new Fanvil model D900.
   SVN Rev[7155]

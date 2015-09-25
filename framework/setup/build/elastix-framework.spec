@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.5.0
-Release: 9
+Release: 10
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -352,11 +352,20 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-10
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Wed Jul 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: javascript method showPopupElastix has been replaced by
   method showPopupCloudLogin. Now elastix-framework must be marked as conflicting
   with older versions of elastix-addons which used the removed method.
   SVN Rev[7117]
+
+* Wed Jun 24 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: Framework: (trivial) tweak sizes of default controls for blackmin
+  theme
+  SVN Rev[7098]
 
 * Mon May  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix invalid HTML syntax on datetime control.
@@ -365,6 +374,7 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Apr 27 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-9
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[7026]
 
 * Thu Apr 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix bookmark toggling that was incorrectly placed at the

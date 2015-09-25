@@ -3,7 +3,7 @@
 Summary: Elastix Security
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 1
+Release: 2
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -127,6 +127,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Sun Mar 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Advanced Settings - jQuery-1.11.2 migration: fix incorrect use of
   attribute instead of property.
@@ -135,10 +139,12 @@ fi
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[6773]
 
 * Wed Oct 15 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-9
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6754]
 
 * Wed Jun 04 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: fix typo in previous commit

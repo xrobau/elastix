@@ -3,7 +3,7 @@
 Summary: Elastix Module Email
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -199,6 +199,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Sun Mar 29 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Remote SMTP - jQuery-1.11.2 migration: fix incorrect use of attribute
   instead of property.
@@ -215,6 +219,7 @@ fi
 * Mon Mar 02 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[6884]
 
 * Mon Feb 23 2015 Armando Chuto <armando@palosanto.com>
 - ADDED: /core/reports/setup/build/ added library php-PHPMailer

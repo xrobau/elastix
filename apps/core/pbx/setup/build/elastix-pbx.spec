@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -277,6 +277,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-5
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Tue May 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: when replacing recording path with date directories, use
   filesize() on the replaced path, not the original path. Fixes Elastix 
@@ -306,6 +310,7 @@ fi
 * Wed Feb 04 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[6837]
 
 * Wed Feb  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: update SQL conditions to filter recordings based on type.

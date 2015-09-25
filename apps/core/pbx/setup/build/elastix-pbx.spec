@@ -277,15 +277,20 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sat Sep 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: ensure plus sign in recording filename is encoded
+  correctly. Fixes Elastix bug #2295.
+  SVN Rev[7157]
+
 * Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-5
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 
 * Tue May 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: when replacing recording path with date directories, use
-  filesize() on the replaced path, not the original path. Fixes Elastix 
+  filesize() on the replaced path, not the original path. Fixes Elastix
   bug #2228.
-  SVN Rev[7055] 
+  SVN Rev[7055]
 
 * Sun Apr  5 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: pbxadmin: comment out styles that affect the entire page. These

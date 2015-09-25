@@ -315,9 +315,17 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
                       break;
                 }
                 if ($namefile != 'deleted') {
-                    $recordingLink = "<a  href=\"javascript:popUp('index.php?menu=$module_name&action=display_record&id=$file&namefile=$namefile&rawmode=yes',350,100);\">"._tr("Listen")."</a>&nbsp;";
+                    $urlparams = array(
+                        'menu'      =>  $module_name,
+                        'action'    =>  'display_record',
+                        'id'        =>  $file,
+                        'namefile'  =>  $namefile,
+                        'rawmode'   =>  'yes',
+                    );
+                    $recordingLink = "<a href=\"javascript:popUp('index.php?".urlencode(http_build_query($urlparams)."',350,100);")."\">"._tr("Listen")."</a>&nbsp;";
 
-                    $recordingLink .= "<a href='?menu=$module_name&action=download&id=$file&namefile=$namefile&rawmode=yes' >"._tr("Download")."</a>";
+                    $urlparams['action'] = 'download';
+                    $recordingLink .= "<a href='?".http_build_query($urlparams)."' >"._tr("Download")."</a>";
                 } else {
                     $recordingLink = '';
                 }
@@ -416,7 +424,7 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
             die("<b>404 "._tr("no_file")." </b>");
         }
     }
-    
+
     // Set Content-Type according to file extension
     $contentTypes = array(
         'wav'   =>  'audio/wav',
@@ -429,7 +437,7 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     	Header('HTTP/1.1 404 Not Found');
         die("<b>404 "._tr("no_file")." </b>");
     }
-    
+
     // Actually open and transmit the file
     $fp = fopen($ok_path, 'rb');
     if (!$fp) {

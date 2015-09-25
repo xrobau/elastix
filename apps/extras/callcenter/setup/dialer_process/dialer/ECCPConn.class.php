@@ -2023,13 +2023,22 @@ LEER_CAMPANIA;
             return $xml_response;
         }
 
+        // Timeout luego del cual quitar el silencio de la llamada, en segundos
+        $timeout = NULL;
+        if (isset($comando->timeout)) {
+            $timeout = (int)$comando->timeout;
+            if ($timeout <= 0) {
+                $this->_agregarRespuestaFallo($xml_mixmonitormuteResponse, 417, 'Invalid timeout');
+                return $xml_response;
+            }
+        }
+
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
 
         if (is_null($infoLlamada) || is_null($infoLlamada['agentchannel'])) {
             $this->_agregarRespuestaFallo($xml_mixmonitormuteResponse, 417, 'Agent not in call');
             return $xml_response;
         }
-
 
         $r = $this->_ami->MixMonitorMute($infoLlamada['channel'], true);
         if ($r['Response'] != 'Success') {
@@ -2038,6 +2047,7 @@ LEER_CAMPANIA;
             $this->_agregarRespuestaFallo($xml_mixmonitormuteResponse, 500, 'Cannot mute agent call');
             return $xml_response;
         }
+        $this->_tuberia->msg_AMIEventProcess_llamadaSilenciada($sAgente, $infoLlamada['channel'], $timeout);
 
         $xml_mixmonitormuteResponse->addChild('success');
         return $xml_response;
@@ -2069,13 +2079,21 @@ LEER_CAMPANIA;
             return $xml_response;
         }
 
-        $r = $this->_ami->MixMonitorMute($infoLlamada['channel'], false);
-        if ($r['Response'] != 'Success') {
-            $this->_log->output('ERR: No se puede restaurar la grabacion para '.$sAgente.
-                ' ('.$infoLlamada['channel'].') - '.$r['Message']);
+        $c = 0;
+        foreach ($infoLlamada['mutedchannels'] as $chan) {
+            $r = $this->_ami->MixMonitorMute($chan, false);
+            if ($r['Response'] != 'Success') {
+                $this->_log->output('ERR: No se puede restaurar la grabacion para '.$sAgente.
+                    ' ('.$chan.') - '.$r['Message']);
+            } else {
+                $c++;
+            }
+        }
+        if ($c <= 0) {
             $this->_agregarRespuestaFallo($xml_mixmonitorunmuteResponse, 500, 'Cannot unmute agent call');
             return $xml_response;
         }
+        $this->_tuberia->msg_AMIEventProcess_llamadaSinSilencio($sAgente);
 
         $xml_mixmonitorunmuteResponse->addChild('success');
         return $xml_response;

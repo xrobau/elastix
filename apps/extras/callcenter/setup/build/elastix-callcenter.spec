@@ -100,6 +100,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Sep 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): implement timeout for mixmonitormute. New ECCP events
+  recordingmute and recordingunmute were created.
+  SVN Rev[7158]
+
 * Thu Sep 24 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-13
 - Bump version for release
 - FIXED: Campaign Monitoring: removed dead code that references the old

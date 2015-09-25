@@ -169,6 +169,9 @@ class Llamada
     private $_failure_cause = NULL;
     private $_failure_cause_txt = NULL;
 
+    // Canales silenciados via mixmonitormute
+    private $_mutedchannels = array();
+
     // Este constructor sólo debe invocarse desde ListaLlamadas::nuevaLlamada()
     function __construct(ListaLlamadas $lista, $tipo_llamada, $tuberia, $log)
     {
@@ -265,6 +268,8 @@ class Llamada
                                 return $this->_id_current_call;
         case 'waiting_id_current_call':
                                 return $this->_waiting_id_current_call;
+        case 'mutedchannels':
+                                return $this->_mutedchannels;
         default:
             $this->_log->output('ERR: '.__METHOD__.' - propiedad no implementada: '.$s);
             die(__METHOD__.' - propiedad no implementada: '.$s."\n");
@@ -455,7 +460,7 @@ class Llamada
 
     public function resumenLlamada()
     {
-    	$resumen = array(
+        $resumen = array(
             'calltype'              =>  $this->tipo_llamada,
             'campaign_id'           =>  is_null($this->campania) ? NULL : $this->campania->id,
             'dialnumber'            =>  $this->phone,
@@ -468,6 +473,7 @@ class Llamada
             'status'                =>  $this->_status,
             'channel'               =>  $this->channel,
             'actualchannel'         =>  $this->actualchannel,
+            'mutedchannels'         =>  $this->mutedchannels,
         );
         if (is_null($resumen['queuenumber']) && !is_null($this->campania)) {
         	$resumen['queuenumber'] = $this->campania->queue;
@@ -1002,6 +1008,31 @@ class Llamada
         $this->_tuberia->msg_CampaignProcess_agregarArchivoGrabacion(
             $this->tipo_llamada, $this->id_llamada, $uniqueid, $channel,
             $recordingfile);
+    }
+
+    public function agregarCanalSilenciado($chan)
+    {
+        if (in_array($chan, $this->_mutedchannels)) return FALSE;
+        if (count($this->_mutedchannels) == 0 && !is_null($this->agente)) {
+            // Primer canal silenciado, se emite evento
+            $this->_tuberia->msg_ECCPProcess_recordingMute(
+                $this->agente->channel, $this->tipo_llamada,
+                is_null($this->campania) ? NULL : $this->campania->id,
+                $this->id_llamada);
+        }
+        $this->_mutedchannels[] = $chan;
+        return TRUE;
+    }
+
+    public function borrarCanalesSilenciados()
+    {
+        if (!is_null($this->agente)) {
+            $this->_tuberia->msg_ECCPProcess_recordingUnmute(
+                $this->agente->channel, $this->tipo_llamada,
+                is_null($this->campania) ? NULL : $this->campania->id,
+                $this->id_llamada);
+        }
+        $this->_mutedchannels = array();
     }
 }
 ?>

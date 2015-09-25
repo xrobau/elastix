@@ -2,7 +2,7 @@
 <?php
 require_once ("/var/www/html/modules/agent_console/libs/ECCP.class.php");
 
-if (count($argv) < 3) die("Use: {$argv[0]} agentchannel agentpassword\n");
+if (count($argv) < 3) die("Use: {$argv[0]} agentchannel agentpassword [timeout]\n");
 $agentname = $argv[1];
 $agentpass = $argv[2];
 
@@ -15,7 +15,7 @@ try {
     $x->setAgentPass($agentpass);
 	print_r($x->getAgentStatus());
 	print "Mute...\n";
-	$r = $x->mixmonitormute();
+	$r = $x->mixmonitormute((count($argv) > 3) ? $argv[3] : NULL);
 	print_r($r);
 	print "Disconnect...\n";
 	$x->disconnect();

@@ -345,5 +345,39 @@ class ECCPProxyConn extends MultiplexConn
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
     }
+
+    function notificarEvento_RecordingMute($sAgente, $sTipoLlamada, $idCampaign, $idLlamada)
+    {
+        if (is_null($this->_sUsuarioECCP)) return;
+        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
+
+        $xml_response = new SimpleXMLElement('<event />');
+        $xml_recordingMute = $xml_response->addChild('recordingmute');
+
+        $xml_recordingMute->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
+        $xml_recordingMute->addChild('calltype', $sTipoLlamada);
+        if (!is_null($idCampaign)) $xml_recordingMute->addChild('id_campaign', $idCampaign);
+        $xml_recordingMute->addChild('call_id', $idLlamada);
+
+        $s = $xml_response->asXML();
+        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
+    }
+
+    function notificarEvento_RecordingUnmute($sAgente, $sTipoLlamada, $idCampaign, $idLlamada)
+    {
+        if (is_null($this->_sUsuarioECCP)) return;
+        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
+
+        $xml_response = new SimpleXMLElement('<event />');
+        $xml_recordingUnmute = $xml_response->addChild('recordingunmute');
+
+        $xml_recordingUnmute->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
+        $xml_recordingUnmute->addChild('calltype', $sTipoLlamada);
+        if (!is_null($idCampaign)) $xml_recordingUnmute->addChild('id_campaign', $idCampaign);
+        $xml_recordingUnmute->addChild('call_id', $idLlamada);
+
+        $s = $xml_response->asXML();
+        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
+    }
 }
 ?>

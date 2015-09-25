@@ -79,7 +79,7 @@ class ECCPProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('AgentLogin', 'AgentLogoff', 'AgentLinked',
             'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada',
-            'nuevaMembresiaCola') as $k)
+            'nuevaMembresiaCola', 'recordingMute', 'recordingUnmute') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
         foreach (array('eccpresponse') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
@@ -691,6 +691,26 @@ SQL_EXISTE_AUDIT;
         } catch (PDOException $e) {
             $this->_stdManejoExcepcionDB($e, 'no se puede cargar información de pausa');
         }
+    }
+
+    public function msg_recordingMute($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        list($sAgente, $sTipoLlamada, $idCampaign, $idLlamada) = $datos;
+
+        $this->_multiplex->notificarEvento_RecordingMute($sAgente, $sTipoLlamada, $idCampaign, $idLlamada);
+    }
+
+    public function msg_recordingUnmute($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        list($sAgente, $sTipoLlamada, $idCampaign, $idLlamada) = $datos;
+
+        $this->_multiplex->notificarEvento_RecordingUnmute($sAgente, $sTipoLlamada, $idCampaign, $idLlamada);
     }
 
     public function msg_eccpresponse($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)

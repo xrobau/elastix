@@ -63,6 +63,9 @@ class AMIEventProcess extends TuberiaProcess
     private $_tmp_estadoAgenteCola = NULL;
     private $_tmp_actionid_queuestatus = NULL;
 
+    // Lista de alarmas
+    private $_alarmas = array();
+
     public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
     	$this->_log = $oMainLog;
@@ -84,7 +87,8 @@ class AMIEventProcess extends TuberiaProcess
 
         // Registro de manejadores de eventos desde ECCPWorkerProcess
         foreach (array('idNuevaSesionAgente', 'idNuevoBreakAgente',
-            'quitarBreakAgente', 'idNuevoHoldAgente', 'quitarHoldAgente') as $k)
+            'quitarBreakAgente', 'idNuevoHoldAgente', 'quitarHoldAgente',
+            'llamadaSilenciada', 'llamadaSinSilencio') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente',
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
@@ -156,6 +160,9 @@ class AMIEventProcess extends TuberiaProcess
         if ($this->_multiplex->procesarPaquetes())
             $this->_multiplex->procesarActividad(0);
         else $this->_multiplex->procesarActividad(1);
+
+        // Verificar timeouts de callbacks en espera
+        $this->_ejecutarAlarmas();
 
         $this->_limpiarLlamadasViejasEspera();
         $this->_limpiarAgentesTimeout();
@@ -1005,6 +1012,47 @@ class AMIEventProcess extends TuberiaProcess
         }
     }
 
+    private function _llamadaSilenciada($sAgente, $channel, $timeout = NULL)
+    {
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (is_null($a)) {
+            $this->_log->output("ERR: ".__METHOD__." no se encuentra agente para grabación silenciada ".$sAgente);
+            return;
+        }
+        if (is_null($a->llamada)) {
+            $this->_log->output("ERR: ".__METHOD__." agente  ".$sAgente." no tiene llamada");
+            return;
+        }
+
+        $r = $a->llamada->agregarCanalSilenciado($channel);
+        if ($r && !is_null($timeout)) {
+            $this->_agregarAlarma($timeout, array($this, '_quitarSilencio'), array($a->llamada));
+        }
+    }
+
+    private function _llamadaSinSilencio($sAgente)
+    {
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (is_null($a)) {
+            $this->_log->output("ERR: ".__METHOD__." no se encuentra agente para grabación silenciada ".$sAgente);
+            return;
+        }
+        if (is_null($a->llamada)) {
+            $this->_log->output("ERR: ".__METHOD__." agente  ".$sAgente." no tiene llamada");
+            return;
+        }
+
+        $a->llamada->borrarCanalesSilenciados();
+    }
+
+    private function _quitarSilencio($llamada)
+    {
+        if (count($llamada->mutedchannels) > 0) {
+            $this->_tuberia->msg_CampaignProcess_asyncMixMonitorUnmute($llamada->mutedchannels);
+            $llamada->borrarCanalesSilenciados();
+        }
+    }
+
     /**************************************************************************/
 
     public function rpc_informarCredencialesAsterisk($sFuente, $sDestino,
@@ -1345,6 +1393,24 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
         }
         call_user_func_array(array($this, '_actualizarConfig'), $datos);
+    }
+
+    public function msg_llamadaSilenciada($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_llamadaSilenciada'), $datos);
+    }
+
+    public function msg_llamadaSinSilencio($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_llamadaSinSilencio'), $datos);
     }
 
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
@@ -2425,6 +2491,24 @@ Uniqueid: 1429642067.241008
                 $this->_log->output("\t".str_pad($ev, $padlen, '.').'...'.sprintf("%6d", $cnt));
         }
         $this->_log->output('INFO: '.__METHOD__.' fin de volcado status de seguimiento...');
+    }
+
+    private function _agregarAlarma($timeout, $callback, $arglist)
+    {
+        $this->_alarmas[] = array(microtime(TRUE) + $timeout, $callback, $arglist);
+    }
+
+    private function _ejecutarAlarmas()
+    {
+        $ks = array_keys($this->_alarmas);
+        $lanzadas = array();
+        foreach ($ks as $k) {
+            if ($this->_alarmas[$k][0] <= microtime(TRUE)) {
+                $lanzadas[] = $k;
+                call_user_func_array($this->_alarmas[$k][1], $this->_alarmas[$k][2]);
+            }
+        }
+        foreach ($lanzadas as $k) unset($this->_alarmas[$k]);
     }
 }
 ?>

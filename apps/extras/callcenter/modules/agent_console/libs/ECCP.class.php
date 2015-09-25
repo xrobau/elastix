@@ -292,12 +292,15 @@ class ECCP
         return $xml_response->getagentstatus_response;
     }
 
-    public function mixmonitormute()
+    public function mixmonitormute($timeout = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");
         $xml_cmdRequest = $xml_request->addChild('mixmonitormute');
         $xml_cmdRequest->addChild('agent_number', $this->_agentNumber);
         $xml_cmdRequest->addChild('agent_hash', $this->agentHash($this->_agentNumber, $this->_agentPass));
+        if (!is_null($timeout) && (int)$timeout > 0) {
+            $xml_cmdRequest->addChild('timeout', (int)$timeout);
+        }
         $xml_response = $this->send_request($xml_request);
         return $xml_response->mixmonitormute_response;
     }

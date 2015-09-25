@@ -115,7 +115,7 @@ class CampaignProcess extends TuberiaProcess
             'sqlupdatecurrentcalls', 'sqlupdatestatcampaign',
             'actualizarCanalRemoto', 'finalsql', 'verificarFinLlamadasAgendables',
             'forzarLogoffAgente', 'asyncQueueAdd', 'asyncQueueRemove',
-            'agregarArchivoGrabacion') as $k)
+            'agregarArchivoGrabacion', 'asyncMixMonitorUnmute') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde ECCPProcess
@@ -1512,6 +1512,15 @@ PETICION_LLAMADAS_AGENTE;
         call_user_func_array(array($this, '_asyncQueueRemove'), $datos);
     }
 
+    public function msg_asyncMixMonitorUnmute($sFuente, $sDestino,
+            $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_asyncMixMonitorUnmute'), $datos);
+    }
+
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
     	$this->_log->output('INFO: recibido mensaje de finalización, se detienen campañas...');
@@ -1851,6 +1860,16 @@ PETICION_LLAMADAS_AGENTE;
             $r = $this->_ami->QueueRemove($q, $channel);
             if ($r['Response'] != 'Success') {
                 $this->_log->output("ERR: falla al quitar $channel de cola $q: ".print_r($r, TRUE));
+            }
+        }
+    }
+
+    private function _asyncMixMonitorUnmute($chlist)
+    {
+        foreach ($chlist as $chan) {
+            $r = $this->_ami->MixMonitorMute($chan, false);
+            if ($r['Response'] != 'Success') {
+                $this->_log->output('ERR: No se puede restaurar la grabacion ('.$chan.') - '.$r['Message']);
             }
         }
     }

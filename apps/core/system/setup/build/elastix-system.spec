@@ -139,11 +139,19 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Sep 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: remove an incorrect DELETE statement that has been dormant
+  in the SQL update scripts since 2.0.4 (SVN commit #2543). This statement
+  failed to run because of a lack of a newline at the end but becomes active if
+  concatenated with a newer update and would proceed to remove all active
+  applets.
+  SVN Rev[7159]
+
 * Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.
 
-* Mon Apr 06 2015 Bruno Macias <bmacias@palosanto.com> 
+* Mon Apr 06 2015 Bruno Macias <bmacias@palosanto.com>
 - FIXED: module backup_restore, Missing argument 5 for downloadBackup() was
   deleted.
   SVN Rev[6962]

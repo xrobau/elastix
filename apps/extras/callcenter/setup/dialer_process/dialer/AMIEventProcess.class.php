@@ -275,7 +275,7 @@ class AMIEventProcess extends TuberiaProcess
         $is = array();
         foreach ($this->_listaAgentes as $a) {
             if (!in_array($a->channel, $agentsexclude) &&
-                (in_array($queue, $a->listaColasAgente()) || in_array($queue, $a->listaColasDinamicas())) ) {
+                (in_array($queue, $a->colas_actuales) || in_array($queue, $a->colas_dinamicas)) ) {
                 $is[$a->channel] = $a->resumenSeguimiento();
             }
         }
@@ -289,7 +289,7 @@ class AMIEventProcess extends TuberiaProcess
         foreach ($ks as $s) {
             $a = $this->_listaAgentes->buscar('agentchannel', $s);
             if (!is_null($a)) {
-                $queuelist[$s] = array($a->listaColasAgente(), $a->listaColasDinamicas());
+                $queuelist[$s] = array($a->colas_actuales, $a->colas_dinamicas, $a->colas_penalty);
             }
         }
 
@@ -732,6 +732,7 @@ class AMIEventProcess extends TuberiaProcess
                 }
             } else {
             	$llamada->timestamp_originatestart = $iTimestampInicioOriginate;
+
                 /* Una llamada recién creada empieza con status == NULL. Si antes
                  * de eso se recibió OriginateResponse(Failure) entonces se seteó
                  * a Failure el estado. No se debe sobreescribir este Failure
@@ -941,7 +942,7 @@ class AMIEventProcess extends TuberiaProcess
 
                 $this->_log->output('INFO: deslogoneando a '.$a->channel.' debido a inactividad...');
                 $a->resetTimeout();
-                $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->listaColasAgente());
+                $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->colas_actuales);
             }
             if (!is_null($a->logging_inicio) && time() - $a->logging_inicio > 5 * 60) {
                 $this->_log->output('ERR: proceso de login trabado para '.$a->channel.', se indica fallo...');
@@ -1423,7 +1424,7 @@ class AMIEventProcess extends TuberiaProcess
                 	if ($a->type == 'Agent') {
                         $this->_ami->Agentlogoff($a->number);
                 	} else {
-                	    foreach ($a->listaColasAgente() as $q) $this->_ami->QueueRemove($q, $a->channel);
+                	    foreach ($a->colas_actuales as $q) $this->_ami->QueueRemove($q, $a->channel);
                     }
                 }
             }
@@ -1738,7 +1739,7 @@ Uniqueid: 1429642067.241008
 
         if ($a->estado_consola != 'logged-in') {
             if (!is_null($a->extension)) {
-                if (in_array($params['Queue'], $a->listaColasDinamicas())) {
+                if (in_array($params['Queue'], $a->colas_dinamicas)) {
                     $a->completarLoginAgente();
                     $this->_tuberia->msg_ECCPProcess_AgentLogin(
                         $sAgente,
@@ -2251,7 +2252,7 @@ Uniqueid: 1429642067.241008
             	// La extensión usada para login se ha desregistrado - deslogonear al agente
                 $this->_log->output('INFO: '.__METHOD__.' se detecta desregistro de '.
                     $params['Peer'].' - deslogoneando '.$a->channel.'...');
-                $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->listaColasAgente());
+                $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->colas_actuales);
             }
     	}
     }
@@ -2361,7 +2362,7 @@ Uniqueid: 1429642067.241008
                         // Colas a las que no pertenece y debería pertenecer
                         if (count($diffcolas[0]) > 0) {
                             $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
-                                'agregado a las colas ['.implode(' ', $diffcolas[0]).']');
+                                'agregado a las colas ['.implode(' ', array_keys($diffcolas[0])).']');
                             $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
                                 $diffcolas[0], $a->name, ($a->num_pausas > 0));
                         }

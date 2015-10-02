@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Oct  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: dynamic agents now honor penalty from astdb. Previously the
+  QueueAdd() call for a dynamic agent was done with penalty=0 regardless of the
+  value stored in the astdb. Fixes Elastix bug #2362.
+  SVN Rev[7161]
+
 * Thu Oct  1 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: use Location instead of Name in msg_QueueMember. When
   enumerating queue members, Name and Location are identical if QueueAdd() did

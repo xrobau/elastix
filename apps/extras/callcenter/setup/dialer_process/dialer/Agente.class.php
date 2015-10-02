@@ -111,7 +111,9 @@ class Agente
     /* Estado del agente en todas las colas a la que pertenece */
     private $_estado_agente_colas = array();
 
-    /* Sólo agentes dinámicos: lista de colas dinámicas a las que debe pertenecer */
+    /* Sólo agentes dinámicos: lista de colas dinámicas a las que debe
+     * pertenecer. Las claves son las colas y los valores son el valor de
+     * penalty en cada cola. */
     private $_colas_dinamicas = array();
 
     var $llamada_agendada = NULL;
@@ -145,7 +147,7 @@ class Agente
         $s .= ("\tnumber.............".$this->number)."\n";
         $s .= ("\tchannel............".$this->channel)."\n";
         if ($this->type != 'Agent')
-            $s .= ("\tcolas dinámicas....[".implode(', ', $this->_colas_dinamicas))."]\n";
+            $s .= ("\tcolas dinámicas....[".implode(', ', $this->colas_dinamicas))."]\n";
         $s .= ("\testado de colas....[".$this->_strestadocolas())."]\n";
         $s .= ("\testado_consola.....".$this->estado_consola)."\n";
         if (!is_null($this->logging_inicio))
@@ -236,6 +238,9 @@ class Agente
         case 'reservado':       return $this->_reservado;
         case 'max_inactivo':    return $this->_max_inactivo;
         case 'timeout_inactivo':return (!is_null($this->_max_inactivo) && (time() >= $this->_ultima_actividad + $this->_max_inactivo));
+        case 'colas_dinamicas': return array_keys($this->_colas_dinamicas);
+        case 'colas_actuales':  return array_keys($this->_estado_agente_colas);
+        case 'colas_penalty':   return $this->_colas_dinamicas;
         default:
             die(__METHOD__.' - propiedad no implementada: '.$s);
         }
@@ -475,11 +480,13 @@ class Agente
 
     public function asignarColasDinamicas($lista)
     {
-        $colas_agregadas = array_diff($lista, $this->_colas_dinamicas);
-        $colas_quitadas = array_diff($this->_colas_dinamicas, $lista);
+        $colas = array_keys($lista);
+
+        $colas_agregadas = array_diff($colas, $this->colas_dinamicas);
+        $colas_quitadas = array_diff($this->colas_dinamicas, $colas);
 
         $this->_colas_dinamicas = $lista;
-        sort($this->_colas_dinamicas);
+        ksort($this->_colas_dinamicas);
 
         return (count($colas_agregadas) > 0 || count($colas_quitadas) > 0);
     }
@@ -487,35 +494,30 @@ class Agente
     public function diferenciaColasDinamicas()
     {
         if ($this->type == 'Agent') return NULL;
-        $currcolas = $this->listaColasAgente();
-        return array(
-            array_diff($this->_colas_dinamicas, $currcolas), // colas a las cuales agregar agente
-            array_diff($currcolas, $this->_colas_dinamicas), // colas de las cuales quitar agente
+        $currcolas = $this->colas_actuales;
+        $dyncolas = $this->colas_dinamicas;
+        $r = array(
+            array_diff($dyncolas, $currcolas), // colas a las cuales agregar agente
+            array_diff($currcolas, $dyncolas), // colas de las cuales quitar agente
         );
+        $qp = array();
+        foreach ($r[0] as $q) $qp[$q] = $this->_colas_dinamicas[$q];
+        $r[0] = $qp;
+
+        return $r;
     }
 
     public function hayColasDinamicasLogoneadas()
     {
         $currcolas = array_keys($this->_estado_agente_colas);
-        return (count(array_intersect($currcolas, $this->_colas_dinamicas)) > 0);
-    }
-
-    // Colas a las cuales pertenece actualmente el agente
-    public function listaColasAgente()
-    {
-        return array_keys($this->_estado_agente_colas);
-    }
-
-    public function listaColasDinamicas()
-    {
-        return $this->_colas_dinamicas;
+        return (count(array_intersect($currcolas, $this->colas_dinamicas)) > 0);
     }
 
     public function nuevaMembresiaCola($tuberia)
     {
         $colasAtencion = ($this->type == 'Agent')
-            ? $this->listaColasAgente()
-            : $this->listaColasDinamicas();
+            ? $this->colas_actuales
+            : $this->colas_dinamicas;
         $tuberia->msg_ECCPProcess_nuevaMembresiaCola(
             $this->channel,
             $this->resumenSeguimientoLlamada(),

@@ -1480,9 +1480,9 @@ LEER_CAMPANIA;
                     // Lo saco de todas las colas ...
                     $r = $this->_ami->QueueRemove($cola, $sAgente);
                 }
-                foreach ($listaColas[$sAgente][1] as $cola) {
+                foreach ($listaColas[$sAgente][2] as $cola => $penalty) {
                     // Para volverlos a agregar aqui.
-                    $r = $this->_ami->QueueAdd($cola, $sAgente, 0, $name);
+                    $r = $this->_ami->QueueAdd($cola, $sAgente, $penalty, $name);
                     if ($r['Response'] != 'Success') {
                         $this->_log->output('WARN: '.__METHOD__.': falla al ingresar agente '.
                             $sAgente.' a cola '.$cola.': '.print_r($r, TRUE));

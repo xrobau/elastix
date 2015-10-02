@@ -406,7 +406,7 @@ class CampaignProcess extends TuberiaProcess
             $regs = NULL;
             if (preg_match('|^/QPENALTY/(\d+)/agents/(\S+)$|', $k, $regs)) {
                 if (isset($arrExt[$regs[2]])) {
-                    $dynmembers[$arrExt[$regs[2]]][] = $regs[1];
+                    $dynmembers[$arrExt[$regs[2]]][$regs[1]] = (int)$db_output[$k];
                 }
             }
         }
@@ -578,7 +578,6 @@ PETICION_CAMPANIAS_ENTRANTES;
         $iNumLlamadasColocar = $infoCampania['max_canales'];
         if (!is_null($iNumLlamadasColocar) && $iNumLlamadasColocar <= 0)
             $iNumLlamadasColocar = NULL;
-
 
         // Listar todas las llamadas agendables para la campaña
         $listaLlamadasAgendadas = $this->_actualizarLlamadasAgendables($infoCampania, $datosTrunk);
@@ -1841,8 +1840,8 @@ PETICION_LLAMADAS_AGENTE;
 
     private function _asyncQueueAdd($channel, $queues, $name, $pause = FALSE)
     {
-        foreach ($queues as $q) {
-            $r = $this->_ami->QueueAdd($q, $channel, 0, $name);
+        foreach ($queues as $q => $p) {
+            $r = $this->_ami->QueueAdd($q, $channel, $p, $name);
             if ($r['Response'] != 'Success') {
                 $this->_log->output("ERR: falla al agregar $channel a cola $q: ".print_r($r, TRUE));
             } elseif ($pause) {

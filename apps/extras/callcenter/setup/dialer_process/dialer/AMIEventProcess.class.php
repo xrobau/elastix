@@ -2296,7 +2296,9 @@ Uniqueid: 1429642067.241008
 
         if (is_null($this->_tmp_actionid_queuestatus)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
-        $this->_tmp_estadoAgenteCola[$params['Name']][$params['Queue']] = $params['Status'];
+
+        /* Se debe usar Location porque Name puede ser el nombre amistoso */
+        $this->_tmp_estadoAgenteCola[$params['Location']][$params['Queue']] = $params['Status'];
     }
 
     public function msg_QueueEntry($sEvent, $params, $sServer, $iPort)

@@ -100,6 +100,14 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Oct  1 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: use Location instead of Name in msg_QueueMember. When
+  enumerating queue members, Name and Location are identical if QueueAdd() did
+  not specify a friendly name, but are now different as of SVN commit #7137.
+  This breaks detection of queue membership changes for dynamic agents until
+  fixed here.
+  SVN Rev[7160]
+
 * Fri Sep 25 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): implement timeout for mixmonitormute. New ECCP events
   recordingmute and recordingunmute were created.

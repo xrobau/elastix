@@ -301,7 +301,7 @@ class AMIEventProcess extends TuberiaProcess
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (!is_null($a)) {
             $a->max_inactivo = $iTimeout;
-        	$a->iniciarLoginAgente($sExtension);
+            $a->iniciarLoginAgente($sExtension);
         }
         return !is_null($a);
     }
@@ -676,18 +676,23 @@ class AMIEventProcess extends TuberiaProcess
             	// Llamada monitoreada repetida en dialstring
                 $listaKeyRepetidos[] = $k;
             } else {
-            	// Llamada nueva, se procede normalmente
-                if (!isset($this->_campaniasSalientes[$tupla['id_campaign']])) {
-                	$this->_log->output('ERR: '.__METHOD__.": no se encuentra ".
-                        "campaña {$tupla['id_campaign']} requerida por llamada: ".
+                // Llamada nueva, se procede normalmente
+
+                // Identificar tipo de llamada nueva
+                $tipo_llamada = 'outgoing';
+                $cl =& $this->_campaniasSalientes;
+
+                if (!isset($cl[$tupla['id_campaign']])) {
+                    $this->_log->output('ERR: '.__METHOD__.": no se encuentra ".
+                        "campaña [{$tupla['id_campaign']}] requerida por llamada: ".
                         print_r($tupla, 1));
                 } else {
-                    $llamada = $this->_listaLlamadas->nuevaLlamada('outgoing');
+                    $llamada = $this->_listaLlamadas->nuevaLlamada($tipo_llamada);
                     $llamada->id_llamada = $tupla['id'];
                     $llamada->phone = $tupla['phone'];
                     $llamada->actionid = $tupla['actionid'];
                     $llamada->dialstring = $tupla['dialstring'];
-                    $llamada->campania = $this->_campaniasSalientes[$tupla['id_campaign']];
+                    $llamada->campania = $cl[$tupla['id_campaign']];
 
                     if (!is_null($tupla['agent'])) {
                     	$a = $this->_listaAgentes->buscar('agentchannel', $tupla['agent']);
@@ -1800,15 +1805,8 @@ Uniqueid: 1429642067.241008
                     $this->_log->output("DEBUG: ".__METHOD__.": QueueMemberRemoved({$params['Location']}) todavía quedan colas pendientes, ignorando...");
                 }
             } else {
-                $this->_tuberia->msg_ECCPProcess_AgentLogoff(
-                    $params['Location'],
-                    $params['local_timestamp_received'],
-                    $a->id_agent,
-                    $a->id_sesion,
-                    $a->id_audit_break,
-                    $a->id_audit_hold);
-                $this->_verificarLlamadaActivaLogoff($a, $params['Event']);
-                $a->terminarLoginAgente();
+                $this->_ejecutarLogoffAgente($params['Location'], $a,
+                    $params['local_timestamp_received'], $params['Event']);
             }
         } else {
             if ($this->DEBUG) {
@@ -2221,15 +2219,7 @@ Uniqueid: 1429642067.241008
             return FALSE;
         }
 
-        $this->_tuberia->msg_ECCPProcess_AgentLogoff(
-            $sAgente,
-            $params['local_timestamp_received'],
-            $a->id_agent,
-            $a->id_sesion,
-            $a->id_audit_break,
-            $a->id_audit_hold);
-        $this->_verificarLlamadaActivaLogoff($a, $params['Event']);
-        $a->terminarLoginAgente();
+        $this->_ejecutarLogoffAgente($sAgente, $a, $params['local_timestamp_received'], $params['Event']);
 
         if ($this->_finalizandoPrograma) $this->_verificarFinalizacionLlamadas();
 
@@ -2439,17 +2429,27 @@ Uniqueid: 1429642067.241008
         $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
     }
 
-    private function _verificarLlamadaActivaLogoff($a, $evtname)
+    private function _ejecutarLogoffAgente($sAgente, $a, $timestamp, $evtname)
     {
-        if (is_null($a->llamada)) return;
+        $this->_tuberia->msg_ECCPProcess_AgentLogoff(
+            $sAgente,
+            $timestamp,
+            $a->id_agent,
+            $a->id_sesion,
+            $a->id_audit_break,
+            $a->id_audit_hold);
 
-        $this->_log->output('WARN: agente '.$a->channel.' todavía tiene una '.
-            'llamada al procesar '.$evtname.', se cierra...');
-        $r = $this->_ami->Hangup($a->llamada->agentchannel);
-        if ($r['Response'] != 'Success') {
-            $this->_log->output('ERR: No se puede colgar la llamada para '.$a->channel.
-                ' ('.$a->llamada->agentchannel.') - '.$r['Message']);
+        if (!is_null($a->llamada)) {
+            $this->_log->output('WARN: agente '.$a->channel.' todavía tiene una '.
+                'llamada al procesar '.$evtname.', se cierra...');
+            $r = $this->_ami->Hangup($a->llamada->agentchannel);
+            if ($r['Response'] != 'Success') {
+                $this->_log->output('ERR: No se puede colgar la llamada para '.$a->channel.
+                    ' ('.$a->llamada->agentchannel.') - '.$r['Message']);
+            }
         }
+
+        $a->terminarLoginAgente();
     }
 
     private function _dumpstatus()

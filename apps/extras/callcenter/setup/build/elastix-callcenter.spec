@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Fri Oct  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: (trivial) partial synchronization with CallCenterPRO.
+  SVN Rev[7162]
 - CHANGED: Dialer: dynamic agents now honor penalty from astdb. Previously the
   QueueAdd() call for a dynamic agent was done with penalty=0 regardless of the
   value stored in the astdb. Fixes Elastix bug #2362.

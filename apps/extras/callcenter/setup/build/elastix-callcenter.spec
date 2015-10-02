@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 13
+Release: 14
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -100,7 +100,8 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
-* Fri Oct  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Fri Oct  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-14
+- Bump version for release.
 - FIXED: Campaign Out: allow outgoing campaign without forms to be created.
   SVN Rev[7163]
 - CHANGED: Dialer: (trivial) partial synchronization with CallCenterPRO.

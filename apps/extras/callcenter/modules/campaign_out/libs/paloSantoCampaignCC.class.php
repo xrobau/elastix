@@ -56,7 +56,7 @@ class paloSantoCampaignCC
             }
         }
     }
-    
+
     /**
      * Procedimiento para obtener el listado de los campañas existentes. Si
      * se especifica id, el listado contendrá únicamente la campaña
@@ -77,7 +77,7 @@ class paloSantoCampaignCC
         if (!is_null($id_campaign) && !ctype_digit("$id_campaign")) {
             $this->errMsg = _tr("Campaign ID is not valid");
             return FALSE;
-        } 
+        }
         $sPeticionSQL = <<<SQL_SELECT_CAMPAIGNS
 SELECT id, name, trunk, context, queue, datetime_init, datetime_end, daytime_init,
     daytime_end, script, retries, promedio, num_completadas, estatus, max_canales,
@@ -86,7 +86,7 @@ FROM campaign
 SQL_SELECT_CAMPAIGNS;
         $paramWhere = array();
         $paramSQL = array();
-        
+
         if (in_array($estatus, array('A', 'I', 'T'))) {
         	$paramWhere[] = 'estatus = ?';
             $paramSQL[] = $estatus;
@@ -110,7 +110,7 @@ SQL_SELECT_CAMPAIGNS;
     }
 
     /**
-     * Procedimiento para crear una nueva campaña, vacía e inactiva. Esta campaña 
+     * Procedimiento para crear una nueva campaña, vacía e inactiva. Esta campaña
      * debe luego llenarse con números de teléfono en sucesivas operaciones.
      *
      * @param   $sNombre            Nombre de la campaña
@@ -125,10 +125,10 @@ SQL_SELECT_CAMPAIGNS;
      * @param   $sHoraFinal         Hora del día (HH:MM militar) en que se debe dejar de hacer llamadas
      * @param   $script             Texto del script a recitar por el agente
      * @param   $id_url             NULL, o ID del URL externo a cargar
-     * 
+     *
      * @return  int    El ID de la campaña recién creada, o NULL en caso de error
      */
-    function createEmptyCampaign($sNombre, $iMaxCanales, $iRetries, $sTrunk, $sContext, $sQueue, 
+    function createEmptyCampaign($sNombre, $iMaxCanales, $iRetries, $sTrunk, $sContext, $sQueue,
         $sFechaInicial, $sFechaFinal, $sHoraInicio, $sHoraFinal, $script, $id_url)
     {
         $id_campaign = NULL;
@@ -147,7 +147,7 @@ SQL_SELECT_CAMPAIGNS;
         $sNombre = trim($sNombre);
         $iMaxCanales = trim($iMaxCanales);
         $iRetries = trim($iRetries);
-        $sTrunk = trim($sTrunk); 
+        $sTrunk = trim($sTrunk);
         $sContext = trim($sContext);
         $sQueue = trim($sQueue);
         $sFechaInicial = trim($sFechaInicial);
@@ -200,7 +200,7 @@ INSERT INTO campaign (name, max_canales, retries, trunk, context, queue,
     datetime_init, datetime_end, daytime_init, daytime_end, script, id_url)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 SQL_INSERT_CAMPAIGN;
-            $paramSQL = array($sNombre, $iMaxCanales, $iRetries, $sTrunk, 
+            $paramSQL = array($sNombre, $iMaxCanales, $iRetries, $sTrunk,
                 $sContext, $sQueue, $sFechaInicial, $sFechaFinal, $sHoraInicio,
                 $sHoraFinal, $script, $id_url);
             if ($this->_DB->genQuery($sPeticionSQL, $paramSQL)) {
@@ -220,16 +220,16 @@ SQL_INSERT_CAMPAIGN;
     /**
 	 * Procedimiento para agregar los formularios a la campaña
 	 *
-     * @param	int		$id_campaign	ID de la campaña 
-     * @param	string		$formularios	los id de los formularios 1,2,....., 
-     * @return	bool            true or false       
+     * @param	int		$id_campaign	ID de la campaña
+     * @param	string		$formularios	los id de los formularios 1,2,.....,
+     * @return	bool            true or false
     */
     function addCampaignForm($id_campania,$formularios)
     {
-        if (!is_array($formularios)) $formularios = explode(',', $formularios);
-        if (count($formularios) <= 0) {
-            $this->errMsg = _tr("There aren't form selected");
-        	return FALSE;
+        if (!is_array($formularios)) {
+            if ($formularios == '')
+                $formularios = array();
+            else $formularios = explode(',', $formularios);
         }
         foreach ($formularios as $id_form) {
         	$r = $this->_DB->genQuery(
@@ -246,15 +246,15 @@ SQL_INSERT_CAMPAIGN;
     /**
 	 * Procedimiento para actualizar los formularios a la campaña
 	 *
-     * @param	int		$id_campaign	ID de la campaña 
-     * @param	string		$formularios	los id de los formularios 1,2,....., 
-     * @return	bool            true or false       
+     * @param	int		$id_campaign	ID de la campaña
+     * @param	string		$formularios	los id de los formularios 1,2,.....,
+     * @return	bool            true or false
     */
     function updateCampaignForm($id_campania, $formularios)
     {
         if (!$this->_DB->genQuery(
-            'DELETE FROM campaign_form WHERE id_campaign = ?', 
-            array($id_campania))) { 
+            'DELETE FROM campaign_form WHERE id_campaign = ?',
+            array($id_campania))) {
             $this->errMsg = $this->_DB->errMsg;
             return FALSE;
         }
@@ -264,7 +264,7 @@ SQL_INSERT_CAMPAIGN;
     /**
 	 * Procedimiento para obtener los formualarios de una campaña
 	 *
-     * @param	int		$id_campaign	ID de la campaña 
+     * @param	int		$id_campaign	ID de la campaña
      * @return	mixed	NULL en caso de error o los id formularios
     */
     function obtenerCampaignForm($id_campania)
@@ -304,7 +304,7 @@ SQL_INSERT_CAMPAIGN;
     function countCampaignNumbers($idCampaign)
     {
     	$iNumTelefonos = NULL;
-    	
+
         if (!ctype_digit($idCampaign)) {
             $this->errMsg = _tr('Invalid Campaign ID'); //;'ID de campaña no es numérico';
             return NULL;
@@ -318,7 +318,7 @@ SQL_INSERT_CAMPAIGN;
         }
         return (int)$tupla[0];
     }
-    
+
     /**
      * Procedimiento para agregar los números de teléfono indicados por la
      * ruta de archivo indicada a la campaña. No se hace intento alguno por
@@ -335,7 +335,7 @@ SQL_INSERT_CAMPAIGN;
     {
         // Detectar codificación para procesar siempre como UTF-8 (bug #325)
         if (is_null($sEncoding))
-            $sEncoding = $this->_adivinarCharsetArchivo($sFilePath);        
+            $sEncoding = $this->_adivinarCharsetArchivo($sFilePath);
 
         $hArchivo = fopen($sFilePath, 'rt');
         if (!$hArchivo) {
@@ -384,21 +384,21 @@ SQL_INSERT_CAMPAIGN;
                 $sql = 'SELECT COUNT(*) FROM dont_call WHERE caller_id = ? AND status = ?';
                 $tupla = $this->_DB->getFirstRowQuery($sql, FALSE, array($tuplaNumero['NUMERO'], 'A'));
                 $iDNC = ($tupla[0] != 0) ? 1 : 0;
-                
+
                 // Inserción del número principal
                 $sql = 'INSERT INTO calls (id_campaign, phone, status, dnc) VALUES (?, ?, NULL, ?)';
                 $result = $this->_DB->genQuery($sql, array($idCampaign, $tuplaNumero['NUMERO'], $iDNC));
                 if (!$result) {
                     // TODO: internacionalizar
-                    $this->errMsg = sprintf('(internal) Cannot insert phone %s - %s', 
+                    $this->errMsg = sprintf('(internal) Cannot insert phone %s - %s',
                         $tuplaNumero['NUMERO'], $this->_DB->errMsg);
                     fclose($hArchivo);
                     return FALSE;
                 }
-                
+
                 // Recuperar el ID de inserción para insertar atributos. Esto asume MySQL.
                 $idCall = $this->_DB->getLastInsertId();
-                
+
                 // Insertar atributos adicionales.
                 foreach ($tuplaNumero['ATRIBUTOS'] as $iNumColumna => $atributos) {
                     $sClave = $atributos['CLAVE'];
@@ -418,7 +418,7 @@ SQL_INSERT_CAMPAIGN;
         fclose($hArchivo);
         return TRUE;
     }
-    
+
     // Función que intenta adivinar la codificación de caracteres del archivo
     private function _adivinarCharsetArchivo($sFilePath)
     {
@@ -436,7 +436,7 @@ SQL_INSERT_CAMPAIGN;
             "ISO-8859-15"
         );
         //$sContenido = file_get_contents($sFilePath);
-        
+
         // Ya no se usa file_get_contents() porque el archivo puede ser muy grande
         $hArchivo = fopen($sFilePath);
         if (!$hArchivo) return 'UTF-8';
@@ -445,7 +445,7 @@ SQL_INSERT_CAMPAIGN;
         $sEncoding = mb_detect_encoding($sContenido, $listaEncodings);
         return $sEncoding;
     }
-    
+
     /**
      * Procedimiento para modificar las propiedades de una campaña existente
      *
@@ -462,7 +462,7 @@ SQL_INSERT_CAMPAIGN;
      * @param   $sHoraFinal         Hora del día (HH:MM militar) en que se debe dejar de hacer llamadas
      * @param   $script             Texto del script a recitar por el agente
      * @param   $id_url             NULL, o ID del URL externo a cargar
-     * 
+     *
      * @return  bool                VERDADERO si se actualiza correctamente, FALSO en error
      */
     function updateCampaign($idCampaign, $sNombre, $iMaxCanales, $iRetries, $sTrunk,
@@ -512,7 +512,7 @@ SQL_INSERT_CAMPAIGN;
 
             // Construir y ejecutar la orden de update SQL
             $sPeticionSQL = <<<SQL_UPDATE_CAMPAIGN
-UPDATE campaign SET 
+UPDATE campaign SET
     name = ?, max_canales = ?, retries = ?, trunk = ?,
     context = ?, queue = ?, datetime_init = ?, datetime_end = ?,
     daytime_init = ?, daytime_end = ?, script = ?, id_url = ?
@@ -537,7 +537,7 @@ SQL_UPDATE_CAMPAIGN;
             return FALSE;
         }
         return TRUE;
-    } 
+    }
 
     function delete_campaign($idCampaign)
     {
@@ -566,7 +566,7 @@ SQL_UPDATE_CAMPAIGN;
     }
 
     /**
-     * Procedimiento para leer la totalidad de los datos de una campaña terminada, 
+     * Procedimiento para leer la totalidad de los datos de una campaña terminada,
      * incluyendo todos los datos recogidos en los diversos formularios asociados.
      *
      * @param   object  $pDB            Conexión paloDB a la base de datos call_center
@@ -622,7 +622,7 @@ SELECT
     c.failure_cause     AS failure_cause,
     c.failure_cause_txt AS failure_cause_txt
 FROM calls c
-LEFT JOIN agent a 
+LEFT JOIN agent a
     ON c.id_agent = a.id
 WHERE
     c.id_campaign = ? AND
@@ -692,7 +692,7 @@ SQL_ATRIBUTOS;
 
         // Leer los datos de los formularios asociados a esta campaña
         $sqlFormularios = <<<SQL_FORMULARIOS
-(SELECT 
+(SELECT
     f.id        AS id_form,
     ff.id       AS id_form_field,
     ff.etiqueta AS campo_nombre,

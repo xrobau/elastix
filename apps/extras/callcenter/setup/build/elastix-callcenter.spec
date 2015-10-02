@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Fri Oct  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Out: allow outgoing campaign without forms to be created.
+  SVN Rev[7163]
 - CHANGED: Dialer: (trivial) partial synchronization with CallCenterPRO.
   SVN Rev[7162]
 - CHANGED: Dialer: dynamic agents now honor penalty from astdb. Previously the

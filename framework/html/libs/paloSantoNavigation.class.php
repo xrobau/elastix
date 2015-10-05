@@ -37,18 +37,18 @@ class paloSantoNavigationBase
     protected $_selection;    // Arreglo de IDs de menú desde primer nivel hasta selección
 
     /**
-     * Constructor de objeto de manejo del menú. El parámetro arrMenu es un 
+     * Constructor de objeto de manejo del menú. El parámetro arrMenu es un
      * arreglo de tuplas. La clave de cada tupla es el valor del item del menú.
      * Cada tupla contiene los siguientes elementos:
      *  id          Valor de item del menú, debe ser idéntico a la clave de tupla
      *  IdParent    Valor de item del menú que contiene a este menú, o es empty()
      *              si es un item de primer nivel de menú.
      *  Name        Etiqueta a mostrar en el menú para este item
-     *  Type        module|framed|empty() 
+     *  Type        module|framed|empty()
      *  Link        Si no es empty(), plantilla de enlace para Type=framed
      *  order_no    (no se usa)
      *  HasChild    (se sobreescribe según presencia o ausencia de hijos)
-     * 
+     *
      * @param   array   $arrMenu    Lista de menús
      * @param   string  $idMenuSelected Si != NULL, elemento inicial a seleccionar
      * @param   object  $smarty     Referencia a objeto Smarty para plantillas
@@ -84,10 +84,10 @@ class paloSantoNavigationBase
      * Procedimiento para obtener un arreglo que representa la ruta a través del
      * menú desde el primer nivel hasta el módulo seleccionado. Si el item es
      * un item con hijos, se completa con el primer hijo en cada nivel hasta
-     * el último nivel. 
-     * 
+     * el último nivel.
+     *
      * @param   $idMenuSelected string  Item de menú que se ha seleccionado.
-     * 
+     *
      * @return  mixed   NULL si el árbol está vacío, o la ruta como arreglo
      */
     private function _getMenuSelectionPath($idMenuSelected)
@@ -101,7 +101,7 @@ class paloSantoNavigationBase
 
         /* En este punto se $m es el nodo seleccionado, el cual puede estar en
          * cualquier parte del árbol. Primero se navegará por este nodo y los
-         * hijos hasta llegar al último nivel. Luego, del mismo nodo, se 
+         * hijos hasta llegar al último nivel. Luego, del mismo nodo, se
          * obtendrán los padres hasta llegar al primer nivel */
         $path = array();
         $m = &$this->_menunodes[$idMenuSelected];
@@ -120,9 +120,9 @@ class paloSantoNavigationBase
 
     /**
      * Asignar como item actual el módulo seleccionado según el item indicado
-     * 
+     *
      * @param   $idMenuSelected string  Item de menú que se ha seleccionado.
-     * 
+     *
      * @return  void
      */
     function setSelectedModule($idMenuSelected)
@@ -132,17 +132,17 @@ class paloSantoNavigationBase
 
     /**
      * Obtener el item actualmente seleccionado
-     * 
+     *
      * @return  mixed   NULL si el elemento es inválido, o el módulo seleccionado
      */
     function getSelectedModule()
     {
         return is_null($this->_selection) ? NULL : $this->_selection[count($this->_selection) - 1];
     }
-    
+
     /**
      * Obtener la ruta a través del menú hasta el item de módulo seleccionado
-     * 
+     *
      * @return  mixed   NULL si el elemento es inválido, o el módulo seleccionado
      */
     function getSelectedModulePath()
@@ -183,14 +183,14 @@ class paloSantoNavigation extends paloSantoNavigationBase
     function renderMenuTemplates()
     {
     	if (is_null($this->_selection)) die('FATAL: Unable to render with empty menu!');
-        
+
         // Generar las listas de items de menú en formato compatible con temas
         $menuItemsForThemes = array();
         $nodeListRef = &$this->_menubase;
         $i = 0;
         foreach ($this->_selection as $menuItem) {
         	if ($i >= MAX_THEME_LEVEL) break;
-            
+
             $menuItemsForThemes[$i] = &$nodeListRef;
             $nodeListRef = &$this->_menunodes[$menuItem]['children'];
             $i++;
@@ -223,7 +223,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
     {
         $selectedModule = $this->getSelectedModule();
         $this->putHEAD_JQUERY_HTML();
-        
+
         // Módulo seleccionado es un verdadero módulo con código
         if ($this->_menunodes[$selectedModule]['Type'] == 'module')
             return $this->includeModule($selectedModule);
@@ -252,7 +252,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
             global $arrConfModule;
             $arrConf = array_merge($arrConf, $arrConfModule);
         }
-        
+
         // Cargar las traducciones para el módulo elegido
         load_language_module($module);
         */
@@ -281,8 +281,10 @@ class paloSantoNavigation extends paloSantoNavigationBase
     */
     private function putHEAD_MODULE_HTML($menuLibs)  // add by eduardo
     {
+        global $arrConf;
+
         // get the header with scripts and links(css)
-        $documentRoot = $_SERVER["DOCUMENT_ROOT"];
+        $documentRoot = $arrConf['basePath'];
 
         //STEP 1: include file of module
         $directory = "$documentRoot/modules/".$menuLibs;
@@ -317,7 +319,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
     function putHEAD_JQUERY_HTML()
     {
         global $arrConf;
-        
+
         // TODO: allow custom theme to define a jQueryUI theme
         $jquery_ui_theme = 'ui-lightness';
         switch ($arrConf['mainTheme']) {
@@ -326,14 +328,14 @@ class paloSantoNavigation extends paloSantoNavigationBase
         case 'giox':
         case 'elastixblue':
         case 'elastixneo':  $jquery_ui_theme = 'redmond'; break;
-        
+
         case 'elastixwine':
         case 'default':     $jquery_ui_theme = 'blitzer'; break;
         case 'slashdot':    $jquery_ui_theme = 'start'; break;
         }
         $jquery_ui_path = 'libs/js/jquery/css/'.$jquery_ui_theme;
-        
-        $documentRoot = $_SERVER["DOCUMENT_ROOT"];
+
+        $documentRoot = $arrConf['basePath'];
         // include file of framework
         $HEADER_LIBS_JQUERY = array();
         $JQqueryDirectory = "$documentRoot/libs/js/jquery";

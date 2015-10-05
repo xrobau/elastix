@@ -83,7 +83,7 @@ if(!empty($pACL->errMsg)) {
 }
 
 // Load smarty
-$smarty = getSmarty($arrConf['mainTheme']);
+$smarty = getSmarty($arrConf['mainTheme'], $arrConf['basePath']);
 
 //- 1) SUBMIT. Si se hizo submit en el formulario de ingreso
 //-            autentico al usuario y lo ingreso a la sesion

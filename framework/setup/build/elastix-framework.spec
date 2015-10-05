@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Oct  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: tweaks to make framework (mostly) relocatable - GUI.
+  SVN Rev[7166]
+
 * Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-10
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
@@ -362,7 +366,7 @@ rm -rf $RPM_BUILD_ROOT
   with older versions of elastix-addons which used the removed method.
   SVN Rev[7117]
 
-* Wed Jun 24 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Wed Jun 24 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: (trivial) tweak sizes of default controls for blackmin
   theme
   SVN Rev[7098]

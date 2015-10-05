@@ -88,16 +88,18 @@ class paloMenu {
             }
             unset($pDB);
         }
-        
+
         if ($uelastix && isset($_SESSION['elastix_user_permission']))
             return $_SESSION['elastix_user_permission'];
 
-        // Adjuntar base de datos de ACL para acelerar búsqueda
-        $bExito = $this->_DB->genQuery('ATTACH DATABASE ? AS acl', 
-            array(str_replace('sqlite3:////', '/', $arrConf['elastix_dsn']['acl'])));
-        if (!$bExito) {
-            $this->errMsg = $this->_DB->errMsg;
-            return NULL;
+        if (strpos($arrConf['elastix_dsn']['acl'], 'sqlite3:////') === 0) {
+            // Adjuntar base de datos de ACL para acelerar búsqueda
+            $bExito = $this->_DB->genQuery('ATTACH DATABASE ? AS acl',
+                array(str_replace('sqlite3:////', '/', $arrConf['elastix_dsn']['acl'])));
+            if (!$bExito) {
+                $this->errMsg = $this->_DB->errMsg;
+                return NULL;
+            }
         }
 
         // Obtener todos los módulos autorizados
@@ -107,15 +109,15 @@ FROM menu, (
     SELECT acl_resource.name AS acl_resource_name, acl_group.name AS acl_name
     FROM acl_membership, acl_group, acl_group_permission, acl_resource
     WHERE acl_membership.id_user = ?
-        AND acl_membership.id_group = acl_group.id 
-        AND acl_group.id = acl_group_permission.id_group 
-        AND acl_group_permission.id_resource = acl_resource.id 
+        AND acl_membership.id_group = acl_group.id
+        AND acl_group.id = acl_group_permission.id_group
+        AND acl_group_permission.id_resource = acl_resource.id
     UNION
     SELECT acl_resource.name AS acl_resource_name, acl_user.name AS acl_name
     FROM acl_user, acl_user_permission, acl_resource
     WHERE acl_user_permission.id_user = ?
-        AND acl_user_permission.id_resource = acl_resource.id 
-)
+        AND acl_user_permission.id_resource = acl_resource.id
+) AS aclu
 WHERE acl_resource_name = id ORDER BY order_no;
 INFO_AUTH_MODULO;
         $arrMenuFiltered = array();
@@ -124,7 +126,9 @@ INFO_AUTH_MODULO;
             $this->errMsg = $this->_DB->errMsg;
         	return NULL;
         }
-        $this->_DB->genQuery('DETACH DATABASE acl');
+        if (strpos($arrConf['elastix_dsn']['acl'], 'sqlite3:////') === 0) {
+            $this->_DB->genQuery('DETACH DATABASE acl');
+        }
         foreach ($r as $tupla) {
         	$tupla['HasChild'] = FALSE;
             $arrMenuFiltered[$tupla['id']] = $tupla;
@@ -162,7 +166,7 @@ INFO_AUTH_MODULO;
         $arrMenuFiltered = array_merge(
             $arrMenuFiltered,
             array_intersect_key($menuPrimerNivel, $menuSuperior));
-                
+
         if ($uelastix) $_SESSION['elastix_user_permission'] = $arrMenuFiltered;
         return $arrMenuFiltered;
     }
@@ -192,13 +196,13 @@ INFO_AUTH_MODULO;
     }
 
     /**
-     * Procedimiento para crear un nuevo menu 
+     * Procedimiento para crear un nuevo menu
      *
-     * @param string    $id       
-     * @param string    $name   
-     * @param string    $id_parent       
-     * @param string    $type         
-     * @param string    $link  
+     * @param string    $id
+     * @param string    $name
+     * @param string    $id_parent
+     * @param string    $type
+     * @param string    $link
      * @param string    $order
      *
      * @return bool     VERDADERO si el menu se crea correctamente, FALSO en error
@@ -253,7 +257,7 @@ INFO_AUTH_MODULO;
 
         return $bExito;
     }
-    
+
     /*********************************************************************************************/
     function updateItemMenu($id, $name, $id_parent, $type='module', $link='', $order=-1){
         $bExito = FALSE;
@@ -296,9 +300,9 @@ INFO_AUTH_MODULO;
     }
 
  /**
-     * This function is for obtaining all the submenu from menu 
+     * This function is for obtaining all the submenu from menu
      *
-     * @param string    $menu_name   The name of the main menu or menu father       
+     * @param string    $menu_name   The name of the main menu or menu father
      *
      * @return array    $result      An array of children or submenu where the father or main menu is $menu_name
      */
@@ -313,10 +317,10 @@ INFO_AUTH_MODULO;
    }
 
  /**
-     * This function delete a specific menu from database 
+     * This function delete a specific menu from database
      *
-     * @param string    $menu_name   The name of the main menu or menu father       
-     *  
+     * @param string    $menu_name   The name of the main menu or menu father
+     *
      * @return int      An integer where such integer let us know if the menu was or not was removed from database
      */
 
@@ -331,11 +335,11 @@ INFO_AUTH_MODULO;
     }
 
 /**
-     * This function is a recursive function. The input is the name of main menu or father menu which will be removed from database with all children and the children of its children 
+     * This function is a recursive function. The input is the name of main menu or father menu which will be removed from database with all children and the children of its children
      *
-     * @param string    $menu_name   The name of the main menu or menu father       
+     * @param string    $menu_name   The name of the main menu or menu father
      * @param object    $acl   		 The class object ACL
-     *  
+     *
      * @return $menu_name   The menu which will be removed
      */
 

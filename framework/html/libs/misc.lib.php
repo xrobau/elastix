@@ -181,10 +181,10 @@ function obtener_info_de_sistema()
 }
 
 /**
- * Procedimiento para construir una cadena de parámetros GET a partir de un 
+ * Procedimiento para construir una cadena de parámetros GET a partir de un
  * arreglo asociativo de variables. Opcionalmente se puede indicar un conjunto
  * de variables a excluir de la construcción. Si se ejecuta en contexto web y
- * se dispone del superglobal $_GET, sus variables se agregan también a la 
+ * se dispone del superglobal $_GET, sus variables se agregan también a la
  * cadena, a menos que el nombre de la variable GET conste también en la lista
  * de variables indicada explícitamente.
  *
@@ -215,7 +215,7 @@ function construirURL($arrVars=array(), $arrExcluir=array())
     foreach ($listaVars as $k => $v) {
         $keyval[] = urlencode($k).'='.urlencode($v);
     }
-    return '?'.implode('&amp;', $keyval);    
+    return '?'.implode('&amp;', $keyval);
 }
 
 // Translate a date in format 9 Dec 2006
@@ -234,7 +234,7 @@ function translateDate($dateOrig)
         else if($arrReg[2]=="Oct") $numMonth = "10";
         else if($arrReg[2]=="Nov") $numMonth = "11";
         else if($arrReg[2]=="Dec") $numMonth = "12";
-        return $arrReg[3] . "-" . $numMonth . "-" . $arrReg[1]; 
+        return $arrReg[3] . "-" . $numMonth . "-" . $arrReg[1];
     } else {
         return false;
     }
@@ -242,7 +242,7 @@ function translateDate($dateOrig)
 function get_key_settings($pDB,$key)
 {
     $r = $pDB->getFirstRowQuery(
-        'SELECT value FROM settings WHERE key = ?',
+        'SELECT `value` FROM settings WHERE `key` = ?',
         FALSE, array($key));
     return ($r && count($r) > 0) ? $r[0] : '';
 }
@@ -250,15 +250,15 @@ function set_key_settings($pDB,$key,$value)
 {
     // Verificar si existe el valor de configuración
     $r = $pDB->getFirstRowQuery(
-        'SELECT COUNT(*) FROM settings WHERE key = ?',
+        'SELECT COUNT(*) FROM settings WHERE `key` = ?',
         FALSE, array($key));
     if (!$r) return FALSE;
     $r = $pDB->genQuery(
-        (($r[0] > 0) 
-            ? 'UPDATE settings SET value = ? WHERE key = ?' 
-            : 'INSERT INTO settings (value, key) VALUES (?, ?)'),
+        (($r[0] > 0)
+            ? 'UPDATE settings SET `value` = ? WHERE `key` = ?'
+            : 'INSERT INTO settings (`value`, `key`) VALUES (?, ?)'),
         array($value, $key));
-    return $r ? TRUE : FALSE;    
+    return $r ? TRUE : FALSE;
 }
 
 function load_version_elastix($ruta_base='')
@@ -400,7 +400,7 @@ function checkbox($id_name, $checked='off', $disable='off')
     if(!($disable=='off'))
         $disab = "disabled=\"disabled\"";
 
-    $checkbox  = "<input type=\"checkbox\" name=\"chkold{$id_name}\" $check $disab onclick=\"javascript:{$id_name_fixed}check();\" /> 
+    $checkbox  = "<input type=\"checkbox\" name=\"chkold{$id_name}\" $check $disab onclick=\"javascript:{$id_name_fixed}check();\" />
                   <input type=\"hidden\"   name=\"{$id_name}\" id=\"{$id_name}\"   value=\"{$checked}\" />
                   <script type=\"text/javascript\">
                     function {$id_name_fixed}check(){
@@ -456,7 +456,7 @@ function obtenerClaveCyrusAdmin($ruta_base='')
 
 	$pConfig = new paloConfig("/etc", "elastix.conf", "=", "[[:space:]]*=[[:space:]]*");
 	$listaParam = $pConfig->leer_configuracion(FALSE);
-	if (isset($listaParam['cyrususerpwd'])) 
+	if (isset($listaParam['cyrususerpwd']))
 		return $listaParam['cyrususerpwd']['valor'];
 	else return 'palosanto'; // Compatibility for updates where /etc/elastix.conf is not available
 }
@@ -485,7 +485,7 @@ function obtenerClaveConocidaMySQL($sNombreUsuario, $ruta_base='')
     case 'root':
         $pConfig = new paloConfig("/etc", "elastix.conf", "=", "[[:space:]]*=[[:space:]]*");
         $listaParam = $pConfig->leer_configuracion(FALSE);
-        if (isset($listaParam['mysqlrootpwd'])) 
+        if (isset($listaParam['mysqlrootpwd']))
             return $listaParam['mysqlrootpwd']['valor'];
         else return 'eLaStIx.2oo7'; // Compatibility for updates where /etc/elastix.conf is not available
         break;
@@ -519,7 +519,7 @@ function obtenerClaveAMIAdmin($ruta_base='')
 }
 
 /**
- * Función para construir un DSN para conectarse a varias bases de datos 
+ * Función para construir un DSN para conectarse a varias bases de datos
  * frecuentemente utilizadas en Elastix. Para cada base de datos reconocida, se
  * busca la clave en /etc/elastix.conf o en /etc/amportal.conf según corresponda.
  *
@@ -560,7 +560,7 @@ function isPostfixToElastix2(){
     }
     else{
         $band = FALSE;// if the conf postfix is for Elastix 1.6
-    } 
+    }
     return $band;
 }
 
@@ -579,7 +579,7 @@ function checkFrameworkDatabases($dbdir)
 
 function writeLOG($logFILE, $log)
 {
-    $logPATH = "/var/log/elastix"; 
+    $logPATH = "/var/log/elastix";
     $path_of_file = "$logPATH/".$logFILE;
 
     $fp = fopen($path_of_file, 'a+');
@@ -634,33 +634,33 @@ SQL_PROFILE_MENUCOLOR;
 }
 
 /**
- * Procedimiento que almacena el item de menú como parte del historial de 
- * navegación del usuario indicado por $uid. El historial del usuario debe 
+ * Procedimiento que almacena el item de menú como parte del historial de
+ * navegación del usuario indicado por $uid. El historial del usuario debe
  * cumplir las siguientes propiedades:
  * - El historial es una lista con un máximo número de items (5), parecido, pero
  *   no idéntico, a una cola FIFO.
  * - Los items están ordenados por su ID de inserción. El item más reciente es
  *   el item de mayor número de inserción.
- * - Repetidas llamadas sucesivas a esta función con el mismo valor de $uid y 
- *   $menu deben dejar la lista inalterada, asumiendo que no hayan otras 
+ * - Repetidas llamadas sucesivas a esta función con el mismo valor de $uid y
+ *   $menu deben dejar la lista inalterada, asumiendo que no hayan otras
  *   ventanas de navegación abierta.
  * - Si la lista tiene su número máximo de items y se agrega un nuevo item que
  *   no estaba previamente presente en la lista, el item más antiguo se olvida.
  * - Si el item resulta idéntico en menú a uno que ya existe, debe de quitarse
- *   de su posición actual y colocarse en la parte superior de la lista. El 
+ *   de su posición actual y colocarse en la parte superior de la lista. El
  *   número de items debe quedar inalterado.
- * 
+ *
  * @param   object  $pdbACL     Objeto paloDB conectado a las tablas de ACL.
  * @param   object  $pACL       Objeto paloACL para consultar IDs de menú.
  * @param   integer $uid        ID de usuario para el historial
  * @param   string  $menu       Item de menú a insertar en el historial
- * 
- * @return  bool    VERDADERO si se inserta el item, FALSO en error.  
+ *
+ * @return  bool    VERDADERO si se inserta el item, FALSO en error.
  */
 function putMenuAsHistory($pdbACL, $pACL, $uid, $menu)
 {
     global $arrConf;
-    
+
     $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
     if (empty($pDB->errMsg)) {
         $uelastix = get_key_settings($pDB, 'uelastix');
@@ -669,19 +669,19 @@ function putMenuAsHistory($pdbACL, $pACL, $uid, $menu)
 
 	$id_resource = $pACL->getResourceId($menu);
     if (is_null($id_resource)) return FALSE;
-    
+
     // Leer historial actual. El item 0 es el más reciente
     $sqlselect = <<<SQL_LEER_HISTORIAL
 SELECT aus.id AS id, ar.id AS id_menu FROM acl_user_shortcut aus, acl_resource ar
 WHERE id_user = ? AND type = 'history' AND ar.id = aus.id_resource
-ORDER BY aus.id DESC    
+ORDER BY aus.id DESC
 SQL_LEER_HISTORIAL;
     $historial = $pdbACL->fetchTable($sqlselect, TRUE, array($uid));
     if (!is_array($historial)) return FALSE;
     if (count($historial) > 0 && $historial[0]['id_menu'] == $id_resource)
         return TRUE;    // Idempotencia
     for ($i = 0; $i < count($historial); $i++) $historial[$i]['modified'] = FALSE;
-        
+
     // Procesar la lista según las reglas requeridas
     $shiftindex = NULL;
     for ($i = 0; $i < count($historial); $i++) {
@@ -692,7 +692,7 @@ SQL_LEER_HISTORIAL;
     }
     if (is_null($shiftindex) && count($historial) >= 5)
         $shiftindex = count($historial);
-    
+
     // Insertar nuevo item al inicio, corriendo los items si es necesario
     if (!is_null($shiftindex)) {
     	for ($i = $shiftindex; $i > 0; $i--) if ($i < count($historial)) {
@@ -702,7 +702,7 @@ SQL_LEER_HISTORIAL;
         $historial[0]['id_menu'] = $id_resource;
         $historial[0]['modified'] = TRUE;
     } else array_unshift($historial, array('id' => NULL, 'id_menu' => $id_resource, 'modified' => TRUE));
-    
+
     // Guardar en la DB todas las modificaciones
     $pdbACL->beginTransaction();
     foreach ($historial as $item) if ($item['modified']) {
@@ -725,7 +725,7 @@ SQL_LEER_HISTORIAL;
 function menuIsBookmark($pdbACL, $uid, $menu)
 {
     require_once 'libs/paloSantoACL.class.php';
-    
+
     $pACL = new paloACL($pdbACL);
     $tupla = $pdbACL->getFirstRowQuery(
         'SELECT COUNT(id) FROM acl_user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?',
@@ -753,7 +753,7 @@ function getStatusNeoTabToggle($pdbACL, $uid)
 function getStickyNote($pdbACL, $uid, $menu)
 {
     require_once 'libs/paloSantoACL.class.php';
-    
+
     $arrResult = array(
         'status'    =>  FALSE,
         'msg'       =>  'no_data',
@@ -820,7 +820,7 @@ function getSmarty($mainTheme, $basedir = '/var/www/html')
     }
 
     $smarty = new $smartyClass();
-   
+
     $smarty->template_dir = "$basedir/themes/$mainTheme";
     $smarty->config_dir =   "$basedir/configs/";
     $smarty->compile_dir =  "$basedir/var/templates_c/";
@@ -833,7 +833,7 @@ function getSmarty($mainTheme, $basedir = '/var/www/html')
 function loadShortcut($pdbACL, $uid, &$smarty)
 {
     global $arrConf;
-    
+
     $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
     if (empty($pDB->errMsg)) {
         $uelastix = get_key_settings($pDB, 'uelastix');
@@ -851,7 +851,7 @@ SQL_BOOKMARKS_HISTORY;
     $bookmarks = $pdbACL->fetchTable($sql, TRUE, array($uid, 'bookmark'));
     if (is_array($bookmarks) && count($bookmarks) >= 0)
     foreach (array_keys($bookmarks) as $i) {
-        $bookmarks[$i]['name'] = _tr($bookmarks[$i]['name']); 
+        $bookmarks[$i]['name'] = _tr($bookmarks[$i]['name']);
     } else $bookmarks = NULL;
     $smarty->assign(array(
         'SHORTCUT_BOOKMARKS' => $bookmarks,
@@ -861,13 +861,13 @@ SQL_BOOKMARKS_HISTORY;
     $history = $pdbACL->fetchTable($sql, TRUE, array($uid, 'history'));
     if (is_array($history) && count($history) >= 0)
     foreach (array_keys($history) as $i) {
-        $history[$i]['name'] = _tr($history[$i]['name']); 
+        $history[$i]['name'] = _tr($history[$i]['name']);
     } else $history = NULL;
     $smarty->assign(array(
         'SHORTCUT_HISTORY' => $history,
         'SHORTCUT_HISTORY_LABEL' => _tr('History'),
     ));
-    
+
     return $smarty->fetch('_common/_shortcut.tpl');
 }
 

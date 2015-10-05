@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Oct  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: use backticks for column names that are reserved keywords
+  in MySQL.
+  SVN Rev[7172]
 - CHANGED: Framework: isolate sqlite3-specific operations in menu list.
   SVN Rev[7171]
 - CHANGED: Framework (trivial): add error message reporting for failure to filter

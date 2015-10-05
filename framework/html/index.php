@@ -116,6 +116,9 @@ if (isset($_SESSION['elastix_user']) &&
     $idUser = $pACL->getIdUser($_SESSION['elastix_user']);
     $pMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
     $arrMenuFiltered = $pMenu->filterAuthorizedMenus($idUser);
+    if (!is_array($arrMenuFiltered)) {
+        die("FATAL: unable to filter module list for user: ".$pMenu->errMsg);
+    }
 
     verifyTemplate_vm_email(); // para cambiar el template del email ue se envia al recibir un voicemail
 

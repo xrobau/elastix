@@ -35,7 +35,7 @@ session_name("elastixSession");
 session_start();
 
 // Load smarty
-$smarty = getSmarty($arrConf['mainTheme']);
+$smarty = getSmarty($arrConf['mainTheme'], $arrConf['basePath']);
 $smarty->assign("THEMENAME", $arrConf['mainTheme']);
 
 // Nombres válidos de módulos son alfanuméricos y subguión
@@ -48,23 +48,23 @@ if(!empty($_GET['id_nodo'])){
     if(!empty($_GET['name_nodo'])){
         $smarty->assign("node_name", htmlentities($_GET['name_nodo'], ENT_COMPAT, 'UTF-8'));
     }
-                
+
     // Si no existe el archivo de ayuda y se trata de un menu "padre",
     // muestro el menu hijo que encuentre primero
 /*
-    $resArchivoExiste = existeArchivoAyuda($idMenuMostrar); 
+    $resArchivoExiste = existeArchivoAyuda($idMenuMostrar);
     if($resArchivoExiste == 3 || $resArchivoExiste == 4) {
 		$idMenuMostrar = menuHijoPorOmision($idMenuMostrar);
         $resArchivoExiste = existeArchivoAyuda($idMenuMostrar);
     }
-    		
+
     if($resArchivoExiste == 1) {
-       $smarty->assign("node_id", $idMenuMostrar);     
+       $smarty->assign("node_id", $idMenuMostrar);
        $smarty->display($_SERVER["DOCUMENT_ROOT"]."/modules/$idMenuMostrar/help/$idMenuMostrar.hlp");
     }else if($resArchivoExiste == 2) {
-       $smarty->assign("node_id", $idMenuMostrar);    
+       $smarty->assign("node_id", $idMenuMostrar);
        $smarty->display($_SERVER["DOCUMENT_ROOT"]."/help/content/$idMenuMostrar.hlp");
-    } else      
+    } else
        echo "The help file for the selected menu does not exists";
 */
     $sRuta = rutaArchivoAyuda($idMenuMostrar);
@@ -75,7 +75,7 @@ if(!empty($_GET['id_nodo'])){
     if (is_null($sRuta)) {
     	echo '<html><body>The help file for selected menu does not exist.</body></html>';
     } else {
-       $smarty->assign("node_id", $idMenuMostrar);    
+       $smarty->assign("node_id", $idMenuMostrar);
        $smarty->display($sRuta);
     }
 } else {
@@ -122,10 +122,10 @@ function existeArchivoAyuda($idMenu)
 function rutaArchivoAyuda($idMenu)
 {
     $serverDir = dirname($_SERVER['SCRIPT_FILENAME']).'/..';
-    
+
     $lang = get_language("$serverDir/");
     $lang = ($lang == "es" || $lang == "en")?$lang:"en";
-    
+
     $listaRutas = array(
         "$serverDir/modules/$idMenu/help/$lang.hlp",
         "$serverDir/modules/$idMenu/help/$idMenu.hlp",

@@ -1,4 +1,4 @@
-<?php 
+<?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
@@ -36,7 +36,7 @@ session_name("elastixSession");
 session_start();
 
 // Load smarty
-$smarty = getSmarty($arrConf['mainTheme']);
+$smarty = getSmarty($arrConf['mainTheme'], $arrConf['basePath']);
 
 $smarty->assign("THEMENAME", $arrConf['mainTheme']);
 $smarty->assign("titulo", "Help Window");

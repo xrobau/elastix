@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Oct  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: tweaks to make framework (mostly) relocatable - Help.
+  SVN Rev[7168]
 - CHANGED: Framework: tweaks to make framework (mostly) relocatable - GUI.
   SVN Rev[7166]
 

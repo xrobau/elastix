@@ -29,7 +29,7 @@
 
 global $arrConf;
 
-$arrConf['basePath'] = dirname(realpath($_SERVER["SCRIPT_FILENAME"]));
+$arrConf['basePath'] = realpath(dirname(__FILE__).'/..');
 $arrConf['elastix_dbdir'] = '/var/www/db';
 $arrConf['elastix_dsn'] = array(
                                 "acl"       =>  "sqlite3:///$arrConf[elastix_dbdir]/acl.db",

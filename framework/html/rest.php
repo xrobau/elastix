@@ -24,7 +24,7 @@
 */
 
 global $arrConf;
-$documentRoot = $_SERVER["DOCUMENT_ROOT"];
+$documentRoot = dirname($_SERVER['SCRIPT_FILENAME']);
 require_once "$documentRoot/libs/misc.lib.php";
 require_once "$documentRoot/configs/default.conf.php";
 require_once "$documentRoot/libs/paloSantoJSON.class.php";
@@ -34,7 +34,7 @@ load_default_timezone();
 
 // Verificación de autenticación
 // Verificar si el método HTTP es conocido
-if (!in_array($_SERVER['REQUEST_METHOD'], 
+if (!in_array($_SERVER['REQUEST_METHOD'],
     array('GET', 'POST', 'HEAD', 'PUT', 'DELETE', 'OPTIONS', 'TRACE'))) {
     Header('HTTP/1.1 501 Not Implemented');
     exit;
@@ -57,7 +57,7 @@ session_name("elastixSession");
 session_start();
 if (isset($_SESSION['elastix_user']) && isset($_SESSION['elastix_pass'])) {
     $auth_user = $_SESSION['elastix_user'];
-    $auth_md5pass = $_SESSION['elastix_pass'];    
+    $auth_md5pass = $_SESSION['elastix_pass'];
     $_SERVER['PHP_AUTH_USER'] = $_SESSION['elastix_user'];
 } elseif (isset($_SERVER['PHP_AUTH_USER']) && $_SERVER['PHP_AUTH_USER'] != '') {
     $auth_user = $_SERVER['PHP_AUTH_USER'];
@@ -93,7 +93,7 @@ if(!isset($_SERVER["PATH_INFO"])){
 $pathList = explode("/",$_SERVER["PATH_INFO"]);
 array_shift($pathList);
 //Como estándar se ha decidido que el primer elemento de la ruta será el id del módulo que contenga el recurso
-$moduleId = array_shift($pathList); 
+$moduleId = array_shift($pathList);
 
 //Verifico si el módulo existe
 if(!file_exists("$documentRoot/modules/$moduleId")){

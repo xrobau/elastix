@@ -63,6 +63,28 @@ class paloACL {
         }
     }
 
+    private function _getRowsById($table, $fieldlist, $id = NULL)
+    {
+        $this->errMsg = '';
+        if (!is_null($id) && !ctype_digit("$id")) {
+            $this->errMsg = "Key is not numeric";
+            return FALSE;
+        }
+
+        $sql = 'SELECT '.implode(', ', $fieldlist).' FROM '.$table;
+        $param = array();
+        if (!is_null($id)) {
+            $sql .= ' WHERE id = ?';
+            $param[] = $id;
+        }
+        $recordset = $this->_DB->fetchTable($sql, FALSE, $param);
+        if (!is_array($recordset)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return $recordset;
+    }
+
     /**
      * Procedimiento para obtener el listado de los usuarios existentes en los ACL. Si
      * se especifica un ID numérico de usuario, el listado contendrá únicamente al usuario
@@ -78,20 +100,10 @@ class paloACL {
      */
     function getUsers($id_user = NULL)
     {
-        $arr_result = FALSE;
-        if (!is_null($id_user) && !preg_match('/^[[:digit:]]+$/', "$id_user")) {
-            $this->errMsg = "User ID is not numeric";
-        } else {
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT id, name, description,extension FROM acl_user".
-                (is_null($id_user) ? '' : " WHERE id = $id_user");
-            $arr_result = $this->_DB->fetchTable($sPeticionSQL);
-            if (!is_array($arr_result)) {
-                $arr_result = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $arr_result;
+        return $this->_getRowsById(
+            'acl_user',
+            array('id', 'name', 'description', 'extension'),
+            $id_user);
     }
 
     /**
@@ -107,22 +119,23 @@ class paloACL {
      *      ...
      *  )
      */
-    function getUsersPaging($limit = NULL, $offset = NULL)
+    function getUsersPaging($limit, $offset)
     {
         $arr_result = FALSE;
-        if (!is_null($limit) && !preg_match('/^[[:digit:]]+$/', "$limit")) {
+        if (!preg_match('/^[[:digit:]]+$/', "$limit")) {
             $this->errMsg = "Limit is not numeric";
             return FALSE;
         }
-        if (!is_null($offset) && !preg_match('/^[[:digit:]]+$/', "$offset")) {
+        if (!preg_match('/^[[:digit:]]+$/', "$offset")) {
             $this->errMsg = "Offset is not numeric";
             return FALSE;
         }
 
         $this->errMsg = "";
-        $sPeticionSQL = "SELECT id, name, description,extension FROM acl_user limit $limit offset $offset";
+        $sPeticionSQL = "SELECT id, name, description,extension FROM acl_user limit ? offset ?";
+        $param = array($limit, $offset);
 
-        $arr_result = $this->_DB->fetchTable($sPeticionSQL);
+        $arr_result = $this->_DB->fetchTable($sPeticionSQL, FALSE, $param);
         if (!is_array($arr_result)) {
             $arr_result = FALSE;
             $this->errMsg = $this->_DB->errMsg;
@@ -143,21 +156,22 @@ class paloACL {
      *      ...
      *  )
      */
-    function getGroupsPaging($limit = NULL, $offset = NULL)
+    function getGroupsPaging($limit, $offset)
     {
         $arr_result = FALSE;
-        if (!is_null($limit) && !preg_match('/^[[:digit:]]+$/', "$limit")) {
+        if (!preg_match('/^[[:digit:]]+$/', "$limit")) {
             $this->errMsg = "Limit is not numeric";
             return FALSE;
         }
-        if (!is_null($offset) && !preg_match('/^[[:digit:]]+$/', "$offset")) {
+        if (!preg_match('/^[[:digit:]]+$/', "$offset")) {
             $this->errMsg = "Offset is not numeric";
             return FALSE;
         }
         $this->errMsg = "";
-        $sPeticionSQL = "SELECT id, name, description FROM acl_group limit $limit offset $offset";
+        $sPeticionSQL = "SELECT id, name, description FROM acl_group limit ? offset ?";
+        $param = array($limit, $offset);
 
-        $arr_result = $this->_DB->fetchTable($sPeticionSQL);
+        $arr_result = $this->_DB->fetchTable($sPeticionSQL, FALSE, $param);
         if (!is_array($arr_result)) {
             $arr_result = FALSE;
             $this->errMsg = $this->_DB->errMsg;
@@ -311,12 +325,9 @@ class paloACL {
             $this->errMsg = "Password is not a valid MD5 hash";
         } else {
              if ($this->errMsg == "") {
-                $sPeticionSQL = paloDB::construirUpdate(
-                    "acl_user",
-                    array('md5_password'    =>  paloDB::DBCAMPO($md5_password)),
-                    array('id'              =>  $id_user)
-                );
-                if ($this->_DB->genQuery($sPeticionSQL)) {
+                $sPeticionSQL = 'UPDATE acl_user SET md5_password = ? WHERE id = ?';
+                $param = array($md5_password, $id_user);
+                if ($this->_DB->genQuery($sPeticionSQL, $param)) {
                     $bExito = TRUE;
                 } else {
                     $this->errMsg = $this->_DB->errMsg;
@@ -326,7 +337,7 @@ class paloACL {
 
         return $bExito;
     }
-    
+
     /**
      * Procedimiento para borrar un usuario ACL, dado su ID numérico de usuario
      *
@@ -342,14 +353,17 @@ class paloACL {
         } else {
             $this->errMsg = "";
             $listaSQL = array(
-                "DELETE FROM acl_user_permission WHERE id_user = '$id_user'",
-                "DELETE FROM acl_membership WHERE id_user = '$id_user'",
-                "DELETE FROM acl_user WHERE id = '$id_user'",
+                "DELETE FROM acl_user_permission WHERE id_user = ?",
+                "DELETE FROM acl_membership WHERE id_user = ?",
+                "DELETE FROM acl_user_profile WHERE id_user = ?",
+                "DELETE FROM acl_user_shortcut WHERE id_user = ?",
+                "DELETE FROM sticky_note WHERE id_user = ?",
+                "DELETE FROM acl_user WHERE id = ?",
             );
             $bExito = TRUE;
 
             foreach ($listaSQL as $sPeticionSQL) {
-                $bExito = $this->_DB->genQuery($sPeticionSQL);
+                $bExito = $this->_DB->genQuery($sPeticionSQL, array($id_user));
                 if (!$bExito) {
                     $this->errMsg = $this->_DB->errMsg;
                     break;
@@ -357,6 +371,18 @@ class paloACL {
             }
         }
         return $bExito;
+    }
+
+    private function _getIdRowByName($table, $name)
+    {
+        $this->errMsg = '';
+        $sql = 'SELECT id FROM '.$table.' WHERE name = ?';
+        $result = $this->_DB->getFirstRowQuery($sql, FALSE, array($name));
+        if ($result && is_array($result) && count($result) > 0) {
+            return $result[0];
+        }
+        $this->errMsg = $this->_DB->errMsg;
+        return FALSE;
     }
 
     /**
@@ -368,15 +394,7 @@ class paloACL {
      */
     function getIdUser($sNombreUser)
     {
-        $idUser = FALSE;
-
-        $this->errMsg = '';
-        $sPeticionSQL = "SELECT id FROM acl_user WHERE name = ".paloDB::DBCAMPO($sNombreUser);
-        $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE);
-        if ($result && is_array($result) && count($result)>0) {
-            $idUser = $result[0];
-        }else $this->errMsg = $this->_DB->errMsg;
-        return $idUser;
+        return $this->_getIdRowByName('acl_user', $sNombreUser);
     }
 
     /**
@@ -394,20 +412,10 @@ class paloACL {
      */
     function getGroups($id_group = NULL)
     {
-        $arr_result = FALSE;
-        if (!is_null($id_group) && !preg_match('/^[[:digit:]]+$/', "$id_group")) {
-            $this->errMsg = "Group ID is not numeric";
-        } else {
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT id, name, description FROM acl_group".
-                (is_null($id_group) ? '' : " WHERE id = $id_group");
-            $arr_result = $this->_DB->fetchTable($sPeticionSQL);
-            if (!is_array($arr_result)) {
-                $arr_result = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $arr_result;
+        return $this->_getRowsById(
+            'acl_group',
+            array('id', 'name', 'description'),
+            $id_group);
     }
 
     /**
@@ -433,8 +441,8 @@ class paloACL {
             $sPeticionSQL =
                 "SELECT g.id, g.name ".
                 "FROM acl_group as g, acl_membership as m ".
-                "WHERE m.id_group = g.id AND m.id_user = $id_user";
-            $result = $this->_DB->fetchTable($sPeticionSQL, FALSE);
+                "WHERE m.id_group = g.id AND m.id_user = ?";
+            $result = $this->_DB->fetchTable($sPeticionSQL, FALSE, array($id_user));
             if ($result && is_array($result) && count($result)>0) {
                 $arr_resultado = array();
                 foreach($result as $key => $value)
@@ -453,17 +461,9 @@ class paloACL {
      */
     function getIdGroup($sNombreGroup)
     {
-        $idGroup = FALSE;
-
-        $this->errMsg = '';
-        $sPeticionSQL = "SELECT id FROM acl_group WHERE name = ".paloDB::DBCAMPO($sNombreGroup);
-        $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE);
-        if ($result && is_array($result) && count($result)>0) {
-            $idGroup = $result[0];
-        }else $this->errMsg = $this->_DB->errMsg;
-        return $idGroup;
+        return $this->_getIdRowByName('acl_group', $sNombreGroup);
     }
-    
+
     /**
      * Procedimiento para asegurar que un usuario identificado por su ID pertenezca al grupo
      * identificado también por su ID. Se verifica primero que tanto el usuario como el grupo
@@ -488,8 +488,8 @@ class paloACL {
                 $this->errMsg = "Group doesn't exist";
             } else {
                 // Verificar existencia de la combinación usuario-grupo
-                $sPeticionSQL = "SELECT id FROM acl_membership WHERE id_user = $id_user AND id_group = $id_group";
-                $listaMembresia = $this->_DB->fetchTable($sPeticionSQL);
+                $sPeticionSQL = "SELECT id FROM acl_membership WHERE id_user = ? AND id_group = ?";
+                $listaMembresia = $this->_DB->fetchTable($sPeticionSQL, FALSE, array($id_user, $id_group));
                 if (!is_array($listaMembresia)) {
                     // Ocurre un error de base de datos
                     $this->errMsg = $this->_DB->errMsg;
@@ -498,13 +498,8 @@ class paloACL {
                     $bExito = TRUE;
                 } else {
                     // El usuario no tiene membresía en el grupo - se debe de agregar
-                    $sPeticionSQL = paloDB::construirInsert(
-                        'acl_membership', 
-                        array(
-                            'id_user'   =>  paloDB::DBCAMPO($id_user),
-                            'id_group'  =>  paloDB::DBCAMPO($id_group),
-                        ));
-                    if (!($bExito = $this->_DB->genQuery($sPeticionSQL))) {
+                    $sPeticionSQL = 'INSERT INTO acl_membership (id_user, id_group) VALUES (?, ?)';
+                    if (!($bExito = $this->_DB->genQuery($sPeticionSQL, array($id_user, $id_group)))) {
                         // Ocurre un error de base de datos
                         $this->errMsg = $this->_DB->errMsg;
                     }
@@ -531,8 +526,8 @@ class paloACL {
         } else if (!preg_match('/^[[:digit:]]+$/', "$id_group")) {
             $this->errMsg = "Group ID is not numeric";
         } else {
-            $sql = "DELETE FROM acl_membership WHERE id_user = '$id_user' AND id_group = '$id_group'";
-            if (!($bExito = $this->_DB->genQuery($sql))) {
+            $sql = "DELETE FROM acl_membership WHERE id_user = ? AND id_group = ?";
+            if (!($bExito = $this->_DB->genQuery($sql, array($id_user, $id_group)))) {
                 $this->errMsg = $this->_DB->errMsg;
             }
         }
@@ -554,21 +549,42 @@ class paloACL {
      */
     function getActions($id_action = NULL)
     {
-        $arr_result = FALSE;
-        if (!is_null($id_action) && !preg_match('/^[[:digit:]]+$/', "$id_action")) {
-            $this->errMsg = "Action ID is not numeric";
-        } else {
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT id, name, description FROM acl_action".
-                (is_null($id_action) ? '' : " WHERE id = $id_action");
-            $arr_result = $this->_DB->fetchTable($sPeticionSQL);
-            if (!is_array($arr_result)) {
-                $arr_result = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $arr_result;
+        return $this->_getRowsById(
+            'acl_action',
+            array('id', 'name', 'description'),
+            $id_action);
+    }
 
+    private function _createOrUpdateRowWithDescription($table, $name, $description = '')
+    {
+        $this->errMsg = '';
+        if ($name == '') {
+            $this->errMsg = 'Name cannot be empty';
+            return FALSE;
+        }
+        if ($description == '') $description = $name;
+
+        // Verificar si la tupla ya existe
+        $sql = 'SELECT description FROM '.$table.' WHERE name = ?';
+        $tupla = $this->_DB->getFirstRowQuery($sql, FALSE, array($name));
+        if (!is_array($tupla)) {
+            // Ocurre error de DB en consulta
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        $sql = (count($tupla) == 0)
+            ? 'INSERT INTO '.$table.' (description, name) VALUES (?, ?)'
+            : 'UPDATE '.$table.' SET description = ? WHERE name = ?';
+        $param = array($description, $name);
+
+        // Se intenta crear acción idéntica a existente en DB?
+        if (count($tupla) > 0 && $tupla[0] == $description) return TRUE;
+
+        if (!$this->_DB->genQuery($sql, $param)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
     }
 
     /**
@@ -580,58 +596,9 @@ class paloACL {
      *
      * @return bool     VERDADERO si la acción ya existe o fue creada/actualizada correctamente
      */
-    function createAction($name, $description = '')
+    function createAction($groupname, $description = '')
     {
-        $bExito = FALSE;
-        $this->errMsg = "";
-        if ($groupname == "") {
-            $this->errMsg = "Action Name can't be empty";
-        } else {
-            if ($description == '') $description = $groupname;
-
-            // Verificar si la acción ya existe
-            $sPeticionSQL =
-                "SELECT description FROM acl_action ".
-                "WHERE name = ".paloDB::DBCAMPO($groupname);
-            $tupla = $this->_DB->getFirstRowQuery($sPeticionSQL);
-            if (!is_array($tupla)) {
-                // Ocurre error de DB en consulta
-                $this->errMsg = $this->_DB->errMsg;
-            } else if (count($tupla) == 0) {
-                // Acción no existía previamente
-                $sPeticionSQL = paloDB::construirInsert(
-                    "acl_action",
-                    array(
-                        "name"          =>  paloDB::DBCAMPO($groupname),
-                        "description"   =>  paloDB::DBCAMPO($description),
-                    )
-                );
-                if ($this->_DB->genQuery($sPeticionSQL)) {
-                    $bExito = TRUE;
-                } else {
-                    $this->errMsg = $this->_DB->errMsg;
-                }
-            } else {
-                // Acción existía previamente, se actualiza opcionalmente desc
-                if ($tupla[0] != $description) {
-                    // Se modifica descripción de acción existente
-                    $sPeticionSQL = paloDB::construirUpdate(
-                        'acl_action',
-                        array('description' =>  paloDB::DBCAMPO($description)),
-                        array('name'        =>  paloDB::DBCAMPO($groupname)));
-                    if ($this->_DB->genQuery($sPeticionSQL)) {
-                        $bExito = TRUE;
-                    } else {
-                        $this->errMsg = $this->_DB->errMsg;
-                    }
-                } else {
-                    // Se intenta crear acción idéntica a existente en DB
-                    $bExito = TRUE;
-                }
-            }
-        }
-
-        return $bExito;
+        return $this->_createOrUpdateRowWithDescription('acl_action', $groupname, $description);
     }
 
     /**
@@ -649,20 +616,10 @@ class paloACL {
      */
     function getResources($id_rsrc = NULL)
     {
-        $arr_result = FALSE;
-        if (!is_null($id_rsrc) && !preg_match('/^[[:digit:]]+$/', "$id_rsrc")) {
-            $this->errMsg = "Resource ID is not numeric";
-        } else {
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT id, name, description FROM acl_resource".
-                (is_null($id_rsrc) ? '' : " WHERE id = $id_rsrc");
-            $arr_result = $this->_DB->fetchTable($sPeticionSQL);
-            if (!is_array($arr_result)) {
-                $arr_result = FALSE;
-                $this->errMsg = $this->_DB->errMsg;
-            }
-        }
-        return $arr_result;
+        return $this->_getRowsById(
+            'acl_resource',
+            array('id', 'name', 'description'),
+            $id_rsrc);
     }
 
     /**
@@ -676,56 +633,7 @@ class paloACL {
      */
     function createResource($name, $description = NULL)
     {
-        $bExito = FALSE;
-        $this->errMsg = "";
-        if ($name == "") {
-            $this->errMsg = "Resource Name can't be empty";
-        } else {
-            if ($description == '') $description = $name;
-
-            // Verificar si el recurso ya existe
-            $sPeticionSQL =
-                "SELECT description FROM acl_resource ".
-                "WHERE name = ".paloDB::DBCAMPO($name);
-            $tupla = $this->_DB->getFirstRowQuery($sPeticionSQL);
-            if (!is_array($tupla)) {
-                // Ocurre error de DB en consulta
-                $this->errMsg = $this->_DB->errMsg;
-            } else if (count($tupla) == 0) {
-                // Recurso no existía previamente
-                $sPeticionSQL = paloDB::construirInsert(
-                    'acl_resource',
-                    array(
-                        "name"          =>  paloDB::DBCAMPO($name),
-                        "description"   =>  paloDB::DBCAMPO($description),
-                    )
-                );
-                if ($this->_DB->genQuery($sPeticionSQL)) {
-                    $bExito = TRUE;
-                } else {
-                    $this->errMsg = $this->_DB->errMsg;
-                }
-            } else {
-                // Recurso existía previamente, se actualiza opcionalmente desc
-                if ($tupla[0] != $description) {
-                    // Se modifica descripción de grupo existente
-                    $sPeticionSQL = paloDB::construirUpdate(
-                        'acl_resource',
-                        array('description' =>  paloDB::DBCAMPO($description)),
-                        array('name'        =>  paloDB::DBCAMPO($name)));
-                    if ($this->_DB->genQuery($sPeticionSQL)) {
-                        $bExito = TRUE;
-                    } else {
-                        $this->errMsg = $this->_DB->errMsg;
-                    }
-                } else {
-                    // Se intenta crear recurso idéntico a existente en DB
-                    $bExito = TRUE;
-                }
-            }
-        }
-
-        return $bExito;
+        return $this->_createOrUpdateRowWithDescription('acl_resource', $name, $description);
     }
 
     /**
@@ -744,7 +652,7 @@ class paloACL {
      *
      * @return mixed    Matriz que describe las acciones autorizadas, o NULL en caso de error
      */
-    function getUserPermissions($id_user)
+    private function getUserPermissions($id_user)
     {
          $arr_resultado = array();
         if (!preg_match('/^[[:digit:]]+$/', "$id_user")) {
@@ -753,8 +661,8 @@ class paloACL {
             $sql =
                 "SELECT a.name, r.name, up.id ".
                 "FROM acl_user_permission as up, acl_action as a, acl_resource as r ".
-                "WHERE up.id_user = $id_user AND up.id_action = a.id AND up.id_resource = r.id";
-            $result = $this->_DB->fetchTable($sql, FALSE);
+                "WHERE up.id_user = ? AND up.id_action = a.id AND up.id_resource = r.id";
+            $result = $this->_DB->fetchTable($sql, FALSE, array($id_user));
             if ($result && is_array($result) && count($result)>0) {
                 $arr_resultado = array();
                 foreach($result as $key => $value)
@@ -781,7 +689,7 @@ class paloACL {
      *
      * @return mixed    Matriz que describe las acciones autorizadas, o NULL en caso de error
      */
-    function getGroupPermissions($id_group)
+    private function getGroupPermissions($id_group)
     {
         $arr_resultado = NULL;
         if (!preg_match('/^[[:digit:]]+$/', "$id_group")) {
@@ -790,8 +698,8 @@ class paloACL {
             $sPeticionSQL =
                 "SELECT a.name, r.name, gp.id ".
                 "FROM acl_group_permission as gp, acl_action as a , acl_resource as r ".
-                "WHERE gp.id_group = $id_group AND gp.id_action = a.id AND gp.id_resource = r.id";
-            $result = $this->_DB->fetchTable($sPeticionSQL, FALSE);
+                "WHERE gp.id_group = ? AND gp.id_action = a.id AND gp.id_resource = r.id";
+            $result = $this->_DB->fetchTable($sPeticionSQL, FALSE, array($id_group));
             if ($result && is_array($result) && count($result)>0) {
                 $arr_resultado = array();
                 foreach($result as $key => $value)
@@ -814,10 +722,10 @@ class paloACL {
      *
      * @return mixed    Arreglo de todos los permisos del usuario, o NULL en caso de error
      */
-    function getArrayPermissions($id_user)
+    private function getArrayPermissions($id_user)
     {
         $arr_priv = NULL;
-        
+
         if (!preg_match('/^[[:digit:]]+$/', "$id_user")) {
             $this->errMsg = "User ID is not numeric";
         } else {
@@ -867,7 +775,7 @@ class paloACL {
     }
 
     function isUserAuthorized($username, $action_name, $resource_name)
-    {    
+    {
         if($id_user = $this->getIdUser($username)) {
             $resultado = $this->isUserAuthorizedById($id_user, $action_name, $resource_name);
         } else {
@@ -901,8 +809,8 @@ class paloACL {
                 return FALSE;
             }
 
-            $sql = "SELECT name FROM acl_user WHERE name = '$user' AND md5_password = '$pass'";
-            $arr = $this->_DB->fetchTable($sql);
+            $sql = "SELECT name FROM acl_user WHERE name = ? AND md5_password = ?";
+            $arr = $this->_DB->fetchTable($sql, FALSE, array($user, $pass));
             if (is_array($arr)) {
                 return (count($arr) > 0);
             } else {
@@ -914,26 +822,9 @@ class paloACL {
 
     function saveGroupPermission($idGroup, $resources)
     {
-        $bExito=FALSE;
-        if (!preg_match('/^[[:digit:]]+$/', "$idGroup")) {
-            $this->errMsg = "Group ID is not valid";
-        } else {
-            foreach ($resources as $resource){
-                $sPeticionSQL=
-                    "INSERT INTO acl_group_permission (id_action, id_group, id_resource) ".
-                    "VALUES (1, $idGroup, $resource)";
-
-                if ($this->_DB->genQuery($sPeticionSQL)) {
-                    $bExito = TRUE;
-                } else {
-                    $this->errMsg = $this->_DB->errMsg;
-                    break;
-                }
-            }
-        }
-        return $bExito;
+        return $this->saveGroupPermissions('access', $idGroup, $resources);
     }
-
+/*
     function deleteGroupPermission($idGroup,$resources)
     {
         $bExito=FALSE;
@@ -944,7 +835,7 @@ class paloACL {
                 $sPeticionSQL=
                     "DELETE FROM acl_group_permission ".
                     "WHERE id_group=$idGroup AND id_resource=$resource";
-                
+
                 if ($this->_DB->genQuery($sPeticionSQL)) {
                     $bExito = TRUE;
                 } else {
@@ -955,13 +846,13 @@ class paloACL {
         }
         return $bExito;
     }
-
+*/
     /**
-     * Procedimiento para obtener la extension de un usuario mediante su username. 
+     * Procedimiento para obtener la extension de un usuario mediante su username.
      *
      * @param string   $username  Username del usuario
      *
-     * @return string    numero de extension 
+     * @return string    numero de extension
      */
     function getUserExtension($username)
     {
@@ -980,25 +871,22 @@ class paloACL {
     }
 
     /**
-     * Procedimiento para obtener el is del recurso dado su nombre. 
+     * Procedimiento para obtener el is del recurso dado su nombre.
      *
      * @param string   $resource_name  Nombre del recurso
      *
-     * @return string    numero de extension 
+     * @return string    numero de extension
      */
     function getResourceId($resource_name)
     {
-        $id_resource = null;
         if (!preg_match('/^([-_[:alnum:]]+[[a-z0-9\-_]+]*)$/', "$resource_name")) {
             $this->errMsg = "Resource Name is not valid";
-        } else {
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT id FROM acl_resource WHERE name = '$resource_name'";
-            $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE);
-            if ($result && is_array($result) && count($result)>0) {
-                $id_resource = $result[0];
-            }else $this->errMsg = $this->_DB->errMsg;
+            return NULL;
         }
+
+        // El API requiere devolver NULL en caso de fallo
+        $id_resource = $this->getIdResource($resource_name);
+        if ($id_resource === FALSE) $id_resource = NULL;
         return $id_resource;
     }
 
@@ -1007,7 +895,7 @@ class paloACL {
      *
      * @param string   $username  Username del usuario
      *
-     * @return boolean true or false 
+     * @return boolean true or false
      */
     function isUserAdministratorGroup($username)
     {
@@ -1043,14 +931,8 @@ class paloACL {
                 $this->errMsg = "Group already exists";
             } elseif ($this->errMsg == "") {
 
-                $sPeticionSQL = paloDB::construirInsert(
-                    "acl_group",
-                    array(
-                        "name"          =>  paloDB::DBCAMPO($group),
-                        "description"   =>  paloDB::DBCAMPO($description)
-                    )
-                );
-                if ($this->_DB->genQuery($sPeticionSQL)) {
+                $sPeticionSQL = 'INSERT INTO acl_group (description, name) VALUES (?, ?)';
+                if ($this->_DB->genQuery($sPeticionSQL, array($description, $group))) {
                     $bExito = TRUE;
                 } else {
                     $this->errMsg = $this->_DB->errMsg;
@@ -1104,15 +986,8 @@ class paloACL {
 
                 if ($bContinuar) {
                     // Proseguir con la modificación del grupo
-                    $sPeticionSQL = paloDB::construirUpdate(
-                        "acl_group",
-                        array(
-                            "name"          =>  paloDB::DBCAMPO($group),
-                            "description"   =>  paloDB::DBCAMPO($description),
-                            ),
-                        array(
-                            "id"  =>  $id_group));
-                    if ($this->_DB->genQuery($sPeticionSQL)) {
+                    $sPeticionSQL = 'UPDATE acl_group SET name = ?, description = ? WHERE id = ?';
+                    if ($this->_DB->genQuery($sPeticionSQL, array($group, $description, $id_group))) {
                         $bExito = TRUE;
                     } else {
                         $this->errMsg = $this->_DB->errMsg;
@@ -1138,13 +1013,14 @@ class paloACL {
         } else {
             $this->errMsg = "";
             $listaSQL = array(
-                "DELETE FROM acl_group_permission WHERE id_group = '$id_group'",
-                "DELETE FROM acl_group WHERE id = '$id_group'",
+                "DELETE FROM acl_membership WHERE id_group = ?",
+                "DELETE FROM acl_group_permission WHERE id_group = ?",
+                "DELETE FROM acl_group WHERE id = ?",
             );
             $bExito = TRUE;
 
             foreach ($listaSQL as $sPeticionSQL) {
-                $bExito = $this->_DB->genQuery($sPeticionSQL);
+                $bExito = $this->_DB->genQuery($sPeticionSQL, array($id_group));
                 if (!$bExito) {
                     $this->errMsg = $this->_DB->errMsg;
                     break;
@@ -1160,8 +1036,8 @@ class paloACL {
         if (!is_null($id_group) && !preg_match('/^[[:digit:]]+$/', "$id_group")) {
             $this->errMsg = "Group ID is not numeric";
         } else {
-            $sPeticionSQL = "SELECT count(*) FROM acl_membership WHERE id_group = $id_group";
-            $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE);
+            $sPeticionSQL = "SELECT count(*) FROM acl_membership WHERE id_group = ?";
+            $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE, array($id_group));
             if ($result && is_array($result) && count($result)>0) {
                 $users = $result[0];
                 if($users==0)
@@ -1251,11 +1127,11 @@ class paloACL {
                  "FROM acl_resource ar, (SELECT aa.name action_name, agp.id_resource resource_id ".
                                         "FROM acl_group_permission agp ".
                                         "INNER JOIN acl_action aa on agp.id_action = aa.id ".
-                                        "WHERE agp.id_group = $id_group ) AS gp ".
+                                        "WHERE agp.id_group = ? ) AS gp ".
                  "WHERE gp.resource_id = ar.id ".
                  "ORDER BY 1 asc ";
 
-        $result = $this->_DB->fetchTable($query, true);
+        $result = $this->_DB->fetchTable($query, true, array($id_group));
         if( $result == false ) {
             $this->errMsg = $this->_DB->errMsg;
             return array();
@@ -1263,7 +1139,7 @@ class paloACL {
 
         return $result;
     }
-
+/*
     function loadResourceGroupPermissions($action, $id_group)
     {
         $query = "SELECT acl_resource.name AS resource_name  ".
@@ -1282,7 +1158,7 @@ class paloACL {
 
         return $result;
     }
-
+*/
     function saveGroupPermissions($action, $idGroup, $resources)
     {
         $bExito = FALSE;
@@ -1290,12 +1166,11 @@ class paloACL {
             $this->errMsg = "Group ID is not valid";
         else
         {
+            $sPeticionSQL = "INSERT INTO acl_group_permission (id_action, id_group, id_resource) ".
+                            "VALUES( (SELECT id FROM acl_action WHERE name = ?) , ?, ?)";
             foreach ($resources as $resource)
             {
-                $sPeticionSQL = "INSERT INTO acl_group_permission (id_action, id_group, id_resource) ".
-                                "VALUES( (SELECT id FROM acl_action WHERE name = '$action') , $idGroup, $resource)";
-
-                if ($this->_DB->genQuery($sPeticionSQL))
+                if ($this->_DB->genQuery($sPeticionSQL, array($action, $idGroup, $resource)))
                     $bExito = TRUE;
                 else {
                     $this->errMsg = $this->_DB->errMsg;
@@ -1313,12 +1188,12 @@ class paloACL {
             $this->errMsg = "Group ID is not valid";
         else
         {
+            $sPeticionSQL =
+                "DELETE FROM acl_group_permission ".
+                "WHERE id_group = ? AND id_resource = ? AND ".
+                    "id_action = (SELECT id FROM acl_action WHERE name = ?) ";
             foreach ($resources as $resource){
-                $sPeticionSQL = "DELETE FROM acl_group_permission ".
-                                "WHERE id_group = $idGroup AND id_resource = $resource AND ".
-                                      "id_action = (SELECT id FROM acl_action WHERE name = '$action') ";
-                
-                if ($this->_DB->genQuery($sPeticionSQL))
+                if ($this->_DB->genQuery($sPeticionSQL, array($idGroup, $resource, $action)))
                     $bExito = TRUE;
                 else
                 {
@@ -1330,31 +1205,25 @@ class paloACL {
         return $bExito;
     }
  /**
-     * Procedimiento para obtener el id del recurso mediante su nameid. 
+     * Procedimiento para obtener el id del recurso mediante su nameid.
      *
-     * @param string   $username  
+     * @param string   $username
      *
-     * @return integer    id 
+     * @return integer    id
      *******************************************************************/
     function getIdResource($resource_name)
     {
-        $id_resource = null;
         if (!preg_match('/^([-_[:alnum:]]+[[a-z0-9\-_]+]*)$/', "$resource_name")) {
             $this->errMsg = "Resource Name is not valid";
-        } else {
-            $this->errMsg = "";
-            $sPeticionSQL = "SELECT id FROM acl_resource WHERE name = '$resource_name'";
-            $result = $this->_DB->getFirstRowQuery($sPeticionSQL, FALSE);
-            if ($result && is_array($result) && count($result)>0) {
-                $id_resource = $result[0];
-                return $id_resource;
-            }else $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
         }
-        return 0;
+
+        // ATENCION: la implementación nueva devuelve FALSE en lugar de 0 en error
+        return $this->_getIdRowByName('acl_resource', $resource_name);
     }
 
     /**
-     * Procedimiento para eliminar el recurso dado su id. 
+     * Procedimiento para eliminar el recurso dado su id.
      *
      * @param integer   $idresource
      *
@@ -1363,13 +1232,24 @@ class paloACL {
     function deleteIdResource($idresource)
     {
         $this->errMsg = "";
-        $sPeticionSQL = "DELETE FROM acl_resource WHERE id = $idresource";
-        $result = $this->_DB->genQuery($sPeticionSQL);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
+        $listaSQL = array(
+            "DELETE FROM acl_group_permission WHERE id_resource = ?",
+            "DELETE FROM acl_user_permission WHERE id_resource = ?",
+            "DELETE FROM acl_user_profile WHERE id_resource = ?",
+            "DELETE FROM acl_user_shortcut WHERE id_resource = ?",
+            "DELETE FROM sticky_note WHERE id_resource = ?",
+            "DELETE FROM acl_resource WHERE id = ?",
+        );
+        $bExito = TRUE;
+
+        foreach ($listaSQL as $sPeticionSQL) {
+            $bExito = $this->_DB->genQuery($sPeticionSQL, array($idresource));
+            if (!$bExito) {
+                $this->errMsg = $this->_DB->errMsg;
+                break;
+            }
         }
-        return true;
+        return $bExito;
     }
 
     /**
@@ -1382,8 +1262,8 @@ class paloACL {
     function deleteIdGroupPermission($idresource)
     {
         $id_resource = null;
-        $sPeticionSQL = "DELETE FROM acl_group_permission WHERE id_resource = $idresource";
-        $result = $this->_DB->genQuery($sPeticionSQL);
+        $sPeticionSQL = "DELETE FROM acl_group_permission WHERE id_resource = ?";
+        $result = $this->_DB->genQuery($sPeticionSQL, array($idresource));
         if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
@@ -1392,11 +1272,11 @@ class paloACL {
     }
 
      /**
-     * Procedimiento para obtener el nombre del grupo dado un id. 
+     * Procedimiento para obtener el nombre del grupo dado un id.
      *
      * @param integer   $idGroup  id del grupo
      *
-     * @return string    nombre del grupo 
+     * @return string    nombre del grupo
      */
     function getGroupNameByid($idGroup)
     {

@@ -352,6 +352,14 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Oct  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: code cleanup in paloSantoACL class:
+  - all cases of string concatenation for SQL replaced with SQL parameters
+  - factored common read patterns into helper functions
+  - reimplementation of some functions as special cases of others
+  - added missing cascade deletion in user and resource deletion.
+  SVN Rev[7173]
+
 * Mon Oct  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: use backticks for column names that are reserved keywords
   in MySQL.

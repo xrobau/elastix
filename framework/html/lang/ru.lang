@@ -69,7 +69,7 @@ $arrLang=array(
 "Delete" => "Удалить",
 "Accept" => "Принять",
 "Group Permission" => "Права группы",
-"Users" => "Users",
+"Users" => "Пользователи",
 "Directory couldn't be opened" => "Директория не может быть открыта",
 /*end User Management*/
 
@@ -81,7 +81,7 @@ $arrLang=array(
 /*end  menu*/
 
 /*Start Language*/
-"Language" => "Language",
+"Language" => "Язык",
 "Change" => "Изменить",
 "Logout" => "Выход",
 /*end Language*/
@@ -105,6 +105,9 @@ $arrLang=array(
 "Date/Time" => "Дата и Время",
 /*end system - date/time*/
 
+/*History*/
+"History" => "История",
+
 /*load module*/
 "Load Module" => "Загрузить Модуль",
 "ID for new module (folder name)" => "ID для нового модуля (имя папки)",
@@ -121,20 +124,77 @@ $arrLang=array(
 "File install.php doesn't exist in module file" => "Файл install.php не существует в файле модуля",
 /*end load module*/
 
-// Elastix 0.9 
+// Elastix 0.9
 /*Start SubModule Themes*/
 "Themes" => "Темы",
 "Change Theme" => "Изменить Тему",
 /*end SubModule Themes*/
 
+
+/*Module Agenda*/
+"Agenda" => "Планировщик",
+"Calendar" => "Календарь",
+"Address Book" => "Адресная Книга",
+
+/*Module Email*/
+"Email" => "Email",
+"Domains" => "Домены",
+"Accounts" => "Учётные записи",
+"Relay" => "Relay",
+"Webmail" =>"Webmail",
+"Antispam" => "Antispam",
+"Remote SMTP" => "Удалённый SMTP",
+"Email list" => "Списки Рассылки",
+"Email stats" => "Статистика",
+"Vacations" => "Автоматический Ответ",
+
+/*Module Fax*/
+"Fax" => "Факс",
+
+/*Module PBX*/
+"PBX" => "PBX",
+"PBX Configuration" => "Настройка PBX",
+"Operator Panel" => "Панель Оператора",
+"Voicemail" => "Голосовая почта",
+"Configuration" => "Настройка",
+"Calls Recordings" => "Записи Разговоров",
+"Batch Configurations" => "Групповая Настройка",
+"Endpoint Configurator" => "Настройка Телефонов",
+"Batch of Extensions" => "Группа Extensions",
+"Conference" => "Конференция",
+"Tools" => "Инструменты",
+"Asterisk-Cli" => "Командная строка Asterisk",
+"Asterisk File Editor" => "Редактор файлов Asterisk",
+"Recordings" => "Запись приветствий",
+"Flash Operator Panel" => "Flash Панель Оператора",
+
 /*Module IM*/
-"IM" => "IM",
+"IM" => "Мгновенные сообщения",
 "OpenFire" => "OpenFire",
 "The service Openfire No running" => "Сервис Openfire не запущен",
 "Webmin" => "Webmin",
 "The service Webmin No running" => "The Webmin service is not active at this moment. If you want to activate it please ",
 
+/*Module Reports*/
+"Reports" => "Отчёты",
+
+"Extras" => "Extras",
+"Addons" => "Дополнения",
+"My Extension" => "Мой Extension",
+
+/*Module Security*/
+"Security" => "Безопасность",
+"Firewall" => "Сетевой Экран",
+"Audit" => "Аудит",
+"Weak Keys" => "Слабые пароли",
+"Advanced Settings" => "Расширенные настройки",
+"Firewall Rules" => "Правила Сетевого Экрана",
+"Define Ports" => "Определение Портов",
+"Port Knocking Interface" => "Port Knocking Interface",
+"Port Knocking Users" => "Port Knocking Users",
+
 /*vTigerCRM*/
+
 "vTigerCRM" => "vTigerCRM",
 "The vTiger installation is almost done. To complete it please" => "The vTiger installation is almost done. To complete it please ",
 "click here" => "click here",
@@ -143,13 +203,33 @@ $arrLang=array(
 "SugarCRM" => "SugarCRM",
 "The SugarCRM installation is almost done. To complete it please" => "The SugarCRM installation is almost done. To complete it please",
 
+/*Dashboard*/
+"Dashboard" => "Панель состояния",
+"Dashboard Applet Admin" => "Настройка Панели Состояния",
+
+/*Network*/
+"Network" => "Сеть",
+
+/*Shutdown*/
+"Shutdown" => "Выключение",
+
+/*Hardware Detector*/
+"Hardware Detector" => "Обнаружение Оборудования",
+
+/*Updates*/
+"Updates" => "Обновления",
+
+/*Backup/Restore*/
+"Backup/Restore" => "Резервное копирование/Восстановление",
+
 /*Preferences*/
 "Preferences" => "Предпочтения",
+"Currency" => "Валюта",
 
 /* Start About Elastix */
 "About Elastix" => "Об Elastix",
-"About Elastix2"=>"About us",
-"HELP"=>"Help",
+"About Elastix2"=>"Об Elastix",
+"HELP"=>"Помощь",
 "About Elastix Content" => "Elastix was created under the premise of becoming a reliable, easy-to-use,web-based system for the management of communications over IP. This open
 source software started in Ecuador has become the solution of choice for
 implementations of Voice over IP around the globe.",
@@ -158,35 +238,51 @@ implementations of Voice over IP around the globe.",
 
 //Elastix 0.9.1
 /*Start module Group List*/
-"Groups"=>"Groups",
-"Group List"=>"Group List",
+"Groups"=>"Группы",
+"Group List"=>"Список Групп",
 /*End module Group List*/
 
 /*Grouplist*/
 "administrator" => "Administrator",
-"operator" => "Operator",
+"operator" => "Оператор",
 "extension" => "Extension",
-"total access" => "Total Access",
+"total access" => "Полный Доступ",
 "extension user" => "Extension User",
 /*Grouplist*/
 "Title" => "Title",
-"Search" => "Search",
-"Show"   => "Show",
+"Search" => "Искать",
+"Show"   => "Показать",
 'md_message_title' => 'Dismiss',
-"ERROR" => "Error",
-"VersionDetails" => "Version",
-"VersionPackage" => "Details of package versions",
-"textMode" => "Text Mode",
-"htmlMode" => "Html Mode",
-"Register" => "Register",
-"Registered" => "Registered",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access to this page" => "You are not authorized to access to this page",
-"You need administrator privileges" => "You need administrator privileges",
+"ERROR" => "Ошибка",
+"VersionDetails" => "Версия",
+"VersionPackage" => "Версии пакетов",
+"textMode" => "Режим Текст",
+"htmlMode" => "Режим Html",
+"Register" => "Регистрация",
+"Registered" => "Зарегистрирован",
+"Unauthorized" => "Неавторизованный",
+"You are not authorized to access to this page" => "Вы неавторизованны для доступа к этой странице",
+"You need administrator privileges" => "Вам нужны права администратора",
 "Elastix Authentication" => "Elastix Authentication",
-"Unauthorized" => "Unauthorized",
-"You are not authorized to access this page." => "You are not authorized to access this page.",
-"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "You have not permissions to access to Flash Operator Panel. Please contact your administrator.",
-"Advice" => "Advice"
+"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "Вам не разрешен доступ к Flash Панели Оператора. Пожалуйста, свяжитесь с администратором.",
+"Advice" => "Advice",
+
+/*New*/
+"Hide left panel" => "Скрыть левую панель",
+"Load left panel" => "Показать левую панель",
+"Add Bookmark" => "Добавить Закладку",
+"Search modules" => "Поиск модулей",
+"Change Elastix Password" => "Изменить Пароль Elastix",
+"CDR Report" => "Отчёт CDR",
+"Channels Usage" => "Использование Каналов",
+"Billing" => "Биллинг",
+"Rates" => "Тарифы",
+"Billing Report" => "Билинговый отчёт",
+"Destination Distribution" => "Направления",
+"Billing Setup" => "Настройка Биллинга",
+"Asterisk Logs" => "Журнал Asterisk",
+"Graphic Report"  => "Графический Отчёт",
+"Summary"  => "Сводка",
+"Missed Calls"  => "Пропущенные Звонки"
 );
 ?>

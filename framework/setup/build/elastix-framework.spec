@@ -352,6 +352,9 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Oct  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Updated Russian translation. Provided by user Russian.
+  SVN Rev[7176]
 * Tue Oct  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: code cleanup in paloSantoACL class:
   - all cases of string concatenation for SQL replaced with SQL parameters

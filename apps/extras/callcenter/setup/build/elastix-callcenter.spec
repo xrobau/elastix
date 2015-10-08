@@ -100,6 +100,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Oct  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Calls Details: do not display duplicate rows when multiple recordings
+  are found. Instead collect them all and display the most recent one as the
+  main one, and hide the rest until clicked on. Fixes Elastix bug #2350.
+  SVN Rev[7138]
+
 * Fri Oct  2 2015 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-14
 - Bump version for release.
 - FIXED: Campaign Out: allow outgoing campaign without forms to be created.

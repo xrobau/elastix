@@ -190,16 +190,12 @@ class paloSantoCallsDetail
             return NULL;
         }
 
-        /* FIXME: El LEFT JOIN con call_recording asume un máximo de 1 registro
-         * de grabación por llamada. Si hay más de 1 aparecerán registros
-         * duplicados. */
-
         $sPeticion_incoming = <<<SQL_INCOMING
 SELECT agent.number, agent.name, call_entry.datetime_init AS start_date,
     call_entry.datetime_end AS end_date, call_entry.duration,
     call_entry.duration_wait, queue_call_entry.queue, 'Inbound' AS type,
     IF(contact.telefono IS NULL, call_entry.callerid, contact.telefono) AS telefono,
-    call_entry.transfer, call_entry.status, call_recording.id
+    call_entry.transfer, call_entry.status, call_entry.id AS idx
 FROM (call_entry, queue_call_entry)
 LEFT JOIN contact
     ON contact.id = call_entry.id_contact
@@ -207,8 +203,6 @@ LEFT JOIN agent
     ON agent.id = call_entry.id_agent
 LEFT JOIN campaign_entry
     ON campaign_entry.id = call_entry.id_campaign
-LEFT JOIN call_recording
-    ON call_recording.id_call_incoming = call_entry.id
 WHERE call_entry.id_queue_call_entry = queue_call_entry.id
 SQL_INCOMING;
         list($sWhere_incoming, $param_incoming) = $this->_construirWhere_incoming($param);
@@ -219,12 +213,10 @@ SELECT agent.number, agent.name, calls.start_time AS start_date,
     calls.end_time AS end_date, calls.duration,
     calls.duration_wait, campaign.queue, 'Outbound' AS type,
     calls.phone AS telefono,
-    calls.transfer, calls.status, call_recording.id
+    calls.transfer, calls.status, calls.id AS idx
 FROM (calls, campaign)
 LEFT JOIN agent
     ON agent.id = calls.id_agent
-LEFT JOIN call_recording
-    ON call_recording.id_call_outgoing = calls.id
 WHERE campaign.id = calls.id_campaign
 SQL_OUTGOING;
         list($sWhere_outgoing, $param_outgoing) = $this->_construirWhere_outgoing($param);
@@ -260,6 +252,29 @@ SQL_OUTGOING;
             $this->errMsg = '(internal) Failed to fetch CDRs - '.$this->_DB->errMsg;
             $recordset = NULL;
         }
+
+        /* Buscar grabaciones para las llamadas leídas. No se usa un LEFT JOIN
+         * en el query principal porque pueden haber múltiples grabaciones por
+         * registro (múltiples intentos en caso outgoing) y la cuenta de
+         * registros no considera esta duplicidad. */
+        $sqlfield = array(
+            'Inbound'   =>  'id_call_incoming',
+            'Outbound'  =>  'id_call_outgoing',
+        );
+        foreach (array_keys($recordset) as $i) {
+            /* Se asume que el tipo de llamada está en la columna 7 y el ID del
+             * intento de llamada en la columna 11. */
+            $sql = 'SELECT id, datetime_entry FROM call_recording WHERE '.
+                $sqlfield[$recordset[$i][7]].' = ? ORDER BY datetime_entry DESC';
+            $r2 = $this->_DB->fetchTable($sql, TRUE, array($recordset[$i][11]));
+            if (!is_array($r2)) {
+                $this->errMsg = '(internal) Failed to fetch recordings for CDRs - '.$this->_DB->errMsg;
+                $recordset = NULL;
+                break;
+            }
+            $recordset[$i][] = $r2;
+        }
+
         return $recordset;
     }
 
@@ -306,7 +321,7 @@ SQL_OUTGOING;
         // Sumar las cuentas de ambas tablas en caso necesario
         $iNumRegistros = 0;
         if (!isset($param['calltype'])) $param['calltype'] = 'any';
-        if ($param['calltype'] != 'incoming') {
+        if (in_array($param['calltype'], array('any', 'outgoing'))) {
             // Agregar suma de llamadas salientes
             $tupla = $this->_DB->getFirstRowQuery($sPeticion_outgoing, FALSE, $param_outgoing);
             if (is_array($tupla) && count($tupla) > 0) {
@@ -316,7 +331,7 @@ SQL_OUTGOING;
                 return NULL;
             }
         }
-        if ($param['calltype'] != 'outgoing') {
+        if (in_array($param['calltype'], array('any', 'incoming'))) {
             // Agregar suma de llamadas entrantes
             $tupla = $this->_DB->getFirstRowQuery($sPeticion_incoming, FALSE, $param_incoming);
             if (is_array($tupla) && count($tupla) > 0) {
@@ -369,7 +384,7 @@ SQL_OUTGOING;
         }
         return $recordset;
     }
-    
+
     function getRecordingFilePath($id)
     {
         $tupla = $this->_DB->getFirstRowQuery(
@@ -380,7 +395,7 @@ SQL_OUTGOING;
             return NULL;
         }
         if (count($tupla) <= 0) return NULL;
-        
+
         // TODO: volver configurable
         $recordingpath = '/var/spool/asterisk/monitor';
         if ($tupla['recordingfile']{0} != '/')

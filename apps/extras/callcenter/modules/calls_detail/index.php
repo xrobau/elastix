@@ -51,7 +51,7 @@ function _moduleContent(&$smarty, $module_name)
     $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
     $pDB = new paloDB($cadena_dsn);
-    
+
     switch (getParameter('action')) {
     case 'download':
         return downloadRecording($smarty, $module_name, $pDB);
@@ -61,7 +61,7 @@ function _moduleContent(&$smarty, $module_name)
 }
 
 function reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir)
-{    
+{
     // Cadenas estáticas de Smarty
     $smarty->assign(array(
         "Filter"    =>  _tr('Filter'),
@@ -233,8 +233,22 @@ function reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir)
                         $cdr[9],
                         isset($mapaEstados[$cdr[10]]) ? $mapaEstados[$cdr[10]] : _tr($cdr[10]),
                     );
-                    if (!$bExportando)
-                        $tupla[] = (is_null($cdr[11]) ? '' : '<a href="?menu='.$module_name.'&amp;action=download&amp;id='.$cdr[11].'&amp;rawmode=yes">'._tr('Download').'</a>');
+                    if (!$bExportando) {
+                        $downloadlinks = array();
+                        foreach ($cdr[12] as $rec) {
+                            $downloadlinks[] = '<a href="?menu='.$module_name.
+                                '&amp;action=download&amp;id='.$rec['id'].'&amp;rawmode=yes">'.
+                                ((count($downloadlinks) > 0 ? $rec['datetime_entry'] : _tr('Download'))).'</a>';
+                        }
+                        $s = _tr('Total').': '.count($downloadlinks);
+                        if (count($downloadlinks) > 0) {
+                            $s = '<div class="callcenter-recordings collapsed" title="'.
+                                _tr('Click to expand or collapse').'">'.
+                                _tr('Total').': '.count($downloadlinks).
+                                '<div>'.implode('</div><div>', $downloadlinks).'</div></div>';
+                        }
+                        $tupla[] = $s;
+                    }
                     $arrData[] = $tupla;
                 }
             }
@@ -242,7 +256,7 @@ function reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir)
     }
 
     $arrColumnas = array(_tr("No.Agent"), _tr("Agent"),
-        _tr('Start Time'), _tr('End Time'), 
+        _tr('Start Time'), _tr('End Time'),
         _tr("Duration"),
         _tr("Duration Wait"), _tr("Queue"), _tr("Type"), _tr("Phone"),
         _tr("Transfer"), _tr("Status"));
@@ -252,21 +266,21 @@ function reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir)
     if($bElastixNuevo) {
         $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Start Date")." = ".$paramLista['date_start'].", "._tr("End Date")." = ".
             $paramLista['date_end'], $paramLista, array('date_start' => date("d M Y"),'date_end' => date("d M Y")),true);
-        
+
         $oGrid->addFilterControl(_tr("Filter applied ")._tr("Phone")." = ".$paramLista['phone'], $_POST, array("fname" =>''));
-        
+
         $paramLista['calltype'] = isset($callType[$paramLista['calltype']])?$paramLista['calltype'] : '';
         $_POST['calltype']=$paramLista['calltype'];
         $oGrid->addFilterControl(_tr("Filter applied ")._tr("Call Type")." = ".$callType[$paramLista['calltype']], $_POST, array("calltype" => ''),true);
-        
+
         $paramLista['queue'] = isset($comboColas[$paramLista['queue']]) ? $paramLista['queue'] : '';
         $_POST['queue'] = $paramLista['queue'];
         $oGrid->addFilterControl(_tr("Filter applied ")._tr("Queue")." = ".$comboColas[$paramLista['queue']], $_POST, array("queue" => ''),true);
-        
+
         $paramLista['agent'] = isset($comboAgentes[$paramLista['agent']]) ? $paramLista['agent'] : '';
         $_POST['agent'] = $paramLista['agent'];
         $oGrid->addFilterControl(_tr("Filter applied ")._tr("Agent")." = ".$comboAgentes[$paramLista['agent']], $_POST, array("agent" => ''),true);
-        
+
         $oGrid->setURL(construirURL($urlVars, array("nav", "start")));
         $oGrid->setData($arrData);
         $oGrid->setColumns($arrColumnas);

@@ -1,8 +1,8 @@
 $(document).ready(function() {
-    $('div.callcenter-recordings').click(function () {
+    $('div.callcenter-recordings > div:first-child').click(function () {
         // Ocultar o mostrar items según la clase
-        if ($(this).hasClass('collapsed'))
-            $(this).removeClass('collapsed');
-        else $(this).addClass('collapsed');
+        if ($(this).parent().hasClass('collapsed'))
+            $(this).parent().removeClass('collapsed');
+        else $(this).parent().addClass('collapsed');
     });
 });

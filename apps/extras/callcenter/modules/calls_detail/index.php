@@ -240,12 +240,19 @@ function reportCallsDetail($smarty, $module_name, $pDB, $local_templates_dir)
                                 '&amp;action=download&amp;id='.$rec['id'].'&amp;rawmode=yes">'.
                                 ((count($downloadlinks) > 0 ? $rec['datetime_entry'] : _tr('Download'))).'</a>';
                         }
-                        $s = _tr('Total').': '.count($downloadlinks);
-                        if (count($downloadlinks) > 0) {
-                            $s = '<div class="callcenter-recordings collapsed" title="'.
-                                _tr('Click to expand or collapse').'">'.
-                                _tr('Total').': '.count($downloadlinks).
-                                '<div>'.implode('</div><div>', $downloadlinks).'</div></div>';
+                        if (count($downloadlinks) == 0) {
+                            $s = '';
+                        } elseif (count($downloadlinks) == 1) {
+                            $s = $downloadlinks[0];
+                        } else {
+                            if (count($downloadlinks) > 0) {
+                                $s = '<div class="callcenter-recordings collapsed" >'.
+                                     '<div title="'._tr('Click to expand or collapse').'">'._tr('Other').': '.(count($downloadlinks) - 1).'</div>';
+                                for ($i = 0; $i < count($downloadlinks); $i++) {
+                                    $s .= '<div'.(($i > 0) ? ' class="collapsable"' : '').'>'.$downloadlinks[$i].'</div>';
+                                }
+                                $s .= '</div>';
+                            }
                         }
                         $tupla[] = $s;
                     }

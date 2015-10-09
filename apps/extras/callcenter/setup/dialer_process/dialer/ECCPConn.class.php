@@ -1316,7 +1316,9 @@ LEER_CAMPANIA;
         } else {
             // No hay canal de login. Se inicia login a través de Originate
             $r = $this->_loginAgente($listaExtensiones[$sExtension], $sAgente, $infoSeguimiento['name'], $iTimeout);
-            return $this->Response_LoginAgentResponse('logging');
+            return ($r['Response'] == 'Success')
+                ? $this->Response_LoginAgentResponse('logging')
+                : $this->Response_LoginAgentResponse('logged-out', 500, 'Failed to login - '.$r['Message']);
         }
     }
 
@@ -1472,6 +1474,10 @@ LEER_CAMPANIA;
             if (count($listaColas[$sAgente][1]) <= 0) {
                 // Este agente no tiene colas asociadas
                 $this->_log->output('WARN: agente dinámico '.$sAgente.' no es miembro dinámico de ninguna cola, no se puede realizar login.');
+                $r = array(
+                    'Response'  =>  'Error',
+                    'Message'   =>  'Extension not a dynamic member of any queue.',
+                );
             } else {
                 $this->_tuberia->AMIEventProcess_agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout);
 
@@ -1488,8 +1494,11 @@ LEER_CAMPANIA;
                             $sAgente.' a cola '.$cola.': '.print_r($r, TRUE));
                     } else $bIngresoCola = TRUE;
                 }
-                if (!$bIngresoCola)
+                if (!$bIngresoCola) {
                     $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
+                } else {
+                    $r['Response'] = 'Success'; // asumir éxito aunque alguna cola haya fallado
+                }
             }
         }
         return $r;

@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Thu Oct  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): emit a failure condition as soon as it is evident that
+  the dynamic agent trying to log in does not belong to any queue.
+  SVN Rev[7177]
 - FIXED: Calls Details: do not display duplicate rows when multiple recordings
   are found. Instead collect them all and display the most recent one as the
   main one, and hide the rest until clicked on. Fixes Elastix bug #2350.

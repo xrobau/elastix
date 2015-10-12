@@ -63,9 +63,13 @@ CREATE TABLE IF NOT EXISTS `break` (
   `name` varchar(250) NOT NULL,
   `description` varchar(250) default NULL,
   `status` varchar(1) NOT NULL default 'A',
-  `tipo` enum('B','H') default 'B',
+  `tipo` enum('B','H','F') default 'B',
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+/* 2015/10/12 actualizar enumeración para introducir pausa de formulario */
+ALTER TABLE `break`
+CHANGE COLUMN `tipo` `tipo` enum('B','H','F') default 'B';
 
 --
 -- Dumping data for table `break`
@@ -73,6 +77,7 @@ CREATE TABLE IF NOT EXISTS `break` (
 /*!40000 ALTER TABLE `break` DISABLE KEYS */;
 LOCK TABLES `break` WRITE;
 REPLACE INTO `break` VALUES (1,'Hold','Hold','A','H');
+REPLACE INTO `break` VALUES ((SELECT `id` FROM `break` AS B WHERE `tipo`='F'), 'Form', 'Pause to fill forms after call', 'A', 'F');
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `break` ENABLE KEYS */;
 
@@ -144,23 +149,29 @@ CREATE TABLE IF NOT EXISTS `calls` (
 -- Table structure for table `campaign`
 --
 CREATE TABLE IF NOT EXISTS `campaign` (
-  `id` int(10) unsigned NOT NULL auto_increment,
-  `name` varchar(64) NOT NULL,
-  `datetime_init` date NOT NULL,
-  `datetime_end` date NOT NULL,
-  `daytime_init` time NOT NULL,
-  `daytime_end` time NOT NULL,
-  `retries` int(10) unsigned NOT NULL default '1',
-  `trunk` varchar(255),
-  `context` varchar(32) NOT NULL,
-  `queue` varchar(16) NOT NULL,
-  `max_canales` int(10) unsigned NOT NULL default '0',
-  `num_completadas` int(10) unsigned default NULL,
-  `promedio` int(10) unsigned default NULL,
-  `desviacion` int(10) unsigned default NULL,
-  `script` text NOT NULL,
-  `estatus` varchar(1) NOT NULL default 'A',
-  `id_url`  int unsigned,
+    `id`                int(10) unsigned NOT NULL auto_increment,
+    `name`              varchar(64) NOT NULL,
+    `datetime_init`     date NOT NULL,
+    `datetime_end`      date NOT NULL,
+    `daytime_init`      time NOT NULL,
+    `daytime_end`       time NOT NULL,
+    `retries`           int(10) unsigned NOT NULL default '1',
+    `trunk`             varchar(255),
+    `context`           varchar(32) NOT NULL,
+    `queue`             varchar(16) NOT NULL,
+    `max_canales`       int(10) unsigned NOT NULL default '0',
+    `num_completadas`   int(10) unsigned default NULL,
+    `promedio`          int(10) unsigned default NULL,
+    `desviacion`        int(10) unsigned default NULL,
+    `script`            text NOT NULL,
+    `estatus`           varchar(1) NOT NULL default 'A',
+    `id_url`            int unsigned,
+
+    /* 2015/10/12 pausa para formulario, por campaña:
+     * NULL     para desactivar (por omisión)
+     * 0        pausa arbitrariamente larga (hasta que agente indique fin)
+     * > 0      pausa se desactiva automáticamente luego de los segundos indicados */
+    `formpause`         int unsigned,
 
   PRIMARY KEY  (`id`),
   FOREIGN KEY (id_url)  REFERENCES campaign_external_url(id)
@@ -339,6 +350,12 @@ CREATE TABLE IF NOT EXISTS campaign_entry
     estatus             varchar(1)  NOT NULL DEFAULT 'A',
     script              text    NOT NULL,
     id_url              int unsigned,
+
+    /* 2015/10/12 pausa para formulario, por campaña:
+     * NULL     para desactivar (por omisión)
+     * 0        pausa arbitrariamente larga (hasta que agente indique fin)
+     * > 0      pausa se desactiva automáticamente luego de los segundos indicados */
+    `formpause`         int unsigned,
 
     FOREIGN KEY (id_queue_call_entry) REFERENCES queue_call_entry(id),
     FOREIGN KEY (id_form) REFERENCES form(id),
@@ -932,6 +949,36 @@ DELIMITER ; ++
 
 CALL temp_engine_call_recording_2015_07_13();
 DROP PROCEDURE IF EXISTS temp_engine_call_recording_2015_07_13;
+
+
+/* Procedimiento para agregar columnas de pausa para formulario por campaña */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_campaign_formpause_2015_10_12 ++
+CREATE PROCEDURE temp_campaign_formpause_2015_10_12 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_columna tinyint(1);
+
+    SET l_existe_columna = 0;
+
+    /* Verificar existencia de columna campaign.formpause que debe agregarse */
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'campaign'
+        AND COLUMN_NAME = 'formpause';
+    IF l_existe_columna = 0 THEN
+        ALTER TABLE campaign ADD COLUMN formpause int unsigned;
+        ALTER TABLE campaign_entry ADD COLUMN formpause int unsigned;
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_campaign_formpause_2015_10_12();
+DROP PROCEDURE IF EXISTS temp_campaign_formpause_2015_10_12;
 
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;

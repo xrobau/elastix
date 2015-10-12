@@ -48,42 +48,48 @@ if (file_exists($path_script_db))
 
     $pDB = new paloDB ('mysql://root:'.MYSQL_ROOT_PASSWORD.'@localhost/call_center');
     quitarColumnaSiExiste($pDB, 'call_center', 'agent', 'queue');
-    crearColumnaSiNoExiste($pDB, 'call_center', 'calls', 
-        'dnc', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'calls',
+        'dnc',
         "ADD COLUMN dnc int(1) NOT NULL DEFAULT '0'");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'call_entry', 
-        'id_campaign', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'call_entry',
+        'id_campaign',
         "ADD COLUMN id_campaign  int unsigned, ADD FOREIGN KEY (id_campaign) REFERENCES campaign_entry (id)");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'calls', 
-        'date_init', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'calls',
+        'date_init',
         "ADD COLUMN date_init  date, ADD COLUMN date_end  date, ADD COLUMN time_init  time, ADD COLUMN time_end  time");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'calls', 
-        'agent', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'calls',
+        'agent',
         "ADD COLUMN agent varchar(32)");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'call_entry', 
-        'trunk', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'call_entry',
+        'trunk',
         "ADD COLUMN trunk varchar(20) NOT NULL");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'calls', 
-        'failure_cause', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'calls',
+        'failure_cause',
         "ADD COLUMN failure_cause int(10) unsigned default null, ADD COLUMN failure_cause_txt varchar(32) default null");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'calls', 
-        'datetime_originate', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'calls',
+        'datetime_originate',
         "ADD COLUMN datetime_originate datetime default NULL");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'agent', 
-        'eccp_password', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'agent',
+        'eccp_password',
         "ADD COLUMN eccp_password varchar(128) default NULL");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'campaign', 
-        'id_url', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'campaign',
+        'id_url',
         "ADD COLUMN id_url int unsigned, ADD FOREIGN KEY (id_url) REFERENCES campaign_external_url (id)");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'campaign_entry', 
-        'id_url', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'campaign_entry',
+        'id_url',
         "ADD COLUMN id_url int unsigned, ADD FOREIGN KEY (id_url) REFERENCES campaign_external_url (id)");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'calls', 
-        'trunk', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'calls',
+        'trunk',
         "ADD COLUMN trunk varchar(20) NOT NULL");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'agent', 
-        'type', 
+    crearColumnaSiNoExiste($pDB, 'call_center', 'agent',
+        'type',
         "ADD COLUMN type enum('Agent','SIP','IAX2') DEFAULT 'Agent' NOT NULL AFTER id");
+    crearColumnaSiNoExiste($pDB, 'call_center', 'campaign',
+        'formpause',
+        "ALTER TABLE campaign ADD COLUMN formpause int unsigned");
+    crearColumnaSiNoExiste($pDB, 'call_center', 'campaign_entry',
+        'formpause',
+        "ALTER TABLE campaign ADD COLUMN formpause int unsigned");
 
     crearIndiceSiNoExiste($pDB, 'call_center', 'audit',
         'agent_break_datetime',
@@ -103,7 +109,7 @@ if (file_exists($path_script_db))
     crearIndiceSiNoExiste($pDB, 'call_center', 'dont_call',
         'callerid',
         "ADD KEY callerid (caller_id)");
-    
+
     // Asegurarse de que todo agente tiene una contraseña de ECCP
     $pDB->genQuery('UPDATE agent SET eccp_password = SHA1(CONCAT(NOW(), RAND(), number)) WHERE eccp_password IS NULL');
 
@@ -118,7 +124,7 @@ function quitarColumnaSiExiste($pDB, $sDatabase, $sTabla, $sColumna)
 {
     $sPeticionSQL = <<<EXISTE_COLUMNA
 SELECT COUNT(*)
-FROM INFORMATION_SCHEMA.COLUMNS 
+FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?
 EXISTE_COLUMNA;
     $r = $pDB->getFirstRowQuery($sPeticionSQL, FALSE, array($sDatabase, $sTabla, $sColumna));
@@ -140,8 +146,8 @@ EXISTE_COLUMNA;
 function crearColumnaSiNoExiste($pDB, $sDatabase, $sTabla, $sColumna, $sColumnaDef)
 {
     $sPeticionSQL = <<<EXISTE_COLUMNA
-SELECT COUNT(*) 
-FROM INFORMATION_SCHEMA.COLUMNS 
+SELECT COUNT(*)
+FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?
 EXISTE_COLUMNA;
     $r = $pDB->getFirstRowQuery($sPeticionSQL, FALSE, array($sDatabase, $sTabla, $sColumna));
@@ -192,7 +198,7 @@ function instalarContextosEspeciales()
 	$sArchivo = '/etc/asterisk/extensions_custom.conf';
     $sInicioContenido = "; BEGIN ELASTIX CALL-CENTER CONTEXTS DO NOT REMOVE THIS LINE\n";
     $sFinalContenido =  "; END ELASTIX CALL-CENTER CONTEXTS DO NOT REMOVE THIS LINE\n";
-    
+
     // Cargar el archivo, notando el inicio y el final del área de contextos de callcenter
     $bEncontradoInicio = $bEncontradoFinal = FALSE;
     $contenido = array();

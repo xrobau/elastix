@@ -101,6 +101,8 @@ fi
 
 %changelog
 * Thu Oct  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add columns and enumerations for form pause functionality.
+  SVN Rev[7178]
 - FIXED: Dialer (ECCP): emit a failure condition as soon as it is evident that
   the dynamic agent trying to log in does not belong to any queue.
   SVN Rev[7177]

@@ -139,6 +139,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Applet Admin: add Russian translation provided by user Russian.
+  SVN Rev[7180]
+
 * Wed Sep 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: remove an incorrect DELETE statement that has been dormant
   in the SQL update scripts since 2.0.4 (SVN commit #2543). This statement

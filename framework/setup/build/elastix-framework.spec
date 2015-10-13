@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Updated Russian translation (2). Provided by user Russian.
+  SVN Rev[7179]
+
 * Thu Oct  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Updated Russian translation. Provided by user Russian.
   SVN Rev[7176]

@@ -169,7 +169,7 @@ $arrLang=array(
 "Flash Operator Panel" => "Flash Панель Оператора",
 
 /*Module IM*/
-"IM" => "Мгновенные сообщения",
+"IM" => "Мгновенные Cообщения",
 "OpenFire" => "OpenFire",
 "The service Openfire No running" => "Сервис Openfire не запущен",
 "Webmin" => "Webmin",
@@ -204,7 +204,7 @@ $arrLang=array(
 "The SugarCRM installation is almost done. To complete it please" => "The SugarCRM installation is almost done. To complete it please",
 
 /*Dashboard*/
-"Dashboard" => "Панель состояния",
+"Dashboard" => "Панель Состояния",
 "Dashboard Applet Admin" => "Настройка Панели Состояния",
 
 /*Network*/
@@ -218,9 +218,11 @@ $arrLang=array(
 
 /*Updates*/
 "Updates" => "Обновления",
+"Repositories" => "Репозитории",
+"Packages" => "Пакеты",
 
 /*Backup/Restore*/
-"Backup/Restore" => "Резервное копирование/Восстановление",
+"Backup/Restore" => "Резервное Копирование",
 
 /*Preferences*/
 "Preferences" => "Предпочтения",
@@ -252,7 +254,7 @@ implementations of Voice over IP around the globe.",
 "Title" => "Title",
 "Search" => "Искать",
 "Show"   => "Показать",
-'md_message_title' => 'Dismiss',
+'md_message_title' => 'Отклонить',
 "ERROR" => "Ошибка",
 "VersionDetails" => "Версия",
 "VersionPackage" => "Версии пакетов",

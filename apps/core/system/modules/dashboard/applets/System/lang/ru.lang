@@ -25,25 +25,14 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+  $Id: ru.lang,v 1.0 2015/10/10 15:17:42 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Dashboard" => "Панель Состояния",
-    "Loading" => "Загрузка",
-    "System Resources" => "Системные Ресурсы",
-    "Processes Status" => "Состояние Процессов",
-    "Hard Drives" => "Жёсткие Диски",
-    "Calls" => "Вызовы",
-    "You haven't extension" => "У вас нет внутреннего номера",
-    "Performance Graphic" => "График Производительности",
-    "News" => "Новости",
-    "Communication Activity" => "Коммуникационная Активность",
-    "Calendar" => "Календарь",
-    "Faxes" => "Факсы",
-    "Telephony Hardware" => "Телефонное Оборудование",
-    "Unimplemented method" => "Метод не реализован",
-    "Invalid request" => "Не верный запрос",
-    "Emails" => "Электронная Почта",
-    "Voicemails" => "Голосовая Почта",
+    "You don't have a webmail account" => "Учётная запись электронной почты не ассоциирована с этим пользователем.",
+    "does not exist locally or password is incorrect" => "не существует локально или указан неверный пароль",
+    "Imap: Connection error" => "Imap: Ошибка соединения.",
+    "Quota asigned" => "Установленная email квота:",
+    "Quota Used" => "Использовано email квоты:",
+    "Quota free space" => "Оставшаяся email квота:",
 );
 ?>

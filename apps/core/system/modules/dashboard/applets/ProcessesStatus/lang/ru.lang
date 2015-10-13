@@ -25,9 +25,27 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+  $Id: ru.lang,v 1.0 2015/10/10 14:44:42 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Not running" => "Service Not Activated",
+    "Start process" => "Запустить",
+    "Stop process" => "Остановить",
+    "Restart process" => "Перезапустить",
+    "Enable process" => "Enable process",
+    "Disable process" => "Disable process",
+    "Running" => "Running",
+    "Not running" => "Not running",
+    "Not installed" => "Not installed",
+    "Telephony Service" => "Телефония",
+    "Instant Messaging Service" => "Мгновенные Сообщения",
+    "Fax Service" => "Факс",
+    "IAXModem Service" => "IAXModem",
+    "Email Service" => "Электронная почта",
+    "Database Service" => "База Данных",
+    "Web Server" => "Веб-сервер",
+    "Elastix Call Center Service" => "Elastix Call Center Service",
+    "Invalid service" => "Invalid service",
+    "Invalid process action" => "Invalid process action",
+    "Process control restricted to administrators" => "Process control restricted to administrators",
 );
 ?>

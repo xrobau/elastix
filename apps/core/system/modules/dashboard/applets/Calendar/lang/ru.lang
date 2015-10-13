@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
-  +----------------------------------------------------------------------+
++----------------------------------------------------------------------+
   | Elastix version 0.5                                                  |
   | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
@@ -25,25 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+  $Id: ru.lang,v 1.7 2015/10/09 16:47:42 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Dashboard" => "Панель Состояния",
-    "Loading" => "Загрузка",
-    "System Resources" => "Системные Ресурсы",
-    "Processes Status" => "Состояние Процессов",
-    "Hard Drives" => "Жёсткие Диски",
-    "Calls" => "Вызовы",
-    "You haven't extension" => "У вас нет внутреннего номера",
-    "Performance Graphic" => "График Производительности",
-    "News" => "Новости",
-    "Communication Activity" => "Коммуникационная Активность",
-    "Calendar" => "Календарь",
-    "Faxes" => "Факсы",
-    "Telephony Hardware" => "Телефонное Оборудование",
-    "Unimplemented method" => "Метод не реализован",
-    "Invalid request" => "Не верный запрос",
-    "Emails" => "Электронная Почта",
-    "Voicemails" => "Голосовая Почта",
+    "You don't have events" => "У вас нет запланированных событий",
+    "Date" => "Дата",
+    "Call" => "Звонок",
 );
 ?>

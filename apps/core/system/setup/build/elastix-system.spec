@@ -140,6 +140,8 @@ fi
 
 %changelog
 * Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Dashboard: add Russian translation provided by user Russian.
+  SVN Rev[7181]
 - ADDED: Applet Admin: add Russian translation provided by user Russian.
   SVN Rev[7180]
 

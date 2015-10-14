@@ -23,10 +23,15 @@ function showPopupCloudRegister(title, width, height)
 {
     var arrAction         = new Array();
 
-    request("register.php", {
-    	action:		'registration',
-    	rawmode:	'yes'
-    }, false, function(arrData,statusResponse,error) {
+    $.get('index.php', {
+        menu:       'registration',
+        action:     'registration',
+        rawmode:    'yes'
+    }, function(response) {
+        var arrData = response.message;
+        var statusResponse = response.statusResponse;
+        var error = response.error;
+
         ShowModalPopUP(title,width,height,arrData['form']);
         $('.tdIdServer').hide();
         $('.neo-modal-elastix-popup-box').css({
@@ -49,20 +54,25 @@ function registration()
     showLoading($('#msgtmp').val());
     $('#btnAct').css("visibility","hidden");
 
-    request("register.php", {
-    	action:			'saveregister',
-    	contactNameReg:	$('#contactNameReg').val(),
-    	emailReg:		$('#emailReg').val(),
-    	emailConfReg:	$('#emailReg').val(),
-    	passwdReg:		$('#passwdReg').val(),
-    	passwdConfReg:	$('#passwdConfReg').val(),
-    	phoneReg:		$('#phoneReg').val(),
-    	companyReg:		$('#companyReg').val(),
-    	addressReg:		$('#addressReg').val(),
-    	cityReg:		$('#cityReg').val(),
-    	countryReg:		$('#countryReg option:selected').val(),
-    	rawmode:		'yes'
-    }, false, function(arrData,statusResponse,error) {
+    $.post('index.php', {
+        menu:           'registration',
+        action:         'saveregister',
+        contactNameReg: $('#contactNameReg').val(),
+        emailReg:       $('#emailReg').val(),
+        emailConfReg:   $('#emailReg').val(),
+        passwdReg:      $('#passwdReg').val(),
+        passwdConfReg:  $('#passwdConfReg').val(),
+        phoneReg:       $('#phoneReg').val(),
+        companyReg:     $('#companyReg').val(),
+        addressReg:     $('#addressReg').val(),
+        cityReg:        $('#cityReg').val(),
+        countryReg:     $('#countryReg option:selected').val(),
+        rawmode:        'yes'
+    }, function(response) {
+        var arrData = response.message;
+        var statusResponse = response.statusResponse;
+        var error = response.error;
+
         if(error!=""){
             alert(error);
             clearMessage();
@@ -74,7 +84,7 @@ function registration()
             $('.register_link').text(arrData['label']);
 
             if(statusResponse=="TRUE") {
-                registrationEnd(arrData);
+                registrationEnd(arrData.msg);
             }
         }
         $('#btnAct').css("visibility","visible");
@@ -84,10 +94,15 @@ function registration()
 function getDataWebServer()
 {
     $('#btnAct').hide();
-    request("register.php", {
-    	action:		'getDataRegisterServer',
-    	rawmode:	'yes'
-    }, false, function(arrData,statusResponse,error) {
+    $.get('index.php', {
+        menu:       'registration',
+        action:     'getDataRegisterServer',
+        rawmode:    'yes'
+    }, function(response) {
+        var arrData = response.message;
+        var statusResponse = response.statusResponse;
+        var error = response.error;
+
         $('#btnAct').show();
 
         if(statusResponse == "TRUE"){
@@ -132,12 +147,17 @@ function registrationByAccount()
             visibility: 'hidden'
         });
 
-        request("register.php", {
-        	action:		'savebyaccount',
-        	username:	username,
-        	password:	password,
-        	rawmode:	'yes'
-        }, false, function(arrData,statusResponse,error) {
+        $.post('index.php', {
+            menu:       'registration',
+            action:     'savebyaccount',
+            username:   username,
+            password:   password,
+            rawmode:    'yes'
+        }, function(response) {
+            var arrData = response.message;
+            var statusResponse = response.statusResponse;
+            var error = response.error;
+
             $(".action_register_button").css({
                 visibility: ''
             });
@@ -146,12 +166,11 @@ function registrationByAccount()
             else
                showMessage(arrData);
 
-            console.log(arrData['msg']);
             $('.register_link').css('color',arrData['color']);
             $('.register_link').text(arrData['label']);
 
             if(statusResponse=="TRUE") {
-                registrationEnd(arrData);
+                registrationEnd(arrData.msg);
             }
         });
     }
@@ -177,44 +196,36 @@ function showLoading(msg)
     });
 }
 
-function registrationEnd(arrData)
+function registrationEnd(msg)
 {
     var callback = $('#callback').val();
-    if(callback && callback !=""){ //cuando estamos en el menu addons
-        getElastixKey();
-        hideModalPopUP();
-    }
-    else {
-        $('.cloud-login-button, .cloud-signup-button').hide();
-        showLoading(arrData['msg']);
+    if (callback && callback !=""){ //cuando estamos en el menu addons
+        $.get('index.php', {
+            menu:       'registration',
+            action:     'isRegistered',
+            rawmode:    'yes'
+        }, function(response) {
+            var arrData = response.message;
+            var statusResponse = response.statusResponse;
+            var error = response.error;
 
-        setTimeout(function(){
-            showPopupCloudLogin("",540,335)
-        }, 3000);
-    }
-}
-
-function getElastixKey()
-{
-    var arrAction         = new Array();
-    arrAction['action']   = "isRegistered";
-    arrAction["rawmode"]  = "yes";
-
-    request("register.php", {
-        action:     'isRegistered',
-        rawmode:    'yes'
-    }, false, function(arrData,statusResponse,error) {
-        if (arrData["registered"]=="yes-all") {
-            hideModalPopUP();
-            var callback = $('#callback').val();
-            if (callback && callback !="") {
+            if (arrData["registered"]=="yes-all") {
+                hideModalPopUP();
                 if(callback=="do_checkDependencies")
                     do_checkDependencies(arrData["sid"]);
                 else if(callback=="do_iniciarInstallUpdate")
                     do_iniciarInstallUpdate();
             }
-        }
-    });
+        });
+        hideModalPopUP();
+    } else {
+        $('.cloud-login-button, .cloud-signup-button').hide();
+        showLoading(msg);
+
+        setTimeout(function(){
+            showPopupCloudLogin("",540,335)
+        }, 3000);
+    }
 }
 
 function checkSubmit(e)

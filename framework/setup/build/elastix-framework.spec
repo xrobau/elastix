@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: route all registration actions through explicit
+  registration module instead of register.php.
+  SVN Rev[7188]
 - FIXED: Framework: move Content-Type assignments to cover registration error
   cases.
   SVN Rev[7187]

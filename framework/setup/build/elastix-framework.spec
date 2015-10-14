@@ -23,7 +23,7 @@ Conflicts: elastix-pbx <= 2.2.0-16
 Conflicts: elastix-fax <= 2.2.0-5
 Conflicts: elastix-email_admin <= 2.3.0-8
 Conflicts: elastix-developer <= 2.3.0-4
-Conflicts: elastix-addons <= 2.4.0-8
+Conflicts: elastix-addons <= 2.5.0-3
 Conflicts: kernel-module-dahdi
 Conflicts: kernel-module-rhino
 Conflicts: kernel-module-wanpipe
@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove register.php helper. Update Conflicts: for
+  elastix-addons to match.
+  SVN Rev[7192]
 - CHANGED: Framework: add register_link as a standard CSS class for all themes.
   SVN Rev[7190]
 - CHANGED: Framework: use plain $.get instead of request() for three dialogs.

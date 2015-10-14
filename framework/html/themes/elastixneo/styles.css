@@ -128,7 +128,7 @@ input {
         border-bottom: 1px solid #CCC;
         border-left: 1px solid #999;
         border-right: 1px solid #CCC;
-        
+
         border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
         -webkit-border-radius: 5px 5px 5px 5px;
@@ -243,7 +243,7 @@ a {
     left:0px;
     width:200px;
     height:65px;
-    margin:7px 0px 14px 0px;	
+    margin:7px 0px 14px 0px;
 }
 
 /* Herramientas de esquina superior derecha */
@@ -270,7 +270,7 @@ a {
     margin-bottom: 2px;
     font: 13px Verdana, Arial,Helvetica,sans-serif;
 /*    color: #eee;*/
-    background:url(images/divider2.png)  no-repeat left;    
+    background:url(images/divider2.png)  no-repeat left;
 }
 #cmenubox>div:last-child
 {
@@ -361,7 +361,7 @@ a {
     text-shadow: 1px 1px #333;
     background-color: #454545;
     background-image:url(images/tabhonbg.png);
-    background-repeat:repeat-x; 
+    background-repeat:repeat-x;
 }
 #elxneo-topnav-toolbar>div#mmenubox>div.selected:first-child
 {
@@ -375,7 +375,7 @@ a {
     color: #666;
     text-shadow: 1px 1px #ddd;
     position: relative;
-    bottom: 0px; 
+    bottom: 0px;
 }
 #elxneo-topnav-toolbar>div#mmenubox>div.selected>a
 {
@@ -419,7 +419,7 @@ a {
 #elxneo-topnav-toolbar div.elxneo-menu>div>div>a
 {
 	display: block;
-    padding: 10px;    
+    padding: 10px;
 	color: #444;
 	text-decoration: none;
 }
@@ -445,7 +445,7 @@ a {
     height: 34px;
     background-color:#454545;
     background-image:url(images/men2bg.png);
-    overflow: hidden; 
+    overflow: hidden;
 }
 #elxneo-topnav-toolbar>div#smenubox>div
 {
@@ -525,7 +525,7 @@ div#elxneo-leftcolumn
 {
 	float: left;
 	width: 220px;
-    margin-right: 15px; 
+    margin-right: 15px;
 }
 div#elxneo-leftcolumn>div#menubox
 {
@@ -541,9 +541,9 @@ div#elxneo-leftcolumn>div#menubox
     border-left: 1px solid #aaa;
     border-right: 1px solid #999;
     border-bottom: 1px solid #999;
-    -moz-box-shadow: 2px 2px 1px rgb(180,180,180); 
-    -webkit-box-shadow: 2px 2px 1px rgb(180,180,180); 
-    box-shadow: 2px 2px 1px rgb(180,180,180); 
+    -moz-box-shadow: 2px 2px 1px rgb(180,180,180);
+    -webkit-box-shadow: 2px 2px 1px rgb(180,180,180);
+    box-shadow: 2px 2px 1px rgb(180,180,180);
     background:url(images/3menubgtop.png) repeat-x top #f0f0f0;
 }
 div#elxneo-leftcolumn>div#menubox>div
@@ -640,7 +640,7 @@ div.elxneo-module-title {
     width:100%;
     padding:5px 0px 0px 0px;
     overflow:auto;
-    /*z-index:10;*/ 
+    /*z-index:10;*/
 }
 div.elxneo-module-title>div.name-left {
     padding: 5px 0px 0px 0px;
@@ -678,7 +678,7 @@ div.elxneo-module-title>div.buttonstab-right {
 div.elxneo-module-title>span.buttonstab {
     float:right;
     padding: 2px 3px 0px 0px;
-    display:inline-block;   
+    display:inline-block;
     height:28px;
     background:url(images/moduletitlebuttonstab.png) repeat-x top;
 }
@@ -917,7 +917,7 @@ table.elastix-standard-table>tfoot>tr>th
     text-indent: 5px;
     font: 12px Verdana, Arial,Helvetica,sans-serif;
     font-weight: normal;
-    
+
 }
 table.elastix-standard-table>thead>tr>th a.link_summary_off,
 table.elastix-standard-table>tfoot>tr>th a.link_summary_off
@@ -943,7 +943,7 @@ table.elastix-standard-table>tbody>tr>td
     border-bottom: 1px #b6b6b6 solid;
     padding: 6px 6px 6px 6px;
     font: 11px Verdana, Arial,Helvetica,sans-serif;
-    color: #555555;    
+    color: #555555;
 }
 table.elastix-standard-table>tbody>tr>td.table_data_last_row
 {
@@ -1004,7 +1004,7 @@ TD.menudescription {
     background-image: url(images/bgGray.gif);
     background-position: bottom;
 }
-TD.menudescription2 {    
+TD.menudescription2 {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 9pt;
     FONT-WEIGHT: bold;
@@ -1039,7 +1039,7 @@ td a.link_summary_on{
   font-weight:bold;
 }
 div.div_msg_errors{
-    background-color: #FFFFFF; 
+    background-color: #FFFFFF;
     margin-left: 5px;
     margin-right: 5px;
     border: 1px solid #aaa;
@@ -1116,4 +1116,10 @@ div.div_msg_errors_title{
 }
 a.setadminpassword {
     cursor: pointer;
+}
+a.register_link {
+    color: #FF0000;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
 }

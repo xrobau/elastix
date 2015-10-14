@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add register_link as a standard CSS class for all themes.
+  SVN Rev[7190]
 - CHANGED: Framework: use plain $.get instead of request() for three dialogs.
   SVN Rev[7189]
 - CHANGED: Framework: route all registration actions through explicit

@@ -50,10 +50,10 @@ INPUT {
     FONT-SIZE: 12px;
     TEXT-DECORATION: none;
     BACKGROUND: #FAFAFA;
-    BORDER-TOP: 1px #999999 solid; 
-    BORDER-BOTTOM: 1px #cccccc solid; 
-    BORDER-LEFT: 1px #999999 solid; 
-    BORDER-RIGHT: 1px #cccccc solid; 
+    BORDER-TOP: 1px #999999 solid;
+    BORDER-BOTTOM: 1px #cccccc solid;
+    BORDER-LEFT: 1px #999999 solid;
+    BORDER-RIGHT: 1px #cccccc solid;
 }
 input:focus,textarea:focus, select:focus {
         background-color: #fff;
@@ -108,7 +108,7 @@ tr.primera_fila {
     font-weight: bold;
     text-align: left;
     background-color: #f8f7f7;
-    background-image: url(images/primerafilabg.gif); 
+    background-image: url(images/primerafilabg.gif);
     background-repeat: repeat-x;
     background-position: bottom;
     padding: 3px 5px 3px 5px;
@@ -133,7 +133,7 @@ TABLE.table_data_login{
 }
 table.menumini {
     border-bottom: 1px solid #aaaaaa;
-    background-image: url(../../images/background_mini.jpg); 
+    background-image: url(../../images/background_mini.jpg);
 }
 TD.table_data {
 /*    BACKGROUND: #FFFFFF; */
@@ -142,7 +142,7 @@ TD.table_data {
     FONT-SIZE: 8pt;
     BORDER-BOTTOM: 1px #eeeeee solid;
     PADDING: 4px 4px 4px 4px;
-} 
+}
 TD.table_data_last_row {
 /*    BACKGROUND: #FFFFFF;  */
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
@@ -150,7 +150,7 @@ TD.table_data_last_row {
     FONT-SIZE: 8pt;
     BORDER-BOTTOM: 1px #aaaaaa solid;
     PADDING: 4px 4px 4px 4px;
-} 
+}
 TR.table_title_row {
     font-size: 11px;
     color: #33485c;
@@ -158,7 +158,7 @@ TR.table_title_row {
     text-align: left;
     background-color: #f8f7f7;
     /* background-image: url(images/primerafilabg.gif); */
-    background-image: url(../../images/bgGray.gif); 
+    background-image: url(../../images/bgGray.gif);
     background-repeat: repeat-x;
     background-position: bottom;
     border-bottom: 1px #aaaaaa solid;
@@ -213,7 +213,7 @@ TD.menulogo {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 9pt;
     BACKGROUND: #ffffff;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../images/bgblue.gif);
     PADDING-RIGHT: 20px;
     PADDING-LEFT: 0px;
     PADDING-BOTTOM: 0px;
@@ -223,7 +223,7 @@ TD.menulogo {
 TD.logologin {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 9pt;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../images/bgblue.gif);
     PADDING-RIGHT: 0px;
     PADDING-LEFT: 0px;
     PADDING-BOTTOM: 0px;
@@ -239,7 +239,7 @@ TD.headlink {
 }
 TD.headlinkon {
     BACKGROUND: #ffffff;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../images/bgblue.gif);
     PADDING-LEFT: 0px;
     PADDING-RIGHT: 0px;
 }
@@ -265,7 +265,7 @@ TD.menutabletaboff {
     BACKGROUND-COLOR: #eeeeee;
     PADDING-LEFT: 7px;
     PADDING-RIGHT: 7px;
-    BACKGROUND-IMAGE: url(../../images/bggris.gif); 
+    BACKGROUND-IMAGE: url(../../images/bggris.gif);
     TEXT-ALIGN: center;
 }
 TD.menutabletabon {
@@ -280,14 +280,14 @@ TD.menutabletabon {
     PADDING-LEFT: 7px;
     PADDING-RIGHT: 7px;
     BACKGROUND-COLOR: #bb0000;
-    BACKGROUND-IMAGE: url(../../images/bgrojo.gif); 
+    BACKGROUND-IMAGE: url(../../images/bgrojo.gif);
     TEXT-ALIGN: center;
 }
 TD.menuaftertab {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 9pt;
     BACKGROUND: #ffffff;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../images/bgblue.gif);
     PADDING-RIGHT: 20px;
     PADDING-LEFT: 10px;
     PADDING-BOTTOM: 0px;
@@ -298,7 +298,7 @@ TD.menuaftertab {
 TABLE.menuflotante td{
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 12px;
-    BACKGROUND-IMAGE: url(../../images/bgblue.gif); 
+    BACKGROUND-IMAGE: url(../../images/bgblue.gif);
     PADDING-RIGHT: 20px;
     PADDING-LEFT: 10px;
     PADDING-BOTTOM: 3px;
@@ -455,7 +455,7 @@ tr.primera_fila {
     font-weight: bold;
     text-align: left;
     background-color: #f8f7f7;
-    background-image: url(images/primerafilabg.gif); 
+    background-image: url(images/primerafilabg.gif);
     background-repeat: repeat-x;
     background-position: bottom;
     padding: 3px 5px 3px 5px;
@@ -493,7 +493,7 @@ tr.fila_paginacion {
     border-top: 1px solid #ffffff;
     border-bottom: 1px solid #b0cbe2;
 }
-tr.fila_paginacion td { 
+tr.fila_paginacion td {
     font-size: 10px;
     color: #999999;
     background-color: #eeeeee;
@@ -623,7 +623,7 @@ td.botonoff {
     border-right: 1px solid #330000;
     border-bottom: 1px solid #330000;
     background: #cc0000;
-    background-image: url(../../images/bgrojo.gif); 
+    background-image: url(../../images/bgrojo.gif);
 }
 td.botonoff a {
     COLOR: #ffffff;
@@ -687,7 +687,7 @@ td.botonoff a {
     color: #444;
     background-color: #ffffff;
     border-color: #999999;
-    background-image: url(../../images/bgGray.gif); 
+    background-image: url(../../images/bgGray.gif);
     color: #990033;
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-SIZE: 14px;
@@ -881,7 +881,7 @@ td a.link_summary_on{
     height:33px;
     float:left;
     padding:8px 10px 0px 10px;
-    border: 1px solid #aaa;    
+    border: 1px solid #aaa;
     cursor: pointer;
 }
 .table-header-row-filter {
@@ -950,4 +950,10 @@ td a.link_summary_on{
 .neo-modal-elastix-popup-content {
     position: relative;
     top: 20px;
+}
+a.register_link {
+    color: #FF0000;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
 }

@@ -678,3 +678,9 @@ td a.link_summary_on{
 a.setadminpassword {
 	cursor: pointer;
 }
+a.register_link {
+    color: #FF0000;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+}

@@ -34,7 +34,7 @@
     <div id="info" class="elxneo-menu">
         <img src="themes/{$THEMENAME}/images/information.png" width="19" height="21" alt="user_info" border="0" />
         <div>
-            <div><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;">{$Registered}</a></div>
+            <div><a href="#" class="register_link">{$Registered}</a></div>
             <div><a id="viewDetailsRPMs">{$VersionDetails}</a></div>
             <div><a href="http://www.elastix.org" target="_blank">Elastix Website</a></div>
             <div><a href="#" id="dialogaboutelastix">{$ABOUT_ELASTIX2}</a></div>

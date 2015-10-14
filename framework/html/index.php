@@ -134,13 +134,7 @@ if (isset($_SESSION['elastix_user']) &&
     $smarty->assign("Register", _tr("Register"));
     $smarty->assign("lblRegisterCm", _tr("Register"));
     $smarty->assign("lblRegisteredCm", _tr("Registered"));
-    if(!is_file("/etc/elastix.key")){
-        $smarty->assign("Registered", _tr("Register"));
-    	$smarty->assign("ColorRegister", "#FF0000");
-    } else {
-        $smarty->assign("Registered", _tr("Registered"));
-    	$smarty->assign("ColorRegister", "#008800");
-    }
+    $smarty->assign("Registered", _tr("Register"));
 
     $smarty->assign("md_message_title", _tr('md_message_title'));
     $sCurYear = date('Y');

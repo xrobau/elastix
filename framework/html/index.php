@@ -158,25 +158,10 @@ if (isset($_SESSION['elastix_user']) &&
 
     $selectedMenu = getParameter('menu');
 
-    /* El módulo _elastixutils sirve para contener las utilidades json que
-     * atienden requerimientos de varios widgets de la interfaz Elastix. Todo
-     * requerimiento nuevo que no sea un módulo debe de agregarse aquí */
-    // TODO: agregar manera de rutear _elastixutils a través de paloSantoNavigation
-    if (!is_null($selectedMenu) && $selectedMenu == '_elastixutils' &&
-        file_exists('modules/_elastixutils/index.php')) {
-
-        // Cargar las configuraciones para el módulo elegido
-        if (file_exists('modules/_elastixutils/configs/default.conf.php')) {
-            require_once 'modules/_elastixutils/configs/default.conf.php';
-
-            global $arrConf;
-            global $arrConfModule;
-            $arrConf = array_merge($arrConf, $arrConfModule);
-        }
-
-        // Cargar las traducciones para el módulo elegido
-        load_language_module($selectedMenu);
-
+    // Ejecutar una petición a un módulo global del framework
+    if (!is_null($selectedMenu) && isset($arrConf['elx_framework_globalmodules']) &&
+        in_array($selectedMenu, $arrConf['elx_framework_globalmodules']) &&
+        file_exists("modules/$selectedMenu/index.php")) {
         require_once 'modules/_elastixutils/index.php';
         echo _moduleContent($smarty, $selectedMenu);
         return;

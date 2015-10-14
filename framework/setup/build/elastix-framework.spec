@@ -352,6 +352,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: the _elastixutils module is no longer "special". Instead
+  a list is defined in the framework configuration for modules to be provided
+  without ACL authorization. This enables functionality to be migrated away from
+  register.php and removes the _elastixutils special case.
+  SVN Rev[7182]
+
 * Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Updated Russian translation (2). Provided by user Russian.
   SVN Rev[7179]

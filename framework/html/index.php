@@ -162,7 +162,7 @@ if (isset($_SESSION['elastix_user']) &&
     if (!is_null($selectedMenu) && isset($arrConf['elx_framework_globalmodules']) &&
         in_array($selectedMenu, $arrConf['elx_framework_globalmodules']) &&
         file_exists("modules/$selectedMenu/index.php")) {
-        require_once 'modules/_elastixutils/index.php';
+        require_once "modules/$selectedMenu/index.php";
         echo _moduleContent($smarty, $selectedMenu);
         return;
     }

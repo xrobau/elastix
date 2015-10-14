@@ -17,14 +17,14 @@ var refer = document.URL;
 
 /* El siguiente objeto es el estado de la interfaz del Addon Market. Al comparar
  * este objeto con los cambios de estado producto de la revisión periódica del
- * demonio actualizador, consigue detectar los cambios requeridos a la interfaz 
+ * demonio actualizador, consigue detectar los cambios requeridos a la interfaz
  * sin tener que recurrir a llamadas repetidas al servidor.
  * Este objeto se actualiza en do_checkStatus() */
-var estadoCliente = 
+var estadoCliente =
 {
 	// Este estado inicializado representa una sistema ocioso
 	name_rpm:	null,	// NULL para sistema ocioso, o el RPM que se opera
-	fraccion:	0		// Fracción de completado, rango 0 hasta 1000. 
+	fraccion:	0		// Fracción de completado, rango 0 hasta 1000.
 };
 
 $(document).ready(function() {
@@ -51,18 +51,18 @@ $(document).ready(function() {
 	});
         $('.neo-module-content').css("padding-bottom","0px");
         $('#addonlist').css("border-bottom","1px solid #CCC");
-	
+
 	do_listarAddons(null);
 });
 
 /**
  * Procedimiento para listar los addons vía AJAX. Inmediatamente luego de que
  * se recibe una respuesta correcta, se invoca de inmediato do_checkStatus() que
- * actualiza la interfaz para que se corresponda al estado del sistema de 
+ * actualiza la interfaz para que se corresponda al estado del sistema de
  * actualización.
- * 
+ *
  * @param int	offset	Offset desde el cual iniciar el listado
- * 
+ *
  * @return void
  */
 function do_listarAddons(list_offset)
@@ -75,7 +75,7 @@ function do_listarAddons(list_offset)
 	addonlist_limit = null;
 	addonlist_total = null;
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'listarAddons',
 		offset:		list_offset,
@@ -131,8 +131,8 @@ function do_listarAddons(list_offset)
 			    $('#addonlist_start_range, #addonlist_start_range_footer').text(addonlist_offset + 1);
 			$('#addonlist_total, #addonlist_total_footer').text(addonlist_total);
 			$('#addonlist_end_range, #addonlist_end_range_footer').text(
-					(addonlist_offset + addonlist_limit >= addonlist_total) 
-					? addonlist_total 
+					(addonlist_offset + addonlist_limit >= addonlist_total)
+					? addonlist_total
 					: addonlist_offset + addonlist_limit);
 
 			$('.neo-addons-row-button-buy-left, .neo-addons-row-button-buy-right').unbind('click');
@@ -176,29 +176,29 @@ function do_listarAddons(list_offset)
 
 function checkServerID(isPurchase)
 {
-    var arrAction         = new Array();
-    arrAction['action']   = "isRegistered";
-    arrAction["rawmode"]  = "yes";
-    
-    request("register.php",arrAction,false,
-        function(arrData,statusResponse,error)
-        {
-            $('body').css('cursor','default');
-            $('.neo-addons-row-button-buy-left, .neo-addons-row-button-buy-right, .neo-addons-row-button-install-left, .neo-addons-row-button-install-right, .neo-addons-row-button-trial-left, .neo-addons-row-button-trial-right').css('cursor','pointer');
-	
-	    if(arrData["registered"]=="yes-all"){
-                if(isPurchase)
-                    do_checkDependencies(null);
-                else
-                    do_iniciarInstallUpdate();
-            }
-            else{
-                var callback = (isPurchase) ? "do_checkDependencies" : "do_iniciarInstallUpdate";
-                $('#callback').val(callback);
-                showPopupCloudLogin('',540,335);
-            }
+    $.get('index.php',{
+        menu:       'registration',
+        action:     'isRegistered',
+        rawmode:    'yes'
+    }, function(response) {
+        var arrData = response.message;
+        var statusResponse = response.statusResponse;
+        var error = response.error;
+
+        $('body').css('cursor','default');
+        $('.neo-addons-row-button-buy-left, .neo-addons-row-button-buy-right, .neo-addons-row-button-install-left, .neo-addons-row-button-install-right, .neo-addons-row-button-trial-left, .neo-addons-row-button-trial-right').css('cursor','pointer');
+
+        if(arrData["registered"]=="yes-all"){
+            if(isPurchase)
+                do_checkDependencies(null);
+            else
+                do_iniciarInstallUpdate();
+        } else{
+            var callback = (isPurchase) ? "do_checkDependencies" : "do_iniciarInstallUpdate";
+            $('#callback').val(callback);
+            showPopupCloudLogin('',540,335);
         }
-    );
+    });
 }
 
 function keyPressed(e)
@@ -219,7 +219,7 @@ function mostrar_mensaje(s, is_error)
 	   $('#neo-addons-error-message').addClass('ui-state-error');
 	   $('#neo-addons-error-message').removeClass('ui-state-focus');
 	   $('.ui-icon').addClass('ui-icon-alert');
-	   $('.ui-icon').removeClass('ui-icon-info'); 
+	   $('.ui-icon').removeClass('ui-icon-info');
 	}
 	else{
 	   $('#neo-addons-error-message').addClass('ui-state-focus');
@@ -244,7 +244,7 @@ function do_iniciarCompra()
 function do_iniciarInstallUpdate()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'iniciarInstallUpdate',
 		name_rpm:	estadoCliente.name_rpm
@@ -270,7 +270,7 @@ function do_iniciarInstallUpdate()
 function do_iniciarUninstall()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'iniciarUninstall',
 		name_rpm:	estadoCliente.name_rpm
@@ -304,18 +304,18 @@ function mostrar_dialogo_progreso()
 {
     var maskHeight = $(document).height();
     var maskWidth = $(window).width();
- 
+
     $('.neo-modal-blockmask').css({'width':maskWidth,'height':maskHeight});
-     
-    $('.neo-modal-blockmask').fadeIn(600);   
+
+    $('.neo-modal-blockmask').fadeIn(600);
     $('.neo-modal-blockmask').fadeTo("fast",0.8);
 
     var winH = $(window).height();
     var winW = $(window).width();
-           
+
     $('.neo-modal-box').css('top',  winH/2-$('.neo-modal-box').height()/2);
     $('.neo-modal-box').css('left', winW/2-$('.neo-modal-box').width()/2);
- 
+
     $('.neo-modal-box').fadeIn(2000);
     dialogo_progreso_abierto = true;
 }
@@ -346,7 +346,7 @@ function neo_upgrade_progress_bar(percentage)
 function do_checkStatus()
 {
 	$.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'checkStatus'
 	},
@@ -414,7 +414,7 @@ function do_checkStatus()
 function do_clearYum()
 {
       $.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'clearYum'
 	},
@@ -425,7 +425,7 @@ function do_clearYum()
 function do_deleteActionTmp()
 {
       $.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'deleteActionTmp'
 	},
@@ -436,7 +436,7 @@ function do_deleteActionTmp()
 function cancelTransaction()
 {
     $.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		menu:		module_name, 
+		menu:		module_name,
 		rawmode:	'yes',
 		action:		'cancelTransaction'
 	},
@@ -457,12 +457,12 @@ function do_checkDependencies(serverId)
       if(serverId != null)
 	link += "&serverkey="+serverId;
       $('#'+estadoCliente.name_rpm+'_link').val(link);
-      
+
       if($('#'+estadoCliente.name_rpm+'_installed').val() == "yes")
 	do_iniciarCompra();
       else{
 	  $.post('index.php?menu=' + module_name + '&rawmode=yes', {
-		    menu:		module_name, 
+		    menu:		module_name,
 		    rawmode:	'yes',
 		    action:		'checkDependencies',
 		    name_rpm:	estadoCliente.name_rpm

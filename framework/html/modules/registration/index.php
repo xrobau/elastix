@@ -138,6 +138,7 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
     $jsonObject->set_status("TRUE");
     $jsonObject->set_message($msgResponse);
 
+    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 
@@ -148,6 +149,7 @@ function isRegisteredServer(&$pDB, $arrConf) {
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status("TRUE");
     $jsonObject->set_message($iRegister);
+    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 
@@ -179,6 +181,7 @@ function saveRegisterByAccount(&$pDB, $arrConf) {
     $iRegister = $pRegister->isRegisteredInfo();
     $iRegister['msg'] = $msg;
     $jsonObject->set_message($iRegister);
+    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 
@@ -241,6 +244,7 @@ function saveRegister(&$pDB, $arrConf) {
     $iRegister = $pRegister->isRegisteredInfo();
     $iRegister['msg'] = $msg;
     $jsonObject->set_message($iRegister);
+    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 
@@ -253,6 +257,7 @@ function getDataRegistration(&$pDB, $arrConf) {
     $jsonObject->set_status( ($data) ? "TRUE":"FALSE" );
     $jsonObject->set_message($data);
 
+    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 

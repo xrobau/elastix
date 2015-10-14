@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: add Content-Type: application/json to all registration
+  responses.
+  SVN Rev[7184]
 - CHANGED: Framework: the _elastixutils module is no longer "special". Instead
   a list is defined in the framework configuration for modules to be provided
   without ACL authorization. This enables functionality to be migrated away from

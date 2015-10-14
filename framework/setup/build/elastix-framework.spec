@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move one javascript function to registration module. Fix
+  the rest of the base.js calls to use registration module explicitly.
+  SVN Rev[7185]
 - FIXED: Framework: add Content-Type: application/json to all registration
   responses.
   SVN Rev[7184]

@@ -3,20 +3,20 @@ $(document).ready(function(){
         $(this).val($(this).attr('defaultVal'));
         $(this).css({color:'grey'});
     });
-    
+
     $('.cloud-login-input').focus(function(){
         if ( $(this).val() == $(this).attr('defaultVal') ){
             $(this).val('');
             $(this).css({color:'black'});
         }
     });
-    
+
     $('.cloud-login-input').blur(function(){
         if ( $(this).val() == '' ){
             $(this).val($(this).attr('defaultVal'));
             $(this).css({color:'grey'});
         }
-    }); 
+    });
 });
 
 function showPopupCloudRegister(title, width, height)
@@ -32,7 +32,7 @@ function showPopupCloudRegister(title, width, height)
         $('.neo-modal-elastix-popup-box').css({
             height: '388px',
         });
-        
+
         if(arrData['registered']=="yes-inc"){
             $('.tdIdServer').css("display","");
             $('.neo-modal-elastix-popup-box').css({
@@ -48,7 +48,7 @@ function registration()
 {
     showLoading($('#msgtmp').val());
     $('#btnAct').css("visibility","hidden");
-    
+
     request("register.php", {
     	action:			'saveregister',
     	contactNameReg:	$('#contactNameReg').val(),
@@ -69,12 +69,12 @@ function registration()
         }
         else {
             showMessage(arrData['msg']);
-            
+
             $('.register_link').css('color',arrData['color']);
             $('.register_link').text(arrData['label']);
-                
+
             if(statusResponse=="TRUE") {
-                registrationEnd(arrData);                    
+                registrationEnd(arrData);
             }
         }
         $('#btnAct').css("visibility","visible");
@@ -89,10 +89,10 @@ function getDataWebServer()
     	rawmode:	'yes'
     }, false, function(arrData,statusResponse,error) {
         $('#btnAct').show();
-        
+
         if(statusResponse == "TRUE"){
             clearMessage();
-            
+
             $('#identitykey').text(arrData['identitykeyReg']);
 
             if(arrData["has_account"]=="yes"){
@@ -113,7 +113,7 @@ function getDataWebServer()
                 $('#countryReg').val(arrData['countryReg']);
             }
         }
-        
+
         if(error!="") showMessage(error);
 	});
 }
@@ -125,13 +125,13 @@ function registrationByAccount()
     var usernameDefaultVal = $('#input_user').attr('defaultVal').trim();
     var passwordDefaultVal = $('#input_pass').attr('defaultVal').trim();
 
-    if(!((username == usernameDefaultVal) || (password == passwordDefaultVal))){        
+    if(!((username == usernameDefaultVal) || (password == passwordDefaultVal))){
         showLoading($('#msgtmp').val());
-        
+
         $(".action_register_button").css({
             visibility: 'hidden'
         });
-        
+
         request("register.php", {
         	action:		'savebyaccount',
         	username:	username,
@@ -145,15 +145,15 @@ function registrationByAccount()
                showMessage(arrData['msg']);
             else
                showMessage(arrData);
-                            
+
             console.log(arrData['msg']);
             $('.register_link').css('color',arrData['color']);
-            $('.register_link').text(arrData['label']);    
-            
+            $('.register_link').text(arrData['label']);
+
             if(statusResponse=="TRUE") {
                 registrationEnd(arrData);
             }
-        });            
+        });
     }
 }
 
@@ -180,18 +180,41 @@ function showLoading(msg)
 function registrationEnd(arrData)
 {
     var callback = $('#callback').val();
-    if(callback && callback !=""){ //cuando estamos en el menu addons        
+    if(callback && callback !=""){ //cuando estamos en el menu addons
         getElastixKey();
         hideModalPopUP();
     }
     else {
         $('.cloud-login-button, .cloud-signup-button').hide();
         showLoading(arrData['msg']);
-        
+
         setTimeout(function(){
             showPopupCloudLogin("",540,335)
         }, 3000);
     }
+}
+
+function getElastixKey()
+{
+    var arrAction         = new Array();
+    arrAction['action']   = "isRegistered";
+    arrAction["rawmode"]  = "yes";
+
+    request("register.php", {
+        action:     'isRegistered',
+        rawmode:    'yes'
+    }, false, function(arrData,statusResponse,error) {
+        if (arrData["registered"]=="yes-all") {
+            hideModalPopUP();
+            var callback = $('#callback').val();
+            if (callback && callback !="") {
+                if(callback=="do_checkDependencies")
+                    do_checkDependencies(arrData["sid"]);
+                else if(callback=="do_iniciarInstallUpdate")
+                    do_iniciarInstallUpdate();
+            }
+        }
+    });
 }
 
 function checkSubmit(e)

@@ -168,52 +168,23 @@ function hideModalPopUP()
     $('.neo-modal-elastix-popup-content').html("");
 }
 
-function isRegisteredServer()
-{
-    request("register.php", {
-    	action:		'isRegistered',
-    	rawmode:	'yes'
-    }, false, function(arrData,statusResponse,error) {
-        $('.register_link').css('color',arrData['color']);
-        $('.register_link').text(arrData['label']);
-    });
-}
-
 function showPopupCloudLogin(title, width, height)
 {
-    request("register.php", {
-    	action:		'cloudlogin',
-    	rawmode:	'yes'
-    }, false,  function(arrData,statusResponse,error) {
+    $.get('index.php', {
+        menu:       'registration',
+        action:     'cloudlogin',
+        rawmode:    'yes'
+    }, function(response) {
+        var arrData = response.message;
+        var statusResponse = response.statusResponse;
+        var error = response.error;
+
         ShowModalPopUP(title,width,height,arrData['form']);
 
         if(arrData['registered']=="yes-all"){
             showLoading(arrData['msgloading']);
             getDataWebServer();
         }
-    });
-}
-
-function getElastixKey()
-{
-    var arrAction         = new Array();
-    arrAction['action']   = "isRegistered";
-    arrAction["rawmode"]  = "yes";
-
-    request("register.php", {
-    	action:		'isRegistered',
-    	rawmode:	'yes'
-    }, false, function(arrData,statusResponse,error) {
-        if (arrData["registered"]=="yes-all") {
-        	hideModalPopUP();
-        	var callback = $('#callback').val();
-        	if (callback && callback !="") {
-        		if(callback=="do_checkDependencies")
-        			do_checkDependencies(arrData["sid"]);
-        		else if(callback=="do_iniciarInstallUpdate")
-        			do_iniciarInstallUpdate();
-        	}
-	    }
     });
 }
 
@@ -272,12 +243,12 @@ $(document).ready(function(){
     	source:		'index.php?menu=_elastixutils&action=search_module&rawmode=yes',
     	focus:		function() { return false; },
     	select:		function(event, ui) { window.open('?menu='+ui.item.value, '_self'); },
-    	
+
     	// El div de búsqueda debe permanecer visible mientras se selecciona
     	open:		function(event, ui) { $(this).parents('div').first().css('display', 'block'); },
     	close:		function(event, ui) { $(this).parents('div').first().css('display', ''); }
     });
-    
+
     var menu = getParameterByName("menu");
         if (typeof  menu!== "undefined" && menu) {
             var lblmenu = menu.split("_");
@@ -296,7 +267,18 @@ $(document).ready(function(){
 
     // En el index.php del framework se hacía uso de smarty para
     // setear el estado del registro, ahora se hace desde javascript.
-    isRegisteredServer();
+    $.get('index.php', {
+        menu:       'registration',
+        action:     'isRegistered',
+        rawmode:    'yes'
+    }, function(response) {
+        var arrData = response.message;
+        var statusResponse = response.statusResponse;
+        var error = response.error;
+
+        $('.register_link').css('color',arrData['color']);
+        $('.register_link').text(arrData['label']);
+    });
 });
 
 //Si se presiona enter se hace un submit al formulario para que se aplica el filtro

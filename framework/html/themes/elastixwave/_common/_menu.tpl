@@ -65,7 +65,7 @@
                 <td width="30%" nowrap="nowrap">
                     <div id="menu_float" class="background">
                         <div id="logout_in">
-			    <span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('',540,335)">{$Registered}</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
+			    <span><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;">{$Registered}</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
                             <span><a class="logout" id="viewDetailsRPMs">{$VersionDetails}</a></span>&nbsp;
                             <span class="menuguion">*</span>&nbsp;
                             <span><a class="logout" href="#" id="dialogaboutelastix">{$ABOUT_ELASTIX2}</a></span>&nbsp;

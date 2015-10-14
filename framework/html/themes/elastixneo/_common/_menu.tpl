@@ -26,7 +26,7 @@
 	    <div>
           <div><a href="#" class="setadminpassword">{$CHANGE_PASSWORD}</a></div>
 	      <div><a class="logout" href="?logout=yes">{$LOGOUT} (<font style='color:#FFFFFF;font-style:italic'>{$USER_LOGIN}</font>)</a></div>
-	    </div>        
+	    </div>
     </div>
     <div id="addons">
         <a href="index.php?menu=addons"><img src="themes/{$THEMENAME}/images/toolbar_addons.png" width="19" height="21" alt="elastix_addons" border="0" /></a>
@@ -34,7 +34,7 @@
     <div id="info" class="elxneo-menu">
         <img src="themes/{$THEMENAME}/images/information.png" width="19" height="21" alt="user_info" border="0" />
         <div>
-            <div><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;" onclick="showPopupCloudLogin('',540,335)">{$Registered}</a></div>
+            <div><a class="register_link" style="color: {$ColorRegister}; cursor: pointer; font-weight: bold; font-size: 13px;">{$Registered}</a></div>
             <div><a id="viewDetailsRPMs">{$VersionDetails}</a></div>
             <div><a href="http://www.elastix.org" target="_blank">Elastix Website</a></div>
             <div><a href="#" id="dialogaboutelastix">{$ABOUT_ELASTIX2}</a></div>
@@ -44,7 +44,7 @@
         <img src="themes/{$THEMENAME}/images/searchw.png" width="19" height="21" alt="user_search" border="0" />
         <div>
             <p>{$MODULES_SEARCH}</p>
-            <p><input type="search"  id="search_module_elastix" name="search_module_elastix"  value="" autofocus="autofocus" placeholder="search" /></p>        
+            <p><input type="search"  id="search_module_elastix" name="search_module_elastix"  value="" autofocus="autofocus" placeholder="search" /></p>
         </div>
     </div>
     <div id="cpallet">
@@ -114,11 +114,11 @@
           {/if}
           width="24" height="24" alt="expand" id="toggleleftcolumn" border="0" />
         <img src="themes/{$THEMENAME}/images/{$IMG_BOOKMARKS}" width="24" height="24" alt="bookmark" {if $IMG_BOOKMARKS eq 'bookmark.png'}title="{$ADD_BOOKMARK}"{else}title="{$REMOVE_BOOKMARK}"{/if} id="togglebookmark" />
-{if !empty($idSubMenu2Selected)}        
+{if !empty($idSubMenu2Selected)}
         <a href="javascript:popUp('help/?id_nodo={$idSubMenu2Selected}&amp;name_nodo={$nameSubMenu2Selected}','1000','460')">
 {else}
         <a href="javascript:popUp('help/?id_nodo={$idSubMenuSelected}&amp;name_nodo={$nameSubMenuSelected}','1000','460')">
-{/if}        
+{/if}
             <img src="images/icon-help.png" width="24" height="24" alt="help" title="{$HELP}" border="0"/>
         </a>
     </span>

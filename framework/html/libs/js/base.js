@@ -279,6 +279,7 @@ $(document).ready(function(){
         $('.register_link').css('color',arrData['color']);
         $('.register_link').text(arrData['label']);
     });
+    $('a.register_link').click(function() { showPopupCloudLogin('',540,335); });
 });
 
 //Si se presiona enter se hace un submit al formulario para que se aplica el filtro

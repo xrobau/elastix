@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: use jQuery instead of onclick for registration link.
+  SVN Rev[7186]
 - CHANGED: Framework: move one javascript function to registration module. Fix
   the rest of the base.js calls to use registration module explicitly.
   SVN Rev[7185]

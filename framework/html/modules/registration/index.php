@@ -159,6 +159,8 @@ function saveRegisterByAccount(&$pDB, $arrConf) {
     $username = trim(getParameter("username"));
     $password = trim(getParameter("password"));
 
+    Header('Content-Type: application/json');
+
     // proceso de validacion de datos
     if (!preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/", $username)) {
         $jsonObject->set_status("FALSE");
@@ -181,7 +183,6 @@ function saveRegisterByAccount(&$pDB, $arrConf) {
     $iRegister = $pRegister->isRegisteredInfo();
     $iRegister['msg'] = $msg;
     $jsonObject->set_message($iRegister);
-    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 
@@ -202,6 +203,8 @@ function saveRegister(&$pDB, $arrConf) {
     $city = trim(getParameter("cityReg"));
     $country = trim(getParameter("countryReg"));
     $str_error = "";
+
+    Header('Content-Type: application/json');
 
     // proceso de validacion de datos
     if ($company == '')
@@ -244,7 +247,6 @@ function saveRegister(&$pDB, $arrConf) {
     $iRegister = $pRegister->isRegisteredInfo();
     $iRegister['msg'] = $msg;
     $jsonObject->set_message($iRegister);
-    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 

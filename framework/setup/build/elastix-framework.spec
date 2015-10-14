@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: move Content-Type assignments to cover registration error
+  cases.
+  SVN Rev[7187]
 - CHANGED: Framework: use jQuery instead of onclick for registration link.
   SVN Rev[7186]
 - CHANGED: Framework: move one javascript function to registration module. Fix

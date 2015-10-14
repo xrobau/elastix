@@ -205,33 +205,45 @@ $(document).ready(function(){
     }
 
     $('#viewDetailsRPMs').click(function() {
-        request('index.php', {
+        $.get('index.php', {
             menu:       '_elastixutils',
             action:     'dialogRPM',
             rawmode:    'yes'
-        }, false, function(arrData,statusResponse,error) {
+        }, function(response) {
+            var arrData = response.message;
+            var statusResponse = response.statusResponse;
+            var error = response.error;
+
             ShowModalPopUP(arrData['title'],380,800,arrData['html']);
 
             // La plantilla tiene una referencia a script que llama a versionRPM
         });
     });
     $('a.setadminpassword').click(function () {
-        request('index.php', {
+        $.get('index.php', {
             menu:       '_elastixutils',
             action:     'dialogPasswordElastix',
             rawmode:    'yes'
-        }, false, function(arrData,statusResponse,error) {
+        }, function(response) {
+            var arrData = response.message;
+            var statusResponse = response.statusResponse;
+            var error = response.error;
+
             ShowModalPopUP(arrData['title'], 380, 160, arrData['html']);
 
             // La plantilla tiene una referencia a script que llama a changePasswordElastix
        });
     });
     $('#dialogaboutelastix').click(function() {
-        request("index.php", {
+        $.get("index.php", {
             menu:       '_elastixutils',
             action:     'showAboutUs',
             rawmode:    'yes'
-        }, false, function(arrData,statusResponse,error) {
+        }, function(response) {
+            var arrData = response.message;
+            var statusResponse = response.statusResponse;
+            var error = response.error;
+
             ShowModalPopUP(arrData['title'],450,120,arrData['html']);
         });
     });

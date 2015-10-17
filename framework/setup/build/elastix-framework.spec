@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Sat Oct 17 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: (trivial) add dummy href attribute to link in elastixneo.
+  SVN Rev[7193]
+
 * Wed Oct 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - DELETED: Framework: remove register.php helper. Update Conflicts: for
   elastix-addons to match.

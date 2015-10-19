@@ -97,6 +97,8 @@ fi
 
 %changelog
 * Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- Added: Calendar: add Russian translation by user Russian.
+  SVN Rev[7195]
 - ADDED: Address Book: add Russian translation by user Russian.
   SVN Rev[7194]
 

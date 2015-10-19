@@ -140,6 +140,9 @@ fi
 
 %changelog
 * Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: netconfig: allow network devices not of the form ethN. Part of fix for
+  Elastix bug #2376.
+  SVN Rev[7197]
 - FIXED: Network Parameters: allow network devices not of the form ethN. Part of
   fix for Elastix bug #2376.
   SVN Rev[7196]

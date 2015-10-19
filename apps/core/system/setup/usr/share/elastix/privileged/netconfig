@@ -35,13 +35,13 @@ require_once 'Console/Getopt.php';
 $opt = Console_Getopt::getopt($argv, '', array(
     'genconf',  // General network configuration
     'ifconf',   // Interface-specific configuration
-    
+
     // General network configuration options
     'host=',        // New hostname
     'dns1=',        // DNS 1
     'dns2=',        // DNS 2
     'gateway=',     // Network gateway
-    
+
     // Interface configuration options
     'device=',      // ethN
     'bootproto=',   // Either 'dhcp' or 'static'
@@ -154,7 +154,7 @@ function action_generalConfiguration($opt)
 
     // Change hostname
     if ($bExito && !is_null($sHostname)) setHostname($sHostname);
-    
+
     // Change DNS servers
     if ($bExito && !is_null($sDNS1)) setDNS($sDNS1, $sDNS2);
 
@@ -189,7 +189,7 @@ function setDefaultGateway($sGateway)
             if ($bClavePresente) file_put_contents($sArchivo, $contenidoNuevo);
         }
     }
-    
+
     // In /etc/sysconfig/network replace GATEWAY or add it if absent
     $bClavePresente = FALSE;
     $contenidoNuevo = array();
@@ -200,11 +200,11 @@ function setDefaultGateway($sGateway)
         } else {
             $contenidoNuevo[] = $sLinea;
         }
-            
+
     }
     if (!$bClavePresente) $contenidoNuevo[] = "GATEWAY=$sGateway\n";
     file_put_contents('/etc/sysconfig/network', $contenidoNuevo);
-	
+
     // Set default gateway with route commands
     $output = NULL; $sOldGateway = NULL;
     exec('/sbin/route -n', $output);
@@ -224,10 +224,10 @@ function setDefaultGateway($sGateway)
 // List all ethernet interfaces from the output of /proc/net/dev
 function listEthernetInterfaces()
 {
-	$interfaces = array();
+    $interfaces = array();
     foreach (file('/proc/net/dev') as $s) {
         $regs = NULL;
-    	if (preg_match('/^\s*(eth\d+):/', $s, $regs)) $interfaces[] = $regs[1];
+        if (preg_match('/^\s*([[:alnum:]]+):/', $s, $regs)) $interfaces[] = $regs[1];
     }
     return $interfaces;
 }
@@ -244,7 +244,7 @@ function setHostname($sHostname)
             $contenidoNuevo[] = "HOSTNAME=$sHostname\n";
         } else {
             $contenidoNuevo[] = $sLinea;
-        }            
+        }
     }
     if (!$bClavePresente) $contenidoNuevo[] = "HOSTNAME=$sHostname\n";
     file_put_contents('/etc/sysconfig/network', $contenidoNuevo);
@@ -263,7 +263,7 @@ function setHostname($sHostname)
             $contenidoNuevo[] = "127.0.0.1\tlocalhost $sHostname localhost.localdomain\n";
         } else {
             $contenidoNuevo[] = $sLinea;
-        }            
+        }
     }
     if ($bClavePresente) file_put_contents('/etc/hosts', $contenidoNuevo);
 
@@ -286,7 +286,7 @@ function setHostname($sHostname)
             $contenidoNuevo[] = "mydomain = $sDomain\n";
         } else {
             $contenidoNuevo[] = $sLinea;
-        }            
+        }
     }
     if (!$bClavePresente['myhostname']) $contenidoNuevo[] = "myhostname = $sHostname\n";
     if (!$bClavePresente['mydomain']) $contenidoNuevo[] = "mydomain = $sDomain\n";
@@ -350,21 +350,21 @@ function action_interfaceConfiguration($opt)
         $contenido = array();
         if (file_exists($sPath)) $contenido = file($sPath);
         $settings = array(
-            'DEVICE'    =>  $sDevice, 
-            'BOOTPROTO' =>  $sBootproto, 
+            'DEVICE'    =>  $sDevice,
+            'BOOTPROTO' =>  $sBootproto,
             'ONBOOT'    =>  'yes',
             'TYPE'      =>  'Ethernet',
             'IPADDR'    =>  '',
             'NETMASK'   =>  '',
             'NOZEROCONF'=>  'yes',
-        ); 
+        );
         if ($sBootproto == 'static') {
             $settings['IPADDR']     = $sIpAddr;
             $settings['NETMASK']    = $sNetMask;
-            $settings['BROADCAST']  = construir_ip_broadcast($sIpAddr, $sNetMask); 
-            $settings['NETWORK']    = construir_ip_red($sIpAddr, $sNetMask);; 
+            $settings['BROADCAST']  = construir_ip_broadcast($sIpAddr, $sNetMask);
+            $settings['NETWORK']    = construir_ip_red($sIpAddr, $sNetMask);;
         }
-        
+
         $contenidoNuevo = array();
         foreach ($contenido as $sLinea) {
         	$regs = NULL;
@@ -393,20 +393,20 @@ function action_interfaceConfiguration($opt)
     return $bExito;
 }
 
-function construir_ip_broadcast($ip, $mascara) 
+function construir_ip_broadcast($ip, $mascara)
 {
     $ip = explode(".", $ip);
     $mascara = explode(".", $mascara);
     for ($i = 0; $i < 4; $i++) $ip[$i] = ((int)$ip[$i]) | (~((int)$mascara[$i])& 0xFF);
-    return implode(".", $ip); 
-} 
+    return implode(".", $ip);
+}
 
-function construir_ip_red($ip, $mascara) 
-{    
+function construir_ip_red($ip, $mascara)
+{
     $ip = explode(".", $ip);
     $mascara = explode(".", $mascara);
-    for ($i = 0; $i < 4; $i++) $ip[$i] = (int)$ip[$i] & (int)$mascara[$i];    
-    return implode(".", $ip); 
+    for ($i = 0; $i < 4; $i++) $ip[$i] = (int)$ip[$i] & (int)$mascara[$i];
+    return implode(".", $ip);
 }
 
 ?>

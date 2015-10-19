@@ -101,7 +101,7 @@ function _moduleContent(&$smarty, $module_name)
                                                      "INPUT_TYPE"             => "HIDDEN",
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "ereg",
-                                                     "VALIDATION_EXTRA_PARAM" => "^eth[[:digit:]]{1,2}$"));
+                                                     "VALIDATION_EXTRA_PARAM" => "^[[:alnum:]]+$"));
 
     $strReturn ="";
 
@@ -133,7 +133,7 @@ function _moduleContent(&$smarty, $module_name)
         $oForm = new paloForm($smarty, $arrFormNetwork);
 
         if($oForm->validateForm($_POST)) {
-            $arrNetConf['host'] = $_POST['host']; 
+            $arrNetConf['host'] = $_POST['host'];
             $arrNetConf['dns_ip_1'] = $_POST['dns1'];
             $arrNetConf['dns_ip_2'] = $_POST['dns2'];
             $arrNetConf['gateway_ip'] = $_POST['gateway'];
@@ -155,7 +155,7 @@ function _moduleContent(&$smarty, $module_name)
             $smarty->assign("mb_message", $strErrorMsg);
             $smarty->assign("CANCEL", $arrLang["Cancel"]);
             $smarty->assign("SAVE", $arrLang["Save"]);
-            $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);    
+            $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
             $strReturn=$oForm->fetchForm("$local_templates_dir/network.tpl", $arrLang["Network Parameters"], $_POST);
         }
 	$smarty->assign("icon","modules/network_parameters/images/system_network_network_parameters.png");

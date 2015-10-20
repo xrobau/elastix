@@ -4,22 +4,21 @@
             {if $accion.type eq 'link'}
                 <a href="{$accion.task}" class="neo-table-action" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} >
                     <div class="neo-table-header-row-filter">
-                        {if !empty($accion.icon)}
-                            <img border="0" src="{$accion.icon}" align="absmiddle"  />&nbsp;
-                        {/if}
-                        {$accion.alt}
+                    <button type="button" name="{$accion.task}" value="{$accion.alt}" class="neo-table-toolbar-button" {if !empty($accion.ocolor)} style="background-color:#{$accion.ocolor}; border:1px solid #{$accion.ocolor};" {/if}>
+                       {if !empty($accion.iconclass)}<i class="fa fa-{$accion.iconclass}"></i> {elseif !empty($accion.icon)}<img border="0" src="{$accion.icon}" align="absmiddle"  />{/if}{$accion.alt}
+                    </button>
                     </div>
                 </a>
             {elseif $accion.type eq 'button'}
                 <div class="neo-table-header-row-filter">
                     <button type="button" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="neo-table-toolbar-button" {if !empty($accion.ocolor)} style="background-color:#{$accion.ocolor}; border:1px solid #{$accion.ocolor};" {/if}>
-                       {if !empty($accion.icon)}<i class="fa fa-{$accion.icon}"></i> {/if}{$accion.alt}
+                       {if !empty($accion.iconclass)}<i class="fa fa-{$accion.iconclass}"></i> {elseif !empty($accion.icon)}<img border="0" src="{$accion.icon}" align="absmiddle"  />{/if}{$accion.alt}
                     </button>
                 </div>
             {elseif $accion.type eq 'submit'}
                 <div class="neo-table-header-row-filter">
                     <button type="submit" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="neo-table-toolbar-button" {if !empty($accion.ocolor)} style="background-color:#{$accion.ocolor}; border:1px solid #{$accion.ocolor};" {/if}>
-                       {if !empty($accion.icon)}<i class="fa fa-{$accion.icon}"></i> {/if}{$accion.alt}
+                       {if !empty($accion.iconclass)}<i class="fa fa-{$accion.iconclass}"></i> {elseif !empty($accion.icon)}<img border="0" src="{$accion.icon}" align="absmiddle"  />{/if}{$accion.alt}
                     </button>
                 </div>
             {elseif $accion.type eq 'text'}

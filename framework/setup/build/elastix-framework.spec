@@ -353,6 +353,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: update link control in paloSantoGrid for tenant theme so
+  that it displays the font icon, while preserving backward compatibility with
+  other themes and custom icons. Opportunistically map known framework icons
+  to font icons in addAction method.
+  SVN Rev[7200]
 - CHANGED: Framework: rework of tenant theme by Edgar Landivar.
   SVN Rev[7199]
 - DELETED: Framework: remove fonts.old folder in tenant theme.

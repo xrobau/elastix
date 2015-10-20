@@ -131,7 +131,7 @@ class paloSantoGrid {
     {
         $type    = ($asLink)?"link":"submit";
         $onclick = "return confirmSubmit('"._tr($msg)."')";
-        $this->addAction($task,$alt,"images/delete5.png",$type,$onclick);
+        $this->addAction($task,$alt,"images/delete5.png",$type,$onclick,"ec6459");
     }
 
     public function addLinkAction($href="action=add", $alt="New Row", $icon=null, $onclick=null)
@@ -179,8 +179,20 @@ class paloSantoGrid {
         $this->addAction($html,null,null,"html",null);
     }
 
-    private function addAction($task, $alt, $icon, $type="submit", $event=null)
+    private function addAction($task, $alt, $icon, $type="submit", $event=null, $overwrite_color=null)
     {
+        global $arrConf;
+
+        $iconclass = NULL;
+        if ($arrConf['mainTheme'] == 'tenant') {
+            // Mapa de iconos conocidos a clases de iconos de tenant
+            $iconmap = array(
+                "images/delete5.png" => "eraser",
+                "images/plus2.png" => "plus",
+            );
+            if (isset($iconmap[$icon])) $iconclass = $iconmap[$icon];
+        }
+
         $newAction = array();
 
         switch($type){
@@ -192,7 +204,9 @@ class paloSantoGrid {
                     'task' => $task,
                     'alt'  => $alt,
                     'icon' => $icon,
-                    'onclick' => empty($event)?null:$event);
+                    'iconclass' => $iconclass,
+                    'onclick' => empty($event)?null:$event,
+                    'ocolor' => empty($overwrite_color)?null:$overwrite_color);
                 break;
             case 'html':
                 $newAction = array(
@@ -204,6 +218,7 @@ class paloSantoGrid {
                     'type' => "submit",
                     'task' => $task,
                     'alt'  => $alt,
+                    'iconclass' => $iconclass,
                     'icon' => $icon);
                 break;
         }

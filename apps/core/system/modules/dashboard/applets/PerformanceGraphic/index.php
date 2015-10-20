@@ -45,13 +45,10 @@ class Applet_PerformanceGraphic
         );
         //CallsMemoryCPU
         $respuesta['html'] = "<div style='width:450px;height:240px;' id='dashboard-applet-performancegraph'></div>
-<script>" .
-$this->_sampler_CallsMemoryCPU() . "
-$.plot('#dashboard-applet-performancegraph', [
-    { data: data1, color: '#33cc33', shadowSize: 0, label: 'Calls' },
-    { data: data2, color: '#3da8fb', shadowSize: 0, label: 'CPU', yaxis: 2 },
-    { data: data3, color: '#cb4b4b', shadowSize: 0, fill: true, fillColor: '#eeeeee', label: 'RAM', yaxis: 3 }
-], {
+<script>
+$.plot('#dashboard-applet-performancegraph', ".
+$this->_sampler_CallsMemoryCPU().
+", {
     xaxes: [ { mode: 'time' } ],
     yaxes: [ { min: 0 }, {
     // align if we are to the right
@@ -85,16 +82,6 @@ $.plot('#dashboard-applet-performancegraph', [
         return $json->encode($respuesta);
     }
 
-    function handleJSON_graphic($smarty, $module_name, $appletlist)
-    {
-        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
-         * que otras operaciones ajax puedan funcionar. */
-        session_commit();
-
-        $result = $this->_sampler_CallsMemoryCPU();
-        displayGraphResult($result);
-    }
-
     private function _sampler_CallsMemoryCPU()
     {
         $arrayResult = array();
@@ -118,26 +105,40 @@ $.plot('#dashboard-applet-performancegraph', [
 
         $i = 1;
         $arrValues = array();
-        $resultadox = '';
-        foreach($arrLines as $num => $line)
-        {
+        $json = new Services_JSON();
+        foreach ($arrLines as $line) {
             $arraySample = $oSampler->getSamplesByLineId($line['id']);
-
-            $resultadox .= "data" . $i . " = [\n";
-            foreach( $arraySample as $num => $time_value ) {
-                $desfase = $time_value['timestamp'] % 300;
-                $resultadox .= "[" . $time_value['timestamp'] . "," . (int)$time_value['value'] . "],\n";
+            $data = array();
+            $obj = array(
+                'data'  =>  array(),
+                'shadowSize'    =>  0,
+                'label'         =>  _tr($line['name']),
+                'yaxis'         =>  $i,
+                'color'         =>  $line['color'],
+            );
+            foreach ($arraySample as $time_value) {
+                $obj['data'][] = array((int)$time_value['timestamp'], (int)$time_value['value']);
             }
-            $resultadox .= "];\n\n";
+            switch ($i) {
+            case 1:
+                //$obj['color'] = '#33cc33';
+                //$obj['label'] => 'Calls';
+                break;
+            case 2:
+                //$obj['color'] = '#3da8fb';
+                //$obj['label'] => 'CPU';
+                break;
+            case 3:
+                //$obj['color'] = '#cb4b4b';
+                //$obj['label'] => 'RAM';
+                $obj['fill'] = TRUE;
+                $obj['fillColor'] = '#eeeeee';
+                break;
+            }
+            $arrValues[] = $obj;
             $i++;
         }
-
-        return $resultadox;
-    }
-
-    function functionCallback($value)
-    {
-        return Date('H:i', $value);
+        return $json->encode($arrValues);
     }
 }
 

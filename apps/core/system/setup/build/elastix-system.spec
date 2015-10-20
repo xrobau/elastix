@@ -139,6 +139,8 @@ fi
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: cleanup and proper JSON encoding for Performance Graphic.
+  SVN Rev[7209]
 - CHANGED: Dashboard: switch to jQuery Plot for Performance Graphic plot.
   SVN Rev[7208]
 - CHANGED: Dashboard: part 2 of changes for tenant theme integration. Use icons

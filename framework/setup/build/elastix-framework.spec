@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: allow modules to specify a icon class for the tenant
+  theme. Currently this will show no icon on other themes.
+  SVN Rev[7202]
 - FIXED: Framework: update link control in paloSantoGrid for tenant theme so
   that it displays the font icon, while preserving backward compatibility with
   other themes and custom icons. Opportunistically map known framework icons

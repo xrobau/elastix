@@ -7,7 +7,7 @@
         <ul>
             {foreach from=$SHORTCUT_BOOKMARKS item=shortcut name=shortcut}
                 <li>
-                    <a href="index.php?menu={$shortcut.id_menu}">
+                    <a href="index.php?menu={$shortcut.namemenu}">
                         <span>{$shortcut.name}</span>
                     </a>
                 </li>
@@ -24,7 +24,7 @@
     <ul>
         {foreach from=$SHORTCUT_HISTORY item=shortcut}
             <li>
-                <a href="index.php?menu={$shortcut.id_menu}">
+                <a href="index.php?menu={$shortcut.namemenu}">
                     <span>{$shortcut.name}</span>
                 </a>
             </li>

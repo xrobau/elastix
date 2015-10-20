@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: use module name instead of id for shortcuts in tenant theme.
+  SVN Rev[7203]
 - CHANGED: Framework: allow modules to specify a icon class for the tenant
   theme. Currently this will show no icon on other themes.
   SVN Rev[7202]

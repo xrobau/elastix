@@ -74,7 +74,7 @@ function _moduleContent(&$smarty, $module_name)
 	    return "";
 	}
 	else
-	    $smarty->assign('mb_message', "<b>"._tr("no_extension")."</b>");
+	    $smarty->assign('mb_message', _tr("no_extension"));
     }
 
     // Para usuarios que no son administradores, se restringe a los CDR de la
@@ -88,7 +88,7 @@ function _moduleContent(&$smarty, $module_name)
     $dataRG = $oRG->getRingGroup();
     $dataRG[''] = _tr('(Any ringgroup)');
 
-    
+
 
 
     // Cadenas estáticas en la plantilla
@@ -149,7 +149,7 @@ function _moduleContent(&$smarty, $module_name)
     // Parámetros base y validación de parámetros
     $url = array('menu' => $module_name);
     $paramFiltroBase = $paramFiltro = array(
-        'date_start'    => date("d M Y"), 
+        'date_start'    => date("d M Y"),
         'date_end'      => date("d M Y"),
         'field_name'    => 'dst',
         'field_pattern' => '',
@@ -228,7 +228,7 @@ function _moduleContent(&$smarty, $module_name)
 		));
 	}
     }
-    
+
     $oGrid->setTitle(_tr("CDR Report"));
     $oGrid->pagingShow(true); // show paging section.
 
@@ -237,7 +237,7 @@ function _moduleContent(&$smarty, $module_name)
     $oGrid->setURL($url);
     if($isAdministrator)
 	$oGrid->deleteList("Are you sure you wish to delete CDR(s) Report(s)?","delete",_tr("Delete"));
-    
+
     $arrData = null;
     if(!isset($sExtension) || $sExtension == ""  && !$isAdministrator)
 	$total = 0;
@@ -247,12 +247,12 @@ function _moduleContent(&$smarty, $module_name)
     if($oGrid->isExportAction()){
         $limit = $total;
         $offset = 0;
-        
+
         $arrColumns = array(_tr("Date"), _tr("Source"), _tr("Ring Group"), _tr("Destination"), _tr("Src. Channel"),_tr("Account Code"),_tr("Dst. Channel"),_tr("Status"),_tr("Duration"));
         $oGrid->setColumns($arrColumns);
 
 	$arrResult = $oCDR->listarCDRs($paramFiltro, $limit, $offset);
- 
+
         if(is_array($arrResult['cdrs']) && $total>0){
             foreach($arrResult['cdrs'] as $key => $value){
                 $arrTmp[0] = $value[0];

@@ -1,6 +1,6 @@
 %define modname reports
 
-Summary: Elastix Module Reports 
+Summary: Elastix Module Reports
 Name:    elastix-reports
 Version: 2.5.0
 Release: 4
@@ -93,6 +93,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Oct 20 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: CDR Report: (trivial) sync with tenant rework.
+  SVN Rev[7201]
+
 * Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
@@ -106,15 +110,15 @@ fi
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
 
-* Fri Feb 27 2015 Armando Chuto <armando@palosanto.com> 
+* Fri Feb 27 2015 Armando Chuto <armando@palosanto.com>
 - ADDED: framework/report added tcpdf library
   SVN Rev[6880]
 
-* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com>
 - ADDED: /core/reports/setup/build/ added library php-jpgraph
   SVN Rev[6862]
 
-* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com>
 - CHANGED: core/reports/modules/graphic_report: change the route to usr/share
   of jpgraph library
   SVN Rev[6859]
@@ -125,15 +129,15 @@ fi
   SVN Rev[6838]
 
 * Wed Feb  4 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: CDR Report: reinstalling FreePBX adds the cdr.did column 
+- CHANGED: CDR Report: reinstalling FreePBX adds the cdr.did column
   independently from elastix-reports. This could cause a failure to apply all
   SQL scripts from elastix-reports. Fix by declaring and running a temporary
   stored procedure to check whether cdr.did exists. This method was lifted from
   elastix-callcenter.
-  SVN Rev[6835] 
+  SVN Rev[6835]
 
 * Mon Jan 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: CDR Report: add new column that is required by the CDR module in 
+- FIXED: CDR Report: add new column that is required by the CDR module in
   FreePBX. Fixes Elastix bugs #2127, #2074.
   SVN Rev[6827]
 
@@ -152,14 +156,14 @@ fi
   with unescaped embedded slash. Fixes Elastix bug #1975.
   SVN Rev[6711]
 
-* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com> 
+* Wed Jun 04 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: modules - Classes, Libraries and Indexes: Because in the new php 5.3
   packages were depreciated many functions, the equivalent functions are
   updated in the files that use to have the menctioned functions.
   SVN Rev[6638]
 
 * Wed Feb 19 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Asterisk Logs: update log parsing for changed date format resulting 
+- FIXED: Asterisk Logs: update log parsing for changed date format resulting
   from update to FreePBX 2.11.
   SVN Rev[6487]
 
@@ -169,7 +173,7 @@ fi
   SVN Rev[6379]
 
 * Wed Jan 8 2014 Jose Briones <jbriones@elastix.com>
-- CHANGED: CDR Report, Channels Usage, Rates, Billing Report, Destination 
+- CHANGED: CDR Report, Channels Usage, Rates, Billing Report, Destination
   Distribution, Billing Setup, Asterisk Logs, Graphic Report, Summary,
   Missed Calls: For each module listed here the english help file was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
   SVN Rev[6348]
@@ -179,7 +183,7 @@ fi
   a single zero from filter parameters.
   SVN Rev[5997]
 
-* Fri Sep 20 2013 Luis Abarca <labarca@palosanto.com> 
+* Fri Sep 20 2013 Luis Abarca <labarca@palosanto.com>
 - FIXED: An update line in the CDR table its corrected.
   SVN Rev[5920]
 
@@ -188,14 +192,14 @@ fi
   SVN history. Bump release in specfile.
   SVN Rev[5913]
 
-* Wed Sep 18 2013 Luis Abarca <labarca@palosanto.com> 
+* Wed Sep 18 2013 Luis Abarca <labarca@palosanto.com>
 - ADDED: Some new fields has been added to the CDR table.
   SVN Rev[5898]
 
 * Mon Sep 09 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Billing Report: move filter widgets to separate row in order to avoid
   misplacement. Fixes Elastix bug #1637.
-  SVN Rev[5844] 
+  SVN Rev[5844]
 
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-7
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
@@ -208,91 +212,91 @@ fi
 - CHANGED: Asterisk Logs: convert uses of arrLang to _tr. Sync with trunk.
   SVN Rev[5725]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5642]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5641]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5639]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5638]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5637]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5636]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5635]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5634]
 
-* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file es.lang.
   SVN Rev[5510]
 
-* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file es.lang.
   SVN Rev[5509]
 
-* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file es.lang.
   SVN Rev[5508]
 
-* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module file_editor. Correction of some mistakes in the translation
   file es.lang.
   SVN Rev[5507]
 
-* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Aug 02 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module file_editor. Correction of some mistakes in the translation
   file es.lang.
   SVN Rev[5506]
 
-* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 31 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module summary_by_extension. Correction of some mistakes in the
   translation files.
   SVN Rev[5471]
 
-* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com> 
+* Mon Jul 29 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module missed_calls. Correction of some mistakes in the translation
   files.
   SVN Rev[5435]
 
-* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Jul 26 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module graphic_report. Correction of some mistakes in the
   translation files.
   SVN Rev[5420]
 
-* Fri Jul 19 2013 Jose Briones <jbriones@palosanto.com> 
+* Fri Jul 19 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module cdrreport. Correction of some mistakes in the translation
   files.
   SVN Rev[5384]
 
-* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module billing_report. Correction of some mistakes in the
   translation files.
   SVN Rev[5358]
 
-* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module billing_rates. Correction of some mistakes in the translation
   files.
   SVN Rev[5357]
 
-* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module asterisk_log. Correction of some mistakes in the translation
   files.
   SVN Rev[5355]
@@ -302,25 +306,25 @@ fi
   SVN history. Bump release in specfile.
   SVN Rev[5353]
 
-* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module graphic_report. Correction of a mistake in the english
   translation file
   SVN Rev[5319]
 
 * Wed Jun 26 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Summary By Extension: tweak SQL query used to report summary, 
+- CHANGED: Summary By Extension: tweak SQL query used to report summary,
   attempts to fix Elastix bug #1607.
   SVN Rev[5133]
-- FIXED: Summary By Extension: SVN commit 4907 introduced a regression that 
+- FIXED: Summary By Extension: SVN commit 4907 introduced a regression that
   breaks filtering by a particular extension or user. Fixed. Should fix last
   part of Elastix bug #1322.
   SVN Rev[5132]
 
 * Mon Jun 24 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Graphic Report: fix report of DAHDI extensions that did not appear as
-  part of the pie chart count. Fixes Elastix bug #1606. Additionally, remove 
+  part of the pie chart count. Fixes Elastix bug #1606. Additionally, remove
   dead code and use standard translator function for date handling.
-  SVN Rev[5122] 
+  SVN Rev[5122]
 
 * Mon Jun 17 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-5
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
@@ -331,7 +335,7 @@ fi
 - FIXED: Asterisk Logs: fix date parsing to avoid interpreting plain PIDs as
   dates. Extract date from a new type of message line on asterisk boot. Remove
   unnecessary database connection parameter.
-  SVN Rev[5097] 
+  SVN Rev[5097]
 
 * Tue Jun 11 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-4
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
@@ -423,7 +427,7 @@ fi
   SVN Rev[4748]
 
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
-- CHANGED: reports - Build/elastix-reports.spec: Changed Version and Release in 
+- CHANGED: reports - Build/elastix-reports.spec: Changed Version and Release in
   specfile according to the current branch.
   SVN Rev[4643]
 
@@ -453,14 +457,14 @@ fi
   SVN Rev[4362]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Framework,Modules: remove temporary file preversion_MODULE.info under 
+- Framework,Modules: remove temporary file preversion_MODULE.info under
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
-  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on
   RPM update. Part of the fix for Elastix bug #1398.
 - Framework,Modules: switch as many files and directories as possible under
-  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
   Elastix bug #1399.
-- Framework,Modules: clean up specfiles by removing directories under 
+- Framework,Modules: clean up specfiles by removing directories under
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
 - Endpoint Configurator: install new configurator properly instead of leaving
@@ -500,7 +504,7 @@ fi
 
 * Fri Mar 30 2012 Bruno Macias <bmacias@palosanto.com> 2.3.0-3
 - CHANGED: In spec file, changed prereq elastix-framework >= 2.3.0-5
-- FIXED: modules - SQLs DB: se quita SQL redundante de alter table y nuevos 
+- FIXED: modules - SQLs DB: se quita SQL redundante de alter table y nuevos
   registros, esto causaba un error leve en la instalación de el/los modulos.
   SVN Rev[3797]
 
@@ -529,55 +533,55 @@ fi
 
 * Wed Feb 01 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-14
 - CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-30
-- CHANGED: file index.php to fixed the problem with the paged. 
+- CHANGED: file index.php to fixed the problem with the paged.
   SVN Rev[3624]
-- FIXED: Modules - Billing Report: Actually are generated two 
-  reporting lines (CDRs) for each billed call, one by the assigned 
+- FIXED: Modules - Billing Report: Actually are generated two
+  reporting lines (CDRs) for each billed call, one by the assigned
   rate and other by 'Default' rate.
 
 * Mon Jan 29 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-13
 - CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-28
 - CHANGED: to fixed the problem with the pagineo. SVN REv[3609].
-- ADDED: modules - billing_setup: Se agrega linea en el index del modulo 
+- ADDED: modules - billing_setup: Se agrega linea en el index del modulo
   para ocultar el pagineo del modulo ya que no era usado. SVN REv[3606].
 
 * Sat Jan 28 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-12
 - CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-28
-- CHANGED: Modules - Summary: Changes in index.php file for change 
+- CHANGED: Modules - Summary: Changes in index.php file for change
   the column title color in the grid of Summary module. SVN Rev[3580].
 - CHANGED: modules - images: icon image title was changed on some modules.
   SVN Rev[3572].
-- CHANGED: modules - cdrrport: Se cambia el nombre del boton eliminar, 
-  al igual que el mensaje que sale de confirmación de eliminación. 
+- CHANGED: modules - cdrrport: Se cambia el nombre del boton eliminar,
+  al igual que el mensaje que sale de confirmación de eliminación.
   SVN Rev[3571].
-- CHANGED: modules - icons: Se cambio de algunos módulos los iconos que 
+- CHANGED: modules - icons: Se cambio de algunos módulos los iconos que
   los representaba. SVN Rev[3563].
 - CHANGED: modules - trunk/core/reports/modules/asterisk_log/themes/
-  default/filter.tpl: Se modifico el archivo _filter.tpl en cuestion 
-  de diseño para que los elementos dentro del filtro no esten muy 
+  default/filter.tpl: Se modifico el archivo _filter.tpl en cuestion
+  de diseño para que los elementos dentro del filtro no esten muy
   distanciados. SVN Rev[3556].
-- CHANGED: modules - * : Cambios en ciertos mòdulos que usan grilla 
-  para mostrar ciertas opciones fuera del filtro, esto debido al 
+- CHANGED: modules - * : Cambios en ciertos mòdulos que usan grilla
+  para mostrar ciertas opciones fuera del filtro, esto debido al
   diseño del nuevo filtro. SVN Rev[3549].
-- CHANGED: Modules - Reports: Support for the new grid layout. 
+- CHANGED: Modules - Reports: Support for the new grid layout.
   SVN Rev[3542].
-- UPDATED: modules - *.tpl: Se elimino en los archivos .tpl de ciertos 
-  módulos que tenian una tabla demás en su diseño de filtro que formaba 
+- UPDATED: modules - *.tpl: Se elimino en los archivos .tpl de ciertos
+  módulos que tenian una tabla demás en su diseño de filtro que formaba
   parte de la grilla. SVN REV[3541].
 
 
 * Tue Jan 17 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-11
-- CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-26 
+- CHANGED: In spec file, changed prereq to elastix-framework >= 2.2.0-26
 - CHANGED: modules - reports/setup/db/update/asteriskcdrdb: Se cambia el create index por un procedimiento para que verifique si existe previamente el indice caso contrario lo agrega a la tabla asteriskcdrdb.cdr. El indice es IDX_UNIQUEID relacionado al campo uniqueid. SVN Rev[3506].
 
 * Thu Jan 05 2012 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-10
 - UPDATED: modules - reports/setup/db/db.info: Changed sql scripts to do not
-  remove asteriskcdrdb and ignore the action to create a backup after the 
+  remove asteriskcdrdb and ignore the action to create a backup after the
   process unistall of RPM.
 
 * Tue Jan 03 2012 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-9
-- FIXED: Modules - Reports/Billing_rates: Fixed bug where import a file 
-  is not work, because only take a first row and then return as successful 
+- FIXED: Modules - Reports/Billing_rates: Fixed bug where import a file
+  is not work, because only take a first row and then return as successful
   (don't read the others rows).
        * Bug: 1134
        * Introduced by: Eduardo Cueva
@@ -596,9 +600,9 @@ fi
 
 * Sat Oct 29 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-5
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-12
-- CHANGED: Modules - Summary By Extension: changed size of popup in 
+- CHANGED: Modules - Summary By Extension: changed size of popup in
   Summary By Extension. SVN Rev[3227]
-- FIXED: Modules - Summary by extension: Changed the image flecha.png 
+- FIXED: Modules - Summary by extension: Changed the image flecha.png
   with background blank with transparent as background.
   CHANGED: Modules - menu.xml: Changed label of summary by extension
   by summary and User Management with users.
@@ -615,11 +619,11 @@ fi
   SVN Rev[3152]
 
 * Fri Oct 07 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-4
-- FIXED: Modules - Billing Reports: Fixed bug where trunk SIP 
+- FIXED: Modules - Billing Reports: Fixed bug where trunk SIP
   or IAX were not showed in billing reports. SVN Rev[3065]
-- CHANGED: module billing_rates, the word "required field" was 
+- CHANGED: module billing_rates, the word "required field" was
   deleted for view mode. SVN Rev[3027]
-- CHANGED: module billing_setup, the asterisks in labels and word 
+- CHANGED: module billing_setup, the asterisks in labels and word
   "required field" were removed for view mode. SVN Rev[3020]
 
 * Thu Sep 22 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-3
@@ -646,20 +650,20 @@ fi
 
 * Tue Jul 19 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-15
 - CHANGED: In spec file change prereq elastix >= 2.0.4-29
-- FIXED: Modules - cdrreport: Fixed bug where any user without 
+- FIXED: Modules - cdrreport: Fixed bug where any user without
   an extension assigned could see all cdr in cdrreports.
   SVN Rev[2835]
-- CHANGED: module graphic_report, in case of error no graphic 
+- CHANGED: module graphic_report, in case of error no graphic
   is showed. SVN Rev[2809]
-- CHANGED: module graphic_report, when there is no data to show 
+- CHANGED: module graphic_report, when there is no data to show
   the design was changed like used in module email_stats.
   SVN Rev[2800]
-- CHANGED: module dest_distribution, when there is no data to 
-  show the design is changed like used in module email_stats. 
+- CHANGED: module dest_distribution, when there is no data to
+  show the design is changed like used in module email_stats.
   SVN Rev[2799]
-- CHANGED: module channelusage, when there is no data to show a 
-  jpgraph error was displayed. Now in this case a blank image 
-  with the message "Nothing to show yet" and the title of it 
+- CHANGED: module channelusage, when there is no data to show a
+  jpgraph error was displayed. Now in this case a blank image
+  with the message "Nothing to show yet" and the title of it
   is displayed. SVN Rev[2777]
 
 * Wed Jun 29 2011 Alberto Santos <asantos@palosanto.com> 2.0.4-14
@@ -674,37 +678,37 @@ fi
 
 * Fri Jun 24 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-13
 - CHANGED: IN spec file change prereq elastix >= 2.0.4-25
-- FIXED: module graphic_report, changed action onclick to onchange 
+- FIXED: module graphic_report, changed action onclick to onchange
   on combo box. SVN Rev[2756].
 - FIXED: Bug in module Dest distribution, Error to create image.
-  PieGraph class do not exists, To solve the library 
+  PieGraph class do not exists, To solve the library
   paloSantoGraphImage.lib.php had to be included. SVN Rev[2754]
-- CHANGED: Module CDR Reports, change soap name 
+- CHANGED: Module CDR Reports, change soap name
  class SOAP_Cdr.class.php to SOAP_CDR.class.php. SVN Rev[2750]
 
 * Mon Jun 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-12
-- CHANGED: Modules - Trunk: The ereg function was replaced by the 
-  preg_match function due to that the ereg function was deprecated 
+- CHANGED: Modules - Trunk: The ereg function was replaced by the
+  preg_match function due to that the ereg function was deprecated
   since PHP 5.3.0. SVN Rev[2688]
 
 * Thu May 05 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-11
 - ADDED: CDR Report: Add support for filter by ringgroup. SVN Rev[2617].
 - FIXED: CDR Report: fix typo in Spanish translation. SVN Rev[2612]
-- FIXED: CDR Report: fix date comparison bug on delete scenario - 
-  dates were being compared with "d M Y" format, should be compared 
+- FIXED: CDR Report: fix date comparison bug on delete scenario -
+  dates were being compared with "d M Y" format, should be compared
   with ISO format. SVN Rev[2611]
 - CHANGED: CDR Report: report now uses CDR API with parameter arrays.
   SVN Rev[2611]
 - CHANGED: paloSantoCDR: add checks for invalid parameter arrays.
   SVN Rev[2610]
-- FIXED: module summary_by_extension, for numbers too big the 
+- FIXED: module summary_by_extension, for numbers too big the
   leyend could overlaps the percentages. SVN Rev[2606]
-- FIXED: cdrreport: Fixed bug [#821] filters don't work if the 
+- FIXED: cdrreport: Fixed bug [#821] filters don't work if the
   action is "delete cdr". SVN Rev[2605]
-- FIXED: paloSantoCDR: refuse to process any query or delete that 
+- FIXED: paloSantoCDR: refuse to process any query or delete that
   specifies a non-null date in an invalid format. SVN Rev[2604]
 - ADDED: paloSantoCDR: add support for ringgroup filtering. SVN Rev[2603]
-- CHANGED: CDR Report: create new method contarCDRs that receives 
+- CHANGED: CDR Report: create new method contarCDRs that receives
   a parameter array, and modify getNumCDR to forward to contarCDRs
   SVN Rev[2599]
 - CHANGED: CDR Report: make Delete_All_CDRs() use getParam() helper.
@@ -726,39 +730,39 @@ fi
   SVN Rev[2508]
 
 * Tue Apr 05 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-9
-- CHANGED:  Reports - Billing reports: Changes in styles and 
+- CHANGED:  Reports - Billing reports: Changes in styles and
   tpl. SVN Rev[2506]
 
 * Wed Mar 30 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-8
-- FIXED:  Reports - Email: Button cancel don't work in action 
-  edit due to on URL put parameter "edit" where that parameter 
-  has the name of rate and it is wrong because this parameter 
+- FIXED:  Reports - Email: Button cancel don't work in action
+  edit due to on URL put parameter "edit" where that parameter
+  has the name of rate and it is wrong because this parameter
   is only for the action EDIT. SVN Rev[2474]
 
 * Tue Mar 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-7
-- FIXED: Reports - Cdrreports:  
-  Fix bug "http://bugs.elastix.org/view.php?id=753" this 
-  require commit 2445, and change function "borrarCDRs" 
-  where query to execute never receive the array of values 
+- FIXED: Reports - Cdrreports:
+  Fix bug "http://bugs.elastix.org/view.php?id=753" this
+  require commit 2445, and change function "borrarCDRs"
+  where query to execute never receive the array of values
   for parametrization method. SVN Rev[2446]
-- FIXED: reports - cdrreports:  Fixed bug 
-  "http://bugs.elastix.org/view.php?id=753" where repors of 
+- FIXED: reports - cdrreports:  Fixed bug
+  "http://bugs.elastix.org/view.php?id=753" where repors of
   call from cdr reports cannot be deleted. SVN Rev[2445]
-- CHANGED: module summary_by_extension, changed the column 
+- CHANGED: module summary_by_extension, changed the column
   names according to the bug #756. SVN Rev[2432]
-- CHANGED: module billing_rates, changed the message where it 
+- CHANGED: module billing_rates, changed the message where it
   is one suggestion to keep or create a new rate according to the
   bug #755. SVN Rev[2431]
-- CHANGED: module cdrreport, changed the popup message to "Are 
-  you sure you wish to delete the displayed CDR(s)?" and the 
+- CHANGED: module cdrreport, changed the popup message to "Are
+  you sure you wish to delete the displayed CDR(s)?" and the
   delete button to "Delete the displayed CDR(s)". SVN Rev[2426]
 - CHANGED: module cdrreport, changed the title from "CDRReport"
   to "CDR Report". SVN Rev[2422]
 
 * Tue Mar 01 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-6
 - CHANGED:  In Spec file add prerequiste elastix 2.0.4-10
-- FIXED:  Reports - billing_rates/billing_report:  Fixed bug 
-  where module billing rate does not work, the problem was the 
+- FIXED:  Reports - billing_rates/billing_report:  Fixed bug
+  where module billing rate does not work, the problem was the
   actions are bad and the comparison was wrong. SVN Rev[2388]
 
 * Mon Feb 07 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-5
@@ -767,146 +771,146 @@ fi
 * Mon Feb 07 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
 - CHANGED:   In Spec add lines to support install or update
   proccess by script.sql.
-- DELETED:   Databases sqlite were removed to use the new format 
+- DELETED:   Databases sqlite were removed to use the new format
   to sql script for administer process install, update and delete
   SVN Rev[2332]
-- FIXED:  Reports - Billing_report: Fixed some bug report in 
-  bugs.elastix.org [694][709] and field time of duration per 
-  call are in format number(s) (number(h) number(m) number(s)). 
+- FIXED:  Reports - Billing_report: Fixed some bug report in
+  bugs.elastix.org [694][709] and field time of duration per
+  call are in format number(s) (number(h) number(m) number(s)).
   Example: 145s (2m 25s). SVN Rev[2327]
-- ADD:  addons, agenda, reports. Add folders to contain sql 
+- ADD:  addons, agenda, reports. Add folders to contain sql
   scrips to update, install or delete. SVN Rev[2321]
 
 * Thu Feb 03 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-3
-- CHANGED:  menu.xml to support new tag "permissions" where has 
-  all permissions of group per module and new attribute "desc" 
-  into tag  "group" for add a description of group. 
+- CHANGED:  menu.xml to support new tag "permissions" where has
+  all permissions of group per module and new attribute "desc"
+  into tag  "group" for add a description of group.
   SVN Rev[2294][2299]
-- CHANGED:  Put rate by default in billing rates, when the modules 
+- CHANGED:  Put rate by default in billing rates, when the modules
   is used for first time appear Default rate as unique rate created.
   SVN Rev[2261]
-- CHANGED:  paloSantoCDR, changed to order DESC in the function 
+- CHANGED:  paloSantoCDR, changed to order DESC in the function
   listarCDRs. SVN Rev[2258]
 
 * Mon Jan 17 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-2
-- CHANGED:   Reports: Billing Module: Change billing reports 
-  and billing rates for better performance, creation of new 
-  rates and edit the same rates without affect the reports 
+- CHANGED:   Reports: Billing Module: Change billing reports
+  and billing rates for better performance, creation of new
+  rates and edit the same rates without affect the reports
   with rates older.....[#205] SVN Rev[2244]
 
 * Thu Dec 23 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-1
-- CHANGED: Additionals libs, move libs from additional folder 
+- CHANGED: Additionals libs, move libs from additional folder
   to each specify module by example paloSantoCDR.class.php
    SVN Rev[2150]
 
 * Mon Dec 06 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-21
 - CHANGE: add new prereq asterisk in spec file.
 - CHANGE: cdrreport module, change format to export and get data
-  New function getNumCDR in PaloSantoCDR to obtain total of 
+  New function getNumCDR in PaloSantoCDR to obtain total of
   regiters. SVN Rev[2046]
 - FIXED: Graphic Report: add rawmode=yes to all graphic URLs.
   SVN Rev[2037]
-- CHANGED: Graphic Report: make use of new functionality to 
-  implement expansion of trunk groups. Requires 2022 
-  (getTrunkGroupsDAHDI() function), 2032 (rewrite of loadTrunks()) 
+- CHANGED: Graphic Report: make use of new functionality to
+  implement expansion of trunk groups. Requires 2022
+  (getTrunkGroupsDAHDI() function), 2032 (rewrite of loadTrunks())
   to work properly. Fixes Elastix bug #468 for Elastix 2.0.
   SVN Rev[2035]
-- CHANGED: Graphic Report: rewrite the method used to query total 
+- CHANGED: Graphic Report: rewrite the method used to query total
   duration/callcount by trunk:
            Removes opportunities for SQL injection
-           Uses a single SELECT instead of two nested SELECTs, 
+           Uses a single SELECT instead of two nested SELECTs,
              more efficient search
-           Removes unnecessary use of TO_DAYS function, enabling 
+           Removes unnecessary use of TO_DAYS function, enabling
              speedup by applying indexes on cdr.calldate
            Adds capability to query for multiple trunks, required
              for trunk groups
-           Fixes potential bug in which statistics for DAHDI/1 
+           Fixes potential bug in which statistics for DAHDI/1
              trunk would include DAHDI/10, DAHDI/11...
   SVN Rev[2032]
-- CHANGED:  remove trunk.db in setup of reports (svn) and new 
-  trunk.db in setup folder of pbx. It changes is for VOIP Provider 
+- CHANGED:  remove trunk.db in setup of reports (svn) and new
+  trunk.db in setup folder of pbx. It changes is for VOIP Provider
   module.
   install.php of pbx was changed to support new trunk.db
-  install.php of reports was changed, because the support of 
+  install.php of reports was changed, because the support of
   trunk.db is in install.php of pbx by VOIP Provider. SVN Rev[2026]
-- CHANGED: CDR Report: rewrite of report code. This achieves 
+- CHANGED: CDR Report: rewrite of report code. This achieves
  the following:
-           Fix (potential) vuln of non-admin user deleting CDRs 
+           Fix (potential) vuln of non-admin user deleting CDRs
              belonging to other users
            Improve readability of code
-           Making use of _tr and load_language_module() for 
+           Making use of _tr and load_language_module() for
              better i18n support
-           Depend on newer support for integrated CSV/XLS/PDF 
+           Depend on newer support for integrated CSV/XLS/PDF
              export of full report
   Requires SVN commit 2020 to work properly. SVN Rev[2021]
 - CHANGED: CDR Report: improve XHTML compatibility. SVN Rev[2019]
-- FIXED:   Graphic Report: fix regression due to picking 'menu' 
-  variable from $_POST for module selection - Graphic. 
+- FIXED:   Graphic Report: fix regression due to picking 'menu'
+  variable from $_POST for module selection - Graphic.
   SVN Rev[2004]
-- CHANGED: Graphic Report: detect availability of getParameter() 
+- CHANGED: Graphic Report: detect availability of getParameter()
   at runtime. SVN Rev[2004]
-- CHANGED: Graphic Report: remove invalid <BODY> tag from filter 
+- CHANGED: Graphic Report: remove invalid <BODY> tag from filter
   template. SVN Rev[2004]
-- CHANGED: massive search and replace of HTML encodings with the 
+- CHANGED: massive search and replace of HTML encodings with the
   actual characters. SVN Rev[2002]
-- CHANGED: Billing Report: 
-           stop assigning template variable "url" directly, and 
+- CHANGED: Billing Report:
+           stop assigning template variable "url" directly, and
   remove nested <form> tag. SVN Rev[1985]
            add "menu" URL variable to list of variables for grid
   SVN Rev[1989]
-- CHANGED: Destination Distribution: rework functionality from 
-  images/pie_dist.php into main module. This integrates graphic 
-  generation into its only user so images/pie_dist.php is no 
+- CHANGED: Destination Distribution: rework functionality from
+  images/pie_dist.php into main module. This integrates graphic
+  generation into its only user so images/pie_dist.php is no
   longer needed. SVN Rev[1980]
 - CHANGED: Destination Distribution: separate querying code into its
   own function, in preparation for graphic rework. SVN Rev[1979]
-- CHANGED: Channel Usage: switch to use of palosantoGraphImage.lib.php 
+- CHANGED: Channel Usage: switch to use of palosantoGraphImage.lib.php
   for graph generation. Requires commits 1964,1969 to work properly.
   SVN Rev[1970]
-- CHANGED: Summary by Extension: remove reference to 
+- CHANGED: Summary by Extension: remove reference to
   paloSantoGraph.class.php. SVN Rev[1968]
 
 * Fri Nov 12 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-20
 - FIXED: make module aware of url-as-array in paloSantoGrid.
      Split up URL construction into an array.
      Assign the URL array as a member of the $arrGrid structure.
-     Remove <form> tags from the filter HTML template fetch. They are 
-      not required, since the template already includes a proper <form> 
+     Remove <form> tags from the filter HTML template fetch. They are
+      not required, since the template already includes a proper <form>
       tag enclosing the grid.
-     Part of fix for Elastix bug #572. Requires commits 1901 and 1902 
+     Part of fix for Elastix bug #572. Requires commits 1901 and 1902
       in order to work properly.
   SVN Rev[1916]
-- FIXED: make module aware of url-as-array in paloSantoGrid. 
-     Delegate URL construction to class paloSantoGrid instead of calling 
+- FIXED: make module aware of url-as-array in paloSantoGrid.
+     Delegate URL construction to class paloSantoGrid instead of calling
       construirURL directly
      Assign the URL array as a member of the $arrGrid structure.
-     Remove <form> tags from the filter HTML template. They are not 
-      required, since the template already includes a proper <form> tag 
+     Remove <form> tags from the filter HTML template. They are not
+      required, since the template already includes a proper <form> tag
       enclosing the grid.
-     Part of fix for Elastix bug #572. Requires commits 1901 and 1902 
+     Part of fix for Elastix bug #572. Requires commits 1901 and 1902
       in order to work properly.
   SVN Rev[1914]
-- FIXED: make module aware of url-as-array in paloSantoGrid. This commit 
-  shows the basic transformations required on each module to escape URL 
+- FIXED: make module aware of url-as-array in paloSantoGrid. This commit
+  shows the basic transformations required on each module to escape URL
   variables:
      Split up URL construction into an array.
      Assign the URL array as a member of the $arrGrid structure.
-     Remove <form> tags around the returned value of fetchGrid method. 
-      They are not required, since the template already includes a 
+     Remove <form> tags around the returned value of fetchGrid method.
+      They are not required, since the template already includes a
       proper <form> tag enclosing the grid.
-     Part of fix for Elastix bug #572. Requires commits 1901 and 1902 
+     Part of fix for Elastix bug #572. Requires commits 1901 and 1902
       in order to work properly.
   SVN Rev[1903]
 
 * Thu Oct 28 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-19
-- FIXED:   Fixed bug by update elastix-report replace rate.db it 
+- FIXED:   Fixed bug by update elastix-report replace rate.db it
   remove all data in rate.db. Problem was installer.php. SVN Rev[1864]
 
 * Wed Oct 27 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-18
 - CHANGED: Updated the Bulgarian language elastix. SVN Rev[1857]
 
 * Mon Oct 18 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-17
-- FIXED:   variable decimalTotal undefined. This variable show time in 
+- FIXED:   variable decimalTotal undefined. This variable show time in
   seconds > 3600 in format ( h m s )[#353] SVN Rev[1845]
 - CHANGED: Updated fr.lang. SVN Rev[1825]
 - ADDED:   New lang file fa.lang (Persian) SVN Rev[1823]

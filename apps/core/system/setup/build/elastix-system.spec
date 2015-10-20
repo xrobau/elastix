@@ -139,6 +139,8 @@ fi
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: switch to jQuery Plot for Performance Graphic plot.
+  SVN Rev[7208]
 - CHANGED: Dashboard: part 2 of changes for tenant theme integration. Use icons
   and spinners from tenant (Bootstrap) theme if available.
   SVN Rev[7207]

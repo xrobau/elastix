@@ -38,25 +38,59 @@ class Applet_PerformanceGraphic
         /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
          * que otras operaciones ajax puedan funcionar. */
         session_commit();
-        
+
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
         );
         //CallsMemoryCPU
-        $respuesta['html'] = "<div class='tabFormTable' style='text-align:center;'><img alt=\"CallsMemoryCPU\" src=\"?menu=$module_name&amp;rawmode=yes&amp;applet=PerformanceGraphic&amp;action=graphic\"/></div>";
-    
+        $respuesta['html'] = "<div style='width:450px;height:240px;' id='dashboard-applet-performancegraph'></div>
+<script>" .
+$this->_sampler_CallsMemoryCPU() . "
+$.plot('#dashboard-applet-performancegraph', [
+    { data: data1, color: '#33cc33', shadowSize: 0, label: 'Calls' },
+    { data: data2, color: '#3da8fb', shadowSize: 0, label: 'CPU', yaxis: 2 },
+    { data: data3, color: '#cb4b4b', shadowSize: 0, fill: true, fillColor: '#eeeeee', label: 'RAM', yaxis: 3 }
+], {
+    xaxes: [ { mode: 'time' } ],
+    yaxes: [ { min: 0 }, {
+    // align if we are to the right
+    position: 'right'} ],
+    legend: {
+       position: 'ne',
+       labelBoxBorderColor: '#ffffff'
+     },
+    margin: { top: 20,  left: 20, bottom: 20, right: 20 },
+    xaxis: {tickLength:0},
+    series: {
+       lines: {
+          lineWidth: 1,
+          show: true ,
+          fill: true,
+          shadowSize: 0
+       }
+    },
+    grid: {
+       hoverable: true,
+       clickable: true,
+       tickColor: '#f6f6f6',
+       borderWidth: 0,
+       labelMargin: 22
+    },
+});
+</script>";
+
         $json = new Services_JSON();
         Header('Content-Type: application/json');
         return $json->encode($respuesta);
     }
-    
+
     function handleJSON_graphic($smarty, $module_name, $appletlist)
     {
         /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
          * que otras operaciones ajax puedan funcionar. */
         session_commit();
-        
+
         $result = $this->_sampler_CallsMemoryCPU();
         displayGraphResult($result);
     }
@@ -64,7 +98,6 @@ class Applet_PerformanceGraphic
     private function _sampler_CallsMemoryCPU()
     {
         $arrayResult = array();
-
         $oSampler = new paloSampler();
 
         //retorna
@@ -76,69 +109,36 @@ class Applet_PerformanceGraphic
         $arrGraph = $oSampler->getGraphById(1);
 
         $endtime = time();
-        $starttime = $endtime - 26*60*60;
+        $starttime = $endtime - 8*60*60;
         $oSampler->deleteDataBeforeThisTimestamp($starttime);
-
-        $arrayResult['ATTRIBUTES'] = array(
-            'TITLE'     =>  utf8_decode(_tr($arrGraph['name'])),
-            'TYPE'      =>  'lineplot_multiaxis',
-            'LABEL_X'   =>  'Etiqueta X',
-            'LABEL_Y'   =>  'Etiqueta Y',
-            'SHADOW'    =>  false,
-            'SIZE'      =>  "450,260",
-            'MARGIN'    =>  "50,110,30,120",
-            'COLOR'     => "#fafafa",
-            'POS_LEYEND'=> "0.35,0.85",
-        );
-
-        $arrayResult['MESSAGES'] = array(
-            'ERROR' => 'Error',
-            'NOTHING_SHOW' => _tr('Nothing to show yet')
-        );
 
         //$oSampler->getSamplesByLineId(1)
         //retorna
-        //Array ( [0] => Array ( [timestamp] => 1230562202 [value] => 2 ), ....... 
+        //Array ( [0] => Array ( [timestamp] => 1230562202 [value] => 2 ), .......
 
         $i = 1;
-        $arrData = array();
+        $arrValues = array();
+        $resultadox = '';
         foreach($arrLines as $num => $line)
         {
             $arraySample = $oSampler->getSamplesByLineId($line['id']);
 
-            $arrDat_N = array();
-
-            $arrValues = array();
-            foreach( $arraySample as $num => $time_value )
-                $arrValues[ $time_value['timestamp'] ] = (int)$time_value['value'];
-
-            $arrStyle = array();
-            $arrStyle['COLOR'] = $line['color'];
-            $arrStyle['LEYEND'] = utf8_decode(_tr($line['name']));
-            $arrStyle['STYLE_STEP'] = true;
-            $arrStyle['FILL_COLOR'] = ($i==1)?true:false;
-
-            $arrDat_N["VALUES"] = $arrValues;
-            $arrDat_N["STYLE"] = $arrStyle;
-
-            if(count($arrValues)>1)
-                $arrData["DAT_$i"] = $arrDat_N;
-            else
-                $arrData["DAT_$i"] = array();
-
+            $resultadox .= "data" . $i . " = [\n";
+            foreach( $arraySample as $num => $time_value ) {
+                $desfase = $time_value['timestamp'] % 300;
+                $resultadox .= "[" . $time_value['timestamp'] . "," . (int)$time_value['value'] . "],\n";
+            }
+            $resultadox .= "];\n\n";
             $i++;
         }
-        $arrayResult['DATA'] = $arrData;
-        $arrayResult['FORMAT_CALLBACK'] = array($this, 'functionCallback');
 
-        return $arrayResult;
+        return $resultadox;
     }
 
     function functionCallback($value)
     {
         return Date('H:i', $value);
     }
-
 }
 
 ?>

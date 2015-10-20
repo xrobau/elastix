@@ -439,7 +439,7 @@ address {
 }
 table {
   max-width: 100%;
-  background-color: transparent;
+  /* background-color: transparent; */
 }
 th {
   text-align: left;
@@ -803,9 +803,6 @@ output {
 .form-control:focus {
   border-color: #c8cdd7;
   outline: 0;
-  -moz-box-shadow:  0 2px 1px rgba(203, 208, 217, 0.08);
-  -webkit-box-shadow:  0 2px 1px rgba(203, 208, 217, 0.08);
-  box-shadow:  0 2px 1px rgba(203, 208, 217, 0.08);
 }
 .form-control::-webkit-input-placeholder {
   color: #aaaaaa;

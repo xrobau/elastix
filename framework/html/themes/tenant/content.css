@@ -116,18 +116,10 @@ div.neo-module-title-buttonstab-right {
     background:url(images/lengueta_minimizada.png) no-repeat top;
 }
 div.neo-module-content {
-    /*position:relative;*/
-    /*margin-top:35px;*/
     margin-top:3px;
-    /* padding: 10px 0px 10px 0px; */
     overflow:hidden;
-    /*
-    -moz-border-radius: 0px 10px 10px 10px;
-    -webkit-border-radius: 0px 10px 10px 10px;
-    border-radius: 0px 10px 10px 10px;
-    */
-    background-color:#f0f0f0;
-    border: 1px solid #999;
+    background-color:#fff;
+    color:#666;
 }
 div.neo-module-content *, div.neo-module-content *::before, div.neo-module-content *::after {
     box-sizing :initial;

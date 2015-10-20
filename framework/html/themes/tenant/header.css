@@ -22,6 +22,34 @@
 	height:29px;
 	overflow: hidden;
 }
+ul.neo-topbar-notification > li > a {
+    color:#fff;
+    font-size:16px;
+    background:#33cc33;
+    padding:6px 8px;
+    margin-right:2px;
+    border-radius:50%;
+    -webkit-border-radius:50%;
+    padding-right:8px !important;
+    border: 1px solid #fafafa;
+}
+.neo-topbar-notification-badge {
+    position:absolute;
+    /*right:-10px;*/
+    top:-10px;
+    z-index:100;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 11px;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    background-color: #FCB322;
+    border-radius: 10px;
+}
 #neo-toptools {
 	top:0px;
 	left:0px;

@@ -30,7 +30,6 @@
         <script type='text/javascript' src="libs/js/sticky_note/sticky_note.js"></script>
         <script type='text/javascript' src="libs/js/iframe.js"></script>
 
-
         {$HEADER}
     {$HEADER_MODULES}
 
@@ -43,15 +42,15 @@
         {$MENU} <!-- Viene del tpl menu.tlp-->
         {if !empty($mb_message)}
         <div class="div_msg_errors" id="message_error">
-                    <div style="height:24px">
-                        <div class="div_msg_errors_title" style="padding-left:5px">
-                            <b style="color:red;">&nbsp;{$mb_title}</b>
-                        </div>
-                        <div class="div_msg_errors_dismiss">
-                            <input type="button" onclick="hide_message_error();" value="{$md_message_title}"/>
-                        </div>
-                    </div>
-            <div style="padding:2px 10px 2px 10px">
+           {if !empty($mb_title)}
+           <div class="div_msg_errors_title" style="padding-left:5px">
+              <b style="color:red;">&nbsp;{$mb_title}</b>
+           </div>
+           {/if}
+           <div class="div_msg_errors_dismiss">
+               <i class="fa fa-remove" javascript="onclick='hide_message_error();'"></i>
+           </div>
+            <div style="padding:6px 30px 6px 15px">
             {$mb_message}
             </div>
         </div>
@@ -63,7 +62,7 @@
         </div>
 
         <!-- Footer -->
-        <footer class="main" style="margin-left:22px;">
+        <footer class="main" style="margin-left:16px;">
             <a href="http://www.elastix.org" style="color: #444; text-decoration: none;" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank' style="color: #444; text-decoration: none;" >GPL</a> by <a href="http://www.palosanto.com" target='_blank' style="color: #444; text-decoration: none;">PaloSanto Solutions</a>. 2006 - {$currentyear}.
         </footer>
 

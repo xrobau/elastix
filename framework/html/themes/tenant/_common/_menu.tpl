@@ -25,7 +25,7 @@ $(document).ready(function(){
           $("#subMenuExport").addClass("neo-display-none");
       }
     );
-    $("#export_button").click(
+    $("#neo-table-button-download-right").click(
       function () {
           if($(this).attr("aria-expanded") == "false"){
           var exportPosition = $('#export_button').position();
@@ -180,7 +180,7 @@ function removeNeoDisplayOnMouseOver(ref){
 <!-- fin del menú tipo acordeon-->
 
 <!-- inicio del head principal-->
-<div style="height:71px;background-color:#EB2B06;padding:15px;">
+<div style="height:72px;background-color:#efefef;padding:15px;">
 
     <!-- Profile Info and Notifications -->
     <div class="col-md-6 col-sm-8 clearfix">
@@ -217,53 +217,23 @@ function removeNeoDisplayOnMouseOver(ref){
     </div>
 
     <!-- Raw Links -->
-    <div class="col-md-6 col-sm-4 clearfix pull-none-xsm">
+    <div class="clearfix pull-none-xsm">
 
-        <ul class="list-inline links-list pull-right">
+        <ul style="padding-top:12px;" class="list-inline links-list pull-right neo-topbar-notification">
 
-            <!-- Language Selector -->
-            <li class="dropdown language-selector profile-info">
-                <a href="index.php?menu=language">
-                    Language: &nbsp;
+        <!-- notification dropdown start-->
+        <li id="header_notification_bar" class="dropdown">
+            <a data-toggle="dropdown" class="" href="#">
+                <i class="fa fa-heartbeat"></i>
+            </a>
+        </li>
+        <!-- notification dropdown end -->
+        <li id="header_notification_bar" class="dropdown">
+            <a data-toggle="dropdown" class="" href="#">
+                <i class="fa fa-bell-o"></i>
+            </a>
+        </li>
 
-                            <img  style="border:0px" src="{$WEBPATH}themes/{$THEMENAME}/images/flags/{$LANG}.png" />
-
-                </a>
-            </li>
-
-            <li class="sep"></li>
-
-            <!-- Information -->
-            <li class="dropdown language-selector profile-info">
-
-
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" data-close-others="true">
-                    <i class="entypo-info"></i> Info
-                </a>
-
-                <ul class="dropdown-menu pull-right">
-                    <li>
-                        <a href="http://www.elastix.org">
-                            <span>Elastix Website</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" id="dialogaboutelastix">
-                            <span>{$ABOUT_ELASTIX2}</span>
-                        </a>
-                    </li>
-                </ul>
-
-            </li>
-
-
-            <li class="sep"></li>
-
-            <li class="dropdown profile-info">
-                <a href="?logout=yes">
-                    Log Out <i class="entypo-logout right"></i>
-                </a>
-            </li>
         </ul>
 
     </div>

@@ -10,25 +10,20 @@ body {
     margin-bottom: 0px;
     /*background-image:url(images/bgbodytest.png);*/
     font: 13px Verdana, Arial,Helvetica,sans-serif;
-    color: #444;
+    color: #999;
 }
 input {
-    /**/
     COLOR:#333333;
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     TEXT-DECORATION: none;
     BACKGROUND: #FAFAFA;
-    /**/
-    border-top: 1px solid #999;
-        border-bottom: 1px solid #CCC;
-        border-left: 1px solid #999;
-        border-right: 1px solid #CCC;
-        
-        border-radius: 5px 5px 5px 5px;
+    border: 1px solid #ccc;    
+    border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
-        -webkit-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
     font-size:12px;
     height: 24px;
+    outline: none;
 }
 
 input[type="checkbox"] {
@@ -167,7 +162,6 @@ TD.table_data {
     cursor: default;
     font: 75% arial,sans-serif;
     margin: 0 8px 0 0;
-    outline: medium none;
     padding: 3px 8px;
     text-align: center;
     vertical-align: middle;
@@ -193,7 +187,6 @@ background-image: url(images/bgbodytest.png);*/
 .subMenu {
     position:absolute;
     cursor: default;
-    outline: medium none;  
     z-index: 1000;
     margin: -1px 3px;
     -moz-user-select: none;
@@ -884,7 +877,7 @@ td.botonoff a {
 .tabForm td {
     padding: 4px 4px 4px 4px;
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
-    color: #333333;
+    color: #666666;
 }
 .filterForm {
     /*border-color: #999;*/
@@ -909,20 +902,20 @@ td.botonoff a {
 }
 
 .button {
-    color: #444;
-    border: 1px solid;
-    border-color: #999;
-    font-size: 12px;
+    color: #fff;
+    border: 1px solid #57c8f1;
+    font-size: 13px;
     font-weight: normal;
     background-repeat: repeat-x;
     background-position: bottom;
-    background-color: #dbdbdb;
+    background-color: #57c8f1;
 /*     background-image: url(images/bgGray.gif); */
-    height: 28px;
+    height: 16px;
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
     border-radius: 5px 5px 5px 5px;
+    padding: 6px 12px 6px 12px;
 }
 .required {
     color: #ff0000;
@@ -1211,10 +1204,11 @@ img.fullwidth {
 }
 
 div.div_msg_errors{
-    background-color: #FFFFFF; 
+    background-color: #fcf8e3; 
     margin-left: 5px;
     margin-right: 5px;
-    border: 1px solid #aaa;
+    border: 1px solid #faebcc;
+    color: #8a6d3b;
     border-radius:5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
@@ -1225,6 +1219,8 @@ div.div_msg_errors_dismiss{
     float: right;
     text-align: right;
     padding: 3px;
+    right:20px;
+    position: absolute;
 }
 
 div.div_msg_errors_title{

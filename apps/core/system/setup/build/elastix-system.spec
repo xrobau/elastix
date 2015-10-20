@@ -139,6 +139,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: (trivial) tweak translations
+  SVN Rev[7204]
+
 * Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: netconfig: allow network devices not of the form ethN. Part of fix for
   Elastix bug #2376.

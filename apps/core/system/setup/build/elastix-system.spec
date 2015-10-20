@@ -6,11 +6,10 @@ Version: 2.5.0
 Release: 2
 License: GPL
 Group:   Applications/System
-#Source0: %{modname}_%{version}-2.tgz
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.5.0-6
+Prereq: elastix-framework >= 2.5.0-11
 Prereq: elastix-fax >= 2.2.0-4
 Prereq: php-soap
 Prereq: dahdi
@@ -140,6 +139,9 @@ fi
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore, Packages, Repositories: part 1 of changes for tenant
+  theme integration. This requires updated elastix-framework support.
+  SVN Rev[7206]
 - CHANGED: Backup/Restore: (trivial) tweak translations
   SVN Rev[7204]
 

@@ -126,7 +126,7 @@ function report_backup_restore($smarty, $module_name, $local_templates_dir, $dir
 
     $nombre_archivos = array_slice($total_archivos, $offset, $limit);
     //Fin Paginacion
-    
+
     // obtencion de parametros desde la base
     $pFTPBackup = new paloSantoFTPBackup($pDB);
     $_DATA = $pFTPBackup->getStatusAutomaticBackupById(1);
@@ -175,7 +175,7 @@ function report_backup_restore($smarty, $module_name, $local_templates_dir, $dir
     $smarty->assign("FTP_BACKUP", _tr('FTP Backup'));
     $oGrid->addNew("backup",_tr("Backup"));
     $oGrid->deleteList(_tr("Are you sure you wish to delete backup (s)?"),'delete_backup',_tr("Delete"));
-    $oGrid->customAction("view_form_FTP",_tr("FTP Backup"));
+    $oGrid->customAction("view_form_FTP",_tr("FTP Backup"), "cloud");
 
     $backupIntervals = array(
         'DISABLED'  =>  _tr('DISABLED'),
@@ -317,15 +317,15 @@ function restore_form($smarty, $local_templates_dir, $path_backup, $module_name)
     if (!preg_match('/^elastixbackup-\d{14}-\w{2}\.tar$/', $archivo_post)) {
         Header("Location: ?menu=$module_name");
         return NULL;
-    }    
-    
+    }
+
     $output = $retval = NULL;
     exec('tar -xOf '.escapeshellarg("$path_backup/$archivo_post").' backup/a_options.xml',
         $output, $retval);
     if ($retval == 0)
     {
         $xmlDoc = new DOMDocument();
-        $xmlDoc->loadXML(implode('', $output));        
+        $xmlDoc->loadXML(implode('', $output));
 
         //copio el archivo en memoria
         $root = $xmlDoc->documentElement;//apunto a el tag raiz
@@ -343,7 +343,7 @@ function restore_form($smarty, $local_templates_dir, $path_backup, $module_name)
     $smarty->assign("BACKUP_FILE", $archivo_post);
     $smarty->assign("title", _tr("Restore"). ": $archivo_post");
     $smarty->assign("OPTION_URL", "restore");
-    list($versionList_current, $versionList_torestore, $compare) = 
+    list($versionList_current, $versionList_torestore, $compare) =
         runPackageVersionCompare($path_backup, $smarty, $archivo_post);
 
     if (!is_null($compare) && count($compare) > 0) {
@@ -473,7 +473,7 @@ function Array_Options($disabled="")
     	$arrBackupOptions[$k1][$k2]['msg'] = '';
         $arrBackupOptions[$k1][$k2]['disable'] = "$disabled";
     }
-    
+
     return $arrBackupOptions;
 }
 
@@ -609,8 +609,8 @@ function getVersionPrograms_SYSTEM()
     foreach ($output as $s) {
         $fields = explode(' ', trim($s));
         if (count($fields) == 3 && in_array($fields[0], $packageList)) {
-        
-            // This is needed for compatibility with previous backup implementation 
+
+            // This is needed for compatibility with previous backup implementation
             $sPackageName = $fields[0];
             if ($sPackageName == 'freePBX') $sPackageName = 'freepbx';
 
@@ -622,7 +622,7 @@ function getVersionPrograms_SYSTEM()
             unset($packageList[$k]);
         }
     }
-    
+
     /* Any remaining values in $packageList are missing packages. The missing
      * package is marked with 'Package not installed' as attribute value for
      * compatibility with the previous backup implementation. */
@@ -646,7 +646,7 @@ function getVersionPrograms_XML($path_file_backup)
     if ($retval != 0) return NULL;
     $xmlDoc = new DOMDocument();
     if (!$xmlDoc->loadXML(implode('', $output))) return NULL;
-    
+
     $arrPrograms = null;
 
     //copio el archivo en memoria
@@ -662,16 +662,16 @@ function getVersionPrograms_XML($path_file_backup)
 }
 
 /**
- * Procedimiento para comparar las listas de versiones entre lo instalado 
- * actualmente y lo que se va a restarar, para avisar de posibles 
+ * Procedimiento para comparar las listas de versiones entre lo instalado
+ * actualmente y lo que se va a restarar, para avisar de posibles
  * inconsistencias.
- * 
- * @param   array   $versionList_current    Lista de paquetes instalados 
+ *
+ * @param   array   $versionList_current    Lista de paquetes instalados
  *                                          actualmente.
- * @param   array   $versionList_torestore  Lista de paquetes que estaban 
+ * @param   array   $versionList_torestore  Lista de paquetes que estaban
  *                                          instalados cuando se realizó el
  *                                          backup.
- * 
+ *
  * @return  array   Lista (posiblemente vacía) de diferencias de versiones
  */
 function comparePackageVersions($versionList_current, $versionList_torestore)
@@ -693,7 +693,7 @@ function comparePackageVersions($versionList_current, $versionList_torestore)
 function viewFormFTPBackup($smarty, $module_name, $local_templates_dir, &$pDB)
 {
     global $arrConf;
-    
+
     // Variables estáticas
     $smarty->assign(array(
         'SAVE'              =>  _tr('Save'),
@@ -706,9 +706,9 @@ function viewFormFTPBackup($smarty, $module_name, $local_templates_dir, &$pDB)
         'icon'              =>  "modules/$module_name/images/system_backup_restore.png",
         'module_name'       =>  $module_name,
     ));
-    
+
     $pFTPBackup = new paloSantoFTPBackup($pDB);
-    
+
     // Datos a mostrar en el formulario de credenciales del servidor
     $ftpcred = array(
         'server'        =>  '',
@@ -819,7 +819,7 @@ function obtainList($fileString)
 function createFieldForm()
 {
     $arrFields = array(
-        "server"   => array(      
+        "server"   => array(
             "LABEL"                  => _tr("Server FTP"),
             "REQUIRED"               => "no",
             "INPUT_TYPE"             => "TEXT",

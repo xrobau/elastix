@@ -38,7 +38,7 @@ function _moduleContent(&$smarty, $module_name)
     require_once "modules/$module_name/libs/PaloSantoPackages.class.php";
 
     load_language_module($module_name);
-    
+
     //global variables
     global $arrConf;
     global $arrConfModule;
@@ -65,7 +65,7 @@ function _moduleContent(&$smarty, $module_name)
 function listPackages($smarty, $module_name, $local_templates_dir, $arrConf)
 {
     $oPackages = new PaloSantoPackages($arrConf['ruta_yum']);
-    
+
     $submitInstalado = getParameter('submitInstalado');
     $nombre_paquete = getParameter('nombre_paquete');
 
@@ -82,11 +82,11 @@ function listPackages($smarty, $module_name, $local_templates_dir, $arrConf)
         'UninstallPackage'      =>  _tr('Uninstalling Package'),
         'msgConfirmUpdate'      =>  _tr('Are you sure want to Update this package?'),
     ));
-    
+
     $arrPaquetes = $oPackages->listarPaquetes(
         ($submitInstalado == 'all') ? 'all' : 'installed',
-        $nombre_paquete);        
-    
+        $nombre_paquete);
+
     if ($oPackages->bActualizar) {
         $smarty->assign("mb_title",_tr("Message"));
         $smarty->assign("mb_message",_tr("The repositories are not up to date. Click on the")." <b>\""._tr('Repositories Update')."\"</b> "._tr("button to list all available packages."));
@@ -114,7 +114,7 @@ function listPackages($smarty, $module_name, $local_templates_dir, $arrConf)
         	$packageActions[] = "<a href='#'  onclick="."installaPackage('$tmpPaquete',0)".">["._tr('Install')."]</a>";
         } else {
         	$packageActions[] = "<a href='#'  onclick="."confirmDelete('$tmpPaquete')".">["._tr('Uninstall')."]</a>";
-        }        
+        }
         $rowData = array(
             $paquete['name'],
             $paquete['arch'],
@@ -174,7 +174,7 @@ function listPackages($smarty, $module_name, $local_templates_dir, $arrConf)
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("Name")." = $nombre_paquete",
         $arrFilter, array("nombre_paquete" => ""));
     $oGrid->addButtonAction('update_repositorios', _tr('Repositories Update'),
-        null, 'mostrarReloj()');
+        'refresh', 'mostrarReloj()');
     $oGrid->showFilter($oFilterForm->fetchForm("$local_templates_dir/new.tpl",
         '', $arrFilter));
     return $oGrid->fetchGrid($arrGrid, $arrData);
@@ -211,7 +211,7 @@ function actualizarRepositorios($arrConf)
 {
     $oPackages = new PaloSantoPackages($arrConf['ruta_yum']);
     $resultado = $oPackages->checkUpdate();
-    
+
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status($resultado);
     return $jsonObject->createJSON();

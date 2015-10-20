@@ -4,15 +4,19 @@
         {foreach from=$applet_col_1 item=applet}
         <div class='appletwindow' id='portlet-{$applet.code}'>
             <div class='appletwindow_topbar'>
-                <div class='appletwindow_title' width='80%'><img src='modules/{$module_name}/applets/{$applet.applet}/images/{$applet.icon}' align='absmiddle' />&nbsp;{$applet.name}</div>
+                <div class='appletwindow_title' width='80%'><!-- <img src='modules/{$module_name}/applets/{$applet.applet}/images/{$applet.icon}' align='absmiddle' />&nbsp;-->{$applet.name}</div>
                 <div class='appletwindow_widgets' align='right' width='10%'>
                     <a class='appletrefresh'>
+                        {if $THEMENAME == "tenant"}
+                        <i class="fa fa-refresh" style="color:#aaa"></i>
+                        {else}
                         <img class='ima' src='modules/{$module_name}/images/reload.png' border='0' align='absmiddle' />
+                        {/if}
                     </a>
                 </div>
             </div>
             <div class='appletwindow_content' id='{$applet.code}'>
-                <div class='appletwindow_wait'><img class='ima' src='modules/{$module_name}/images/loading.gif' border='0' align='absmiddle' />&nbsp;{$LABEL_LOADING}</div>
+                <div class='appletwindow_wait'>{if $THEMENAME == "tenant"}<i style="color:#aaa;" class="fa fa-spinner fa-3x fa-pulse"></i>{else}<img class='ima' src='modules/{$module_name}/images/loading.gif' border='0' align='absmiddle' />{/if}&nbsp;{$LABEL_LOADING}</div>
                 <div class='appletwindow_fullcontent'></div>
             </div>
         </div>
@@ -22,15 +26,19 @@
         {foreach from=$applet_col_2 item=applet}
         <div class='appletwindow' id='portlet-{$applet.code}'>
             <div class='appletwindow_topbar'>
-                <div class='appletwindow_title' width='80%'><img src='modules/{$module_name}/applets/{$applet.applet}/images/{$applet.icon}' align='absmiddle' />&nbsp;{$applet.name}</div>
+                <div class='appletwindow_title' width='80%'><!-- <img src='modules/{$module_name}/applets/{$applet.applet}/images/{$applet.icon}' align='absmiddle' />&nbsp;-->{$applet.name}</div>
                 <div class='appletwindow_widgets' align='right' width='10%'>
                     <a class='appletrefresh'>
+                        {if $THEMENAME == "tenant"}
+                        <i class="fa fa-refresh" style="color:#aaa"></i>
+                        {else}
                         <img src='modules/{$module_name}/images/reload.png' border='0' align='absmiddle' />
+                        {/if}
                     </a>
                 </div>
             </div>
             <div class='appletwindow_content' id='{$applet.code}'>
-                <div class='appletwindow_wait'><img class='ima' src='modules/{$module_name}/images/loading.gif' border='0' align='absmiddle' />&nbsp;{$LABEL_LOADING}</div>
+                <div class='appletwindow_wait'>{if $THEMENAME == "tenant"}<i style="color:#aaa;" class="fa fa-spinner fa-3x fa-pulse"></i>{else}<img class='ima' src='modules/{$module_name}/images/loading.gif' border='0' align='absmiddle' />{/if}&nbsp;{$LABEL_LOADING}</div>
                 <div class='appletwindow_fullcontent'></div>
             </div>
         </div>

@@ -139,6 +139,9 @@ fi
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: part 2 of changes for tenant theme integration. Use icons
+  and spinners from tenant (Bootstrap) theme if available.
+  SVN Rev[7207]
 - CHANGED: Backup/Restore, Packages, Repositories: part 1 of changes for tenant
   theme integration. This requires updated elastix-framework support.
   SVN Rev[7206]

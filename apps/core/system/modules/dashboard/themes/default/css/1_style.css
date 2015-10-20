@@ -19,11 +19,8 @@
     border-left: 1px solid #aaa;
     border-right: 1px solid #999;
     border-bottom: 1px solid #999;
-    -moz-box-shadow: 2px 2px 1px rgb(180,180,180); 
-    -webkit-box-shadow: 2px 2px 1px rgb(180,180,180);
-    box-shadow: 2px 2px 1px rgb(180,180,180); 
-    background:url(../../../images/appletbg.png) repeat-x top #F6F6F6;
-    font-size: 13px;
+    font-size: 12px;
+    background-color:#fcfcfc;
 }
 
 .appletwindow > .appletwindow_topbar
@@ -35,15 +32,19 @@
     color:#E35332;
     height:21px;
     cursor: move;
-}
+    background-color: #eee;
+    -moz-border-radius: 10px 10px 0px 0px;
+    -webkit-border-radius: 10px 10px 0px 0px;
+    border-radius: 10px 10px 0px 0px;
+  }
+
 
 .appletwindow > .appletwindow_topbar > .appletwindow_title {
     position: absolute;
     top: 0px;
     left:0px;
     font: 13px Verdana, Arial,Helvetica,sans-serif;
-    color: #444;
-    text-shadow: 1px 1px #ccc;
+    color: #999;
     padding: 5px 4px 4px 8px;
     float:left;
 }

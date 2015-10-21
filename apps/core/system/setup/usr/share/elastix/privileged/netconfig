@@ -79,7 +79,7 @@ function validateOptions($opt)
         break;
     case '--device':
         // Only support ethernet for now
-        if (!preg_match('/^eth\d+$/', $option[1]))
+        if (!preg_match('/^[[:alnum:]]+$/', $option[1]))
             error_exit('Option '.$option[0].": Invalid network device\n");
         break;
     case '--bootproto':

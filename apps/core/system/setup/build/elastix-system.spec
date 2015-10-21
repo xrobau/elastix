@@ -139,6 +139,8 @@ fi
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: netconfig: allow network devices not of the form ethN in validation.
+  Part of fix for Elastix bug #2376.
 - CHANGED: Dashboard: switch to JustGage for System Resources applet.
   SVN Rev[7210]
 - CHANGED: Dashboard: cleanup and proper JSON encoding for Performance Graphic.

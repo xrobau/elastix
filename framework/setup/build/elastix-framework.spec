@@ -353,6 +353,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move font icons from tenant theme to libs/font-icons so
+  all themes can use them. Update paloSantoNavigation to add links to fonts
+  under font-icons.
+  SVN Rev[7216]
 - CHANGED: Framework: code cleanup in paloSantoNavigation.
   SVN Rev[7215]
 - DELETED: Framework: (trivial) remove backup css file in tenant theme.

@@ -315,6 +315,10 @@ class paloSantoNavigation extends paloSantoNavigationBase
         foreach (array('libs/js/jquery/widgetcss', 'libs/js/jquery/css/'.$jquery_ui_theme) as $csspath) {
             $HEADER_LIBS_JQUERY = array_merge($HEADER_LIBS_JQUERY, $this->_buildCSSTags($arrConf['basePath'], $csspath));
         }
+
+        // Se buscan font-icons para referenciar
+        $HEADER_LIBS_JQUERY = array_merge($HEADER_LIBS_JQUERY, $this->_buildFontTags($arrConf['basePath'], '/libs/font-icons'));
+
         $this->_smarty->assign("HEADER_LIBS_JQUERY", implode("\n", $HEADER_LIBS_JQUERY));
     }
 
@@ -337,6 +341,31 @@ class paloSantoNavigation extends paloSantoNavigationBase
         if (is_dir($dirpath)) {
             foreach ($this->obtainFiles($dirpath, "css") as $file) {
                 $tags[] = "<link rel='stylesheet' href='{$url}/{$file}' />";
+            }
+        }
+        return $tags;
+    }
+
+    private function _buildFontTags($documentRoot, $url)
+    {
+        $tags = array();
+        $dirpath = "$documentRoot/$url";
+        if (is_dir($dirpath)) {
+            foreach (scandir($dirpath) as $fontname) {
+                $fontdirurl = "$url/$fontname/css";
+                if ($fontname != '.' && $fontname != '..' && is_dir("$documentRoot/$fontdirurl")) {
+                    $fonturl = "$fontdirurl/$fontname.css";
+                    $fonturlmin = "$fontdirurl/$fontname.min.css";
+                    $furl = NULL;
+                    if (file_exists($documentRoot.'/'.$fonturlmin)) {
+                        $furl = $fonturlmin;
+                    } elseif (file_exists($documentRoot.'/'.$fonturl)) {
+                        $furl = $fonturl;
+                    }
+                    if (!is_null($furl)) {
+                        $tags[] = "<link rel='stylesheet' href='{$furl}' />";
+                    }
+                }
             }
         }
         return $tags;

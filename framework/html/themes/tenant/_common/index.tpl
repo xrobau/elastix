@@ -5,15 +5,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF8" />
         <title>Elastix</title>
 
-    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/font-icons/entypo/css/entypo.css">
-    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/font-icons/font-awesome/css/font-awesome.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/bootstrap.css">
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/neon-core.css">
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/neon-theme.css">
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/neon-forms.css">
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/custom.css">
-    
+
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css" />
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/help.css" />
     <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/header.css" />
@@ -58,7 +56,7 @@
                 {$CONTENT}
             </div>
             </div>
-            
+
         </div>
 
         <!-- Footer -->
@@ -78,7 +76,7 @@
                   </div>
                   <div id="neo-sticky-note-text-edit-delete"></div>
                 </div>
-{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *} 
+{* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *}
 {if $AUTO_POPUP eq '1'}{literal}
 <script type='text/javascript'>
 $(document).ready(function(e) {

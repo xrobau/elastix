@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: (trivial) remove backup css file in tenant theme.
+  SVN Rev[7214]
 - CHANGED: Framework: (trivial) fix background-image paths on tenant css styles.
   SVN Rev[7212]
 

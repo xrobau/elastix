@@ -1,6 +1,6 @@
 $(document).ready(function() {
 	$('.telephonyhardware_editregister').click(function () {
-		$.post('index.php', {
+		$.get('index.php', {
 			menu:	getCurrentElastixModule(),
 			rawmode: 'yes',
 			applet: 'TelephonyHardware',

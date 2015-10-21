@@ -138,6 +138,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: use $.get instead of $.post for several AJAX queries with
+  no side effects.
+  SVN Rev[7213]
+
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: netconfig: allow network devices not of the form ethN in validation.
   Part of fix for Elastix bug #2376.

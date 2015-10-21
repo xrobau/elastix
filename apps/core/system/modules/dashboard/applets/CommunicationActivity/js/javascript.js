@@ -3,8 +3,8 @@ $(document).ready(function() {
 		communicationactivity_status_timer = null;
 	if (communicationactivity_status_timer != null) clearInterval(communicationactivity_status_timer);
 	communicationactivity_status_timer = setInterval(function() {
-		$.post('index.php', {
-			menu:		getCurrentElastixModule(), 
+		$.get('index.php', {
+			menu:		getCurrentElastixModule(),
 			rawmode:	'yes',
 			applet:		'CommunicationActivity',
 			action:		'updateStatus'

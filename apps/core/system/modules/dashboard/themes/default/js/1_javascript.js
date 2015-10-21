@@ -11,7 +11,7 @@ $(document).ready(function() {
         	var appletlist_right = $('#applet_col_2 .appletwindow_content')
         		.map(function() { return this.id; })
         		.get();
-        	
+
         	/* NOTA: el siguiente código codifica el orden de presentación de
         	 * los applets pero no indica exactamente en qué columna aparecerán.
         	 * Esto es consistente con la implementación anterior. */
@@ -22,7 +22,7 @@ $(document).ready(function() {
         		if (i < appletlist_right.length)
         			appletlist.push(appletlist_right[i]);
         	}
-        	
+
         	//console.debug(appletlist);
         	$.post('index.php', {
         		menu: getCurrentElastixModule(),
@@ -48,7 +48,7 @@ function appletRefresh(appletwindow_content)
 {
 	appletwindow_content.children('.appletwindow_fullcontent').hide().empty();
 	appletwindow_content.children('.appletwindow_wait').show();
-	$.post('index.php', {
+	$.get('index.php', {
 		menu: getCurrentElastixModule(),
 		rawmode: 'yes',
 		applet: appletwindow_content.attr('id').substr(7), // para quitar 'Applet_'

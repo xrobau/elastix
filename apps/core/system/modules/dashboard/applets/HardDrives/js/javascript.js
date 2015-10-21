@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	$('#harddrives_dirspacereport_fetch').click(function() {
 		$('#harddrives_dirspacereport').html("<img class='ima' src='modules/" + getCurrentElastixModule() + "/images/loading.gif' border='0' align='absmiddle' />");
-		$.post('index.php', {
+		$.get('index.php', {
 			menu: getCurrentElastixModule(),
 			rawmode: 'yes',
 			applet: 'HardDrives',

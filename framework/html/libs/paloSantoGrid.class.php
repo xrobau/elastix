@@ -47,7 +47,7 @@ class paloSantoGrid {
     private $arrActions;
     private $arrControlFilters;
 
-    private static $_whitelist_fontclass_tenant = array(
+    private static $_whitelist_fontclass_font_awesome = array(
         "glass", "music", "search", "envelope-o", "heart", "star", "star-o",
         "user", "film", "th-large", "th", "th-list", "check", "remove", "close",
         "times", "search-plus", "search-minus", "power-off", "signal", "gear",
@@ -317,20 +317,17 @@ class paloSantoGrid {
     {
         global $arrConf;
 
+        // Mapa de iconos conocidos a clases de iconos de tenant
+        $iconmap = array(
+            "images/delete5.png" => "eraser",
+            "images/plus2.png" => "plus",
+        );
         $iconclass = NULL;
-        if ($arrConf['mainTheme'] == 'tenant') {
-            // Mapa de iconos conocidos a clases de iconos de tenant
-            $iconmap = array(
-                "images/delete5.png" => "eraser",
-                "images/plus2.png" => "plus",
-            );
-            if (isset($iconmap[$icon])) {
-                $iconclass = $iconmap[$icon];
-                $icon = NULL;
-            } elseif (in_array($icon, self::$_whitelist_fontclass_tenant)) {
-                $iconclass = $icon;
-                $icon = NULL;
-            }
+        if (isset($iconmap[$icon])) {
+            $iconclass = $iconmap[$icon];
+        } elseif (in_array($icon, self::$_whitelist_fontclass_font_awesome)) {
+            $iconclass = $icon;
+            $icon = NULL;
         }
         if (!is_null($icon) && !file_exists($icon)) {
             $icon = NULL;

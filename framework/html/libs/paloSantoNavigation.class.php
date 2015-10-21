@@ -317,7 +317,7 @@ class paloSantoNavigation extends paloSantoNavigationBase
         }
 
         // Se buscan font-icons para referenciar
-        $HEADER_LIBS_JQUERY = array_merge($HEADER_LIBS_JQUERY, $this->_buildFontTags($arrConf['basePath'], '/libs/font-icons'));
+        $HEADER_LIBS_JQUERY = array_merge($HEADER_LIBS_JQUERY, $this->_buildFontTags($arrConf['basePath'], 'libs/font-icons'));
 
         $this->_smarty->assign("HEADER_LIBS_JQUERY", implode("\n", $HEADER_LIBS_JQUERY));
     }

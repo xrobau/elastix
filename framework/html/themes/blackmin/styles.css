@@ -393,13 +393,13 @@ form.elastix-standard-formgrid>div.controls div.export-background
     color: #FFFFFF;
 }
 form.elastix-standard-formgrid>div.controls a,
-form.elastix-standard-formgrid>div.controls div.toolaction>input.neo-table-action
+form.elastix-standard-formgrid>div.controls div.toolaction>input.neo-table-action,
+form.elastix-standard-formgrid>div.controls div.toolaction>button.neo-table-action
 {
     border:0px;
     background-color:transparent;
     cursor:pointer;
     padding: 0px;
-    vertical-align: middle;
     color:#444;
     text-decoration:none;
 }

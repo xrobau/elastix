@@ -5,26 +5,23 @@
     {foreach from=$arrActions key=k item=accion name=actions}
         {if $accion.type eq 'link'}
             <a href="{$accion.task}" class="neo-table-action" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} >
-                <div class="toolcell toolaction">
-                    {if !empty($accion.icon)}
-                        <img border="0" src="{$accion.icon}" align="absmiddle"  />&nbsp;
-                    {/if}
-                    {$accion.alt}
+                <div class="toolcell toolaction" {if !empty($accion.ocolor)} style="background-color:#{$accion.ocolor};" {/if}>
+                    <button type="button" name="{$accion.task}" value="{$accion.alt}" class="neo-table-toolbar-button">
+                       {if !empty($accion.iconclass)}<i class="{$accion.iconclass}"></i> {elseif !empty($accion.icon)}<img border="0" src="{$accion.icon}" align="absmiddle"  />{/if}{$accion.alt}
+                    </button>
                 </div>
             </a>
         {elseif $accion.type eq 'button'}
-            <div class="toolcell toolaction">
-                {if !empty($accion.icon)}
-                    <img border="0" src="{$accion.icon}" align="absmiddle"  />
-                {/if}
-                <input type="button" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="neo-table-action" />
+            <div class="toolcell toolaction" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="neo-table-action" {if !empty($accion.ocolor)} style="background-color:#{$accion.ocolor};" {/if}>
+                <button type="button" name="{$accion.task}" value="{$accion.alt}">
+                    {if !empty($accion.iconclass)}<i class="{$accion.iconclass}"></i> {elseif !empty($accion.icon)}<img border="0" src="{$accion.icon}" align="absmiddle"  />{/if}{$accion.alt}
+                </button>
             </div>
         {elseif $accion.type eq 'submit'}
-            <div class="toolcell toolaction">
-                {if !empty($accion.icon)}
-                    <input type="image" src="{$accion.icon}" align="absmiddle" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="neo-table-action" />
-                {/if}
-                <input type="submit" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="neo-table-action" />
+            <div class="toolcell toolaction" {if !empty($accion.ocolor)} style="background-color:#{$accion.ocolor};" {/if}>
+                <button type="submit" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="neo-table-action">
+                   {if !empty($accion.iconclass)}<i class="{$accion.iconclass}"></i> {elseif !empty($accion.icon)}<img border="0" src="{$accion.icon}" align="absmiddle"  />{/if}{$accion.alt}
+                </button>
             </div>
         {elseif $accion.type eq 'text'}
             <div class="toolcell toolaction" style="cursor:default">
@@ -53,20 +50,20 @@
 
 {if !empty($contentFilter)}
         <div class="toolcell toolaction" id="toggle-filter">
-            {if $AS_OPTION eq 0} <img src="images/filter.png" align="absmiddle" /> {/if}
+            {if $AS_OPTION eq 0} <i class='fa fa-filter'></i> {/if}
             <label id="neo-table-label-filter" style="cursor:pointer">{if $AS_OPTION} {$MORE_OPTIONS} {else} {$FILTER_GRID_SHOW} {/if}</label>
-            <img src="images/icon_arrowdown2.png" align="absmiddle" id="neo-tabla-img-arrow" />
+            <i class="fa fa-caret-down" id="neo-tabla-img-arrow"></i>
         </div>
 {/if}
 
 {if $enableExport==true}
         <div class="toolcell toolaction exportmenu" >
-            <img src="images/download2.png" align="absmiddle" /> {$DOWNLOAD_GRID} <img src="images/icon_arrowdown2.png" align="absmiddle" />
+            <i class="fa fa-download"></i> {$DOWNLOAD_GRID} <i class="fa fa-caret-down"></i>
             <div>
                 <ul>
-                    <li><a href="{$url}&exportcsv=yes&rawmode=yes"><img src="images/csv.gif" border="0" align="absmiddle" title="CSV" />&nbsp;CSV</a></li>
-                    <li><a href="{$url}&exportspreadsheet=yes&rawmode=yes"><img src="images/spreadsheet.gif" border="0" align="absmiddle" title="SPREAD SHEET" />&nbsp;Spreadsheet</a></li>
-                    <li><a href="{$url}&exportpdf=yes&rawmode=yes"><img src="images/pdf.png" border="0" align="absmiddle" title="PDF" />&nbsp;PDF</a></li>
+                    <li><a href="{$url}&exportcsv=yes&rawmode=yes"><i style="color:#99c" class="fa fa-file-text-o"></i>&nbsp;CSV</a></li>
+                    <li><a href="{$url}&exportspreadsheet=yes&rawmode=yes"><i style="color:green;" class="fa fa-file-excel-o"></i>&nbsp;Spreadsheet</a></li>
+                    <li><a href="{$url}&exportpdf=yes&rawmode=yes"><i style="color:red;" class="fa fa-file-pdf-o"></i>&nbsp;PDF</a></li>
                 </ul>
             </div>
         </div>
@@ -75,21 +72,19 @@
         <div class="toolcell navigation">
             {if $pagingShow}
                 {if $start<=1}
-                    <img src='images/table-arrow-first.gif' alt='{$lblStart}' align='absmiddle' border='0' width="16" height="16" style="opacity: 0.3;" />
-                    <img src='images/table-arrow-previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width="16" height="16" style="opacity: 0.3;" />
+                    <i class="fa fa-step-backward" style="color:#aaa;"></i>&nbsp;<i class="fa fa-backward" style="color:#aaa"></i>
                 {else}
-                    <a href="{$url}&nav=start&start={$start}"><img src='images/table-arrow-first.gif' alt='{$lblStart}' align='absmiddle' border='0' width='16' height='16' style="cursor: pointer;" /></a>
-                    <a href="{$url}&nav=previous&start={$start}"><img src='images/table-arrow-previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='16' height='16' style="cursor: pointer;" /></a>
+                    <a href="{$url}&nav=start&start={$start}" class="fa fa-step-backward"></a>
+                    <a href="{$url}&nav=previous&start={$start}" class="fa fa-backward"></a>
                 {/if}
                 &nbsp;{$lblPage}&nbsp;
                 <input type="text"  value="{$currentPage}" size="2" align="absmiddle" name="page" id="pageup" />&nbsp;{$lblof}&nbsp;{$numPage}
                 <input type="hidden" value="bypage" name="nav" />
                 {if $end==$total}
-                    <img src='images/table-arrow-next.gif' alt='{$lblNext}' align='absmiddle' border='0' width="16" height="16" style="opacity: 0.3;" />
-                    <img src='images/table-arrow-last.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='16' height='16' style="opacity: 0.3;" />
+                    <i class="fa fa-forward" style="color:#aaa;"></i>&nbsp;<i class="fa fa-step-forward" style="color:#aaa"></i>
                 {else}
-                    <a href="{$url}&nav=next&start={$start}"><img src='images/table-arrow-next.gif' alt='{$lblNext}' align='absmiddle' border='0' width='16' height='16' style="cursor: pointer;" /></a>
-                    <a href="{$url}&nav=end&start={$start}"><img src='images/table-arrow-last.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='16' height='16' style="cursor: pointer;" /></a>
+                    <a href="{$url}&nav=next&start={$start}" class="fa fa-forward"></a>
+                    <a href="{$url}&nav=end&start={$start}" class="fa fa-step-forward"></a>
                 {/if}
             {/if}
         </div>
@@ -104,7 +99,7 @@
         {foreach from=$arrFiltersControl key=k item=filterc name=filtersctrl}
             <div>{$filterc.msg}&nbsp;
             {if $filterc.defaultFilter eq no}
-                <a href="{$url}&name_delete_filters={$filterc.filters}"><img src='images/bookmarks_equis.png' width="18" height="16" align='absmiddle' border="0" /></a>
+                <a href="{$url}&name_delete_filters={$filterc.filters}" style="color:#aaa;text-decoration:none;"><i class="fa fa-remove"></i></a>
             {/if}
             </div>
         {/foreach}
@@ -162,20 +157,18 @@
         <div class="toolcell navigation">
             {if $pagingShow}
                 {if $start<=1}
-                    <img src='images/table-arrow-first.gif' alt='{$lblStart}' align='absmiddle' border='0' width="16" height="16" style="opacity: 0.3;" />
-                    <img src='images/table-arrow-previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width="16" height="16" style="opacity: 0.3;" />
+                    <i class="fa fa-step-backward" style="color:#aaa;"></i>&nbsp;<i class="fa fa-backward" style="color:#aaa"></i>
                 {else}
-                    <a href="{$url}&nav=start&start={$start}"><img src='images/table-arrow-first.gif' alt='{$lblStart}' align='absmiddle' border='0' width='16' height='16' style="cursor: pointer" /></a>
-                    <a href="{$url}&nav=previous&start={$start}"><img src='images/table-arrow-previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='16' height='16' style="cursor: pointer" /></a>
+                    <a href="{$url}&nav=start&start={$start}" class="fa fa-step-backward"></a>
+                    <a href="{$url}&nav=previous&start={$start}" class="fa fa-backward"></a>
                 {/if}
                 &nbsp;{$lblPage}&nbsp;
-                <input  type=text  value="{$currentPage}" size="2" align="absmiddle" name="page" id="pagedown" />&nbsp;{$lblof}&nbsp;{$numPage}&nbsp;({$total}&nbsp;{$lblrecords})
+                <input  type=text  value="{$currentPage}" size="2" align="absmiddle" name="page" id="pagedown" />&nbsp;{$lblof}&nbsp;{$numPage}{*&nbsp;({$total}&nbsp;{$lblrecords})*}
                 {if $end==$total}
-                    <img src='images/table-arrow-next.gif' alt='{$lblNext}' align='absmiddle' border='0' width="16" height="16" style="opacity: 0.3;" />
-                    <img src='images/table-arrow-last.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='16' height='16' style="opacity: 0.3;" />
+                    <i class="fa fa-forward" style="color:#aaa;"></i>&nbsp;<i class="fa fa-step-forward" style="color:#aaa"></i>
                 {else}
-                    <a href="{$url}&nav=next&start={$start}"><img src='images/table-arrow-next.gif' alt='{$lblNext}' align='absmiddle' border='0' width='16' height='16' style="cursor: pointer" /></a>
-                    <a href="{$url}&nav=end&start={$start}"><img src='images/table-arrow-last.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='16' height='16' style="cursor: pointer" /></a>
+                    <a href="{$url}&nav=next&start={$start}" class="fa fa-forward"></a>
+                    <a href="{$url}&nav=end&start={$start}" class="fa fa-step-forward"></a>
                 {/if}
             {/if}
         </div>
@@ -210,12 +203,12 @@ $(document).ready(function() {
             .first().find('#filter-row');
         if (filterrow.is(':visible')) {
             filterrow.hide();
-            $(this).find("#neo-tabla-img-arrow").attr("src","images/icon_arrowdown2.png");
+            $(this).find("#neo-tabla-img-arrow").removeClass('fa-caret-up').addClass('fa-caret-down');
             $(this).find("#neo-table-label-filter").text(filter_show);
             $(this).removeClass("export-background");
         } else {
             filterrow.show();
-            $(this).find("#neo-tabla-img-arrow").attr("src","images/icon_arrowup2.png");
+            $(this).find("#neo-tabla-img-arrow").removeClass('fa-caret-down').addClass('fa-caret-up');
             $(this).find("#neo-table-label-filter").text(filter_hide);
             $(this).addClass("export-background");
         }

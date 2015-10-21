@@ -139,6 +139,9 @@ fi
 
 %changelog
 * Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: remove theme guard in templates. Now font icons are
+  available in all themes.
+  SVN Rev[7221]
 - CHANGED: Dashboard: use $.get instead of $.post for several AJAX queries with
   no side effects.
   SVN Rev[7213]

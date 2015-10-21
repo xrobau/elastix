@@ -3,11 +3,7 @@
 <div class="neo-applet-news-row">
     <span class="neo-applet-news-row-date">{$NEWS_ITEM.date_format}</span>
     <a href="https://twitter.com/share?original_referer={$WEBSITE|escape:"url"}&related=&source=tweetbutton&text={$NEWS_ITEM.title|escape:"url"}&url={$NEWS_ITEM.link|escape:"url"}&via=elastixGui"  target="_blank">
-        {if $THEMENAME == "tenant"}
         <i class="fa fa-twitter" style="color:#4099FF;"></i>
-        {else}
-        <img src="modules/{$module_name}/applets/News/images/twitter-icon.png" width="16" height="16" alt="tweet" />
-        {/if}
     </a>
     <a href="{$NEWS_ITEM.link}" target="_blank">{$NEWS_ITEM.title|escape:"html"}</a>
 </div>

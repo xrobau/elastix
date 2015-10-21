@@ -139,6 +139,8 @@ fi
 
 %changelog
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: switch to JustGage for System Resources applet.
+  SVN Rev[7210]
 - CHANGED: Dashboard: cleanup and proper JSON encoding for Performance Graphic.
   SVN Rev[7209]
 - CHANGED: Dashboard: switch to jQuery Plot for Performance Graphic plot.

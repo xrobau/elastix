@@ -33,15 +33,11 @@ class Applet_SystemResources
 {
     function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
-        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
-         * que otras operaciones ajax puedan funcionar. */
-        session_commit();
-
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
         );
-        
+
         $smarty->assign(array(
             'LABEL_CPU'         =>  _tr('CPU'),
             'LABEL_RAM'         =>  _tr('RAM'),
@@ -52,23 +48,17 @@ class Applet_SystemResources
             'LABEL_MEMORYUSE'   =>  _tr('Memory usage'),
         ));
 
-        $cpu_a = $this->obtener_muestra_actividad_cpu();
-        
-        $fastgauge = $this->_getFastGraphics();
-        
+        $status = $this->_recolectarCargaSistema($module_name);
+
         $cpuinfo = $this->getCPUInfo();
         $speed = number_format($cpuinfo['CpuMHz'], 2)." MHz";
         $cpu_info = $cpuinfo['CpuModel'];
-        
-        $meminfo = $this->getMemInfo();
 
         //MEMORY USAGE
-        $fraction_mem_used = ($meminfo['MemTotal'] - $meminfo['MemFree'] - $meminfo['Cached'] - $meminfo['MemBuffers']) / $meminfo['MemTotal'];
-        $inf2 = number_format($meminfo['MemTotal']/1024, 2)." Mb";
+        $inf2 = number_format($status['MemTotal']/1024, 2)." Mb";
 
         //SWAP USAGE
-        $fraction_swap_used = ($meminfo['SwapTotal'] - $meminfo['SwapFree']) / $meminfo['SwapTotal'];
-        $inf3 = number_format($meminfo['SwapTotal']/1024, 2)." Mb";
+        $inf3 = number_format($status['SwapTotal']/1024, 2)." Mb";
 
         //UPTIME
         $upfields = array();
@@ -77,29 +67,21 @@ class Applet_SystemResources
         $upfields[] = $up % 60; $up = ($up - $upfields[1]) / 60;
         $upfields[] = $up % 24; $up = ($up - $upfields[2]) / 24;
         $upfields[] = $up;
-        
+
         $uptime = $upfields[1].' '._tr('minute(s)');
         if ($upfields[2] > 0) $uptime = $upfields[2].' '._tr('hour(s)').' '.$uptime;
         if ($upfields[3] > 0) $uptime = $upfields[3].' '._tr('day(s)').' '.$uptime;
-        
-        usleep(200000);
-        $cpu_b = $this->obtener_muestra_actividad_cpu();
-        $fraction_cpu_used = $this->calcular_carga_cpu_intervalo($cpu_a, $cpu_b);
 
         $smarty->assign(array(
-            'fastgauge'     =>  $fastgauge,
             'cpu_info'      =>  $cpu_info,
             'uptime'        =>  $uptime,
             'speed'         =>  $speed,
             'memtotal'      =>  $inf2,
             'swaptotal'     =>  $inf3,
         ));
-        $smarty->assign($this->_formatGauges($fraction_cpu_used, $fraction_mem_used, $fraction_swap_used));
+        $smarty->assign($this->_formatGauges($status['cpugauge'], $status['memgauge'], $status['swapgauge']));
         $local_templates_dir = dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module_name/applets/SystemResources/tpl";
         $respuesta['html'] = $smarty->fetch("$local_templates_dir/system_resources.tpl");
-    
-        @session_start();
-        $_SESSION[$module_name]['cpusample'] = $cpu_b;
 
         $json = new Services_JSON();
         Header('Content-Type: application/json');
@@ -108,75 +90,72 @@ class Applet_SystemResources
 
     function handleJSON_updateStatus($smarty, $module_name, $appletlist)
     {
-        $fraction_cpu_used = 0.0;
-        $cpu_b = $this->obtener_muestra_actividad_cpu();
-        if (isset($_SESSION[$module_name]['cpusample'])) {
-            $cpu_a = $_SESSION[$module_name]['cpusample'];
-            $fraction_cpu_used = $this->calcular_carga_cpu_intervalo($cpu_a, $cpu_b);
-        }
-        $_SESSION[$module_name]['cpusample'] = $cpu_b;
-
-        /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
-         * que otras operaciones ajax puedan funcionar. */
-        session_commit();
-
-        $respuesta = array(
-            'status'    =>  'success',
-            'message'   =>  '(no message)',
-        );
-        
-        $meminfo = $this->getMemInfo();
-        $fraction_mem_used = ($meminfo['MemTotal'] - $meminfo['MemFree'] - $meminfo['Cached'] - $meminfo['MemBuffers']) / $meminfo['MemTotal'];
-        $fraction_swap_used = ($meminfo['SwapTotal'] - $meminfo['SwapFree']) / $meminfo['SwapTotal'];
-    
-        $respuesta['status'] = array(
-            'cpugauge'  =>  $fraction_cpu_used,
-            'memgauge'  =>  $fraction_mem_used,
-            'swapgauge' =>  $fraction_swap_used);
+        $respuesta['status'] = $this->_recolectarCargaSistema($module_name);
+        unset($respuesta['status']['MemTotal']);
+        unset($respuesta['status']['SwapTotal']);
         $json = new Services_JSON();
         Header('Content-Type: application/json');
         return $json->encode($respuesta);
     }
 
+    private function _recolectarCargaSistema($module_name)
+    {
+        $cpu_b = $this->obtener_muestra_actividad_cpu();
+        if (isset($_SESSION[$module_name]['cpusample'])) {
+            $cpu_a = $_SESSION[$module_name]['cpusample'];
+        } else {
+            $cpu_a = $cpu_b;
+            /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
+             * que otras operaciones ajax puedan funcionar. */
+            session_commit();
+
+            usleep(200000);
+            $cpu_b = $this->obtener_muestra_actividad_cpu();
+            @session_start();
+        }
+        $fraction_cpu_used = $this->calcular_carga_cpu_intervalo($cpu_a, $cpu_b);
+        $_SESSION[$module_name]['cpusample'] = $cpu_b;
+
+        $respuesta = array(
+            'status'    =>  'success',
+            'message'   =>  '(no message)',
+        );
+
+        $meminfo = $this->getMemInfo();
+        $fraction_mem_used = ($meminfo['MemTotal'] - $meminfo['MemFree'] - $meminfo['Cached'] - $meminfo['MemBuffers']) / $meminfo['MemTotal'];
+        $fraction_swap_used = ($meminfo['SwapTotal'] - $meminfo['SwapFree']) / $meminfo['SwapTotal'];
+
+        return array(
+            'cpugauge'  =>  $fraction_cpu_used,
+            'memgauge'  =>  $fraction_mem_used,
+            'swapgauge' =>  $fraction_swap_used,
+            'MemTotal'  =>  $meminfo['MemTotal'],
+            'SwapTotal' =>  $meminfo['SwapTotal'],
+        );
+    }
+
     private function _formatGauges($fraction_cpu_used, $fraction_mem_used, $fraction_swap_used)
     {
-    	return array(
+        return array(
             'cpugauge'      =>  array(
                 'height_used'   =>  (int)(100.0 * $fraction_cpu_used),
                 'height_free'   =>  100 - (int)(100.0 * $fraction_cpu_used),
                 'fraction'      =>  $fraction_cpu_used,
-                'color'         =>  $this->_elegirColorPorcentaje($fraction_cpu_used),
                 'percent'       =>  number_format($fraction_cpu_used * 100.0, 1),
             ),
             'memgauge'      =>  array(
                 'height_used'   =>  (int)(100.0 * $fraction_mem_used),
                 'height_free'   =>  100 - (int)(100.0 * $fraction_mem_used),
                 'fraction'      =>  $fraction_mem_used,
-                'color'         =>  $this->_elegirColorPorcentaje($fraction_mem_used),
                 'percent'       =>  number_format(100.0 * $fraction_mem_used, 1),
             ),
             'swapgauge'      =>  array(
                 'height_used'   =>  (int)(100.0 * $fraction_swap_used),
                 'height_free'   =>  100 - (int)(100.0 * $fraction_swap_used),
                 'fraction'      =>  $fraction_swap_used,
-                'color'         =>  $this->_elegirColorPorcentaje($fraction_swap_used),
                 'percent'       =>  number_format(100.0 * $fraction_swap_used, 1),
             ),
         );
-    }
-
-    private function _elegirColorPorcentaje($percent)
-    {
-        if ($percent > 1) $percent = 1.0;
-        if ($percent < 0.25)
-            $rgb = array(0, $percent * 4, 1.0);
-        elseif ($percent < 0.5)
-            $rgb = array(0, 1.0, (1.0 - ($percent - 0.25) * 4));
-        elseif ($percent < 0.75)
-            $rgb = array(($percent - 0.5) * 4, 1.0, 0);
-        else
-            $rgb = array(1.0, (1.0 - ($percent - 0.75) * 4), 0);
-        return sprintf('#%02x%02x%02x', (int)($rgb[0] * 255), (int)($rgb[1] * 255), (int)($rgb[2] * 255));
     }
 
     private function getMemInfo()
@@ -220,7 +199,7 @@ class Applet_SystemResources
         }
         return $arrInfo;
     }
-    
+
     private function getUptime()
     {
         $btime = NULL;
@@ -255,7 +234,7 @@ class Applet_SystemResources
     }
 
     /* Método para poder realizar la resta de dos cantidades enteras que pueden
-     * no caber en un entero de PHP, pero cuya diferencia es pequeña y puede 
+     * no caber en un entero de PHP, pero cuya diferencia es pequeña y puede
      * caber en el mismo entero. */
     private function _info_sistema_diff_stat($a, $b)
     {
@@ -276,9 +255,9 @@ class Applet_SystemResources
     {
         $value = $_REQUEST['percent'];
         if (!is_numeric($value)) return;
-        
+
         $size = '140,140';
-        
+
         $result = array();
         $result['ATTRIBUTES'] = array('TYPE'=>'gauge','SIZE'=>$size);  // bar => gauge
         $result['MESSAGES'] = array('ERROR'=>'Error','NOTHING_SHOW'=>'Nada que mostrar');
@@ -288,20 +267,6 @@ class Applet_SystemResources
         $result['DATA'] = $temp;
 
         displayGraphResult($result);
-    }
-
-    private function _getFastGraphics()
-    {
-        global $arrConf;
-
-        $uelastix = FALSE;
-        $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
-        if (empty($pDB->errMsg)) {
-            $uelastix = get_key_settings($pDB, 'uelastix');
-            $uelastix = ((int)$uelastix != 0);
-        }
-        unset($pDB);
-        return $uelastix;
     }
 }
 

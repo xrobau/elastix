@@ -2,46 +2,19 @@
 <script type='text/javascript' src='modules/{$module_name}/applets/SystemResources/js/javascript.js'></script>
 <div style='height:165px; position:relative; text-align:center;'>
     <div style='width:155px; float:left; position: relative;' id='cpugauge'>
-	    {if $fastgauge}
-	    <div style="width: 140px; height: 140px;">
-	        <div style="position: relative; left: 33%; width: 33%; background: #ffffff;  height: 100%; border: 1px solid #000000;">
-	            <div style="position: relative; background: {$cpugauge.color}; top: {$cpugauge.height_free}%; height: {$cpugauge.height_used}%">&nbsp;</div>
-	        </div>
-	    </div>
-	    {else}
-	    <img alt="rbgauge" src="" />
-	    {* ?menu={$module_name}&amp;rawmode=yes&amp;applet=SystemResources&amp;action=graphic&amp;percent={$cpugauge.fraction} *}   
-	    {/if}
-        <div class="neo-applet-sys-gauge-percent">{$cpugauge.percent}%</div><div>{$LABEL_CPU}</div>
+        <div id="dashboard-applet-cpugauge" style="width:140px; height:140px"></div>
         <input type="hidden" name="cpugauge_value" id="cpugauge_value" value="{$cpugauge.fraction}" />
+        <input type="hidden" name="cpugauge_label" id="cpugauge_label" value="{$LABEL_CPU|escape:html}" />
     </div>
     <div style='width:154px; float:left; position: relative;' id='memgauge'>
-        {if $fastgauge}
-        <div style="width: 140px; height: 140px;">
-            <div style="position: relative; left: 33%; width: 33%; background: #ffffff;  height: 100%; border: 1px solid #000000;">
-                <div style="position: relative; background: {$memgauge.color}; top: {$memgauge.height_free}%; height: {$memgauge.height_used}%">&nbsp;</div>
-            </div>
-        </div>
-        {else}
-        <img alt="rbgauge" src="" />
-        {* ?menu={$module_name}&amp;rawmode=yes&amp;applet=SystemResources&amp;action=graphic&amp;percent={$memgauge.fraction} *}   
-        {/if}
-        <div class="neo-applet-sys-gauge-percent">{$memgauge.percent}%</div><div>{$LABEL_RAM}</div>
+        <div id="dashboard-applet-memgauge" style="width:140px; height:140px"></div>
         <input type="hidden" name="memgauge_value" id="memgauge_value" value="{$memgauge.fraction}" />
+        <input type="hidden" name="memgauge_label" id="memgauge_label" value="{$LABEL_RAM|escape:html}" />
     </div>
     <div style='width:155px; float:right; position: relative;' id='swapgauge'>
-        {if $fastgauge}
-        <div style="width: 140px; height: 140px;">
-            <div style="position: relative; left: 33%; width: 33%; background: #ffffff;  height: 100%; border: 1px solid #000000;">
-                <div style="position: relative; background: {$swapgauge.color}; top: {$swapgauge.height_free}%; height: {$swapgauge.height_used}%">&nbsp;</div>
-            </div>
-        </div>
-        {else}
-        <img alt="rbgauge" src="" />
-        {* ?menu={$module_name}&amp;rawmode=yes&amp;applet=SystemResources&amp;action=graphic&amp;percent={$swapgauge.fraction} *}   
-        {/if}
-        <div class="neo-applet-sys-gauge-percent">{$swapgauge.percent}%</div><div>{$LABEL_SWAP}</div>
+        <div id="dashboard-applet-swapgauge" style="width:140px; height:140px"></div>
         <input type="hidden" name="swapgauge_value" id="swapgauge_value" value="{$swapgauge.fraction}" />
+        <input type="hidden" name="swapgauge_label" id="swapgauge_label" value="{$LABEL_SWAP|escape:html}" />
     </div>
 </div>
 <div class='neo-divisor'></div>

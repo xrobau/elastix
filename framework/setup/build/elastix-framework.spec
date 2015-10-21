@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: (trivial) fix background-image paths on tenant css styles.
+  SVN Rev[7212]
+
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: (trivial) tweak button class in blackmin theme to make it
   more similar to an input button.

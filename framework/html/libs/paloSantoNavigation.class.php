@@ -283,37 +283,14 @@ class paloSantoNavigation extends paloSantoNavigationBase
     {
         global $arrConf;
 
-        // get the header with scripts and links(css)
-        $documentRoot = $arrConf['basePath'];
+        // FIXME: The theme default shouldn't be static.
+        $localtheme = 'default';
 
-        //STEP 1: include file of module
-        $directory = "$documentRoot/modules/".$menuLibs;
-        $HEADER_MODULES = array();
-        if(is_dir($directory)){
-            // FIXED: The theme default shouldn't be static.
-            $directoryScrips = "$documentRoot/modules/$menuLibs/themes/default/js/";
-            $directoryCss = "$documentRoot/modules/$menuLibs/themes/default/css/";
-            if(is_dir($directoryScrips)){
-                $arr_js = $this->obtainFiles($directoryScrips,"js");
-                if($arr_js!=false && count($arr_js)>0){
-                    for($i=0; $i<count($arr_js); $i++){
-                        $dir_script = "modules/$menuLibs/themes/default/js/".$arr_js[$i];
-                        $HEADER_MODULES[] = "<script type='text/javascript' src='$dir_script'></script>";
-                    }
-                }
-            }
-            if(is_dir($directoryCss)){
-                $arr_css = $this->obtainFiles($directoryCss,"css");
-                if($arr_css!=false && count($arr_css)>0){
-                    for($i=0; $i<count($arr_css); $i++){
-                        $dir_css = "modules/$menuLibs/themes/default/css/".$arr_css[$i];
-                        $HEADER_MODULES[] = "<link rel='stylesheet' href='$dir_css' />";
-                    }
-                }
-            }
-            //$HEADER_MODULES
-        }
-        $this->_smarty->assign("HEADER_MODULES", implode("\n", $HEADER_MODULES));
+        //$HEADER_MODULES
+        $this->_smarty->assign("HEADER_MODULES", implode("\n", array_merge(
+            $this->_buildScriptTags($arrConf['basePath'], "modules/$menuLibs/themes/$localtheme/js"),
+            $this->_buildCSSTags($arrConf['basePath'], "modules/$menuLibs/themes/$localtheme/css")
+        )));
     }
 
     function putHEAD_JQUERY_HTML()
@@ -333,40 +310,36 @@ class paloSantoNavigation extends paloSantoNavigationBase
         case 'default':     $jquery_ui_theme = 'blitzer'; break;
         case 'slashdot':    $jquery_ui_theme = 'start'; break;
         }
-        $jquery_ui_path = 'libs/js/jquery/css/'.$jquery_ui_theme;
 
-        $documentRoot = $arrConf['basePath'];
-        // include file of framework
-        $HEADER_LIBS_JQUERY = array();
-        $JQqueryDirectory = "$documentRoot/libs/js/jquery";
-        // it to load libs JQuery
-        if(is_dir($JQqueryDirectory)){
-            $directoryScrips = "$documentRoot/libs/js/jquery/";
-            if(is_dir($directoryScrips)){
-                $arr_js = $this->obtainFiles($directoryScrips,"js");
-                if($arr_js!=false && count($arr_js)>0){
-                    for($i=0; $i<count($arr_js); $i++){
-                        $dir_script = "libs/js/jquery/".$arr_js[$i];
-                        $HEADER_LIBS_JQUERY[] = "<script type='text/javascript' src='$dir_script'></script>";
-                    }
-                }
-            }
-
-            // FIXED: The css ui-lightness shouldn't be static.
-            foreach (array('libs/js/jquery/widgetcss', $jquery_ui_path) as $csspath) {
-                $directoryCss = "$documentRoot/$csspath/";
-                if(is_dir($directoryCss)){
-                    $arr_css = $this->obtainFiles($directoryCss,"css");
-                    if($arr_css!=false && count($arr_css)>0){
-                        for($i=0; $i<count($arr_css); $i++){
-                            $dir_css = $csspath.'/'.$arr_css[$i];
-                            $HEADER_LIBS_JQUERY[] = "<link rel='stylesheet' href='$dir_css' />";
-                        }
-                    }
-                }
-            }
+        $HEADER_LIBS_JQUERY = $this->_buildScriptTags($arrConf['basePath'], "libs/js/jquery");
+        foreach (array('libs/js/jquery/widgetcss', 'libs/js/jquery/css/'.$jquery_ui_theme) as $csspath) {
+            $HEADER_LIBS_JQUERY = array_merge($HEADER_LIBS_JQUERY, $this->_buildCSSTags($arrConf['basePath'], $csspath));
         }
         $this->_smarty->assign("HEADER_LIBS_JQUERY", implode("\n", $HEADER_LIBS_JQUERY));
+    }
+
+    private function _buildScriptTags($documentRoot, $url)
+    {
+        $tags = array();
+        $dirpath = "$documentRoot/$url";
+        if (is_dir($dirpath)) {
+            foreach ($this->obtainFiles($dirpath, "js") as $file) {
+                $tags[] = "<script type='text/javascript' src='{$url}/{$file}'></script>";
+            }
+        }
+        return $tags;
+    }
+
+    private function _buildCSSTags($documentRoot, $url)
+    {
+        $tags = array();
+        $dirpath = "$documentRoot/$url";
+        if (is_dir($dirpath)) {
+            foreach ($this->obtainFiles($dirpath, "css") as $file) {
+                $tags[] = "<link rel='stylesheet' href='{$url}/{$file}' />";
+            }
+        }
+        return $tags;
     }
 
     /**
@@ -383,13 +356,11 @@ class paloSantoNavigation extends paloSantoNavigationBase
     * e-mail:
     *   ecueva@palosanto.com
     */
-    private function obtainFiles($dir,$type){
-        $files =  glob($dir."/{*.$type}",GLOB_BRACE);
-        $names ="";
-        foreach ($files as $ima)
-            $names[]=array_pop(explode("/",$ima));
-        if(!$names) return false;
-        return $names;
+    private function obtainFiles($dir, $type)
+    {
+        $files = glob("{$dir}/*.{$type}");
+        if (!is_array($files)) return array();
+        return array_map('basename', $files);
     }
 }
 ?>

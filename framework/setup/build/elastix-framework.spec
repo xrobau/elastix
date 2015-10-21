@@ -353,6 +353,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: whitelist entypo font icons. If a control specifies a
+  font icon, it is checked against the font-awesome whitelist, followed by the
+  entypo whitelist.
+  SVN Rev[7220]
 - CHANGED: Framework: remove theme guard in paloSantoGrid, allowing the font
   icon to be used on any theme that knows about it.
   SVN Rev[7219]

@@ -5,7 +5,7 @@ function _moduleContent(&$smarty, $module_name)
 {
     //include module files
     require_once "modules/$module_name/configs/default.conf.php";
-    
+
 	load_language_module($module_name);
 
     //global variables
@@ -32,7 +32,7 @@ function _moduleContent(&$smarty, $module_name)
     if (!empty($txtCommand)) {
     	$output = $retval = NULL;
         exec("/usr/sbin/asterisk -rnx ".escapeshellarg($txtCommand), $output, $retval);
-        $result = '<pre>'.implode("\n", array_map('htmlspecialchars', $output)).'</pre>';
+        $result = implode("\n", array_map('htmlspecialchars', $output));
     }
     if ($result == "") $result = "&nbsp;";
     $smarty->assign("RESPUESTA_SHELL", $result);

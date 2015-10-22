@@ -277,6 +277,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Oct 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Asterisk CLI: fix incorrect nested table, force monospace for output.
+  SVN Rev[7224]
+
 * Sat Sep 26 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: ensure plus sign in recording filename is encoded
   correctly. Fixes Elastix bug #2295.

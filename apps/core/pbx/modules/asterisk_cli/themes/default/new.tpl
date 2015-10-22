@@ -8,23 +8,25 @@ Comentario:  He agregado variables para que se muestre la misma vista de la 160
 
 <table width="99%" border="0" cellspacing="0" cellpadding="0" align="center">
 
-<table>
 		<tr>
-			<td class="label" align="right">{$command}</td>
-			<td class="type"><input name="txtCommand" type="text" size="70" value="{$txtCommand}"></td>
+			<td align="right">{$command}: </td>
+			<td><input name="txtCommand" type="text" size="70" value="{$txtCommand}"></td>
 		</tr>
-		
+
 		<tr>
-			<td valign="top">   </td>
-			<td valign="top" class="label">
+			<td>&nbsp;</td>
+			<td>
 				<input type="submit" class="button" value="{$execute}">
 			</td>
 		</tr>
-		
+
 		<tr>
-			<td height="8"></td>
-			<td><hr>{$RESPUESTA_SHELL}</td>
+			<td height="8">&nbsp;</td>
+			<td><hr>
+<pre style="font-family: monospace;">
+{$RESPUESTA_SHELL}
+</pre>
+			</td>
 		</tr>
-</table>
 </table>
 </form>

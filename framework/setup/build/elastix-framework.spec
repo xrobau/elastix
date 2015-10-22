@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Oct 22 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: tweak button style in blackmin theme.
+  SVN Rev[7227]
 - FIXED: Framework: fix table grid rounded borders on tenant theme on Firefox.
   Migrate table grid style on tenant to use elastix-standard-table class.
   SVN Rev[7225]

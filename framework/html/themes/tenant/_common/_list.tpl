@@ -130,7 +130,7 @@
         </div>
     {/if}
 
-    <div class="neo-table-ref-table">
+    {*<div class="neo-table-ref-table">*}
         <table align="center" cellspacing="0" cellpadding="0" width="100%" id="neo-table1" >
             <tr class="neo-table-title-row" id="neo-table-title-row-top">
                 {section name=columnNum loop=$numColumns start=0 step=1}
@@ -182,7 +182,7 @@
                 </tr>
             {/if}
         </table>
-    </div>
+    {*</div>*}
 
     {if $numData > 3 and $numPage > 1}
         <div class="neo-table-footer-row">

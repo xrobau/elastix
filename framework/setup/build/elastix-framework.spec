@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: tweak list table to prevent incorrect positioning.
+  SVN Rev[7223]
 - CHANGED: Framework: use font icons in blackmin theme.
   SVN Rev[7222]
 - CHANGED: Framework: whitelist entypo font icons. If a control specifies a

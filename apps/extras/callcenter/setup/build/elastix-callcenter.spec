@@ -100,6 +100,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Oct 22 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: External URL: specify an icon for module.
+  SVN Rev[7226]
+
 * Thu Oct  8 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: add columns and enumerations for form pause functionality.
   SVN Rev[7178]

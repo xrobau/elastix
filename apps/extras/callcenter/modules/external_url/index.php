@@ -37,9 +37,9 @@ require_once "modules/agent_console/libs/elastix2.lib.php";
 function _moduleContent(&$smarty, $module_name)
 {
     require_once "modules/$module_name/libs/externalUrl.class.php";
-    
+
     load_language_module($module_name);
-    
+
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
 
@@ -90,7 +90,7 @@ function listURL($pDB, $smarty, $module_name, $local_templates_dir)
 	$urls = new externalUrl($pDB);
     $grid = new paloSantoGrid($smarty);
     $dtypes = descOpenType();
-    
+
     // para el pagineo
     $url = array('menu' => $module_name);
     $grid->setURL($url);
@@ -112,6 +112,7 @@ function listURL($pDB, $smarty, $module_name, $local_templates_dir)
     $grid->setTitle(_tr('External URLs'));
     $grid->setColumns(array(_tr('Active'), _tr('Opens in'), _tr('URL Template'), _tr('Description'), _tr('Options')));
     $grid->setData($data);
+    $grid->setIcon('images/application_link.png');
     return $grid->fetchGrid();
 }
 
@@ -143,6 +144,7 @@ function formEditURL($pDB, $smarty, $module_name, $local_templates_dir, $id_url)
         return '';
     }
     $smarty->assign('FRAMEWORK_TIENE_TITULO_MODULO', existeSoporteTituloFramework());
+    $smarty->assign("icon", "images/application_link.png");
 
     $urls = new externalUrl($pDB);
     $tuplaURL = NULL;
@@ -196,16 +198,16 @@ function formEditURL($pDB, $smarty, $module_name, $local_templates_dir, $id_url)
         $oForm->setEditMode();
         $smarty->assign('id_url', $id_url);
     }
-	
+
     if (!is_null($tuplaURL)) {
-    	if (!isset($_POST['description'])) $_POST['description'] = $tuplaURL['description']; 
-        if (!isset($_POST['urltemplate'])) $_POST['urltemplate'] = $tuplaURL['urltemplate']; 
-        if (!isset($_POST['opentype'])) $_POST['opentype'] = $tuplaURL['opentype']; 
-        if (!isset($_POST['active'])) $_POST['active'] = $tuplaURL['active'] ? 'on' : 'off'; 
+    	if (!isset($_POST['description'])) $_POST['description'] = $tuplaURL['description'];
+        if (!isset($_POST['urltemplate'])) $_POST['urltemplate'] = $tuplaURL['urltemplate'];
+        if (!isset($_POST['opentype'])) $_POST['opentype'] = $tuplaURL['opentype'];
+        if (!isset($_POST['active'])) $_POST['active'] = $tuplaURL['active'] ? 'on' : 'off';
     } else {
     	if (!isset($_POST['active'])) $_POST['active'] = 'on';
     }
-    
+
     // En esta implementación el formulario trabaja exclusivamente en modo 'input'
     // y por lo tanto proporciona el botón 'save'
     $bDoCreate = isset($_POST['save']);
@@ -235,8 +237,8 @@ function formEditURL($pDB, $smarty, $module_name, $local_templates_dir, $id_url)
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", $urls->errMsg);
             }
-        } 
-    	
+        }
+
     }
 
     $smarty->assign(array(
@@ -245,7 +247,7 @@ function formEditURL($pDB, $smarty, $module_name, $local_templates_dir, $id_url)
         'APPLY_CHANGES' =>  _tr('Apply Changes'),
     ));
     return $oForm->fetchForm(
-        "$local_templates_dir/new.tpl", 
+        "$local_templates_dir/new.tpl",
         is_null($id_url) ? _tr("New URL") : _tr("Edit URL"),
         $_POST);
 }

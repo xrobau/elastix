@@ -221,6 +221,35 @@ function removeNeoDisplayOnMouseOver(ref){
 
         <ul style="padding-top:12px;" class="list-inline links-list pull-right neo-topbar-notification">
 
+        <li id="header_notification_bar" class="dropdown">
+            <a {*data-toggle="dropdown"*} class="" id="togglestickynote1" href="#">
+                <i class="fa fa-sticky-note"></i>
+            </a>
+        </li>
+
+        <li id="header_notification_bar" class="profile-info dropdown">
+            <a data-toggle="dropdown" class="" href="#">
+                <i class="fa fa-info"></i>
+            </a>
+            <ul class="dropdown-menu">
+
+                <!-- Reverse Caret -->
+                <li class="caret"></li>
+
+                <!-- Profile sub-links -->
+                <li><a href="#" class="register_link">{$Registered}</a></li>
+                <li><a href="#" id="viewDetailsRPMs"><i class="fa fa-cube"></i>{$VersionDetails}</a></li>
+                <li><a href="http://www.elastix.org" target="_blank"><i class="fa fa-external-link"></i>Elastix Website</a></li>
+                <li><a href="#" id="dialogaboutelastix"><i class="fa fa-info-circle"></i>{$ABOUT_ELASTIX2}</a></li>
+            </ul>
+        </li>
+
+        <li id="header_notification_bar" class="dropdown">
+            <a {*data-toggle="dropdown"*} class="" href="#" onclick="popUp('help/?id_nodo={if !empty($idSubMenu2Selected)}{$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}{else}{$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}{/if}','1000','460')">
+                <i class="fa fa-question"></i>
+            </a>
+        </li>
+
         <!-- notification dropdown start-->
         <li id="header_notification_bar" class="dropdown">
             <a data-toggle="dropdown" class="" href="#">
@@ -234,6 +263,17 @@ function removeNeoDisplayOnMouseOver(ref){
             </a>
         </li>
 
+        <li id="header_notification_bar" class="dropdown">
+            <a {*data-toggle="dropdown"*} class="" href="index.php?menu=addons">
+                <i class="fa fa-cubes"></i>
+            </a>
+        </li>
+
+        <li id="header_notification_bar" class="dropdown">
+            <a {*data-toggle="dropdown"*} href="index.php?logout=yes" style="background-color: red">
+                <i class="fa fa-sign-out"></i>
+            </a>
+        </li>
         </ul>
 
     </div>

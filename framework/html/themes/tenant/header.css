@@ -22,7 +22,8 @@
 	height:29px;
 	overflow: hidden;
 }
-ul.neo-topbar-notification > li > a {
+ul.neo-topbar-notification > li > a,
+ul.neo-topbar-notification > li.profile-info > a {
     color:#fff;
     font-size:16px;
     background:#33cc33;
@@ -306,7 +307,7 @@ div.neo-tabhon {
 	text-align:center;
 	text-shadow: 1px 1px #333;
 	background-image:url(images/tabhonbg.png);
-	background-repeat:repeat-x; 
+	background-repeat:repeat-x;
 }
 div.neo-tabhon a {
 	font: 12px Verdana, Arial,Helvetica,sans-serif;
@@ -329,7 +330,7 @@ div.neo-tabhon a {
 	height: 34px;
 	background-color:#454545;
 	background-image:url(images/men2bg.png);
-	overflow: hidden; 
+	overflow: hidden;
 }
 #neo-smenubox-innerdiv {
 	position:absolute;

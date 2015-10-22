@@ -352,6 +352,11 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Thu Oct 22 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix table grid rounded borders on tenant theme on Firefox.
+  Migrate table grid style on tenant to use elastix-standard-table class.
+  SVN Rev[7225]
+
 * Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: tweak list table to prevent incorrect positioning.
   SVN Rev[7223]

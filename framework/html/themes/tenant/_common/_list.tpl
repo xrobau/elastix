@@ -1,4 +1,4 @@
-<form id="idformgrid" method="POST" style="margin-bottom:0;" action="{$url}">
+<form class="elastix-standard-formgrid" id="idformgrid" method="POST" style="margin-bottom:0;" action="{$url}">
     <div class="neo-table-header-row">
         {foreach from=$arrActions key=k item=accion name=actions}
             {if $accion.type eq 'link'}
@@ -131,55 +131,53 @@
     {/if}
 
     {*<div class="neo-table-ref-table">*}
-        <table align="center" cellspacing="0" cellpadding="0" width="100%" id="neo-table1" >
-            <tr class="neo-table-title-row" id="neo-table-title-row-top">
+        <table class="elastix-standard-table" align="center" width="100%" >
+        <thead>
+            <tr>
                 {section name=columnNum loop=$numColumns start=0 step=1}
-                    {if $smarty.section.columnNum.first}
-                        <td class="neo-table-title-row" style="background:none;">{$header[$smarty.section.columnNum.index].name}&nbsp;</td>
-                    {else}
-                        <td class="neo-table-title-row">{$header[$smarty.section.columnNum.index].name}&nbsp;</td>
-                    {/if}
+                <th>{$header[$smarty.section.columnNum.index].name}&nbsp;</th>
                 {/section}
             </tr>
+        </thead>
+        <tbody>
             {if $numData > 0}
                 {foreach from=$arrData key=k item=data name=filas}
                 {if $data.ctrl eq 'separator_line'}
-                    <tr class="neo-table-data-row">
+                    <tr>
                         {if $data.start > 0}
-                            <td class="neo-table-data-row" colspan="{$data.start}"></td>
+                            <td colspan="{$data.start}"></td>
                         {/if}
                         {assign var="data_start" value="`$data.start`"}
-                        <td class="neo-table-data-row" colspan="{$numColumns-$data.start}" style='background-color:#AAAAAA;height:1px;'></td>
+                        <td colspan="{$numColumns-$data.start}" style='background-color:#AAAAAA;height:1px;'></td>
                     </tr>
                 {else}
-                    <tr class="neo-table-data-row">
+                    <tr>
                         {if $smarty.foreach.filas.last}
                             {section name=columnNum loop=$numColumns start=0 step=1}
-                                <td class="neo-table-data-row table_data_last_row">{if $data[$smarty.section.columnNum.index] eq ''}&nbsp;{/if}{$data[$smarty.section.columnNum.index]}</td>
+                                <td class="table_data_last_row">{if $data[$smarty.section.columnNum.index] eq ''}&nbsp;{/if}{$data[$smarty.section.columnNum.index]}</td>
                             {/section}
                         {else}
                             {section name=columnNum loop=$numColumns start=0 step=1}
-                                <td class="neo-table-data-row table_data">{if $data[$smarty.section.columnNum.index] eq ''}&nbsp;{/if}{$data[$smarty.section.columnNum.index]}</td>
+                                <td class="table_data">{if $data[$smarty.section.columnNum.index] eq ''}&nbsp;{/if}{$data[$smarty.section.columnNum.index]}</td>
                             {/section}
                         {/if}
                     </tr>
                 {/if}
                 {/foreach}
             {else}
-                <tr class="neo-table-data-row">
-                    <td class="neo-table-data-row table_data" colspan="{$numColumns}" align="center">{$NO_DATA_FOUND}</td>
+                <tr>
+                    <td class="table_data" colspan="{$numColumns}" align="center">{$NO_DATA_FOUND}</td>
                 </tr>
             {/if}
+        </tbody>
             {if $numData > 3}
-                <tr class="neo-table-title-row" id="neo-table-title-row-bottom">
+        <tfoot>
+                <tr>
                     {section name=columnNum loop=$numColumns start=0 step=1}
-                        {if $smarty.section.columnNum.first}
-                            <td class="neo-table-title-row" style="background:none;">{$header[$smarty.section.columnNum.index].name}&nbsp;</td>
-                        {else}
-                            <td class="neo-table-title-row">{$header[$smarty.section.columnNum.index].name}&nbsp;</td>
-                        {/if}
+                    <th>{$header[$smarty.section.columnNum.index].name}&nbsp;</th>
                     {/section}
                 </tr>
+        </tfoot>
             {/if}
         </table>
     {*</div>*}
@@ -195,7 +193,7 @@
                     <a href="{$url}&nav=previous&start={$start}" class="fa fa-backward neo-navigation-arrow-active" alt='{$lblPrevious}'></a>
                 {/if}
                 &nbsp;{$lblPage}&nbsp;
-                <input type="text"  value="{$currentPage}" size="2" align="absmiddle" name="page" id="pageup" />&nbsp;{$lblof}&nbsp;{$numPage}
+                <input type="text"  value="{$currentPage}" size="2" align="absmiddle" name="page" id="pagedown" />&nbsp;{$lblof}&nbsp;{$numPage}
                 <input type="hidden" value="bypage" name="nav" />
                 {if $end==$total}
                     <i class="fa fa-forward" style="color:#ccc;"></i>&nbsp;<i class="fa fa-step-forward" style="color:#ccc"></i>
@@ -211,18 +209,8 @@
 
 {literal}
 <script type="text/Javascript">
-    $(function(){
-        $("#neo-table1").colResizable({
-            liveDrag:true,
-            marginLeft:"1px",
-            onDrag: onDrag
-        });
-    });
-
-    var onDrag = function(){
-
-    }
-
+$(document).ready(function() {
+    // Sincronizar los dos cuadros de texto de navegación al escribir
     $("[id^=page]").keyup(function(event) {
         var id  = $(this).attr("id");
         var val = $(this).val();
@@ -243,7 +231,7 @@
         var filter_hide = "{$FILTER_GRID_HIDE}";
     {/if}
 {literal}
-        var webCommon = /*getWebCommon()*/ '';
+
         if($("#neo-table-header-filterrow").data("neo-table-header-filterrow-status")=="visible") {
             $("#neo-table-header-filterrow").addClass("neo-display-none");
             $("#neo-table-label-filter").text(filter_show);
@@ -259,11 +247,10 @@
         }
     });
 
-    $(document).ready(function() {
-        $('#neo-table-title-row-top td:first-child').css('border-radius', '6px 0px 0px 0px');
-        $('#neo-table-title-row-top td:last-child').css('border-radius', '0px 6px 0px 0px');
-        $('#neo-table-title-row-bottom td:first-child').css('border-radius', '0px 0px 0px 6px');
-        $('#neo-table-title-row-bottom td:last-child').css('border-radius', '0px 0px 6px 0px');
+    $('form.elastix-standard-formgrid>table.elastix-standard-table').colResizable({
+        liveDrag:true,
+        marginLeft:"1px"
     });
+});
 </script>
 {/literal}

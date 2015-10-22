@@ -65,7 +65,7 @@ button {
     cursor: pointer;
 }
 
-.neo-table-header-row-filter:hover, 
+.neo-table-header-row-filter:hover,
 .neo-table-header-row-filter:hover input[type=submit],
 .neo-table-header-row-filter:hover input[type=button]{
     /* background: -moz-linear-gradient(center top , #777777, #999999);
@@ -88,7 +88,7 @@ button {
 
 .neo-navigation-arrow-active {
     color: #666;
-    text-decoration: none; 
+    text-decoration: none;
 }
 
 #neo-table-header-filterrow {
@@ -101,7 +101,7 @@ button {
     -moz-border-radius: 5px;
     -webkit-border-radius: 5px;
     opacity: 0.94;
-    filter: alpha(opacity=94); 
+    filter: alpha(opacity=94);
 }
 
 #neo-table-header-filterrow input[type=text] {
@@ -111,32 +111,85 @@ button {
     border-radius: 5px 5px 5px 5px;
 }
 
-tr.neo-table-title-row {
+/* Tablas */
+table.elastix-standard-table
+{
+    margin: 0px;
+    border-collapse: collapse;
+}
+table.elastix-standard-table>thead>tr,
+table.elastix-standard-table>tfoot>tr
+{
     font-size: 12px;
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     color: #eee;
     text-align: left;
-    background-color: #5d626d;
+/*    background-color: #5d626d;*/
     height: 32px;
 }
 
-td.neo-table-title-row {
+table.elastix-standard-table>thead>tr>td,
+table.elastix-standard-table>tfoot>tr>td
+{
     text-indent: 8px;
     padding: 4px 4px 4px 4px;
+    background-color: #5d626d;
 }
-
-th.neo-table-title-row {
+table.elastix-standard-table>thead>tr>th,
+table.elastix-standard-table>tfoot>tr>th
+{
+/*
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
     FONT-WEIGHT: bold;
     BACKGROUND: #FAFAFA;
     COLOR: #335588;
+*/
+    text-indent: 8px;
+    padding: 4px 4px 4px 4px;
+    color: #eee;
+    background-color: #5d626d;
+}
+table.elastix-standard-table>thead>tr>th:first-child
+{
+    border-radius: 6px 0px 0px 0px;
+}
+table.elastix-standard-table>thead>tr>th:last-child
+{
+    border-radius: 0px 6px 0px 0px;
+}
+table.elastix-standard-table>tfoot>tr>th:first-child
+{
+    border-radius: 0px 0px 0px 6px;
+}
+table.elastix-standard-table>tfoot>tr>th:last-child
+{
+    border-radius: 0px 0px 6px 0px;
 }
 
-tr.neo-table-data-row {
+table.elastix-standard-table>thead>tr>th a.link_summary_off,
+table.elastix-standard-table>tfoot>tr>th a.link_summary_off
+{
+text-decoration: none;
+color:#FFFFFF;
+}
+
+table.elastix-standard-table>thead>tr>th a.link_summary_on,
+table.elastix-standard-table>tfoot>tr>th a.link_summary_on
+{
+text-decoration: none;
+color:#F5DEB3;
+font-weight:bold;
+}
+
+table.elastix-standard-table>tbody>tr {
     /* border-bottom: 1px #bbb dashed; */
     background-color:#fcfcfc;
 }
-td.neo-table-data-row {
+table.elastix-standard-table>tbody>tr:hover {
+    background-color:#e0e0e0;
+}
+
+table.elastix-standard-table>tbody>tr>td {
     font-family: verdana, arial, helvetica, sans-serif;
     color:#555;
     font-size: 11px;
@@ -144,10 +197,6 @@ td.neo-table-data-row {
     border-bottom: 1px #ddd solid;
     padding: 8px;
     background-color:#fcfcfc;
-}
-
-tr.neo-table-data-row:hover {
-    background-color:#e0e0e0;
 }
 
 .neo-table-action{
@@ -159,17 +208,6 @@ tr.neo-table-data-row:hover {
     font: 13px Verdana, Arial,Helvetica,sans-serif;
     color:#444;
     text-decoration:none;
-}
-
-td.neo-table-title-row a.link_summary_off{
-text-decoration: none;
-color:#FFFFFF;
-}
-
-td.neo-table-title-row a.link_summary_on{
-text-decoration: none;
-color:#F5DEB3;
-font-weight:bold;
 }
 
 div.neo-table-filter-controls{

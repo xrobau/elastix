@@ -13,7 +13,7 @@ Requires: lcdproc >= 1:0.5.6-1
 
 %description
 
-This is a daemon and a set of utilities that implement the Elastix status 
+This is a daemon and a set of utilities that implement the Elastix status
 output in the LCD display of Elastix appliances. This daemon should not be
 running on a device without a LCD display, unless you know what you are doing.
 
@@ -36,7 +36,7 @@ rm -rf %{buildroot}
 %pre
 
 %post
-# Add LCDd service, but do not enable it. Prevents program from unnecessarily 
+# Add LCDd service, but do not enable it. Prevents program from unnecessarily
 # running on a system without a LCD display
 /sbin/chkconfig --add lcdelastix
 /sbin/chkconfig lcdelastix off
@@ -55,6 +55,10 @@ fi
 /opt/lcdelastix/*
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: lcdelastix: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7240]
+
 * Wed Aug 28 2013 Alex Villacis Lasso <a_villacis@palosanto.com> 1.4.1-0
 - Bump version for release.
 - CHANGED: Add and require support for setting logo in jbc1602 case.
@@ -72,14 +76,14 @@ fi
   SVN Rev[5425]
 - FIXED: Correct owner of /opt/lcdelastix. Fixes Elastix bug #1639.
 - CHANGED: Rewrite main application to make proper use of LCDProc menus. Rework
-  applets to be capable of having a compact version which will be used with 
-  displays of less than 3 lines. Fix the CPU usage code to calculate the CPU 
+  applets to be capable of having a compact version which will be used with
+  displays of less than 3 lines. Fix the CPU usage code to calculate the CPU
   usage correctly.
   SVN Rev[5422]
 
 * Wed Mar 14 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 1.3.0-1
 - FIXED: additionals - lcdelastix/lcdapplets/ch.php: Se muestra mensaje de error
-  en el shell cuando se accede a PBX Activity>Concurr Channels con el LCD del 
+  en el shell cuando se accede a PBX Activity>Concurr Channels con el LCD del
   appliance. Bug 0001098. SVN Rev[3528]
 
 * Tue Mar 13 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 1.3.0-0

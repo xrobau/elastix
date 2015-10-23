@@ -102,6 +102,7 @@ fi
 %changelog
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: CallCenter: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7247]
   SVN Rev[7246]
 
 * Thu Oct 22 2015 Alex Villacis Lasso <a_villacis@palosanto.com>

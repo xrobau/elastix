@@ -180,10 +180,10 @@ function removeNeoDisplayOnMouseOver(ref){
 <!-- fin del menú tipo acordeon-->
 
 <!-- inicio del head principal-->
-<div style="height:72px;background-color:#efefef;padding:15px;">
+<div class="row" style="height:72px;background-color:#efefef;padding:15px;">
 
     <!-- Profile Info and Notifications -->
-    <div class="col-md-6 col-sm-8 clearfix">
+    <div class="col-md-6 col-sm-4 col-xs-4 clearfix">
 
         <ul class="user-info pull-left pull-none-xsm">
 
@@ -217,7 +217,7 @@ function removeNeoDisplayOnMouseOver(ref){
     </div>
 
     <!-- Raw Links -->
-    <div class="clearfix pull-none-xsm">
+    <div class="col-md-6 col-sm-8 col-sm-12 clearfix pull-none-xsm">
 
         <ul style="padding-top:12px;" class="list-inline links-list pull-right neo-topbar-notification">
 

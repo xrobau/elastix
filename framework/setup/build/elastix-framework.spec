@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Oct 22 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: use Bootstrap grid system properly on tenant theme, fixes
+  overlapping link bar on low resolution screens.
+  SVN Rev[7229]
 - CHANGED: Framework: add several tool links for tenant theme.
   SVN Rev[7228]
 - FIXED: tweak button style in blackmin theme.

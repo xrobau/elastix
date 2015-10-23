@@ -1010,6 +1010,7 @@ TD.menudescription2 {
     COLOR: #FFFFFF;
     BACKGROUND: #00579b;
     background-image: url(images/banner.png);
+    padding: 4px;
 }
 a.submenu_on{
     font-family: verdana, arial, helvetica, sans-serif;

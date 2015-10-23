@@ -35,7 +35,7 @@
                 <div class="div_td2_style"><b id="emailReg" class="b-style"></b></div>
             </div>
                <div id="msnTextErr" align="center" style="height:58px;"></div>
-            <div class="cloud-footernote"><a href="http://www.elastix.org" style="text-decoration: none;" target='_blank'>Elastix</a> {$ELASTIX_LICENSED} <a href="http://www.opensource.org/licenses/gpl-license.php" style="text-decoration: none;" target='_blank'>GPL</a> {$BY} <a href="http://www.palosanto.com" style="text-decoration: none;" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.</div>
+            <div class="cloud-footernote"><a href="http://www.elastix.com" style="text-decoration: none;" target='_blank'>Elastix</a> {$ELASTIX_LICENSED} <a href="http://www.opensource.org/licenses/gpl-license.php" style="text-decoration: none;" target='_blank'>GPL</a> {$BY} <a href="http://www.palosanto.com" style="text-decoration: none;" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.</div>
             <br>
         </div>
     </div>

@@ -18,7 +18,7 @@
 <div id="elx-blackmin-topnav-toolbar">
     <ul class="elx-blackmin-topnav">
         <li class="elx-blackmin-menu">
-<img align="absmiddle" src="themes/{$THEMENAME}/images/elastix_logo_mini.png" height="36" alt="elastix" longdesc="http://www.elastix.org" />
+<img align="absmiddle" src="themes/{$THEMENAME}/images/elastix_logo_mini.png" height="36" alt="elastix" longdesc="http://www.elastix.com" />
 {$MENU}
         </li>
         <li id="elx-blackmin-module-title">
@@ -46,7 +46,7 @@
                 <ul>
                     <li><a href="#" class="register_link">{$Registered}</a></li>
                     <li><a href="#" id="viewDetailsRPMs">{$VersionDetails}</a></li>
-                    <li><a href="http://www.elastix.org" target="_blank">Elastix Website</a></li>
+                    <li><a href="http://www.elastix.com" target="_blank">Elastix Website</a></li>
                     <li><a href="#" id="dialogaboutelastix">{$ABOUT_ELASTIX2}</a></li>
                 </ul>
             </div>
@@ -109,7 +109,7 @@
 
 {* Pie de página con copyright de Elastix *}
 <div id="elx-blackmin-footerbox">
-    <a href="http://www.elastix.org" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.
+    <a href="http://www.elastix.com" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.
 </div>
 
 {* Popup de Sticky Note *}

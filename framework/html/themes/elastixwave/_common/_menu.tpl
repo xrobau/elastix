@@ -5,7 +5,7 @@
                     <table cellspacing="0" cellpadding="0" border="0" height="65px">
                         <tr>
                             <td class="menulogo"  valign="top">
-                                <a href='http://www.elastix.org' target='_blank'>
+                                <a href='http://www.elastix.com' target='_blank'>
                                     <img alt="" src="themes/{$THEMENAME}/images/logo_elastix.gif" border='0' />
                                 </a>
                             </td>

@@ -2,7 +2,7 @@
     <tr class="tabForm" >
         <td class="tabForm" align='center'>
             {$ABOUT_ELASTIX_CONTENT}<br />
-            <a href='http://www.elastix.org' target='_blank'>www.elastix.org</a>
+            <a href='http://www.elastix.com' target='_blank'>www.elastix.com</a>
         </td>
     </tr>
 </table>

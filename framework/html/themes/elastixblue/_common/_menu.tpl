@@ -4,7 +4,7 @@
       <td>
         <table cellSpacing="0" cellPadding="0" width="100%" border="0" height="76">
           <tr>
-            <td class="menulogo" width=380><a href='http://www.elastix.org' target='_blank'><img src="images/logo_elastix_new3.gif" border='0' /></a></td>
+            <td class="menulogo" width=380><a href='http://www.elastix.com' target='_blank'><img src="images/logo_elastix_new3.gif" border='0' /></a></td>
             {foreach from=$arrMainMenu key=idMenu item=menu name=menuMain}
               {if $idMenu eq $idMainMenuSelected}
                 {assign var=found value=1}

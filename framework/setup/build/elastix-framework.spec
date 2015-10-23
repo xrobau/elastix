@@ -352,6 +352,10 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7231]
+
 * Thu Oct 22 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: use Bootstrap grid system properly on tenant theme, fixes
   overlapping link bar on low resolution screens.

@@ -36,7 +36,7 @@ $title         = isset($content['title'])?$content['title']:"";
   <table cellspacing="0" cellpadding="0" width="<?php echo $size; ?>" border="0" class="menulogo2" height="74">
     <tr>
        <td class="menulogo" valign="top">
-           <a target="_blank" href="http://www.elastix.org">
+           <a target="_blank" href="http://www.elastix.com">
                <img border="0" src="<?php echo $image; ?>"/>
            </a>
        </td>
@@ -46,7 +46,7 @@ $title         = isset($content['title'])?$content['title']:"";
     <?php echo $msg; ?>
   <div/>
   <br /><br />
-  <div align="center" class="copyright"><a href="http://www.elastix.org" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - <?php echo $currentYear; ?>.</div>
+  <div align="center" class="copyright"><a href="http://www.elastix.com" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - <?php echo $currentYear; ?>.</div>
   <br />
 </body>
 </html>

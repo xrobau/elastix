@@ -33,7 +33,7 @@
              
             <div id="msnTextErr" align="center"></div>
             
-            <div class="cloud-footernote"><a href="http://www.elastix.org" style="text-decoration: none;" target='_blank'>Elastix</a> {$ELASTIX_LICENSED} <a href="http://www.opensource.org/licenses/gpl-license.php" style="text-decoration: none;" target='_blank'>GPL</a> {$BY} <a href="http://www.palosanto.com" style="text-decoration: none;" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.</div>
+            <div class="cloud-footernote"><a href="http://www.elastix.com" style="text-decoration: none;" target='_blank'>Elastix</a> {$ELASTIX_LICENSED} <a href="http://www.opensource.org/licenses/gpl-license.php" style="text-decoration: none;" target='_blank'>GPL</a> {$BY} <a href="http://www.palosanto.com" style="text-decoration: none;" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.</div>
              
         </div>
     </div>

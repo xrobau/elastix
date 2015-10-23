@@ -155,6 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7236]
+
 * Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-4
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

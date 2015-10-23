@@ -93,6 +93,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: reports: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7243]
+
 * Tue Oct 20 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: CDR Report: (trivial) sync with tenant rework.
   SVN Rev[7201]

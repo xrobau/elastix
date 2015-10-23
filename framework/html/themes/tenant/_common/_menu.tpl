@@ -180,7 +180,7 @@ function removeNeoDisplayOnMouseOver(ref){
 <!-- fin del menú tipo acordeon-->
 
 <!-- inicio del head principal-->
-<div class="row" style="height:72px;background-color:#efefef;padding:15px;">
+<div style="height:72px;background-color:#efefef;padding:15px;">
 
     <!-- Profile Info and Notifications -->
     <div class="col-md-6 col-sm-4 col-xs-4 clearfix">

@@ -127,6 +127,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: security: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7244]
+
 * Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

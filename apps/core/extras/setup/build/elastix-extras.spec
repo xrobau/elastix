@@ -1,6 +1,6 @@
 %define modname extras
 
-Summary: Elastix Extras 
+Summary: Elastix Extras
 Name:    elastix-%{modname}
 Version: 2.5.0
 Release: 1
@@ -13,7 +13,7 @@ BuildArch: noarch
 Prereq: elastix-framework >= 2.2.0-18
 
 %description
-Elastix EXTRA 
+Elastix EXTRA
 
 %prep
 %setup -n %{modname}
@@ -60,8 +60,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: extras: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7237]
+
 * Tue Nov 11 2014 Luis Abarca <labarca@palosanto.com> 2.5.0-1
-- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
   SVN history. Bumped version and release in specfile.
 
 * Mon May 26 2014 Bruno Macias <bmacias@palosanto.com> 2.4.0-5
@@ -69,10 +73,10 @@ fi
   Addons.
 
 * Wed Apr 09 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-4
-- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
   SVN history. Bumped release in specfile.
 
-* Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com> 
+* Mon Apr 07 2014 Luis Abarca <labarca@palosanto.com>
 - REMOVED: extras - elastix-extras.spec: Due to SVN commit 5723, the static
   folder is not part of this module anymore, making unnecessary the creation
   and its corresponding directory change in the spec file. Uncommenting the
@@ -88,7 +92,7 @@ fi
   SVN Rev[6448]
 
 * Tue Jan 14 2014 Luis Abarca <labarca@palosanto.com> 2.4.0-3
-- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
   SVN history. Bumped release in specfile.
   SVN Rev[6379]
 
@@ -101,47 +105,47 @@ fi
   SVN Rev[5811]
 
 * Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-2
-- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
   SVN history. Bumped release in specfile.
   SVN Rev[5786]
 
-* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com>
 - REMOVED: Module Downloads, Help files with wrong names were deleted
   SVN Rev[5729]
 
-* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: The names of the Downloads module's help files were changed.
   SVN Rev[5725]
 
-* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com>
 - ADDED: extras modules, Static pages on Donwloads menu, were added as modules.
   SVN Rev[5723]
 
-* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com>
 - ADDED: extras modules, Static pages on Donwloads menu, were added as modules.
   SVN Rev[5722]
 
-* Mon Aug 12 2013 Jose Briones <jbriones@palosanto.com> 
+* Mon Aug 12 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the description.
   SVN Rev[5719]
 
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
-- CHANGED: extras - Build/elastix-extras.spec: Changed Version and Release in 
+- CHANGED: extras - Build/elastix-extras.spec: Changed Version and Release in
   specfile according to the current branch.
 
 * Wed Oct 17 2012 Luis Abarca <labarca@palosanto.com> 2.3.0-1
-- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest 
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
   SVN history. Changed release in specfile.
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Framework,Modules: remove temporary file preversion_MODULE.info under 
+- Framework,Modules: remove temporary file preversion_MODULE.info under
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
-  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on
   RPM update. Part of the fix for Elastix bug #1398.
 - Framework,Modules: switch as many files and directories as possible under
-  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
   Elastix bug #1399.
-- Framework,Modules: clean up specfiles by removing directories under 
+- Framework,Modules: clean up specfiles by removing directories under
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
   SVN Rev[4347]
@@ -151,8 +155,8 @@ fi
   elastix-framework >= 2.2.0-18
 
 * Mon Jun 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
-- CHANGED: The split function of these modules was replaced by 
-  the explode function due to that the split function was 
+- CHANGED: The split function of these modules was replaced by
+  the explode function due to that the split function was
   deprecated since PHP 5.3.0. SVN Rev[2650]
 - FIXED: a2b menus in extras/menu.xml, deleted It is not usefull.
   SVN Rev[2499]
@@ -162,9 +166,9 @@ fi
   SVN Rev[2499]
 
 * Tue Mar 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-2
-- CHANGED: the information showed ih those static files had 
+- CHANGED: the information showed ih those static files had
   some changes according to the bug #779. SVN Rev[2406]
-- CHANGED:  menu.xml: all modules; new attribute "desc" into 
+- CHANGED:  menu.xml: all modules; new attribute "desc" into
   tag "group" for add a description of group. SVN Rev[2299]
 - CHANGED:  menu.xml in all modules was changed to support new
   tag "permissions" where it has all permissions of group per

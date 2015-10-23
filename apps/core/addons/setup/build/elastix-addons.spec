@@ -131,6 +131,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Addons: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7232]
+
 * Wed Oct 14 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Addons: route through registration module instead of register.php.
   This requires new framework support.

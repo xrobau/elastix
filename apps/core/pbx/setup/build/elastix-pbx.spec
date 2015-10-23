@@ -277,6 +277,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: pbx: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7242]
+
 * Wed Oct 21 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk CLI: fix incorrect nested table, force monospace for output.
   SVN Rev[7224]

@@ -549,10 +549,16 @@ class Llamada
             $this->channel = $channel;
         }
 
-        if ($uniqueid == '<null>') $uniqueid = NULL;
         if ($sStatus == 'Success') $sStatus = 'Ringing';
-        if ($this->status == 'Placing' || $sStatus == 'Failure')
+        if (is_null($this->status) || $this->status == 'Placing' || $sStatus == 'Failure')
             $this->status = $sStatus;
+        if (!in_array($this->status, array('Placing', 'Ringing', 'Dialing', 'Failure'))) {
+            $this->_log->output("WARN: ".__METHOD__." llamada recibe OriginateResponse con status=".
+                    $this->status." inesperado, se asume Ringing");
+            $this->status = 'Ringing';
+        }
+
+        if ($uniqueid == '<null>') $uniqueid = NULL;
         if (is_null($this->uniqueid) && !is_null($uniqueid))
             $this->uniqueid = $uniqueid;
 

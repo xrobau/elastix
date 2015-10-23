@@ -101,6 +101,9 @@ fi
 
 %changelog
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: ensure call status is non-NULL after handling OriginateResponse
+  to prevent database failures when recording call progress.
+  SVN Rev[7248]
 - CHANGED: CallCenter: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7247]
   SVN Rev[7246]

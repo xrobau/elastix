@@ -199,6 +199,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Email_admin: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7235]
+
 * Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

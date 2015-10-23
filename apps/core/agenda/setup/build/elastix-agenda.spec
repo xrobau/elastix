@@ -96,6 +96,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agenda: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7233]
+
 * Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - Added: Calendar: add Russian translation by user Russian.
   SVN Rev[7195]

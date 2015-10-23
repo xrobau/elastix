@@ -5,7 +5,7 @@
   Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 2.0                                                  |
-  | http://www.elastix.org                                               |
+  | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
@@ -377,6 +377,7 @@ $BACKUP_PLAN = array(
                     'type'          =>  'dir',
                     'parentdir'     =>  '/var/www/html/',
                     'pathlist'      =>  array(
+                    	// TODO: panel/ se ha movido a admin/modules/fw_fop/
                         'panel/*.cfg',
                         'panel/*.txt',
                     ),

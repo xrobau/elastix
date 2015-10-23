@@ -138,6 +138,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: system: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7245]
+
 * Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: remove theme guard in templates. Now font icons are
   available in all themes.

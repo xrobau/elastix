@@ -3,7 +3,7 @@
   Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 0.5                                                  |
-  | http://www.elastix.org                                               |
+  | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
@@ -25,7 +25,7 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp 
+  $Id: index.php,v 1.1 2007/01/09 23:49:36 alex Exp
   $Id: index.php,v 1.2 2015/02/04 16:27:54 achuto,dpanchana Exp $
 */
 if (file_exists('/usr/share/php/php-simplepie/autoloader.php'))
@@ -39,9 +39,9 @@ class Applet_News
     {
         /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
          * que otras operaciones ajax puedan funcionar. */
-	    $infoRSS = new SimplePie();	
+	    $infoRSS = new SimplePie();
         session_commit();
-        
+
         $respuesta = array(
             'status'    =>  'success',
             'message'   =>  '(no message)',
@@ -65,25 +65,25 @@ class Applet_News
             $respuesta['message'] = _tr('Could not get web server information. You may not have internet access or the web server is down');
         } else {
             $news = array();
-		    
+
             // Formato de fecha y hora
             foreach ($infoRSS->get_items() as $item) {
                 $news[] = array(
                     'title'       =>  $item->get_title(),
                     'link'        =>  $item->get_link(),
                     'date_format' =>  date('Y.m.d', $item->get_date('U')),
-                ); 
+                );
             }
-            
+
             $smarty->assign(array(
-                'WEBSITE'   =>  'http://www.elastix.org',
+                'WEBSITE'   =>  'http://www.elastix.com',
                 'NO_NEWS'   =>  _tr('No News to display'),
                 'NEWS_LIST' =>  array_slice($news, 0, 7),
             ));
             $local_templates_dir = dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module_name/applets/News/tpl";
             $respuesta['html'] = $smarty->fetch("$local_templates_dir/rssfeed.tpl");
         }
-    
+
         $json = new Services_JSON();
         Header('Content-Type: application/json');
         return $json->encode($respuesta);

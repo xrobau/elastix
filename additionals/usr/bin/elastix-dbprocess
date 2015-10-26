@@ -30,7 +30,7 @@
 
 /*
 This script takes two argument, the first is the action (install,update,delete)
-and the second argument is the database folder path where are files sqls. 
+and the second argument is the database folder path where are files sqls.
 This script install, update and delete database.
 */
 
@@ -89,7 +89,7 @@ if (count($argv) < 3 || !in_array($argv[1], $arrActions)) {
     return 1;
 }
 
-$documentRoot="/var/www/html";
+if (!($documentRoot = getenv('ELASTIX_ROOT'))) $documentRoot="/var/www/html";
 require_once("$documentRoot/libs/misc.lib.php");
 require_once("$documentRoot/configs/default.conf.php");
 load_default_timezone();
@@ -99,7 +99,7 @@ global $arrConf;
 require_once("$arrConf[basePath]/libs/paloSantoConfig.class.php");
 
 $action      = $_SERVER['argv'][1];
-$path_folder = $_SERVER['argv'][2]; 
+$path_folder = $_SERVER['argv'][2];
 $version     = isset($_SERVER['argv'][3])?$_SERVER['argv'][3]:false;
 $sql_export  = isset($_SERVER['argv'][4])?$_SERVER['argv'][4]:false;
 $data        = getDatabaseData($path_folder);
@@ -331,13 +331,13 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
         unlink($fullpath);
         return TRUE;
     }
-    
+
     // Check for stopped mysql
     if ($data['engine'] == 'mysql' && !ismysqlRunning()) {
         fputs(STDERR, "WARN: mysqld not running.\n");
         return FALSE;
     }
-    
+
     // Build and execute command
     $datafile = NULL;
     switch ($data['engine']) {
@@ -364,7 +364,7 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
         fputs(STDERR, "ERR: status $status from command: $command.\n");
         return FALSE;
     }
-    
+
     unlink($fullpath);
     if ($data["engine"] == "sqlite3") {
         if (!chown($datafile, "asterisk")) {
@@ -374,7 +374,7 @@ function executeSQL($data, $path_folder, $sql_export, $dbName, $action, $passwor
         if (!chgrp($datafile, "asterisk")) {
             fputs(STDERR, "ERR: failed to change group on $datafile to asterisk.\n");
             return FALSE;
-        } 
+        }
     }
     //echo "The action $action was successfull for database $dbName\n";
     return TRUE;
@@ -438,7 +438,7 @@ function compareRpmVersion($a, $b)
 {
     if (!function_exists('compareRpmVersion_string')) {
         function compareRpmVersion_string($v1, $v2)
-        { 
+        {
              $v1 = preg_split("/[^a-zA-Z0-9]+/", $v1);
              $v2 = preg_split("/[^a-zA-Z0-9]+/", $v2);
              while (count($v1) > 0 && count($v2) > 0) {
@@ -480,7 +480,7 @@ function imprimirArreglo($value, $dbname, $version_actual,$path_folder)
 {
    $update="";
    //si $value['before'] es mayor a $version_actual entra en la condicion
-   //pero tambien $version_actual debe ser menor que $value['current']. 
+   //pero tambien $version_actual debe ser menor que $value['current'].
    if(compareRpmVersion(explode("-",$value['current']),$version_actual) === 1){
        $update= file_get_contents("$path_folder/update/$dbname/version_sql/$value[namefile]");
        $update=$update."\n\n";
@@ -517,7 +517,7 @@ function getSQLUpdateString($version_actual,$path_folder,$action,$dbname)
                         $arrversion=array("id"=>$id,"before"=>$before,"current"=>$current,"namefile"=>$file);
                         $cadenareturn .= imprimirArreglo($arrversion, $dbname, $version_actual,$path_folder);
                     }
-                } 
+                }
             }
         }
         return $cadenareturn;

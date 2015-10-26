@@ -37,7 +37,7 @@ installation. The corresponding folders in /var/www/html/modules/MENU must exist
 if ($argc < 2) die("Please specify path to menu.xml for module to be installed.\n");
 if (!is_readable($argv[1])) die("FATAL: unable to read $argv[1] \n");
 
-$documentRoot="/var/www/html";
+if (!($documentRoot = getenv('ELASTIX_ROOT'))) $documentRoot="/var/www/html";
 require_once("$documentRoot/libs/misc.lib.php");
 require_once("$documentRoot/configs/default.conf.php");
 

@@ -353,6 +353,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: allow ELASTIX_ROOT to specify location of base Elastix
+  for command-line tools.
+  SVN Rev[7254]
 - DELETED: elastix-menutranslate: apparently not used anywhere.
   SVN Rev[7253]
 - CHANGED: elastix-menumerge, elastix-menuremove: use elastix_dsn instead of

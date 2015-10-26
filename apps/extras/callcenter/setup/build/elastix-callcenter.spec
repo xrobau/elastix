@@ -9,6 +9,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
+# TODO: usar getCurrentElastixModule() desde elastix-framework-2.4.0-3
 Prereq: elastix-framework >= 2.4.0-1
 Requires: asterisk
 Requires: freePBX
@@ -100,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fix External URL tab handling with older jQueryUI.
+  SVN Rev[7257]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: ensure call status is non-NULL after handling OriginateResponse
   to prevent database failures when recording call progress.

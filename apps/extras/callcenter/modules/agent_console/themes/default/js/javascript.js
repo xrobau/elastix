@@ -29,6 +29,8 @@ var timer = null;
 var evtSource = null;
 
 // Copia del URL a cargar al agregar la nueva cejilla
+var jqueryui_tabs_use_refresh = true;
+var externalurl = null;
 var externalurl_title = null;
 
 $(document).ready(function() {
@@ -54,7 +56,32 @@ $(document).ready(function() {
     $('#transfer_type_radio').buttonset();
     $('#btn_guardar_formularios').button();
     $('#schedule_date').hide();
-    $('#elastix-callcenter-cejillas-contenido').tabs();
+    $('#elastix-callcenter-cejillas-contenido').tabs({
+        // Este evento sólo se dispara para jQueryUI < 1.9.0
+        add:    function (event, ui) {
+            if (externalurl != null)
+                $(ui.panel).append("<iframe scrolling=\"auto\" height=\"450\" frameborder=\"0\" width=\"100%\" src=\"" + externalurl + "\" />");
+            externalurl = null;
+        }
+    });
+
+    // Verificar versión de jQueryUI para manejo de tabs
+    var curr_uiversion = $.ui.version.split('.').map(function(x) { return parseInt(x); });
+    var min_uiversion = [1,9,0];
+    while (curr_uiversion.length > min_uiversion.length) min_uiversion.push(0);
+    while (curr_uiversion.length < min_uiversion.length) curr_uiversion.push(0);
+    while (curr_uiversion.length > 0) {
+        var a = curr_uiversion.shift();
+        var b = min_uiversion.shift();
+        if (a > b) {
+            jqueryui_tabs_use_refresh = true;
+            break;
+        }
+        if (a < b) {
+            jqueryui_tabs_use_refresh = false;
+            break;
+        }
+    }
 
     if ($('#elastix-callcenter-llamada-paneles').length > 0) {
         $('#elastix-callcenter-llamada-paneles').layout({fxName: 'none', west: { size: 300 }});
@@ -759,20 +786,26 @@ function abrir_url_externo(urlopentype, url)
 	if (urlopentype != null) {
 		switch (urlopentype) {
 		case 'iframe':
-		    // Se quita la cejilla anterior. Se asume que se fue marcada con clase .externalurl
-		    $('#elastix-callcenter-cejillas-contenido').find('.ui-tabs-nav li.tab-externalurl').remove();
-		    $('#tabs-externalurl').remove();
+			if (jqueryui_tabs_use_refresh) {
+			    // Se quita la cejilla anterior. Se asume que se fue marcada con clase .externalurl
+		    	$('#elastix-callcenter-cejillas-contenido').find('.ui-tabs-nav li.tab-externalurl').remove();
+			    $('#tabs-externalurl').remove();
 
-		    // Se agrega la nueva cejilla, si existe
-		    if (url != null) {
-		        $('#elastix-callcenter-cejillas-contenido').append(
-		            '<div id="tabs-externalurl"><iframe scrolling="auto" height="450" frameborder="0" width="100%" src="' + url + '" /></div>');
-		        $('<li class="tab-externalurl"><a href="#tabs-externalurl">'+externalurl_title+'</a></li>')
-		            .appendTo('#elastix-callcenter-cejillas-contenido > .ui-tabs-nav');
+			    // Se agrega la nueva cejilla, si existe
+			    if (url != null) {
+			        $('#elastix-callcenter-cejillas-contenido').append(
+			            '<div id="tabs-externalurl"><iframe scrolling="auto" height="450" frameborder="0" width="100%" src="' + url + '" /></div>');
+			        $('<li class="tab-externalurl"><a href="#tabs-externalurl">'+externalurl_title+'</a></li>')
+			            .appendTo('#elastix-callcenter-cejillas-contenido > .ui-tabs-nav');
+			    }
+
+			    // Aplicar cambios
+			    $('#elastix-callcenter-cejillas-contenido').tabs('refresh');
+		    } else {
+                externalurl = url;
+                $('#elastix-callcenter-cejillas-contenido').tabs('remove', '#tabs-externalurl');
+                $('#elastix-callcenter-cejillas-contenido').tabs('add', '#tabs-externalurl', externalurl_title);
 		    }
-
-		    // Aplicar cambios
-		    $('#elastix-callcenter-cejillas-contenido').tabs('refresh');
 			break;
 		case 'jsonp':
 			$.ajax(url, {

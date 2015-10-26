@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: use elastix_dsn.acl instead of hardcoding sqlite DSN.
+  SVN Rev[7250]
 - CHANGED: Framework: use elastix_dsn.acl instead of hardcoding sqlite DSN. Code
   cleanup of bookmark add/remove code. Ensure AJAX response for bookmark request
   is of type application/json. Update error message on bookmark list full. Add

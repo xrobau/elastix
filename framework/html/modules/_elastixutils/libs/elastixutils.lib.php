@@ -86,29 +86,29 @@ function obtenerDetallesRPMS()
 
 function setUserPassword()
 {
-    include_once "libs/paloSantoACL.class.php";
+    global $arrConf;
+    require_once "libs/paloSantoACL.class.php";
 
     $old_pass   = getParameter("oldPassword");
     $new_pass   = getParameter("newPassword");
     $new_repass = getParameter("newRePassword");
     $arrResult  = array();
     $arrResult['status'] = FALSE;
-    if($old_pass == ""){
-      $arrResult['msg'] = _tr("Please write your current password.");
-      return $arrResult;
+    if ($old_pass == "") {
+        $arrResult['msg'] = _tr("Please write your current password.");
+        return $arrResult;
     }
-    if($new_pass == "" || $new_repass == ""){
-      $arrResult['msg'] = _tr("Please write the new password and confirm the new password.");
-      return $arrResult;
+    if ($new_pass == "" || $new_repass == "") {
+        $arrResult['msg'] = _tr("Please write the new password and confirm the new password.");
+        return $arrResult;
     }
-    if($new_pass != $new_repass){
-      $arrResult['msg'] = _tr("The new password doesn't match with retype new password.");
-      return $arrResult;
+    if ($new_pass != $new_repass) {
+        $arrResult['msg'] = _tr("The new password doesn't match with retype new password.");
+        return $arrResult;
     }
 
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    global $arrConf;
-    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['acl']);
     $pACL = new paloACL($pdbACL);
     $uid = $pACL->getIdUser($user);
     if($uid===FALSE)
@@ -190,7 +190,8 @@ function searchModulesByName()
 
 function changeMenuColorByUser()
 {
-    include_once "libs/paloSantoACL.class.php";
+    global $arrConf;
+    require_once "libs/paloSantoACL.class.php";
 
     $color = getParameter("menuColor");
     $arrResult  = array();
@@ -201,8 +202,7 @@ function changeMenuColorByUser()
     }
 
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    global $arrConf;
-    $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['acl']);
     $pACL = new paloACL($pdbACL);
     $uid = $pACL->getIdUser($user);
 
@@ -342,13 +342,14 @@ SQL_LEER_BOOKMARKS_ACTUALES;
  */
 function saveStickyNote($menu, $description, $popup)
 {
-    include_once "libs/paloSantoACL.class.php";
+    global $arrConf;
+    require_once "libs/paloSantoACL.class.php";
     $arrResult['status'] = FALSE;
     $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
     if($menu != ""){
         $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
         global $arrConf;
-        $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+        $pdbACL = new paloDB($arrConf['elastix_dsn']['acl']);
         $pACL = new paloACL($pdbACL);
         $id_resource = $pACL->getResourceId($menu);
         $uid = $pACL->getIdUser($user);
@@ -398,13 +399,14 @@ function saveStickyNote($menu, $description, $popup)
 
 function saveNeoToggleTabByUser($menu, $action_status)
 {
+    global $arrConf;
+
     include_once "libs/paloSantoACL.class.php";
     $arrResult['status'] = FALSE;
     $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
     if($menu != ""){
         $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        global $arrConf;
-        $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
+        $pdbACL = new paloDB($arrConf['elastix_dsn']['acl']);
         $pACL = new paloACL($pdbACL);
         $uid = $pACL->getIdUser($user);
         if($uid!==FALSE){

@@ -111,7 +111,6 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/local/sbin/motd.sh          
 chmod 755 $RPM_BUILD_ROOT/usr/local/sbin/motd.sh
 
 # ** /usr/share/ files ** #
-mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/share/elastix/menusAdminElx                  $RPM_BUILD_ROOT/usr/share/elastix/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/share/pear/DB/sqlite3.php                    $RPM_BUILD_ROOT/usr/share/pear/DB/
 
 # ** setup ** #
@@ -353,6 +352,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- DELETED: menusAdminElx: apparently not used anywhere.
+  SVN Rev[7255]
 - CHANGED: Framework: allow ELASTIX_ROOT to specify location of base Elastix
   for command-line tools.
   SVN Rev[7254]

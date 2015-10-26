@@ -29,7 +29,7 @@
  */
 
 /*
-This script takes one argument, the name parent module or rpm name section. 
+This script takes one argument, the name parent module or rpm name section.
 This script delete menus and resources elastix.
 */
 
@@ -46,8 +46,8 @@ require_once("$arrConf[basePath]/libs/paloSantoDB.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoMenu.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
 
-$pDB = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/menu.db");
-$pDBACL = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/acl.db");
+$pDB = new paloDB($arrConf['elastix_dsn']['menu']);
+$pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
 
 if(!empty($pDB->errMsg)) echo "ERROR DE DB: {$pDB->errMsg}\n";
 if(!empty($pDBACL->errMsg)) echo "ERROR DE DB: {$pDBACL->errMsg}\n";
@@ -57,10 +57,10 @@ $oACL = new paloACL($pDBACL);
 
 if(isset($_SERVER['argv'][1])){
     $idmenu = $_SERVER['argv'][1];
-    
+
     $oMenu->_DB->beginTransaction();
     $oACL->_DB->beginTransaction();
- 
+
     if($oMenu->deleteFather($idmenu, $oACL)){
         $oMenu->_DB->commit();
         $oACL->_DB->commit();
@@ -68,7 +68,7 @@ if(isset($_SERVER['argv'][1])){
     }
     else{
         $oMenu->_DB->rollBack();
-        $oACL->_DB->rollBack();	
+        $oACL->_DB->rollBack();
 	echo "Error: The menus haven't been removed\n";
     }
 }

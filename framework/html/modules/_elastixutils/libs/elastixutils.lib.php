@@ -266,70 +266,67 @@ function changeMenuColorByUser()
 
 function putMenuAsBookmark($menu)
 {
-    include_once "libs/paloSantoACL.class.php";
-    $arrResult['status'] = FALSE;
-    $arrResult['data'] = array("action" => "none", "menu" => "$menu");
-    $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
-    if($menu != ""){
-        $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        global $arrConf;
-        $pdbACL = new paloDB("sqlite3:///$arrConf[elastix_dbdir]/acl.db");
-        $pACL = new paloACL($pdbACL);
-        $uid = $pACL->getIdUser($user);
-        if($uid!==FALSE){
-            $id_resource = $pACL->getResourceId($menu);
-            $resource = $pACL->getResources($id_resource);
-            $exist = false;
-            $bookmarks = "SELECT aus.id AS id, ar.id AS id_menu, ar.name AS name, ar.description AS description FROM acl_user_shortcut aus, acl_resource ar WHERE id_user = ? AND type = 'bookmark' AND ar.id = aus.id_resource ORDER BY aus.id DESC";
-            $arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid));
-            if($arr_result1 !== FALSE){
-                $i = 0;
-                $arrIDS = array();
-                foreach($arr_result1 as $key => $value){
-                    if($value['id_menu'] == $id_resource)
-                        $exist = true;
-                }
-                if($exist){
-                    $pdbACL->beginTransaction();
-                    $query = "DELETE FROM acl_user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?";
-                    $r = $pdbACL->genQuery($query, array($uid, $id_resource, "bookmark"));
-                    if(!$r){
-                        $pdbACL->rollBack();
-                        $arrResult['status'] = FALSE;
-                        $arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource, "menu_session" => $menu);
-                        $arrResult['msg'] = _tr("Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error: ").$pdbACL->errMsg;
-                        return $arrResult;
-                    }else{
-                        $pdbACL->commit();
-                        $arrResult['status'] = TRUE;
-                        $arrResult['data'] = array("action" => "delete", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu);
-                        $arrResult['msg'] = _tr("Bookmark has been removed.");
-                        return $arrResult;
-                    }
-                }
+    global $arrConf;
+    require_once "libs/paloSantoACL.class.php";
 
-                if(count($arr_result1) > 4){
-                    $arrResult['msg'] = _tr("The bookmark maximum is 5. Please uncheck one in order to add this bookmark");
-                }else{
-                    $pdbACL->beginTransaction();
-                    $query = "INSERT INTO acl_user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)";
-                    $r = $pdbACL->genQuery($query, array($uid, $id_resource, "bookmark"));
-                    if(!$r){
-                        $pdbACL->rollBack();
-                        $arrResult['status'] = FALSE;
-                        $arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu );
-                        $arrResult['msg'] = _tr("Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error: ").$pdbACL->errMsg;
-                    }else{
-                        $pdbACL->commit();
-                        $arrResult['status'] = TRUE;
-                        $arrResult['data'] = array("action" => "add", "menu" => _tr($resource[0][2]), "idmenu" => $id_resource,  "menu_session" => $menu );
-                        $arrResult['msg'] = _tr("Bookmark has been added.");
-                        return $arrResult;
-                    }
-                }
-            }
-        }
+    $arrResult = array(
+        'status'    =>  FALSE,
+        'data'      =>  array("action" => "none", "menu" => "$menu"),
+        'msg'       =>  _tr("Please your session id does not exist. Refresh the browser and try again."),
+    );
+    if ($menu == '' || !isset($_SESSION['elastix_user'])) return $arrResult;
+
+    $pdbACL = new paloDB($arrConf['elastix_dsn']['acl']);
+    $pACL = new paloACL($pdbACL);
+    $uid = $pACL->getIdUser($_SESSION['elastix_user']);
+    if ($uid === FALSE) return $arrResult;
+
+    $id_resource = $pACL->getResourceId($menu);
+    $resource = $pACL->getResources($id_resource);
+    $exist = false;
+    $bookmarks = <<<SQL_LEER_BOOKMARKS_ACTUALES
+SELECT aus.id AS id, ar.id AS id_menu, ar.name AS name, ar.description AS description
+FROM acl_user_shortcut aus, acl_resource ar
+WHERE id_user = ? AND type = 'bookmark' AND ar.id = aus.id_resource
+ORDER BY aus.id DESC
+SQL_LEER_BOOKMARKS_ACTUALES;
+    $arr_result1 = $pdbACL->fetchTable($bookmarks, TRUE, array($uid));
+    if ($arr_result1 === FALSE) return $arrResult;
+
+    $arrIDS = array();
+    foreach ($arr_result1 as $key => $value) {
+        if($value['id_menu'] == $id_resource)
+            $exist = true;
     }
+    if (!$exist && count($arr_result1) > 4) {
+        $arrResult['msg'] = _tr('The bookmark maximum is 5. Please remove one in order to add this bookmark');
+        return $arrResult;
+    }
+
+    $arrResult['data'] = array(
+        'action'        =>  ($exist ? 'delete' : 'add'),
+        'menu'          =>  _tr($resource[0][2]),
+        'idmenu'        =>  $id_resource,
+        'menu_session'  =>  $menu,
+    );
+    $query = $exist
+        ? 'DELETE FROM acl_user_shortcut WHERE id_user = ? AND id_resource = ? AND type = ?'
+        : 'INSERT INTO acl_user_shortcut(id_user, id_resource, type) VALUES(?, ?, ?)';
+    $pdbACL->beginTransaction();
+    $r = $pdbACL->genQuery($query, array($uid, $id_resource, "bookmark"));
+    if (!$r) {
+        $pdbACL->rollBack();
+        $arrResult['msg'] = (
+            $exist
+                ? _tr('Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error')
+                : _tr('Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error')
+            ).': '.$pdbACL->errMsg;
+    } else {
+        $pdbACL->commit();
+        $arrResult['status'] = TRUE;
+        $arrResult['msg'] = $exist ? _tr('Bookmark has been removed.') : _tr('Bookmark has been added.');
+    }
+
     return $arrResult;
 }
 

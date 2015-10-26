@@ -29,12 +29,12 @@
 global $arrLangModule;
 $arrLangModule = array(
 'The bookmark maximum is 5. Please remove one in order to add this bookmark' =>
-    'The bookmark maximum is 5. Please remove one in order to add this bookmark',
+    'El máximo número de marcadores es 5. Por favor quite uno antes de agregar este marcador',
 'Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error' =>
-    'Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error',
+    'No se puede agregar marcador. Por favor vuelva a intentarlo o contacte al administrador de Elastix y notifique el error',
 'Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error' =>
-    'Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error',
-'Bookmark has been removed.' => 'Bookmark has been removed.',
-'Bookmark has been added.' => 'Bookmark has been added.',
+    'No se puede quitar marcador. Por favor vuelva a intentarlo o contacte al administrador de Elastix y notifique el error',
+'Bookmark has been removed.' => 'Se ha quitado el marcador.',
+'Bookmark has been added.' => 'Se ha agregado el marcador.',
 );
 ?>

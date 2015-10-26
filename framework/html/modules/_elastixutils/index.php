@@ -140,6 +140,8 @@ function handleJSON_addBookmark($smarty, $local_templates_dir, $module_name)
         $jsonObject->set_error($output['msg']);
         $jsonObject->set_message($output['data']);
     }
+
+    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 

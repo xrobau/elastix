@@ -352,6 +352,13 @@ rm -rf $RPM_BUILD_ROOT
 /var/lib/php/session-asterisk
 
 %changelog
+* Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: use elastix_dsn.acl instead of hardcoding sqlite DSN. Code
+  cleanup of bookmark add/remove code. Ensure AJAX response for bookmark request
+  is of type application/json. Update error message on bookmark list full. Add
+  Spanish translations for messages.
+  SVN Rev[7249]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7231]

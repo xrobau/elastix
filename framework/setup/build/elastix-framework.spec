@@ -39,6 +39,15 @@ Requires: php-PHPMailer
 %description
 Elastix is a Web based software to administrate a PBX based in open source programs
 
+%package themes-extra
+Summary: Elastix GUI themes from 2.4 and earlier
+Group: Applications/System
+BuildArch: noarch
+
+%description themes-extra
+This package provides the Elastix GUI themes from earlier versions.
+
+
 %prep
 %setup -n elastix-framework
 
@@ -320,7 +329,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/lang
 /var/www/html/libs
 /var/www/html/modules
-/var/www/html/themes
+/var/www/html/themes/tenant
+/var/www/html/themes/blackmin
 /var/www/html/*.php
 /var/www/html/robots.txt
 /usr/share/elastix/*
@@ -350,8 +360,17 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(770, root, asterisk, 770)
 /var/lib/php/session-asterisk
 
+%files themes-extra
+%defattr(-, root, root)
+/var/www/html/themes/*
+%exclude(/var/www/html/themes/tenant)
+%exclude(/var/www/html/themes/blackmin)
+
 %changelog
 * Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: attempt 1 to split off all themes except tenant and
+  blackmin into a separate package.
+  SVN Rev[7256]
 - DELETED: menusAdminElx: apparently not used anywhere.
   SVN Rev[7255]
 - CHANGED: Framework: allow ELASTIX_ROOT to specify location of base Elastix

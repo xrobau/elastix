@@ -353,6 +353,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Group Permission: use elastix_dsn.menu instead of hardcoding DSN.
+  SVN Rev[7251]
 - CHANGED: Framework: use elastix_dsn.acl instead of hardcoding sqlite DSN.
   SVN Rev[7250]
 - CHANGED: Framework: use elastix_dsn.acl instead of hardcoding sqlite DSN. Code

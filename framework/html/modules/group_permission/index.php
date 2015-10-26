@@ -179,8 +179,7 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir)
     $_POST['filter_group'] = $id_group;
 
     // Cargar el menú completo
-    $dsn = "sqlite3:///{$arrConf['elastix_dbdir']}/menu.db";
-    $oMenu = new paloMenu($dsn);
+    $oMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
     $fullmenu = $oMenu->cargar_menu();
     foreach (array_keys($fullmenu) as $k) $fullmenu[$k]['actions'] = array();
 

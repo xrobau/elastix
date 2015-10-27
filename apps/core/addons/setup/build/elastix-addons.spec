@@ -14,6 +14,12 @@ Prereq: elastix-framework >= 2.5.0-11
 Prereq: chkconfig, php-soap
 Requires: yum
 
+# commands: /usr/bin/uname
+Requires: coreutils
+
+# commands: rpm
+Requires: rpm
+
 %description
 Elastix Addons
 
@@ -131,6 +137,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Oct 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Addons: explicitly spell out previously hidden package requirements
+  that provide system commands.
+  SVN Rev[7259]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Addons: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7232]

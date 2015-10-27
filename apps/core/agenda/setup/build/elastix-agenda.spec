@@ -14,6 +14,14 @@ Prereq: freePBX >= 2.8.1-1
 Prereq: elastix-framework >= 2.4.0-14
 Requires: php-PHPMailer
 
+# commands: mv
+Requires: coreutils
+
+# commands: hostname
+Requires: /bin/hostname
+
+# commands: festival
+Requires: festival
 
 %description
 Elastix Module Agenda
@@ -96,6 +104,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Oct 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agenda: explicitly spell out previously hidden package requirements
+  that provide system commands.
+  SVN Rev[7260]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Agenda: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7233]

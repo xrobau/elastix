@@ -12,6 +12,7 @@ BuildArch: noarch
 Prereq: /sbin/chkconfig, /etc/sudoers, sudo
 Prereq: php, php-gd, php-pear, php-xml, php-mysql, php-pdo, php-imap, php-soap
 Prereq: httpd, mysql-server, ntp, mod_ssl
+# /usr/sbin/close-on-exec.pl /usr/local/sbin/motd.sh
 Prereq: perl
 Prereq: elastix-firstboot >= 2.3.0-4
 Prereq: /sbin/pidof
@@ -35,6 +36,24 @@ Requires: php-Smarty
 Requires: php-jpgraph
 Requires: php-tcpdf
 Requires: php-PHPMailer
+
+# commands: uname df rm cat
+Requires: coreutils
+
+# commands: uptime
+Requires: procps
+
+# commands: rpm
+Requires: rpm
+
+# commands: /usr/bin/mysql /usr/bin/mysqldump
+Requires: mysql
+
+# commands: /usr/bin/sqlite3
+Requires: sqlite
+
+# FIXME: /usr/local/elastix/sampler.php requieres /usr/sbin/asterisk but
+# elastix-framework should stand by itself without an asterisk dependency.
 
 %description
 Elastix is a Web based software to administrate a PBX based in open source programs
@@ -367,6 +386,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude(/var/www/html/themes/blackmin)
 
 %changelog
+* Tue Oct 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: explicitly spell out previously hidden package
+  requirements that provide system commands.
+  SVN Rev[7258]
+
 * Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: attempt 1 to split off all themes except tenant and
   blackmin into a separate package.

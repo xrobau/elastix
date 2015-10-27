@@ -17,9 +17,6 @@ Requires: php-PHPMailer
 # commands: mv
 Requires: coreutils
 
-# commands: hostname
-Requires: /bin/hostname
-
 # commands: festival
 Requires: festival
 
@@ -105,6 +102,8 @@ fi
 
 %changelog
 * Tue Oct 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: use /proc file instead of running hostname command.
+  SVN Rev[7261]
 - CHANGED: Agenda: explicitly spell out previously hidden package requirements
   that provide system commands.
   SVN Rev[7260]

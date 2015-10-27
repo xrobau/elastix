@@ -49,16 +49,16 @@ class paloSantoCalendar
     private $_userid;
     private $_tpldir;
     private $_calldir;
-    
+
     /**
      * Constructor del objeto fábrica de eventos de calendario. Se requiere,
      * además de una conexión a la base de datos calendar.db, el ID de usuario
      * para el cual se están manipulando eventos de calendario.
-     * 
+     *
      * @param   object  $pDB    Objeto paloDB o cadena de conexión
      * @param   int     $uid    ID del usuario para el cual consultar eventos
      * @param    string    $tpldir    Ruta a plantillas para correo y para iCal
-     * 
+     *
      * @throws    InvalidCalendarPropertyException
      */
     function __construct($pDB, $uid, $tpldir, $calldir)
@@ -75,7 +75,7 @@ class paloSantoCalendar
         $this->_userid = (int)$uid;
         $this->_tpldir = $tpldir;
         $this->_calldir = $calldir;
-        
+
         // Se recibe como parámetro una referencia a una conexión paloDB
         if (is_object($pDB)) {
             $this->_DB =& $pDB;
@@ -92,21 +92,21 @@ class paloSantoCalendar
             }
         }
     }
-    
+
     /**
      * Construir un nuevo evento que hereda el ID de usuario y la conexión DB
-     * 
+     *
      * @return object paloSantoCalendarEvent
      * @throws FailedEventReadException
      */
     function nuevoEvento()
     {
-        return new paloSantoCalendarEvent($this->_DB, $this->_userid, $this->_tpldir, $this->_calldir); 
+        return new paloSantoCalendarEvent($this->_DB, $this->_userid, $this->_tpldir, $this->_calldir);
     }
-    
+
     /**
      * Procedimiento para leer un evento, dado su ID.
-     * 
+     *
      * @return object paloSantoCalendarEvent
      * @throws FailedEventReadException
      */
@@ -120,22 +120,22 @@ class paloSantoCalendar
              * se la traga, así que se crea una nueva. */
             throw new FailedEventReadException($this->_DB->errMsg);
         }
-        
+
         $ev = $this->_construirEventos($recordset);
         return (count($ev) > 0) ? $ev[0] : NULL;
     }
 
     /**
      * Procedimiento para leer todos los eventos del usuario asociado que estén
-     * activos en el intervalo semicerrado [$sFechaInicial, $sFechaFinal) 
+     * activos en el intervalo semicerrado [$sFechaInicial, $sFechaFinal)
      * indicado como cadenas yyyy-mm-dd hh:mm:ss. Este método también devolverá
-     * registros para los eventos que se encuentren parcialmente fuera del 
+     * registros para los eventos que se encuentren parcialmente fuera del
      * intervalo. Este comportamiento es adecuado para la implementación del
      * visor de calendario del GUI de Elastix.
-     * 
+     *
      * @param    string    $sFechaInicial    Fecha inicial del intervalo
      * @param    string    $sFechaFinal    Fecha final del intervalo (opcional)
-     * 
+     *
      * @return    array    Arreglo de objetos paloSantoCalendarEvent
      * @throws FailedEventReadException
      */
@@ -158,7 +158,7 @@ class paloSantoCalendar
              * se la traga, así que se crea una nueva. */
             throw new FailedEventReadException($this->_DB->errMsg);
         }
-        
+
         return $this->_construirEventos($recordset);
     }
 
@@ -189,15 +189,15 @@ class paloSantoCalendarEvent
     eventtype;     // Tipo de regularidad de evento, véase EVENTO_*
     subject;       // Nombre del evento
     description;   // Descripción del evento
-    
+
     asterisk_call; // booleano, se guarda como 'on' u 'off'
     recording;     // Texto usado para sintetizar mensaje de recordatorio, o cadena vacía
     call_to;       // Número al cual enviar la llamada de recordatorio
     reminderTimer;     // Minutos antes del evento en que hay que llamar
-    
+
     notification;  // booleano, se guarda como 'on' u 'off'
     emails_notification;   // Lista de correos a notificar
-    
+
     each_repeat = 1;   // TODO: averiguar qué hace
     days_repeat;       // TODO: averiguar qué hace (lista "Sa," para Saturday)
     color = COLOR_EVENTO_OMISION; // Color a usar para mostrar el recordatorio
@@ -210,24 +210,24 @@ class paloSantoCalendarEvent
     private $_description = '';
     private $_event_color = COLOR_EVENTO_OMISION;
     private $_event_type = EVENTO_UNICO;
-    
+
     /* Los siguientes 3 campos definen el recordatorio. Deben de setearse todos
-     * a NULL, o todos con valores válidos. */ 
+     * a NULL, o todos con valores válidos. */
     private $_reminder_callnum = NULL;
     private $_reminder_tts = NULL;
     private $_reminder_minutes = NULL;
-    
+
     private $_notify_emails = array();
-    
+
     private $_tpldir = NULL;
     private $_calldir = NULL;
-    
+
     /**
      * Constructor de un evento de calendario. Este constructor sólo debería ser
      * invocado desde los métodos de la clase paloSantoCalendar. El valor de
      * $dbcampos se asume que es una tupla con los valores de las columnas de
      * la tabla events de calendar.db .
-     * 
+     *
      * @throws InvalidCalendarPropertyException
      */
     function __construct($pDB, $userid, $tpldir, $calldir, $dbcampos = NULL)
@@ -235,7 +235,7 @@ class paloSantoCalendarEvent
         $this->_DB =& $pDB;
         $this->_timestamp_start = time();
         $this->_timestamp_end = time();
-        
+
         if (is_null($userid) || $userid == 0) {
             throw new InvalidCalendarPropertyException(_tr('Invalid user ID'));
         }
@@ -248,9 +248,9 @@ class paloSantoCalendarEvent
         $this->_userid = (int)$userid;
         $this->_tpldir = $tpldir;
         $this->_calldir = $calldir;
-        
+
         if (is_null($dbcampos)) return;
-        
+
         // Asignar los valores desde la tupla de la base de datos
         $this->_id = (int)$dbcampos['id'];
         $this->_userid = (int)$dbcampos['uid'];
@@ -273,12 +273,12 @@ class paloSantoCalendarEvent
                 array($this, '_rechazar_correo_vacio'));
         }
     }
-    
+
     private function _rechazar_correo_vacio($email)
     {
         return (0 != preg_match(PALOCALENDAR_EMAIL_REGEXP, trim($email)));
     }
-    
+
     public function __get($s)
     {
         // Campos base
@@ -290,7 +290,7 @@ class paloSantoCalendarEvent
             $s = '_'.$s;
             return $this->$s;
         }
-        
+
         // Campos derivados para transformaciones
         if (in_array($s, array('datetime_start', 'datetime_end'))) {
             $s = str_replace('datetime_', '_timestamp_', $s);
@@ -304,13 +304,13 @@ class paloSantoCalendarEvent
             $s = str_replace('ical', '_timestamp_', $s);
             return gmdate('Ymd\THis\Z', $this->$s);
         }
-        
+
         die(__METHOD__.' - propiedad no implementada: '.$s."\n");
     }
-    
+
     /**
      * Implementación de asignación de varias propiedades del evento
-     * 
+     *
      * @throws InvalidCalendarPropertyException
      */
     public function __set($s, $v)
@@ -366,14 +366,14 @@ class paloSantoCalendarEvent
             die(__METHOD__.' - propiedad no implementada: '.$s."\n");
         }
     }
-    
+
     /**
      * Método para quitar el recordatorio de llamada, antes de guardar cambios.
-     * El método NO QUITA archivos de llamada existentes producto de 
+     * El método NO QUITA archivos de llamada existentes producto de
      * recordatorios definidos anteriormente. La actualización del estado de los
-     * archivos de llamada se realizará al momento de guardar el estado del 
+     * archivos de llamada se realizará al momento de guardar el estado del
      * evento.
-     * 
+     *
      * @return void
      */
     function quitarRecordatorio()
@@ -382,17 +382,17 @@ class paloSantoCalendarEvent
         $this->_reminder_tts = NULL;
         $this->_reminder_minutes = NULL;
     }
-    
+
     /**
      * Método para asignar el recordatorio de llamada, antes de guardar cambios.
      * El método NO CREA archivos de llamada nuevos al momento de ser invocado.
      * La actualización del estado de los archivos de llamada se realizará al
      * momento de guardar el estado del evento.
-     * 
+     *
      * @param   string  $callnum    Número que se debe marcar para notificar
      * @param   string  $tts        Texto a usar para Text2Speech con Festival
      * @param   int     $minutes    Número de minutos antes de evento para recordatorio
-     * 
+     *
      * @return  void
      * @throws  InvalidCalendarReminderException
      */
@@ -401,15 +401,15 @@ class paloSantoCalendarEvent
         // Número a marcar debe ser no-vacío y consistir sólo de dígitos
         if (!preg_match('/^\d+$/', $callnum))
             throw new InvalidCalendarReminderException(_tr('Invalid extension to call for reminder'));
-        
+
         // Texto a generar no debe contener saltos de línea
         if (FALSE !== strpbrk($tts, "\r\n"))
             throw new InvalidCalendarReminderException(_tr('Reminder text may not have newlines'));
-        
+
         $minutes = (int)$minutes;
         if ($minutes <= 0)
             throw new InvalidCalendarReminderException(_tr('Invalid interval for remainder timer'));
-        
+
         $this->_reminder_callnum = "$callnum";
         $this->_reminder_tts = "$tts";
         $this->_reminder_minutes = $minutes;
@@ -419,7 +419,7 @@ class paloSantoCalendarEvent
      * Método que ejecuta el guardado del evento en la base de datos, creando o
      * actualizando el registro en caso necesario, y ejecutando la creación o
      * borrado de archivos de llamada, además del envío de correo.
-     * 
+     *
      * @return void
      * @throws FailedEventUpdateException
      */
@@ -431,7 +431,7 @@ class paloSantoCalendarEvent
             $this->_timestamp_start = $this->_timestamp_end;
             $this->_timestamp_end = $t;
         }
-        
+
         // Elegir SQL correcto para insertar o actualizar evento
         $paramSQL = array(
             $this->_userid,
@@ -455,7 +455,7 @@ class paloSantoCalendarEvent
         if (is_null($this->_id)) {
             $sMailEvento = 'CREATE';
             $sql = <<<SQL_INSERT_EVENT
-INSERT INTO events (uid, startdate, enddate, starttime, eventtype, subject, 
+INSERT INTO events (uid, startdate, enddate, starttime, eventtype, subject,
     description, asterisk_call, recording, call_to, notification,
     emails_notification, endtime, each_repeat, days_repeat, reminderTimer, color)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -478,30 +478,30 @@ SQL_UPDATE_EVENT;
             throw new FailedEventUpdateException($this->_DB->errMsg);
         }
         if (is_null($this->_id)) $this->_id = $this->_DB->getLastInsertId();
-        
+
         // Archivos de llamada de evento
         $this->_borrarArchivosLlamadaEvento();
         $this->_crearArchivosLlamadaEventoPeriodico();
-        
+
         // Enviar correo de notificación CREATE/UPDATE
         $this->_enviarCorreosNotificacionEvento($sMailEvento);
     }
-    
+
     /**
      * Método que ejecuta el borrado del evento previamente guardado. Este método
      * también se encarga de borrar todos los archivos de llamadas de notificación
      * pendientes, y también de enviar los correos que notifican que el evento
      * ha sido borrado.
-     * 
+     *
      * @throws FailedEventUpdateException
      */
     function borrarEvento()
     {
         if (is_null($this->_id)) return;
-        
+
         // Enviar correo de notificación DELETE
         $this->_enviarCorreosNotificacionEvento('DELETE');
-        
+
         $this->_borrarArchivosLlamadaEvento();
         $r = $this->_DB->genQuery('DELETE FROM events WHERE id = ?', array($this->_id));
         if ($r === FALSE) {
@@ -525,7 +525,7 @@ SQL_UPDATE_EVENT;
     private function _crearArchivosLlamadaEventoPeriodico()
     {
         if (is_null($this->_reminder_callnum)) return;
-        
+
         $horasNotificacion = $this->generarIntervalosEventoPeriodico();
         $timestampHoy = time();
         foreach ($horasNotificacion as $i => $t) {
@@ -542,7 +542,7 @@ SQL_UPDATE_EVENT;
      * evento semanal o mensual. Si el evento es único, se devuelve una lista de
      * un solo elemento. Para eventos semanales o mensuales, se calcula la lista
      * de intervalos apropiados dentro de un solo día.
-     * 
+     *
      * @return    array    Lista de intervalos, como tuplas de 2 timestamp UNIX.
      */
     function generarIntervalosEventoPeriodico()
@@ -552,11 +552,11 @@ SQL_UPDATE_EVENT;
             $horasNotificacion[] = array($this->_timestamp_start, $this->_timestamp_end);
         } else {
             // Calcular diferencia entre porciones de hora para timestamps inicio y final
-            $intervaloDiario = 
-                ($this->_timestamp_end - strtotime(date('Y-m-d', $this->_timestamp_end))) 
+            $intervaloDiario =
+                ($this->_timestamp_end - strtotime(date('Y-m-d', $this->_timestamp_end)))
                 - ($this->_timestamp_start - strtotime(date('Y-m-d', $this->_timestamp_start)));
             if ($intervaloDiario < 0) $intervaloDiario = 0;
-            
+
             switch ($this->_event_type) {
             case EVENTO_SEMANAL:
                 $strtotime_increment = '+ 1 week';
@@ -568,17 +568,17 @@ SQL_UPDATE_EVENT;
             $t = $this->_timestamp_start;
             while ($t <= $this->_timestamp_end) {
                 $horasNotificacion[] = array($t, $t + $intervaloDiario);
-                
+
                 $t = strtotime(date('Y-m-d H:i:s', $t).$strtotime_increment);
             }
         }
-        
+
         return $horasNotificacion;
     }
 
     /**
      * Procedimiento para crear el archivo de llamada para un nuevo evento. El
-     * archivo de llamada se crea con la fecha de creación y modificación 
+     * archivo de llamada se crea con la fecha de creación y modificación
      * adecuados para que Asterisk realice la llamada en el momento requerido.
      *
      * @param   integer    $sCallerID              Texto para CallerID
@@ -603,7 +603,7 @@ CONTENIDO_ARCHIVO_AUDIO;
             throw new FailedEventUpdateException(_tr('Unable to create callfile for event in calendar'));
         }
         touch($sNombreTemp, $iCallTimestamp, $iCallTimestamp);
-        
+
         // La función rename() de PHP no preserva atime o mtime. Grrrr...
         $sRutaArchivo = $this->_calldir."/event_{$this->_id}_{$idx}.call";
         system("mv $sNombreTemp $sRutaArchivo");
@@ -619,11 +619,11 @@ CONTENIDO_ARCHIVO_AUDIO;
             'DELETE'    =>    _tr('Delete_Event'),
         );
         if (count($this->_notify_emails) <= 0) return;
-        
+
         require_once 'PHPMailer/class.phpmailer.php';
-        
+
         $sNombreUsuario = $this->_leerNombreUsuario();
-        $sHostname = `hostname`; // TODO: mejorar petición de nombre de host
+        $sHostname = trim(file_get_contents("/proc/sys/kernel/hostname")); // TODO: mejorar petición de nombre de host
         $sRemitente = 'noreply@'.$sHostname;
         $sTema = _tr($map_tipoEvento[$sMailEvento]);
         $sContenidoCorreo = $this->_generarContenidoCorreoEvento($sTema, $sMailEvento, $sNombreUsuario);
@@ -634,11 +634,11 @@ CONTENIDO_ARCHIVO_AUDIO;
         $oMail->Host = 'localhost';
         $oMail->Body = $sContenidoCorreo;
         $oMail->IsHTML(true); // Correo HTML
-        $oMail->WordWrap = 50; 
-        $oMail->From = $sRemitente; 
+        $oMail->WordWrap = 50;
+        $oMail->From = $sRemitente;
         $oMail->FromName = $sNombreUsuario;
         // Depende de carga de idiomas hecha por _generarContenidoCorreoEvento()
-        $oMail->Subject = _tr($sTema).': '.$this->title; 
+        $oMail->Subject = _tr($sTema).': '.$this->title;
         $oMail->AddStringAttachment($sContenidoIcal, 'icalout.ics', 'base64', 'text/calendar');
         foreach ($this->_notify_emails as $sDireccionEmail) {
             $sNombre = '';
@@ -653,9 +653,9 @@ CONTENIDO_ARCHIVO_AUDIO;
                 $oMail->AddAddress($sEmail, $sNombre);
                 $oMail->Send();
             }
-        } 
+        }
     }
-    
+
     // Procedimiento para leer el nombre del usuario a partir del ACL
     private function _leerNombreUsuario()
     {
@@ -686,7 +686,7 @@ CONTENIDO_ARCHIVO_AUDIO;
         ));
         return $smarty->fetch($this->_tpldir.'/emailbody.tpl');
     }
-    
+
     private function _generarContenidoIcal()
     {
         $smarty = getSmarty('default');

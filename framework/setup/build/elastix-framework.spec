@@ -62,6 +62,7 @@ Elastix is a Web based software to administrate a PBX based in open source progr
 Summary: Elastix GUI themes from 2.4 and earlier
 Group: Applications/System
 BuildArch: noarch
+Requires: elastix-framework = %{version}-%{release}
 
 %description themes-extra
 This package provides the Elastix GUI themes from earlier versions.
@@ -386,6 +387,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude(/var/www/html/themes/blackmin)
 
 %changelog
+* Wed Oct 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: elastix-framework-themes-extras requires elastix-framework
+  SVN Rev[7264]
+
 * Tue Oct 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: explicitly spell out previously hidden package
   requirements that provide system commands.

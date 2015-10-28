@@ -30,9 +30,6 @@
 
         {$HEADER}
     {$HEADER_MODULES}
-
-<script src="/themes/tenant/js/jquery.easypiechart.js"></script>
-
     </head>
     <body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" class="mainBody page-body" {$BODYPARAMS}>
     <div class="page-container">

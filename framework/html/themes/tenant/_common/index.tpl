@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/custom.css">
 
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/styles.css" />
+    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/widgets.css" />
     <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/help.css" />
     <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/header.css" />
     <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/content.css" />
@@ -27,6 +28,7 @@
 	<script type='text/javascript' src="libs/js/base.js"></script>
         <script type='text/javascript' src="libs/js/sticky_note/sticky_note.js"></script>
         <script type='text/javascript' src="libs/js/iframe.js"></script>
+        <script type='text/javascript' src="themes/tenant/js/edwidgets.js"></script>
 
         {$HEADER}
     {$HEADER_MODULES}

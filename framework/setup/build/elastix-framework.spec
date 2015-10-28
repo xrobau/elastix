@@ -388,6 +388,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: experimental colorpicker widget for tenant theme only.
+  SVN Rev[7267]
 - CHANGED: Framework: experimental support for bootstrap-datetimepicker widget.
   SVN Rev[7266]
 - DELETED: Framework: remove unused easypiechart javascript library.

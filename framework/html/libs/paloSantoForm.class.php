@@ -99,7 +99,7 @@ class paloForm
         $this->smarty = &$smarty;
         $this->arrFormElements = $arrFormElements;
         $this->arrErroresValidacion = "";
-        $this->modo = 'input'; // Modo puede ser 0 (Modo normal de formulario) o 1 (modo de vista o preview 
+        $this->modo = 'input'; // Modo puede ser 0 (Modo normal de formulario) o 1 (modo de vista o preview
                                // de datos donde no se puede modificar.
     }
 
@@ -114,34 +114,34 @@ class paloForm
      *                                  en el formulario. Este arreglo es idéntico
      *                                  en formato al arreglo $_POST que se genera
      *                                  al enviar el formulario lleno, de forma que
-     *                                  se puede usar $_POST directamente para 
-     *                                  llenar con valores en caso de que la 
+     *                                  se puede usar $_POST directamente para
+     *                                  llenar con valores en caso de que la
      *                                  validación falle.
      *
      * @return  string  Texto HTML del formulario con valores asignados
      */
     function fetchForm($templateName, $title, $arrPreFilledValues = array())
     {
-        /* Función interna para convertir un arreglo especificado en 
-           INPUT_EXTRA_PARAM en una cadena de atributos clave=valor adecuada 
-           para incluir al final de un widget HTML. Si no existe 
+        /* Función interna para convertir un arreglo especificado en
+           INPUT_EXTRA_PARAM en una cadena de atributos clave=valor adecuada
+           para incluir al final de un widget HTML. Si no existe
            INPUT_EXTRA_PARAM, o no es un arreglo, se devuelve una cadena vacía
          */
         if (!function_exists('_inputExtraParam_a_atributos')) {
             function _inputExtraParam_a_atributos(&$arrVars)
             {
-                if (!isset($arrVars['INPUT_EXTRA_PARAM']) || 
-                    !is_array($arrVars['INPUT_EXTRA_PARAM']) || 
+                if (!isset($arrVars['INPUT_EXTRA_PARAM']) ||
+                    !is_array($arrVars['INPUT_EXTRA_PARAM']) ||
                     count($arrVars['INPUT_EXTRA_PARAM']) <= 0)
                     return '';
                 $listaAttr = array();
                 foreach($arrVars['INPUT_EXTRA_PARAM'] as $key => $value) {
                     $listaAttr[] = sprintf(
-                        '%s="%s"', 
+                        '%s="%s"',
                         htmlentities($key, ENT_COMPAT, 'UTF-8'),
                         htmlentities($value, ENT_COMPAT, 'UTF-8'));
                 }
-                
+
                 return implode(' ', $listaAttr);
             }
         }
@@ -153,7 +153,7 @@ class paloForm
                 return htmlentities($s, ENT_COMPAT, 'UTF-8');
             }
         }
-        
+
         if (!function_exists('_labelName')) {
             function _labelName($varName,&$arrVars)
             {
@@ -174,7 +174,7 @@ class paloForm
                 }
             }
         }
-        
+
         foreach($this->arrFormElements as $varName=>$arrVars) {
             if(!isset($arrPreFilledValues[$varName]))
                 $arrPreFilledValues[$varName] = "";
@@ -187,15 +187,15 @@ class paloForm
 
             /* El indicar ENT_COMPAT escapa las comillas dobles y deja intactas
                las comillas simples. Por lo tanto, se asume que todos los usos
-               de $varXXX_escaped serán dentro de comillas dobles, o en texto 
+               de $varXXX_escaped serán dentro de comillas dobles, o en texto
                libre. */
             $varName_escaped = htmlentities($varName, ENT_COMPAT, 'UTF-8');
-            $varValue_escaped = is_array($arrPreFilledValues[$varName]) 
+            $varValue_escaped = is_array($arrPreFilledValues[$varName])
                 ? NULL : htmlentities($arrPreFilledValues[$varName], ENT_COMPAT, 'UTF-8');
 
             switch($arrVars['INPUT_TYPE']) {
                 case "TEXTAREA":
-                    $strInput = $bIngresoActivo 
+                    $strInput = $bIngresoActivo
                         ? sprintf(
                             '<textarea name="%s" rows="%s" cols="%s" %s>%s</textarea>',
                             $varName_escaped,
@@ -208,11 +208,11 @@ class paloForm
                 case "TEXT":
                     $strInput = $bIngresoActivo
                         ? sprintf(
-                            '<input type="text" name="%s" value="%s" %s />', 
+                            '<input type="text" name="%s" value="%s" %s />',
                             $varName_escaped,
                             $varValue_escaped,
                             _inputExtraParam_a_atributos($arrVars))
-                        : $varValue_escaped;                    
+                        : $varValue_escaped;
                     break;
                 case "CHECKBOX":
                     $checked = 'off';
@@ -228,26 +228,26 @@ class paloForm
                 case "PASSWORD":
                     $strInput = $bIngresoActivo
                         ? sprintf(
-                            '<input type="password" name="%s" value="%s" %s />', 
+                            '<input type="password" name="%s" value="%s" %s />',
                             $varName_escaped,
                             $varValue_escaped,
                             _inputExtraParam_a_atributos($arrVars))
-                        : $varValue_escaped;                    
+                        : $varValue_escaped;
                     break;
                 case "HIDDEN":
                     $strInput = sprintf(
-                        '<input type="hidden" name="%s" value="%s" %s />', 
+                        '<input type="hidden" name="%s" value="%s" %s />',
                         $varName_escaped,
                         $varValue_escaped,
-                        _inputExtraParam_a_atributos($arrVars));                    
+                        _inputExtraParam_a_atributos($arrVars));
                     break;
                 case "FILE":
                     $strInput = $bIngresoActivo
                         ? sprintf(
-                            '<input type="file" name="%s" %s />', 
+                            '<input type="file" name="%s" %s />',
                             $varName_escaped,
                             _inputExtraParam_a_atributos($arrVars))
-                        : $varValue_escaped;                    
+                        : $varValue_escaped;
                     break;
                 case "RADIO":
                     if($bIngresoActivo) {
@@ -264,9 +264,9 @@ class paloForm
                                     ($radioValue == $arrPreFilledValues[$varName]) ? 'checked="checked"' : '',
                                     $varName_escaped.$cntRadio,
                                     htmlentities($radioLabel, ENT_COMPAT, 'UTF-8'));
-                                $cntRadio++;    
+                                $cntRadio++;
                             }
-                            $strInput = "<div class='radio_buttonset_elx'>".implode("\n", $listaRadio)."</div>"; 
+                            $strInput = "<div class='radio_buttonset_elx'>".implode("\n", $listaRadio)."</div>";
                         }
                     } else {
                         $strInput = $varValue_escaped;
@@ -275,8 +275,8 @@ class paloForm
                 case "SELECT":
                     if ($bIngresoActivo) {
                         $listaOpts = array();
-                        $keyVals = is_array($arrPreFilledValues[$varName]) 
-                            ? $arrPreFilledValues[$varName] 
+                        $keyVals = is_array($arrPreFilledValues[$varName])
+                            ? $arrPreFilledValues[$varName]
                             : array($arrPreFilledValues[$varName]);
                         if (is_array($arrVars['INPUT_EXTRA_PARAM'])) {
                             foreach($arrVars['INPUT_EXTRA_PARAM'] as $idSeleccion => $nombreSeleccion) {
@@ -298,17 +298,17 @@ class paloForm
                             $sNombreSelect,
                             $sNombreSelect,
                             $sAttrMultiple,
-                            (isset($arrVars['SIZE']) && $arrVars['SIZE'] != '') 
-                                ? sprintf('size="%s"', htmlentities($arrVars['SIZE'], ENT_COMPAT, 'UTF-8')) 
+                            (isset($arrVars['SIZE']) && $arrVars['SIZE'] != '')
+                                ? sprintf('size="%s"', htmlentities($arrVars['SIZE'], ENT_COMPAT, 'UTF-8'))
                                 : '',
-                            (isset($arrVars['ONCHANGE']) && $arrVars['ONCHANGE'] != '') 
-                                ? "onchange='{$arrVars['ONCHANGE']}'" 
+                            (isset($arrVars['ONCHANGE']) && $arrVars['ONCHANGE'] != '')
+                                ? "onchange='{$arrVars['ONCHANGE']}'"
                                 : '',
                             implode("\n", $listaOpts));
                     } else {
                         $strInput = is_array($arrPreFilledValues[$varName])
-                            ? '| '.implode(' | ', 
-                                array_map('_map_htmlentities', 
+                            ? '| '.implode(' | ',
+                                array_map('_map_htmlentities',
                                     array_intersect_key(
                                         $arrVars['INPUT_EXTRA_PARAM'],
                                         array_flip($arrPreFilledValues[$varName])
@@ -321,7 +321,7 @@ class paloForm
                 case "DATE":
                     if ($bIngresoActivo) {
                         require_once 'libs/JSON.php';
-                        
+
                         // Mapa para traducir de formato jsCalendar a DateTimePicker
                         $dateFormatMap = array(
                             '%Y'    =>  'yy',
@@ -345,12 +345,12 @@ class paloForm
                             'showWeek'          =>  TRUE,
                             'constrainInput'    =>  TRUE,
                         );
-                        
+
                         // Evaluación de los valores para formulario
                         $useTimePicker = FALSE;
                         $datewidget = 'datepicker';
                         $formValues = array();
-                        
+
                         if (is_array($arrVars['INPUT_EXTRA_PARAM'])) {
                             $useTimePicker = (isset($arrVars['INPUT_EXTRA_PARAM']['TIME'])
                                 && $arrVars['INPUT_EXTRA_PARAM']['TIME']);
@@ -361,8 +361,8 @@ class paloForm
                                 $arrVars['INPUT_EXTRA_PARAM']['FORMAT'] = '%d %b %Y';
                             if (!isset($arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT']))
                                 $arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] = '%H:%M';
-                            
-                            // El siguiente código asume que el formato de hora siempre 
+
+                            // El siguiente código asume que el formato de hora siempre
                             // se especifica luego del formato de fecha
                             $timepos = FALSE;
                             foreach (array_keys($timeFormatMap) as $tf) {
@@ -387,10 +387,23 @@ class paloForm
                                     $arrVars['INPUT_EXTRA_PARAM']['FORMAT']);
                             }
                         }
-                            
+
                         $json = new Services_JSON();
                         $params = $json->encode(array_merge($defaultValues, $formValues));
-                        $strInput = <<<DATETIME_PICKER_FIELD
+                        if(($datewidget=='datetimepicker') AND ($arrVars['INPUT_EXTRA_PARAM']['TIMELIB']=='bootstrap-datetimepicker')) {
+                            $strInput = <<<DATETIME_PICKER_FIELD
+<div class="input-append date form_datetime" nowrap>
+    <input size="16" type="text" name="{$varName_escaped}" value="{$varValue_escaped}" class="datepicker-input" readonly>
+    <span class="add-on datepicker-button"><i class="fa fa-calendar"></i></span>
+</div>
+<script type="text/javascript">
+$(function() {
+    $("input[name={$varName}]").{$datewidget}({$params});
+});
+</script>
+DATETIME_PICKER_FIELD;
+                        } else {
+                            $strInput = <<<DATETIME_PICKER_FIELD
 <input type="text" name="{$varName_escaped}" value="{$varValue_escaped}"
     style="width: 10em; color: #840; background-color: #fafafa; border: 1px solid #999999; text-align: center" />
 <script type="text/javascript">
@@ -399,6 +412,7 @@ $(function() {
 });
 </script>
 DATETIME_PICKER_FIELD;
+                        }
                     } else {
                         $strInput = $varValue_escaped;
                     }
@@ -414,7 +428,7 @@ DATETIME_PICKER_FIELD;
         $this->smarty->assign("mode", $this->modo);
         return $this->smarty->fetch("file:$templateName");
     }
-    
+
     function setViewMode()
     {
         $this->modo = 'view';
@@ -441,7 +455,7 @@ DATETIME_PICKER_FIELD;
                 if($this->arrFormElements[$varName]['REQUIRED']=='yes' or ($this->arrFormElements[$varName]['REQUIRED']!='yes' AND !empty($varValue))) {
                     $editable = isset($this->arrFormElements[$varName]['EDITABLE'])?$this->arrFormElements[$varName]['EDITABLE']:"yes";
                     if($this->modo=='input' || ($this->modo=='edit' AND $editable != 'no')) {
-                        $oVal->validar($this->arrFormElements[$varName]['LABEL'], $varValue, $this->arrFormElements[$varName]['VALIDATION_TYPE'], 
+                        $oVal->validar($this->arrFormElements[$varName]['LABEL'], $varValue, $this->arrFormElements[$varName]['VALIDATION_TYPE'],
                                        $this->arrFormElements[$varName]['VALIDATION_EXTRA_PARAM']);
                     }
                 }

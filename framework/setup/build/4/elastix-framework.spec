@@ -389,6 +389,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Oct 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: experimental support for bootstrap-datetimepicker widget.
+  SVN Rev[7266]
 - DELETED: Framework: remove unused easypiechart javascript library.
   SVN Rev[7265]
 - CHANGED: Framework: elastix-framework-themes-extras requires elastix-framework

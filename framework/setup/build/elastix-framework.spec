@@ -388,6 +388,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move edwidgets to libs/js/jquery/jquery-edwidgets.js so
+  all themes may use it.
+  SVN Rev[7273]
 - FIXED: Framework: do not assume TIMELIB is defined in bootstrap-datetimepicker
   check.
   SVN Rev[7269]

@@ -101,6 +101,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: tweaks for tenant theme support by Edgar Landivar.
+  SVN Rev[7272]
+
 * Tue Oct 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: use /proc file instead of running hostname command.
   SVN Rev[7261]

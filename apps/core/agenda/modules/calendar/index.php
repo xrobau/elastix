@@ -47,16 +47,16 @@ function _moduleContent(&$smarty, $module_name)
     $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir = (isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
+
     $h = 'handleHTML_mainReport';
     if (isset($_REQUEST['action'])) {
         $h = NULL;
-        
+
         if (is_null($h) && function_exists('handleJSON_'.$_REQUEST['action']))
             $h = 'handleJSON_'.$_REQUEST['action'];
         if (is_null($h))
             $h = 'handleJSON_unimplemented';
-    }        
+    }
     return call_user_func($h, $smarty, $module_name, $local_templates_dir);
 }
 
@@ -67,14 +67,14 @@ function handleHTML_mainReport($smarty, $module_name, $local_templates_dir)
         $smarty->assign('mb_title', _tr('Message'));
         $smarty->assign('mb_message', _tr('Festival is not up'));
     }
-    
+
     $oForm = new paloForm($smarty, array(
         "event"   => array(
             'LABEL'                  => _tr('Name'),
             'REQUIRED'               => "no",
             'INPUT_TYPE'             => "TEXT",
             'INPUT_EXTRA_PARAM'      => array(
-                "style" => "width:274px",
+                "style" => "width:274px; margin: 6px;",
                 "id" => "event"
             ),
             'VALIDATION_TYPE'        => "text",
@@ -86,6 +86,7 @@ function handleHTML_mainReport($smarty, $module_name, $local_templates_dir)
             'INPUT_TYPE'             => "DATE",
             'INPUT_EXTRA_PARAM'      => array(
                 "TIME" => true,
+                "TIMELIB" => 'bootstrap-datetimepicker',
                 'FORMAT'=> '%Y-%m-%d %H:%M',
                 "style" => "width:80px"
             ),
@@ -99,6 +100,7 @@ function handleHTML_mainReport($smarty, $module_name, $local_templates_dir)
             'INPUT_TYPE'             => "DATE",
             'INPUT_EXTRA_PARAM'      => array(
                 "TIME" => true,
+                "TIMELIB" => 'bootstrap-datetimepicker',
                 'FORMAT'=> '%Y-%m-%d %H:%M',
             ),
             'VALIDATION_TYPE'        => "",
@@ -110,12 +112,12 @@ function handleHTML_mainReport($smarty, $module_name, $local_templates_dir)
             'REQUIRED'               => "no",
             'INPUT_TYPE'             => "TEXTAREA",
             'INPUT_EXTRA_PARAM'      => array(
-                "style"=>"width: 271px; height: 36px;"
+                "style"=>"width: 274px; margin: 6px;"
             ),
             'VALIDATION_TYPE'        => "text",
             'VALIDATION_EXTRA_PARAM' => "",
             "COLS"                   => "36px",
-            "ROWS"                   => "2",
+            "ROWS"                   => "4",
             'EDITABLE'               => "si",
             ),
         "call_to"   => array(
@@ -194,7 +196,7 @@ function handleHTML_mainReport($smarty, $module_name, $local_templates_dir)
         'LBL_CONTACT_EMAIL'         =>  _tr('Email'),
         'SERVER_YEAR'               =>  date('Y'),
         'SERVER_MONTH'              =>  date('m') - 1,
-        
+
         'ARRLANG_MAIN'              =>  $json->encode(array(
             'LBL_SAVE'              =>  _tr('Save'),
             'LBL_DELETE'            =>  _tr('Delete'),
@@ -226,8 +228,8 @@ function handleJSON_unimplemented($smarty, $module_name, $local_templates_dir)
 
 function handleJSON_display($smarty, $module_name, $local_templates_dir)
 {
-    /* Esta función sólo llega a invocarse desde el applet Calendar del 
-     * Dashboard en el módulo elastix-system. Al invocarse, se asigna 
+    /* Esta función sólo llega a invocarse desde el applet Calendar del
+     * Dashboard en el módulo elastix-system. Al invocarse, se asigna
      * $_GET['id'] al id de evento que se desea que se muestre. */
     $smarty->assign('EVENT_ID', (isset($_GET['id']) && ctype_digit($_GET['id']))
         ? trim($_GET['id']) : '');
@@ -249,7 +251,7 @@ function handleJSON_searchcontacts($smarty, $module_name, $local_templates_dir)
 {
     $json = new Services_JSON();
     Header('Content-Type: application/json');
-    
+
     return $json->encode(searchCalendarContacts(
         getParameter('search'),
         $_SESSION['elastix_user']
@@ -267,7 +269,7 @@ function handleJSON_phone_numbers($smarty, $module_name, $local_templates_dir)
 
     $pACL    = new paloACL(new paloDB($arrConf['elastix_dsn']['acl']));
     $id_user = $pACL->getIdUser($_SESSION['elastix_user']);
-    
+
     $directory_type = (isset($_POST['select_directory_type']) && $_POST['select_directory_type']=='External')
         ? 'external' : 'internal';
     $_POST['select_directory_type'] = $directory_type;
@@ -287,7 +289,7 @@ function handleJSON_phone_numbers($smarty, $module_name, $local_templates_dir)
         'Internal'              =>  _tr('Internal'),
         'External'              =>  _tr('External'),
     ));
-    
+
     $field   = NULL;
     $pattern = NULL;
     $namePattern = NULL;

@@ -1,6 +1,6 @@
 %define modname agenda
 
-Summary: Elastix Module Agenda 
+Summary: Elastix Module Agenda
 Name:    elastix-%{modname}
 Version: 4.0.0
 Release: 2
@@ -101,26 +101,30 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: tweaks for tenant theme support by Edgar Landivar.
+  SVN Rev[7272]
+
 * Tue Oct 27 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-2
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump version and release in specfile.
 
-* Tue Oct 27 2015 Alex Villací­s Lasso <a_villacis@palosanto.com>
+* Tue Oct 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: use /proc file instead of running hostname command.
   SVN Rev[7261]
 - CHANGED: Agenda: explicitly spell out previously hidden package requirements
   that provide system commands.
   SVN Rev[7260]
 
-* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Agenda: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7233]
 
-* Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
   Added: Calendar: add Russian translation by user Russian.
   SVN Rev[7195]
 
-* Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Address Book: add Russian translation by user Russian.
   SVN Rev[7194]
 
@@ -137,7 +141,7 @@ fi
 - FIXED: Calendar: fix regexp that separates friendly name from email address.
   SVN Rev[6951]
 - CHANGED: Calendar: remove extraneous explicit font sizing.
-  SVN Rev[6950] 
+  SVN Rev[6950]
 
 * Mon Mar 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: isolate datetime formatting function and make it check for
@@ -148,7 +152,7 @@ fi
 - CHANGED: Agenda - jQuery-1.11.2 migration - fix incorrect use of
   attribute instead of property.
   SVN Rev[6923]
-- CHANGED: Agenda - jQuery-1.11.2 migration - empty strings are no longer 
+- CHANGED: Agenda - jQuery-1.11.2 migration - empty strings are no longer
   considered a valid JSON response by jQuery. Return "null" instead.
   SVN Rev[6922]
 
@@ -157,12 +161,12 @@ fi
   SVN history. Bump version and release in specfile.
   SVN Rev[6888]
 
-* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com>
 - CHANGED: /apps/core/agenda/modules/calendar/libs changed route of PHPMailer
   library
   SVN Rev[6869]
 
-* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com> 
+* Mon Feb 23 2015 Armando Chuto <armando@palosanto.com>
 - ADDED: /apps/core/agenda/setup/built added PHPMailer library
   SVN Rev[6867]
 
@@ -176,20 +180,20 @@ fi
   SVN history. Bump release in specfile.
   SVN Rev[6665]
 
-* Fri Jul 04 2014 Sergio Broncano <sbroncano@palosanto.com> 
+* Fri Jul 04 2014 Sergio Broncano <sbroncano@palosanto.com>
 - FIXED: Address book: Was fixed the bug #1928.
   SVN Rev[6662]
 
-* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com> 
+* Fri Jun 13 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: trunk - core/specs: Update specfile with latest SVN history. Bump
   Release in specfile.
   SVN Rev[6650]
 
-* Fri May 02 2014 Bruno Macias <bmacias@palosanto.com> 
+* Fri May 02 2014 Bruno Macias <bmacias@palosanto.com>
 - UPDATED: languages modules were updated.
   SVN Rev[6619]
 
-* Fri Apr 25 2014 Luis Abarca <labarca@palosanto.com> 
+* Fri Apr 25 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: apps - Build/spec's: Commented some code that actually its not used.
   SVN Rev[6608]
 
@@ -219,20 +223,20 @@ fi
 
 * Mon Mar 24 2014 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar - complete rewrite. The Calendar module has been rewritten,
-  starting with the definition of classes paloSantoCalendar and 
+  starting with the definition of classes paloSantoCalendar and
   paloSantoCalendarEvent as the single implementation of the Calendar code. The
   core.class.php file now directly delegates to this implementation instead of
   partially implementing functionality duplicated in the old index.php. The new
   core.class.php now has a method for updating an event, which is now exposed
   via SOAP and REST. The Calendar GUI has been rewritten to make exclusive use
-  of REST to load and save calendar information. Also, the javascript 
+  of REST to load and save calendar information. Also, the javascript
   implementation has been restructured to take full advantage of utilities
   provided by jQuery and jQueryUI. All of this adds up to remove almost all the
   implementation code from index.php, which now forwards requests not directly
   related to loading and updating the calendar.
   SVN Rev[6555]
 
-* Sun Feb 16 2014 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Sun Feb 16 2014 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: mark some library functions as private
   SVN Rev[6477]
 
@@ -263,15 +267,15 @@ fi
   SVN history. Bump release in specfile.
   SVN Rev[5783]
 
-* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com> 
+* Tue Aug 13 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE: Correction of some mistakes in the translation file es.lang.
   SVN Rev[5733]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5609]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5608]
 
@@ -280,12 +284,12 @@ fi
   SVN history. Bump release in specfile.
   SVN Rev[5558]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module address_book. Correction of some mistakes in the translation
   files.
   SVN Rev[5494]
 
-* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 01 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module calendar. Correction of some mistakes in the translation
   files.
   SVN Rev[5493]
@@ -300,30 +304,30 @@ fi
   SVN history. Bump release in specfile.
   SVN Rev[5351]
 
-* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module address_book. Correction of some mistakes in the translation
   files.
   SVN Rev[5348]
 
-* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module calendar. Correction of some mistakes in the translation
   files.
   SVN Rev[5347]
 
-* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Jul 18 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module calendar. Correction of some mistakes in the translation
   files.
   SVN Rev[5346]
 
-* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com> 
+* Wed Jul 17 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Module address_book. Correction of some mistakes in the english
   translation file
   SVN Rev[5327]
 
 * Mon Jul 15 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Calendar: FIXED: Calendar: remove *second* bogus compare of translated 
-  ajax response field to hardcoded untranslated string. Apparently the check 
-  serves no purpose, and breaks loading of event data in languages other than 
+- FIXED: Calendar: FIXED: Calendar: remove *second* bogus compare of translated
+  ajax response field to hardcoded untranslated string. Apparently the check
+  serves no purpose, and breaks loading of event data in languages other than
   English.
 - FIXED: Calendar: remove reference to uninitialized variable.
   SVN Rev[5312]
@@ -349,10 +353,10 @@ fi
   SVN Rev[5083]
 
 * Mon Jun 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Address Book: hardcode base URL for REST service because PHP_SELF is 
+- CHANGED: Address Book: hardcode base URL for REST service because PHP_SELF is
   insecure. Pointed out by Fortify report.
   SVN Rev[5077]
-- CHANGED: Calendar: hardcode base URL for REST service because PHP_SELF is 
+- CHANGED: Calendar: hardcode base URL for REST service because PHP_SELF is
   insecure. Pointed out by Fortify report.
   SVN Rev[5075]
 - FIXED: Agenda: discard nonnumeric values of contact ID to prevent manipulation
@@ -360,7 +364,7 @@ fi
   SVN Rev[5074]
 
 * Tue Jun 04 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Agenda: the output of 'core show channels concise' has changed from 
+- FIXED: Agenda: the output of 'core show channels concise' has changed from
   Asterisk 1.6 to 1.8 and later, and breaks parsing prior to call transfer.
   Fixed. Fixes part of Elastix bug #1570.
   SVN Rev[5053]
@@ -397,7 +401,7 @@ fi
 * Wed May 22 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agenda: remove unnecessary and risky copy of uploaded file. Pointed out
   by Fortify report.
-  SVN Rev[4998] 
+  SVN Rev[4998]
 
 * Wed May 22 2013 Bruno Macias <bmacias@palosanto.com>
 - ADDED: module address book, new fields for internal contacts, fields are im
@@ -426,10 +430,10 @@ fi
   SVN history. Changed release in specfile.
 
 * Fri May 10 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Calendar: check that notification phone is numeric, and disallow 
+- FIXED: Calendar: check that notification phone is numeric, and disallow
   newlines on TTS text. Fixes Elastix bug #1549.
   SVN Rev[4912]
-- FIXED: Address Book: check that phone number is numeric on contacts CSV 
+- FIXED: Address Book: check that phone number is numeric on contacts CSV
   upload. Fixes Elastix bug #1548.
   SVN Rev[4910]
 
@@ -441,7 +445,7 @@ fi
 
 * Wed Apr 17 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Agenda: fix broken user filtering in main listing of contacts that
-  resulted in private contacts from other users being visible. Fixes Elastix 
+  resulted in private contacts from other users being visible. Fixes Elastix
   bug #1529.
   SVN Rev[4847]
 
@@ -463,7 +467,7 @@ fi
   SVN Rev[4704]
 
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
-- CHANGED: Agenda - Build/elastix-agenda.spec: Changed Version and Release in 
+- CHANGED: Agenda - Build/elastix-agenda.spec: Changed Version and Release in
   specfile according to the current branch.
   SVN Rev[4635]
 
@@ -491,14 +495,14 @@ fi
   SVN Rev[4373]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Framework,Modules: remove temporary file preversion_MODULE.info under 
+- Framework,Modules: remove temporary file preversion_MODULE.info under
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
-  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on
   RPM update. Part of the fix for Elastix bug #1398.
 - Framework,Modules: switch as many files and directories as possible under
-  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
   Elastix bug #1399.
-- Framework,Modules: clean up specfiles by removing directories under 
+- Framework,Modules: clean up specfiles by removing directories under
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
   SVN Rev[4347]
@@ -508,7 +512,7 @@ fi
   SVN history. Changed release in specfile.
 
 * Fri Jun 8 2012 Alberto Santos <asantos87@palosanto.com>
-- CHANGED: Agenda - build/elastix-agenda.spec: Changed specfile, updated with 
+- CHANGED: Agenda - build/elastix-agenda.spec: Changed specfile, updated with
   the latest information.
   SVN Rev[3981]
 
@@ -523,12 +527,12 @@ fi
   SVN Rev[3975]
 
 * Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
-- ADDED: module calendar, added new rest resources for events synchronization 
+- ADDED: module calendar, added new rest resources for events synchronization
   and data integrity verification.
   SVN Rev[3973]
 
 * Thu Jun 7 2012 Alberto Santos <asantos87@palosanto.com>
-- ADDED: modules address_book, added new rest resources for synchronitation 
+- ADDED: modules address_book, added new rest resources for synchronitation
   and data verification integrity.
   SVN Rev[3972]
 
@@ -539,13 +543,13 @@ fi
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-6
 - CHANGED: Agenda - Build/elastix-agenda.spec: Changed release in specfile
-- ADDED: CHANGED: Agenda - themes/js: Changed javascript3.js to solve bug 
-  introduce in commit 3908. Didn't work color picker when was created a event. 
+- ADDED: CHANGED: Agenda - themes/js: Changed javascript3.js to solve bug
+  introduce in commit 3908. Didn't work color picker when was created a event.
   SVN Rev[3910]
-  
+
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-5
 - CHANGED: Agenda - Build/elastix-agenda.spec: Changed release in specfile
-- ADDED: Calendar - themes/evento.tpl: Added file evento.tpl. File required 
+- ADDED: Calendar - themes/evento.tpl: Added file evento.tpl. File required
   for commit 3488. SVN Rev[3908]
 
 * Fri Apr 27 2012 Rocio Mera <rmera@palosanto.com> 2.3.0-4
@@ -556,13 +560,13 @@ fi
   called "_rechazar_correo_vacio" that was not implemented. Now that function is
   implemented in the class.
   SVN Rev[3890]
-- CHANGED: Modules - Calendar: Changed the format of the popup that appear when 
+- CHANGED: Modules - Calendar: Changed the format of the popup that appear when
   a user want create, view or edit a event.
   SVN Rev[3844]
 
 * Fri Mar 30 2012 Bruno Macias <bmacias@palosanto.com> 2.3.0-3
 - CHANGED: In spec file, changed prereq elastix-framework >= 2.3.0-5
-- FIXED: modules - SQLs DB: se quita SQL redundante de alter table y nuevos 
+- FIXED: modules - SQLs DB: se quita SQL redundante de alter table y nuevos
   registros, esto causaba un error leve en la instalación de el/los modulos.
   SVN Rev[3797]
 
@@ -634,45 +638,45 @@ fi
   elastix-framework >= 2.2.0-30
 - CHANGED: file index.php to fixed the problem with the paged.
   SVN Rev[3611].
- 
+
 * Mon Jan 30 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-11
 - CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-29
 - FIXED: Modules - Calendar: A query was doubly parameterized.
   SVN Rev[3596].
-- CHANGED: modules - address_book/index.php Little chande in 
-  message that appear when the current user dont have a extension 
+- CHANGED: modules - address_book/index.php Little chande in
+  message that appear when the current user dont have a extension
   number associated.SVN Rev[3593].
 
 
 * Sat Jan 28 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-10
-- CHANGED: In spec file changed Prereq elastix to 
+- CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-28
-- CHANGED: modules address_book, in function listAddressBook, 
+- CHANGED: modules address_book, in function listAddressBook,
   the generation of url is not longer necessary because this
   is now done by the script restful.php. SVN Rev[3579].
-- CHANGED: Modules - Calendar: Se revertió los cambios en 
-  paloSantoCalendar.class.php que se hicieron en el 
+- CHANGED: Modules - Calendar: Se revertió los cambios en
+  paloSantoCalendar.class.php que se hicieron en el
   commit [3574]. SVN Rev[3547].
-- FIXED: Modules - Calendar: Fixed bug, the search filter 
+- FIXED: Modules - Calendar: Fixed bug, the search filter
   'Phone Directory' doesn't work in Pop Up of Address Book.
   M    calendar/themes/default/filter_adress_book.tpl
   M    calendar/libs/paloSantoCalendar.class.php
   M    calendar/index.php. SVN Rev[3574].
-- CHANGED: modules - images: icon image title was changed 
+- CHANGED: modules - images: icon image title was changed
   on some modules. SVN Rev[3572].
-- FIXED: modules address_book, changed the field_pattern 
-  from "'%%'" to "%%" in function listAddressBook becuase 
-  now the address_book querys are parameterized and the 
+- FIXED: modules address_book, changed the field_pattern
+  from "'%%'" to "%%" in function listAddressBook becuase
+  now the address_book querys are parameterized and the
   single quotes are not necessary. SVN Rev[3566].- CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-28- CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-28- CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-28
-- CHANGED: modules address_book, added a functional point 
+- CHANGED: modules address_book, added a functional point
   to update a contact. SVN Rev[3564]
-- CHANGED: modules - icons: Se cambio de algunos módulos 
+- CHANGED: modules - icons: Se cambio de algunos módulos
   los iconos que los representaba. SVN Rev [3563]
-- FIXED: modules address_book, all the querys were 
+- FIXED: modules address_book, all the querys were
   parameterized. SVN Rev[3558].
 - NEW: modules - address_book: Se agrega nueva imagen para
   el icono del módulo. SVN Rev[3551].
@@ -682,18 +686,18 @@ fi
 - CHANGED: modules - * : Cambios en ciertos mòdulos que
   usan grilla para mostrar ciertas opciones fuera del
   filtro, esto debido al diseño del nuevo filtro. SVN Rev
-  [3549]. 
- 
+  [3549].
+
 
 * Tue Jan 17 2012 Rocio Mera <rmera@palosanto.com> 2.2.0-9
 - CHANGED: In spec file changed Prereq elastix to elastix-framework >= 2.2.0-26
-- CHANGED: Modules - Agenda/Calendar: Changes in javascript to better the message of pop-up. This changes 
+- CHANGED: Modules - Agenda/Calendar: Changes in javascript to better the message of pop-up. This changes
   require the commit SVN Rev[3514]. SVN[3517].
-  
+
 * Tue Dec 20 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-8
 - CHANGED: In spec file changed Prereq elastix to
   elastix-framework >= 2.2.0-23
-- FIXED: Calendar: fix invalid javascript syntax for object 
+- FIXED: Calendar: fix invalid javascript syntax for object
   literal in fullCalendar declaration. SVN Rev[3455]
 
 * Fri Nov 25 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-7
@@ -702,10 +706,10 @@ fi
 
 * Tue Nov 22 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-6
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-15
-- REMOVED: Modules - Calendar: Removed jquery01.blockUI.js 
+- REMOVED: Modules - Calendar: Removed jquery01.blockUI.js
   and moved to the framework. SVN Rev[3337]
-- REMOVED: Modules - Agenda: Removed files style4.colorpicker.css 
-  and jquery02.colorpicker.js in calendar modules because this 
+- REMOVED: Modules - Agenda: Removed files style4.colorpicker.css
+  and jquery02.colorpicker.js in calendar modules because this
   libs are in framework. SVN Rev[3336]
 
 * Sat Oct 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-5
@@ -713,18 +717,18 @@ fi
 
 * Sat Oct 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-4
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-12
-- CHANGED: Modules - Calendar: Added css property border-radius 
+- CHANGED: Modules - Calendar: Added css property border-radius
   in calendar. SVN Rev[3225]
 - UPDATED: fax new  templates files support new elastixneo theme
   SVN Rev[3144]
-- UPDATED: address book templates files support new elastixneo 
+- UPDATED: address book templates files support new elastixneo
   theme. SVN Rev[3140]
 - UPDATED: calendar templates files support new elastixneo theme
-  SVN Rev[3134] 
+  SVN Rev[3134]
 
 * Fri Oct 07 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-3
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-8
-- FIXED: module address_book, added an id of "filter_value" to 
+- FIXED: module address_book, added an id of "filter_value" to
   the filter text box, also the event onkeypress was removed
   from this text box
   SVN Rev[3034]
@@ -746,7 +750,7 @@ fi
 - CHANGED: module recordings, changed the location of module
   recordings, now it is in PBX->tools
   SVN Rev[2953]
-- CHANGED: module address_book, in view mode the asterisks and 
+- CHANGED: module address_book, in view mode the asterisks and
   word required were removed
   SVN Rev[2947]
 - FIXED: Agenda - Calendar: Fixed bug where calendar popup appear
@@ -756,18 +760,18 @@ fi
 
 
 * Fri Jul 29 2011 Eduardo Cueva <ecueva@palsoanto.com> 2.0.4-12
-- CHANGED: Agenda - Calendar:  Show message after to create an 
-  event because there are a load page as event and in a remote 
+- CHANGED: Agenda - Calendar:  Show message after to create an
+  event because there are a load page as event and in a remote
   test there is not a feedback to the user. SVN Rev[2852]
 
 * Tue Jul 28 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-11
-- FIXED: Modules - Calendar: Fixed problem with text to speach 
+- FIXED: Modules - Calendar: Fixed problem with text to speach
   by characters like ",". SVN Rev[2839][2836]
-- CHANGED: module address_book, when the user does not have an 
+- CHANGED: module address_book, when the user does not have an
   extension associated, a link appear to assign one extension.
   SVN Rev[2796]
-- CHANGED: module recordings, when the user does not have an 
-  extension associated, a link appear to assign one extension. 
+- CHANGED: module recordings, when the user does not have an
+  extension associated, a link appear to assign one extension.
   SVN Rev[2792]
 
 * Wed Jun 29 2011 Alberto Santos <asantos@palosanto.com> 2.0.4-10
@@ -779,23 +783,23 @@ fi
   to bug #903. SVN Rev[2757]
 
 * Mon Jun 13 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-9
-- CHANGED: In spec file change prereq freepbx >= 2.8.1-1 and 
+- CHANGED: In spec file change prereq freepbx >= 2.8.1-1 and
   elastix >= 2.0.4-24
-- CHANGED: Agenda/Recordings: replace direct use of paloConfig on 
+- CHANGED: Agenda/Recordings: replace direct use of paloConfig on
   /etc/amportal.conf with call to generarDSNSistema(). SVN Rev[2676]
-- CHANGED: Agenda/AddressBook: replace direct use of paloConfig 
-  on /etc/amportal.conf with call to generarDSNSistema(). The object 
+- CHANGED: Agenda/AddressBook: replace direct use of paloConfig
+  on /etc/amportal.conf with call to generarDSNSistema(). The object
   is still used to get access to the AMI credentials. SVN Rev[2673]
-- CHANGED: Agenda/Calendar: replace direct use of paloConfig on 
+- CHANGED: Agenda/Calendar: replace direct use of paloConfig on
   /etc/amportal.conf with call to generarDSNSistema(). SVN Rev[2670]
-- CHANGED: The split function of these modules was replaced by the 
-  explode function due to that the split function was deprecated since 
+- CHANGED: The split function of these modules was replaced by the
+  explode function due to that the split function was deprecated since
   PHP 5.3.0. SVN Rev[2650]
 
 * Tue Apr 26 2011 Alberto Santos <asantos@palosanto.com> 2.0.4-8
 - FIXED: Agenda - calendar: Fixed bug where appear a div at the bottom
   of the big calendar
-  SVN Rev[2584] 
+  SVN Rev[2584]
 - CHANGED: module calendar, changed class name to core_Calendar
   SVN Rev[2576]
 - CHANGED: module address_book, changed class name to core_AddressBook
@@ -814,27 +818,27 @@ fi
   SVN Rev[2540]
 - CHANGED: file db.info, changed installation_force to ignore_backup
   SVN Rev[2489]
-- CHANGED: Agenda - calendar : Clean the textarea when do an action 
+- CHANGED: Agenda - calendar : Clean the textarea when do an action
   to create a new event because this field was never clean it
   SVN Rev[2470]
 - CHANGED: elastix-agenda.spec, changed prereq elastix to 2.0.4-19
 
 * Tue Mar 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-7
-- CHANGED:  Agenda - calendar: Change the style.css in calendar 
-  where buttons to change the view fo calendar (Month, week, day) 
-  don't appear the border right of each button, this only occur 
-  with the buttons "month" and "week". For see more information 
+- CHANGED:  Agenda - calendar: Change the style.css in calendar
+  where buttons to change the view fo calendar (Month, week, day)
+  don't appear the border right of each button, this only occur
+  with the buttons "month" and "week". For see more information
   check the ticket "http://bugs.elastix.org/view.php?id=739"
   SVN Rev[2456]
-- CHANGED:  Agenda - Calendar:  Changes in styles and to 
-  attach ical file, now the function AddStringAttachment from 
+- CHANGED:  Agenda - Calendar:  Changes in styles and to
+  attach ical file, now the function AddStringAttachment from
   PHPMAILER attach the file icals as part of html. SVN Rev[2405]
-- CHANGED:  agenda - calendar: 
-          - clear the code 
-          - remove the action loading to show the form 
-            to create a new windows. 
+- CHANGED:  agenda - calendar:
+          - clear the code
+          - remove the action loading to show the form
+            to create a new windows.
           - Add 5 minutes more by defaul in end date
-          - Add lib gcal.js to get google 
+          - Add lib gcal.js to get google
             calendar(non-functional for now)
   SVN Rev[2399]
 
@@ -844,30 +848,30 @@ fi
 * Mon Feb 07 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-5
 - CHANGED:   In Spec add lines to support install or update
   proccess by script.sql.
-- DELETED:   Databases sqlite were removed to use the new 
-  format to sql script for administer process install, update 
+- DELETED:   Databases sqlite were removed to use the new
+  format to sql script for administer process install, update
   and delete. SVN Rev[2332]
-- ADD:  addons, agenda, reports. Add folders to contain sql 
+- ADD:  addons, agenda, reports. Add folders to contain sql
   scrips to update, install or delete. SVN Rev[2321]
 
 * Thu Feb 03 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
-- CHANGED:  menu.xml to support new tag "permissions" where has 
-  all permissions of group per module and new attribute "desc" 
-  into tag  "group" for add a description of group. 
+- CHANGED:  menu.xml to support new tag "permissions" where has
+  all permissions of group per module and new attribute "desc"
+  into tag  "group" for add a description of group.
   SVN Rev[2294][2299]
-- CHANGED:  Agenda - Address_book: change icons and add text to 
-  know when a contact is private, public or public and not 
+- CHANGED:  Agenda - Address_book: change icons and add text to
+  know when a contact is private, public or public and not
   editable. SVN Rev[2265]
-- CHANGED:  All calendar in module calendar start on Monday 
-  before date in events start on Monday but the others calendars 
+- CHANGED:  All calendar in module calendar start on Monday
+  before date in events start on Monday but the others calendars
   start on Sunday. Task[478] SVN Rev[2230]
 
 * Thu Dec 30 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-3
-- FIXED:  Fixed bug in recording where any file can be uploaded 
+- FIXED:  Fixed bug in recording where any file can be uploaded
   for security must be wav, gsm and wav49. SVN Rev[2188]
 
 * Wed Dec 29 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-2
-- CHANGED:  Hide image loading gif in calendar when you create 
+- CHANGED:  Hide image loading gif in calendar when you create
   a new event or view one it appear top of box. SVN Rev[2181]
 
 * Wed Dec 29 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-1
@@ -879,47 +883,47 @@ fi
 * Mon Dec 20 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-26
 - CHANGED:  Change path reference about phpMailer.lib to send mails
   SVN Rev[2100]
-- CHANGED:  changes applied for support calendar with color by 
+- CHANGED:  changes applied for support calendar with color by
   calendars's events. [#411] SVN Rev[2091]
 * Mon Dec 06 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-25
 - ADD:     New Prereq asterisk and freePbx in spec file.
 - CHANGED: massive search and replace of HTML encodings with the actual
   characters. SVN Rev[2002]
 - FIXED:   Calendar: Fix failure to remove call files. Previous commits
-  replaced a system() call with an unlink() but did not take into 
+  replaced a system() call with an unlink() but did not take into
   account that a shell glob was being relied upon. SVN Rev[2000]
-- FIXED:   Calendar: Actually send an email when deleting an event with 
+- FIXED:   Calendar: Actually send an email when deleting an event with
   e-mail notifications. SVN Rev[2000]
-- CHANGED: Address Book: stop assigning template variable "url" directly, 
+- CHANGED: Address Book: stop assigning template variable "url" directly,
   and remove nested <form> tags. SVN Rev[1997]
-- FIXED:   Calendar: Allow browsing of public contacts from external 
+- FIXED:   Calendar: Allow browsing of public contacts from external
   phonebook.SVN Rev[1995]
-	   Calendar: stop assigning template variable "url" directly, 
+	   Calendar: stop assigning template variable "url" directly,
   and remove nested <form> tag. SVN Rev[1994]
 
 * Fri Nov 12 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-24
-- FIXED:  Fixed some bug about calendar module, and some function was 
+- FIXED:  Fixed some bug about calendar module, and some function was
   improved like show list email in notification emails and so on.
   SVN Rev[1945]
-- ADDED:  New javascript to show a box with a legend say "loading data" 
+- ADDED:  New javascript to show a box with a legend say "loading data"
   the lib is jquery01.blockUI.js in calendar. SVN Rev[1945]
-- FIXED: revert htmlspecialchars() escaping when displaying full external 
-  contact information. The paloForm::fetchForm method does this already 
-  since commit 1911, so the data gets doubly-escaped. Assumes commit 1911 
+- FIXED: revert htmlspecialchars() escaping when displaying full external
+  contact information. The paloForm::fetchForm method does this already
+  since commit 1911, so the data gets doubly-escaped. Assumes commit 1911
   is already applied in system. It is in Address_book. SVN Rev[1912]
 
 * Fri Oct 29 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-23
-- FIXED: Fixed to show script in address_book of calendar, this was solved 
+- FIXED: Fixed to show script in address_book of calendar, this was solved
   using htmlspecialchars function in PHP. SVN Rev[1878]
 
 * Wed Oct 27 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-22
 - CHANGED:  New Parameters en Calendar "reminderTimer" it is used to create
   .call files to reminder 10, 30 or 60 minutes before to start the event
   SVN Rev[1858]
-- FIXED:    Fixed some bug about the information of events per user, where 
+- FIXED:    Fixed some bug about the information of events per user, where
   other user can be view, edit or delete the event only knowing the id_event
   SVN Rev[1858]
-- FIXED:    In address_book the view of report in external contact was escaped 
+- FIXED:    In address_book the view of report in external contact was escaped
   for html using htmlspecialchars function, it is for avoid security bugs
   SVN Rev[1858]
 - CHANGED:  Add changes to add new field reminderTimer in installer.php(agenda)
@@ -933,7 +937,7 @@ fi
   contacts in address_book.
 
 * Mon Oct 12 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.0-20
-- FIXED:   function getIdUser was removed of paloAdressBook.class.php because 
+- FIXED:   function getIdUser was removed of paloAdressBook.class.php because
   already exists in paloSantoACL. SVN Rev[1848]
 - FIXED:   Fixed security bug in recording module, where was possible execute
   commands in the text field of recording name because it use  function exec in php
@@ -1005,7 +1009,7 @@ fi
 - Increment release.
 
 * Mon Oct 19 2009 Bruno Macias <bmacias@palosanto.com> 2.0.0-3
-- Add accion uninstall rpm. 
+- Add accion uninstall rpm.
 
 * Mon Sep 07 2009 Bruno Macias <bmacias@palosanto.com> 2.0.0-2
 - New structure menu.xml, add attributes link and order.

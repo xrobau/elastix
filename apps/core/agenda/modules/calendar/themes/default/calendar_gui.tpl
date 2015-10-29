@@ -3,15 +3,15 @@
 <table class="tabForm" width="100%"><tr>
 	<td id="calendar_toolbar" width="10%" align="left" valign="top">
 	    <div id="calendar_buttonbox" style="margin: 0px 10px 6px 10px; text-align: center;" valign="middle">
-	        <a href="#" id="calendar_newevent" >{$LBL_CREATE_EVENT}</a>    
+	        <button type='button' class='button' id="calendar_newevent" ><i class="fa fa-plus"></i>&nbsp;{$LBL_CREATE_EVENT}</button>
 	    </div>
-	    <div id="calendar_datepick">    
+	    <div id="calendar_datepick">
 	    </div>
 	    <div id="calendar_ical_links" class="ui-widget ui-widget-content ui-helper-clearfix ui-corner-all">
             <div class="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all title_size">{$LBL_EXPORT_CALENDAR}</div>
             <div class="content_ical">
                 <a href="/rest.php/{$module_name}/CalendarEvent?format=ical">
-                    <span>{$LBL_LINK_ICAL}</span>
+                    <span><i class="fa fa-download"></i>&nbsp;{$LBL_LINK_ICAL}</span>
                 </a>
             </div>
 	    </div>

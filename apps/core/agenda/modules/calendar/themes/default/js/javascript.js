@@ -60,7 +60,7 @@ $(document).ready(function() {
      * inicialización del FullCalendar toma todo el ancho restante disponible
      * al momento de dibujarse, y si el DatePicker se inicializa después, la
      * columna del último día de la semana se aplasta. */
-    
+
     // Definición del calendario para navegar
     $("#calendar_datepick").datepicker({
         firstDay: 1,
@@ -78,9 +78,9 @@ $(document).ready(function() {
             $('#calendar_main').fullCalendar('changeView', 'agendaDay');
         }
     });
-    
+
     // Botón de nuevo evento
-    $("#calendar_newevent").button().click(function() {
+    $("#calendar_newevent").click(function() {
         clearEventDialog();
         $('#calendar_eventdialog').dialog({
             title: arrLang_main['LBL_NEW_EVENT'],
@@ -113,7 +113,7 @@ $(document).ready(function() {
 
     /* Definición del widget principal del calendario. Este script también se
      * pide desde el popup de contactos telefónicos, que no incluye fullCalendar.
-     * Por lo tanto se verifica si fullCalendar está disponible. */    
+     * Por lo tanto se verifica si fullCalendar está disponible. */
     if (typeof $('#calendar_main').fullCalendar != 'undefined') $('#calendar_main').fullCalendar({
         theme: true,    // Usar tema actual de jQueryUI
         editable: true, // Habilitar modificación de eventos (drag/resize)
@@ -171,10 +171,10 @@ $(document).ready(function() {
             return false;
         }
     });
-    
+
     // Color del título del calendario
     $('.fc-header-title').css('color', '#E35332');
-    
+
     // Preparar diálogo y widgets
     $('#calendar_eventdialog').dialog({
         autoOpen: false,
@@ -184,26 +184,7 @@ $(document).ready(function() {
     });
     $('#CheckBoxRemi').button();
     $('#CheckBoxNoti').button();
-    $('#colorSelector').ColorPicker({
-        color: '#3366CC',
-        onShow: function (colpkr) {
-            $(colpkr).fadeIn(500);
-            return false;
-        },
-        onHide: function (colpkr) {
-            $(colpkr).fadeOut(500);
-            return false;
-        },
-        //onSubmit: function(hsb, hex, rgb, el) {
-        onSubmit: function(hsb, hex, rgb, el) {
-            $(el).ColorPickerHide();
-        },
-        onChange: function (hsb, hex, rgb) {
-            $('#colorSelector div').css('backgroundColor', '#' + hex);
-            //$('#colorHex').val('#' + hex);
-        }
-    });
-    
+
     // Mostrar u ocultar recordatorio y correos según sea necesario
     $('#CheckBoxRemi').click(function() {
         if ($('#CheckBoxRemi').is(':checked')) {
@@ -225,12 +206,12 @@ $(document).ready(function() {
         $($(this).parents('tr')[0]).remove();
         reindexEmailList($('#grilla tbody'));
     });
-    
+
     // Cuenta de caracteres disponibles para TTS
     $(':input[name="tts"]')
         .change(updateTTSCharCount)
         .keyup(updateTTSCharCount);
-    
+
     // Llamada de prueba con texto TTS
     $('#listenTTS').click(function() {
         var call_to = $(':input[name="call_to"]').val();
@@ -270,13 +251,13 @@ $(document).ready(function() {
         minLength: 0,
         source: function(request, response) {
             var search = extractLast(request.term);
-            
+
             // No se realiza búsqueda para cadenas vacías
             if (search.trim() == '') {
                 response([]);
                 return
             }
-            
+
             // Se espera que la respuesta sea un arreglo de {label, value}
             $.get('index.php', {
                 menu:       getCurrentElastixModule(),
@@ -305,7 +286,7 @@ $(document).ready(function() {
             return false;
         }
     });
-    
+
     // Popup de búsqueda de número de teléfono
     $('#add_phone a').click(function() {
         var ancho = 600;
@@ -318,15 +299,15 @@ $(document).ready(function() {
                 "width="+ancho+",height="+alto+",top="+winal+",left="+winiz+
                     ",location=yes,status=yes,resizable=yes,scrollbars=yes,fullscreen=no,toolbar=yes");
         my_window.document.close();
-        
+
     });
-    
+
     // Esta clase sólo existe dentro del popup de contactos telefónicos
     $('.selected_contact_phone').click(function() {
         $(opener.document).find('#call_to').val($(this).text());
         window.close();
     });
-    
+
     var event_id = $('input[name="event_id"]').val();
     if (event_id != '') openEventDialog('/rest.php/' + getCurrentElastixModule() + '/CalendarEvent/' + event_id);
 });
@@ -399,9 +380,7 @@ function clearEventDialog()
 {
     $(':input[name="event"]').val('');
     $(':input[name="description"]').val('');
-    $('#colorSelector').ColorPickerSetColor('#3366CC');
-    $('#colorSelector div').css('backgroundColor', '#3366CC');
-    
+
     var today_str = formatdate(new Date);
     $(':input[name="date"]').val(today_str);
     $(':input[name="to"]').val(today_str);
@@ -412,7 +391,7 @@ function clearEventDialog()
     $(':input[name="tts"]').val('').change();
     $('#CheckBoxRemi').prop('checked', false).button('refresh');
     $('.remin').hide();
-    
+
     // Campos de notificaciones
     $('#CheckBoxNoti').prop('checked', false).button('refresh');
     $('#tags').val('');
@@ -428,9 +407,7 @@ function fillEventDialog(eventdata)
 {
     $(':input[name="event"]').val(eventdata.subject);
     $(':input[name="description"]').val(eventdata.description);
-    $('#colorSelector').ColorPickerSetColor(eventdata.color);
-    $('#colorSelector div').css('backgroundColor', eventdata.color);
-    
+
     /* Se tiene que usar la utilidad parseISO8601 para que el parseo de la fecha
      * funcione en IE8 (...típico) */
     $(':input[name="date"]').val(formatdate($.fullCalendar.parseISO8601(eventdata.starttime)));
@@ -450,7 +427,7 @@ function fillEventDialog(eventdata)
         $('#CheckBoxNoti').prop('checked', true).button('refresh');
         $('.notif').show();
         $('#grilla').show();
-        
+
         var module_name = getCurrentElastixModule();
         var grilla_tbody = $('#grilla tbody');
         var email_regexp = /^"?(.*?)"?\s*<?(\S+@\S+?)>?$/;
@@ -500,14 +477,13 @@ function saveEventDialog(url)
         enddate:        datehhmm($(':input[name="to"]').val()),
         subject:        $(':input[name="event"]').val(),
         description:    $(':input[name="description"]').val(),
-        color:          rgb2hex($('#colorSelector div').css('backgroundColor')),
-        
+        color:          rgb2hex($('#colorSelector .colorpicker-box').css('backgroundColor')),
         asterisk_call:  $('#CheckBoxRemi').is(':checked'),
         recording:      $(':input[name="tts"]').val(),
         call_to:        $(':input[name="call_to"]').val(),
         reminder_timer: $(':input[name="ReminderTime"]').val(),
-        
-        emails_notification: ($('#CheckBoxNoti').is(':checked')) 
+
+        emails_notification: ($('#CheckBoxNoti').is(':checked'))
             ? $('#grilla tbody tr').map(function(tr) { return $(this).data('email'); }).get()
             : []
     };
@@ -546,7 +522,7 @@ function saveEventDialog(url)
             return null;
         }
     }
-    
+
     return $.post(url, postvars);
 }
 

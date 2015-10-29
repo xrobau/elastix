@@ -44,21 +44,51 @@ class Applet_PerformanceGraphic
             'message'   =>  '(no message)',
         );
         //CallsMemoryCPU
-        $respuesta['html'] = "<div style='width:450px;height:240px;' id='dashboard-applet-performancegraph'></div>
+        $respuesta['html'] = "<div style='width:442px;height:240px;' id='dashboard-applet-performancegraph'></div>
 <script>
 $.plot('#dashboard-applet-performancegraph', ".
 $this->_sampler_CallsMemoryCPU().
 ", {
-    xaxes: [ { mode: 'time' } ],
-    yaxes: [ { min: 0 }, {
+    xaxes: [ {
+        mode: 'time',
+        position: 'bottom'
+    } ],
+    yaxes: [ {
     // align if we are to the right
-    position: 'right'} ],
+          font: {
+             size: 11,
+             lineHeight: 13,
+             family: 'sans-serif',
+             variant: 'small-caps',
+             color: '#cb4b4b'
+          },
+          position: 'right'
+       },
+       {
+          min: 0,
+          font: {
+             size: 11,
+             lineHeight: 13,
+             family: 'sans-serif',
+             variant: 'small-caps',
+             color: '#33cc33'
+          }
+       },
+       {
+          font: {
+             size: 11,
+             lineHeight: 13,
+             family: 'sans-serif',
+             variant: 'small-caps',
+             color: '#3da8fb'
+          }
+       }
+    ],
     legend: {
        position: 'ne',
        labelBoxBorderColor: '#ffffff'
      },
-    margin: { top: 20,  left: 20, bottom: 20, right: 20 },
-    xaxis: {tickLength:0},
+    margin: { top: 20,  left: 20, bottom: 20, right: 10 },
     series: {
        lines: {
           lineWidth: 1,
@@ -72,7 +102,7 @@ $this->_sampler_CallsMemoryCPU().
        clickable: true,
        tickColor: '#f6f6f6',
        borderWidth: 0,
-       labelMargin: 22
+       labelMargin: 18
     },
 });
 </script>";

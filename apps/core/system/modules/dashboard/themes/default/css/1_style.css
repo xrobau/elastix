@@ -10,11 +10,8 @@
     float:left;
     margin: 10px 5px 0px 0px;
     padding: 0px 0px 10px 0px;
-    width: 480px;
+    width: 474px;
     height: 300px;
-    -moz-border-radius: 10px 10px 10px 10px;
-    -webkit-border-radius: 10px 10px 10px 10px;
-    border-radius: 10px 10px 10px 10px;
     border-top: 1px solid #aaa;
     border-left: 1px solid #aaa;
     border-right: 1px solid #999;
@@ -33,11 +30,7 @@
     height:21px;
     cursor: move;
     background-color: #eee;
-    -moz-border-radius: 10px 10px 0px 0px;
-    -webkit-border-radius: 10px 10px 0px 0px;
-    border-radius: 10px 10px 0px 0px;
   }
-
 
 .appletwindow > .appletwindow_topbar > .appletwindow_title {
     position: absolute;
@@ -73,7 +66,7 @@
     top:32px;
     left:0px;
     padding:8px 8px 8px 8px;
-    width:464px;
+    width:462px;
 }
 
 /*nuevo*/

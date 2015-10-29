@@ -138,6 +138,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: more tweaks to applet appearance by Edgar Landivar.
+  SVN Rev[7275]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: system: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7245]

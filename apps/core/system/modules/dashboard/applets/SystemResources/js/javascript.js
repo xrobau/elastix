@@ -6,6 +6,11 @@ $(document).ready(function() {
             value: $('input#'+gauges[i]+'_value').val() * 100.0,
             min: 0,
             max: 100,
+            donut: true,
+            startAnimationType : 'bounce',
+            shadowSize: 0,
+            shadowVerticalOffset: 0,
+            valueFontColor: '#666666',
             title: $('input#'+gauges[i]+'_label').val(),
             label: "%"
         }));

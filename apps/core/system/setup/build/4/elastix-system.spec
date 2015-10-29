@@ -139,80 +139,84 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: more tweaks to applet appearance by Edgar Landivar.
+  SVN Rev[7275]
+
 * Tue Oct 27 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-2
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.
 
-* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: system: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7245]
 
-* Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: remove theme guard in templates. Now font icons are
   available in all themes.
   SVN Rev[7221]
 
-* Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Wed Oct 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: use $.get instead of $.post for several AJAX queries with
   no side effects.
   SVN Rev[7213]
 
-* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: netconfig: allow network devices not of the form ethN in validation.
   Part of fix for Elastix bug #2376.
   SVN Rev[7211]
 
-* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: switch to JustGage for System Resources applet.
   SVN Rev[7210]
 
-* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: cleanup and proper JSON encoding for Performance Graphic.
   SVN Rev[7209]
 
-* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: switch to jQuery Plot for Performance Graphic plot.
   SVN Rev[7208]
 
-* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: part 2 of changes for tenant theme integration. Use icons
   and spinners from tenant (Bootstrap) theme if available.
   SVN Rev[7207]
 
-* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore, Packages, Repositories: part 1 of changes for tenant
   theme integration. This requires updated elastix-framework support.
   SVN Rev[7206]
 
-* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: (trivial) tweak translations
   SVN Rev[7204]
 
-* Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: netconfig: allow network devices not of the form ethN. Part of fix for
   Elastix bug #2376.
   SVN Rev[7197]
 
-* Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Mon Oct 19 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Network Parameters: allow network devices not of the form ethN. Part
   of fix for Elastix bug #2376.
   SVN Rev[7196]
 
-* Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Dashboard: add Russian translation provided by user Russian.
   SVN Rev[7181]
 
-* Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Tue Oct 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Applet Admin: add Russian translation provided by user Russian.
   SVN Rev[7180]
 
-* Mon Oct 05 2015 Luis Abarca <labarca@palosanto.com> 
+* Mon Oct 05 2015 Luis Abarca <labarca@palosanto.com>
 - FIXED: db - system/sql_version: One of the scripts in charge of handling the
   update of database in the module, it was not working correctly, leaving the
   dashboard module showing only one applet after updating the whole module.
   SVN Rev[7165]
 
-* Wed Sep 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Wed Sep 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: remove an incorrect DELETE statement that has been dormant
   in the SQL update scripts since 2.0.4 (SVN commit #2543). This statement
   failed to run because of a lack of a newline at the end but becomes active if
@@ -229,7 +233,7 @@ fi
   SVN history. Changed version and release in specfile.
   SVN Rev[6972]
 
-* Mon Apr 06 2015 Bruno Macias <bmacias@palosanto.com> 
+* Mon Apr 06 2015 Bruno Macias <bmacias@palosanto.com>
 - FIXED: module backup_restore, Missing argument 5 for downloadBackup() was
   deleted.
   SVN Rev[6962]

@@ -24,9 +24,10 @@
 }
 ul.neo-topbar-notification > li > a,
 ul.neo-topbar-notification > li.profile-info > a {
-    color:#fff;
+    color:#888;
     font-size:16px;
-    background:#33cc33;
+    /* background:#33cc33;*/
+    background:#fafafa;
     padding:6px 8px;
     margin-right:2px;
     border-radius:50%;

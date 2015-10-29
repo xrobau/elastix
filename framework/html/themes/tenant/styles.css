@@ -903,22 +903,6 @@ td.botonoff a {
     FONT-FAMILY: verdana, arial, helvetica, sans-serif;
 }
 
-.button {
-    color: #fff;
-    border: 1px solid #57c8f1;
-    font-size: 13px;
-    font-weight: normal;
-    background-repeat: repeat-x;
-    background-position: bottom;
-    background-color: #57c8f1;
-/*     background-image: url(images/bgGray.gif); */
-    height: 16px;
-    border-radius: 5px 5px 5px 5px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    -webkit-border-radius: 5px 5px 5px 5px;
-    border-radius: 5px 5px 5px 5px;
-    padding: 6px 12px 6px 12px;
-}
 .required {
     color: #ff0000;
 }

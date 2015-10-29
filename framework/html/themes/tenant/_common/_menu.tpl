@@ -181,48 +181,47 @@ function removeNeoDisplayOnMouseOver(ref){
 
 <!-- inicio del head principal-->
 <div style="height:72px;background-color:#efefef;padding:15px;">
-
     <!-- Profile Info and Notifications -->
-    <div class="col-md-6 col-sm-4 col-xs-4 clearfix">
-
-        <ul class="user-info pull-left pull-none-xsm">
-
+    <span style='float:right; text-align:right; padding:0px 5px 0px 0px; width:175px;' class="col-md-6 col-sm-8 clearfix">
+        <ul style='float:right;' class="user-info pull-none-xsm">
             <!-- Profile Info -->
-            <li class="profile-info dropdown"><!-- add class "pull-right" if you want to place this from right -->
-
+            <li class="profile-info dropdown pull-right"><!-- add class "pull-right" if you want to place this from right -->
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-
                     <!--<img  style="border:0px" src="index.php?menu=_elastixutils&action=getImage&ID={$USER_ID}&rawmode=yes" alt="" class="img-circle" width="44" />-->
-			<img  style="border:0px" src="/themes/tenant/images/Icon-user.png" alt="" class="img-circle" width="44" />
+            <img  style="border:0px" src="/themes/tenant/images/Icon-user.png" alt="" class="img-circle" width="44" />
                     {$USER_LOGIN}
                 </a>
-
+                <!-- Reverse Caret -->
+                <i style='font-size:15px;font-weight:bold;' class="fa fa-angle-down"></i>
+                <!-- Profile sub-links -->
                 <ul class="dropdown-menu">
 
                     <!-- Reverse Caret -->
                     <li class="caret"></li>
 
                     <!-- Profile sub-links -->
-                    <li>
+                    <li class="dropdown">
                         <a href="#" class="setadminpassword">
-                            <i class="entypo-user"></i>
+                            <i class="fa fa-user"></i>
                             {$CHANGE_PASSWORD}
+                        </a>
+                    </li>
+                    <li class="dropdown">
+                        <a {*data-toggle="dropdown"*} href="index.php?logout=yes" {*style="background-color: red"*}>
+                            <i class="fa fa-sign-out"></i>
+                            {$LOGOUT}
                         </a>
                     </li>
                 </ul>
             </li>
-
         </ul>
-
-    </div>
+    </span>
 
     <!-- Raw Links -->
-    <div class="col-md-6 col-sm-8 col-sm-12 clearfix pull-none-xsm">
-
+    <span style='float:right; width:400px;'>
         <ul style="padding-top:12px;" class="list-inline links-list pull-right neo-topbar-notification">
-
         <li id="header_notification_bar" class="dropdown">
-            <a {*data-toggle="dropdown"*} class="" id="togglestickynote1" href="#">
+            <a id="togglestickynote1" href="#">
                 <i class="fa fa-sticky-note"></i>
             </a>
         </li>
@@ -250,6 +249,12 @@ function removeNeoDisplayOnMouseOver(ref){
             </a>
         </li>
 
+        <li id="header_notification_bar" class="dropdown">
+            <a {*data-toggle="dropdown"*} class="" href="index.php?menu=addons">
+                <i class="fa fa-cubes"></i>
+            </a>
+        </li>
+
         <!-- notification dropdown start-->
         <li id="header_notification_bar" class="dropdown">
             <a data-toggle="dropdown" class="" href="#">
@@ -262,21 +267,9 @@ function removeNeoDisplayOnMouseOver(ref){
                 <i class="fa fa-bell-o"></i>
             </a>
         </li>
-
-        <li id="header_notification_bar" class="dropdown">
-            <a {*data-toggle="dropdown"*} class="" href="index.php?menu=addons">
-                <i class="fa fa-cubes"></i>
-            </a>
-        </li>
-
-        <li id="header_notification_bar" class="dropdown">
-            <a {*data-toggle="dropdown"*} href="index.php?logout=yes" style="background-color: red">
-                <i class="fa fa-sign-out"></i>
-            </a>
-        </li>
         </ul>
+    </span>
 
-    </div>
 
 </div>
 

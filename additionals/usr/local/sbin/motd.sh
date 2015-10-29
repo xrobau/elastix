@@ -13,8 +13,8 @@ if [ ! -e /etc/init.d/wanrouter ] ; then
         fi
 fi
 
-IPADDR=`LANG=C /sbin/ip addr show dev eth0 | perl -ne 'print $1 if /inet (\d+\.\d+.\d+.\d+)/;'`
 MSJ_NO_IP_DHCP="If you could not get a DHCP IP address please type setup and select \"Network configuration\" to set up a static IP."
+INTFCNET=`ls -A /sys/class/net/`
 
 echo ""
 echo "Welcome to Elastix "
@@ -29,11 +29,37 @@ echo ""
 echo "To access your Elastix System, using a separate workstation (PC/MAC/Linux)"
 echo "Open the Internet Browser using the following URL:"
 
-if [ "$IPADDR" = "" ]; then
-   echo "http://<YOUR-IP-HERE>"
+cont=0
+for x in $INTFCNET
+do
+	case $x in
+		lo*)
+		;;
+
+		sit*)
+		;;
+				
+		# Since CentOS 7 the way of naming network interfaces change to "Consistent Network Device Naming"
+		# wich implements a change in the usual name 'ethN' to others network names of the form:
+		# en* for ethernet interfaces
+		# wl* for wireless lan interfaces
+		# ww* for wireless wan interfaces
+		# sl* for lineal serial interfaces
+		eth*|en*|ww*|wl*|sl*)
+			IPADDR[$cont]=`LANG=C /sbin/ip addr show dev $x | perl -ne 'print $1 if /inet (\d+\.\d+.\d+.\d+)/;'`
+		;;
+	esac
+	let "cont++"
+done
+if [ "$IPADDR[@]" = "" ]; then
+   echo "http://<YOUR-IP(s)-HERE>"
    echo "$MSJ_NO_IP_DHCP"
 else
-   echo "http://$IPADDR"
+   arr=$(echo ${IPADDR[@]} | tr " " "\n")
+   for IPs in $arr
+   do
+	  echo "http://$IPs"
+   done
 fi
 
 echo ""

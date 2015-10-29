@@ -17,6 +17,12 @@ Requires: elastix-system
 Requires: php-mcrypt
 Requires: elastix-portknock
 
+# commands: cut
+Requires: coreutils
+
+# /usr/share/elastix/privileged/anonymoussip recarga asterisk
+Requires: asterisk
+
 %description
 Elastix Security
 
@@ -127,6 +133,11 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: security: explicitly spell out previously hidden package requirements
+  that provide system commands.
+  SVN Rev[7277]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: security: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7244]

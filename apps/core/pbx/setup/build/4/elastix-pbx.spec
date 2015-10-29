@@ -21,6 +21,26 @@ Prereq: freePBX >= 2.11.0-1
 Conflicts: elastix-endpointconfig2 <= 0.0.7
 Requires: elastix-endpointconfig2 >= 2.4.0-0
 
+# commands: mv chown
+Requires: coreutils
+
+# commands: sed
+Requires: sed
+
+# commands: grep
+Requires: grep
+
+# commands: /usr/bin/killall
+Requires: psmisc
+
+# commands: /usr/bin/sqlite3
+Requires: sqlite
+
+# commands: /sbin/chkconfig
+Requires: chkconfig
+
+Requires: /sbin/pidof
+
 %description
 Elastix Module PBX
 
@@ -277,15 +297,20 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: pbx: explicitly spell out previously hidden package requirements that
+  provide system commands.
+  SVN Rev[7276]
+
 * Tue Oct 27 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-2
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
 
-* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: pbx: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7242]
 
-* Thu Oct 22 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Thu Oct 22 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Asterisk CLI: fix incorrect nested table, force monospace for output.
   SVN Rev[7224]
 

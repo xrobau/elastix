@@ -140,7 +140,6 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/local/sbin/motd.sh          
 chmod 755 $RPM_BUILD_ROOT/usr/local/sbin/motd.sh
 
 # ** /usr/share/ files ** #
-mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/share/elastix/menusAdminElx                  $RPM_BUILD_ROOT/usr/share/elastix/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/share/pear/DB/sqlite3.php                    $RPM_BUILD_ROOT/usr/share/pear/DB/
 
 # ** setup ** #

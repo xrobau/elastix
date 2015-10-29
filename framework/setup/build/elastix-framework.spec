@@ -387,6 +387,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude(/var/www/html/themes/blackmin)
 
 %changelog
+* Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: do not assume TIMELIB is defined in bootstrap-datetimepicker
+  check.
+  SVN Rev[7269]
+
 * Wed Oct 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: further tweaks to the tenant theme by Edgar Landivar.
   SVN Rev[7268]

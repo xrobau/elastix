@@ -390,7 +390,8 @@ class paloForm
 
                         $json = new Services_JSON();
                         $params = $json->encode(array_merge($defaultValues, $formValues));
-                        if(($datewidget=='datetimepicker') AND ($arrVars['INPUT_EXTRA_PARAM']['TIMELIB']=='bootstrap-datetimepicker')) {
+                        if ($datewidget == 'datetimepicker' && isset($arrVars['INPUT_EXTRA_PARAM']['TIMELIB']) &&
+                            $arrVars['INPUT_EXTRA_PARAM']['TIMELIB'] == 'bootstrap-datetimepicker') {
                             $strInput = <<<DATETIME_PICKER_FIELD
 <div class="input-append date form_datetime" nowrap>
     <input size="16" type="text" name="{$varName_escaped}" value="{$varValue_escaped}" class="datepicker-input" readonly>

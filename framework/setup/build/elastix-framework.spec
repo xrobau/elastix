@@ -383,10 +383,14 @@ rm -rf $RPM_BUILD_ROOT
 %files themes-extra
 %defattr(-, root, root)
 /var/www/html/themes/*
-%exclude(/var/www/html/themes/tenant)
-%exclude(/var/www/html/themes/blackmin)
+%exclude /var/www/html/themes/tenant
+%exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix invalid exclude syntax in specfile.
+  SVN Rev[7278]
+
 * Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: move edwidgets to libs/js/jquery/jquery-edwidgets.js so
   all themes may use it.

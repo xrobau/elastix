@@ -41,11 +41,11 @@ $opt = Console_Getopt::getopt($argv, '', array(
     'start',    // Start DHCP service and mark as autostart
     'stop',     // Stop DHCP service and remove from autostart
     //'restart',  // Restart DHCP service
-    
+
     // DHCP configuration options
     'ip-start=',    // Start of IP range
     'ip-end=',      // End of IP range
-    'lease-time=',  // Lease time 
+    'lease-time=',  // Lease time
     'dns1=',        // DNS 1 (optional)
     'dns2=',        // DNS 2 (optional)
     'gateway=',     // Network gateway (optional)
@@ -161,7 +161,7 @@ function action_configuration($opt)
         $bPhonesOnly = TRUE;
     	break;
     }
-    
+
     // Check required parameters
     if ($bExito && is_null($sIpStart)) {
         $bExito = FALSE;
@@ -181,14 +181,14 @@ function action_configuration($opt)
     }
 
     if ($bExito) {
-        $bExito = configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway, 
+        $bExito = configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway,
             $sDNS1, $sDNS2, $sWINS, $bPhonesOnly);
     }
     return $bExito;
 }
 
 // Write out DHCP configuration from requested parameters. Return TRUE on success
-function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL, 
+function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL,
     $sDNS1 = NULL, $sDNS2 = NULL, $sWINS = NULL, $bPhonesOnly = FALSE)
 {
     $bExito = TRUE;
@@ -215,13 +215,11 @@ function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL,
     $sTimezoneName = date_default_timezone_get();
 
     // Find out hostname
-    $output = NULL;
-    exec('/bin/hostname', $output);
-    $sHostname = $output[0];
+    $sHostname = trim(file_get_contents("/proc/sys/kernel/hostname"));
 
     // Figure out a domain for the hostname
     $sDomain = array_pop(explode('.', $sHostname, 2));
-    
+
     /* There might be multiple interfaces on the machine. The configuration
      * file must be built with the subnet/mask information of the interface
      * that contains the required IP range */
@@ -251,7 +249,7 @@ function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL,
                 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 $sth = $conn->query('SELECT hostname, ipaddress, macaddress FROM dhcp_conf ORDER BY ipaddress');
                 $ips = $sth->fetchAll(PDO::FETCH_ASSOC);
-                
+
                 // Classify IPs on whether they are inside or outside subnet
                 foreach ($ips as $ip) {
                     if (construir_ip_red($ip['ipaddress'], $sNetmask) == $sNetwork)
@@ -259,7 +257,7 @@ function configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway = NULL,
                     else $ipsOutsideNet[] = $ip;
                 }
                 $conn = NULL;
-            } catch (PDOException $e) {            
+            } catch (PDOException $e) {
                 $bExito = FALSE;
                 fprintf(STDERR, "ERR: failed to query fixed IPs for DHCP - %s\n", $e->getMessage());
             }
@@ -394,7 +392,7 @@ function listIpAddresses()
                 ($iMask >>  8) & 0xFF,
                 ($iMask      ) & 0xFF,
             ));
-            if (!is_null($if) && !isset($iflist[$if])) { 
+            if (!is_null($if) && !isset($iflist[$if])) {
                 $iflist[$if] = array(
                     'ipaddr'    =>  $regs[1],
                     'broadcast' =>  $regs[3],
@@ -407,12 +405,12 @@ function listIpAddresses()
     return $iflist;
 }
 
-function construir_ip_red($ip, $mascara) 
-{    
+function construir_ip_red($ip, $mascara)
+{
     $ip = explode(".", $ip);
     $mascara = explode(".", $mascara);
-    for ($i = 0; $i < 4; $i++) $ip[$i] = (int)$ip[$i] & (int)$mascara[$i];    
-    return implode(".", $ip); 
+    for ($i = 0; $i < 4; $i++) $ip[$i] = (int)$ip[$i] & (int)$mascara[$i];
+    return implode(".", $ip);
 }
 
 // Starts DHCP and marks it for autostart. Returns TRUE on success.
@@ -478,15 +476,15 @@ function action_refresh($opt)
         } elseif (strpos($s, 'elastix-known-phones') !== FALSE) {
             $bPhonesOnly = TRUE;
         }
-        
+
         if (!$bExito) break;
     }
-    
+
     if ($bExito) {
-        $bExito = configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway, 
+        $bExito = configureDHCP($sIpStart, $sIpEnd, $iLeaseTime, $sGateway,
             $sDNS1, $sDNS2, $sWINS, $bPhonesOnly);
     }
-    
-    return $bExito;    
+
+    return $bExito;
 }
 ?>

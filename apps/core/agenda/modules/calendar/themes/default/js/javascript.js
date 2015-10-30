@@ -308,8 +308,10 @@ $(document).ready(function() {
         window.close();
     });
 
-    var event_id = $('input[name="event_id"]').val();
-    if (event_id != '') openEventDialog('/rest.php/' + getCurrentElastixModule() + '/CalendarEvent/' + event_id);
+    if ($('input[name="event_id"]').length > 0) {
+        var event_id = $('input[name="event_id"]').val();
+        if (event_id != undefined && event_id != '') openEventDialog('/rest.php/' + getCurrentElastixModule() + '/CalendarEvent/' + event_id);
+    }
 });
 
 function openEventDialog(url)

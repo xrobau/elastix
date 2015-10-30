@@ -101,6 +101,13 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: when invoked as a contact list helper for graphic_report,
+  the event_id input tag is absent, but the js code assumed it was present. The
+  REST rewrite now displays an error in this case. Fixed by checking for the
+  presence of the tag before trying to use its value.
+  SVN Rev[7283]
+
 * Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: tweaks for tenant theme support by Edgar Landivar.
   SVN Rev[7272]

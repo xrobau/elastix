@@ -182,6 +182,8 @@ fi
 
 %changelog
 * Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Packages: unbreak stray requestURL() call in REST service.
+  SVN Rev[7280]
 - CHANGED: System: explicitly spell out previously hidden package requirements
   that provide system commands.
   SVN Rev[7279]

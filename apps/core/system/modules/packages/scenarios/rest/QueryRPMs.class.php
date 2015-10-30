@@ -35,7 +35,7 @@ require_once "$documentRoot/modules/packages/libs/rpm.class.php";
 */
 /*
  * Para esta implementación de REST, se tienen los siguientes URIs:
- * 
+ *
  *  /QueryRPMs            application/json
  *      GET     lista las opciones de URIs disponibles para las diferentes consultas especificadas.
  *  /QueryRPMs/listall   application/json
@@ -65,11 +65,11 @@ class QueryRPMs
 	} elseif (in_array($this->resourcePath[0], array('listall', 'onlyone','notinstalled','installed'))) {
 	    switch (array_shift($this->resourcePath)) {
 	    case 'listall':
-            $uriObject = (count($this->resourcePath) <= 0) 
+            $uriObject = (count($this->resourcePath) <= 0)
 		    ? new ListAll("correct")
 		    : new ListAll("incorrect");
 		break;
-      
+
 	    case 'notinstalled':
 		    if(count($this->resourcePath) <= 0)
 		        $uriObject = new NotInstalled();
@@ -77,12 +77,12 @@ class QueryRPMs
 
         case 'installed':
             if(count($this->resourcePath) <= 0)
-                $uriObject = new Installed(); 
+                $uriObject = new Installed();
         break;
 
         case 'onlyone':
             if( (count($this->resourcePath) > 0 ) && (count($this->resourcePath) < 2 ) )
-                $uriObject = new OnlyOne(array_shift($this->resourcePath)); 
+                $uriObject = new OnlyOne(array_shift($this->resourcePath));
         break;
 	    }
 	}
@@ -99,10 +99,10 @@ class RpmBase extends REST_Resource
     {
     	$json = new Services_JSON();
         return $json->encode(array(
-            'url_listall'  =>  $this->requestURL().'/listall',
-            'url_onlyone'  =>  $this->requestURL().'/onlyone',
-            'url_notinstalled'  =>  $this->requestURL().'/notinstalled',
-            'url_installed'  =>  $this->requestURL().'/installed'));
+            'url_listall'  =>  '/rest.php/packages/QueryRPMs/listall',
+            'url_onlyone'  =>  '/rest.php/packages/QueryRPMs/onlyone',
+            'url_notinstalled'  =>  '/rest.php/packages/QueryRPMs/notinstalled',
+            'url_installed'  =>  '/rest.php/packages/QueryRPMs/installed'));
     }
 }
 
@@ -126,7 +126,7 @@ class ListAll extends REST_Resource
 class NotInstalled extends REST_Resource
 {
     function HTTP_GET()
-    {    
+    {
         $cq = new core_QueryRpms();
         $out = $cq->notinstalled();
         $json = new Services_JSON();

@@ -19,6 +19,48 @@ Requires: dhcp
 Requires: php-simplepie
 Requires: hdparm
 
+# commands: /bin/date /usr/bin/stat /usr/bin/du rm /bin/chown /bin/su /bin/df
+Requires: coreutils
+
+# commands: /sbin/dmsetup
+Requires: device-mapper
+
+# commands: rpm
+Requires: rpm
+
+# commands: yum
+Requires: yum
+
+# commands: /sbin/ip
+Requires: iproute
+
+# commands: /sbin/route
+Requires: net-tools
+
+# netconfig assumes postfix service is present
+Requires: postfix
+
+# dhcpconfig assumes dhcpd service is present
+Requires: dhcp
+
+# commands: chkconfig
+Requires: chkconfig
+
+# commands: tar
+Requires: tar
+
+# commands: mysqldump mysql
+Requires: mysql
+
+# commands: /usr/lib/cyrus-imapd/reconstruct
+Requires: cyrus-imapd
+
+Requires: /usr/sbin/saslpasswd2
+
+Requires: /sbin/pidof
+Requires: /bin/hostname
+Requires: /sbin/shutdown
+
 %description
 Elastix Module System
 
@@ -138,6 +180,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: System: explicitly spell out previously hidden package requirements
+  that provide system commands.
+  SVN Rev[7279]
+
 * Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: more tweaks to applet appearance by Edgar Landivar.
   SVN Rev[7275]

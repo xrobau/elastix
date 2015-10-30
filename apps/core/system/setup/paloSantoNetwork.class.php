@@ -62,15 +62,15 @@ class paloNetwork
 
         return $type;
     }
- 
+
     /**
      * Procedimiento para obtener información sobre las interfases de red del
      * sistema. Actualmente se listan las interfases de tipo Ethernet y las
      * localhost. Para cada interfaz de red se crea una entrada cuya clave es
      * el nombre de la interfaz, y el valor es un arreglo con los siguientes
      * elementos:
-     *  Name        : 'Ethernet' o 'Loopback'. Si se identifica la interfaz 
-     *                como un alias de otra interfaz, se la marca como 
+     *  Name        : 'Ethernet' o 'Loopback'. Si se identifica la interfaz
+     *                como un alias de otra interfaz, se la marca como
      *                Ethernet X Alias Y
      *  Type        : Tipo de configuración de red: static dhcp ...
      *  HW_info     : Información de hardware sobre la interfaz. Sólo para Ethernet.
@@ -82,21 +82,21 @@ class paloNetwork
      *  RX bytes    : Número de bytes recibidos
      *  TX packets  : Número de paquetes enviados
      *  TX bytes    : Número de bytes enviados
-     * 
+     *
      * @return array    Lista de interfases de red
      */
     static function obtener_interfases_red()
     {
     	$interfases = array();
-        
+
         // Se listan todas las interfases físicas, y se toman loopback y ether
         /*
         [root@elx2 net]# ip link show
-        1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue 
+        1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue
             link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
         2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast qlen 1000
             link/ether 08:00:27:2b:f0:14 brd ff:ff:ff:ff:ff:ff
-        3: sit0: <NOARP> mtu 1480 qdisc noop 
+        3: sit0: <NOARP> mtu 1480 qdisc noop
             link/sit 0.0.0.0 brd 0.0.0.0
          */
         $output = NULL;
@@ -132,8 +132,8 @@ class paloNetwork
                 }
             }
         }
-        
-        /* Para cada interfaz física, se leen las estadísticas de bytes y 
+
+        /* Para cada interfaz física, se leen las estadísticas de bytes y
          * paquetes transmitidos y recibidos, así como el controlador del
          * dispositivo de red. */
         foreach (array_keys($interfases) as $if_actual) {
@@ -147,31 +147,31 @@ class paloNetwork
             	if (file_exists($p))
                     $interfases[$if_actual][$k] = trim(file_get_contents($p));
             }
-            
+
             // Nombre del controlador del dispositivo de red
             if (file_exists("/sys/class/net/$if_actual/device/driver")) {
             	$interfases[$if_actual]['HW_info'] = basename(readlink("/sys/class/net/$if_actual/device/driver"));
             }
         }
 
-        /* Para cada interfaz física, se listan sus IPs. La que tiene la 
+        /* Para cada interfaz física, se listan sus IPs. La que tiene la
            interfaz sin adornos es la IP de la interfaz. Otras IPs definen
-           alias de la interfaz. */ 
+           alias de la interfaz. */
         /*
         [root@elx2 net]# ip addr show dev eth0
         2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast qlen 1000
             link/ether 08:00:27:2b:f0:14 brd ff:ff:ff:ff:ff:ff
             inet 192.168.5.193/16 brd 192.168.255.255 scope global eth0
             inet 192.168.6.1/24 brd 192.168.6.255 scope global eth0:0
-            inet6 fe80::a00:27ff:fe2b:f014/64 scope link 
+            inet6 fe80::a00:27ff:fe2b:f014/64 scope link
                valid_lft forever preferred_lft forever
         [root@elx2 net]# ip addr show dev lo
-        1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue 
+        1: lo: <LOOPBACK,UP,LOWER_UP> mtu 16436 qdisc noqueue
             link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
             inet 127.0.0.1/8 scope host lo
-            inet6 ::1/128 scope host 
+            inet6 ::1/128 scope host
                valid_lft forever preferred_lft forever
-         */        
+         */
         foreach (array_keys($interfases) as $if_actual) {
         	$output = NULL;
             exec('/sbin/ip addr show dev '.$if_actual, $output);
@@ -186,7 +186,7 @@ class paloNetwork
                         ($iMask >>  8) & 0xFF,
                         ($iMask      ) & 0xFF,
                     ));
-                    
+
                     // Verificar si es IP de interfaz o de alias
                     if ($regs[3] == $if_actual) {
                     	$interfases[$if_actual]['Inet Addr'] = $regs[1];
@@ -207,7 +207,7 @@ class paloNetwork
             	}
             }
         }
-        
+
         // Tipo de interfaz de red configurada en /etc/sysconfig/network-scripts/
         foreach (array_keys($interfases) as $if_actual) {
         	$interfases[$if_actual]['Type'] = self::obtener_tipo_interfase($if_actual);
@@ -215,13 +215,13 @@ class paloNetwork
 
         return $interfases;
     }
-    
+
     // Es decir que no se incluye "lo" ni interfases virtuales
     static function obtener_interfases_red_fisicas()
     {
         $arrInterfasesRedPreliminar=array();
         $arrInterfasesRedPreliminar=self::obtener_interfases_red();
-    
+
         // Selecciono solo las interfases de red fisicas
         $arrInterfasesRed=array();
         foreach($arrInterfasesRedPreliminar as $nombreReal => $arrData) {
@@ -233,9 +233,9 @@ class paloNetwork
     }
 
     /**
-     * Procedimiento para interrogar la configuración general de red del 
-     * sistema. 
-     * 
+     * Procedimiento para interrogar la configuración general de red del
+     * sistema.
+     *
      * @return array arreglo con los siguientes valores:
      *      dns:        arreglo con 0 o más DNS asignados
      *      host:       nombre de host para el sistema
@@ -253,22 +253,21 @@ class paloNetwork
         //- Obtengo los dnss
         if($fh=fopen($archivoResolv, "r")) {
             while(!feof($fh)) {
-                $linea = fgets($fh, 4048); 
+                $linea = fgets($fh, 4048);
                 if(preg_match("/^nameserver[[:space:]]+(.*)$/", $linea, $arrReg)) {
                     $arrResult['dns'][] = $arrReg[1];
-                }                
-            } 
+                }
+            }
 
         } else {
             // Error?
         }
 
         //- Obtengo el hostname
-        $arrOutput = NULL;
-        exec("/bin/hostname", $arrOutput);
-        $arrResult['host'] = $arrOutput[0];
+        $arrResult['host'] = trim(file_get_contents("/proc/sys/kernel/hostname"));
 
         //- Obtengo el Default Gateway
+        $arrOutput = NULL;
         exec("/sbin/route -n", $arrOutput);
         if(is_array($arrOutput)) {
             foreach($arrOutput as $linea) {
@@ -281,7 +280,7 @@ class paloNetwork
     }
 
     /**
-     * Procedimiento para escribir la configuracin de red del sistema en los 
+     * Procedimiento para escribir la configuracin de red del sistema en los
      * archivos de configuración, a partir del arreglo indicado en el parámetro.
      * El arreglo indicado en el parámetro debe de tener los siguientes
      * elementos:
@@ -290,9 +289,9 @@ class paloNetwork
      *      $arreglo["dns_ip_2"]    DNS secundario de la maquina
      *      $arreglo["gateway_ip"]  IP del gateway asociado a la interfaz externa
      *  La función devuelve VERDADERO en caso de éxito, FALSO en caso de error.
-     * 
+     *
      * @param   mixed   $config_red Nueva configuración deseada de la red
-     * 
+     *
      * @return  bool    VERDADERO en éxito, FALSO en error
      */
     function escribir_configuracion_red_sistema($config_red)
@@ -316,12 +315,12 @@ class paloNetwork
     /**
      * Procedimiento para escribir la configuración de red de una interfaz
      * Ethernet específica.
-     * 
+     *
      * @param   string  $dev    Dispositivo de red a modificar: eth0
      * @param   string  $tipo   Una de las cadenas: static dhcp
      * @param   string  $ip     (opcional)  IP a asignar en caso static
      * @param   string  $mask   (opcional)  Máscara a asignar en caso static
-     * 
+     *
      * @return  bool    VERDADERO en éxito, FALSO en error
      */
     function escribirConfiguracionInterfaseRed($dev, $tipo, $ip="", $mask="")
@@ -343,14 +342,14 @@ class paloNetwork
     }
 
     /**
-     * Compute IPv4 network address given IPv4 host address and bits in netmask. 
-     * Function that returns the network address of the given ip for the given mask 
+     * Compute IPv4 network address given IPv4 host address and bits in netmask.
+     * Function that returns the network address of the given ip for the given mask
      *
      * @param string     $ip         IPv4 host address in dotted-quad format
-     * @param string     $mask       Number of bits in network mask    
+     * @param string     $mask       Number of bits in network mask
      *
      * @return string    Computed IPv4 network address
-     */ 
+     */
     static function getNetAdress($ip, $mask)
     {
         $octetos_ip = explode('.', $ip);
@@ -360,17 +359,17 @@ class paloNetwork
         	$octetmask = ($mask >= 8) ? 8 : $mask;
             $mask -= $octetmask;
             $octetos_net[$k] = (int)$octetos_ip[$k] & ((0xFF << (8 - $octetmask)) & 0xFF);
-        }        
+        }
         return implode('.', $octetos_net);
     }
 
     /**
      * Count the number of bits set in a network mask and returns the count:
-     * 255.255.128.0 => 17 
+     * 255.255.128.0 => 17
      * This assumes the network mask is well formed.
-     * 
+     *
      * @param string    $mask   IP mask in dotted-quad format
-     * 
+     *
      * @return int      Number of bits set in the mask
      */
     static function maskToDecimalFormat($mask)
@@ -382,7 +381,7 @@ class paloNetwork
             while (($octeto & 0x80) != 0) {
                 $octeto = ($octeto << 1) & 0xFF;
             	$decimal++;
-            }            
+            }
         }
         return $decimal;
     }

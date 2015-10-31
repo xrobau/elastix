@@ -18,6 +18,9 @@ Requires: mailman >= 2.1.9
 Requires: php-jpgraph
 Requires: php-PHPMailer
 
+# sieveshell requires at least plain authentication method
+Requires: cyrus-sasl-plain
+
 %description
 Elastix Module Email
 
@@ -199,6 +202,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Vacations: cyrus-sasl-plain is required for Vacations.
+  SVN Rev[7285]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Email_admin: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7235]

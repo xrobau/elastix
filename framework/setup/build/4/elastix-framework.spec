@@ -388,6 +388,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: tweak elastixneo and blackmin themes so that the download
+  links extend to the full width of the yellow highlight.
+  SVN Rev[7284]
 - FIXED: Framework: fix invalid exclude syntax in specfile.
   SVN Rev[7278]
 

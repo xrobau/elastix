@@ -440,6 +440,10 @@ form.elastix-standard-formgrid>div.controls div.exportmenu>div>ul>li:hover
 {
     background: #f4fa58;
 }
+form.elastix-standard-formgrid>div.controls div.exportmenu>div>ul>li>a
+{
+    display: block;
+}
 form.elastix-standard-formgrid>div.controls div.navigation
 {
     float: right;

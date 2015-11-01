@@ -387,6 +387,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude(/var/www/html/themes/blackmin)
 
 %changelog
+* Sat Oct 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Updated Russian translation (3). Provided by user Russian.
+  SVN Rev[7286]
+
 * Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: tweak elastixneo and blackmin themes so that the download
   links extend to the full width of the yellow highlight.

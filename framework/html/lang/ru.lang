@@ -209,6 +209,10 @@ $arrLang=array(
 
 /*Network*/
 "Network" => "Сеть",
+"Network Parameters" => "Сетевые Настройки",
+"DHCP Server" => "DHCP-Сервер",
+"DHCP Client List" => "Список Клиентов DHCP",
+"Assign IP Address to Host" => "Резервирование DHCP",
 
 /*Shutdown*/
 "Shutdown" => "Выключение",
@@ -268,6 +272,29 @@ implementations of Voice over IP around the globe.",
 "Elastix Authentication" => "Elastix Authentication",
 "You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "Вам не разрешен доступ к Flash Панели Оператора. Пожалуйста, свяжитесь с администратором.",
 "Advice" => "Advice",
+
+/*Module Call Center*/
+
+"Call Center" => "Контакт-Центр",
+"Reports" => "Отчеты",
+"Forms" => "Формы",
+"Breaks" => "Перерывы",
+"Agent Options" => "Настройки Агента",
+"Ingoing Calls" => "Входящие Вызовы",
+"Outgoing Calls" => "Исходящие Вызовы",
+"Agent Console" => "Консоль Агента",
+"Reports Break" => "Отчет о Перерывах",
+"Calls Detail"  => "Детализация Вызовов",
+"Calls per hour" => "Вызовов за час",
+"Calls per Agent" => "Вызовов Агенту",
+"Hold Time" => "Время Удержания",
+"Ingoing Calls Success" => "Входящие Вызовы Успешно",
+"Graphic Calls per hour" => "График Вызовов за час",
+"Agent Information" => "Информация об Агенте",
+"Agents Monitoring" => "Мониторинг Агентов",
+"Trunks used per hour" => "Занятость транков за час",
+"Incoming calls monitoring" => "Мониторинг входящих вызовов",
+"Campaign monitoring" => "Мониторинг кампании",
 
 /*New*/
 "Hide left panel" => "Скрыть левую панель",

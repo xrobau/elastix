@@ -101,6 +101,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sun Nov  1 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Calendar: update phone picker to use rewritten elastixneo theme.
+  SVN Rev[7292]
+
 * Sat Oct 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Address Book: switch all uses of $arrLang to _tr() and replace
   hand-coded translation loading with load_language_module().

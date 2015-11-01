@@ -1,28 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
     <head>
         <title>Elastix</title>
         <link rel="stylesheet" href="{$path}themes/{$THEMENAME}/styles.css">
         <link rel="stylesheet" href="{$path}themes/{$THEMENAME}/help.css">
-        {if $THEMENAME eq "elastixneo"}
-        <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/header.css" />
-        <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/content.css" />
-        <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/applet.css" />
-        <link rel="stylesheet" media="screen" type="text/css" href="themes/{$THEMENAME}/table.css" />
-        {/if}
         {$HEADER_LIBS_JQUERY}
         <script src="{$path}libs/js/base.js"></script>
         <script src="{$path}modules/{$module_name}/themes/default/js/javascript.js"></script>
     </head>
-    <body>
+    <body {$BODYPARAMS}>
         {if $THEMENAME eq "elastixneo"}
           <div>
-            <div class="neo-module-title"><div class="neo-module-name-left"></div><span class="neo-module-name">
-              {if $icon ne null}
-              <img src="{$icon}" width="22" height="22" align="absmiddle" />
-              {/if}
-              &nbsp;{$title}</span><div class="neo-module-name-right"></div>
-              </div>
-          <div class="neo-module-content">
+            <div class="elxneo-module-title">
+                <div class="name-left"></div>
+                <span class="name">
+                      {if $icon ne null}
+                      <img src="{$icon}" width="22" height="22" align="absmiddle" />
+                      {/if}
+                      &nbsp;{$title}</span>
+                <div class="name-right"></div>
+            </div>
+           <input type="hidden" id="elastix_framework_module_id" value="{$module_name}" />
+           <div id="elxneo-content">
               <div class="div_msg_errors" id="message_error" style="display:none;">
               <div style="float:left;">
                   <span id="mb_title" style="color:red;font-weight:bold"></span>

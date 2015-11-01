@@ -388,6 +388,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Oct 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: the paloSantoForm class has been modified to use methods
+  for each known widget. This allows the class to be subclassed and methods
+  for specific widgets overloaded or added.
+  SVN Rev[7291]
 - CHANGED: Group Permission: Updated Russian translation. Provided by user
   Russian.
   SVN Rev[7288]

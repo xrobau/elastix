@@ -189,210 +189,242 @@ class paloForm
                las comillas simples. Por lo tanto, se asume que todos los usos
                de $varXXX_escaped serán dentro de comillas dobles, o en texto
                libre. */
+            $varValue = $arrPreFilledValues[$varName];
             $varName_escaped = htmlentities($varName, ENT_COMPAT, 'UTF-8');
-            $varValue_escaped = is_array($arrPreFilledValues[$varName])
-                ? NULL : htmlentities($arrPreFilledValues[$varName], ENT_COMPAT, 'UTF-8');
+            $varValue_escaped = is_array($varValue)
+                ? NULL : htmlentities($varValue, ENT_COMPAT, 'UTF-8');
 
-            switch($arrVars['INPUT_TYPE']) {
-                case "TEXTAREA":
-                    $strInput = $bIngresoActivo
-                        ? sprintf(
-                            '<textarea name="%s" rows="%s" cols="%s" %s>%s</textarea>',
-                            $varName_escaped,
-                            isset($arrVars['ROWS']) ? (int)$arrVars['ROWS'] : 3,
-                            isset($arrVars['COLS']) ? (int)$arrVars['COLS'] : 20,
-                            _inputExtraParam_a_atributos($arrVars),
-                            $varValue_escaped)
-                        : $varValue_escaped;
-                    break;
-                case "TEXT":
-                    $strInput = $bIngresoActivo
-                        ? sprintf(
-                            '<input type="text" name="%s" value="%s" %s />',
-                            $varName_escaped,
-                            $varValue_escaped,
-                            _inputExtraParam_a_atributos($arrVars))
-                        : $varValue_escaped;
-                    break;
-                case "CHECKBOX":
-                    $checked = 'off';
-                    $disable = 'on';
-                    if($arrPreFilledValues[$varName]=='on')
-                        $checked = 'on';
-                    if($bIngresoActivo)
-                        $disable = 'off';
-
-                    //Funcion definida en misc.lib.php
-                    $strInput = checkbox($varName,$checked, $disable);
-                    break;
-                case "PASSWORD":
-                    $strInput = $bIngresoActivo
-                        ? sprintf(
-                            '<input type="password" name="%s" value="%s" %s />',
-                            $varName_escaped,
-                            $varValue_escaped,
-                            _inputExtraParam_a_atributos($arrVars))
-                        : $varValue_escaped;
-                    break;
-                case "HIDDEN":
-                    $strInput = sprintf(
-                        '<input type="hidden" name="%s" value="%s" %s />',
+            $widget_method = '_form_widget_'.$arrVars['INPUT_TYPE'];
+            $attrstring = _inputExtraParam_a_atributos($arrVars);
+            if (method_exists($this, $widget_method)) {
+                $strInput = call_user_func_array(array($this, $widget_method),
+                    array(
+                        $bIngresoActivo,
+                        $varName,
+                        $varValue,
+                        $arrVars,
                         $varName_escaped,
                         $varValue_escaped,
-                        _inputExtraParam_a_atributos($arrVars));
-                    break;
-                case "FILE":
-                    $strInput = $bIngresoActivo
-                        ? sprintf(
-                            '<input type="file" name="%s" %s />',
-                            $varName_escaped,
-                            _inputExtraParam_a_atributos($arrVars))
-                        : $varValue_escaped;
-                    break;
-                case "RADIO":
-                    if($bIngresoActivo) {
-                        $strInput = "";
-                        if(is_array($arrVars['INPUT_EXTRA_PARAM'])) {
-                            $listaRadio = array();
-                            $cntRadio = 1;
-                            foreach($arrVars['INPUT_EXTRA_PARAM'] as $radioValue => $radioLabel) {
-                                $listaRadio[] = sprintf(
-                                    '<input type="radio" id="%s" name="%s" value="%s" %s /><label for="%s">%s</label>',
-                                    $varName_escaped.$cntRadio,
-                                    $varName_escaped,
-                                    htmlentities($radioValue, ENT_COMPAT, 'UTF-8'),
-                                    ($radioValue == $arrPreFilledValues[$varName]) ? 'checked="checked"' : '',
-                                    $varName_escaped.$cntRadio,
-                                    htmlentities($radioLabel, ENT_COMPAT, 'UTF-8'));
-                                $cntRadio++;
-                            }
-                            $strInput = "<div class='radio_buttonset_elx'>".implode("\n", $listaRadio)."</div>";
-                        }
-                    } else {
-                        $strInput = $varValue_escaped;
-                    }
-                    break;
-                case "SELECT":
-                    if ($bIngresoActivo) {
-                        $listaOpts = array();
-                        $keyVals = is_array($arrPreFilledValues[$varName])
-                            ? $arrPreFilledValues[$varName]
-                            : array($arrPreFilledValues[$varName]);
-                        if (is_array($arrVars['INPUT_EXTRA_PARAM'])) {
-                            foreach($arrVars['INPUT_EXTRA_PARAM'] as $idSeleccion => $nombreSeleccion) {
-                                $listaOpts[] = sprintf(
-                                    '<option value="%s" %s>%s</option>',
-                                    htmlentities($idSeleccion, ENT_COMPAT, 'UTF-8'),
-                                    in_array((string)$idSeleccion, $keyVals) ? 'selected="selected"' : '',
-                                    htmlentities($nombreSeleccion, ENT_COMPAT, 'UTF-8'));
-                            }
-                        }
-                        $sNombreSelect = $varName_escaped;
-                        $sAttrMultiple = '';
-                        if (isset($arrVars['MULTIPLE']) && $arrVars['MULTIPLE'] != '' && $arrVars['MULTIPLE']) {
-                            $sAttrMultiple = 'multiple="multiple"';
-                            $sNombreSelect .= '[]';
-                        }
-                        $strInput = sprintf(
-                            '<select name="%s" id="%s" %s %s %s>%s</select>',
-                            $sNombreSelect,
-                            $sNombreSelect,
-                            $sAttrMultiple,
-                            (isset($arrVars['SIZE']) && $arrVars['SIZE'] != '')
-                                ? sprintf('size="%s"', htmlentities($arrVars['SIZE'], ENT_COMPAT, 'UTF-8'))
-                                : '',
-                            (isset($arrVars['ONCHANGE']) && $arrVars['ONCHANGE'] != '')
-                                ? "onchange='{$arrVars['ONCHANGE']}'"
-                                : '',
-                            implode("\n", $listaOpts));
-                    } else {
-                        $strInput = is_array($arrPreFilledValues[$varName])
-                            ? '| '.implode(' | ',
-                                array_map('_map_htmlentities',
-                                    array_intersect_key(
-                                        $arrVars['INPUT_EXTRA_PARAM'],
-                                        array_flip($arrPreFilledValues[$varName])
-                                    )))
-                            : (isset($arrVars['INPUT_EXTRA_PARAM'][$arrPreFilledValues[$varName]])
-                                ? htmlentities($arrVars['INPUT_EXTRA_PARAM'][$arrPreFilledValues[$varName]], ENT_COMPAT, 'UTF-8')
-                                : '');
-                    }
-                    break;
-                case "DATE":
-                    if ($bIngresoActivo) {
-                        require_once 'libs/JSON.php';
+                        $attrstring
+                    )
+                );
+            }
+            $arrMacro['LABEL'] = _labelName($varName, $arrVars);
+            $arrMacro['INPUT'] = $strInput;
+            $this->smarty->assign($varName, $arrMacro);
+        }
+        $this->smarty->assign("title", htmlentities($title, ENT_COMPAT, 'UTF-8'));
+        $this->smarty->assign("mode", $this->modo);
+        return $this->smarty->fetch("file:$templateName");
+    }
 
-                        // Mapa para traducir de formato jsCalendar a DateTimePicker
-                        $dateFormatMap = array(
-                            '%Y'    =>  'yy',
-                            '%m'    =>  'mm',
-                            '%b'    =>  'M',
-                            '%d'    =>  'dd',
-                        );
-                        $timeFormatMap = array(
-                            '%H'    =>  'HH',
-                            '%M'    =>  'mm',
-                        );
-                        $defaultValues = array(
-                            'showOn'            =>  'button',
-                            'firstDay'          =>  1,
-                            'buttonImage'       =>  'images/calendar.gif',
-                            'buttonImageOnly'   =>  TRUE,
-                            'dateFormat'        =>  'dd M yy',
-                            'timeFormat'        =>  'HH:mm',
-                            'changeMonth'       =>  TRUE,
-                            'changeYear'        =>  TRUE,
-                            'showWeek'          =>  TRUE,
-                            'constrainInput'    =>  TRUE,
-                        );
+    protected function _form_widget_TEXTAREA($bIngresoActivo, $varName, $varValue,
+        $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        return $bIngresoActivo
+            ? sprintf(
+                '<textarea name="%s" rows="%s" cols="%s" %s>%s</textarea>',
+                $varName_escaped,
+                isset($arrVars['ROWS']) ? (int)$arrVars['ROWS'] : 3,
+                isset($arrVars['COLS']) ? (int)$arrVars['COLS'] : 20,
+                $attrstring,
+                $varValue_escaped)
+            : $varValue_escaped;
+    }
 
-                        // Evaluación de los valores para formulario
-                        $useTimePicker = FALSE;
-                        $datewidget = 'datepicker';
-                        $formValues = array();
+    protected function _form_widget_TEXT($bIngresoActivo, $varName, $varValue,
+        $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        return $bIngresoActivo
+            ? sprintf('<input type="text" name="%s" value="%s" %s />',
+                $varName_escaped, $varValue_escaped, $attrstring)
+            : $varValue_escaped;
+    }
 
-                        if (is_array($arrVars['INPUT_EXTRA_PARAM'])) {
-                            $useTimePicker = (isset($arrVars['INPUT_EXTRA_PARAM']['TIME'])
-                                && $arrVars['INPUT_EXTRA_PARAM']['TIME']);
-                            $datewidget = $useTimePicker ? 'datetimepicker' : 'datepicker';
-                            if (isset($arrVars['INPUT_EXTRA_PARAM']['FIRSTDAY']))
-                                $formValues['firstDay'] = (int)$arrVars['INPUT_EXTRA_PARAM']['FIRSTDAY'];
-                            if (!isset($arrVars['INPUT_EXTRA_PARAM']['FORMAT']))
-                                $arrVars['INPUT_EXTRA_PARAM']['FORMAT'] = '%d %b %Y';
-                            if (!isset($arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT']))
-                                $arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] = '%H:%M';
+    protected function _form_widget_CHECKBOX($bIngresoActivo, $varName, $varValue,
+        $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        //Funcion definida en misc.lib.php
+        return checkbox($varName, ($varValue=='on') ? 'on' : 'off', $bIngresoActivo ? 'off' : 'on');
+    }
 
-                            // El siguiente código asume que el formato de hora siempre
-                            // se especifica luego del formato de fecha
-                            $timepos = FALSE;
-                            foreach (array_keys($timeFormatMap) as $tf) {
-                                $tp = strpos($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], $tf);
-                                if ($timepos === FALSE || ($tp !== FALSE && $timepos > $tp))
-                                    $timepos = $tp;
-                            }
-                            if ($timepos !== FALSE) {
-                                $arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] = trim(substr($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], $timepos));
-                                $arrVars['INPUT_EXTRA_PARAM']['FORMAT'] = trim(substr($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], 0, $timepos));
-                            }
-                            if ($arrVars['INPUT_EXTRA_PARAM']['FORMAT'] != '%d %b %Y') {
-                                $formValues['dateFormat'] = str_replace(
-                                    array_keys($dateFormatMap),
-                                    array_values($dateFormatMap),
-                                    $arrVars['INPUT_EXTRA_PARAM']['FORMAT']);
-                            }
-                            if ($arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] != '%H:%M') {
-                                $formValues['timeFormat'] = str_replace(
-                                    array_keys($timeFormatMap),
-                                    array_values($timeFormatMap),
-                                    $arrVars['INPUT_EXTRA_PARAM']['FORMAT']);
-                            }
-                        }
+    protected function _form_widget_HIDDEN($bIngresoActivo, $varName, $varValue,
+        $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        return sprintf('<input type="hidden" name="%s" value="%s" %s />',
+            $varName_escaped, $varValue_escaped, $attrstring);
+    }
 
-                        $json = new Services_JSON();
-                        $params = $json->encode(array_merge($defaultValues, $formValues));
-                        if ($datewidget == 'datetimepicker' && isset($arrVars['INPUT_EXTRA_PARAM']['TIMELIB']) &&
-                            $arrVars['INPUT_EXTRA_PARAM']['TIMELIB'] == 'bootstrap-datetimepicker') {
-                            $strInput = <<<DATETIME_PICKER_FIELD
+    protected function _form_widget_PASSWORD($bIngresoActivo, $varName, $varValue,
+        $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        return $bIngresoActivo
+            ? sprintf('<input type="password" name="%s" value="%s" %s />',
+                $varName_escaped,
+                $varValue_escaped,
+                $attrstring)
+            : $varValue_escaped;
+    }
+
+    protected function _form_widget_FILE($bIngresoActivo, $varName, $varValue,
+            $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        return $bIngresoActivo
+            ? sprintf('<input type="file" name="%s" %s />',
+                $varName_escaped, $attrstring)
+            : $varValue_escaped;
+    }
+
+    protected function _form_widget_RADIO($bIngresoActivo, $varName, $varValue,
+            $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        if (!$bIngresoActivo) return $varValue_escaped;
+        if (!is_array($arrVars['INPUT_EXTRA_PARAM'])) return '';
+
+        $listaRadio = array();
+        $cntRadio = 1;
+        foreach($arrVars['INPUT_EXTRA_PARAM'] as $radioValue => $radioLabel) {
+            $listaRadio[] = sprintf(
+                '<input type="radio" id="%s" name="%s" value="%s" %s /><label for="%s">%s</label>',
+                $varName_escaped.$cntRadio,
+                $varName_escaped,
+                htmlentities($radioValue, ENT_COMPAT, 'UTF-8'),
+                ($radioValue == $varValue) ? 'checked="checked"' : '',
+                $varName_escaped.$cntRadio,
+                htmlentities($radioLabel, ENT_COMPAT, 'UTF-8'));
+            $cntRadio++;
+        }
+        return "<div class='radio_buttonset_elx'>".implode("\n", $listaRadio)."</div>";
+    }
+
+    protected function _form_widget_SELECT($bIngresoActivo, $varName, $varValue,
+            $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        if ($bIngresoActivo) {
+            $listaOpts = array();
+            $keyVals = is_array($varValue)
+                ? $varValue
+                : array($varValue);
+            if (is_array($arrVars['INPUT_EXTRA_PARAM'])) {
+                foreach($arrVars['INPUT_EXTRA_PARAM'] as $idSeleccion => $nombreSeleccion) {
+                    $listaOpts[] = sprintf(
+                        '<option value="%s" %s>%s</option>',
+                        htmlentities($idSeleccion, ENT_COMPAT, 'UTF-8'),
+                        in_array((string)$idSeleccion, $keyVals) ? 'selected="selected"' : '',
+                        htmlentities($nombreSeleccion, ENT_COMPAT, 'UTF-8'));
+                }
+            }
+            $sNombreSelect = $varName_escaped;
+            $sAttrMultiple = '';
+            if (isset($arrVars['MULTIPLE']) && $arrVars['MULTIPLE'] != '' && $arrVars['MULTIPLE']) {
+                $sAttrMultiple = 'multiple="multiple"';
+                $sNombreSelect .= '[]';
+            }
+            $strInput = sprintf(
+                '<select name="%s" id="%s" %s %s %s>%s</select>',
+                $sNombreSelect,
+                $sNombreSelect,
+                $sAttrMultiple,
+                (isset($arrVars['SIZE']) && $arrVars['SIZE'] != '')
+                    ? sprintf('size="%s"', htmlentities($arrVars['SIZE'], ENT_COMPAT, 'UTF-8'))
+                    : '',
+                (isset($arrVars['ONCHANGE']) && $arrVars['ONCHANGE'] != '')
+                    ? "onchange='{$arrVars['ONCHANGE']}'"
+                    : '',
+                implode("\n", $listaOpts));
+        } else {
+            $strInput = is_array($varValue)
+                ? '| '.implode(' | ',
+                    array_map('_map_htmlentities',
+                        array_intersect_key(
+                            $arrVars['INPUT_EXTRA_PARAM'],
+                            array_flip($varValue)
+                        )))
+                : (isset($arrVars['INPUT_EXTRA_PARAM'][$varValue])
+                    ? htmlentities($arrVars['INPUT_EXTRA_PARAM'][$varValue], ENT_COMPAT, 'UTF-8')
+                    : '');
+        }
+        return $strInput;
+    }
+
+    protected function _form_widget_DATE($bIngresoActivo, $varName, $varValue,
+            $arrVars, $varName_escaped, $varValue_escaped, $attrstring)
+    {
+        if (!$bIngresoActivo) return $varValue_escaped;
+
+        require_once 'libs/JSON.php';
+
+        // Mapa para traducir de formato jsCalendar a DateTimePicker
+        $dateFormatMap = array(
+                        '%Y'    =>  'yy',
+                        '%m'    =>  'mm',
+                        '%b'    =>  'M',
+                        '%d'    =>  'dd',
+        );
+        $timeFormatMap = array(
+                        '%H'    =>  'HH',
+                        '%M'    =>  'mm',
+        );
+        $defaultValues = array(
+                        'showOn'            =>  'button',
+                        'firstDay'          =>  1,
+                        'buttonImage'       =>  'images/calendar.gif',
+                        'buttonImageOnly'   =>  TRUE,
+                        'dateFormat'        =>  'dd M yy',
+                        'timeFormat'        =>  'HH:mm',
+                        'changeMonth'       =>  TRUE,
+                        'changeYear'        =>  TRUE,
+                        'showWeek'          =>  TRUE,
+                        'constrainInput'    =>  TRUE,
+        );
+
+        // Evaluación de los valores para formulario
+        $useTimePicker = FALSE;
+        $datewidget = 'datepicker';
+        $formValues = array();
+
+        if (is_array($arrVars['INPUT_EXTRA_PARAM'])) {
+            $useTimePicker = (isset($arrVars['INPUT_EXTRA_PARAM']['TIME'])
+                    && $arrVars['INPUT_EXTRA_PARAM']['TIME']);
+            $datewidget = $useTimePicker ? 'datetimepicker' : 'datepicker';
+            if (isset($arrVars['INPUT_EXTRA_PARAM']['FIRSTDAY']))
+                $formValues['firstDay'] = (int)$arrVars['INPUT_EXTRA_PARAM']['FIRSTDAY'];
+            if (!isset($arrVars['INPUT_EXTRA_PARAM']['FORMAT']))
+                $arrVars['INPUT_EXTRA_PARAM']['FORMAT'] = '%d %b %Y';
+            if (!isset($arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT']))
+                $arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] = '%H:%M';
+
+            // El siguiente código asume que el formato de hora siempre
+            // se especifica luego del formato de fecha
+            $timepos = FALSE;
+            foreach (array_keys($timeFormatMap) as $tf) {
+                $tp = strpos($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], $tf);
+                if ($timepos === FALSE || ($tp !== FALSE && $timepos > $tp))
+                    $timepos = $tp;
+            }
+            if ($timepos !== FALSE) {
+                $arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] = trim(substr($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], $timepos));
+                $arrVars['INPUT_EXTRA_PARAM']['FORMAT'] = trim(substr($arrVars['INPUT_EXTRA_PARAM']['FORMAT'], 0, $timepos));
+            }
+            if ($arrVars['INPUT_EXTRA_PARAM']['FORMAT'] != '%d %b %Y') {
+                $formValues['dateFormat'] = str_replace(
+                        array_keys($dateFormatMap),
+                        array_values($dateFormatMap),
+                        $arrVars['INPUT_EXTRA_PARAM']['FORMAT']);
+            }
+            if ($arrVars['INPUT_EXTRA_PARAM']['TIMEFORMAT'] != '%H:%M') {
+                $formValues['timeFormat'] = str_replace(
+                        array_keys($timeFormatMap),
+                        array_values($timeFormatMap),
+                        $arrVars['INPUT_EXTRA_PARAM']['FORMAT']);
+            }
+        }
+
+        $json = new Services_JSON();
+        $params = $json->encode(array_merge($defaultValues, $formValues));
+        if ($datewidget == 'datetimepicker' && isset($arrVars['INPUT_EXTRA_PARAM']['TIMELIB']) &&
+            $arrVars['INPUT_EXTRA_PARAM']['TIMELIB'] == 'bootstrap-datetimepicker') {
+            $strInput = <<<DATETIME_PICKER_FIELD
 <div class="input-append date form_datetime" nowrap>
     <input size="16" type="text" name="{$varName_escaped}" value="{$varValue_escaped}" class="datepicker-input" readonly>
     <span class="add-on datepicker-button"><i class="fa fa-calendar"></i></span>
@@ -403,8 +435,8 @@ $(function() {
 });
 </script>
 DATETIME_PICKER_FIELD;
-                        } else {
-                            $strInput = <<<DATETIME_PICKER_FIELD
+        } else {
+            $strInput = <<<DATETIME_PICKER_FIELD
 <input type="text" name="{$varName_escaped}" value="{$varValue_escaped}"
     style="width: 10em; color: #840; background-color: #fafafa; border: 1px solid #999999; text-align: center" />
 <script type="text/javascript">
@@ -413,21 +445,8 @@ $(function() {
 });
 </script>
 DATETIME_PICKER_FIELD;
-                        }
-                    } else {
-                        $strInput = $varValue_escaped;
-                    }
-                    break;
-                default:
-                    $strInput = "";
-            }
-            $arrMacro['LABEL'] = _labelName($varName, $arrVars);
-            $arrMacro['INPUT'] = $strInput;
-            $this->smarty->assign($varName, $arrMacro);
         }
-        $this->smarty->assign("title", htmlentities($title, ENT_COMPAT, 'UTF-8'));
-        $this->smarty->assign("mode", $this->modo);
-        return $this->smarty->fetch("file:$templateName");
+        return $strInput;
     }
 
     function setViewMode()

@@ -388,7 +388,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Oct 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGED: Group List: Updated Russian translation (3). Provided by user Russian.
+- CHANGED: Group Permission: Updated Russian translation. Provided by user
+  Russian.
+  SVN Rev[7288]
+- CHANGED: Group List: Updated Russian translation. Provided by user Russian.
   SVN Rev[7287]
 - CHANGED: Framework: Updated Russian translation (3). Provided by user Russian.
   SVN Rev[7286]

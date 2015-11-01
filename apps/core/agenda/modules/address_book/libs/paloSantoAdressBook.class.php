@@ -34,7 +34,7 @@
 if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) {
 require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 }
-global $arrConf; 
+global $arrConf;
 //include_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
 
 class paloAdressBook {
@@ -70,7 +70,7 @@ a array with the field "total" containing the total of records.
     	$sql = 'SELECT '.($count ? 'COUNT(*) AS total' : '*, telefono work_phone').' FROM contact';
         $whereFields = array('(iduser = ? OR status = ?)',"directory='external'");
         $sqlParams = array($iduser, 'isPublic');
-        
+
         // Filtro por campo específico. Por omisión se filtra por id
         if (!is_null($field_name) and !is_null($field_pattern)) {
         	if (!in_array($field_name, array('id','name','last_name','telefono','cell_phone','home_phone',
@@ -84,10 +84,10 @@ a array with the field "total" containing the total of records.
             }
             $whereFields[] = $cond;
         }
-        
+
         if (count($whereFields) > 0) $sql .= ' WHERE '.implode(' AND ', $whereFields);
         $sql .= ' ORDER BY last_name, name';
-        
+
         if (!is_null($limit)) {
         	$sql .= ' LIMIT ?';
             $sqlParams[] = (int)$limit;
@@ -107,25 +107,25 @@ a array with the field "total" containing the total of records.
     function getInternalContacts($arrDevices)
     {
         $arrData = array();
-        
+
         if(is_array($arrDevices) && count($arrDevices) > 0){
             foreach($arrDevices as $k => $dev)
                 $arrIDs[] = $dev['id'];
 
             $query = "SELECT * FROM contact WHERE telefono in (".implode(',',$arrIDs).") and directory='internal' and status='isPublic'";
-            
+
             $result = $this->_DB->fetchTable($query, true, array());
             if (!is_array($result)) {
                     $this->errMsg = $this->_DB->errMsg;
             }
-            
+
             foreach($result as $k => $contact){
                 $arrData[$contact['telefono']] = $contact;
             }
         }
         return $arrData;
     }
-    
+
     function getAddressBookByCsv($limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL, $count=FALSE, $iduser=NULL)
     {
     	return $this->getAddressBook($limit, $offset, $field_name, $field_pattern, $count, $iduser);
@@ -135,10 +135,10 @@ a array with the field "total" containing the total of records.
     {
         if($directory == "external"){
             $where = "id=? and (iduser=? or status='isPublic') and directory='external'";
-            $params = array($id, $id_user);    
-        
-            $query   = "SELECT *, telefono work_phone FROM contact WHERE $where";            
-        
+            $params = array($id, $id_user);
+
+            $query   = "SELECT *, telefono work_phone FROM contact WHERE $where";
+
             $result=$this->_DB->getFirstRowQuery($query, true, $params);
             if(!$result && $result==null && count($result) < 1)
                 return false;
@@ -148,10 +148,10 @@ a array with the field "total" containing the total of records.
         else if($directory == "internal" && $isAdminGroup){
             $matriz = $this->getDeviceFreePBX_Completed($dsn,1,0,"telefono",$id,FALSE);
             $result = $matriz[0];
-            
+
             if(!$result['exists_on_address_book_db'])
                 unset($result['id']);
-              
+
             return $result;
         }
     }
@@ -227,11 +227,10 @@ a array with the field "total" containing the total of records.
     }
 
     function AsteriskManager_Redirect($host, $user, $password, $command_data) {
-        global $arrLang;
         $astman = new AGI_AsteriskManager();
 
         if (!$astman->connect("$host", "$user" , "$password")) {
-            $this->errMsg = $arrLang["Error when connecting to Asterisk Manager"];
+            $this->errMsg = _tr("Error when connecting to Asterisk Manager");
         } else{
             $salida = $astman->Redirect($command_data['channel'], "", $command_data['destino'], "from-internal", "1");
 
@@ -244,11 +243,10 @@ a array with the field "total" containing the total of records.
     }
 
     function AsteriskManager_Originate($host, $user, $password, $command_data) {
-        global $arrLang;
         $astman = new AGI_AsteriskManager();
 
         if (!$astman->connect("$host", "$user" , "$password")) {
-            $this->errMsg = $arrLang["Error when connecting to Asterisk Manager"];
+            $this->errMsg = _tr("Error when connecting to Asterisk Manager");
         } else{
             $parameters = $this->Originate($command_data['origen'], $command_data['destino'], $command_data['channel'], $command_data['description']);
 
@@ -293,11 +291,11 @@ a array with the field "total" containing the total of records.
     function existsDeviceFreePBX($dsn, $device)
     {
         $query = "SELECT count(*) existe FROM devices WHERE id=?";
-        
+
         $pDB = new paloDB($dsn);
         if($pDB->connStatus)
             return false;
-        $result = $pDB->getFirstRowQuery($query,true,array($device)); //se consulta a la base asterisk 
+        $result = $pDB->getFirstRowQuery($query,true,array($device)); //se consulta a la base asterisk
 
         if(is_array($result) && count($result)>0){
             if($result['existe']>0)
@@ -307,7 +305,7 @@ a array with the field "total" containing the total of records.
         }
         return false;
     }
-    
+
     function getDeviceFreePBX($dsn, $limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL,$count=FALSE)
     {
         //Defining the fields to get. If the param $count is true, then we will get the result of the sql function count(), else, we will get all fields in the table.
@@ -357,9 +355,9 @@ a array with the field "total" containing the total of records.
     }
 
     function getDeviceFreePBX_Completed($dsn, $limit=NULL, $offset=NULL, $field_name=NULL, $field_pattern=NULL,$count=FALSE)
-    {        
+    {
         $arrDevices = $this->getDeviceFreePBX($dsn,$limit,$offset,$field_name,$field_pattern,$count);
-        
+
         if(!$count){
             $arrVMs     = $this->getMailsFromVoicemail();
             $arrContact = $this->getInternalContacts($arrDevices);
@@ -390,7 +388,7 @@ a array with the field "total" containing the total of records.
                     $device['id_on_address_book_db']     = isset($arrContact[$device['id']]['id'])?$arrContact[$device['id']]['id']:false;
                 }
                 return $arrDevices;
-            }        
+            }
             else{
                 return false;//CASO ERROR
             }
@@ -403,7 +401,7 @@ a array with the field "total" containing the total of records.
                 return false; //CASO DE ERROR
         }
     }
-    
+
     function getMailsFromVoicemail()
     {
         $result = array();
@@ -426,7 +424,7 @@ a array with the field "total" containing the total of records.
         //de sus creadores o dueños.
         //Tambien se pueden editar los contactos internos pero
         //solo lo hacen usuarios del grupo administrador
-        
+
         if($directory == "external"){
             $params = array($id, $id_user);
             $query   = "SELECT * FROM contact WHERE id=? and iduser=? ";
@@ -437,7 +435,7 @@ a array with the field "total" containing the total of records.
             return $result;
         }
         else if($directory == "internal" && $isAdminGroup){
-            return $this->existsDeviceFreePBX($dns,$id); 
+            return $this->existsDeviceFreePBX($dns,$id);
         }
         return false;
     }

@@ -101,6 +101,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sat Oct 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book: switch all uses of $arrLang to _tr() and replace
+  hand-coded translation loading with load_language_module().
+  SVN Rev[7290]
+
 - FIXED: Calendar: when invoked as a contact list helper for graphic_report,
   the event_id input tag is absent, but the js code assumed it was present. The
   REST rewrite now displays an error in this case. Fixed by checking for the

@@ -181,6 +181,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Sat Oct 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: System: Updated Russian translation. Provided by user Russian.
+  SVN Rev[7289]
+
 * Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: System: replace two instances of /bin/hostname with read of /proc.
   SVN Rev[7281]

@@ -1,8 +1,8 @@
 <?php
-/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 1.6-12                                               |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,34 +25,31 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2009/03/05 00:36:42 aflores Exp $ */
+  $Id: ru.lang,v 1.0 2015/10/20 01:59:04 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Network Parameters" => "Сетевые Настройки",
-"Device" => "Устройство",
-"Type" => "Тип",
-"IP" => "IP",
-"Mask" => "Маска",
+"Assign IP Address to Host" => "Резервирование DHCP",
+"Host Name" => "Имя Хоста",
+"IP Address" => "IP-адрес",
 "MAC Address" => "MAC-адрес",
-"HW Info" => "Сведения об аппаратном обеспечении",
-"Status" => "Статус",
-"Ethernet Interfaces List" => "Список интерфейсов Ethernet",
-"Connected" => "Подключен",
-"Not Connected" => "Не подключен",
-"Edit Interface" => "Редактирование интерфейса",
-"Validation Error" => "Ошибка валидации",
-"The following fields contain errors" => "Следующие поля содержат ошибки",
-"Host" => "FQDN",
-"Primary DNS" => "Первичный DNS",
-"Secondary DNS" => "Вторичный DNS",
-"Default Gateway" => "Шлюз по Умолчанию",
-"IP Address" => "IP-Адрес",
-"Network Mask" => "Маска подсети",
-"Interface Type" => "Тип Интерфейса",
-"Save" => "Сохранить",
-"Edit Network Parameters" => "Изменить Сетевые Настройки",
-"Required field" => "Обязательное поле",
-"Apply changes" => "Применить изменения",
-"Are you sure you want to edit network parameters?" => "Вы уверены что хотите изменить сетевые настройки?",
+
+"Hostname" => "Hostname",
+"Assign IP Address" => "Зарезирвировать IP-адрес",
+"View edit" => "View edit",
+
+"Are you sure you wish to delete the DHCP configuration." => "Вы уверены, что хотите удалить настройки DHCP?",
+"The name of hostname is duplicated please changes to another name" => "Имя Хоста уже используется, пожалуйста, введите другое имя",
+"The following fields are duplicates or already exists" => "Следующие поля дублируются или уже существуют",
+"ex_hostname" => "(напр. myhostname)",
+"ex_ipaddress" => "(напр. 127.0.0.1)",
+"ex_mac_address" => "(напр. AA:BB:CC:DD:EE:FF)",
+'Invalid hostname' => 'Недействительное Имя Хоста',
+'Invalid IP address' => 'Недействительный IP-адрес',
+'Invalid MAC address' => 'Недействительный MAC-адрес',
+'Duplicate IP or MAC' => 'IP или MAC уже используется',
+"Show Filter" => "Показать Фильтр",
+"Hide Filter" => "Скрыть Фильтр",
+"Page" => "Страница",
+"No records match the filter criteria" => "Нет записей соответствуют критериям фильтра",
 );
 ?>

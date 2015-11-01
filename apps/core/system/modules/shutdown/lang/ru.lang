@@ -32,9 +32,9 @@ $arrLangModule=array(
 "Accept" => "Принять",
 "Halt" => "Выключить систему",
 "Reboot" => "Перезагрузить",
-"Shutdown in progress" => "Выполняется останов системы",
-"Your system in shutting down now. Please, try again later." => "Выполняется останов системы. Пожалуйста, попробуйте позже.",
-"The reboot signal has been sent correctly." => "The reboot signal has been sent correctly.",
+"Shutdown in progress" => "Выполняется остановка системы",
+"Your system in shutting down now. Please, try again later." => "Выполняется остановка системы. Пожалуйста, попробуйте позже.",
+"The reboot signal has been sent correctly." => "Сигнал на перезагрузку был отправлен корректно.",
 "Continue" => "Continue"
 );
 ?>

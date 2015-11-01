@@ -3,7 +3,7 @@
   Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 0.5                                                  |
-  | http://www.elastix.com                                               |
+  | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
@@ -31,11 +31,17 @@ $arrLangModule=array(
 "Repositories" => "Репозитории",
 "Active" => "Active",
 "Name" => "Имя",
-"Save/Update" => "Save/Update",
-"Default" => "Default",
-"Type" => "Type",
-"Main" => "Main",
-"Others" => "Others",
-"All" => "All"
+"Save/Update" => "Сохранить/Обновить",
+"Default" => "По умолчанию",
+"Type" => "Тип",
+"Main" => "Основной",
+"Others" => "Другие",
+"All" => "Все",
+"Page" => "Страница",
+"Show Filter" => "Показать Фильтр",
+"Hide Filter" => "Скрыть Фильтр",
+"Active" => "Активный",
+"Repo" => "Репозиторий",
+"records" => "записей",
 );
 ?>

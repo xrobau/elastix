@@ -1,8 +1,8 @@
 <?php
-/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 1.6-6                                               |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,34 +25,31 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2009/03/05 00:36:42 aflores Exp $ */
+  $Id: ru.lang,v 1.0 2015/10/20 01:49:29 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Network Parameters" => "Сетевые Настройки",
-"Device" => "Устройство",
-"Type" => "Тип",
-"IP" => "IP",
-"Mask" => "Маска",
+
+"New Email list" => "New Email list",
+"Are you sure you wish to delete the email list." => "Are you sure you wish to delete the email list.",
+"Email List Name" => "Email List Name",
+
+"Email Member" => "Email Member",
+"Email List Members" => "Email List Members",
+
+"Number of Accounts" => "Number of Accounts",
+//nuevos
+"DHCP Client List" => "Список Клиентов DHCP",
+"New Dhcp client" => "New Dhcp client",
+"Are you sure you wish to delete the Ip." => "Are you sure you wish to delete the Ip.",
+"Action" => "Действие",
+"See All DHCP Info" => "See All DHCP Info",
+
+"IP Address" => "IP-адрес",
+"Start Date" => "Начальная Дата",
+"End Date" => "Конечная Дата",
 "MAC Address" => "MAC-адрес",
-"HW Info" => "Сведения об аппаратном обеспечении",
-"Status" => "Статус",
-"Ethernet Interfaces List" => "Список интерфейсов Ethernet",
-"Connected" => "Подключен",
-"Not Connected" => "Не подключен",
-"Edit Interface" => "Редактирование интерфейса",
-"Validation Error" => "Ошибка валидации",
-"The following fields contain errors" => "Следующие поля содержат ошибки",
-"Host" => "FQDN",
-"Primary DNS" => "Первичный DNS",
-"Secondary DNS" => "Вторичный DNS",
-"Default Gateway" => "Шлюз по Умолчанию",
-"IP Address" => "IP-Адрес",
-"Network Mask" => "Маска подсети",
-"Interface Type" => "Тип Интерфейса",
-"Save" => "Сохранить",
-"Edit Network Parameters" => "Изменить Сетевые Настройки",
-"Required field" => "Обязательное поле",
-"Apply changes" => "Применить изменения",
-"Are you sure you want to edit network parameters?" => "Вы уверены что хотите изменить сетевые настройки?",
+"View Details" => "Просмотр Деталей",
+"Page" => "Страница",
+"No records match the filter criteria" => "Нет записей соответствующих критериям фильтра",
 );
 ?>

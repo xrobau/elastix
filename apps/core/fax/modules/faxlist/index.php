@@ -35,22 +35,15 @@ function _moduleContent($smarty, $module_name)
 {
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -59,7 +52,7 @@ function _moduleContent($smarty, $module_name)
     $accion = getAction();
     switch($accion){
         case "checkFaxStatus":
-            $contenidoModulo = checkFaxStatus("faxListStatus",$smarty, $module_name, $local_templates_dir, $arrConf, $arrLang);
+            $contenidoModulo = checkFaxStatus("faxListStatus",$smarty, $module_name, $local_templates_dir, $arrConf);
             break;
         default:
             $contenidoModulo = listFax($smarty, $module_name, $local_templates_dir);
@@ -117,7 +110,7 @@ function listFax($smarty, $module_name, $local_templates_dir)
     return $oGrid->fetchGrid();
 }
 
-function checkFaxStatus($function, $smarty, $module_name, $local_templates_dir, $arrConf, $arrLang)
+function checkFaxStatus($function, $smarty, $module_name, $local_templates_dir, $arrConf)
 {
     $executed_time = 1; //en segundos
     $max_time_wait = 30; //en segundos
@@ -126,7 +119,7 @@ function checkFaxStatus($function, $smarty, $module_name, $local_templates_dir, 
 
     $i = 1;
     while(($i*$executed_time) <= $max_time_wait){
-        $return = $function($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang);
+        $return = $function($smarty, $module_name, $local_templates_dir, $arrConf);
         $data   = $return['data'];
         if($return['there_was_change']){
             $event_flag = true;
@@ -138,7 +131,7 @@ function checkFaxStatus($function, $smarty, $module_name, $local_templates_dir, 
    return $data;
 }
 
-function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf, $arrLang)
+function faxListStatus($smarty, $module_name, $local_templates_dir, $arrConf)
 {
     $oFax    = new paloFax();
     $arrFax  = $oFax->getFaxList();
@@ -179,7 +172,7 @@ function msgStatusFaxDevice(&$arrFaxStatus, $fax_dev_id)
 function thereChanges($data){
     $session = getSession();
     $arrData = array();
-    if (isset($session['faxlist']['faxListStatus']) && 
+    if (isset($session['faxlist']['faxListStatus']) &&
         is_array($session['faxlist']['faxListStatus']))
         $arrData = $session['faxlist']['faxListStatus'];
     $arraResult = array();

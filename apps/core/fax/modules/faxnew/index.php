@@ -32,74 +32,67 @@ function _moduleContent(&$smarty, $module_name)
     include_once "libs/paloSantoForm.class.php";
     include_once "libs/paloSantoFax.class.php";
     include_once "libs/paloSantoDB.class.php";
-	
+
 	//include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
 	$contenidoModulo='';
-    $arrFormElements = array("name"        => array("LABEL"                  => $arrLang["Virtual Fax Name"],
+    $arrFormElements = array("name"        => array("LABEL"                  => _tr("Virtual Fax Name"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "email"       => array("LABEL"                  => $arrLang["Destination Email"],
+                             "email"       => array("LABEL"                  => _tr("Destination Email"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "email",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "extension"   => array("LABEL"                  => "{$arrLang['Fax Extension']} (IAX)",
+                             "extension"   => array("LABEL"                  => ""._tr('Fax Extension')." (IAX)",
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "secret"      => array("LABEL"                  => "{$arrLang['Secret']} (IAX)",
+                             "secret"      => array("LABEL"                  => ""._tr('Secret')." (IAX)",
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "clid_name"   => array("LABEL"                  => $arrLang["Caller ID Name"],
+                             "clid_name"   => array("LABEL"                  => _tr("Caller ID Name"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "clid_number" => array("LABEL"                  => $arrLang["Caller ID Number"],
+                             "clid_number" => array("LABEL"                  => _tr("Caller ID Number"),
                                                     "REQUIRED"               => "no",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "text",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "country_code" => array("LABEL"                  => $arrLang["Country Code"],
+                             "country_code" => array("LABEL"                  => _tr("Country Code"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "numeric",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                             "area_code" => array("LABEL"                  => $arrLang["Area Code"],
+                             "area_code" => array("LABEL"                  => _tr("Area Code"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
@@ -120,21 +113,21 @@ function _moduleContent(&$smarty, $module_name)
                                 );
 
     $oForm = new paloForm($smarty, $arrFormElements);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("APPLY_CHANGES", $arrLang["Apply changes"]);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("DELETE", $arrLang["Delete"]);
-    $smarty->assign("CONFIRM_CONTINUE", $arrLang["Are you sure you wish to continue?"]);
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("DELETE", _tr("Delete"));
+    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
     $smarty->assign("icon","/modules/$module_name/images/fax_virtual_fax_list.png");
 
     if(isset($_POST['save'])) {
         if($oForm->validateForm($_POST)) {
             // Exito, puedo procesar los datos ahora.
             $oFax = new paloFax();
-            
-            $bExito = $oFax->createFaxExtension($_POST['name'], $_POST['extension'], $_POST['secret'], $_POST['email'], 
+
+            $bExito = $oFax->createFaxExtension($_POST['name'], $_POST['extension'], $_POST['secret'], $_POST['email'],
                                       $_POST['clid_name'], $_POST['clid_number'],$_POST['country_code'],$_POST['area_code']);
             if ($bExito) {
                 header("Location: ?menu=faxlist");
@@ -143,19 +136,19 @@ function _moduleContent(&$smarty, $module_name)
                     'mb_title'  =>  _tr('Failed to create fax extension'),
                     'mb_message'    =>  $oFax->errMsg,
                 ));
-                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["New Virtual Fax"], $_POST);
+                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", _tr("New Virtual Fax"), $_POST);
             }
         } else {
             // Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
+            $smarty->assign("mb_title", _tr("Validation Error"));
             $arrErrores=$oForm->arrErroresValidacion;
-            $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br>";
+            $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
             }
             $strErrorMsg .= "";
             $smarty->assign("mb_message", $strErrorMsg);
-            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["New Virtual Fax"], $_POST);       
+            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", _tr("New Virtual Fax"), $_POST);
         }
 
     } else if(isset($_POST['apply_changes'])) {
@@ -175,25 +168,25 @@ function _moduleContent(&$smarty, $module_name)
                     'mb_title'  =>  _tr('Failed to update fax extension'),
                     'mb_message'    =>  $oFax->errMsg,
                 ));
-                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Edit Virtual Fax"], $_POST);
+                $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Edit Virtual Fax"), $_POST);
             }
         } else {
             // Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
+            $smarty->assign("mb_title", _tr("Validation Error"));
             $arrErrores=$oForm->arrErroresValidacion;
-            $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br>";
+            $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
             }
             $strErrorMsg .= "";
             $smarty->assign("mb_message", $strErrorMsg);
-            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Edit Virtual Fax"], $_POST);       
+            $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Edit Virtual Fax"), $_POST);
             /////////////////////////////////
         }
 
     } else if(isset($_POST['delete'])) {
         //- TODO: Validar el id de fax
-        $oFax = new paloFax(); 
+        $oFax = new paloFax();
         $oFax->deleteFaxExtensionById($_POST['id_fax']);
         header("Location: ?menu=faxlist");
 
@@ -206,7 +199,7 @@ function _moduleContent(&$smarty, $module_name)
         $arrFax=$oFax->getFaxById($_GET['id']);
 
         $smarty->assign("id_fax", $_GET['id']);
-        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["Edit Virtual Fax"], $arrFax); // hay que pasar el arreglo
+        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", _tr("Edit Virtual Fax"), $arrFax); // hay que pasar el arreglo
 
     } else if(isset($_GET['action']) && $_GET['action']=="view") {
         //- TODO: Tengo que validar que el id sea valido, si no es valido muestro un mensaje de error
@@ -216,7 +209,7 @@ function _moduleContent(&$smarty, $module_name)
         $arrFax=$oFax->getFaxById($_GET['id']);
 
         $smarty->assign("id_fax", $_GET['id']);
-        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["View Virtual Fax"], $arrFax); // hay que pasar el arreglo
+        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", _tr("View Virtual Fax"), $arrFax); // hay que pasar el arreglo
     } else {
     	//incializar los valores
     	if (!isset($_POST['name'])) $_POST['name']='';
@@ -229,7 +222,7 @@ function _moduleContent(&$smarty, $module_name)
     	if (!isset($_POST['dev_id'])) $_POST['dev_id']='';
         if (!isset($_POST['country_code'])) $_POST['country_code']='';
     	if (!isset($_POST['area_code'])) $_POST['area_code']='';
-        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", $arrLang["New Virtual Fax"],$_POST);
+        $contenidoModulo=$oForm->fetchForm("$local_templates_dir/new.tpl", _tr("New Virtual Fax"),$_POST);
     }
     return $contenidoModulo;
 }

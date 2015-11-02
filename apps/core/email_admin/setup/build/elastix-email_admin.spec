@@ -202,6 +202,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Nov  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Antispam: switch all uses of $arrLang to _tr() and replace hand-coded
+  translation loading with load_language_module().
+  SVN Rev[7293]
+
 * Fri Oct 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Vacations: cyrus-sasl-plain is required for Vacations.
   SVN Rev[7285]

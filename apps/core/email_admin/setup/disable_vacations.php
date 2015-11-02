@@ -45,8 +45,7 @@
     $timestamp1 = mktime(0,0,0,date("m"),date("d"),date("Y"));
 
     load_language("/var/www/html/");
-    global $arrLang;
-    
+
     if(count($emails)>0){
 	foreach($emails as $key => $value){
 	    $id       = $value['id'];
@@ -79,7 +78,7 @@
 		if(preg_match("/scriptTest.sieve/",$scripts['actived']) && $scripts['status']) // si CapturaSpam=? y Vacations=ON
 		    $spamCapture0 = true;
 		$body = str_replace("{END_DATE}", $end_date, $body);
-		$status = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture0, $arrLang);
+		$status = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture0);
 	    }
 
 	    // elimina el script de vacaciones si el tiempo de sus vacaciones ya expiro
@@ -89,13 +88,13 @@
 		if($seconds > 0){// si es positivo entonces la fecha actual es mayor que la fecha final del script
 		    $res = $pVacations->updateMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
 		    if($res)
-			$status = $pVacations->deleteVacationScript($email, $objAntispam, $spamCapture, $arrLang);
+			$status = $pVacations->deleteVacationScript($email, $objAntispam, $spamCapture);
 		    if(!$status)
 			echo $pVacations->errMsg;
 		}
 	    }
 	}
     }
-    
+
 
 ?>

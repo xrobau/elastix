@@ -38,21 +38,14 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoEmailRelay.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -67,16 +60,16 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         case "save_config":
-            $content = saveNewEmailRelay($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = saveNewEmailRelay($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
         default: // view_form
-            $content = viewFormEmailRelay($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = viewFormEmailRelay($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
     }
     return $content;
 }
 
-function viewFormEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function viewFormEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pEmailRelay = new paloSantoEmailRelay($pDB);
 
@@ -94,35 +87,35 @@ function viewFormEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, 
 		$_DATA['SMTP_Server'] = "custom";
     }
 
-    $smarty->assign("CONFIGURATION_UPDATE",$arrLang['Save']);
-    $smarty->assign("ENABLED", $arrLang["Enabled"]);
-    $smarty->assign("DISABLED", $arrLang["Disabled"]);
-    $smarty->assign("ENABLE", $arrLang["Enable"]);
-    $smarty->assign("DISABLE", $arrLang["Disable"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("STATUS",$arrLang['Status']);
-    $smarty->assign("MSG_REMOTE_SMTP",$arrLang['Message Remote SMTP Server']);
-    $smarty->assign("MSG_REMOTE_AUT",$arrLang['Message Remote Autentification']);
+    $smarty->assign("CONFIGURATION_UPDATE",_tr('Save'));
+    $smarty->assign("ENABLED", _tr("Enabled"));
+    $smarty->assign("DISABLED", _tr("Disabled"));
+    $smarty->assign("ENABLE", _tr("Enable"));
+    $smarty->assign("DISABLE", _tr("Disable"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("STATUS",_tr('Status'));
+    $smarty->assign("MSG_REMOTE_SMTP",_tr('Message Remote SMTP Server'));
+    $smarty->assign("MSG_REMOTE_AUT",_tr('Message Remote Autentification'));
     $smarty->assign("icon", "images/list.png");
     $smarty->assign("Example",_tr("Ex"));
-    $smarty->assign("lbldomain",$arrLang["Domain"]);
+    $smarty->assign("lbldomain",_tr("Domain"));
 
-    $arrFormEmailRelay = createFieldForm($arrLang);
+    $arrFormEmailRelay = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormEmailRelay);
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["Remote SMTP Delivery"], $_DATA);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Remote SMTP Delivery"), $_DATA);
     return "<form method='POST' style='margin-bottom:0; action='?menu=$module_name'>".$htmlForm."</form>";
 }
 
-function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
-    $arrFormEmailRelay = createFieldForm($arrLang);
+    $arrFormEmailRelay = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormEmailRelay);
 
     if(!$oForm->validateForm($_POST)){
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
+        $smarty->assign("mb_title", _tr("Validation Error"));
 
         $arrErrores = $oForm->arrErroresValidacion;
-        $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/>";
+        $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
@@ -145,22 +138,22 @@ function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $
         $SMTP_Server = rtrim(getParameter('SMTP_Server'));
         if($SMTP_Server != "custom"){
             if($arrData['user'] == "" || $arrData['password'] == ""){
-        	$varErrors = ""; 
+        	$varErrors = "";
         	if($arrData['user'] == "")
         	    $varErrors = _tr("Username").", ";
         	if($arrData['password'] == "")
         	    $varErrors .= " "._tr("Password");
-        
-        	$strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/> ".$varErrors;
+
+        	$strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/> ".$varErrors;
         	$smarty->assign("mb_message", $strErrorMsg);
-        	$content = viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf,$arrLang);
+        	$content = viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf);
         	return $content;
             }
         }
 
         $tls_enabled  = ($arrData['autentification']=="on")?true:false;
         $auth_enabled = ($arrData['user']!="" && $arrData['password']!="");
-        $isOK = ($arrData['status'] == 'on') 
+        $isOK = ($arrData['status'] == 'on')
             ? $pEmailRelay->checkSMTP(
                 $arrData['relayhost'] ,
                 $arrData['port'],
@@ -172,28 +165,28 @@ function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $
 
         if(is_array($isOK)){ //hay errores al tratar de verificar datos
             $errors = $isOK["ERROR"];
-            $smarty->assign("mb_title", $arrLang["ERROR"]);
+            $smarty->assign("mb_title", _tr("ERROR"));
             $smarty->assign("mb_message", _tr($errors));
-            $content= viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf,$arrLang);
+            $content= viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf);
             return $content;
         }
 
         $pEmailRelay->setStatus($arrData['status']);
         $ok = $pEmailRelay->processUpdateConfiguration($arrData);
         if($ok){
-            $smarty->assign("mb_title", $arrLang["Result transaction"]);
-            $smarty->assign("mb_message", $arrLang["Configured successful"]);
+            $smarty->assign("mb_title", _tr("Result transaction"));
+            $smarty->assign("mb_message", _tr("Configured successful"));
         }
         else{
-            $smarty->assign("mb_title", $arrLang["ERROR"]);
+            $smarty->assign("mb_title", _tr("ERROR"));
             $smarty->assign("mb_message", $pEmailRelay->errMsg);
         }
     }
-    $content= viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf,$arrLang);
+    $content= viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf);
     return $content;
 }
 
-function createFieldForm($arrLang)
+function createFieldForm()
 {
 
     $arrServers = array(
@@ -203,49 +196,49 @@ function createFieldForm($arrLang)
         "smtp.mail.yahoo.com" => "YAHOO");
 
     $arrFields = array(
-            "status"   => array(      "LABEL"                  => $arrLang["Status"],
+            "status"   => array(      "LABEL"                  => _tr("Status"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "CHECKBOX",
                                             "INPUT_EXTRA_PARAM"      => array("id"=>"status"),
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "SMTP_Server"    => array(      "LABEL"                  => $arrLang["SMTP Server"],
+            "SMTP_Server"    => array(      "LABEL"                  => _tr("SMTP Server"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "SELECT",
                                             "INPUT_EXTRA_PARAM"      => $arrServers,
                                             "VALIDATION_TYPE"        => "",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "relayhost"    => array(        "LABEL"                  => $arrLang["Domain"],
+            "relayhost"    => array(        "LABEL"                  => _tr("Domain"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "port"         => array(        "LABEL"                  => $arrLang["Port"],
+            "port"         => array(        "LABEL"                  => _tr("Port"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "numeric",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "user"         => array(        "LABEL"                  => $arrLang["Username"],
+            "user"         => array(        "LABEL"                  => _tr("Username"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "password"     => array(        "LABEL"                  => $arrLang["Password"],
+            "password"     => array(        "LABEL"                  => _tr("Password"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "PASSWORD",
                                             "INPUT_EXTRA_PARAM"      => "",
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "autentification"   => array(   "LABEL"                  => $arrLang["TLS Enable"],
+            "autentification"   => array(   "LABEL"                  => _tr("TLS Enable"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "CHECKBOX",
                                             "INPUT_EXTRA_PARAM"      => "",

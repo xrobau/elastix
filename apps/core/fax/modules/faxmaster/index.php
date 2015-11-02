@@ -35,34 +35,27 @@ function _moduleContent(&$smarty, $module_name)
 
  //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
+
 
     $contenido='';
     $msgError='';
 
     $pDBSetting = new paloDB($arrConf['dsn_conn_database']);
- 
-    $arrForm  = array("fax_master"       => array("LABEL"                   => $arrLang["Fax Master Email"],
+
+    $arrForm  = array("fax_master"       => array("LABEL"                   => _tr("Fax Master Email"),
                                                     "REQUIRED"               => "yes",
                                                     "EDITABLE"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
@@ -76,12 +69,12 @@ function _moduleContent(&$smarty, $module_name)
     $oForm->setEditMode();
     //obtener el valor de la tarifa por defecto
     $arrDefault['fax_master']=get_key_settings($pDBSetting,"fax_master");
-    $smarty->assign("FAXMASTER_MSG", $arrLang["Write the email address which will receive the notifications of received messages, errors and activity summary of the Fax Server"]);
+    $smarty->assign("FAXMASTER_MSG", _tr("Write the email address which will receive the notifications of received messages, errors and activity summary of the Fax Server"));
 
-    $smarty->assign("icon", "/modules/$module_name/images/fax_fax_master.png"); 
-    $smarty->assign("APPLY_CHANGES", $arrLang["Save"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $strReturn = $oForm->fetchForm("$local_templates_dir/fax_master.tpl", $arrLang["Fax Master Configuration"], $arrDefault);
+    $smarty->assign("icon", "/modules/$module_name/images/fax_fax_master.png");
+    $smarty->assign("APPLY_CHANGES", _tr("Save"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $strReturn = $oForm->fetchForm("$local_templates_dir/fax_master.tpl", _tr("Fax Master Configuration"), $arrDefault);
 
     if(isset($_POST['save_default'])) {
         $oForm = new paloForm($smarty, $arrForm);
@@ -90,9 +83,9 @@ function _moduleContent(&$smarty, $module_name)
         if($oForm->validateForm($_POST)) {
             $bMostrarError=FALSE;
             $bValido=set_key_settings($pDBSetting,'fax_master',$arrDefault['fax_master']);
-           
+
             if(!$bValido) {
-                echo $arrLang["Error when saving Fax Master"];
+                echo _tr("Error when saving Fax Master");
             } else {
                 //guardar en /etc/postfix/virtual
                 $bExito=modificar_archivos_mail($arrDefault['fax_master'],$error);
@@ -104,15 +97,15 @@ function _moduleContent(&$smarty, $module_name)
                 }
             }
         }else
-            $mensaje=$arrLang["Value for Fax Master is not valid"];
+            $mensaje=_tr("Value for Fax Master is not valid");
         if ($bMostrarError) {
             // Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
+            $smarty->assign("mb_title", _tr("Validation Error"));
             $smarty->assign("mb_message", $mensaje);
 
-            $smarty->assign("APPLY_CHANGES", $arrLang["Save"]);
-            $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-            $strReturn = $oForm->fetchForm("$local_templates_dir/fax_master.tpl", $arrLang["Fax Master Configuration"], $arrDefault);
+            $smarty->assign("APPLY_CHANGES", _tr("Save"));
+            $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+            $strReturn = $oForm->fetchForm("$local_templates_dir/fax_master.tpl", _tr("Fax Master Configuration"), $arrDefault);
         }
     }
 

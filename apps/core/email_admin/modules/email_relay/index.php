@@ -30,32 +30,23 @@
 function _moduleContent(&$smarty, $module_name)
 {
     include_once "libs/paloSantoValidar.class.php";
-
-    
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
-    
+
+
     $contenido='';
     $bGuardar=TRUE;
     $msgErrorVal = "";
@@ -70,18 +61,18 @@ function _moduleContent(&$smarty, $module_name)
                 foreach ($arrRedesRelay as $redRelay) {
                     //validar
                     $redRelay = trim($redRelay);
-                    $val->validar("$arrLang[Network] $redRelay", $redRelay, "ip/mask");
+                    $val->validar(_tr('Network')." $redRelay", $redRelay, "ip/mask");
                 }
             } else {
-                $smarty->assign("mb_title",$arrLang["Error"]);
-                $smarty->assign("mb_message", $arrLang["No network entered, you must keep at least the net 127.0.0.1/32"]);
+                $smarty->assign("mb_title",_tr("Error"));
+                $smarty->assign("mb_message", _tr("No network entered, you must keep at least the net 127.0.0.1/32"));
                 $bGuardar=FALSE;
             }
         } else {
             // El textarea esta vacia
             $bGuardar=FALSE;
-            $smarty->assign("mb_title",$arrLang["Error"]);
-            $smarty->assign("mb_message", $arrLang["No network entered, you must keep at least the net 127.0.0.1/32"]);
+            $smarty->assign("mb_title",_tr("Error"));
+            $smarty->assign("mb_message", _tr("No network entered, you must keep at least the net 127.0.0.1/32"));
         }
 
         if($val->existenErroresPrevios()) {
@@ -89,14 +80,14 @@ function _moduleContent(&$smarty, $module_name)
                 $msgErrorVal .= "<b>" . $nombreVar . "</b>: " . $arrVar['mensaje'] . "<br>";
 
             }
-            $smarty->assign("mb_title",$arrLang["Message"]);
-            $smarty->assign("mb_message", $arrLang["Validation Error"]."<br><br>$msgErrorVal");
+            $smarty->assign("mb_title",_tr("Message"));
+            $smarty->assign("mb_message", _tr("Validation Error")."<br><br>$msgErrorVal");
             $bGuardar=FALSE;
-        } 
+        }
         if($bGuardar) {
             // Si no hay errores de validacion entonces ingreso las redes al archivo de relay /etc/postfix/network_table
             $output = $retval = NULL;
-            exec('/usr/bin/elastix-helper relayconfig '.            
+            exec('/usr/bin/elastix-helper relayconfig '.
                 implode(' ', array_map('escapeshellarg', $arrRedesRelay)).' 2>&1',
                 $output, $retval);
             if ($retval != 0) {
@@ -123,23 +114,23 @@ function _moduleContent(&$smarty, $module_name)
             fclose($fh);
         } else {
             // Si no se puede abrir el archivo se debe mostrar mensaje de error
-            $smarty->assign("mb_title",$arrLang["Error"]);
-            $smarty->assign("mb_message", $arrLang["Could not read the relay configuration."]);
+            $smarty->assign("mb_title",_tr("Error"));
+            $smarty->assign("mb_message", _tr("Could not read the relay configuration."));
         }
     } else {
         // Si el archivo no existe algo anda mal.
-        $smarty->assign("mb_title",$arrLang["Error"]);
-        $smarty->assign("mb_message", $arrLang["Could not read the relay configuration."]);
-    } 
+        $smarty->assign("mb_title",_tr("Error"));
+        $smarty->assign("mb_message", _tr("Could not read the relay configuration."));
+    }
 
 
 
 
-    $relay_msg=$arrLang["message about email relay"];
-    $smarty->assign("APPLY_CHANGES",$arrLang["Apply changes"]);
+    $relay_msg=_tr("message about email relay");
+    $smarty->assign("APPLY_CHANGES",_tr("Apply changes"));
     $smarty->assign("EMAIL_RELAY_MSG",$relay_msg);
     $smarty->assign("RELAY_CONTENT", $contenido);
-    $smarty->assign("title",$arrLang["Networks which can RELAY"]);
+    $smarty->assign("title",_tr("Networks which can RELAY"));
     $contenidoModulo=$smarty->fetch("file:$local_templates_dir/form_relay.tpl");
     return $contenidoModulo;
 }

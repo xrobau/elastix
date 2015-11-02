@@ -60,6 +60,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Nov  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Extras: replace hand-coded translation loading with
+  load_language_module().
+  SVN Rev[7303]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: extras: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7237]

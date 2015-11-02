@@ -194,6 +194,9 @@ fi
 
 %changelog
 * Mon Nov  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Send Fax: switch all uses of $arrLang to _tr() and replace
+  hand-coded translation loading with load_language_module().
+  SVN Rev[7308]
 - CHANGED: Fax New: switch all uses of $arrLang to _tr() and replace
   hand-coded translation loading with load_language_module().
   SVN Rev[7307]

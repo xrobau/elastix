@@ -38,21 +38,14 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoVacations.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -68,28 +61,28 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
 	case "activate":
-	    $content = activateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	    $content = activateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 	    break;
 	case "disactivate":
-	    $content = disactivateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	    $content = disactivateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 	    break;
 	case "showAllEmails":
-	    $html = showAllEmails($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	    $html = showAllEmails($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 	    $smarty->assign("CONTENT",$html);
 	    $content = $smarty->display("$local_templates_dir/emailsGrid.tpl");
 	    break;
         default: // view_form
-            $content = viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+            $content = viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
             break;
     }
     return $content;
 }
 
-function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf, $arrLang)
+function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf)
 {
     $pVacations  = new paloSantoVacations($pDB);
     $objAntispam = new paloSantoAntispam($arrConf['path_postfix'], $arrConf['path_spamassassin'],$arrConf['file_master_cf'], $arrConf['file_local_cf']);
-    $arrFormVacations = createFieldForm($arrLang);
+    $arrFormVacations = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormVacations);
     $pACL = new paloACL($pDBACL);
 
@@ -141,7 +134,7 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
     }
     $smarty->assign("ID", $id); //persistence id with input hidden in tpl
 
-    $statusSieve = $pVacations->verifySieveStatus($arrLang);
+    $statusSieve = $pVacations->verifySieveStatus();
     if(!$statusSieve['response']){
 	$smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",$statusSieve['message']);
@@ -163,10 +156,10 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
     $dias = floor($dias);
 
     $smarty->assign("num_days",$dias);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("icon", "images/list.png");
     $smarty->assign("SAVE_MESSAGE", _tr("Save Message"));
     $smarty->assign("DISACTIVATE_MESSAGE", _tr("Disable Message Vacations"));
@@ -179,18 +172,18 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
     $smarty->assign("TO", _tr("TO"));
     $smarty->assign("days", _tr("day(s)"));
 
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["Vacations"], $_DATA);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Vacations"), $_DATA);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $content;
 }
 
-function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf, $arrLang)
+function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf)
 {
     $pVacations = new paloSantoVacations($pDB);
     $pACL = new paloACL($pDBACL);
     $objAntispam = new paloSantoAntispam($arrConf['path_postfix'], $arrConf['path_spamassassin'],$arrConf['file_master_cf'], $arrConf['file_local_cf']);
-    $arrFormVacations = createFieldForm($arrLang);
+    $arrFormVacations = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormVacations);
 
     $id         = getParameter("id");
@@ -216,20 +209,20 @@ function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$p
         }
 	$smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
 	$smarty->assign("mb_title", _tr("Error"));
 	$smarty->assign("mb_message",_tr('Email is empty or is not correct. Please write the email account.'));
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     if($email != $emails){
 	if(!$pACL->isUserAdministratorGroup($userAccount)){
 	    $smarty->assign("mb_title", _tr("Error"));
 	    $smarty->assign("mb_message",_tr('Email is not correct or is not correct. Please write the email assigned to your elastix account.'));
-	    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 	}
     }
 
@@ -247,14 +240,14 @@ function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$p
     if($seconds < 0){
 	$smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",_tr("End date should be greater than the initial date"));
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
-    $statusSieve = $pVacations->verifySieveStatus($arrLang);
+    $statusSieve = $pVacations->verifySieveStatus();
     if(!$statusSieve['response']){
 	$smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",$statusSieve['message']);
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
     $pDB->beginTransaction();
     $scripts = $objAntispam->existScriptSieve($email, "scriptTest.sieve");
@@ -280,7 +273,7 @@ function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$p
     if($res){
 	if($timeSince >= 0){
 	    $body = str_replace("{END_DATE}", $end_date, $body);
-	    $result = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture, $arrLang);
+	    $result = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture);
 	}else    $result = true;
     }else
 	$result = false;
@@ -293,15 +286,15 @@ function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$p
 	$msgError = $pVacations->errMsg;
 	$smarty->assign("mb_message", $msgError);
     }
-    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 }
 
-function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf, $arrLang)
+function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf)
 {
     $pVacations  = new paloSantoVacations($pDB);
     $pACL = new paloACL($pDBACL);
     $objAntispam = new paloSantoAntispam($arrConf['path_postfix'], $arrConf['path_spamassassin'],$arrConf['file_master_cf'], $arrConf['file_local_cf']);
-    $arrFormVacations = createFieldForm($arrLang);
+    $arrFormVacations = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormVacations);
 
     $id         = getParameter("id");
@@ -327,20 +320,20 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
         }
 	$smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
 	$smarty->assign("mb_title", _tr("Error"));
 	$smarty->assign("mb_message",_tr('Email is empty or is not correct. Please write the email account.'));
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     if($email != $emails){
 	if(!$pACL->isUserAdministratorGroup($userAccount)){
 	    $smarty->assign("mb_title", _tr("Error"));
 	    $smarty->assign("mb_message",_tr('Email is not correct. Please write the email assigned to your elastix account.'));
-	    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 	}
     }
 
@@ -358,14 +351,14 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
     if($seconds < 0){
 	$smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",_tr("End date should be greater than the initial date"));
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
-    $statusSieve = $pVacations->verifySieveStatus($arrLang);
+    $statusSieve = $pVacations->verifySieveStatus();
     if(!$statusSieve['response']){
 	$smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",$statusSieve['message']);
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     $pDB->beginTransaction();
@@ -390,7 +383,7 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
 	}
 	if($res){
 	    if($timeSince >= 0)
-		$result = $pVacations->deleteVacationScript($email, $objAntispam, $spamCapture, $arrLang);
+		$result = $pVacations->deleteVacationScript($email, $objAntispam, $spamCapture);
 	    else    $result = true;
 	}else
 	    $result = false;
@@ -404,10 +397,10 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
 	$pDB->rollBack();
 	$smarty->assign("mb_message", $msgError);
     }
-    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf, $arrLang);
+    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 }
 
-function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf, $arrLang)
+function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf)
 {
     $pVacations    = new paloSantoVacations($pDB);
     $oGrid         = new paloSantoGrid($smarty);
@@ -427,7 +420,7 @@ function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDB
     if(!$pACL->isUserAdministratorGroup($userAccount)){
 	  return _tr("User isn't allowed to view this content.");
     }else{
-	  $totalEmail = $pVacations->getNumVacations($filter_field, $filter_value, $arrLang);
+	  $totalEmail = $pVacations->getNumVacations($filter_field, $filter_value);
 	  $url = array_merge($url, array('rawmode' => 'yes'));
 
 	  $oGrid->setURL($url);
@@ -443,7 +436,7 @@ function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDB
 	  $offset = $oGrid->calculateOffset();
 	  $arrData = null;
 
-	  $arrResult =$pVacations->getVacations($limit, $offset, $filter_field, $filter_value, $arrLang);
+	  $arrResult =$pVacations->getVacations($limit, $offset, $filter_field, $filter_value);
 	  $tmpIDs = 1;
 	  $infoHtml = "<div id='infoDataAccount'>";
 	  if(is_array($arrResult) && $total>0){
@@ -494,13 +487,13 @@ function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDB
 	  $size = count($arrData);
 
 	  //begin section filter
-	  $arrFormFilter = createFieldFilter($arrLang);
+	  $arrFormFilter = createFieldFilter();
 	  $oFilterForm = new paloForm($smarty, $arrFormFilter);
-	  $smarty->assign("SHOW", $arrLang["Show"]);
+	  $smarty->assign("SHOW", _tr("Show"));
 
 		$arrFilter = array(
-		"username" => $arrLang["Account"],
-		"vacation" => $arrLang["Vacations Activated"],
+		"username" => _tr("Account"),
+		"vacation" => _tr("Vacations Activated"),
 				);
 
 	  if(!is_null($filter_field)){
@@ -522,25 +515,25 @@ function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDB
 }
 
 
-function createFieldForm($arrLang)
+function createFieldForm()
 {
 
     $arrFields = array(
-            "email"   => array(      "LABEL"                  => $arrLang["Email Address"],
+            "email"   => array(      "LABEL"                  => _tr("Email Address"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("id"=>"email","readonly"=>"readonly","style"=>"width: 200px;"),
                                             "VALIDATION_TYPE"        => "email",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "subject"   => array(      "LABEL"                  => $arrLang["Subject"],
+            "subject"   => array(      "LABEL"                  => _tr("Subject"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("id"=>"subject", "style" => "width: 370px;"),
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "body"   => array(      "LABEL"                  => $arrLang["Body"],
+            "body"   => array(      "LABEL"                  => _tr("Body"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXTAREA",
                                             "INPUT_EXTRA_PARAM"      => array("id"=>"body","style"=>"width: 368px;"),
@@ -550,7 +543,7 @@ function createFieldForm($arrLang)
                                             "ROWS"                   => "4",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-	    "ini_date"   => array(      "LABEL"                  => $arrLang["Initial Date"],
+	    "ini_date"   => array(      "LABEL"                  => _tr("Initial Date"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "DATE",
                                             "INPUT_EXTRA_PARAM"      => array("FORMAT" => "%d %b %Y"),
@@ -558,7 +551,7 @@ function createFieldForm($arrLang)
                                             "EDITABLE"               => "no",
                                             "VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}$"
                                             ),
-	    "end_date"   => array(      "LABEL"                  => $arrLang["End Date"],
+	    "end_date"   => array(      "LABEL"                  => _tr("End Date"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "DATE",
                                             "INPUT_EXTRA_PARAM"      => array("FORMAT" => "%d %b %Y"),
@@ -570,14 +563,14 @@ function createFieldForm($arrLang)
     return $arrFields;
 }
 
-function createFieldFilter($arrLang){
+function createFieldFilter(){
     $arrFilter = array(
-	    "username" => $arrLang["Account"],
-	    "vacation" => $arrLang["Vacations Activated"],
+	    "username" => _tr("Account"),
+	    "vacation" => _tr("Vacations Activated"),
                     );
 
     $arrFormElements = array(
-            "filter_field" => array("LABEL"                  => $arrLang["Search"],
+            "filter_field" => array("LABEL"                  => _tr("Search"),
                                     "REQUIRED"               => "no",
                                     "INPUT_TYPE"             => "SELECT",
                                     "INPUT_EXTRA_PARAM"      => $arrFilter,

@@ -51,7 +51,7 @@ class paloSantoVacations {
 
     /*HERE YOUR FUNCTIONS*/
 
-    function getNumVacations($filter_field, $filter_value, $arrLang)
+    function getNumVacations($filter_field, $filter_value)
     {
         $where = "";
 	$arrParam = array();
@@ -62,12 +62,12 @@ class paloSantoVacations {
 	    else{
 		$filter_field = "v.$filter_field";
 	    }
-	    if($filter_field == "v.vacation" && strtolower($filter_value) == $arrLang["no"]){
+	    if($filter_field == "v.vacation" && strtolower($filter_value) == _tr("no")){
 		$where = " WHERE $filter_field ISNULL OR $filter_field like ? ";
 		$filter_value = "no";
 	    }else{
 		$where = " WHERE $filter_field like ? ";
-		if(strtolower($filter_value) === $arrLang["yes"])
+		if(strtolower($filter_value) === _tr("yes"))
 		    $filter_value = "yes";
 	    }
 
@@ -90,7 +90,7 @@ class paloSantoVacations {
         return $result[0];
     }
 
-    function getVacations($limit, $offset, $filter_field, $filter_value, $arrLang)
+    function getVacations($limit, $offset, $filter_field, $filter_value)
     {
         $where = "";
 	$arrParam = array();
@@ -100,12 +100,12 @@ class paloSantoVacations {
 	    else{
 		$filter_field = "v.$filter_field";
 	    }
-	    if($filter_field === "v.vacation" && strtolower($filter_value) === $arrLang["no"]){
+	    if($filter_field === "v.vacation" && strtolower($filter_value) === _tr("no")){
 		$where = " WHERE $filter_field ISNULL OR $filter_field like ? ";
 		$filter_value = "no";
 	    }else{
 		$where = " WHERE $filter_field like ? ";
-		if(strtolower($filter_value) === $arrLang["yes"])
+		if(strtolower($filter_value) === _tr("yes"))
 		    $filter_value = "yes";
 	    }
 
@@ -155,7 +155,7 @@ class paloSantoVacations {
     /* - $spamCapture   boleano que indica si esta activo el eveto de captura de spam
     /*
     /*********************************************************************************/
-    function uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture, $arrLang){
+    function uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture){
 
 	$SIEVE  = array();
         $SIEVE['HOST'] = "localhost";
@@ -215,7 +215,7 @@ class paloSantoVacations {
     /* - $spamCapture   boleano que indica si esta activo el eveto de captura de spam
     /*
     /*********************************************************************************/
-    function deleteVacationScript($email, $objAntispam, $spamCapture, $arrLang){
+    function deleteVacationScript($email, $objAntispam, $spamCapture){
 
         $SIEVE  = array();
         $SIEVE['HOST'] = "localhost";
@@ -316,7 +316,7 @@ SCRIPT;
             $this->errMsg = $pDBACL->errMsg;
             return false;
         }
-	
+
 	foreach($result as $key => $value){
 	    $propiedad = $value['property'];
 	    $valor     = $value['value'];
@@ -466,22 +466,21 @@ SCRIPT;
     /*********************************************************************************
     /* Funcion que verifica si el sieve esta corriendo.
     /* Parametros de entrada:
-    /*  - $arrLang:      arreglo de lenguaje
     /*
     /* Retorna:
     /*  - $result:       El resultado de la consulta realizada
     /*********************************************************************************/
-    function verifySieveStatus($arrLang)
+    function verifySieveStatus()
     {
 	$response = array();
 
 	exec("sudo /sbin/service generic-cloexec cyrus-imapd status",$arrConsole,$flagStatus);
         if($flagStatus != 0){
 	    $response['response'] = false;
-	    $response['message'] = $arrLang["Cyrus Imap is down"];
+	    $response['message'] = _tr("Cyrus Imap is down");
         }else{
 	    $response['response'] = true;
-	    $response['message'] = $arrLang["Cyrus Imap is up"];
+	    $response['message'] = _tr("Cyrus Imap is up");
 	}
         return $response;
     }

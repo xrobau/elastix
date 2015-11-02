@@ -63,6 +63,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Nov  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: OF wrapper: switch all uses of $arrLang to _tr().
+  SVN Rev[7309]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: im: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7239]

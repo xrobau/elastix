@@ -100,15 +100,15 @@ if($statusOpenfire == 'off' && isset($_GET['accion']) && $_GET['accion']=='activ
             header("Location: http://".$ip.":".$port);
         }
         else{
-            echo $tabla_ini.$arrLang['ERROR'].$tabla_fin;
+            echo $tabla_ini._tr('ERROR').$tabla_fin;
         }
     }
     else{
-        echo $tabla_ini.$arrLang['ERROR'].$tabla_fin;
+        echo $tabla_ini._tr('ERROR').$tabla_fin;
     }
 }
 else if($statusOpenfire == 'off') { 
-    echo $tabla_ini.$arrLang['The service Openfire No running']."<a href='openfireWrapper.php?accion=activar'>".$arrLang['click here']."</a>".$tabla_fin;
+    echo $tabla_ini._tr('The service Openfire No running')."<a href='openfireWrapper.php?accion=activar'>"._tr('click here')."</a>".$tabla_fin;
 }
 else{ //esta activo openfire
     header("Location: http://".$ip.":".$port);

@@ -34,58 +34,51 @@ function _moduleContent($smarty, $module_name)
 
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
      // Definición del formulario
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("APPLY_CHANGES", $arrLang["Apply changes"]);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("EDIT_PARAMETERS", $arrLang["Edit Parameters"]);
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("EDIT_PARAMETERS", _tr("Edit Parameters"));
     $smarty->assign("icon","/modules/$module_name/images/fax_email_template.png");
 
-    $arrFaxConfig    = array("remite"        => array("LABEL"                 => $arrLang['Fax From'],
+    $arrFaxConfig    = array("remite"        => array("LABEL"                 => _tr('Fax From'),
                                                      "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "TEXT",
                                                      "INPUT_EXTRA_PARAM"      => array("style" => "width:240px"),
                                                      "VALIDATION_TYPE"        => "email",
                                                      "EDITABLE"               => "si",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                             "remitente"      => array("LABEL"                => $arrLang["Fax From Name"],
+                             "remitente"      => array("LABEL"                => _tr("Fax From Name"),
                                                      "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "TEXT",
                                                      "INPUT_EXTRA_PARAM"      => array("style" => "width:240px"),
                                                      "VALIDATION_TYPE"        => "name",
                                                      "EDITABLE"               => "si",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                             "subject"        => array("LABEL"                => $arrLang["Fax Suject"],
+                             "subject"        => array("LABEL"                => _tr("Fax Suject"),
                                                      "REQUIRED"               => "yes",
                                                      "INPUT_TYPE"             => "TEXT",
                                                      "INPUT_EXTRA_PARAM"      => array("style" => "width:240px"),
                                                      "VALIDATION_TYPE"        => "text",
                                                      "EDITABLE"               => "si",
                                                      "VALIDATION_EXTRA_PARAM" => ""),
-                             "content"       => array("LABEL"                 => $arrLang["Fax Content"],
+                             "content"       => array("LABEL"                 => _tr("Fax Content"),
                                                      "REQUIRED"               => "no",
                                                      "INPUT_TYPE"             => "TEXTAREA",
                                                      "INPUT_EXTRA_PARAM"      => "",
@@ -102,10 +95,10 @@ function _moduleContent($smarty, $module_name)
     if (isset($_POST["submit_apply_change"])) $action = "submit_apply_change";
 
     switch($action){
-        case 'submit_edit': 
+        case 'submit_edit':
             $contenidoModulo = editParameterFaxMail($smarty, $module_name, $local_templates_dir, $oForm);
             break;
-        case 'submit_apply_change': 
+        case 'submit_apply_change':
             $contenidoModulo = applyChnageParameterFaxMail($smarty, $module_name, $local_templates_dir, $oForm);
             break;
         default:
@@ -117,22 +110,20 @@ function _moduleContent($smarty, $module_name)
 
 function editParameterFaxMail($smarty, $module_name, $local_templates_dir, $oForm)
 {
-    global $arrLang;
     $oFax    = new paloFax();
     $arrParameterFaxMail = $oFax->getConfigurationSendingFaxMail();
     $oForm->setEditMode();
-    return $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", $arrLang["Configuration Sending Fax Mail"], $arrParameterFaxMail);
+    return $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", _tr("Configuration Sending Fax Mail"), $arrParameterFaxMail);
 }
 
 function applyChnageParameterFaxMail($smarty, $module_name, $local_templates_dir, $oForm)
 {
-    global $arrLang;
     $contenidoModulo="";
 
     if(!$oForm->validateForm($_POST)) {
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
+        $smarty->assign("mb_title", _tr("Validation Error"));
         $arrErrores=$oForm->arrErroresValidacion;
-        $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/>";
+        $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
@@ -141,8 +132,8 @@ function applyChnageParameterFaxMail($smarty, $module_name, $local_templates_dir
         $strErrorMsg .= "";
         $smarty->assign("mb_message", $strErrorMsg);
         $oForm->setEditMode();
-        $contenidoModulo = $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", $arrLang["Configuration Sending Fax Mail"], $_POST);
-    } 
+        $contenidoModulo = $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", _tr("Configuration Sending Fax Mail"), $_POST);
+    }
     else {
         $oFax    = new paloFax();
         if($oFax->setConfigurationSendingFaxMail($_POST['remite'],$_POST['remitente'],$_POST['subject'],$_POST['content'])){
@@ -151,7 +142,7 @@ function applyChnageParameterFaxMail($smarty, $module_name, $local_templates_dir
         else{
             $smarty->assign("mb_message", $oFax->errMsg);
             $oForm->setEditMode();
-            $contenidoModulo = $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", $arrLang["Configuration Sending Fax Mail"], $_POST);
+            $contenidoModulo = $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", _tr("Configuration Sending Fax Mail"), $_POST);
         }
     }
     return $contenidoModulo;
@@ -159,11 +150,10 @@ function applyChnageParameterFaxMail($smarty, $module_name, $local_templates_dir
 
 function listParameterFaxMail($smarty, $module_name, $local_templates_dir, $oForm)
 {
-    global $arrLang;
     $arrData = array();
     $oFax    = new paloFax();
-    $arrParameterFaxMail = $oFax->getConfigurationSendingFaxMail(); 
+    $arrParameterFaxMail = $oFax->getConfigurationSendingFaxMail();
     $oForm->setViewMode();
-    return $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", $arrLang["Configuration Sending Fax Mail"], $arrParameterFaxMail);
+    return $oForm->fetchForm("$local_templates_dir/parameterFaxMail.tpl", _tr("Configuration Sending Fax Mail"), $arrParameterFaxMail);
 }
 ?>

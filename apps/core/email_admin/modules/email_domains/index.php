@@ -40,27 +40,19 @@ function _moduleContent(&$smarty, $module_name)
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
+
     $pDB = new paloDB($arrConf['dsn_conn_database']);
 
     if(!empty($pDB->errMsg)) {
@@ -75,22 +67,22 @@ function _moduleContent(&$smarty, $module_name)
     {
 
         case "submit_create_domain":
-            $content = newDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = newDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
 	case "save":
-	    $content = saveDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+	    $content = saveDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 	    break;
 	case "delete":
-	    $content = deleteDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang, $virtual_postfix);
+	    $content = deleteDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $virtual_postfix);
 	    break;
 	case "edit":
-	    $content = newDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+	    $content = newDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 	    break;
 	case "view":
-	    $content = newDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+	    $content = newDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 	    break;
         default:
-            $content = viewFormDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = viewFormDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
     }
 
@@ -99,7 +91,7 @@ function _moduleContent(&$smarty, $module_name)
 }
 
 
-function viewFormDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function viewFormDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pEmail = new paloEmail($pDB);
     $oGrid  = new paloSantoGrid($smarty);
@@ -149,10 +141,10 @@ function viewFormDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arr
 }
 
 
-function newDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function newDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pEmail = new paloEmail($pDB);
-    $arrFormElements = createFieldForm($arrLang);
+    $arrFormElements = createFieldForm();
     $oForm = new paloForm($smarty, $arrFormElements);
 
     $_DATA  = $_POST;
@@ -176,18 +168,18 @@ function newDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf,
 	$formValues = $arrTmp;
     }
 
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("DELETE", $arrLang["Delete"]);
-    $smarty->assign("CONFIRM_CONTINUE", $arrLang["Are you sure you wish to continue?"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    
-    $content = $oForm->fetchForm("$local_templates_dir/form_domain.tpl", $arrLang["New Domain"],$formValues);
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("DELETE", _tr("Delete"));
+    $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+
+    $content = $oForm->fetchForm("$local_templates_dir/form_domain.tpl", _tr("New Domain"),$formValues);
     return $content;
 }
 
 
-function deleteDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang, $virtual_postfix)
+function deleteDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $virtual_postfix)
 {
     $pEmail = new paloEmail($pDB);
     $id     = (int)getParameter("id");
@@ -198,11 +190,11 @@ function deleteDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
         $smarty->assign('mb_message', _tr('Domain not found by ID'));
     } else {
         $sNombreDominio  = $arrDomain[0][1];
-    
+
         /*** preguntar si el domino que se desea eliminar tiene cuentas o listas de correos creadas ***/
         $arrList = $pEmail->getListByDomain($id);
         $arrAccounts = $pEmail->getAccountsByDomain($id);
-        
+
         if (is_array($arrList) && count($arrList) > 0) {
             /*** 1) Existen listas creadas asignadas a ese dominio **/
             $smarty->assign("mb_title",_tr("Error"));
@@ -221,18 +213,18 @@ function deleteDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
             }
         }
     }
-    return viewFormDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+    return viewFormDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 }
 
-function saveDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function saveDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pEmail = new paloEmail($pDB);
-    $arrFormElements = createFieldForm($arrLang);
+    $arrFormElements = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormElements);
 
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
 
     if(!$oForm->validateForm($_POST)){
         // Validation basic, not empty and VALIDATION_TYPE
@@ -244,7 +236,7 @@ function saveDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
                 $strErrorMsg .= "$k, ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
-        $content = $oForm->fetchForm("$local_templates_dir/form_domain.tpl", $arrLang["New Domain"], $_POST);
+        $content = $oForm->fetchForm("$local_templates_dir/form_domain.tpl", _tr("New Domain"), $_POST);
     }
     else{
 	$pDB->beginTransaction();
@@ -253,22 +245,22 @@ function saveDomain($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf
 	    $pDB->rollBack();
 	    $smarty->assign("mb_title",_tr("Error"));
 	    $smarty->assign("mb_message", $error);
-	    $content = $oForm->fetchForm("$local_templates_dir/form_domain.tpl", $arrLang["New Domain"], $_POST);
+	    $content = $oForm->fetchForm("$local_templates_dir/form_domain.tpl", _tr("New Domain"), $_POST);
 	}
 	else{
 	    $pDB->commit();
 	    $smarty->assign("mb_message", _tr("Domain has been created"));
-	    $content = viewFormDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+	    $content = viewFormDomain($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 	}
     }
     return $content;
 }
 
 
-function createFieldForm($arrLang)
+function createFieldForm()
 {
     $arrFields = array(
-                             "domain_name"       => array("LABEL"                   => $arrLang["Domain name"],
+                             "domain_name"       => array("LABEL"                   => _tr("Domain name"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
@@ -288,7 +280,7 @@ function create_email_domain($pDB,&$errMsg)
     $pEmail = new paloEmail($pDB);
 
     $bExito = $pEmail->createDomain($_POST['domain_name']);
-    if (!$bExito) $errMsg = _tr($pEmail->errMsg);    
+    if (!$bExito) $errMsg = _tr($pEmail->errMsg);
     return $bExito;
 }
 

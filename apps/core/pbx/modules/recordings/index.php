@@ -40,21 +40,13 @@ function _moduleContent(&$smarty, $module_name)
     //include file language agree to elastix configuration
     //if file language not exists, then include language by default (en)
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-/*
-    $lang=get_language();
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-*/
+
     load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -74,27 +66,27 @@ function _moduleContent(&$smarty, $module_name)
     switch($accion)
     {
         case "record":
-            $content = new_recording($smarty, $module_name, $local_templates_dir, $arrLang, $dsn_agi_manager, $arrConf, $pDBACL);
+            $content = new_recording($smarty, $module_name, $local_templates_dir, $dsn_agi_manager, $arrConf, $pDBACL);
             break;
         case "save":
-            $content = save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $pDBACL);
+            $content = save_recording($smarty, $module_name, $local_templates_dir, $arrConf, $pDBACL);
             break;
         default:
-            $content = form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+            $content = form_Recordings($smarty, $module_name, $local_templates_dir, $pDBACL);
             break;
     }
 
     return $content;
 }
 
-function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $arrConf, $pDBACL)
+function save_recording($smarty, $module_name, $local_templates_dir, $arrConf, $pDBACL)
 {
     $bExito = true;
     $pRecording = new paloSantoRecordings();
     $extension = $pRecording->Obtain_Extension_Current_User($arrConf);
 
     if(!$extension)
-        return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+        return form_Recordings($smarty, $module_name, $local_templates_dir, $pDBACL);
 
     $destiny_path = "/var/lib/asterisk/sounds/custom/$extension/";
 
@@ -131,16 +123,16 @@ function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $
                 }
                 if($bExito)
                 {
-                    $filetmp = basename("$destiny_path/$filename"); 
+                    $filetmp = basename("$destiny_path/$filename");
                     $dirFile = "/var/spool/asterisk/tmp/$tmp_file";
                     $dirDest = $destiny_path.$filetmp;
 
                     if(is_file($dirFile)){
                         if(!rename($dirFile, $dirDest)){
-                            $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                            $smarty->assign("mb_message", $arrLang["Possible file upload attack"]." $filename");
+                            $smarty->assign("mb_title", _tr('ERROR').":");
+                            $smarty->assign("mb_message", _tr("Possible file upload attack")." $filename");
                             $bExito = false;
-                            return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+                            return form_Recordings($smarty, $module_name, $local_templates_dir, $pDBACL);
                         }
                     }else{
                         $bExito = false;
@@ -151,8 +143,8 @@ function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $
 
         if(!$bExito)
         {
-            $smarty->assign("mb_title", $arrLang['ERROR'].":");
-            $smarty->assign("mb_message", $arrLang["The recording couldn't be realized"]);
+            $smarty->assign("mb_title", _tr('ERROR').":");
+            $smarty->assign("mb_message", _tr("The recording couldn't be realized"));
         }
     }else{
         if (isset($_FILES['file_record'])) {
@@ -163,10 +155,10 @@ function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $
                     $bExito = mkdir($destiny_path, 0755, TRUE);
                 }
                 if (!preg_match("/^(\w|-|\.|\(|\)|\s)+\.(wav|WAV|Wav|gsm|GSM|Gsm|Wav49|wav49|WAV49)$/",$_FILES['file_record']['name'])) {
-                    $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                    $smarty->assign("mb_message", $arrLang["Possible file upload attack"]." ".$_FILES["file_record"]["name"]);
+                    $smarty->assign("mb_title", _tr('ERROR').":");
+                    $smarty->assign("mb_message", _tr("Possible file upload attack")." ".$_FILES["file_record"]["name"]);
                     $bExito = false;
-                    return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+                    return form_Recordings($smarty, $module_name, $local_templates_dir, $pDBACL);
                 }
                 if($bExito)
                 {
@@ -175,39 +167,39 @@ function save_recording($smarty, $module_name, $local_templates_dir, $arrLang, $
                     $filename = basename("$destiny_path/$filenameTmp");
                     if (!move_uploaded_file($tmp_name, "$destiny_path/$filename"))
                     {
-                        $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                        $smarty->assign("mb_message", $arrLang["Possible file upload attack"]." $filename");
+                        $smarty->assign("mb_title", _tr('ERROR').":");
+                        $smarty->assign("mb_message", _tr("Possible file upload attack")." $filename");
                         $bExito = false;
                     }
                 }else
                 {
-                    $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                    $smarty->assign("mb_message", $arrLang["Destiny directory couldn't be created"]);
+                    $smarty->assign("mb_title", _tr('ERROR').":");
+                    $smarty->assign("mb_message", _tr("Destiny directory couldn't be created"));
                     $bExito = false;
                 }
             }
             else{
-                $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                $smarty->assign("mb_message", $arrLang["Error copying the file"]);
+                $smarty->assign("mb_title", _tr('ERROR').":");
+                $smarty->assign("mb_message", _tr("Error copying the file"));
                 $bExito = false;
             }
         }else{
-            $smarty->assign("mb_title", $arrLang['ERROR'].":");
-            $smarty->assign("mb_message", $arrLang["Error copying the file"]);
+            $smarty->assign("mb_title", _tr('ERROR').":");
+            $smarty->assign("mb_message", _tr("Error copying the file"));
             $bExito = false;
         }
     }
 
     if($bExito)
     {
-       $smarty->assign("mb_title", $arrLang["Message"]);
-       $smarty->assign("mb_message", $arrLang["The recording was saved"]);
+       $smarty->assign("mb_title", _tr("Message"));
+       $smarty->assign("mb_message", _tr("The recording was saved"));
     }
 
-    return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+    return form_Recordings($smarty, $module_name, $local_templates_dir, $pDBACL);
 }
 
-function new_recording($smarty, $module_name, $local_templates_dir, $arrLang, $dsn_agi_manager, $arrConf, $pDBACL)
+function new_recording($smarty, $module_name, $local_templates_dir, $dsn_agi_manager, $arrConf, $pDBACL)
 {
     $recording_name = isset($_POST['recording_name'])?$_POST['recording_name']:'';
     if($recording_name != '')
@@ -222,23 +214,23 @@ function new_recording($smarty, $module_name, $local_templates_dir, $arrLang, $d
             if($result)
             {
                 $smarty->assign("filename", $recording_name);
-                $smarty->assign("mb_message", $arrLang["To continue: record a message then click on save"]);
+                $smarty->assign("mb_message", _tr("To continue: record a message then click on save"));
             }
             else{
-                $smarty->assign("mb_title", $arrLang['ERROR'].":");
-                $smarty->assign("mb_message", $arrLang["The call couldn't be realized"]);
+                $smarty->assign("mb_title", _tr('ERROR').":");
+                $smarty->assign("mb_message", _tr("The call couldn't be realized"));
             }
         }
     }
     else{
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
-        $smarty->assign("mb_message", $arrLang['Insert the Recording Name']);
+        $smarty->assign("mb_title", _tr("Validation Error"));
+        $smarty->assign("mb_message", _tr('Insert the Recording Name'));
     }
 
-    return form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL);
+    return form_Recordings($smarty, $module_name, $local_templates_dir, $pDBACL);
 }
 
-function form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, $pDBACL)
+function form_Recordings($smarty, $module_name, $local_templates_dir, $pDBACL)
 {
     $pACL = new paloACL($pDBACL);
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
@@ -246,9 +238,9 @@ function form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, 
     if(is_null($extension) || $extension==""){
 	$smarty->assign("DISABLED","DISABLED");
 	if($pACL->isUserAdministratorGroup($user))
-	    $smarty->assign("mb_message", "<b>".$arrLang["You don't have extension number associated with user"]."</b>");
+	    $smarty->assign("mb_message", "<b>"._tr("You don't have extension number associated with user")."</b>");
 	else
-	    $smarty->assign("mb_message", "<b>".$arrLang["contact_admin"]."</b>");
+	    $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
     }
     if(isset($_POST['option_record']) && $_POST['option_record']=='by_file')
         $smarty->assign("check_file", "checked");
@@ -257,19 +249,19 @@ function form_Recordings($smarty, $module_name, $local_templates_dir, $arrLang, 
 
     $oForm = new paloForm($smarty,array());
 
-    $smarty->assign("recording_name_Label", $arrLang["Record Name"]);
-    $smarty->assign("record_Label", $arrLang["File Upload"]);
+    $smarty->assign("recording_name_Label", _tr("Record Name"));
+    $smarty->assign("record_Label", _tr("File Upload"));
 
-    $smarty->assign("Record", $arrLang["Record"]);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("INFO", $arrLang["You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup"].".");
-    $smarty->assign("NAME", $arrLang["You do not need to add an extension to the record name"].".");
+    $smarty->assign("Record", _tr("Record"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("INFO", _tr("You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup").".");
+    $smarty->assign("NAME", _tr("You do not need to add an extension to the record name").".");
     $smarty->assign("icon", "/modules/$module_name/images/recording.png");
     $smarty->assign("module_name", $module_name);
-    $smarty->assign("file_upload", $arrLang["File Upload"]);
-    $smarty->assign("record", $arrLang["Record"]);
+    $smarty->assign("file_upload", _tr("File Upload"));
+    $smarty->assign("record", _tr("Record"));
 
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLang["Recordings"], $_POST);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", _tr("Recordings"), $_POST);
 
     $contenidoModulo = "<form enctype='multipart/form-data' method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 

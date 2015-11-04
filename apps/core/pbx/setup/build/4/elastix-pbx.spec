@@ -298,6 +298,9 @@ fi
 
 %changelog
 * Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Recordings: switch all uses of $arrLang to _tr() and replace
+  hand-coded translation loading with load_language_module().
+  SVN Rev[7316]
 - CHANGED: Embedded FreePBX: replace hand-coded translation loading with
   load_language_module(). Remove private implementation of _tr().
   SVN Rev[7315]

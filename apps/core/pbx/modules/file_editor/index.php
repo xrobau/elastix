@@ -66,8 +66,6 @@ function _moduleContent(&$smarty, $module_name)
 
 function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectorio)
 {
-    global $arrLang;
-
     // Función que rechaza los directorios punto y doble punto
     function _reject_dotdirs($s) { return !($s == '.' || $s == '..'); }
     $listaArchivos = (file_exists($sDirectorio) && is_dir($sDirectorio))
@@ -129,7 +127,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
 
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("File")." = ".$sSubStrArchivo, $_POST, array("file" => ""));
     $htmlFilter = $oForm->fetchForm("$local_templates_dir/new.tpl", _tr("File Editor"), $_POST);
-  
+
     $oGrid->setLimit($limit);
     $oGrid->setTotal($total);
 
@@ -138,7 +136,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
     $inicio = ($total == 0) ? 0 : $offset + 1;
     $fin = ($offset+$limit) <= $total ? $offset+$limit : $total;
     $leng = $fin - $inicio;
-   
+
     $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
     $arrGrid = array(
         "title"    => _tr("File Editor"),
@@ -157,7 +155,7 @@ function listarArchivos($module_name, $smarty, $local_templates_dir, $sDirectori
     );
     $oGrid->addNew("?menu=$module_name&action=new",_tr("New File"),true);
     $oGrid->showFilter($htmlFilter);
-    return $oGrid->fetchGrid($arrGrid, $arrDatosGrid, $arrLang);
+    return $oGrid->fetchGrid($arrGrid, $arrDatosGrid);
 }
 
 function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirectorio, $sAccion)
@@ -251,7 +249,7 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
         )
     );
     $oForm->setEditMode();
-  
+
     $smarty->assign('url_edit', construirURL(array('menu' => $module_name, 'action' => $sAccion, 'file' => $sNombreArchivo)));
     $smarty->assign('url_back', construirURL(array('menu' => $module_name), array('action', 'file', 'nav'=>getParameter('nav'), 'page'=>getParameter('page'))));
     $smarty->assign('search',getParameter('search'));
@@ -260,7 +258,7 @@ function modificarArchivo($module_name, $smarty, $local_templates_dir, $sDirecto
     $smarty->assign('LABEL_BACK', _tr('Back'));
     $smarty->assign('msg_status', $sMensajeStatus);
     $smarty->assign('icon',"images/user.png");
-    
+
     return $oForm->fetchForm("$local_templates_dir/file_editor.tpl", _tr("File Editor"), $_POST);
 }
 

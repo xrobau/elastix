@@ -298,6 +298,8 @@ fi
 
 %changelog
 * Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: File Editor: remove useless reference to $arrLang.
+  SVN Rev[7312]
 - CHANGED: Festival: replace hand-coded translation loading with
   load_language_module().
   SVN Rev[7311]

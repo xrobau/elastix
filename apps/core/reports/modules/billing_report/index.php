@@ -42,21 +42,14 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantobilling_report.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -88,9 +81,9 @@ function _moduleContent(&$smarty, $module_name)
     }
 
 	 $smarty->assign("module",$module_name);
-	 $smarty->assign("horas",$arrLang['horas']);
-	 $smarty->assign("minutos",$arrLang['minutos']);
-	 $smarty->assign("segundos",$arrLang['segundos']);
+	 $smarty->assign("horas",_tr('horas'));
+	 $smarty->assign("minutos",_tr('minutos'));
+	 $smarty->assign("segundos",_tr('segundos'));
 
     //actions
     $action = getAction();
@@ -98,13 +91,13 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         default:
-            $content = reportbilling_report($smarty, $module_name, $local_templates_dir, $pDBSet, $pDB,$pRate,$pDBTrunk,$pDBSQLite,$oCDR, $arrConf, $arrLang, $arrConfig);
+            $content = reportbilling_report($smarty, $module_name, $local_templates_dir, $pDBSet, $pDB,$pRate,$pDBTrunk,$pDBSQLite,$oCDR, $arrConf, $arrConfig);
             break;
     }
     return $content;
 }
 
-function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDBSet, &$pDB,&$pRate,&$pDBTrunk,&$pDBSQLite,&$oCDR, $arrConf, $arrLang, $arrConfig)
+function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDBSet, &$pDB,&$pRate,&$pDBTrunk,&$pDBSQLite,&$oCDR, $arrConf, $arrConfig)
 {
     $pbilling_report = new paloSantobilling_report($pDB);
     $filter_field     = getParameter("filter_field"); //combo
@@ -223,7 +216,7 @@ function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDB
     $arr_rates = $pbilling_report->getRates($pDBSQLite);
 
     if($oGrid->isExportAction()) {
-        $limit  = $totalbilling_report; 
+        $limit  = $totalbilling_report;
         $offset = 0;
         $arrResult = $pbilling_report->obtainReport($limit, $offset, $filter_field, $filter_value_tmp, $start_date, $end_date, $pDBSQLite, $time, "ANSWERED", "outgoing", $arrConfig);
 
@@ -237,7 +230,7 @@ function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDB
 		    foreach($arrResult as $key => $value){
 			    $arrTmp[0] = $value['Date'];
                 $hidden_digits = $value['digits'];
-                
+
 				if($value['Rate_applied'] == null){
                     $arrRateTmp = getRate($arr_rates, $value);
                     $value['Rate_applied'] = $arrRateTmp['Rate_applied'];
@@ -245,9 +238,9 @@ function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDB
                     $value['Offset'] = $arrRateTmp['Offset'];
                     $hidden_digits = $arrRateTmp['digits'];
                 }
-                
+
                 if($value['Rate_applied'] == null)
-                    $rate_applied = $arrLang['default'];
+                    $rate_applied = _tr('default');
                 else
                     $rate_applied = $value['Rate_applied'];
                 $arrTmp[1] = $rate_applied;
@@ -279,7 +272,7 @@ function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDB
 			    $arrTmp[4] = $destination;
 			    $arrTmp[5] = $value['Dst_channel'];
                 $arrTmp[6] = $value['accountcode'];
-                
+
 			    $iDuracion = $value['duration'];
                 $iSec = $iDuracion % 60; $iDuracion = (int)(($iDuracion - $iSec) / 60);
                 $iMin = $iDuracion % 60; $iDuracion = (int)(($iDuracion - $iMin) / 60);
@@ -324,7 +317,7 @@ function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDB
                 }
 
                 if($value['Rate_applied'] == null)
-                    $rate_applied = $arrLang['default'];
+                    $rate_applied = _tr('default');
                 else
                     $rate_applied = $value['Rate_applied'];
                 $arrTmp[1] = $rate_applied;
@@ -356,7 +349,7 @@ function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDB
                 $arrTmp[4] = $destination;
                 $arrTmp[5] = $value['Dst_channel'];
                 $arrTmp[6] = $value['accountcode'];
-                
+
                 $iDuracion = $value['duration'];
                 $iSec = $iDuracion % 60; $iDuracion = (int)(($iDuracion - $iSec) / 60);
                 $iMin = $iDuracion % 60; $iDuracion = (int)(($iDuracion - $iMin) / 60);
@@ -380,7 +373,7 @@ function reportbilling_report($smarty, $module_name, $local_templates_dir, &$pDB
     $oGrid->setColumns($arrColumns);
     $oGrid->setData($arrData);
     //begin section filter
-    $arrFormFilterbilling_report = createFieldFilter($arrLang);
+    $arrFormFilterbilling_report = createFieldFilter();
 
     if($_POST['date_start']==="")
         $_POST['date_start']  = " ";
@@ -453,7 +446,7 @@ function getRate($arr_ratesTmp, $arrRateValue)
     return $arrResult;
 }
 
-function createFieldFilter($arrLang){
+function createFieldFilter(){
     $arrFilter = array(
         "rate_applied"  => _tr("Rate Applied"),
         "duration"      => _tr("Duration"),
@@ -461,12 +454,12 @@ function createFieldFilter($arrLang){
 	    "src"           => _tr("Source"),
 	    "dst"           => _tr("Destination"),
 	    "dstchannel"    => _tr("Dst. Channel"),
-	    //"cost"          => $arrLang["Cost"],
+	    //"cost"          => _tr("Cost"),
         "accountcode"   => _tr("Account Code"),
                     );
 
     $arrFormElements = array(
-            "filter_field" => array("LABEL"                  => $arrLang["Search"],
+            "filter_field" => array("LABEL"                  => _tr("Search"),
                                     "REQUIRED"               => "no",
                                     "INPUT_TYPE"             => "SELECT",
                                     "INPUT_EXTRA_PARAM"      => $arrFilter,
@@ -515,9 +508,9 @@ function getAction()
         return "save_new";
     else if(getParameter("save_edit"))
         return "save_edit";
-    else if(getParameter("delete")) 
+    else if(getParameter("delete"))
         return "delete";
-    else if(getParameter("new_open")) 
+    else if(getParameter("new_open"))
         return "view_form";
     else if(getParameter("action")=="view")      //Get parameter by GET (command pattern, links)
         return "view_form";

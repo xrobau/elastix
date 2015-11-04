@@ -93,6 +93,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Billing Rates: switch all uses of $arrLang to _tr() and replace
+  hand-coded translation loading with load_language_module().
+  SVN Rev[7319]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: reports: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7243]

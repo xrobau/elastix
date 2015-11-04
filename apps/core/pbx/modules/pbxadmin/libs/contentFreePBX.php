@@ -4,15 +4,8 @@ function getContent(&$smarty, $elx_module_name, $withList)
     require_once "libs/misc.lib.php";
     $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$elx_module_name/lang/$lang.lang";
-    include_once "modules/$elx_module_name/lang/en.lang";
-    if (file_exists("$base_dir/$lang_file")) {
-        $arrLangEn = $arrLangModule;
-        include_once $lang_file;
-        $arrLangModule = array_merge($arrLangEn, $arrLangModule);
-    }
-    global $arrLang;
-    $arrLang = array_merge($arrLang,$arrLangModule);
+
+    load_language_module($elx_module_name);
 
     $arrLangFreePBX = array("en" => "en_US", "bg" => "bg_BG", "cn" => "zh_CN", "de" => "de_DE", "es" => "es_ES",
                             "fr" => "fr_FR", "he" => "he_IL", "hu" => "hu_HU", "it" => "it_IT",
@@ -20,7 +13,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
     $langFreePBX = isset($arrLangFreePBX[$lang])?$arrLangFreePBX[$lang]:"en_US";
     setcookie("lang",$langFreePBX);
     $local_templates_dir = "$base_dir/modules/$elx_module_name/themes/default";
-    
+
     //set variables
     $vars = array(
         'action'		 => null,
@@ -47,7 +40,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
         $_GET['display']     = 'extensions';
         $_GET['type']        = 'setup';
     }
-    
+
     foreach ($vars as $k => $v) {
         //were use config_vars instead of, say, vars, so as not to polute
         // page.<some_module>.php (which usually uses $var or $vars)
@@ -56,15 +49,15 @@ function getContent(&$smarty, $elx_module_name, $withList)
         //special handeling
         switch ($k) {
                 case 'extdisplay':
-            $extdisplay = (isset($extdisplay) && $extdisplay !== false) 
-                        ? htmlspecialchars($extdisplay, ENT_QUOTES) 
+            $extdisplay = (isset($extdisplay) && $extdisplay !== false)
+                        ? htmlspecialchars($extdisplay, ENT_QUOTES)
                         : false;
                         $_REQUEST['extdisplay'] = $extdisplay;
                         break;
 
                 case 'restrictmods':
-            $restrict_mods = $restrictmods 
-                ? array_flip(explode('/', $restrictmods)) 
+            $restrict_mods = $restrictmods
+                ? array_flip(explode('/', $restrictmods))
                 : false;
                         break;
 
@@ -90,7 +83,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
     global $astman;
     global $extmap;
     global $module_name;
-    global $module_page; 
+    global $module_page;
     global $reload_needed;
     global $active_modules;
     global $remove_rnav;
@@ -102,14 +95,14 @@ function getContent(&$smarty, $elx_module_name, $withList)
     global $path_to_dir;
     global $itemid; // required by FreePBX 2.11.x daynight module
     $return_HTML = "";
-    
+
     // This needs to be included BEFORE the session_start or we fail so
     // we can't do it in bootstrap and thus we have to depend on the
     // __FILE__ path here.
 
     if (isset($_REQUEST['handler'])) {
             $restrict_mods = true;
-            // I think reload is the only handler that requires astman, so skip it 
+            // I think reload is the only handler that requires astman, so skip it
             //for others
             switch ($_REQUEST['handler']) {
                     case 'api':
@@ -122,9 +115,9 @@ function getContent(&$smarty, $elx_module_name, $withList)
                             break;
             }
     }
-    
+
     $bootstrap_settings['freepbx_auth'] = false;
-  
+
     // call bootstrap.php through freepbx.conf
     if (!@include_once(getenv('FREEPBX_CONF') ? getenv('FREEPBX_CONF') : '/etc/freepbx.conf')) {
                     include_once('/etc/asterisk/freepbx.conf');
@@ -140,7 +133,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
     if (!isset($no_auth) && $action != '' && $amp_conf['CHECKREFERER']) {
             if (isset($_SERVER['HTTP_REFERER'])) {
                     $referer = parse_url($_SERVER['HTTP_REFERER']);
-                    $refererok = (trim($referer['host']) == trim($_SERVER['SERVER_NAME'])) 
+                    $refererok = (trim($referer['host']) == trim($_SERVER['SERVER_NAME']))
                             ? true : false;
             } else {
                     $refererok = false;
@@ -153,7 +146,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
             $display = 'noauth';
     }
     // handle special requests
-    if (!in_array($display, array('noauth', 'badrefer')) 
+    if (!in_array($display, array('noauth', 'badrefer'))
             && isset($_REQUEST['handler'])
     ) {
             $module = isset($_REQUEST['module'])	? $_REQUEST['module']	: '';
@@ -161,11 +154,11 @@ function getContent(&$smarty, $elx_module_name, $withList)
             fileRequestHandler($_REQUEST['handler'], $module, $file);
             exit();
     }
-    
+
     if (!$quietmode) {
             module_run_notification_checks();
     }
-    
+
     //draw up freepbx menu
     $fpbx_menu = array();
 
@@ -181,17 +174,17 @@ function getContent(&$smarty, $elx_module_name, $withList)
                     // stored as [items][$type][$category][$name] = $displayvalue
                     if (isset($module['items']) && is_array($module['items'])) {
                             // loop through the types
-                            foreach($module['items'] as $itemKey => $item) {   
-                                
+                            foreach($module['items'] as $itemKey => $item) {
+
                                     // check access, unless module.xml defines all have access
                                     //TODO: move this to bootstrap and make it work
                                     //module is restricted to admin with excplicit permission
-                                    $needs_perms = !isset($item['access']) 
+                                    $needs_perms = !isset($item['access'])
                                                     || strtolower($item['access']) != 'all'
                                             ? true : false;
 
                                     //check if were logged in
-                                    $admin_auth = isset($_SESSION["AMP_user"]) 
+                                    $admin_auth = isset($_SESSION["AMP_user"])
                                             && is_object($_SESSION["AMP_user"]);
 
                                     //per admin access rules
@@ -199,7 +192,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
                                             && $_SESSION["AMP_user"]->checkSection($itemKey);
 
                                     //requies authentication
-                                    $needs_auth = isset($item['requires_auth']) 
+                                    $needs_auth = isset($item['requires_auth'])
                                             && strtolower($item['requires_auth']) == 'false'
                                                     ? false
                                                     : true;
@@ -209,23 +202,23 @@ function getContent(&$smarty, $elx_module_name, $withList)
                                     //			and either the user isnt authenticated
                                     //			or the user is authenticated and dose require
                                     //				section specifc permissions but doesnt have them
-                                    if ($needs_auth 
+                                    if ($needs_auth
                                             && (!$admin_auth || ($needs_perms && !$has_perms))
                                     ) {
-                                            //clear display if they were trying to gain unautherized 
+                                            //clear display if they were trying to gain unautherized
                                             //access to $itemKey. If there logged in, but dont have
                                             //permissions to view this specicc page - show them a message
                                             //otherwise, show them the login page
-                                            if($display == $itemKey){ 
+                                            if($display == $itemKey){
                                                     if ($admin_auth) {
-                                                            $display = 'noaccess';	
+                                                            $display = 'noaccess';
                                                     } else {
                                                             $display = 'noauth';
                                                     }
                                             }
                                             continue;
                                     }
-                                    
+
                                     if (!isset($item['display'])) {
                                             $item['display'] = $itemKey;
                                     }
@@ -233,7 +226,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
                                     // reference to the actual module
                                     $item['module'] =& $active_modules[$key];
 
-                                    // item is an assoc array, with at least 
+                                    // item is an assoc array, with at least
                                     //array(module=> name=>, category=>, type=>, display=>)
                                     $fpbx_menu[$itemKey] = $item;
 
@@ -280,7 +273,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
 
     // extensions vs device/users ... this is a bad design, but hey, it works
     if (!$quietmode && isset($fpbx_menu["extensions"])) {
-            if (isset($amp_conf["AMPEXTENSIONS"]) 
+            if (isset($amp_conf["AMPEXTENSIONS"])
                     && ($amp_conf["AMPEXTENSIONS"] == "deviceanduser")) {
                     unset($fpbx_menu["extensions"]);
             } else {
@@ -289,10 +282,10 @@ function getContent(&$smarty, $elx_module_name, $withList)
             }
     }
 
-    ob_start();    
+    ob_start();
     // load the component from the loaded modules
-    if (!in_array($display, array('', 'badrefer')) 
-            && isset($configpageinits) && is_array($configpageinits) 
+    if (!in_array($display, array('', 'badrefer'))
+            && isset($configpageinits) && is_array($configpageinits)
     ) {
 
             $CC = $currentcomponent = new component($display,$type);
@@ -319,7 +312,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
     if ($display == 'index' && ($cur_menuitem['module']['rawname'] == 'builtin')) {
             $display = '';
     }
-    
+
     // show the appropriate page
     switch($display) {
             case 'modules':
@@ -343,7 +336,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
                                     $config_vars['confirm_email']);
                     }
                     //if we have no admin users AND were trying to set one up
-                    if (!count(getAmpAdminUsers()) 
+                    if (!count(getAmpAdminUsers())
                             && $action == 'setup_admin'
                             && !$config_vars['obe_error_msg']
                     ) {
@@ -377,7 +370,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
                             //show fop option if enabled, probobly doesnt belong on the
                             //login page
                             $login['panel'] = false;
-                            if (!empty($amp_conf['FOPWEBROOT']) 
+                            if (!empty($amp_conf['FOPWEBROOT'])
                                     && is_dir($amp_conf['FOPWEBROOT'])
                             ){
                                     $login['panel'] = str_replace($amp_conf['AMPWEBROOT'] .'/admin/',
@@ -397,7 +390,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
                             show_view($amp_conf['VIEW_WELCOME'], array('AMP_CONF' => &$amp_conf));
                     } else {
                             // no manager, no connection to asterisk
-                            show_view($amp_conf['VIEW_WELCOME_NOMANAGER'], 
+                            show_view($amp_conf['VIEW_WELCOME_NOMANAGER'],
                                     array('mgruser' => $amp_conf["AMPMGRUSER"]));
                     }
                     break;
@@ -408,7 +401,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
                     $module_file = 'modules/'.$module_name.'/page.'.$module_page.'.php';
 
                     //TODO Determine which item is this module displaying.
-                    //Currently this is over the place, we should standardize on a 
+                    //Currently this is over the place, we should standardize on a
                     //"itemid" request var for now, we'll just cover all possibilities :-(
                     $possibilites = array(
                             'userdisplay',
@@ -432,9 +425,9 @@ function getContent(&$smarty, $elx_module_name, $withList)
                     $module_hook->install_hooks($module_page,$module_name,$itemid);
 
                     // let hooking modules process the $_REQUEST
-                    $module_hook->process_hooks($itemid, 
-                            $module_name, 
-                            $module_page, 
+                    $module_hook->process_hooks($itemid,
+                            $module_name,
+                            $module_page,
                             $_REQUEST);
 
 
@@ -467,7 +460,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
 	$content = ob_get_contents();
 	ob_end_clean();
 	$return_HTML = '';
-	 
+
 	$use_popover_css = ($fw_popover || $fw_popover_process);
         $return_HTML .= load_view("$local_templates_dir/header.php", null);
 
@@ -489,8 +482,8 @@ function getContent(&$smarty, $elx_module_name, $withList)
                 $popover_mode = 'display';
         } else {
                 $popover_mode = 'process';
-        }     
-           
+        }
+
 
         $js_content     = load_view("$local_templates_dir/popover_js.php", null);
         $extmap	        = framework_get_extmap(true);
@@ -498,7 +491,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
         $remove_rnav    = true;
         $return_HTML   .= load_view("$local_templates_dir/footer.php", null);
         return $return_HTML;
-    
+
     } else {
         $_SESSION['module_name']	= $module_name;
         $_SESSION['module_page']	= $module_page;
@@ -520,7 +513,7 @@ function getContent(&$smarty, $elx_module_name, $withList)
         //send footer
         $extmap	        = framework_get_extmap(true);
         $reload_needed	= check_reload_needed();
-        $return_HTML .= load_view("$local_templates_dir/footer.php", null); 
+        $return_HTML .= load_view("$local_templates_dir/footer.php", null);
 
         if($withList){
             $smarty->assign("Option", _tr('Option'));

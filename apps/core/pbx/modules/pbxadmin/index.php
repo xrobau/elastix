@@ -27,14 +27,6 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.3 2007/07/17 00:03:42 gcarrillo Exp $ */
 
-if (!function_exists('_tr')) {
-    function _tr($s)
-    {
-        global $arrLang;
-        return isset($arrLang[$s]) ? $arrLang[$s] : $s;
-    }
-}
-
 function _moduleContent(&$smarty, $module_name)
 {
     require_once "modules/$module_name/libs/contentFreePBX.php";

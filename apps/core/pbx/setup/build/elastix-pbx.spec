@@ -298,6 +298,9 @@ fi
 
 %changelog
 * Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Conference: partially revert $arrLang switch to allow the use of
+  elastix-conferenceroom-2.2.0-5 until the latter is updated.
+  SVN Rev[7313]
 - CHANGED: File Editor: remove useless reference to $arrLang.
   SVN Rev[7312]
 - CHANGED: Festival: replace hand-coded translation loading with

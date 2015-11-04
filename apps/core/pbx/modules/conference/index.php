@@ -827,7 +827,10 @@ function embedded_viewFormCreateConference($smarty, $module_name, $local_templat
 
     //conexion resource
     $pDB = new paloDB($arrConf['dsn_conn_database']);
-    return viewFormCreateConference($smarty, $module_plugin, $local_templates_dir, $pDB, $arrConf, TRUE);
+
+    // elastix-conferenceroom-2.2.0-5 requiere de $arrLang
+    global $arrLang;
+    return viewFormCreateConference($smarty, $module_plugin, $local_templates_dir, $pDB, $arrConf, $arrLang, TRUE);
 }
 
 function embedded_prepareWebConfLister()
@@ -875,7 +878,10 @@ function embedded_webConf_mostrarListaInvitados($smarty, $module_name, $local_te
 
     //conexion resource
     $pDB = new paloDB($arrConf['dsn_conn_database']);
-    return mostrarListaInvitados($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+
+    // elastix-conferenceroom-2.2.0-5 requiere de $arrLang
+    global $arrLang;
+    return mostrarListaInvitados($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
 }
 
 function embedded_webConf_mostrarChatLog($smarty, $module_name, $local_templates_dir, $pDB, $arrConfig, $dsn_agi_manager,$dsnAsterisk)
@@ -904,7 +910,10 @@ function embedded_webConf_mostrarChatLog($smarty, $module_name, $local_templates
 
     //conexion resource
     $pDB = new paloDB($arrConf['dsn_conn_database']);
-    return mostrarChatLog($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+
+    // elastix-conferenceroom-2.2.0-5 requiere de $arrLang
+    global $arrLang;
+    return mostrarChatLog($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
 }
 
 // Esto sólo se ejecuta si se tiene soporte de conferencia web
@@ -926,7 +935,10 @@ function validarWebConf($smarty)
     foreach ($listaTraduccion as $tuplaTraduccion) {
         if (isset($_POST[$tuplaTraduccion[0]])) $_POST[$tuplaTraduccion[1]] = $_POST[$tuplaTraduccion[0]];
     }
-    return validate_saveNewCreateConference($smarty);
+
+    // elastix-conferenceroom-2.2.0-5 requiere de $arrLang
+    global $arrLang;
+    return validate_saveNewCreateConference($smarty, $arrLang);
 }
 
 // Esto sólo se ejecuta si se tiene soporte de conferencia web
@@ -959,6 +971,9 @@ function ejecutarCreacionWebConf($smarty)
     foreach ($listaTraduccion as $tuplaTraduccion) {
         if (isset($_POST[$tuplaTraduccion[0]])) $_POST[$tuplaTraduccion[1]] = $_POST[$tuplaTraduccion[0]];
     }
-    return execute_saveNewCreateConference($smarty, $module_plugin, $local_templates_dir, $pDB, $arrConf, TRUE);
+
+    // elastix-conferenceroom-2.2.0-5 requiere de $arrLang
+    global $arrLang;
+    return execute_saveNewCreateConference($smarty, $module_plugin, $local_templates_dir, $pDB, $arrConf, $arrLang, TRUE);
 }
 ?>

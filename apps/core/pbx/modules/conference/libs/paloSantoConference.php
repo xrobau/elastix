@@ -53,14 +53,14 @@ class paloSantoConference {
         }
     }
 
-    private function _queryBooking($sQueryFields, $date_start = '', $date_end = '', 
+    private function _queryBooking($sQueryFields, $date_start = '', $date_end = '',
         $field_name = '', $field_pattern = '', $conference_state = '')
     {
         // Parámetros base de la petición SQL
         $sPeticionSQL = "SELECT $sQueryFields FROM booking";
         $condicionWhere = array();
         $paramWhere = array();
-        
+
         // Fecha según el estado de la conferencia
         if (!empty($date_start) && !preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $date_start)) {
             $this->errMsg = _tr('Invalid date start');
@@ -97,7 +97,7 @@ class paloSantoConference {
             $condicionWhere[] = "AND $field_name LIKE ?";
             $paramWhere[] = "%$field_pattern%";
         }
-        
+
         // Armar SQL con WHERE
         if (count($condicionWhere) > 0) {
             $sPeticionSQL .= ' WHERE '.implode(' AND ', $condicionWhere);
@@ -111,7 +111,7 @@ class paloSantoConference {
     {
         list($sPeticionSQL, $paramWhere) = $this->_queryBooking(
             'roomNo, confDesc, startTime, endTime, maxUser, bookId, roomPass, '.
-            'confOwner, silPass, aFlags, uFlags', $date_start, $date_end, 
+            'confOwner, silPass, aFlags, uFlags', $date_start, $date_end,
             $field_name, $field_pattern, $conference_state);
         $sPeticionSQL .= ' ORDER BY startTime';
         if (!empty($limit)) {
@@ -154,11 +154,11 @@ class paloSantoConference {
         return $result;
     }
 
-    function CreateConference($sNombreConf, $sNumeroConf, $sFechaInicio, 
+    function CreateConference($sNombreConf, $sNumeroConf, $sFechaInicio,
         $iSegundosDuracion, $iMaxUsuarios, $opciones = NULL)
     {
     	if (!is_array($opciones)) $opciones = array();
-        $sPeticionSQL = 
+        $sPeticionSQL =
             'INSERT INTO booking (confDesc, confOwner, roomNo, silPass, aFlags, '.
                 'roomPass, uFlags, startTime, endTime, maxUser, clientId, '.
                 'status, sequenceNo, recurInterval) '.
@@ -195,7 +195,7 @@ class paloSantoConference {
     function ConferenceNumberExist($number)
     {
         $result = $this->_DB->getFirstRowQuery(
-            'SELECT COUNT(*) FROM booking WHERE roomNo = ?', FALSE, 
+            'SELECT COUNT(*) FROM booking WHERE roomNo = ?', FALSE,
             array($number));
         return (is_array($result) && $result[0] > 0);
     }
@@ -203,7 +203,7 @@ class paloSantoConference {
     function DeleteConference($BookId)
     {
         return $this->_DB->genQuery(
-            'DELETE FROM booking WHERE bookId = ?', 
+            'DELETE FROM booking WHERE bookId = ?',
             array($BookId));
     }
 
@@ -214,7 +214,7 @@ class paloSantoConference {
 
         // User #: 01         1064 device               Channel: SIP/1064-00000001     (unmonitored) 00:00:11
         $regexp = '!^User #:\s*(\d+)\s*(\d+).*Channel: (\S+)\s*(\(.*\))\s*([[:digit:]|\:]+)$!i';
-        
+
         $command = "meetme list $room";
         $arrResult = $this->AsteriskManager_Command($data_connection['host'],
             $data_connection['user'], $data_connection['password'], $command);
@@ -273,7 +273,7 @@ class paloSantoConference {
         if (!ctype_digit($device)) return FALSE;
         if (!ctype_digit($room)) return FALSE;
         if (count(preg_split("/[\r\n]+/", $callerId)) > 1) return FALSE;
-        
+
         $command_data['device'] = $device;
         $command_data['room'] = $room;
         $command_data['callerid'] = $callerId;
@@ -282,10 +282,9 @@ class paloSantoConference {
     }
 
     private function AsteriskManager_Command($host, $user, $password, $command) {
-        global $arrLang;
         $astman = new AGI_AsteriskManager( );
         if (!$astman->connect("$host", "$user" , "$password")) {
-            $this->errMsg = $arrLang["Error when connecting to Asterisk Manager"];
+            $this->errMsg = _tr("Error when connecting to Asterisk Manager");
         } else{
             $salida = $astman->Command("$command");
             $astman->disconnect();
@@ -297,16 +296,15 @@ class paloSantoConference {
     }
 
     private function AsteriskManager_Originate($host, $user, $password, $command_data) {
-        global $arrLang;
         $astman = new AGI_AsteriskManager();
 
         if (!$astman->connect("$host", "$user" , "$password")) {
-            $this->errMsg = $arrLang["Error when connecting to Asterisk Manager"];
+            $this->errMsg = _tr("Error when connecting to Asterisk Manager");
         } else{
-            /* Para poder pasar el parámetro Data correctamente, se debe usar 
-             * un valor separado por barra vertical (|) en Asterisk 1.4.x y una 
+            /* Para poder pasar el parámetro Data correctamente, se debe usar
+             * un valor separado por barra vertical (|) en Asterisk 1.4.x y una
              * coma en Asterisk 1.6.x. Para es se requiere detectar la versión
-             * de Asterisk. 
+             * de Asterisk.
              */
             // CoreSettings sólo está disponible en asterisk 1.6.x
             $r = $astman->send_request('CoreSettings');
@@ -322,9 +320,9 @@ class paloSantoConference {
                 array_push($versionMinima, 0);
             while (count($versionMinima) > count($asteriskVersion))
                 array_push($asteriskVersion, 0);
-            $sSeparador = ($asteriskVersion >= $versionMinima) ? ',' : '|';            
+            $sSeparador = ($asteriskVersion >= $versionMinima) ? ',' : '|';
 
-            $parameters = $this->Originate($command_data['device'], 
+            $parameters = $this->Originate($command_data['device'],
                 $command_data['callerid'], $command_data['room'], $sSeparador);
             $salida = $astman->send_request('Originate', $parameters);
 
@@ -349,27 +347,25 @@ class paloSantoConference {
 
     function getDeviceFreePBX($dsn)
     {
-        global $arrLang;
-
         $pDB = new paloDB($dsn);
         if($pDB->connStatus)
             return false;
         $sqlPeticion = "select id, concat(description,' <',user,'>') label FROM devices ORDER BY id ASC;";
         $result = $pDB->fetchTable($sqlPeticion,true); //se consulta a la base asterisk
-        $pDB->disconnect(); 
+        $pDB->disconnect();
         $arrDevices = array();
         if(is_array($result) && count($result)>0){
-                $arrDevices['unselected'] = "-- {$arrLang['Unselected']} --";
+                $arrDevices['unselected'] = "-- "._tr('Unselected')." --";
             foreach($result as $key => $device){
                 $arrDevices[$device['id']] = $device['label'];
             }
         }
         else{
-            $arrDevices['no_device'] = "-- {$arrLang['No Extensions']} --";
+            $arrDevices['no_device'] = "-- "._tr('No Extensions')." --";
         }
 	return $arrDevices;
     }
-    
+
     //CB for fix issue - Phone number active
     function ConferenceNumberExistDateRange($number,$fecha_ini)
     {
@@ -377,7 +373,7 @@ class paloSantoConference {
         $result = $this->_DB->getFirstRowQuery($query, FALSE, array($number, $fecha_ini));
         if($result[0] > 0)
             return true;
-        else 
+        else
           return false;
     }
     //CB - END

@@ -297,6 +297,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Conference: switch all uses of $arrLang to _tr() and replace
+  hand-coded translation loading with load_language_module().
+  SVN Rev[7310]
+
 * Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: pbx: explicitly spell out previously hidden package requirements that
   provide system commands.

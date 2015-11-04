@@ -37,20 +37,11 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoTexttoWav.class.php";
 
-    $lang=get_language();
-    $script_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$script_dir/$lang_file"))
-        include_once($lang_file);
-    else
-        include_once("modules/$module_name/lang/en.lang");
+    load_language_module($module_name);
 
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
@@ -62,39 +53,39 @@ function _moduleContent(&$smarty, $module_name)
     $content = "";
     switch($accion){
         case "generate":
-            $content = generateWav($smarty, $module_name, $local_templates_dir, $arrLang);
+            $content = generateWav($smarty, $module_name, $local_templates_dir);
             break;
         case "back":
             header("Location: ?menu=$module_name");
         default:
-            $content = form_TexttoWav($smarty, $module_name, $local_templates_dir, $arrLang);
+            $content = form_TexttoWav($smarty, $module_name, $local_templates_dir);
             break;
     }
     return $content;
 }
 
-function generateWav($smarty, $module_name, $local_templates_dir, $arrLang)
+function generateWav($smarty, $module_name, $local_templates_dir)
 {
-    $arrFormConference = createFieldForm($arrLang);
+    $arrFormConference = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormConference);
 
     if(!$oForm->validateForm($_POST)) {
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
+        $smarty->assign("mb_title", _tr("Validation Error"));
         $arrErrores = $oForm->arrErroresValidacion;
-        $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/>";
+        $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
             }
         }
         $smarty->assign("mb_message", $strErrorMsg);
-        $contenidoModulo =  form_TexttoWav($smarty, $module_name, $local_templates_dir, $arrLang);
+        $contenidoModulo =  form_TexttoWav($smarty, $module_name, $local_templates_dir);
     } else {
-        $smarty->assign("GENERATE", $arrLang["Generate"]);
-        $smarty->assign("BACK", $arrLang["Back"]);
+        $smarty->assign("GENERATE", _tr("Generate"));
+        $smarty->assign("BACK", _tr("Back"));
         $smarty->assign("icon", "modules/$module_name/images/pbx_tools_text_to_wav.png");
-        $smarty->assign("FORMATO", getParameter('format'));	
-        $smarty->assign("DOWNLOAD",$arrLang["Download File"]);
+        $smarty->assign("FORMATO", getParameter('format'));
+        $smarty->assign("DOWNLOAD",_tr("Download File"));
         $path = "var";
         $smarty->assign("PATH",$path);
 
@@ -105,43 +96,43 @@ function generateWav($smarty, $module_name, $local_templates_dir, $arrLang)
         $oTextToWap = new paloSantoTexttoWav();
         $execute = $oTextToWap->outputTextWave($format, $message);
         if ($execute) {
-        	/* Cortar la salida en este lugar. Evita lidiar con rawmode sólo 
+        	/* Cortar la salida en este lugar. Evita lidiar con rawmode sólo
              * para caso de éxito */
             die();
         } else {
-            $smarty->assign("mb_title", $arrLang["Error"]);
+            $smarty->assign("mb_title", _tr("Error"));
             $smarty->assign("mb_message", $oTextToWap->errMsg);
         }
 
-        $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLang["Text to Wav"], $_POST);
+        $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", _tr("Text to Wav"), $_POST);
         $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
     }
     return $contenidoModulo;
 }
 
 
-function form_TexttoWav($smarty, $module_name, $local_templates_dir, $arrLang)
+function form_TexttoWav($smarty, $module_name, $local_templates_dir)
 {
-    $arrFormConference = createFieldForm($arrLang);
+    $arrFormConference = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormConference);
 
-    $smarty->assign("GENERATE", $arrLang["Generate"]);
+    $smarty->assign("GENERATE", _tr("Generate"));
     $smarty->assign("icon", "modules/$module_name/images/pbx_tools_text_to_wav.png");
     $arrData['format'] = (getParameter("format"))?getParameter("format"):"wav";
 
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $arrLang["Text to Wav"], $arrData);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", _tr("Text to Wav"), $arrData);
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $contenidoModulo;
 }
 
 
-function createFieldForm($arrLang)
+function createFieldForm()
 {
      $arrOptions = array('wav' => "wav", 'gsm' => "gsm");
 
     $arrFields = array(
-            "message"          => array(   "LABEL"                  => $arrLang["Message"],
+            "message"          => array(   "LABEL"                  => _tr("Message"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "TEXTAREA",
                                             "INPUT_EXTRA_PARAM"      => "",
@@ -151,7 +142,7 @@ function createFieldForm($arrLang)
                                             "ROWS"                   => "4",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                 ),
-            "format"             => array(   "LABEL"                  => $arrLang["Format"],
+            "format"             => array(   "LABEL"                  => _tr("Format"),
                                             "REQUIRED"               => "yes",
                                             "INPUT_TYPE"             => "RADIO",
                                             "INPUT_EXTRA_PARAM"      => $arrOptions,

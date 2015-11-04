@@ -37,76 +37,69 @@ function _moduleContent(&$smarty, $module_name)
     require_once "libs/misc.lib.php";
     include_once "libs/paloSantoRate.class.php";
     include_once "libs/paloSantoTrunk.class.php";
-    include_once "libs/paloSantoGraphImage.lib.php";    
+    include_once "libs/paloSantoGraphImage.lib.php";
 
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
+
 
     $MAX_DAYS=60;
 
     $arrData = array();
     $smarty->assign("menu","dest_distribution");
 
-    $smarty->assign("Filter",$arrLang['Filter']);
+    $smarty->assign("Filter",_tr('Filter'));
 
 
 
-    
-    $arrFormElements = array("date_start"  => array("LABEL"                  => $arrLang["Start Date"],
+
+    $arrFormElements = array("date_start"  => array("LABEL"                  => _tr("Start Date"),
                                                         "REQUIRED"               => "yes",
                                                         "INPUT_TYPE"             => "DATE",
                                                         "INPUT_EXTRA_PARAM"      => "",
                                                         "VALIDATION_TYPE"        => "ereg",
                                                         "VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}$"),
-                                 "date_end"    => array("LABEL"                  => $arrLang["End Date"],
+                                 "date_end"    => array("LABEL"                  => _tr("End Date"),
                                                         "REQUIRED"               => "yes",
                                                         "INPUT_TYPE"             => "DATE",
                                                         "INPUT_EXTRA_PARAM"      => "",
                                                         "VALIDATION_TYPE"        => "ereg",
                                                         "VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}$"),
-                                  "criteria"  => array("LABEL"                  => $arrLang["Criteria"],
+                                  "criteria"  => array("LABEL"                  => _tr("Criteria"),
                                                         "REQUIRED"               => "yes",
                                                         "INPUT_TYPE"             => "SELECT",
                                                         "INPUT_EXTRA_PARAM"      => array(
-                                                                 "minutes"         => $arrLang["Distribution by Time"],
-                                                                                    "num_calls"         => $arrLang["Distribution by Number of Calls"],
-                                                                                    "charge"     => $arrLang["Distribution by Cost"]),
+                                                                 "minutes"         => _tr("Distribution by Time"),
+                                                                                    "num_calls"         => _tr("Distribution by Number of Calls"),
+                                                                                    "charge"     => _tr("Distribution by Cost")),
                                                         "VALIDATION_TYPE"        => "text",
                                                         "VALIDATION_EXTRA_PARAM" => ""),
                                  );
-    
+
     $oFilterForm = new paloForm($smarty, $arrFormElements);
-    
+
         // Por omision las fechas toman el sgte. valor (la fecha de hoy)
-    $date_start = date("Y-m-d") . " 00:00:00"; 
+    $date_start = date("Y-m-d") . " 00:00:00";
     $date_end   = date("Y-m-d") . " 23:59:59";
     $value_criteria ="minutes";
-       
-    
+
+
     if(isset($_POST['filter'])) {
         if($oFilterForm->validateForm($_POST)) {
                 // Exito, puedo procesar los datos ahora.
-            $date_start = translateDate($_POST['date_start']) . " 00:00:00"; 
+            $date_start = translateDate($_POST['date_start']) . " 00:00:00";
             $date_end   = translateDate($_POST['date_end']) . " 23:59:59";
         //valido que no exista diferencia mayor de 31 dias entre las fechas
             $inicio=strtotime($date_start);
@@ -117,16 +110,16 @@ function _moduleContent(&$smarty, $module_name)
                 $_POST['date_end']=date("d M Y");
                 $date_start = date("Y-m-d"). " 00:00:00";
                 $date_end   = date("Y-m-d"). " 23:59:59";
-                $smarty->assign("mb_title", $arrLang["Validation Error"]);
-                $smarty->assign("mb_message", "{$arrLang['Date Range spans maximum number of days']}:$MAX_DAYS");
+                $smarty->assign("mb_title", _tr("Validation Error"));
+                $smarty->assign("mb_message", ""._tr('Date Range spans maximum number of days').":$MAX_DAYS");
             }
-            $value_criteria = $_POST['criteria'];    
+            $value_criteria = $_POST['criteria'];
             $arrFilterExtraVars = array("date_start" => $_POST['date_start'], "date_end" => $_POST['date_end'],"criteria"=>$_POST['criteria']);
         } else {
                 // Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
+            $smarty->assign("mb_title", _tr("Validation Error"));
             $arrErrores=$oFilterForm->arrErroresValidacion;
-            $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br>";
+            $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
             foreach($arrErrores as $k=>$v) {
                     $strErrorMsg .= "$k, ";
             }
@@ -134,7 +127,7 @@ function _moduleContent(&$smarty, $module_name)
             $smarty->assign("mb_message", $strErrorMsg);
         }
         $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/dest_dist_filter.tpl", "", $_POST);
-    
+
     } else if(isset($_GET['date_start']) && isset($_GET['date_end'])) {
         //valido que no exista diferencia mayor de 31 dias entre las fechas
         $date_start = translateDate($_GET['date_start']) . " 00:00:00";
@@ -148,17 +141,17 @@ function _moduleContent(&$smarty, $module_name)
             $_GET['date_end']=date("d M Y");
             $date_start = date("Y-m-d"). " 00:00:00";
             $date_end   = date("Y-m-d"). " 23:59:59";
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
-            $smarty->assign("mb_message", "{$arrLang['Date Range spans maximum number of days']}:$MAX_DAYS");
+            $smarty->assign("mb_title", _tr("Validation Error"));
+            $smarty->assign("mb_message", ""._tr('Date Range spans maximum number of days').":$MAX_DAYS");
         }
-           
-        $value_criteria = $_GET['criteria'];    
+
+        $value_criteria = $_GET['criteria'];
         $arrFilterExtraVars = array("date_start" => $_GET['date_start'], "date_end" => $_GET['date_end'],"criteria"=>$_GET['criteria']);
         $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/dest_dist_filter.tpl", "", $_GET);
     } else {
         $date_start = date("Y-m-d"). " 00:00:00";
         $date_end   = date("Y-m-d"). " 23:59:59";
-        $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/dest_dist_filter.tpl", "", 
+        $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/dest_dist_filter.tpl", "",
         array('date_start' => date("d M Y"), 'date_end' => date("d M Y"), 'criteria'=>'minutes'));
     }
 
@@ -187,7 +180,7 @@ function _moduleContent(&$smarty, $module_name)
         'date_start'=>  date('d M Y', strtotime($date_start)),
         'date_end'  =>  date('d M Y', strtotime($date_end)),
     )));
-    
+
     if (count($data_graph["values"])>0){
          $mostrarSumario=TRUE;
         $total_valores=array_sum($data_graph["values"]);
@@ -204,14 +197,14 @@ function _moduleContent(&$smarty, $module_name)
                               "<b>".number_format(100,2)."<b>"
                              );
 
-        $smarty->assign("Rate_Name", $arrLang["Rate Name"]);
+        $smarty->assign("Rate_Name", _tr("Rate Name"));
         $smarty->assign("Title_Criteria", $title_sumary);
         $smarty->assign("results", $results);
     }else
         $mostrarSumario=FALSE;
     $smarty->assign("mostrarSumario", $mostrarSumario);
     $smarty->assign("contentFilter", $htmlFilter);
-    $smarty->assign("title", $arrLang['Destination Distribution']);
+    $smarty->assign("title", _tr('Destination Distribution'));
     $smarty->assign("icon","images/bardoc.png");
     return $smarty->fetch("file:$local_templates_dir/dest_distribution.tpl");
 }
@@ -220,7 +213,6 @@ function leerDatosGrafico($type_graph, $date_start, $date_end)
 {
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
 
     $MAX_SLICES=10;
 
@@ -229,11 +221,11 @@ function leerDatosGrafico($type_graph, $date_start, $date_end)
 
     $pDBSQLite = new paloDB($arrConfModule['dsn_conn_database_2']);
     if(!empty($pDBSQLite->errMsg)) {
-        echo "{$arrLang['ERROR']}: $pDBSQLite->errMsg <br>";
+        echo ""._tr('ERROR').": $pDBSQLite->errMsg <br>";
     }
     $pRate = new paloRate($pDBSQLite);
     if(!empty($pRate->errMsg)) {
-        echo "{$arrLang['ERROR']}: $pRate->errMsg <br>";
+        echo ""._tr('ERROR').": $pRate->errMsg <br>";
     }
 
     $pDBSet = new paloDB($arrConf['elastix_dsn']['settings']);
@@ -268,7 +260,7 @@ function leerDatosGrafico($type_graph, $date_start, $date_end)
             if (!count($tarifa)>0 && ($bExito)) $bExito=$pRate->buscarTarifa($numero,$tarifa,'None');
             if (!$bExito)
             {
-                echo "{$arrLang['ERROR']}: $pRate->errMsg <br>";
+                echo ""._tr('ERROR').": $pRate->errMsg <br>";
             }else
             {
 
@@ -283,7 +275,7 @@ function leerDatosGrafico($type_graph, $date_start, $date_end)
                     }
                 }else
                 {
-                    $rate_name=$arrLang["default"];
+                    $rate_name=_tr("default");
                     $id_rate=0;
                 //no tiene tarifa buscar tarifa por omision
                 //por ahora para probar $1 el minuto
@@ -359,36 +351,36 @@ function leerDatosGrafico($type_graph, $date_start, $date_end)
             $valores_charge=$val_charge;
 
         if ($type_graph=="minutes"){
-            $titulo=$arrLang["Distribution by Time"];
+            $titulo=_tr("Distribution by Time");
             $valores_grafico=$valores_minutos;
-            $title_sumary=$arrLang["Minutes"];
+            $title_sumary=_tr("Minutes");
         }elseif ($type_graph=="charge"){
-            $titulo=$arrLang["Distribution by Cost"];
+            $titulo=_tr("Distribution by Cost");
             $valores_grafico=$valores_charge;
-            $title_sumary=$arrLang["Cost"];
+            $title_sumary=_tr("Cost");
         }
         else{
-            $titulo=$arrLang["Distribution by Number of Calls"];
+            $titulo=_tr("Distribution by Number of Calls");
             $valores_grafico=$valores_num_calls;
-            $title_sumary=$arrLang["Number of Calls"];
+            $title_sumary=_tr("Number of Calls");
         }
 
         //nombres de tarifas para leyenda
         foreach ($valores_grafico as $id=>$valor)
         {
-            $nombres_tarifas[]=isset($nombre_rate[$id])?$nombre_rate[$id]:$arrLang["others"];
+            $nombres_tarifas[]=isset($nombre_rate[$id])?$nombre_rate[$id]:_tr("others");
         }
 
         $data=array_values($valores_grafico);
    }else
    {
         if ($type_graph=="minutes"){
-            $titulo=$arrLang["Distribution by Time"];
+            $titulo=_tr("Distribution by Time");
         }elseif ($type_graph=="charge"){
-            $titulo=$arrLang["Distribution by Cost"];
+            $titulo=_tr("Distribution by Cost");
         }
         else{
-            $titulo=$arrLang["Distribution by Number of Calls"];
+            $titulo=_tr("Distribution by Number of Calls");
         }
         $nombres_tarifas=$data=array();
    }
@@ -405,7 +397,6 @@ function leerDatosGrafico($type_graph, $date_start, $date_end)
 
 function ejecutarGrafico($value_criteria, $date_start, $date_end)
 {
-    global $arrLang;
     $data_graph = leerDatosGrafico($value_criteria, $date_start, $date_end);
 
     if (count($data_graph["values"])>0){
@@ -454,7 +445,7 @@ function ejecutarGrafico($value_criteria, $date_start, $date_end)
 	$title->Center(0,630,110);
 	$graph->AddText($title);
 
-	$t1 = new Text(utf8_decode($arrLang["No records found"]));
+	$t1 = new Text(utf8_decode(_tr("No records found")));
 	$t1->SetBox("white","black",true);
 	$t1->ParagraphAlign("center");
 	$t1->SetColor("black");

@@ -38,21 +38,14 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoMissedCalls.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -87,7 +80,7 @@ function _moduleContent(&$smarty, $module_name)
 function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $pACL, $arrConf)
 {
     ini_set('max_execution_time', 3600);
-    
+
     $pCallingReport = new paloSantoMissedCalls($pDB);
     $oFilterForm  = new paloForm($smarty, createFieldFilter());
     $filter_field = getParameter("filter_field");
@@ -142,7 +135,7 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
     // propia extensión
     $sExtension = $pACL->isUserAdministratorGroup($_SESSION['elastix_user'])? '' : $pACL->getUserExtension($_SESSION['elastix_user']);
     $total = $pCallingReport->getNumCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
-    
+
     if($oGrid->isExportAction()){
         $limit  = $total; // max number of rows.
         $offset = 0;      // since the start.
@@ -167,10 +160,10 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
 	$offset = $oGrid->calculateOffset(); //echo $size." : ".$offset;
 	$arrResult = $pCallingReport->getDataByPagination($arrData, $limit, $offset);
 	$oGrid->setData($arrResult);
-    }    
+    }
 
     //begin section filter
-    
+
     $smarty->assign("SHOW", _tr("Show"));
     $htmlFilter  = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
     //end section filter
@@ -225,9 +218,9 @@ function getAction()
         return "save_new";
     else if(getParameter("save_edit"))
         return "save_edit";
-    else if(getParameter("delete")) 
+    else if(getParameter("delete"))
         return "delete";
-    else if(getParameter("new_open")) 
+    else if(getParameter("new_open"))
         return "view_form";
     else if(getParameter("action")=="view")      //Get parameter by GET (command pattern, links)
         return "view_form";

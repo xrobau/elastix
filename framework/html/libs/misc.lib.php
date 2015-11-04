@@ -283,24 +283,63 @@ function load_version_elastix($ruta_base='')
 function load_theme($ruta_base='')
 {
     require_once $ruta_base."configs/default.conf.php";
+    require_once $ruta_base."libs/paloSantoDB.class.php";
     global $arrConf;
-    include_once $ruta_base."libs/paloSantoDB.class.php";
 
-    //conectarse a la base de settings para obtener el thema actual
+    if (!function_exists('_load_theme_is_theme_dir_valid')) {
+        function _load_theme_is_theme_dir_valid($themedir)
+        {
+            $theme = basename($themedir);
+            if (!preg_match('/^\w+$/', $theme)) return FALSE;
+            if (!is_dir($themedir)) return FALSE;
+            if (!file_exists($themedir.'/_common/index.tpl')) return FALSE;
+            if (!file_exists($themedir.'/_common/_menu.tpl')) return FALSE;
+            if (!file_exists($themedir.'/_common/login.tpl')) return FALSE;
+            return TRUE;
+        }
+    }
+
+    $chosen_theme = NULL;
+
+    // Leer el tema de la base de datos settings
+    $settings_theme = NULL;
     $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
-    if(empty($pDB->errMsg)) {
-        $theme=get_key_settings($pDB,'theme');
+    if (empty($pDB->errMsg)) {
+        $settings_theme = get_key_settings($pDB, 'theme');
+        if (!preg_match('/^\w+$/', $settings_theme))
+            $settings_theme = NULL;
     }
 
-    if (!preg_match('/^\w+$/', $theme)) $theme = false;
-    if ($theme !== false && !is_dir($ruta_base."themes/$theme")) $theme = false;
-
-    //si no se encuentra setear el tema por default
-    if (empty($theme)){
-        set_key_settings($pDB,'theme','default');
-        return "default";
+    // Verificar si los temas existen en el orden indicado
+    $available_themes = array('tenant', 'elastixneo', 'blackmin', 'giox', 'default');
+    if (!is_null($settings_theme)) array_unshift($available_themes, $settings_theme);
+    foreach ($available_themes as $theme) {
+        if (_load_theme_is_theme_dir_valid($ruta_base."themes/$theme")) {
+            $chosen_theme = $theme;
+            break;
+        }
     }
-    else return $theme;
+
+    // Si todavía no se encuentra un tema, se busca el primer directorio
+    if (is_null($chosen_theme)) {
+        foreach (glob($ruta_base.'themes/*') as $theme_dir) {
+            if (_load_theme_is_theme_dir_valid($theme_dir)) {
+                $chosen_theme = basename($theme_dir);
+                break;
+            }
+        }
+    }
+
+    if (is_null($chosen_theme)) {
+        die('No themes found under '.$ruta_base.'themes/. At least one theme must exist for Elastix GUI.');
+    }
+
+    // Guardar nuevo tema elegido, si es distinto del leído
+    if (empty($pDB->errMsg) && $chosen_theme != $settings_theme) {
+        set_key_settings($pDB, 'theme', $chosen_theme);
+        array_map('unlink', glob($ruta_base.'var/templates_c/*php'));
+    }
+    return $chosen_theme;
 }
 
 function load_language($ruta_base='')

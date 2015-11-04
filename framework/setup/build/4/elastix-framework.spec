@@ -387,6 +387,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude(/var/www/html/themes/blackmin)
 
 %changelog
+* Wed Nov  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: rework load_theme() function to be more robust and
+  fallback to tenant theme in case chosen theme is no longer available, as well
+  as performing validations on whether the theme directory is usable.
+  SVN Rev[7325]
+
 * Sat Oct 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: the paloSantoForm class has been modified to use methods
   for each known widget. This allows the class to be subclassed and methods

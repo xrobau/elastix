@@ -180,6 +180,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Nov  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Backup/Restore: switch over the FOP directory to the one used by
+  FreePBX 2.11. This will render the restore incompatible for old backups that
+  contain the 2.8 directory.
+  SVN Rev[7328]
+
 * Sat Oct 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: System: Updated Russian translation. Provided by user Russian.
   SVN Rev[7289]

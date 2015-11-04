@@ -375,13 +375,20 @@ $BACKUP_PLAN = array(
             'components'    =>  array(
                 array(
                     'type'          =>  'dir',
+                    /*
                     'parentdir'     =>  '/var/www/html/',
                     'pathlist'      =>  array(
-                    	// TODO: panel/ se ha movido a admin/modules/fw_fop/
                         'panel/*.cfg',
                         'panel/*.txt',
                     ),
                     'backupfile'    =>  'var.www.html.panel.tgz',
+                    */
+                    'parentdir'     =>  '/var/www/html/admin/modules/',
+                    'pathlist'      =>  array(
+                        'fw_fop/*.cfg',
+                        'fw_fop/*.txt',
+                    ),
+                    'backupfile'    =>  'fw_fop.tgz',
                 ),
                 /* The previous implementation attempted to backup and restore
                  * /var/lib/asterisk/bin/retrieve_op_conf_from_mysql.pl when 

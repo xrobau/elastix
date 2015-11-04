@@ -388,6 +388,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Nov  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Themes System: filter invalid theme dirs from combo. Remove dependency
+  on paloSantoInstaller and instead flush Smarty cache directly.
+  SVN Rev[7326]
 - CHANGED: Framework: rework load_theme() function to be more robust and
   fallback to tenant theme in case chosen theme is no longer available, as well
   as performing validations on whether the theme directory is usable.

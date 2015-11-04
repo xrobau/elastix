@@ -29,7 +29,6 @@
 
 global $arrConf;
 require_once "{$arrConf['basePath']}/libs/paloSantoDB.class.php";
-require_once "{$arrConf['basePath']}/libs/paloSantoInstaller.class.php";
 
 /* Clase que implementa themes */
 class PaloSantoThemes
@@ -55,36 +54,44 @@ class PaloSantoThemes
             }
         }
     }
-    
+
     /**
-     * Procedimiento para obtener el listado de los temas 
+     * Procedimiento para obtener el listado de los temas
      *
-     * @return array    Listado de los temas 
+     * @return array    Listado de los temas
      */
     function getThemes($dir='')
     {
-        if($dir == ''){
+        if ($dir == '') {
             global $arrConf;
             $dir = $arrConf['basePath'];
         }
-        $arr_themes  = scandir($dir);
-        $arr_respuesta = array();
 
-        if (is_array($arr_themes) && count($arr_themes) > 0) {
-            foreach($arr_themes as $key => $theme){ 
-                if(is_dir($dir.$theme) && $theme!="." && $theme!="..")
-                    $arr_respuesta[$theme] = $theme;
+        if (!function_exists('_getThemes_is_theme_dir_valid')) {
+            function _getThemes_is_theme_dir_valid($themedir)
+            {
+                $theme = basename($themedir);
+                if (!preg_match('/^\w+$/', $theme)) return FALSE;
+                if (!is_dir($themedir)) return FALSE;
+                if (!file_exists($themedir.'/_common/index.tpl')) return FALSE;
+                if (!file_exists($themedir.'/_common/_menu.tpl')) return FALSE;
+                if (!file_exists($themedir.'/_common/login.tpl')) return FALSE;
+                return TRUE;
             }
-        } 
-        else 
+        }
+
+        $r = array_map('basename', array_filter(glob("$dir/*"), '_getThemes_is_theme_dir_valid'));
+        if (count($r) <= 0) {
+            // Cómo está funcionando el GUI en estas condiciones?
             $this->errMsg = _tr("Themes not Found");
-        return $arr_respuesta;
+        }
+        return array_combine($r, $r);
     }
 
     /**
      * Procedimiento para obtener de la base settings el tema actual de elastix
      *
-     * @return string    nombre del tema actual si lo encontro, vacio si no 
+     * @return string    nombre del tema actual si lo encontro, vacio si no
      */
     function getThemeActual()
     {
@@ -96,7 +103,7 @@ class PaloSantoThemes
      * Procedimiento para actualizar el tema actual de elastix
      *
      * @param   $sTheme        Nombre del tema a cambiar
-     * 
+     *
      * @return  bool    true or false si actualizo o no
      */
     function updateTheme($sTheme)
@@ -110,34 +117,31 @@ class PaloSantoThemes
             $this->errMsg = _tr('Invalid theme');
             return false;
         }
-        
+
         if(set_key_settings($this->_DB,'theme',$sTheme))
             return true;
         else{
             $this->errMsg = _tr('The theme could not be updated');
             return false;
         }
-    } 
+    }
 
     /**
      * Procedimiento para borrar los tpl temporales de smarty
      *
      * @param   $documentRoot        ruta del document root de la aplicacion
-     * 
+     *
      * @return  bool    true or false si refresco o no
      */
     function smartyRefresh($documentRoot='')
     {
-        if($documentRoot == ''){
+        if ($documentRoot == '') {
             global $arrConf;
             $documentRoot = $arrConf['basePath'];
         }
-
-        $paloInstaller = new Installer();
-        if($paloInstaller->refresh($documentRoot)==1){ //hubo un error, se valida si es igual a 1. 
-            return false;
-        }
-        return true;
-    } 
+        $r = array_map('unlink', glob($documentRoot.'/var/templates_c/*php'));
+        foreach ($r as $b) if (!$b) return FALSE;
+        return TRUE;
+    }
 }
 ?>

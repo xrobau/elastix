@@ -39,20 +39,13 @@ function _moduleContent(&$smarty, $module_name)
 
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
@@ -89,7 +82,7 @@ function _moduleContent(&$smarty, $module_name)
     if(is_null($ext) || $ext==""){
 	$bandCustom = false;
 	if(!$esAdministrador){
-	    $smarty->assign("mb_message", "<b>".$arrLang["contact_admin"]."</b>");
+	    $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
 	    return "";
 	}
     }
@@ -97,12 +90,12 @@ function _moduleContent(&$smarty, $module_name)
         $extension = "[[:digit:]]+";
 
     $smarty->assign("menu","voicemail");
-    $smarty->assign("Filter",$arrLang['Show']);
+    $smarty->assign("Filter",_tr('Show'));
     //formulario para el filtro
-    $arrFormElements = createFieldFormVoiceList($arrLang);
+    $arrFormElements = createFieldFormVoiceList();
     $oFilterForm = new paloForm($smarty, $arrFormElements);
         // Por omision las fechas toman el sgte. valor (la fecha de hoy)
-    $date_start = date("Y-m-d")." 00:00:00"; 
+    $date_start = date("Y-m-d")." 00:00:00";
     $date_end   = date("Y-m-d")." 23:59:59";
     $dateStartFilter = getParameter('date_start');
     $dateEndFilter = getParameter('date_end');
@@ -117,9 +110,9 @@ function _moduleContent(&$smarty, $module_name)
             $arrFilterExtraVars = array("date_start" => $dateStartFilter, "date_end" => $dateEndFilter);
         } else {
             // Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
+            $smarty->assign("mb_title", _tr("Validation Error"));
             $arrErrores=$oFilterForm->arrErroresValidacion;
-            $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br>";
+            $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
             }
@@ -148,7 +141,7 @@ function _moduleContent(&$smarty, $module_name)
         $report = true;
         //se añade control a los filtros
         $arrDate = array('date_start'=>date("d M Y"),'date_end'=>date("d M Y"));
-        $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", 
+        $htmlFilter = $contenidoModulo=$oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "",
         array('date_start' => date("d M Y"), 'date_end' => date("d M Y")));
     }
 
@@ -161,7 +154,7 @@ function _moduleContent(&$smarty, $module_name)
         borrarVoicemails($pACL);
         if($oFilterForm->validateForm($_POST)) {
             // Exito, puedo procesar los datos ahora.
-            $date_start = translateDate($_POST['date_start']) . " 00:00:00"; 
+            $date_start = translateDate($_POST['date_start']) . " 00:00:00";
             $date_end   = translateDate($_POST['date_end']) . " 23:59:59";
             $arrFilterExtraVars = array("date_start" => $_POST['date_start'], "date_end" => $_POST['date_end']);
         }
@@ -170,18 +163,18 @@ function _moduleContent(&$smarty, $module_name)
 
     if( getParameter('config') ){
 	if(!(is_null($ext) || $ext==""))
-	    return form_config($smarty, $module_name, $local_templates_dir, $arrLang, $ext, $pDB_ast);
+	    return form_config($smarty, $module_name, $local_templates_dir, $ext, $pDB_ast);
     }
 
     if( getParameter('save') ){
-        if( !save_config($smarty, $module_name, $local_templates_dir, $arrLang, $ext, $pDB_ast) )
-            return form_config($smarty, $module_name, $local_templates_dir, $arrLang, $ext, $pDB_ast);
+        if( !save_config($smarty, $module_name, $local_templates_dir, $ext, $pDB_ast) )
+            return form_config($smarty, $module_name, $local_templates_dir, $ext, $pDB_ast);
     }
 
     if( getParameter('action') == "display_record"){
 
         $file = getParameter("name");
-        $ext  = getParameter("ext");        
+        $ext  = getParameter("ext");
         $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
         $extension = $pACL->getUserExtension($user);
         $esAdministrador = $pACL->isUserAdministratorGroup($user);
@@ -190,18 +183,18 @@ function _moduleContent(&$smarty, $module_name)
         $tmpfile = basename($voicemailPath);
         $filetmp = "$path/$ext/INBOX/$tmpfile";
         if(!is_file($filetmp)){
-            die("<b>404 ".$arrLang["no_file"]."</b>");
+            die("<b>404 "._tr("no_file")."</b>");
         }
         if(!$esAdministrador){
             if($extension != $ext){
-                 die("<b>404 ".$arrLang["no_file"]."</b>");
+                 die("<b>404 "._tr("no_file")."</b>");
             }
             $voicemailPath = "$path/$extension/INBOX/".base64_decode($file);
         }
 
         if (isset($file) && preg_match("/^[[:alpha:]]+[[:digit:]]+\.(wav|WAV|Wav|mp3|gsm)$/",base64_decode($file))) {
-            if (!is_file($voicemailPath)) { 
-                die("<b>404 ".$arrLang["no_file"]."</b>");
+            if (!is_file($voicemailPath)) {
+                die("<b>404 "._tr("no_file")."</b>");
             }
            $sContenido="";
 
@@ -215,7 +208,7 @@ function _moduleContent(&$smarty, $module_name)
                 case "wav": $ctype='audio/wav'; break;
                 case "gsm": $ctype="audio/x-gsm"; break;
                 // not downloadable
-                default: die("<b>404 ".$arrLang["no_file"]."</b>"); break ;
+                default: die("<b>404 "._tr("no_file")."</b>"); break ;
             }
 
 			if($sContenido == "")
@@ -243,7 +236,7 @@ function _moduleContent(&$smarty, $module_name)
 contenido;
             echo $sContenido;
         }else{
-            die("<b>404 ".$arrLang["no_file"]."</b>");
+            die("<b>404 "._tr("no_file")."</b>");
         }
         return;
     }
@@ -256,7 +249,7 @@ contenido;
         $ext  = getParameter("ext");
         if (!preg_match("/^[[:digit:]]+$/", $ext)) {
             Header("HTTP/1.1 404 Not Found");
-            die("<b>404 ".$arrLang["no_file"]."</b>");
+            die("<b>404 "._tr("no_file")."</b>");
         }
         $record = base64_decode($record);
         $path = "/var/spool/asterisk/voicemail/default";
@@ -264,40 +257,40 @@ contenido;
         $tmpfile = basename($voicemailPath);
         $filetmp = "$path/$ext/INBOX/$tmpfile";
         if(!is_file($filetmp)){
-            die("<b>404 ".$arrLang["no_file"]."</b>");
+            die("<b>404 "._tr("no_file")."</b>");
         }
         if(!$esAdministrador){
             if($extension != $ext){
                 Header("HTTP/1.1 404 Not Found");
-                 die("<b>404 ".$arrLang["no_extension"]."</b>");
+                 die("<b>404 "._tr("no_extension")."</b>");
             }
             $voicemailPath = "$path/$extension/INBOX/".$record;
         }
         if (isset($record) && preg_match("/^[[:alpha:]]+[[:digit:]]+\.(wav|WAV|Wav|mp3|gsm)$/",$record)) {
         // See if the file exists
 
-            if (!is_file($voicemailPath)) { 
+            if (!is_file($voicemailPath)) {
                 Header("HTTP/1.1 404 Not Found");
-                die("<b>404 ".$arrLang["no_file"]."</b>");
+                die("<b>404 "._tr("no_file")."</b>");
             }
         // Gather relevent info about file
             $size = filesize($voicemailPath);
             $name = basename($voicemailPath);
-    
+
         //$extension = strtolower(substr(strrchr($name,"."),1));
-            $extension=substr(strtolower($name), -3); 
+            $extension=substr(strtolower($name), -3);
 
         // This will set the Content-Type to the appropriate setting for the file
             $ctype ='';
             switch( $extension ) {
-    
+
                 case "mp3": $ctype="audio/mpeg"; break;
                 case "wav": $ctype='audio/wav'; break;
                 case "gsm": $ctype="audio/x-gsm"; break;
                 // not downloadable
-                default: die("<b>404 ".$arrLang["no_file"]."</b>"); break ;
+                default: die("<b>404 "._tr("no_file")."</b>"); break ;
             }
-    
+
         // need to check if file is mislabeled or a liar.
             $fp=fopen($voicemailPath, "rb");
             if ($size && $ctype && $fp) {
@@ -314,7 +307,7 @@ contenido;
             }
         }else{
             Header("HTTP/1.1 404 Not Found");
-            die("<b>404 ".$arrLang["no_file"]."</b>");
+            die("<b>404 "._tr("no_file")."</b>");
         }
         return;
     }
@@ -327,7 +320,7 @@ contenido;
     $archivos=array();
     if (!(is_null($ext) || $ext=="") || $esAdministrador){
 	if(is_null($ext) || $ext=="")
-	    $smarty->assign("mb_message", "<b>".$arrLang["no_extension_assigned"]."</b>");
+	    $smarty->assign("mb_message", "<b>"._tr("no_extension_assigned")."</b>");
         $path = "/var/spool/asterisk/voicemail/default";
         $folder = "INBOX";
 
@@ -373,8 +366,8 @@ contenido;
                                     $arrTmp[4] = $arrVoiceMailDes['origmailbox']['valor'];
                                     $arrTmp[5] = $arrVoiceMailDes['duration']['valor'].' sec.';
                                     $pathRecordFile=base64_encode($regs[1].'.wav');
-                                    $recordingLink = "<a href='#' onClick=\"javascript:popUp('index.php?menu=$module_name&action=display_record&ext=$directorio&name=$pathRecordFile&rawmode=yes',350,100); return false;\">{$arrLang['Listen']}</a>&nbsp;";
-                                    $recordingLink .= "<a href='?menu=$module_name&action=download&ext=$directorio&name=$pathRecordFile&rawmode=yes'>{$arrLang['Download']}</a>";
+                                    $recordingLink = "<a href='#' onClick=\"javascript:popUp('index.php?menu=$module_name&action=display_record&ext=$directorio&name=$pathRecordFile&rawmode=yes',350,100); return false;\">"._tr('Listen')."</a>&nbsp;";
+                                    $recordingLink .= "<a href='?menu=$module_name&action=download&ext=$directorio&name=$pathRecordFile&rawmode=yes'>"._tr('Download')."</a>";
                                     $arrTmp[6] = $recordingLink;
                                     $arrData[] = $arrTmp;
                                 }
@@ -421,10 +414,10 @@ contenido;
         $arrVoiceData=array_slice($arrData, $offset, $limit);
     } //fin if (!is_null(extension))
     else {
-        $smarty->assign("mb_message", "<b>".$arrLang["contact_admin"]."</b>");
+        $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
     }
 
-    $arrGrid = array("title"   => $arrLang["Voicemail List"],
+    $arrGrid = array("title"   => _tr("Voicemail List"),
                      "url"     => $url,
                      "icon"    => "/modules/$module_name/images/pbx_voicemail.png",
                      "width"   => "99%",
@@ -433,17 +426,17 @@ contenido;
                      "total"   => $total,
                      "columns" => array(0 => array("name"      => "",
                                                    "property1" => ""),
-                                        1 => array("name"      => $arrLang["Date"],
+                                        1 => array("name"      => _tr("Date"),
                                                    "property1" => ""),
-                                        2 => array("name"      => $arrLang["Time"],
+                                        2 => array("name"      => _tr("Time"),
                                                    "property1" => ""),
-                                        3 => array("name"      => $arrLang["CallerID"],
+                                        3 => array("name"      => _tr("CallerID"),
                                                    "property1" => ""),
-                                        4 => array("name"      => $arrLang["Extension"],
+                                        4 => array("name"      => _tr("Extension"),
                                                    "property1" => ""),
-                                        5 => array("name"      => $arrLang["Duration"],
+                                        5 => array("name"      => _tr("Duration"),
                                                    "property1" => ""),
-                                        6 => array("name"      => $arrLang["Message"],
+                                        6 => array("name"      => _tr("Message"),
                                                    "property1" => ""),
                                         )
                     );
@@ -452,20 +445,20 @@ contenido;
 	$oGrid->customAction("config",_tr("Configuration"));
     $oGrid->deleteList(_tr("Are you sure you wish to delete voicemails?"),"submit_eliminar",_tr("Delete"));
     $oGrid->showFilter($htmlFilter);
-    $contenidoModulo  = $oGrid->fetchGrid($arrGrid, $arrVoiceData,$arrLang);
+    $contenidoModulo  = $oGrid->fetchGrid($arrGrid, $arrVoiceData);
     if (strpos($contenidoModulo, '<form') === FALSE)
     $contenidoModulo  = "<form style='margin-bottom:0;' method='POST' action='?menu=$module_name'>$contenidoModulo</form>";
     return $contenidoModulo;
 }
 
-function form_config($smarty, $module_name, $local_templates_dir, $arrLang, $ext, $pDB)
+function form_config($smarty, $module_name, $local_templates_dir, $ext, $pDB)
 {
-    $arrForm = createFieldFormConfig($arrLang);
+    $arrForm = createFieldFormConfig();
     $oForm = new paloForm($smarty, $arrForm);
 
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required Field"]);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
+    $smarty->assign("REQUIRED_FIELD", _tr("Required Field"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("icon","images/list.png");
 
     $paloVoice = new paloSantoVoiceMail($pDB);
@@ -481,7 +474,7 @@ function form_config($smarty, $module_name, $local_templates_dir, $arrLang, $ext
         }
         else{
             $_POST['status'] = "Enable";
-            
+
             $_POST['password']        = $arrDat[1];
             $_POST['password_confir'] = $arrDat[1];
             //$Name = $arrDat[2];
@@ -494,20 +487,20 @@ function form_config($smarty, $module_name, $local_templates_dir, $arrLang, $ext
             $_POST['delete_vmail']    = ($arrDat[9] == 'yes')?"Yes":"No";
         }
     }
-    
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/configuration.tpl",$arrLang["Configuration"], $_POST);
+
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/configuration.tpl",_tr("Configuration"), $_POST);
 
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $contenidoModulo;
 }
 
-function save_config($smarty, $module_name, $local_templates_dir, $arrLang, $ext, $pDB_ast)
+function save_config($smarty, $module_name, $local_templates_dir, $ext, $pDB_ast)
 {
     $paloVoice = new paloSantoVoiceMail($pDB_ast);
     $arrDat = $paloVoice->loadConfiguration($ext);
 
-    $arrForm = createFieldFormConfig($arrLang);
+    $arrForm = createFieldFormConfig();
     $oForm = new paloForm($smarty, $arrForm);
 
     if(!$oForm->validateForm($_POST) || $_POST['password'] != $_POST['password_confir']){
@@ -557,7 +550,7 @@ function borrarVoicemails($pACL)
     $user = isset($_SESSION['elastix_user']) ? $_SESSION['elastix_user'] : "";
     $extension = $pACL->getUserExtension($user);
     $esAdministrador = $pACL->isUserAdministratorGroup($user);
-    
+
     $listaArchivos = array();
     if (is_array($_POST)) foreach (array_keys($_POST) as $name) {
     	// El formato esperado de clave es voc-msg0001_txt,1064
@@ -577,16 +570,16 @@ function borrarVoicemails($pACL)
     array_map('unlink', $listaArchivos);
 }
 
-function createFieldFormVoiceList($arrLang)
+function createFieldFormVoiceList()
 {
     $arrayFields = array(
-        "date_start" => array("LABEL"                  => $arrLang["Start Date"],
+        "date_start" => array("LABEL"                  => _tr("Start Date"),
                               "REQUIRED"               => "yes",
                               "INPUT_TYPE"             => "DATE",
                               "INPUT_EXTRA_PARAM"      => "",
                               "VALIDATION_TYPE"        => "ereg",
                               "VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}$"),
-        "date_end"   => array("LABEL"                  => $arrLang["End Date"],
+        "date_end"   => array("LABEL"                  => _tr("End Date"),
                               "REQUIRED"               => "yes",
                               "INPUT_TYPE"             => "DATE",
                               "INPUT_EXTRA_PARAM"      => "",
@@ -596,61 +589,61 @@ function createFieldFormVoiceList($arrLang)
     return $arrayFields;
 }
 
-function createFieldFormConfig($arrLang)
+function createFieldFormConfig()
 {
     $arrFields = array(
-        "email"             => array("LABEL"                  => $arrLang['Email'],
+        "email"             => array("LABEL"                  => _tr('Email'),
                                      "REQUIRED"               => "yes",
                                      "INPUT_TYPE"             => "TEXT",
                                      "INPUT_EXTRA_PARAM"      => "",
                                      "VALIDATION_TYPE"        => "email",
                                      "VALIDATION_EXTRA_PARAM" => ""),
-        "pager_email"       => array("LABEL"                  => $arrLang['Pager Email Address'],
+        "pager_email"       => array("LABEL"                  => _tr('Pager Email Address'),
                                      "REQUIRED"               => "no",
                                      "INPUT_TYPE"             => "TEXT",
                                      "INPUT_EXTRA_PARAM"      => "",
                                      "VALIDATION_TYPE"        => "email",
                                      "VALIDATION_EXTRA_PARAM" => ""),
-        "status"            => array("LABEL"                  => $arrLang['Status'],
+        "status"            => array("LABEL"                  => _tr('Status'),
                                      "REQUIRED"               => "no",
                                      "INPUT_TYPE"             => "SELECT",
-                                     "INPUT_EXTRA_PARAM"      => array("Enable"=>$arrLang["Enable"],"Disable"=>$arrLang["Disable"]),
+                                     "INPUT_EXTRA_PARAM"      => array("Enable"=>_tr("Enable"),"Disable"=>_tr("Disable")),
                                      "VALIDATION_TYPE"        => "text",
                                      "VALIDATION_EXTRA_PARAM" => ""),
-        "password"          => array("LABEL"                  => $arrLang['Password'],
+        "password"          => array("LABEL"                  => _tr('Password'),
                                      "REQUIRED"               => "yes",
                                      "INPUT_TYPE"             => "PASSWORD",
                                      "INPUT_EXTRA_PARAM"      => "",
                                      "VALIDATION_TYPE"        => "ereg",
                                      "VALIDATION_EXTRA_PARAM" => "[[:digit:]]+"),
-        "password_confir"   => array("LABEL"                  => $arrLang['Confirm Password'],
+        "password_confir"   => array("LABEL"                  => _tr('Confirm Password'),
                                      "REQUIRED"               => "yes",
                                      "INPUT_TYPE"             => "PASSWORD",
                                      "INPUT_EXTRA_PARAM"      => "",
                                      "VALIDATION_TYPE"        => "ereg",
                                      "VALIDATION_EXTRA_PARAM" => "[[:digit:]]+"),
-        "email_attach"      => array("LABEL"                  => $arrLang["Email Attachment"],
+        "email_attach"      => array("LABEL"                  => _tr("Email Attachment"),
                                      "REQUIRED"               => "yes",
                                      "INPUT_TYPE"             => "RADIO",
-                                     "INPUT_EXTRA_PARAM"      => array("Yes"=>$arrLang["Yes"],"No"=>$arrLang["No"]),
+                                     "INPUT_EXTRA_PARAM"      => array("Yes"=>_tr("Yes"),"No"=>_tr("No")),
                                      "VALIDATION_TYPE"        => "text",
                                      "VALIDATION_EXTRA_PARAM" => ""),
-        "play_cid"          => array("LABEL"                  => $arrLang["Play CID"],
+        "play_cid"          => array("LABEL"                  => _tr("Play CID"),
                                      "REQUIRED"               => "yes",
                                      "INPUT_TYPE"             => "RADIO",
-                                     "INPUT_EXTRA_PARAM"      => array("Yes"=>$arrLang["Yes"],"No"=>$arrLang["No"]),
+                                     "INPUT_EXTRA_PARAM"      => array("Yes"=>_tr("Yes"),"No"=>_tr("No")),
                                      "VALIDATION_TYPE"        => "text",
                                      "VALIDATION_EXTRA_PARAM" => ""),
-        "play_envelope"     => array("LABEL"                  => $arrLang["Play Envelope"],
+        "play_envelope"     => array("LABEL"                  => _tr("Play Envelope"),
                                      "REQUIRED"               => "yes",
                                      "INPUT_TYPE"             => "RADIO",
-                                     "INPUT_EXTRA_PARAM"      => array("Yes"=>$arrLang["Yes"],"No"=>$arrLang["No"]),
+                                     "INPUT_EXTRA_PARAM"      => array("Yes"=>_tr("Yes"),"No"=>_tr("No")),
                                      "VALIDATION_TYPE"        => "text",
                                      "VALIDATION_EXTRA_PARAM" => ""),
-        "delete_vmail"     => array("LABEL"                  => $arrLang["Delete Vmail"],
+        "delete_vmail"     => array("LABEL"                  => _tr("Delete Vmail"),
                                      "REQUIRED"               => "yes",
                                      "INPUT_TYPE"             => "RADIO",
-                                     "INPUT_EXTRA_PARAM"      => array("Yes"=>$arrLang["Yes"],"No"=>$arrLang["No"]),
+                                     "INPUT_EXTRA_PARAM"      => array("Yes"=>_tr("Yes"),"No"=>_tr("No")),
                                      "VALIDATION_TYPE"        => "text",
                                      "VALIDATION_EXTRA_PARAM" => ""),
     );

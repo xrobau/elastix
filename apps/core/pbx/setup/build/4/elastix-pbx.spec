@@ -298,6 +298,9 @@ fi
 
 %changelog
 * Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring: replace hand-coded translation loading with
+  load_language_module().
+  SVN Rev[7314]
 - FIXED: Conference: partially revert $arrLang switch to allow the use of
   elastix-conferenceroom-2.2.0-5 until the latter is updated.
   SVN Rev[7313]

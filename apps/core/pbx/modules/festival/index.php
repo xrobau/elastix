@@ -37,21 +37,14 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/libs/paloSantoFestival.class.php";
     include_once "libs/paloSantoJSON.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
@@ -112,7 +105,7 @@ function changeStatusFestival()
             $arrMessage["mb_title"] = _tr("ERROR").":<br/>";
             $arrMessage["mb_message"] = $pFestival->getError();
             break;
-        }        
+        }
     }
     elseif($status=="deactivate"){
         if(!$pFestival->isFestivalActivated()){

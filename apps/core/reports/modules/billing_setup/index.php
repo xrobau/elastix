@@ -35,29 +35,22 @@ function _moduleContent(&$smarty, $module_name)
     include_once "libs/paloSantoConfig.class.php";
     include_once "libs/paloSantoTrunk.class.php";
     require_once "libs/misc.lib.php";
-    
+
     //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
+
 
     $contenido='';
     $msgError='';
@@ -69,13 +62,13 @@ function _moduleContent(&$smarty, $module_name)
     $pDB     = new paloDB($dsn);
     $pDBSetting = new paloDB($arrConf['elastix_dsn']['settings']);
     $pDBTrunk = new paloDB($arrConfModule['dsn_conn_database_1']);
-    $arrForm  = array("default_rate"       => array("LABEL"                   => $arrLang["Default Rate"],
+    $arrForm  = array("default_rate"       => array("LABEL"                   => _tr("Default Rate"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
                                                     "VALIDATION_TYPE"        => "float",
                                                     "VALIDATION_EXTRA_PARAM" => ""),
-                      "default_rate_offset"       => array("LABEL"                   => $arrLang["Default Rate Offset"],
+                      "default_rate_offset"       => array("LABEL"                   => _tr("Default Rate Offset"),
                                                     "REQUIRED"               => "yes",
                                                     "INPUT_TYPE"             => "TEXT",
                                                     "INPUT_EXTRA_PARAM"      => "",
@@ -88,19 +81,19 @@ function _moduleContent(&$smarty, $module_name)
     //obtener el valor de la tarifa por defecto
     $arrDefaultRate['default_rate']=get_key_settings($pDBSetting,"default_rate");
     $arrDefaultRate['default_rate_offset']=get_key_settings($pDBSetting,"default_rate_offset");
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-    $strReturn = $oForm->fetchForm("$local_templates_dir/default_rate.tpl", $arrLang["Default Rate Configuration"], $arrDefaultRate);
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $strReturn = $oForm->fetchForm("$local_templates_dir/default_rate.tpl", _tr("Default Rate Configuration"), $arrDefaultRate);
 
     if(isset($_POST['edit_default'])) {
         $arrDefaultRate['default_rate']=get_key_settings($pDBSetting,"default_rate");
         $arrDefaultRate['default_rate_offset']=get_key_settings($pDBSetting,"default_rate_offset");
         $oForm = new paloForm($smarty, $arrForm);
 
-        $smarty->assign("CANCEL", $arrLang["Cancel"]);
-        $smarty->assign("SAVE", $arrLang["Save"]);
-        $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-        $strReturn = $oForm->fetchForm("$local_templates_dir/default_rate.tpl", $arrLang["Default Rate Configuration"], $arrDefaultRate);
+        $smarty->assign("CANCEL", _tr("Cancel"));
+        $smarty->assign("SAVE", _tr("Save"));
+        $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+        $strReturn = $oForm->fetchForm("$local_templates_dir/default_rate.tpl", _tr("Default Rate Configuration"), $arrDefaultRate);
 
     }
     else if(isset($_POST['save_default'])) {
@@ -111,18 +104,18 @@ function _moduleContent(&$smarty, $module_name)
             $bValido=set_key_settings($pDBSetting,'default_rate',$arrDefaultRate['default_rate']);
             $bValido=set_key_settings($pDBSetting,'default_rate_offset',$arrDefaultRate['default_rate_offset']);
             if(!$bValido) {
-                echo $arrLang["Error when saving default rate"];
+                echo _tr("Error when saving default rate");
             } else {
                 header("Location: index.php?menu=billing_setup");
             }
         } else {
             // Error
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
-            $smarty->assign("mb_message", $arrLang["Value for rate is not valid"]);
-            $smarty->assign("CANCEL", $arrLang["Cancel"]);
-            $smarty->assign("SAVE", $arrLang["Save"]);
-            $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
-            $strReturn = $oForm->fetchForm("$local_templates_dir/default_rate.tpl", $arrLang["Default Rate Configuration"], $arrDefaultRate);
+            $smarty->assign("mb_title", _tr("Validation Error"));
+            $smarty->assign("mb_message", _tr("Value for rate is not valid"));
+            $smarty->assign("CANCEL", _tr("Cancel"));
+            $smarty->assign("SAVE", _tr("Save"));
+            $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+            $strReturn = $oForm->fetchForm("$local_templates_dir/default_rate.tpl", _tr("Default Rate Configuration"), $arrDefaultRate);
         }
 
     }
@@ -162,7 +155,7 @@ function _moduleContent(&$smarty, $module_name)
         }
         if (!empty($msgError))
                 $smarty->assign("mb_message", $msgError);
-    } 
+    }
 
 
     getTrunksBillFiltrado($pDB, $oTrunk, $arrConfig, $arrTrunks, $arrTrunksBill);
@@ -178,9 +171,9 @@ function _moduleContent(&$smarty, $module_name)
         	$arrData[] = $arrTmp;
     	}
     }
-    
-    
-    $arrGrid = array("title"    => $arrLang["Trunk Bill Configuration"],
+
+
+    $arrGrid = array("title"    => _tr("Trunk Bill Configuration"),
                      "icon"     => "/modules/$module_name/images/reports_billing_setup.png",
 		     "width"    => "99%",
                      "start"    => ($end==0) ? 0 : 1,
@@ -188,15 +181,15 @@ function _moduleContent(&$smarty, $module_name)
                      "total"    => $end,
                      "columns"  => array(0 => array("name"      => "",
                                                     "property1" => ""),
-                                         1 => array("name"      => $arrLang["Trunk"], 
+                                         1 => array("name"      => _tr("Trunk"),
                                                     "property1" => ""),
                                         )
                     );
-    
+
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->pagingShow(false);
     $oGrid->customAction('submit_bill_trunks',_tr('Billing Capable'));
-    $trunk_config = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+    $trunk_config = $oGrid->fetchGrid($arrGrid, $arrData);
     if (strpos($trunk_config, '<form') === FALSE)
         $trunk_config =
             "<form style='margin-bottom:0;' method='POST' action='?menu=billing_setup'>$trunk_config</form>";

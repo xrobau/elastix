@@ -94,6 +94,9 @@ fi
 
 %changelog
 * Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Summary by Extension: switch all uses of $arrLang to _tr() and
+  replace hand-coded translation loading with load_language_module().
+  SVN Rev[7324]
 - CHANGED: Missed Calls: replace hand-coded translation loading with
   load_language_module().
   SVN Rev[7323]

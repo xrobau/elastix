@@ -388,6 +388,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Nov  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: force cast to int of query parameter that is a numeric
+  string that needs to be bound as PDO::PARAM_INT. Required for CentOS 7.
+  SVN Rev[7327]
 - CHANGED: Themes System: filter invalid theme dirs from combo. Remove dependency
   on paloSantoInstaller and instead flush Smarty cache directly.
   SVN Rev[7326]

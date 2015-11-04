@@ -105,14 +105,17 @@ class paloDB {
                 $data_type = PDO::PARAM_BOOL;
                 break;
             case 'string':
-                /* La sentencia LIMIT '1' es ilegal en MySQL debido a las 
+                /* La sentencia LIMIT '1' es ilegal en MySQL debido a las
                  * comillas. Por lo tanto, las cadenas numéricas deben insertarse
                  * como enteros. Sin embargo se debe evitar la conversión si la
                  * cadena numérica tiene un cero por delante, para evitar el
                  * truncamiento de dicho cero. Véase bug Elastix #1694. */
-                $data_type = 
+                $data_type =
                     (ctype_digit("{$param[$i]}") && ($param[$i][0] != '0' || strlen($param[$i]) == 1))
                     ? PDO::PARAM_INT : PDO::PARAM_STR;
+
+                // Some versions of PHP try to bind numeric string as PARAM_STR even if PARAM_INT specified
+                if ($data_type == PDO::PARAM_INT) $param[$i] = (int)$param[$i];
                 break;
             }
             $sth->bindValue($i + 1, $param[$i], $data_type);
@@ -150,7 +153,7 @@ class paloDB {
                 } catch(PDOException $e){
                     $this->errMsg = "Error de conexion a la base de datos - " . $e->getMessage();
                     return FALSE;
-                } 
+                }
             } else {
                 try{
                     if($this->conn->query($query))
@@ -277,7 +280,7 @@ class paloDB {
                 } catch(PDOException $e){
                     $this->errMsg = "Error de conexion a la base de datos - " . $e->getMessage();
                     return FALSE;
-                } 
+                }
             } else {
                 try{
                     if($this->conn->exec($query)===FALSE){
@@ -313,7 +316,7 @@ class paloDB {
             catch(PDOException $e){
                 $this->errMsg = "Error al obtener el ultimo id insertado - " . $e->getMessage();
                 return FALSE;
-            } 
+            }
         }
         else{
             try{

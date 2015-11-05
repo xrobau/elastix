@@ -387,6 +387,20 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Thu Nov  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: complete rewrite of PDF exporting code. This rewrite fixes
+  the following bugs:
+  - The page break check fails to work correctly since the migration to TCPDF.
+    This resulted in invisible data past the first page of a multi-page PDF.
+  - Missing internationalization of page counter and messages.
+  - Incorrect positioning of page table past the first page.
+  - The request to use landscape layout was being ignored.
+  - The Verdana font selection has never worked, and the report was silently
+    defaulting to Helvetica due to the child class incorrectly overriding the
+    setFont() method. The font that is actually used is now acknowledged in
+    code.
+  SVN Rev[7330]
+
 * Wed Nov  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: force cast to int of query parameter that is a numeric
   string that needs to be bound as PDO::PARAM_INT. Required for CentOS 7.

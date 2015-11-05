@@ -1,343 +1,168 @@
 <?php
-require("tcpdf/tcpdf.php"); 
+require_once("tcpdf/tcpdf.php");
 define ('K_TCPDF_EXTERNAL_CONFIG', 'tcpdf/fonts/');
-class paloPDF extends TCPDF
-{    
-    var $wMaxCol=0;
-    var $widthCol;
-    var $widthTable=0;	//valor maximo que puede tomar la tabla
-    var $nCol=0;
-    var $title;
-    var $addpage=false;
-    var $image="";
-    var $colorHeaderTable;
-    var $colorBackg;
-    var $font;
-    var $formatPage;
 
-    function Header(){
-        parent::SetFont($this->getFont(),'',18);
-        $this->SetTextColor(255,255,255);
-        $this->SetFillColor($this->colorBackg[0],$this->colorBackg[1],$this->colorBackg[2]);
-        //Título
-	$tam=$this->w-3;
-	$pX=($this->w-$tam)/2;
-	$this->SetX($pX);
-	parent::Cell($tam,15,$this->getTitle(),0,0,'R',true);
-	if($this->getLogoHeader()!="")
-	   parent::Image($this->getLogoHeader(),$pX,11,40);
-	//Salto de línea
-	parent::Ln(20);
-	parent::SetFont($this->getFont(),'',10);
-    }
+class paloSantoPDF extends TCPDF
+{
+    /* Fuente a usar para todo el reporte. Requiere un archivo llamado
+     * tcpdf/fonts/FONTNAME.php para que se pueda hacer uso. */
+    var $elxReportFontFamily = 'helvetica'/*'Verdana'*/;
 
-    function Footer(){
-        //Posición a 1,5 cm del final
-	$this->SetY(-15);
-	//Arial itálica 8
-	$this->SetFont($this->getFont(),'',9);
-	//Color del texto en gris
-	$this->SetTextColor(128);
-	//Número de página
-	$this->Cell(0,10,'Page '.$this->PageNo().'/{nb}',0,0,'C');
-    }
+    var $elxStyles = array(
+        'PageHeader'    =>  array(
+            'FontColor' =>  array(255, 255, 255),
+            'FillColor' =>  array(5, 68, 132),
+            'FontSize'  =>  18,
+        ),
+        'PageFooter'    =>  array(
+            'FontColor' =>  array(128, 128, 128),
+            'FillColor' =>  array(255, 255, 255),
+            'FontSize'  =>  9,
+        ),
+        'TableHeader'   =>  array(
+            'FontColor' =>  array(255, 255, 255),
+            'FillColor' =>  array(227, 83, 50),
+            'FontSize'  =>  11,
+        ),
+        'TableData'     =>  array(
+            'FontColor' =>  array(0, 0, 0),
+            'FillColor' =>  array(244, 244, 244),
+            'FontSize'  =>  11,
+        ),
+    );
 
-    //Tabla simple
-    function BasicTable($header,$data){
-	if(isset($header)&&isset($data)&&count($header)>0&&count($data)>0)
-	{
-	   $this->setWidthColumns($data);
-	   $this->nCol=count($header);
-	   $this->setMaxCol();
-	   parent::SetFont($this->getFont(),'',10);
-	   $this->validateSizeColumns($header);
-	   $i=0;
-	   $this->setFormatCabecera();
-	   $this->SetFillColor($this->colorHeaderTable[0],$this->colorHeaderTable[1],$this->colorHeaderTable[2]);
-	   $this->Row($header,0,true,'C');
-	   //Datos
-	   $this->setFormatDatos();
-	   $this->SetFillColor(244,244,244);
-	   $fill=false;
-	   foreach($data as $row)
-	   {	  
-               $this->addpage=$this->CheckPageBreak($this->calculateHeight($row),false);
-	           if($this->addpage)
-                    {   
-                        $pageAdd=$this->CheckPageBreak($this->calculateHeight($row),$this->addpage);
-                        $this->addpage=$pageAdd;
-                        $this->SetFillColor($this->colorHeaderTable[0],$this->colorHeaderTable[1],$this->colorHeaderTable[2]);
-                        $this->setFormatCabecera();
-                        $this->Row($header,0,true,'C');
-                        $this->setFormatDatos();
-                        $this->SetFillColor(244,244,244);
-                    }
-                $this->Row($row,1,$fill,'J');
-                $fill=!$fill;
-            }			
-        }else
-            $this->Cell(40,6,"No hay datos que mostrar",0);	
-    }
+    private $_elxReportTitle = '';
+    private $_anchoCols = array();
 
-    //Functions SET
-    function setOrientation ($orientation){
-        if($orientation=='P' || $orientation=='L')
-        {
-           $this->CurPageFormat=$orientation;
-	   $this->DefOrientation=$orientation;
-        }else
-	   $this->Error('Incorrect orientation: '.$orientation);
-    }
- 
-    function setTitle ($title){
-        $this->title=$title;
-    }
-
-    function setLogoHeader($urlImage){
-        $this->image=$urlImage;
-    }	
-
-    function setColorHeader($color){
-        $this->colorBackg=$color;
-    }
-
-    function setColorHeaderTable($color){
-        $this->colorHeaderTable=$color;
-    }
-
-    function setFormatCabecera(){
-        parent::SetFont($this->getFont(),'',10);
-	$this->SetTextColor(255,255,255);
-    }
-
-    function setFormatDatos(){
-        parent::SetFont($this->getFont(),'',10);
-	$this->SetTextColor(0,0,0);
-    }
-
-    function setFont($font){
-	$this->font=$font;
-    }
-
-    //Functions GET
-    function getLogoHeader(){
-        return $this->image;
-    }
-
-    function getColorHeader(){
-        return $this->colorBackg;
-    }
-
-    function getTitle (){
-        return $this->title;
-    }
-
-    function getColorHeaderTable($color){
-        return $this->colorHeaderTable;
-    }
-
-    function getFont(){
-        return $this->font;
-    }
-
-    function printTable($nameFile,$title,$header,$data){
-        $this->setTitle($title);
-        $this->getAliasNbPages();
-	//$this->AddFont('Verdana','','verdana.php');
-	parent::AddPage();
-	$this->SetLineWidth(0.05);
-	$this->SetDrawColor(153,153,153);
-        $this->setWidthTable();
-	$this->SetY(20);
-	$this->BasicTable($header,$data);
-	parent::Output($nameFile,'D');
-    }
-
-    function setWidthColumns($data){
-        $wCol=array();
-        for($i=0;$i<count($data[0]);$i++){
-            $wRow=array();
-            foreach($data as $row)
-            {
-                $wTemp=round(parent::GetStringWidth($row[$i]))+3;
-                $wRow[]=$wTemp;
-            }
-            $wCol[]=$wRow;	
-	}
-        foreach($wCol as $row){
-            $this->widthCol[]=max($row);
-	}
-    }
-
-    function setWidthTable(){
-    $this->widthTable=$this->w -3;
-    }
-
-    function setFormat($format)
+    private function _switchElxRenderStyle($k)
     {
-        if(is_string($format))
-       	   $format=$this->setPageFormat($format); 
-            
-        $this->DefPageFormat=$format;
-	$this->CurPageFormat=$format;
-	//Page orientation
-        $orientation=strtolower($this->DefOrientation);
-	if($orientation=='p' || $orientation=='portrait')
-	{
-	   $this->w=$this->DefPageFormat[0];
-	   $this->h=$this->DefPageFormat[1];
-	}
-	else
-	{
-	   $this->w=$this->DefPageFormat[1];
-	   $this->h=$this->DefPageFormat[0];
-	}
-        $this->PageBreakTrigger=$this->h-$this->bMargin;
+        $style = $this->elxStyles[$k];
+        $this->SetTextColor($style['FontColor'][0], $style['FontColor'][1], $style['FontColor'][2]);
+        $this->SetFillColor($style['FillColor'][0], $style['FillColor'][1], $style['FillColor'][2]);
+        $this->SetFontSize($style['FontSize']);
     }
 
-    function setMaxCol(){
-        $this->wMaxCol=(int)($this->widthTable/$this->nCol);
-        //echo "tabla: {$this->widthTable}, col: {$this->nCol}, max: {$this->wMaxCol}";
-    }
-
-    function validateSizeColumns($header){
-        $i=0;
-        $plus=0;
-        $wmax=$this->wMaxCol;
-        foreach($this->widthCol as $colS)
-        {	
-            $size=round(parent::GetStringWidth($header[$i]["name"]))+3;
-            //echo parent::GetStringWidth($header[$i]["name"]);
-            //echo $header[$i]["name"];
-            $this->widthCol[$i]=max($colS,$size);        
-          //  echo "head: {$size}, col: {$colS}";
-            if($plus>0)
-                $wmax=$wmax+$plus;
-             if($this->widthCol[$i]>$wmax){
-                $this->widthCol[$i]=$wmax;
-            }
-            $plus=$wmax-$this->widthCol[$i];
-            //echo "plus: {$plus}, col: {$this->widthCol[$i]}, maxvar: {$wmax}, maxfijo:{$this->wMaxCol}";
-            $wmax=$this->wMaxCol;
-            $i++;
-        }
-    }
-
-  /*  function CheckPageBreak($h,$addpage)
+    // Pintar la banda azul con el título del reporte
+    function Header()
     {
-        //If the height h would cause an overflow, add a new page immediately
-        if($addpage){
-            $this->AddPage($this->CurOrientation);
-            return false;
-        }
-        if($this->GetY()+$h>$this->PageBreakTrigger )
-            return true;
-        else 
-            return false; 
-    }*/
+        $this->_switchElxRenderStyle('PageHeader');
 
-    function NbLines($w,$txt)
-    {
-        $nl=2;
-        //Computes the number of lines a MultiCell of width w will take
-        $cw=&$this->CurrentFont['cw'];
-        if($w==0)
-         /*   $w=$this->w-$this->rMargin-$this->x;
-        $wmax=($w-2*$this->cMargin)*1000/$this->FontSize;
-        $s=str_replace("\r",'',$txt);
-        $nb=strlen($s);*/
-        if($nb>0 and $s[$nb-1]=="\n")
-            $nb--;
-       /* $sep=-1;
-        $i=0;
-        $j=0;
-        $l=0;
-        $nl=1;
-        while($i<$nb)
-        {
-            $c=$s[$i];
-            if($c=="\n")
-            {
-                $i++;
-                $sep=-1;
-                $j=$i;
-                $l=0;
-                $nl++;
-                continue;
-            }
-            if($c==' ')
-                $sep=$i;
-            $l+=$cw[$c];
-            if($l>$wmax)
-            {
-                if($sep==-1)
-                {
-                    if($i==$j)
-                        $i++;
-                }
-                else
-                    $i=$sep+1;
-                $sep=-1;
-                $j=$i;
-                $l=0;
-                $nl++;
-            }
-            else
-                $i++;
-        }*/
-        return $nl;
-    }
-
-    function Row($data1,$type,$color,$a)
-    {
-        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-        //Calculate the height of the row
-        $data=array();
-        if($type==0)
-        {                   
-            foreach($data1 as $col)
-                $data[]=$col["name"];
-        }
-        else
-            $data=$data1;
-        $h=$this->calculateHeight($data);    
-        //$this->addpage=$this->CheckPageBreak($h,$this->addpage);
-        //Issue a page break first if needed
-        //$this->CheckPageBreak($h);
-        //Draw the cells of the row
-        $this->centrarTabla();		
-        for($i=0;$i<count($data);$i++)
-        {
-            $w=$this->widthCol[$i];
-            //Save the current position
-            $x=$this->GetX();
-            $y=$this->GetY();
-            //Draw the border
-            if($color)
-                $this->Rect($x,$y,$w,$h,'DF');
-            else
-                $this->Rect($x,$y,$w,$h);
-            //Print the text
-            //$this->MultiCell($w,5, utf8_decode(rtrim($data[$i])),0,$a);
-	    $this->MultiCell($w,5, rtrim($data[$i]),0,$a);
-            //Put the position to the right of the cell
-            $this->SetXY($x+$w,$y);
-        }
-        //Go to the next line
-        $this->Ln($h);
-    }
-
-    function calculateHeight($data){
-        $nb=0;
-        for($i=0;$i<count($data);$i++)
-            $nb=max($nb,$this->NbLines($this->widthCol[$i],$data[$i]));
-        $h=5*$nb;
-        return $h;
-    }
-
-    function centrarTabla(){
-        $pX=($this->w-array_sum($this->widthCol))/2;
+        // Cálculo heredado de implementación anterior
+        // $this->w es el ancho de la página actual
+        $tam = $this->w - 3;
+        $pX = ($this->w - $tam) / 2;
         $this->SetX($pX);
+
+        // Dibujar el título alineado a la derecha, con relleno
+        $this->Cell($tam, 15, $this->_elxReportTitle, 0, 0, 'R', true);
+    }
+
+    // Pintar el número de página
+    function Footer()
+    {
+        $this->_switchElxRenderStyle('PageFooter');
+        $this->SetY(-15);   // Posición a 1,5 cm del final
+
+        // Dibujar el contador centrado, sin relleno
+        $this->Cell(0, 10, _tr('Page').' '.$this->getPage().'/'.$this->getAliasNbPages(), 0, 0, 'C');
+    }
+
+    // Función para iniciar la generación del reporte
+    function printTable($outputFile, $title, $header, &$data)
+    {
+        $this->_elxReportTitle = trim($title);
+
+        $this->SetFont($this->elxReportFontFamily);
+        $this->AddPage();
+        $this->SetLineWidth(0.05);
+        $this->SetDrawColor(153, 153, 153); // TODO: parametrizar
+
+        if (!(is_array($header) && is_array($data) && count($header) > 0 && count($data) > 0)) {
+            $this->Cell(40, 6, _tr("No hay datos que mostrar"), 0);
+        } else {
+            // Sólo son necesarios los textos de los títulos
+            $h = array();
+            foreach ($header as $k => $head_tag) $h[$k] = $head_tag['name'];
+            $header = $h;
+
+            // Se calculan los anchos requeridos para las columnas
+            $this->_switchElxRenderStyle('TableHeader');
+            $this->_anchoCols = array_map(array($this, '_elxAnchoTexto'), $header);
+            $this->_switchElxRenderStyle('TableData');
+            for ($i = 0; $i < count($data); $i++) {
+                $this->_anchoCols = array_map('max', $this->_anchoCols, array_map(array($this, '_elxAnchoTexto'), $data[$i]));
+            }
+
+            // Se verifica si el ancho total excede el ancho de la página
+            $iMaxAncho = $this->getPageWidth() - 3;
+            $iAnchoReq = array_sum($this->_anchoCols);
+            if ($iAnchoReq > $iMaxAncho) {
+                /* Algunas columnas deben reducirse. Se calcula la fracción máxima
+                 * del ancho que puede dedicarse a cada columna. Toda columna cuyo
+                 * ancho sea menor a la fracción acumula un exceso que puede luego
+                 * repartirse entre las columnas más anchas. */
+                $fraccion_col = $iMaxAncho / count($this->_anchoCols);
+                $ncols_anchas = 0;
+                $exceso = 0;
+                foreach ($this->_anchoCols as $ancho) {
+                    if ($ancho < $fraccion_col) $exceso += $fraccion_col - $ancho;
+                    if ($ancho > $fraccion_col) $ncols_anchas++;
+                }
+                if ($ncols_anchas > 0) {
+                    $nancho = ($exceso + $fraccion_col * $ncols_anchas) / $ncols_anchas;
+                    for ($i = 0; $i < count($this->_anchoCols); $i++) {
+                        if ($this->_anchoCols[$i] > $fraccion_col) $this->_anchoCols[$i] = $nancho;
+                    }
+                    $iAnchoReq = array_sum($this->_anchoCols);
+                }
+            }
+            $x_inicial = ($this->getPageWidth() - $iAnchoReq) / 2; // centrado de tabla
+            $y_inicial = 20;
+
+            $this->SetXY($x_inicial, $y_inicial);
+            $this->_switchElxRenderStyle('TableHeader');
+            $this->_outputElxRow($header, TRUE, 'C');
+            $this->_switchElxRenderStyle('TableData');
+            $zebra_fill = FALSE;
+            foreach ($data as &$row) {
+                $altura_fila = $this->_calcularAlturaFila($row);
+                if ($this->CheckPageBreak($altura_fila, '', FALSE)) {
+                    $this->CheckPageBreak($altura_fila, '', TRUE);
+
+                    $this->SetXY($x_inicial, $y_inicial);
+                    $this->_switchElxRenderStyle('TableHeader');
+                    $this->_outputElxRow($header, TRUE, 'C');
+                    $this->_switchElxRenderStyle('TableData');
+                }
+                $this->_outputElxRow($row, $zebra_fill, 'J');
+                $zebra_fill = !$zebra_fill;
+            }
+        }
+
+        $this->Output($outputFile, 'D');
+    }
+
+    private function _elxAnchoTexto($s) { return $this->GetStringWidth($s) + 3; }
+
+    private function _calcularAlturaFila(&$row)
+    {
+        return max(array_map(array($this, 'getStringHeight'), $this->_anchoCols, $row));
+    }
+
+    private function _outputElxRow(&$row, $fill, $align)
+    {
+        $h = $this->_calcularAlturaFila($row);
+        $x_orig = $this->GetX();
+        $y = $this->GetY();
+        for ($i = 0; $i < count($row); $i++) {
+            $x = $this->GetX();
+            $w = $this->_anchoCols[$i];
+            $this->Rect($x, $y, $w, $h, $fill ? 'DF' : '');
+            $this->MultiCell($w, 5, rtrim($row[$i]), 0, $align);
+            $this->SetXY($x + $w, $y);
+        }
+        $this->Ln($h);
+        $this->SetX($x_orig);
     }
 }
 ?>

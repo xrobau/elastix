@@ -573,15 +573,9 @@ class paloSantoGrid {
     {
         global $arrConf;
         require_once "{$arrConf['basePath']}/libs/paloSantoPDF.class.php";
-
-        $pdf= new paloPDF();
-        $pdf->setOrientation("L");
-        $pdf->setFormat("A3");
-        //$pdf->setLogoHeader("themes/elastixwave/images/logo_elastix.gif");
-        $pdf->setColorHeader(array(5,68,132));
-        $pdf->setColorHeaderTable(array(227,83,50));
-        $pdf->setFont("Verdana");
+        $pdf = new paloSantoPDF('L', PDF_UNIT, 'A3');
         $pdf->printTable("{$this->nameFile_Export}.pdf", $this->getTitle(), $this->getColumns(), $this->getData());
+
         return "";
     }
 

@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Nov  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Calls Details: fix page count when displaying all types of calls.
+  SVN Rev[7329]
+
 * Mon Oct 26 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: fix External URL tab handling with older jQueryUI.
   SVN Rev[7257]

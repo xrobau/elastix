@@ -224,7 +224,8 @@ SQL_OUTGOING;
 
         // Construir la unión SQL en caso necesario
         $sPeticionSQL = NULL; $paramSQL = NULL;
-        if (!isset($param['calltype'])) $param['calltype'] = 'any';
+        if (!isset($param['calltype']) || !in_array($param['calltype'], array('incoming', 'outgoing')))
+            $param['calltype'] = 'any';
         switch ($param['calltype']) {
         case 'incoming':
             $sPeticionSQL = $sPeticion_incoming;
@@ -320,7 +321,8 @@ SQL_OUTGOING;
 
         // Sumar las cuentas de ambas tablas en caso necesario
         $iNumRegistros = 0;
-        if (!isset($param['calltype'])) $param['calltype'] = 'any';
+        if (!isset($param['calltype']) || !in_array($param['calltype'], array('incoming', 'outgoing')))
+            $param['calltype'] = 'any';
         if (in_array($param['calltype'], array('any', 'outgoing'))) {
             // Agregar suma de llamadas salientes
             $tupla = $this->_DB->getFirstRowQuery($sPeticion_outgoing, FALSE, $param_outgoing);

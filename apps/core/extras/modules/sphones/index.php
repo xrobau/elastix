@@ -64,9 +64,9 @@ function viewFormSoftphones($smarty, $module_name, $local_templates_dir, $arrCon
     $smarty->assign("icon",  "modules/$module_name/images/softphones.png");
     $smarty->assign("xlite_img",  "modules/$module_name/images/x-lite-4-lrg.png");
     $smarty->assign("zoiper_img",  "modules/$module_name/images/zoiper.png");
-    $smarty->assign("tag_manuf_description", _tr("Manufacturer Description"));
+    $smarty->assign("tag_manuf_description", _tr("Developer Description"));
     $smarty->assign("download_link", _tr("Download Link"));
-    $smarty->assign("tag_manufacturer", _tr("Manufacturer"));
+    $smarty->assign("tag_manufacturer", _tr("Developer"));
 
     $smarty->assign("xlite_software_description", _tr("xlite_software_description"));
     $smarty->assign("xlite_manufacturer_description", _tr("xlite_manufacturer_description"));

@@ -29,8 +29,8 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Softphones" => "Softphones",
-"Manufacturer Description" => "Manufacturer Description",
-"Manufacturer" => "Manufacturer",
+"Developer Description" => "Developer Description",
+"Developer" => "Developer",
 "Download Link" => "Download Link",
 
 "xlite_software_description" => "X-Lite is a free softphone SIP client for Windows and Mac OS X. Available also from CounterPath are the commercial clients eyeBeam and Bria (Bria has Ubuntu support).",

@@ -60,6 +60,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Extras: replace "Manufacturer" with "Developer" everywhere.
+  SVN Rev[7336]
+
 * Mon Nov  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Extras: replace hand-coded translation loading with
   load_language_module().

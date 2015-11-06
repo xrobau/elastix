@@ -29,8 +29,8 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Fax Utilities" => "Utilidades de Fax",
-"Manufacturer Description" => "Descripción del Fabricante <i>(traducido)</i>",
-"Manufacturer" => "Fabricante",
+"Developer Description" => "Descripción del Desarrollador <i>(traducido)</i>",
+"Developer" => "Desarrollador",
 "Download Link" => "Enlace de Descarga",
 
 "jhylafax_software_description" => "JHylafax es un frontend de Hylafax escrito en Java. Puede ser instalado en Windows, Linux y MacOS.",

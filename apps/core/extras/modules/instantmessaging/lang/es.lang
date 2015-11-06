@@ -29,8 +29,8 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Instant Messaging" => "Mensajería Instantánea",
-"Manufacturer Description" => "Descripción del Fabricante <i>(traducido)</i>",
-"Manufacturer" => "Fabricante",
+"Developer Description" => "Descripción del Desarrollador <i>(traducido)</i>",
+"Developer" => "Desarrollador",
 "Download Link" => "Enlace de Descarga",
 
 "spark_software_description" => "Spark es la mejor y más facil alternativa al usar redes de mensajería instantánea públicas inseguras.",

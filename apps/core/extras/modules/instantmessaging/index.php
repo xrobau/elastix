@@ -65,9 +65,9 @@ function viewFormInstant_Messaging($smarty, $module_name, $local_templates_dir, 
 
     $smarty->assign("icon",  "modules/$module_name/images/instant_messaging.png");
     $smarty->assign("imess1_img",  "modules/$module_name/images/spark.jpg");
-    $smarty->assign("tag_manuf_description", _tr("Manufacturer Description"));
+    $smarty->assign("tag_manuf_description", _tr("Developer Description"));
     $smarty->assign("download_link", _tr("Download Link"));
-    $smarty->assign("tag_manufacturer", _tr("Manufacturer"));
+    $smarty->assign("tag_manufacturer", _tr("Developer"));
 
     $smarty->assign("imess1_software_description", _tr("spark_software_description"));
     $smarty->assign("imess1_manufacturer_description", _tr("spark_manufacturer_description"));

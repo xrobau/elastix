@@ -64,9 +64,9 @@ function viewFormFax_Utilities($smarty, $module_name, $local_templates_dir, $arr
     $smarty->assign("icon",  "modules/$module_name/images/fax_utilities.png");
     $smarty->assign("fax1_img",  "modules/$module_name/images/jhylafax.jpg");
     $smarty->assign("fax2_img",  "modules/$module_name/images/winprinthylafax.jpg");
-    $smarty->assign("tag_manuf_description", _tr("Manufacturer Description"));
+    $smarty->assign("tag_manuf_description", _tr("Developer Description"));
     $smarty->assign("download_link", _tr("Download Link"));
-    $smarty->assign("tag_manufacturer", _tr("Manufacturer"));
+    $smarty->assign("tag_manufacturer", _tr("Developer"));
 
     $smarty->assign("fax1_software_description", _tr("jhylafax_software_description"));
     $smarty->assign("fax1_manufacturer_description", _tr("jhylafax_manufacturer_description"));

@@ -34,10 +34,8 @@ class PaloSantoDHCP
 {
     var $errMsg;
 
-    function getConfigurationDHCP() 
+    function getConfigurationDHCP()
     {
-        global $arrLang;
-
         // Trato de abrir el archivo de configuracion de dhcp
         $arrConfigurationDHCP = NULL;
         $output = $ret = NULL;
@@ -49,52 +47,52 @@ class PaloSantoDHCP
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]+([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?;";
                 if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
-                    $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_1"] = $arrReg[1]; 
+                    $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_1"] = $arrReg[1];
                     $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_2"] = $arrReg[2];
-                    $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_3"] = $arrReg[3]; 
+                    $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_3"] = $arrReg[3];
                     $arrConfigurationDHCP["IPS_RANGE"]["in_ip_ini_4"] = $arrReg[4];
-                    $arrConfigurationDHCP["IPS_RANGE"]["in_ip_fin_1"] = $arrReg[5]; 
+                    $arrConfigurationDHCP["IPS_RANGE"]["in_ip_fin_1"] = $arrReg[5];
                     $arrConfigurationDHCP["IPS_RANGE"]["in_ip_fin_2"] = $arrReg[6];
-                    $arrConfigurationDHCP["IPS_RANGE"]["in_ip_fin_3"] = $arrReg[7]; 
+                    $arrConfigurationDHCP["IPS_RANGE"]["in_ip_fin_3"] = $arrReg[7];
                     $arrConfigurationDHCP["IPS_RANGE"]["in_ip_fin_4"] = $arrReg[8];
-                } 
-    
+                }
+
                 // LEASE TIME
                 $patron = "^[[:space:]]*default-lease-time[[:space:]]([[:digit:]]{1,8})[[:space:]]?;";
                 if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
                     $arrConfigurationDHCP["LEASE_TIME"]["in_lease_time"] = $arrReg[1];
-                } 
-    
+                }
+
                 // GATEWAY
                 $patron = "^[[:space:]]*option routers[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?";
                 if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
-                    $arrConfigurationDHCP["GATEWAY"]["in_gw_1"] = $arrReg[1]; 
+                    $arrConfigurationDHCP["GATEWAY"]["in_gw_1"] = $arrReg[1];
                     $arrConfigurationDHCP["GATEWAY"]["in_gw_2"] = $arrReg[2];
-                    $arrConfigurationDHCP["GATEWAY"]["in_gw_3"] = $arrReg[3]; 
-                    $arrConfigurationDHCP["GATEWAY"]["in_gw_4"] = $arrReg[4]; 
-                } 
-    
+                    $arrConfigurationDHCP["GATEWAY"]["in_gw_3"] = $arrReg[3];
+                    $arrConfigurationDHCP["GATEWAY"]["in_gw_4"] = $arrReg[4];
+                }
+
                 // GATEWAY NETMASK
                 $patron = "^[[:space:]]*option subnet-mask[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?";
                 if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
-                    $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_1"] = $arrReg[1]; 
+                    $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_1"] = $arrReg[1];
                     $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_2"] = $arrReg[2];
-                    $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_3"] = $arrReg[3]; 
-                    $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_4"] = $arrReg[4]; 
-                } 
-    
+                    $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_3"] = $arrReg[3];
+                    $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_4"] = $arrReg[4];
+                }
+
                 // WINS
                 $patron = "^[[:space:]]*option netbios-name-servers[[:space:]]+([[:digit:]]{1,3})\.([[:digit:]]{1,3})\." .
                         "([[:digit:]]{1,3})\.([[:digit:]]{1,3})[[:space:]]?";
                 if(preg_match("/$patron/", $linea_archivo, $arrReg)) {
-                    $arrConfigurationDHCP["WINS"]["in_wins_1"] = $arrReg[1]; 
+                    $arrConfigurationDHCP["WINS"]["in_wins_1"] = $arrReg[1];
                     $arrConfigurationDHCP["WINS"]["in_wins_2"] = $arrReg[2];
-                    $arrConfigurationDHCP["WINS"]["in_wins_3"] = $arrReg[3]; 
-                    $arrConfigurationDHCP["WINS"]["in_wins_4"] = $arrReg[4]; 
+                    $arrConfigurationDHCP["WINS"]["in_wins_3"] = $arrReg[3];
+                    $arrConfigurationDHCP["WINS"]["in_wins_4"] = $arrReg[4];
                 }
-    
+
                 // DNSs
                 $patron = '/^\s*option domain-name-servers\s+([\d\.\s,]+)/';
                 if (preg_match($patron, $linea_archivo, $arrReg)) {
@@ -102,43 +100,43 @@ class PaloSantoDHCP
                     foreach ($dnsList as $dnsString) {
                     	$ip = explode('.', $dnsString);
                         if(!isset($arrConfigurationDHCP["DNS1"])) {
-                            $arrConfigurationDHCP["DNS1"]["in_dns1_1"] = $ip[0]; 
+                            $arrConfigurationDHCP["DNS1"]["in_dns1_1"] = $ip[0];
                             $arrConfigurationDHCP["DNS1"]["in_dns1_2"] = $ip[1];
-                            $arrConfigurationDHCP["DNS1"]["in_dns1_3"] = $ip[2]; 
-                            $arrConfigurationDHCP["DNS1"]["in_dns1_4"] = $ip[3]; 
+                            $arrConfigurationDHCP["DNS1"]["in_dns1_3"] = $ip[2];
+                            $arrConfigurationDHCP["DNS1"]["in_dns1_4"] = $ip[3];
                         } else if (!isset($arrConfigurationDHCP["DNS2"])){
-                            $arrConfigurationDHCP["DNS2"]["in_dns2_1"] = $ip[0]; 
+                            $arrConfigurationDHCP["DNS2"]["in_dns2_1"] = $ip[0];
                             $arrConfigurationDHCP["DNS2"]["in_dns2_2"] = $ip[1];
-                            $arrConfigurationDHCP["DNS2"]["in_dns2_3"] = $ip[2]; 
+                            $arrConfigurationDHCP["DNS2"]["in_dns2_3"] = $ip[2];
                             $arrConfigurationDHCP["DNS2"]["in_dns2_4"] = $ip[3];
-                        } 
+                        }
                     }
                 }
             } //end while
-    
+
             if(!isset($arrConfigurationDHCP["IPS_RANGE"])){
                 // Error, no se encontro el rango de IPs, la directiva mas importante...
-                $this->errMsg = $arrLang["Could not find IP range"];
+                $this->errMsg = _tr("Could not find IP range");
             }
 
             //Lleno de vacio los q no se encontraron... Para tener q mostrar .. esto solo por presentacion.
             if(!isset($arrConfigurationDHCP["DNS2"])){
-                $arrConfigurationDHCP["DNS2"]["in_dns2_1"] = ""; 
+                $arrConfigurationDHCP["DNS2"]["in_dns2_1"] = "";
                 $arrConfigurationDHCP["DNS2"]["in_dns2_2"] = "";
-                $arrConfigurationDHCP["DNS2"]["in_dns2_3"] = ""; 
+                $arrConfigurationDHCP["DNS2"]["in_dns2_3"] = "";
                 $arrConfigurationDHCP["DNS2"]["in_dns2_4"] = "";
             }
             if(!isset($arrConfigurationDHCP["WINS"])){
-                $arrConfigurationDHCP["WINS"]["in_wins_1"] = ""; 
+                $arrConfigurationDHCP["WINS"]["in_wins_1"] = "";
                 $arrConfigurationDHCP["WINS"]["in_wins_2"] = "";
-                $arrConfigurationDHCP["WINS"]["in_wins_3"] = ""; 
+                $arrConfigurationDHCP["WINS"]["in_wins_3"] = "";
                 $arrConfigurationDHCP["WINS"]["in_wins_4"] = "";
             }
             if(!isset($arrConfigurationDHCP["GATEWAY_NETMASK"])){
-                $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_1"] = ""; 
+                $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_1"] = "";
                 $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_2"] = "";
-                $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_3"] = ""; 
-                $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_4"] = ""; 
+                $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_3"] = "";
+                $arrConfigurationDHCP["GATEWAY_NETMASK"]["in_gwm_4"] = "";
             }
             if(!isset($arrConfigurationDHCP["LEASE_TIME"])){
                 $arrConfigurationDHCP["LEASE_TIME"]["in_lease_time"] = "7200";
@@ -146,7 +144,7 @@ class PaloSantoDHCP
         }
         else{
             // Error al abrir el archivo
-            $this->errMsg = $arrLang["DHCP configuration reading error: Verify that the DHCP service is installed and try again."];
+            $this->errMsg = _tr("DHCP configuration reading error: Verify that the DHCP service is installed and try again.");
         }
         return $arrConfigurationDHCP;
     }
@@ -202,12 +200,12 @@ class PaloSantoDHCP
     }
 
     function updateFileConfDHCP(
-                $ip_gw, 
-                $ip_gw_nm, 
-                $ip_wins, 
-                $ip_dns1, 
-                $ip_dns2, 
-                $IPSubnet, 
+                $ip_gw,
+                $ip_gw_nm,
+                $ip_wins,
+                $ip_dns1,
+                $ip_dns2,
+                $IPSubnet,
                 $conf_red_actual,
                 $ip_ini,
                 $ip_fin,

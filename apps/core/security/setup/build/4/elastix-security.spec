@@ -133,6 +133,11 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: security: replace hand-coded translation loading with
+  load_language_module().
+  SVN Rev[7337]
+
 * Thu Oct 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: security: explicitly spell out previously hidden package requirements
   that provide system commands.

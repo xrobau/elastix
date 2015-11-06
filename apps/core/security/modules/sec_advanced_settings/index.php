@@ -38,24 +38,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoChangePassword.class.php";
 
-
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
@@ -97,7 +88,7 @@ function viewFormAdvancedSecuritySettings($smarty, $module_name, $local_template
     $smarty->assign("value_anonymous_sip", $value_anonymous_sip);
     $smarty->assign("icon", "modules/".$module_name."/images/security_advanced_settings.png");
     $smarty->assign("FreePBX_copy_right", _tr("FreePBX® is a Registered Trademark of Schmooze Com, Inc"));
-    
+
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Advanced Security Settings"), $_POST);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
     return $content;
@@ -156,13 +147,13 @@ function updateAdvancedSecuritySettings($smarty, $module_name, $local_templates_
 {
     $arrFormAdvancedSecuritySettings = createFieldForm();
     $oForm                           = new paloForm($smarty,$arrFormAdvancedSecuritySettings);
-    
+
     //GET FIELDS
     $fpbx_password 	  = '';
     $fpbx_confir_password = '';
     if(isset($_POST["fpbx_password"]))        $fpbx_password         = getParameter("fpbx_password");
     if(isset($_POST["fpbx_confir_password"])) $fpbx_confir_password  = getParameter("fpbx_confir_password");
-    
+
     //VALIDATIONS OF PASSWORD
     $msgValidationEmptyFields = "";
     $msgValidationPassword = "";
@@ -173,7 +164,7 @@ function updateAdvancedSecuritySettings($smarty, $module_name, $local_templates_
       $msgValidationEmptyFields .= _tr("Database and Web Administration FreePBX® Password")."<br/>";
     if($fpbx_confir_password == '')
       $msgValidationEmptyFields .= _tr("Password Confirmation")."<br/>";
-    
+
     //VALIDATION OF PASSWORD
     if(!validatePassword($fpbx_password))
       $msgValidationPassword = _tr("Password may only contain alphanumeric characters, spaces, or the following: .&-@=_!<>.");

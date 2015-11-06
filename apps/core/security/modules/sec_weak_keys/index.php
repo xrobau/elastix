@@ -39,23 +39,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoWeakKeys.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
@@ -93,7 +85,7 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $filter_field = getParameter("filter_field");
     $filter_value = getParameter("filter_value");
     //begin grid parameters
-    $oGrid  = new paloSantoGrid($smarty);    
+    $oGrid  = new paloSantoGrid($smarty);
     $total = $pWeakKeys->getNumWeakKeys($filter_field,$filter_value);
     $pDB2 = new paloDB($arrConf['elastix_dsn']['acl']);
     $pACL = new paloACL($pDB2);
@@ -130,7 +122,7 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $oGrid->setColumns($arrColumns);
     if(is_array($arrResult) && $total>0){
         foreach($arrResult as $tech){
-            foreach($tech as $key => $value){ 
+            foreach($tech as $key => $value){
             $arrTmp[0] = $value['id'];
             $arrTmp[1] = $value['description'];
             $mensaje = getMensaje($value['id'],$value['data']);
@@ -149,7 +141,7 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     $oFilterForm = new paloForm($smarty, $arrFormFilterWeakKeys);
     $smarty->assign("SHOW", _tr("Show"));
 
-    $_POST["filter_field"]= $filter_field; 
+    $_POST["filter_field"]= $filter_field;
     $_POST["filter_value"]= $filter_value;
 
     $oGrid->addFilterControl(_tr("Filter applied: ")._tr("Extension")." = ".$filter_value,$_POST, array("filter_field" => "extension","filter_value" => ""));
@@ -157,7 +149,7 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     //end section filter
     $oGrid->showFilter(trim($htmlFilter));
     $content = $oGrid->fetchGrid();
- 
+
     //end grid parameters
 
     return $content;

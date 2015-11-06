@@ -37,23 +37,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoPortService.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
@@ -109,7 +101,7 @@ function reportPuertos($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         "menu"         =>  $module_name,
         "filter_type"  =>  $field_type,
         "filter_txt"   =>  $field_pattern
-    );    
+    );
     $oGrid->setURL($url);
 
     $arrData = null;
@@ -194,11 +186,11 @@ function NewViewPuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("icon", "images/list.png");
     $protocol = getParameter("protocol");
-    
+
     if( $action == 'new' )
     {
         $smarty->assign("SAVE", _tr("Save"));
-        if($protocol=="ICMP"){        
+        if($protocol=="ICMP"){
             $smarty->assign("port_style", "style = 'display:none;'");
             $smarty->assign("protocol_style", "style = 'display:none;'");
         }elseif($protocol=="IP"){
@@ -243,17 +235,17 @@ function NewViewPuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                $smarty->assign("protocol_style", "style = 'display:none;'");
                $value = explode(":",$result['details']);
                $_POST['type'] = $value[0];
-               $_POST['code'] = $value[1]; 
+               $_POST['code'] = $value[1];
         }else{
                $smarty->assign("port_style", "style = 'display:none;'");
                $smarty->assign("type_style", "style = 'display:none;'");
                $smarty->assign("code_style", "style = 'display:none;'");
                $_POST['protocol_number'] = $result['details'];
         }
-       
+
 
         $_POST['comment'] = $result['comment'];
-        
+
         $titulo = _tr('Edit Port');
     }
     else if( $action == 'view' )
@@ -267,7 +259,7 @@ function NewViewPuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
 
         $_POST['name'] = $result['name'];
         $_POST['protocol'] = $result['protocol'];
- 
+
         if($result['protocol'] == "TCP" || $result['protocol'] == "UDP"){
             $hasGuion = 'yes';
             $arrPort = explode(':', $result['details'] );
@@ -283,7 +275,7 @@ function NewViewPuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
                $smarty->assign("protocol_style", "style = 'display:none;'");
                $value = explode(":",$result['details']);
                $_POST['type'] = $value[0];
-               $_POST['code'] = $value[1]; 
+               $_POST['code'] = $value[1];
         }else{
                $smarty->assign("port_style", "style = 'display:none;'");
                $smarty->assign("type_style", "style = 'display:none;'");
@@ -295,9 +287,9 @@ function NewViewPuerto($smarty, $module_name, $local_templates_dir, &$pDB, $arrC
         $oForm->setViewMode();
         $titulo = _tr('View Port');
 
-     
+
     }
-    
+
     $smarty->assign("MODE", $action);
 
     $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl", $titulo, $_POST);

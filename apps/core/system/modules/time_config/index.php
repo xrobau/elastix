@@ -41,13 +41,13 @@ function _moduleContent(&$smarty, $module_name)
     global $arrConf;
     global $arrConfModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    
+
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
-	
+
+
 
     $smarty->assign("TIME_TITULO",_tr("Date and Time Configuration"));
     $smarty->assign("INDEX_HORA_SERVIDOR",_tr("Current Datetime"));
@@ -71,7 +71,7 @@ function _moduleContent(&$smarty, $module_name)
 	4)	Copiar archivo /usr/share/zoneinfo/abc/def a /etc/localtime
 	5)	Si existe /var/spool/postfix/etc/localtime , removerlo y sobreescribr
 		con el mismo archivo copiado a /etc/localtime
-		
+
 	Luego de esto, ejecutar cambio de hora local
 
 */
@@ -87,9 +87,9 @@ function _moduleContent(&$smarty, $module_name)
 		fclose($hArchivo);
 		sort($listaZonas);
 	}
-	
+
 	// Cargar de /etc/sysconfig/clock la supuesta zona horaria configurada.
-	// El resto de contenido del archivo se preserva, y la clave ZONE se 
+	// El resto de contenido del archivo se preserva, y la clave ZONE se
 	// escribirá como la última línea en caso de actualizar
 	$sZonaActual = get_default_timezone();  // <-- requiere elastix-framework >= 2.5.0-6
 
@@ -139,33 +139,42 @@ function _moduleContent(&$smarty, $module_name)
 			// TODO: internacionalizar
 			$smarty->assign("mb_message", _tr('Date not valid'));
 		} else {
-			if ($sZonaNueva != $sZonaActual) {
+            /* En caso de cambiar la zona horaria, el cambio debe de hacerse
+             * DESPUÉS de setear la hora, porque el usuario espera que la hora
+             * mostrada luego del cambio salte por la cantidad adecuada según
+             * el cambio de zona. */
+            if ($bValido) {
+                $fecha = sprintf('%04d-%02d-%02d %02d:%02d:%02d',
+                    $year, $month, $day, $_POST['ServerDate_Hour'],
+                    $_POST['ServerDate_Minute'], $_POST['ServerDate_Second']);
+                $cmd = "/usr/bin/elastix-helper dateconfig --datetime '$fecha' 2>&1";
+                $output=$ret_val="";
+                exec($cmd,$output,$ret_val);
+
+                if ($ret_val == 0) {
+                    $smarty->assign('mb_message', _tr('System time changed successfully'));
+                } else {
+                    $smarty->assign('mb_message', _tr('System time can not be changed')." - <br/>".implode('<br/>', $output));
+                    $bValido = FALSE;
+                }
+            }
+
+            if ($bValido && $sZonaNueva != $sZonaActual) {
                 $sComando = '/usr/bin/elastix-helper dateconfig'.
                     ' --timezone '.escapeshellarg($sZonaNueva).
                     ' 2>&1';
                 $output = $ret = NULL;
                 exec($sComando, $output, $ret);
                 if ($ret != 0) {
-                	$smarty->assign('mb_message', _tr('Failed to change timezone').' - '.implode('<br/>', $output));
+                    $smarty->assign('mb_message', _tr('Failed to change timezone').' - '.implode('<br/>', $output));
                     $bValido = FALSE;
+                } else {
+                    $sZonaActual = $sZonaNueva;
+
+                    // Actualizar zona horaria para date()
+                    date_default_timezone_set($sZonaActual);
                 }
 			}
-
-            if ($bValido) {
-                $sZonaActual = $sZonaNueva;
-                
-                $fecha = sprintf('%04d-%02d-%02d %02d:%02d:%02d', 
-                	$year, $month, $day, $_POST['ServerDate_Hour'], $_POST['ServerDate_Minute'], $_POST['ServerDate_Second']);
-                $cmd = "/usr/bin/elastix-helper dateconfig --datetime '$fecha' 2>&1";
-                $output=$ret_val="";
-                exec($cmd,$output,$ret_val);
-    			
-    			if ($ret_val == 0) {
-    				$smarty->assign('mb_message', _tr('System time changed successfully'));
-    			} else {
-    				$smarty->assign('mb_message', _tr('System time can not be changed')." - <br/>".implode('<br/>', $output));
-    			}
-            }
 		}
 	}
     $sContenido = '';

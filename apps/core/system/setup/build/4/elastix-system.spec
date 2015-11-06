@@ -182,6 +182,9 @@ fi
 
 %changelog
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Time Config: update timezone AFTER time update, not before. Remember to
+  update the PHP timezone after system timezone update.
+  SVN Rev[7333]
 - CHANGED: Repositories: update list of default active repositories. Replace
   previous implementation with one that can be configured server-side in a
   future version.

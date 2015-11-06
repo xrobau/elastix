@@ -180,6 +180,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Repositories: switch all uses of $arrLang to _tr() and replace
+  hand-coded translation loading with load_language_module().
+  SVN Rev[7331]
+
 * Wed Nov  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Backup/Restore: switch over the FOP directory to the one used by
   FreePBX 2.11. This will render the restore incompatible for old backups that

@@ -39,9 +39,9 @@ class PaloSantoRepositories
     }
 
      /**
-     * Procedimiento para obtener el listado de los repositorios 
+     * Procedimiento para obtener el listado de los repositorios
      *
-     * @return array    Listado de los repositorios 
+     * @return array    Listado de los repositorios
      */
     function getRepositorios($ruta,$typeRepository,$mainRepos)
     {
@@ -49,7 +49,7 @@ class PaloSantoRepositories
         $repositorios = array();
         foreach($arrArchivosRepo as $key => $archivoRepo){
             $auxRepo      = $this->scanFileRepo($ruta,$archivoRepo);
-            $repositorios = array_merge($repositorios,$auxRepo); 
+            $repositorios = array_merge($repositorios,$auxRepo);
         }
         return $repositorios;
     }
@@ -96,7 +96,6 @@ class PaloSantoRepositories
 
     private function getArchivosRepo($dir='/etc/yum.repos.d/',$typeRepository='main',$mainRepos=array())
     {
-        global $arrLang;
         $arr_repositorios  = scandir($dir);
         $arr_respuesta = array();
 
@@ -116,9 +115,9 @@ class PaloSantoRepositories
                 if(!is_dir($dir.$repositorio) && $repositorio!="." && $repositorio!=".." && strstr($repositorio,".repo") && (!$doFilter || $isMainRepo)) //que se un archivo y que el archivo tenga extension .repo
                     $arr_respuesta[$repositorio] = $repositorio;
             }
-        } 
-        else 
-            $this->errMsg = $arrLang["Repositor not Found"];
+        }
+        else
+            $this->errMsg = _tr("Repository not Found");
         return $arr_respuesta;
     }
 
@@ -142,10 +141,10 @@ class PaloSantoRepositories
             } elseif (preg_match('/^name\s*=\s*(.+\S)\s*$/', $linea, $regs) && !is_null($indice)) {
                 $repositorios[$indice]['name'] = $regs[1];
             }
-       	
+
         }
         return $repositorios;
-    } 
+    }
 
     function obtenerVersionDistro()
     {

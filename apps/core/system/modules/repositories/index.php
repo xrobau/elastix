@@ -36,20 +36,12 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     require_once "modules/$module_name/libs/PaloSantoRepositories.class.php";
 
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
-
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
@@ -61,9 +53,8 @@ function _moduleContent(&$smarty, $module_name)
     return $contenidoModulo;
 }
 
-function listRepositories($smarty, $module_name, $local_templates_dir,$arrConf) {
-
-    global $arrLang;
+function listRepositories($smarty, $module_name, $local_templates_dir,$arrConf)
+{
     $oRepositories = new PaloSantoRepositories();
     $arrReposActivos=array();
     $typeRepository = getParameter("typeRepository");
@@ -109,15 +100,15 @@ function listRepositories($smarty, $module_name, $local_templates_dir,$arrConf) 
         $_POST["typeRepository"]="main";
     }
 
-    $arrGrid = array("title"    => $arrLang["Repositories"],
+    $arrGrid = array("title"    => _tr("Repositories"),
         "icon"     => "modules/repositories/images/system_updates_repositories.png",
         "width"    => "99%",
         "start"    => ($total==0) ? 0 : $offset + 1,
         "end"      => $end,
         "total"    => $total,
-        "columns"  => array(0 => array("name"      => $arrLang["Active"],
+        "columns"  => array(0 => array("name"      => _tr("Active"),
                                        "property1" => ""),
-                            1 => array("name"      => $arrLang["Name"],
+                            1 => array("name"      => _tr("Name"),
                                        "property1" => "")));
 
     $oGrid->customAction('submit_aceptar',_tr('Save/Update'));
@@ -135,7 +126,7 @@ function listRepositories($smarty, $module_name, $local_templates_dir,$arrConf) 
     $htmlFilter = $FilterForm->fetchForm("$local_templates_dir/new.tpl","",$_POST);
     $oGrid->showFilter($htmlFilter);
 
-    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
     return $contenidoModulo;
 }
 

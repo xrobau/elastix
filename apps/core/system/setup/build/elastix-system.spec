@@ -181,6 +181,9 @@ fi
 
 %changelog
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Currency: switch all uses of $arrLang to _tr() and replace hand-coded
+  translation loading with load_language_module().
+  SVN Rev[7339]
 - CHANGED: Applet Admin: switch all uses of $arrLang to _tr() and replace
   hand-coded translation loading with load_language_module().
   SVN Rev[7338]

@@ -37,23 +37,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoCurrency.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
@@ -66,19 +58,19 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($accion){
         case "save":
-            $content = saveCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = saveCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
         default:
-            $content = formCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = formCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
     }
     return $content;
 }
 
-function formCurrency($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function formCurrency($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pCurrency = new paloSantoCurrency($pDB);
-    $arrFormCurrency = createFieldForm($arrLang);
+    $arrFormCurrency = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormCurrency);
 
     //CARGAR CURRENCY GUARDADO
@@ -86,18 +78,18 @@ function formCurrency($smarty, $module_name, $local_templates_dir, &$pDB, $arrCo
 
     if( $curr == false ) $curr = "$";
 
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("icon", "modules/$module_name/images/system_preferences_currency.png");
     $_POST['currency'] = $curr;
 
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["Currency"], $_POST);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("Currency"), $_POST);
     $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $contenidoModulo;
 }
 
-function saveCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang)
+function saveCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
 {
     $curr = getParameter("currency");
     $oPalo = new paloSantoCurrency($pDB);
@@ -105,25 +97,25 @@ function saveCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrCon
     $bandera = $oPalo->SaveOrUpdateCurrency($curr);
 
     if($bandera == true ){
-        $smarty->assign("mb_message", $arrLang["Successfully saved"]);
+        $smarty->assign("mb_message", _tr("Successfully saved"));
     }
     else{
-        $smarty->assign("mb_title", $arrLang["Error"]);
+        $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message", $oPalo->errMsg);
     }
 
-    return formCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+    return formCurrency($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 }
 
-function createFieldForm($arrLang)
+function createFieldForm()
 {
     $arrOptions = array('val1' => 'Value 1', 'val2' => 'Value 2', 'val3' => 'Value 3');
 
     $arrFields = array(
-            "currency"   => array(  "LABEL"                  => $arrLang["Currency"],
+            "currency"   => array(  "LABEL"                  => _tr("Currency"),
                                     "REQUIRED"               => "no",
                                     "INPUT_TYPE"             => "SELECT",
-                                    "INPUT_EXTRA_PARAM"      => getCurrencys($arrLang),
+                                    "INPUT_EXTRA_PARAM"      => getCurrencys(),
                                     "VALIDATION_TYPE"        => "text",
                                     "VALIDATION_EXTRA_PARAM" => "",
                                     "EDITABLE"               => "si",
@@ -152,37 +144,37 @@ function loadCurrentCurrency($pDB)
     return $oPalo->loadCurrency();
 }
 
-function getCurrencys($arrLang)
+function getCurrencys()
 {
     return array(
-            "AR$"   => "AR$ - ".$arrLang["Argentinian peso"],
-            "฿"     => "฿ - ".$arrLang["Baht tailandés / balboa panameño"],
-            "Bs"    => "Bs - ".$arrLang["Bolívar venezolano"],
-            "Bs.F." => "Bs.F. - ".$arrLang["Bolívar fuerte venezolana"],
-            "¢"     => "¢ - ".$arrLang["Colón costarricense"],
-            "C$"    => "C$ - ".$arrLang["Córdoba nicaragüense/dólar canadiense"],
-            "₫"     => "₫ - ".$arrLang["Dong vietnamita"],
-            "EC$"   => "EC$ - ".$arrLang["Dólar del Caribe Oriental"],
-            "Kr"    => "Kr - ".$arrLang["Corona danesa, corona sueca"],
-            "£"     => "£ - ".$arrLang["Lira"],
-            "L$"    => "L$ - ".$arrLang["Lempira hondureño"],
-            "Q"     => "Q - ".$arrLang["Quetzal guatemalteco"],
-            "€"     => "€ - ".$arrLang["Euro"],
-            "£GBP"  => "£GBP - ".$arrLang["GB Sterling"],
-            "R"     => "R - ".$arrLang["Rand sudafricano"],
-            "Rp"    => "Rp - ".$arrLang["Rupia indonesia"],
-            "Rs"    => "Rs - ".$arrLang["Rupia"],
-            "R$"    => "R$ - ".$arrLang["Real brasileño"],
-            "руб"   => "руб - ".$arrLang["Rublo ruso"],
-            "A$"    => "A$ - ".$arrLang["Dólar australiano"],
-            "$"     => "$ - ".$arrLang["Dólar/Peso"],
-            "¥"     => "¥ - ".$arrLang["Yen"],
-            "₪"     => "₪ - ".$arrLang["Sheqel israelí"],
-            "¢"     => "¢ - ".$arrLang["Colón salvadoreño"],
-            "元"    => "元 - ".$arrLang["Yuan chino"],
-            "৳"     => "৳ - ".$arrLang["Rupia bengalí"],
-            "S$"    => "S$ - ".$arrLang["Dólar de Singapur"],
-	    "CHF"   => "CHF - ".$arrLang["Swiss Franc"],
+            "AR$"   => "AR$ - "._tr("Argentinian peso"),
+            "฿"     => "฿ - "._tr("Baht tailandés / balboa panameño"),
+            "Bs"    => "Bs - "._tr("Bolívar venezolano"),
+            "Bs.F." => "Bs.F. - "._tr("Bolívar fuerte venezolana"),
+            "¢"     => "¢ - "._tr("Colón costarricense"),
+            "C$"    => "C$ - "._tr("Córdoba nicaragüense/dólar canadiense"),
+            "₫"     => "₫ - "._tr("Dong vietnamita"),
+            "EC$"   => "EC$ - "._tr("Dólar del Caribe Oriental"),
+            "Kr"    => "Kr - "._tr("Corona danesa, corona sueca"),
+            "£"     => "£ - "._tr("Lira"),
+            "L$"    => "L$ - "._tr("Lempira hondureño"),
+            "Q"     => "Q - "._tr("Quetzal guatemalteco"),
+            "€"     => "€ - "._tr("Euro"),
+            "£GBP"  => "£GBP - "._tr("GB Sterling"),
+            "R"     => "R - "._tr("Rand sudafricano"),
+            "Rp"    => "Rp - "._tr("Rupia indonesia"),
+            "Rs"    => "Rs - "._tr("Rupia"),
+            "R$"    => "R$ - "._tr("Real brasileño"),
+            "руб"   => "руб - "._tr("Rublo ruso"),
+            "A$"    => "A$ - "._tr("Dólar australiano"),
+            "$"     => "$ - "._tr("Dólar/Peso"),
+            "¥"     => "¥ - "._tr("Yen"),
+            "₪"     => "₪ - "._tr("Sheqel israelí"),
+            "¢"     => "¢ - "._tr("Colón salvadoreño"),
+            "元"    => "元 - "._tr("Yuan chino"),
+            "৳"     => "৳ - "._tr("Rupia bengalí"),
+            "S$"    => "S$ - "._tr("Dólar de Singapur"),
+	    "CHF"   => "CHF - "._tr("Swiss Franc"),
     );
 }
 ?>

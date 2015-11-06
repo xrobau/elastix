@@ -181,6 +181,9 @@ fi
 
 %changelog
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Applet Admin: switch all uses of $arrLang to _tr() and replace
+  hand-coded translation loading with load_language_module().
+  SVN Rev[7338]
 - FIXED: Time Config: update timezone AFTER time update, not before. Remember to
   update the PHP timezone after system timezone update.
   SVN Rev[7333]

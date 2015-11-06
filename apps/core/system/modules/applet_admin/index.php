@@ -36,23 +36,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoAppletAdmin.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
@@ -74,7 +66,6 @@ function _moduleContent(&$smarty, $module_name)
 function showApplets_Admin($module_name)
 {
     global $smarty;
-    global $arrLang;
     global $arrConf;
 
     $pAppletAdmin = new paloSantoAppletAdmin();
@@ -90,18 +81,18 @@ function showApplets_Admin($module_name)
     //
 
     $smarty->assign("applets",$arrApplets);
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("Applet", $arrLang["Applet"]);
-    $smarty->assign("Activated", $arrLang["Activated"]);
-    $smarty->assign("checkall", $arrLang["Check All"]);
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("Applet", _tr("Applet"));
+    $smarty->assign("Activated", _tr("Activated"));
+    $smarty->assign("checkall", _tr("Check All"));
     $smarty->assign("icon", "modules/$module_name/images/system_dashboard_applet_admin.png");
 
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/applet_admin.tpl",$arrLang["Dashboard Applet Admin"], $_POST);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/applet_admin.tpl",_tr("Dashboard Applet Admin"), $_POST);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $content;
@@ -110,7 +101,6 @@ function showApplets_Admin($module_name)
 function saveApplets_Admin($module_name)
 {
     global $smarty;
-    global $arrLang;
     $arrIDs_DAU = null;
 
     if(is_array($_POST) & count($_POST)>0){
@@ -122,13 +112,13 @@ function saveApplets_Admin($module_name)
 
     $pAppletAdmin = new paloSantoAppletAdmin();
     if(count($arrIDs_DAU)==0){
-        $smarty->assign("mb_title", $arrLang["ERROR"]);
-        $smarty->assign("mb_message", $arrLang["You must have at least one applet activated"]);
+        $smarty->assign("mb_title", _tr("ERROR"));
+        $smarty->assign("mb_message", _tr("You must have at least one applet activated"));
     }
     else{
         $ok = $pAppletAdmin->setApplets_User($arrIDs_DAU, $_SESSION["elastix_user"]);
         if(!$ok){
-            $smarty->assign("mb_title", $arrLang["Validation Error"]);
+            $smarty->assign("mb_title", _tr("Validation Error"));
             $smarty->assign("mb_message", $pAppletAdmin->errMsg);
         }
     }

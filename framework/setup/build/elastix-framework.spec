@@ -387,6 +387,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: reintroduce .menulogo2 CSS style in elastixneo theme since
+  it is used in two templates from patched FreePBX.
+  SVN Rev[7335]
+
 * Thu Nov  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: complete rewrite of PDF exporting code. This rewrite fixes
   the following bugs:

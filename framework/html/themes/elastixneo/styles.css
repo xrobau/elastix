@@ -246,6 +246,17 @@ a {
     margin:7px 0px 14px 0px;
 }
 
+/* El siguiente estilo se usa en elastix_warning_authentication.php y en
+   admin/views/elastix_advice.php */
+.menulogo2 {
+    FONT-FAMILY: verdana, arial, helvetica, sans-serif;
+    FONT-SIZE: 9pt;
+    BACKGROUND: #ffffff;
+    BACKGROUND-IMAGE: url(images/headerbox-bg7.png);
+    border-bottom: #E35332 5px solid;
+}
+
+
 /* Herramientas de esquina superior derecha */
 #cmenubox
 {

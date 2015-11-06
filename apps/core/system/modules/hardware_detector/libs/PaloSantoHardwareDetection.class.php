@@ -41,7 +41,7 @@ class PaloSantoHardwareDetection
     }
 
     /**
-     * Procedimiento para obtener el listado los puertos con la descripcion de la tarjeta 
+     * Procedimiento para obtener el listado los puertos con la descripcion de la tarjeta
      *
      * @return array    Listado de los puertos
      */
@@ -52,8 +52,7 @@ class PaloSantoHardwareDetection
         $pconfEcho->deleteCardParameter();
         //$this->deleteCardManufacturer($pDB);
         //$data = array();
-        global $arrLang;
-        $tarjetas = array(); 
+        $tarjetas = array();
         $data = array();
         $data2 = array();
         $data3 = array();
@@ -63,7 +62,7 @@ class PaloSantoHardwareDetection
 
         if($retorno==0 && $respuesta!=null && count($respuesta) > 0 && is_array($respuesta)){
             $idTarjeta = 0;
-            $count = 0; 
+            $count = 0;
             foreach($respuesta as $key => $linea){
                 $estado_asterisk       = _tr('Unknown');
                 $estado_asterisk_color = "gray";
@@ -76,21 +75,21 @@ class PaloSantoHardwareDetection
                    $dataCardParam['num_serie'] = " ";
                    $dataCardParam['id_card'] = " ";
                    }else $dataCardParam['id_card']=$idTarjeta;
-                   if($dataCardParam['manufacturer']!=" "){ 
+                   if($dataCardParam['manufacturer']!=" "){
                         $exist_data="yes";
-                        $data3['manufacturer'] = $pDB->DBCAMPO($dataCardParam['manufacturer']); 
+                        $data3['manufacturer'] = $pDB->DBCAMPO($dataCardParam['manufacturer']);
                    }else{ $data3['manufacturer']    = $pDB->DBCAMPO(" ");
                         $exist_data = "no";
                    }
 
-                   if($dataCardParam['num_serie']!=" "){ 
+                   if($dataCardParam['num_serie']!=" "){
                         $exist_data="yes";
                         $data3['num_serie'] = $pDB->DBCAMPO($dataCardParam['num_serie']);
                    }else{ $data3['num_serie'] = $pDB->DBCAMPO(" ");
                         $exist_data = "no";
                    }
                    if($dataCardParam['manufacturer']==" " && $dataCardParam['num_serie']==" " && $dataCardParam['id_card']==" "){
-                        $data3['id_card']    = $pDB->DBCAMPO($regs[1]); 
+                        $data3['id_card']    = $pDB->DBCAMPO($regs[1]);
                         $this->addCardManufacturer($pDB, $data3);
                    }else $this->updateCardParameter($pDB, $data3, array("id_card"=>$regs[1]));
                    $tarjetas["TARJETA$idTarjeta"]['DESC'] = array(
@@ -155,7 +154,7 @@ class PaloSantoHardwareDetection
                     //Tipo de las lineas
                     $tipo = $regs1[2];
                     $tarjetas["TARJETA$idTarjeta"]['DESC']['MEDIA'] = $tipo;
-                                        
+
                     $dataType=preg_split('/[:]/',$regs1[4],2);
                     if(count($dataType)>1){
                         $arrEcho=preg_split('/[^\w]/',trim($dataType[1]),2);
@@ -205,7 +204,7 @@ class PaloSantoHardwareDetection
     }
 
     function getMisdnPortInfo()
-    {   
+    {
 
         exec('/usr/bin/misdnportinfo',$arrConsole,$flagStatus);
         if($flagStatus == 0)
@@ -215,7 +214,6 @@ class PaloSantoHardwareDetection
 
     function hardwareDetection($chk_dahdi_replace,$path_file_dahdi,$there_is_sangoma_card,$there_is_misdn_card)
     {
-        global $arrLang;
         $there_is_other_card= "";
         $message = _tr("Satisfactory Hardware Detection");
         $there_is_other_card  ="";
@@ -243,11 +241,11 @@ class PaloSantoHardwareDetection
     /////////////////////////NEW FUNCTIONS/////////////////////////
 
     /**
-     * Procedimiento que combina la transferencia de spans digitales, y la 
+     * Procedimiento que combina la transferencia de spans digitales, y la
      * recuperación de los datos transferidos.
-     * 
+     *
      * @param   object  $pDB    Conexión a la base hardware_detector.db
-     * 
+     *
      * @return  NULL en caso de error, o lista indexada por span_num:
      *          id_card span_num tmsource linebuildout framing coding
      */
@@ -259,10 +257,10 @@ class PaloSantoHardwareDetection
 
     /**
      * Procedimiento que transfiere la información de los spans digitales desde
-     * el archivo /etc/dahdi/system.conf hacia la tabla span_parameter. 
-     * 
+     * el archivo /etc/dahdi/system.conf hacia la tabla span_parameter.
+     *
      * @param   object  $pDB    Conexión a la base hardware_detector.db
-     * 
+     *
      * @return  void
      */
     function transferirSpanConfig($pDB)
@@ -276,9 +274,9 @@ class PaloSantoHardwareDetection
                 // Revisar si este span es un wanpipe
                 list($dummy, $iSpan, $iTimeSource, $iLBO, $sFraming, $sCoding) = $regs;
                 $crc = (strpos($sLinea, 'crc4') !== FALSE) ? 'crc4' : 'ncrc4';
-                
+
                 $sMedioWanpipe = NULL;  // T1/E1 o NULL si no es wanpipe o no es digital
-                if (file_exists("/proc/dahdi/$iSpan") && 
+                if (file_exists("/proc/dahdi/$iSpan") &&
                     strpos(file_get_contents("/proc/dahdi/$iSpan"), 'wanpipe') !== FALSE) {
                     // Confirmado que es wanpipe. Se busca /etc/wanpipe/wanpipeN.conf
                     if (file_exists("/etc/wanpipe/wanpipe$iSpan.conf")) {
@@ -298,23 +296,23 @@ class PaloSantoHardwareDetection
             }
         }
     }
-    
+
     /**
      * Procedimiento que lee la información de la tabla de spans digitales que
      * ha sido previamente llenada por transferirSpanConfig()
-     * 
+     *
      * @param   object  $pDB    Conexión a la base hardware_detector.db
-     * 
+     *
      * @return  NULL en caso de error, o lista indexada por span_num:
      *          id_card span_num tmsource linebuildout framing coding
      */
     function leerSpanConfig($pDB, $iSpan = NULL)
     {
-    	$sPeticionSQL = 
+    	$sPeticionSQL =
             'SELECT id_card, span_num, timing_source AS tmsource, ' .
                 'linebuildout AS lnbuildout, framing, coding, '.
                 'wanpipe_force_media, crc ' .
-            'FROM span_parameter';            
+            'FROM span_parameter';
         $paramSQL = array();
         if (!is_null($iSpan)) {
         	$sPeticionSQL .= ' WHERE span_num = ?';
@@ -335,14 +333,14 @@ class PaloSantoHardwareDetection
 
     /**
      * Procedimiento que guarda para el span indicado, la configuración de span
-     * Luego se debe llamar refreshDahdiConfiguration() para aplicar cambios 
-     * 
+     * Luego se debe llamar refreshDahdiConfiguration() para aplicar cambios
+     *
      * @param int       $idSpan     ID del span que se va a modificar
      * @param int       $tmsource   0 si es master, o prioridad de esclavo 1..N
      * @param int       $lnbuildout Longitud del cable 0..7
      * @param string    $framing    d4 esf cas ccs
      * @param string    $coding     ami b8zs hdb3
-     * 
+     *
      * @return  bool    VERDADERO para éxito, FALSO para error
      */
     function guardarSpanConfig($pDB, $idSpan, $tmsource, $lnbuildout, $framing, $coding, $crc, $force_media = NULL)
@@ -370,7 +368,7 @@ class PaloSantoHardwareDetection
         $r = $pDB->genQuery(
             'UPDATE span_parameter SET timing_source = ?, linebuildout = ?, ' .
                 'framing = ?, coding = ?, wanpipe_force_media = ?, crc = ? ' .
-            'WHERE span_num = ?', 
+            'WHERE span_num = ?',
             array($tmsource, $lnbuildout, $framing, $coding, $force_media, $crc, $idSpan));
         if (!$r) {
             $this->errMsg = $pDB->errMsg;
@@ -381,9 +379,9 @@ class PaloSantoHardwareDetection
 
     /**
      * Procedimiento que llama al ayudante dahdiconfig para que modifique la
-     * información de spans y de cancelador de eco para que se ajuste a lo 
+     * información de spans y de cancelador de eco para que se ajuste a lo
      * almacenado en la base de datos.
-     * 
+     *
      * @return bool VERDADERO en caso de éxito, FALSO en error
      */
     function refreshDahdiConfiguration()
@@ -433,11 +431,11 @@ class PaloSantoHardwareDetection
 
     private function deleteCardManufacturer($pDB, $idCard){
         $query = "DELETE FROM card_parameter";
-        
+
         $strWhere = "id_card=$idCard";
         // Clausula WHERE aqui
         if(!empty($strWhere)) $query .= "WHERE $strWhere ";
-    
+
         $result = $pDB->genQuery($query);
     }
 

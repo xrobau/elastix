@@ -182,6 +182,10 @@ fi
 
 %changelog
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Repositories: update list of default active repositories. Replace
+  previous implementation with one that can be configured server-side in a
+  future version.
+  SVN Rev[7332]
 - CHANGED: Repositories: switch all uses of $arrLang to _tr() and replace
   hand-coded translation loading with load_language_module().
   SVN Rev[7331]

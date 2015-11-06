@@ -51,7 +51,24 @@ class PaloSantoRepositories
             $auxRepo      = $this->scanFileRepo($ruta,$archivoRepo);
             $repositorios = array_merge($repositorios,$auxRepo);
         }
+
+        $defaultrepos = $this->_listarRepositoriosActivosOmision();
+        for ($i = 0; $i < count($repositorios); $i++) {
+            $repositorios[$i]['defaultactive'] = (in_array($repositorios[$i]['id'], $defaultrepos));
+        }
+
         return $repositorios;
+    }
+
+    private function _listarRepositoriosActivosOmision()
+    {
+        // TODO: parametrizar de algún lado, posiblemente de elastix-addons
+        // ATENCION: $arrConf["main_repos"] también restringe repos según el filtro
+        return array(
+            'base', 'updates', 'addons', 'extras', 'elastix-base', 'elastix-updates',
+            'elastix-extras', 'epel', 'commercial-addons', 'LowayResearch', 'iperfex',
+            'pgdg91',
+        );
     }
 
     function setRepositorios($ruta,$arrReposActivos,$typeRepository,$mainRepos)

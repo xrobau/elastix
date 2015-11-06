@@ -1,12 +1,6 @@
-function defaultValues(totalRepos,centosversion,arquitectura)
+function defaultValues()
 {
-    for(var i=0;i<totalRepos;i++){
-        var chkbox = document.getElementById("repo-"+i);
-        var repo = $("#repo-"+i).parent().next().html();
-        if(repo == "CentOS-"+centosversion+" - Base" || repo == "CentOS-"+centosversion+" - Updates" || repo == "CentOS-"+centosversion+" - Addons" || repo == "CentOS-"+centosversion+" - Extras" || repo == "Base RPM Repository for Elastix" || repo == "Updates RPM Repository for Elastix" || repo == "Extras RPM Repository for Elastix" || repo == "Extra Packages for Enterprise Linux 5 - "+arquitectura || repo == "Base RPM Repository for Elastix Commercial-Addons" || repo == "Loway Research Yum Repository" ||
-        repo == "Commercial-Addons RPM Repository for Elastix")
-            chkbox.checked = true;
-        else
-            chkbox.checked = false;
-    }
+    var chk_repos = $('input[type=checkbox][name^="repo-"]');
+    chk_repos.prop('checked', false);
+    chk_repos.filter('.defaultactive').prop('checked', true);;
 }

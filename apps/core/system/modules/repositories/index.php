@@ -85,10 +85,12 @@ function listRepositories($smarty, $module_name, $local_templates_dir,$arrConf)
     if (is_array($arrRepositorios)) {
         for($i=$offset;$i<$end;$i++){
             $activo = "";
-            if($arrRepositorios[$i]['activo'])
-                $activo="checked='checked'";
-             $arrData[] = array(
-                            "<input $activo name='repo-".$arrRepositorios[$i]['id']."' type='checkbox' id='repo-$i' />",$valor = str_replace(array("\$releasever","\$basearch"),array($version,$arch),$arrRepositorios[$i]['name']),);
+            if ($arrRepositorios[$i]['activo']) $activo .= ' checked="checked"';
+            if ($arrRepositorios[$i]['defaultactive']) $activo .= ' class="defaultactive"';
+            $arrData[] = array(
+                "<input $activo name='repo-".$arrRepositorios[$i]['id']."' type='checkbox' />",
+                 str_replace(array("\$releasever","\$basearch"),array($version,$arch),$arrRepositorios[$i]['name']),
+             );
         }
     }
 

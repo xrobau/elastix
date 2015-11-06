@@ -182,6 +182,9 @@ fi
 
 %changelog
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: User List: switch all uses of $arrLang to _tr() and replace
+  hand-coded translation loading with load_language_module().
+  SVN Rev[7345]
 - CHANGED: Shutdown: switch all uses of $arrLang to _tr() and replace
   hand-coded translation loading with load_language_module().
   SVN Rev[7344]

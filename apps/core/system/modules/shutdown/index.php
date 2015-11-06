@@ -30,35 +30,28 @@
 function _moduleContent(&$smarty, $module_name) {
 //include module files
     include_once "modules/$module_name/configs/default.conf.php";
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
 
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
     //folder path for custom templates
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
     $smarty->assign("icon","modules/$module_name/images/system_shutdown.png");
-    $smarty->assign("title",$arrLang["Shutdown"]);
+    $smarty->assign("title",_tr("Shutdown"));
     if(isset($_POST['submit_accept'])) {
-        $smarty->assign("SHUTDOWN_PROGRESS", $arrLang["Shutdown in progress"]);
-        $smarty->assign("MSG_LINK", $arrLang["Continue"]);
+        $smarty->assign("SHUTDOWN_PROGRESS", _tr("Shutdown in progress"));
+        $smarty->assign("MSG_LINK", _tr("Continue"));
         if($_POST['shutdown_mode']=='1') {
-            $smarty->assign("SHUTDOWN_MSG", $arrLang["Your system in shutting down now. Please, try again later."]);
+            $smarty->assign("SHUTDOWN_MSG", _tr("Your system in shutting down now. Please, try again later."));
             exec("sudo -u root /sbin/shutdown -h now", $salida, $retorno);
             $salida = $smarty->fetch("file:$local_templates_dir/shutdown_in_progress.tpl");
         } else if ($_POST['shutdown_mode']=='2') {
-            $smarty->assign("SHUTDOWN_MSG", $arrLang["The reboot signal has been sent correctly."]);
+            $smarty->assign("SHUTDOWN_MSG", _tr("The reboot signal has been sent correctly."));
             exec("sudo -u root /sbin/shutdown -r now", $salida, $retorno);
             $salida = $smarty->fetch("file:$local_templates_dir/shutdown_in_progress.tpl");
         } else {
@@ -66,10 +59,10 @@ function _moduleContent(&$smarty, $module_name) {
         }
 
     } else {
-        $smarty->assign("ACCEPT", $arrLang["Accept"]);
-        $smarty->assign("CONFIRM_CONTINUE", $arrLang["Are you sure you wish to continue?"]);
-        $smarty->assign("HALT", $arrLang["Halt"]);
-        $smarty->assign("REBOOT", $arrLang["Reboot"]);
+        $smarty->assign("ACCEPT", _tr("Accept"));
+        $smarty->assign("CONFIRM_CONTINUE", _tr("Are you sure you wish to continue?"));
+        $smarty->assign("HALT", _tr("Halt"));
+        $smarty->assign("REBOOT", _tr("Reboot"));
         $salida = $smarty->fetch("file:$local_templates_dir/shutdown.tpl");
     }
 

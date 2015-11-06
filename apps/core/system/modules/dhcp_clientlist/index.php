@@ -36,23 +36,15 @@ function _moduleContent(&$smarty, $module_name)
     include_once "modules/$module_name/configs/default.conf.php";
     include_once "modules/$module_name/libs/paloSantoDhcpClient.class.php";
 
-    //include file language agree to elastix configuration
-    //if file language not exists, then include language by default (en)
-    $lang=get_language();
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $lang_file="modules/$module_name/lang/$lang.lang";
-    if (file_exists("$base_dir/$lang_file")) include_once "$lang_file";
-    else include_once "modules/$module_name/lang/en.lang";
+    load_language_module($module_name);
 
     //global variables
     global $arrConf;
     global $arrConfModule;
-    global $arrLang;
-    global $arrLangModule;
     $arrConf = array_merge($arrConf,$arrConfModule);
-    $arrLang = array_merge($arrLang,$arrLangModule);
 
     //folder path for custom templates
+    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
     $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
     $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
@@ -65,36 +57,36 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
 //         case "save_dhcpclient":
-//             $content = saveNewDhcpClient($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+//             $content = saveNewDhcpClient($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 //             break;
         case "new_dhcpclient":
-            $content = viewFormDhcpClientlist($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = viewFormDhcpClientlist($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
         case "see_dhcpclient":
-            $content = viewFormDhcpClientlist($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+            $content = viewFormDhcpClientlist($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
 //         case "delete_list":
-//             $content = delete_emailList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+//             $content = delete_emailList($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
 //             break;
-        default: 
-            $content = reportDhcpClientlist($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+        default:
+            $content = reportDhcpClientlist($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
     }
     return $content;
 }
 
-function reportDhcpClientlist($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function reportDhcpClientlist($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pDhcpClientlist = new paloSantoDhcpClienList($pDB);
     $filter_field = "";
     $filter_value = "";
     $action = getParameter("nav");
     $start  = getParameter("start");
-    
+
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
     $limit  = 20;
-    
+
     $arrResult = $pDhcpClientlist->getDhcpClientList();
     $total  = count($arrResult);
 
@@ -116,11 +108,11 @@ function reportDhcpClientlist($smarty, $module_name, $local_templates_dir, &$pDB
                 $arrResult[$i]['macaddress'],
                 ($arrResult[$i]['binding state'] == 'active') ? _tr('Yes') : _tr('No'),
                 "<a href='?menu=$module_name&action=see_dhcpclient&id=".$i."'>"._tr('View Details')."</a>",
-            );            
+            );
         }
     }
 
-    $buttonDelete = "<input type='submit' name='delete_dhcpclient' value='{$arrLang["Delete"]}' class='button' onclick=\" return confirmSubmit('{$arrLang["Are you sure you wish to delete the Ip."]}');\" />";
+    $buttonDelete = "<input type='submit' name='delete_dhcpclient' value='"._tr("Delete")."' class='button' onclick=\" return confirmSubmit('"._tr("Are you sure you wish to delete the Ip.")."');\" />";
 
     $arrGrid = array(
         "title"    => _tr("DHCP Client List"),
@@ -141,16 +133,16 @@ function reportDhcpClientlist($smarty, $module_name, $local_templates_dir, &$pDB
     );
     //begin section filter
 
-   // $arrFormFilterDhcplist = createFieldFilter($arrLang);
+   // $arrFormFilterDhcplist = createFieldFilter();
    // $oFilterForm = new paloForm($smarty, $arrFormFilterDhcplist);
-//     $smarty->assign("SHOW", $arrLang["Show"]);
-    $smarty->assign("NEW_DHCPCLIENT", $arrLang["New Dhcp client"]);
+//     $smarty->assign("SHOW", _tr("Show"));
+    $smarty->assign("NEW_DHCPCLIENT", _tr("New Dhcp client"));
 
   //  $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST);
     //end section filter
 
   //  $oGrid->showFilter(trim($htmlFilter));
-    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData,$arrLang);
+    $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
     if (strpos($contenidoModulo, '<form') === FALSE)
         $contenidoModulo = "<form  method='POST' style='margin-bottom:0;' action=$url>$contenidoModulo</form>";
     //end grid parameters
@@ -158,10 +150,10 @@ function reportDhcpClientlist($smarty, $module_name, $local_templates_dir, &$pDB
     return $contenidoModulo;
 }
 
-function createFieldFilter($arrLang){
+function createFieldFilter(){
 
     $arrFormElements = array(
-//             "domain"   => array("LABEL"          => $arrLang["Domain"],
+//             "domain"   => array("LABEL"          => _tr("Domain"),
 //                                     "REQUIRED"               => "yes",
 //                                     "INPUT_TYPE"             => "SELECT",
 //                                     "INPUT_EXTRA_PARAM"      => $arrDominios,
@@ -173,13 +165,13 @@ function createFieldFilter($arrLang){
 }
 
 
-function viewFormDhcpClientlist($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function viewFormDhcpClientlist($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pDhcpClientlist = new paloSantoDhcpClienList($pDB);
 
-    $arrFormDhcplist = createFieldForm($arrLang);
+    $arrFormDhcplist = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormDhcplist);
-    
+
     //begin, Form data persistence to errors and other events.
     $_DATA  = $_POST;
     $action = getParameter("action");
@@ -197,41 +189,41 @@ function viewFormDhcpClientlist($smarty, $module_name, $local_templates_dir, &$p
         if(is_array($dataDhcplist) & count($dataDhcplist)>0)
             $_DATA = $dataDhcplist;
         else{
-            $smarty->assign("mb_title", $arrLang["Error get Data"]);
+            $smarty->assign("mb_title", _tr("Error get Data"));
             $smarty->assign("mb_message", $pDhcpClientlist->errMsg);
         }
     }
 
-    $smarty->assign("SAVE", $arrLang["Save"]);
-    $smarty->assign("EDIT", $arrLang["Edit"]);
-    $smarty->assign("CANCEL", $arrLang["Cancel"]);
-    $smarty->assign("REQUIRED_FIELD", $arrLang["Required field"]);
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("EDIT", _tr("Edit"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
     $smarty->assign("icon", "modules/$module_name/images/system_network_dhcp_client_list.png");
 
-    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",$arrLang["View Details"], $_DATA);
+    $htmlForm = $oForm->fetchForm("$local_templates_dir/form.tpl",_tr("View Details"), $_DATA);
     $content = "<form  method='POST' style='margin-bottom:0;' action='?menu=$module_name'>".$htmlForm."</form>";
 
     return $content;
 }
 
-function saveNewDhcpClient($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, $arrLang)
+function saveNewDhcpClient($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
     $pDhcpClientlist = new paloSantoDhcpClienList($pDB);
-    
-    $arrFormDhcplist = createFieldForm($arrLang);
+
+    $arrFormDhcplist = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormDhcplist);
 
     if(!$oForm->validateForm($_POST)){
-        // Validation basic, not empty and VALIDATION_TYPE 
-        $smarty->assign("mb_title", $arrLang["Validation Error"]);
+        // Validation basic, not empty and VALIDATION_TYPE
+        $smarty->assign("mb_title", _tr("Validation Error"));
         $arrErrores = $oForm->arrErroresValidacion;
-        $strErrorMsg = "<b>{$arrLang['The following fields contain errors']}:</b><br/>";
+        $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/>";
         if(is_array($arrErrores) && count($arrErrores) > 0){
             foreach($arrErrores as $k=>$v)
                 $strErrorMsg .= "$k, ";
         }
         $smarty->assign("mb_message", $strErrorMsg);
-        //return $content = viewFormEmaillist($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrLang);
+        //return $content = viewFormEmaillist($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
     }else{
         $dataDhcpClient = array();
         $data = array();
@@ -239,41 +231,41 @@ function saveNewDhcpClient($smarty, $module_name, $local_templates_dir, &$pDB, $
 //         $dataDhcpClient['iphost'] = $pDB->DBCAMPO($_POST['iphost']);
 //         $dataDhcpClient['date_starts'] = $pDB->DBCAMPO($_POST['date_starts']);
 //         $dataDhcpClient['date_ends'] = $pDB->DBCAMPO($_POST['date_ends']);
-//         
+//
 //         $dataDhcpClient['macaddress'] = $pDB->DBCAMPO($_POST['macaddress']);
-// 
+//
 //         $pDhcpClientlist->addNewMailList($_POST['emailadmin'], $_POST['password'], $_POST['namelist']);
         //$result = $pEmaillist->addEmailListDB($dataEmailList);
-        
+
         header("Location: ?menu=$module_name&action=");
     }
 }
 
-function createFieldForm($arrLang)
+function createFieldForm()
 {
     $arrFields = array(
-            "iphost"   => array(      "LABEL"                  => $arrLang["IP Address"],
+            "iphost"   => array(      "LABEL"                  => _tr("IP Address"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:200px","maxlength" =>"200"),
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "date_starts"   => array(      "LABEL"                  => $arrLang["Start Date"],
+            "date_starts"   => array(      "LABEL"                  => _tr("Start Date"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:200px","maxlength" =>"200"),
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "date_ends"   => array(      "LABEL"                  => $arrLang["End Date"],
+            "date_ends"   => array(      "LABEL"                  => _tr("End Date"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:200px","maxlength" =>"200"),
                                             "VALIDATION_TYPE"        => "text",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-            "macaddress"   => array(      "LABEL"                  => $arrLang["MAC Address"],
+            "macaddress"   => array(      "LABEL"                  => _tr("MAC Address"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "TEXT",
                                             "INPUT_EXTRA_PARAM"      => array("style" => "width:200px","maxlength" =>"200"),
@@ -290,7 +282,7 @@ function getAction()
         return "save_dhcpclient";
     else if(getParameter("new_dhcpclient"))
         return "new_dhcpclient";
-    else if(getParameter("delete_dhcpclient")) 
+    else if(getParameter("delete_dhcpclient"))
         return "delete_dhcpclient";
     else if(getParameter("action")=="see_dhcpclient")
         return "see_dhcpclient";

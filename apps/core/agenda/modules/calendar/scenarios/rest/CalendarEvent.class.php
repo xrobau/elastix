@@ -52,16 +52,16 @@ class CalendarEventBase extends REST_Resource
     function HTTP_GET()
     {
         global $arrConf;
-        
+
         $pCore_Calendar = new core_Calendar();
         $json = new paloSantoJSON();
 
         // Verificar si se está sirviendo un feed para fullcalendar
         $bFullCalendar = isset($_GET['format']) && $_GET['format'] == 'fullcalendar';
-        
+
         // Verificar si se está sirviendo una descarga iCal
         $bIcal = isset($_GET['format']) && $_GET['format'] == 'ical';
-        
+
         // FullCalendar manda fechas como timestamps de Unix
         if ($bFullCalendar) {
             if (isset($_GET['start'])) $_GET['startdate'] = date('Y-m-d', $_GET['start']);
@@ -81,7 +81,7 @@ class CalendarEventBase extends REST_Resource
             $json->set_error($error);
             return $json->createJSON();
         }
-        
+
         if ($bIcal) {
             // Formato iCal
             header('Content-Type: text/calendar');
@@ -101,7 +101,7 @@ class CalendarEventBase extends REST_Resource
                         'end'       =>  $event['endtime'],
                         'allDay'    =>  false,
                         'color'     =>  $event['color'],
-                        
+
                         /*  Este URL es el recurso REST y no debe visitarse desde el browser.
                             El callback eventClick() de fullCalendar debe de recoger este
                             URL para hacer la petición REST, y devolver FALSE desde el
@@ -115,7 +115,7 @@ class CalendarEventBase extends REST_Resource
                 foreach (array_keys($result['events']) as $k)
                     $result['events'][$k]['url'] = REST_CALENDAR_BASEURL.$result['events'][$k]['id'];
             }
-            
+
             $json = new Services_JSON();
             return $json->encode($result);
         }
@@ -140,7 +140,7 @@ class CalendarEventBase extends REST_Resource
             'emails_notification', 'color') as $k) {
             if (!isset($_POST[$k])) $_POST[$k] = NULL;
         }
-        
+
         $pCore_Calendar      = new core_Calendar();
         $result = $pCore_Calendar->addCalendarEvent($_POST['startdate'],
             $_POST['enddate'], $_POST['subject'], $_POST['description'],
@@ -150,7 +150,7 @@ class CalendarEventBase extends REST_Resource
         if ($result !== FALSE) {
             Header('HTTP/1.1 201 Created');
             Header('Location: '.REST_CALENDAR_BASEURL.$result);
-            return 'null';            
+            return 'null';
         } else {
             $error = $pCore_Calendar->getError();
             if ($error["fc"] == "DBERROR")
@@ -167,7 +167,7 @@ class CalendarEventBase extends REST_Resource
 class CalendarEventById extends REST_Resource
 {
     protected $_idNumero;
-    
+
     function __construct($sIdNumero)
     {
         $this->_idNumero = $sIdNumero;
@@ -177,7 +177,7 @@ class CalendarEventById extends REST_Resource
     {
         $pCore_Calendar = new core_Calendar();
         $json = new paloSantoJSON();
-        
+
         $result = $pCore_Calendar->listCalendarEvents(NULL,NULL, $this->_idNumero);
         if (!is_array($result)) {
             $error = $pCore_Calendar->getError();
@@ -195,7 +195,7 @@ class CalendarEventById extends REST_Resource
             $json->set_error('No event was found');
             return $json->createJSON();
         }
-        
+
         $tupla = $result['events'][0];
         $tupla['url'] = REST_CALENDAR_BASEURL.$this->_idNumero;
         $json = new Services_JSON();
@@ -218,17 +218,17 @@ class CalendarEventById extends REST_Resource
         }
         foreach (array('startdate', 'enddate', 'subject', 'description',
             'asterisk_call', 'recording', 'call_to', 'reminder_timer', 'color',
-            'emails_notification') as $k) 
+            'emails_notification') as $k)
             if (!isset($_POST[$k])) $_POST[$k] = NULL;
 
         $pCore_Calendar = new core_Calendar();
-        $result = $pCore_Calendar->editCalendarEvent($this->_idNumero, 
+        $result = $pCore_Calendar->editCalendarEvent($this->_idNumero,
             $_POST['startdate'], $_POST['enddate'], $_POST['subject'],
             $_POST['description'], $_POST['asterisk_call'], $_POST['recording'],
-            $_POST['call_to'], $_POST['reminder_timer'], $_POST['color'], 
+            $_POST['call_to'], $_POST['reminder_timer'], $_POST['color'],
             $_POST['emails_notification']);
         if ($result !== FALSE) {
-            header('HTTP/1.1 205 Reset Content');
+            header('HTTP/1.1 204 No Content');
             return 'null';
         } else {
             $error = $pCore_Calendar->getError();

@@ -101,6 +101,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Calendar: use 204 No Content instead of 205 Reset Content when saving
+  event. This fixes the refresh after saving an existing contact.
+  SVN Rev[7334]
+
 * Sun Nov  1 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Calendar: update phone picker to use rewritten elastixneo theme.
   SVN Rev[7292]

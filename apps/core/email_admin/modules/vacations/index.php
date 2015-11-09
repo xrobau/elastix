@@ -272,6 +272,7 @@ function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$p
 
     if($res){
 	if($timeSince >= 0){
+	    $subject = str_replace("{END_DATE}", $end_date, $subject);
 	    $body = str_replace("{END_DATE}", $end_date, $body);
 	    $result = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture);
 	}else    $result = true;

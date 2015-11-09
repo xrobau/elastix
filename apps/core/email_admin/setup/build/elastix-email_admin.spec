@@ -202,6 +202,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Nov  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Vacations: implement substitution of {END_DATE} in Subject line. Add
+  empty line between MIME headers and body in order to fix failure of body to
+  be displayed when sent in Elastix 4.
+  SVN Rev[7347]
+
 * Mon Nov  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: disable_vacations.php: remove unused $arrLang.
   SVN Rev[7302]

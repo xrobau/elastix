@@ -180,6 +180,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Nov  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: remove height:800px CSS rule for FTP backup panel.
+  SVN Rev[7346]
+
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: User List: switch all uses of $arrLang to _tr() and replace
   hand-coded translation loading with load_language_module().

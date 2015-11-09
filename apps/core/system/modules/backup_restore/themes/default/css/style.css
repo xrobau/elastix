@@ -1,26 +1,25 @@
 #table_center{
     width:100%;
-    height:800px;
     margin:0 auto;
 }
 
-#sortable1, #sortable2 { 
-    list-style-type: none; 
-    margin: 0; 
+#sortable1, #sortable2 {
+    list-style-type: none;
+    margin: 0;
     float: left;
-    margin-right: 10px; 
-    background: #656565; 
+    margin-right: 10px;
+    background: #656565;
     padding: 2px;
     width: 316px;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
 }
-    
-#sortable1 li, #sortable2 li { 
+
+#sortable1 li, #sortable2 li {
     margin: 2px;
-    padding: 5px; 
-    font-size: 1.2em; 
+    padding: 5px;
+    font-size: 1.2em;
     width: 300px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
@@ -43,7 +42,7 @@
 }
 
 .item{
-    font-size: 0.6em; 
+    font-size: 0.6em;
 }
 
 .divs{
@@ -106,7 +105,7 @@ li{
     background-position: top;
 }
 
-/* Arreglo temporal para droppable que no recibe elemento en lista vacía de 
+/* Arreglo temporal para droppable que no recibe elemento en lista vacía de
 altura 0 (Elastix bug #1526) */
 .droptrue, .droptrue2 {
     min-height: 20px;

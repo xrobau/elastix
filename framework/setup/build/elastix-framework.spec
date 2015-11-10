@@ -388,6 +388,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Nov 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: add explicit index.php in two themes where it would
+  otherwise be replaced by config.php when displaying Embedded FreePBX.
+  SVN Rev[7351]
 - ADDED: Framework: include jquery-migrate to work around modules requiring
   jQuery 1.8 APIs, in particular Embedded FreePBX.
   SVN Rev[7350]

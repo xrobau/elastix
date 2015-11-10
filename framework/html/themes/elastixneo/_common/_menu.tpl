@@ -12,7 +12,7 @@
 </div>
 <div id="smenubox"> <!-- mostrando contenido del menu secundario -->
 {foreach from=$arrSubMenu key=idSubMenu item=subMenu}
-    <div {if $idSubMenu eq $idSubMenuSelected}class="selected"{/if}><a href="?menu={$idSubMenu}">{$subMenu.Name}</a></div>
+    <div {if $idSubMenu eq $idSubMenuSelected}class="selected"{/if}><a href="index.php?menu={$idSubMenu}">{$subMenu.Name}</a></div>
 {/foreach}
 </div>
 <div id="smenubox-arrows">

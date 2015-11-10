@@ -91,7 +91,7 @@
                                 {foreach from=$arrSubMenu key=idSubMenu item=subMenu}
                                 {if $idSubMenu eq $idSubMenuSelected}
                                 <td title="" class="botonon">
-                                        <a href="?menu={$idSubMenu}" class="submenu_on">{$subMenu.Name}{if $subMenu.HasChild }<img alt='' src='images/miniArrowDown.png' align='absmiddle' style='border:0;'/>{/if}</a>
+                                        <a href="index.php?menu={$idSubMenu}" class="submenu_on">{$subMenu.Name}{if $subMenu.HasChild }<img alt='' src='images/miniArrowDown.png' align='absmiddle' style='border:0;'/>{/if}</a>
                                 </td>
                                 {else}
                                 <td title="" class="botonoff"><a href="index.php?menu={$idSubMenu}">{$subMenu.Name}{if $subMenu.HasChild }<img alt='' src='images/miniArrowDown.png' align='absmiddle' style='border:0;'/>{/if}</a></td>

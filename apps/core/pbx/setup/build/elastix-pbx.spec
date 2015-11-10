@@ -297,6 +297,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Nov 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: PBX Admin: fix two unpaired div tags in embedded admin template. Patch
+  one module on the fly to fix an instance of invalid generated HTML.
+  SVN Rev[7349]
+
 * Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Voicemail: switch all uses of $arrLang to _tr() and replace
   hand-coded translation loading with load_language_module().

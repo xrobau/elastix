@@ -12,7 +12,7 @@ $version_tag = '?load_version=' . urlencode($version);
 
 $html = '';
 $html .= '</div>';//page_body
-$html .= '</div>'; //page
+//$html .= '</div><!-- div id="page" -->'; //page
 
 //add javascript
 
@@ -49,7 +49,7 @@ $clean = array(
 		'FOPPASSWORD',
 		'FOPSORT',
 );
-	
+
 foreach ($clean as $var) {
 	if (isset($fpbx['conf'][$var])) {
 		unset($fpbx['conf'][$var]);
@@ -61,7 +61,7 @@ $fpbx['conf']['text_dir']		= isset($_COOKIE['lang']) && in_array($_COOKIE['lang'
 $fpbx['conf']['uniqueid']		= sql('SELECT data FROM module_xml WHERE id = "installid"', 'getOne');
 $fpbx['conf']['dist']			= _module_distro_id();
 $fpbx['conf']['ver']			= get_framework_version();
-$fpbx['conf']['reload_needed']  = $reload_needed; 
+$fpbx['conf']['reload_needed']  = $reload_needed;
 $fpbx['msg']['framework']['reload_unidentified_error'] = _(" error(s) occurred, you should view the notification log on the dashboard or main screen to check for more details.");
 $fpbx['msg']['framework']['close'] = _("Close");
 $fpbx['msg']['framework']['continuemsg'] = _("Continue");//continue is a resorved word!
@@ -78,7 +78,7 @@ $fpbx['msg']['framework']['noupemail'] = _("Are you sure you don't want to provi
 $fpbx['msg']['framework']['invalid_responce'] = _("Error: Did not receive valid response from server");
 $fpbx['msg']['framework']['invalid_response'] = $fpbx['msg']['framework']['invalid_responce']; // TYPO ABOVE
 $fpbx['msg']['framework']['validateSingleDestination']['required'] = _('Please select a "Destination"');
-$fpbx['msg']['framework']['validateSingleDestination']['error'] = _('Custom Goto contexts must contain the string "custom-".  ie: custom-app,s,1'); 
+$fpbx['msg']['framework']['validateSingleDestination']['error'] = _('Custom Goto contexts must contain the string "custom-".  ie: custom-app,s,1');
 $fpbx['msg']['framework']['weakSecret']['length'] = _("The secret must be at minimum six characters in length.");
 $fpbx['msg']['framework']['weakSecret']['types'] = _("The secret must contain at least two numbers and two letters.");
 
@@ -122,7 +122,7 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== false) {
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
 		<script>
 			!$.cookie('skip_cf_check') //skip check if skip_cf_check cookie is active
-				&& CFInstall	//make sure CFInstall is loaded 
+				&& CFInstall	//make sure CFInstall is loaded
 				&& !!window.attachEvent //attachEvent is ie only, should never fire in other browsers
 				&& window.attachEvent("onload", function() {
 				 CFInstall.check({

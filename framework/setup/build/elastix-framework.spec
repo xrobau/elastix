@@ -387,6 +387,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Tue Nov 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: include jquery-migrate to work around modules requiring
+  jQuery 1.8 APIs, in particular Embedded FreePBX.
+  SVN Rev[7350]
+
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: reintroduce .menulogo2 CSS style in elastixneo theme since
   it is used in two templates from patched FreePBX.

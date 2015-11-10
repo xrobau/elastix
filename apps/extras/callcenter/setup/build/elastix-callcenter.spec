@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Nov 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: verify that AMI is available when receiving new agent list. If
+  not, the QueueStatus run should be delayed until AMI is available. Ported from
+  CallCenterPRO.
+  SVN Rev[7348]
+
 * Thu Nov  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Calls Details: fix page count when displaying all types of calls.
   SVN Rev[7329]

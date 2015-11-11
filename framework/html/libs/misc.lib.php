@@ -663,13 +663,16 @@ function verifyTemplate_vm_email()
 
 function getMenuColorByMenu($pdbACL, $uid)
 {
-    $sql = <<<SQL_PROFILE_MENUCOLOR
-SELECT value FROM acl_profile_properties, acl_user_profile
-WHERE acl_user_profile.id_profile = acl_profile_properties.id_profile
-    AND acl_user_profile.id_user = ? AND acl_profile_properties.property = ?
-SQL_PROFILE_MENUCOLOR;
-    $tupla = $pdbACL->getFirstRowQuery($sql, FALSE, array($uid, 'menuColor'));
-    return (is_array($tupla) && count($tupla) > 0) ? $tupla[0] : '#454545';
+    /* Desde el commit SVN #3231 hecho por (quien ya sabemos), se ha estado
+     * almacenando el valor de menuColor bajo el perfil "default" del recurso
+     * con ID=19, sin importar si existe realmente un recurso con ese ID, o su
+     * identidad. Voy a asumir aquí que (quien ya sabemos) anotó el ID de
+     * recurso para themes_system, así que se pedirá el valor para ese recurso
+     * primero, y luego se consulta al recurso 19 si themes_system no tiene el
+     * valor almacenado. */
+    $pACL = new paloACL($pdbACL);
+    $color = $pACL->getUserProfileProperty($uid, 'themes_system', 'default', 'menuColor');
+    return is_null($color) ? $pACL->getUserProfileProperty($uid, 19, 'default', 'menuColor', '#454545') : $color;
 }
 
 /**

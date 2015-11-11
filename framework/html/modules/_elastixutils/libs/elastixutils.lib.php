@@ -206,60 +206,15 @@ function changeMenuColorByUser()
     $pACL = new paloACL($pdbACL);
     $uid = $pACL->getIdUser($user);
 
-    if($uid===FALSE)
+    if ($uid === FALSE)
         $arrResult['msg'] = _tr("Please your session id does not exist. Refresh the browser and try again.");
-    else{
-        //si el usuario no tiene un color establecido entonces se crea el nuevo registro caso contrario se lo inserta
-        //obteniendo el id profile del usuario
-
-        $id_profile = "";
-        $sPeticionID = "SELECT id_profile FROM acl_user_profile WHERE id_user = ?";
-        $tupla = $pdbACL->getFirstRowQuery($sPeticionID, FALSE, array($uid));
-        if ($tupla === FALSE) {
-            $arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-            return $arrResult;
-        } elseif (count($tupla) == 0) {
-            $id_profile = NULL;
-        } else {
-            $id_profile = $tupla[0];
-        }
-
-        if (is_null($id_profile) || $id_profile == "") {
-            // Crear el nuevo perfil para el usuario indicado...
-            $sPeticionNuevoPerfil = 'INSERT INTO acl_user_profile (id_user, id_resource, profile) VALUES (?, ?, ?)';
-            $r = $pdbACL->genQuery($sPeticionNuevoPerfil, array($uid, "19", "default"));
-            if (!$r) {
-                $arrResult['msg'] = _tr("ERROR DE DB: ").$pDB->errMsg;
-            }
-            $id_profile = $pdbACL->getLastInsertId();
-        }
-        if(isset($id_profile) && $id_profile != ""){
-          $sPeticionPropiedades = "SELECT property, value FROM acl_profile_properties WHERE id_profile = ?";
-          $existColor = false;
-          $tabla = $pdbACL->fetchTable($sPeticionPropiedades, FALSE, array($id_profile));
-          if ($tabla === FALSE) {
-            $arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-          } else {
-            foreach ($tabla as $tupla) {
-                if($tupla[0] == "menuColor")
-                  $existColor = true;
-            }
-            if ($existColor) {
-                $sPeticionSQL = 'UPDATE acl_profile_properties SET value = ? WHERE id_profile = ? AND property = ?';
-                $params = array($color, $id_profile, "menuColor");
-            } else {
-                $sPeticionSQL = 'INSERT INTO acl_profile_properties (id_profile, property, value) VALUES (?, ?, ?)';
-                $params = array($id_profile, "menuColor", $color);
-            }
-            $r = $pdbACL->genQuery($sPeticionSQL, $params);
-            if (!$r) {
-                $arrResult['msg'] = _tr("ERROR DB: ").$pdbACL->errMsg;
-            }else{
-                $arrResult['status'] = TRUE;
-                $arrResult['msg'] = _tr("OK");
-            }
-          }
-        }
+    else {
+        /* Desde el commit SVN #3231 hecho por (quien ya sabemos) el valor de
+         * menuColor se ha estado almacenando bajo el id_resource=19. Ahora se
+         * implementa correctamente que el recurso que posee el color de menú
+         * es themes_system. */
+        $arrResult['status'] = $pACL->saveUserProfileProperty($uid, 'themes_system', 'default', 'menuColor', $color);
+        $arrResult['msg'] = $arrResult['status'] ? _tr("OK") : _tr("ERROR DE DB: ").$pDB->errMsg;
     }
     return $arrResult;
 }

@@ -387,6 +387,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Wed Nov 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: introduce methods paloACL::getUserProfileProperty() and
+  paloACL::saveUserProfileProperty(). Switch menu color management to use these
+  methods as a proof of concept.
+  SVN Rev[7352]
+
 * Tue Nov 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: add explicit index.php in two themes where it would
   otherwise be replaced by config.php when displaying Embedded FreePBX.

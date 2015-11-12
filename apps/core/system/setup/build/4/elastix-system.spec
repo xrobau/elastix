@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -181,6 +181,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Mon Nov  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: remove height:800px CSS rule for FTP backup panel.
   SVN Rev[7346]

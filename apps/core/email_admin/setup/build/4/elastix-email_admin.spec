@@ -3,7 +3,7 @@
 Summary: Elastix Module Email
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -202,6 +202,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Mon Nov  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Vacations: implement substitution of {END_DATE} in Subject line. Add
   empty line between MIME headers and body in order to fix failure of body to

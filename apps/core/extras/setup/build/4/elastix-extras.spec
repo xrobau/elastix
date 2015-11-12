@@ -3,7 +3,7 @@
 Summary: Elastix Extras
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -60,6 +60,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
+- CHANGED: extras - Build/elastix-extras.spec: update specfile with latest
+  SVN history. Bumped version and release in specfile.
+
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Extras: replace "Manufacturer" with "Developer" everywhere.
   SVN Rev[7336]

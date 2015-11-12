@@ -3,7 +3,7 @@
 Summary: Elastix Security
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -133,6 +133,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: security: replace hand-coded translation loading with
   load_language_module().

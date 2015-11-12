@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -101,6 +101,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump version and release in specfile.
+
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: use 204 No Content instead of 205 Reset Content when saving
   event. This fixes the refresh after saving an existing contact.

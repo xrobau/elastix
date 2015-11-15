@@ -387,6 +387,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sat Nov 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix corner case in main menu handling in elastixneo theme
+  where the selected item would cause the overflow menu to overflow itself after
+  being re-added to the main menul.
+  SVN Rev[7355]
+
 * Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

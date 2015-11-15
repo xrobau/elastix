@@ -2,10 +2,10 @@ $(document).ready(function() {
 	$(window).resize(function() {
 		// Ajustar menú de primer nivel
 		elxneo_adjust_mmenu();
-		
+
 		elxneo_resize_jcresizer_table();
 	});
-	
+
 	// Ajustar menús
 	elxneo_adjust_mmenu();
 
@@ -25,7 +25,7 @@ $(document).ready(function() {
 		}).mouseup(function() {
 			if (elxneo_scroll_timer != null) clearInterval(elxneo_scroll_timer);
 		});
-	
+
 	// Aplicar los cambios de color a los menús
 	$('#cmenubox>div#cpallet').ColorPicker({
 		color: '#0000ff',
@@ -45,7 +45,7 @@ $(document).ready(function() {
 	elxneo_display_colorchange();
 	$('#cmenubox>div#cpallet').ColorPickerSetColor($('#userMenuColor').val());
 
-	
+
 	// Manejo de la columna de menú de tercer nivel
 	$("#toggleleftcolumn").click(function() {
 		request("index.php", {
@@ -69,7 +69,7 @@ $(document).ready(function() {
 		elastix_blockUI((/bookmarkon.png/.test(imgBookmark))
 			? $('#toolTip_removingBookmark').val()
 			: $('#toolTip_addingBookmark').val());
-		
+
 		request("index.php", {
 			menu:		'_elastixutils',
 			id_menu:	getCurrentElastixModule(),
@@ -97,7 +97,7 @@ $(document).ready(function() {
 		    		.attr('src',"themes/"+$('#elastix_theme_name').val()+"/images/bookmark.png")
 		    		.attr('title', $("#toolTip_addBookmark").val());
 		    	elxneo_remove_bookmarktab(arrData['idmenu']);
-		    }			
+		    }
 		});
 	});
 	$('#historybox').on('click', 'div>div.neo-bookmarks-equis', function() {
@@ -115,14 +115,14 @@ $(document).ready(function() {
 				return;
 			}
 			if (arrData['action'] != "delete") return;
-			
+
 			// Sólo hacer esto si el menu actual es el que se esta eliminando
 			if (arrData['menu_url'] == arrData['menu_session']) {
 				$('#togglebookmark')
 					.attr('src', "themes/"+$('#elastix_theme_name').val()+"/images/bookmark.png")
 					.attr('title', $("#toolTip_addBookmark").val());
 			}
-			
+
 			elxneo_remove_bookmarktab(arrData['idmenu']);
 		});
 	});
@@ -145,23 +145,27 @@ function elxneo_adjust_mmenu()
 	$('div#elxneo-mmenu-overflow>div')
 		.detach()
 		.insertBefore('div#mmenubox>div:last-child');
-	
+
 	// La flecha de overflow debe estar con top == 0, lo que indica que ya no
 	// hay elementos de menú que se desparraman.
 	while ($('div#mmenubox>div:last-child').position().top > 0)
 		elxneo_move_one_mmenu_to_overflow();
-	
+
 	// Verificar si el primer nivel seleccionado está en overflow
 	var sel_overflow = $('div#elxneo-mmenu-overflow>div.selected');
-	if (sel_overflow.length > 0) {
+	while (sel_overflow.length > 0) {
 		// Quitar uno más para hacer espacio
 		elxneo_move_one_mmenu_to_overflow();
-		
-		// TODO: qué ocurre si selected vuelve a desparramarse al ser agregado?
+
 		sel_overflow.detach().insertBefore('div#mmenubox>div:last-child');
+
+		// Se verifica si selected vuelve a desparramarse al ser agregado.
+		while ($('div#mmenubox>div:last-child').position().top > 0)
+		    elxneo_move_one_mmenu_to_overflow();
+		sel_overflow = $('div#elxneo-mmenu-overflow>div.selected');
 	}
-	
-	// Mostrar el control de scroll de segundo nivel si el último item 
+
+	// Mostrar el control de scroll de segundo nivel si el último item
 	// se desparrama, ocultarlo si no.
 	if ($('div#smenubox>div:last-child').position().top > 0)
 		$('div#smenubox-arrows').show();
@@ -221,14 +225,14 @@ function elxneo_toggle_3menu_visible()
 			.attr('src',"images/expandOut.png")
 			.attr('title', $('#toolTip_showTab').val());
 	}
-	
+
 	elxneo_resize_jcresizer_table();
 }
 
 function elxneo_resize_jcresizer_table()
 {
 	var elxtables = $('form.elastix-standard-formgrid>table.elastix-standard-table');
-	
+
 	// Desactivar y volver a aplicar colResizable luego de quitar width
 	elxtables.colResizable({disable: true});
 	elxtables.find('thead>tr>th').css('width', '');

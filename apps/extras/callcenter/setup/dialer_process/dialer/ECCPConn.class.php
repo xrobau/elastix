@@ -2677,12 +2677,20 @@ LEER_STATS_CAMPANIA;
             $errcode = 417; $errdesc = 'Not in outgoing call';
             return FALSE;
         }
-        if ($infoLlamada['calltype'] != 'outgoing') {
-            //$this->_log->output('ERR: al agendar llamada: no se puede agendar llamada entrante: '.$sAgente);
+
+        switch ($infoLlamada['calltype']) {
+        case 'outgoing':
+            return $this->_agendarLlamadaAgente_outgoing($infoLlamada['callid'], $sAgente, $horario, $bMismoAgente,
+                $sNuevoTelefono, $sNuevoNombre, $errcode, $errdesc);
+        default:
             $errcode = 417; $errdesc = 'Not in outgoing call';
             return FALSE;
         }
+    }
 
+    private function _agendarLlamadaAgente_outgoing($callid, $sAgente, $horario, $bMismoAgente,
+        $sNuevoTelefono, $sNuevoNombre, &$errcode, &$errdesc)
+    {
         // Leer toda la información de la campaña y la cola
         $sqlLlamadaCampania = <<<SQL_LLAMADA_CAMPANIA_AGENDAMIENTO
 SELECT campaign.datetime_init, campaign.datetime_end, campaign.daytime_init,
@@ -2691,7 +2699,7 @@ FROM campaign, calls
 WHERE campaign.id = calls.id_campaign AND calls.id = ?
 SQL_LLAMADA_CAMPANIA_AGENDAMIENTO;
         $recordset = $this->_db->prepare($sqlLlamadaCampania);
-        $recordset->execute(array($infoLlamada['callid']));
+        $recordset->execute(array($callid));
         $tuplaCampania = $recordset->fetch(PDO::FETCH_ASSOC);
         $recordset->closeCursor();
 
@@ -2727,7 +2735,7 @@ WHERE id_call = ?
 ORDER BY column_number
 SQL_LLAMADA_ATRIBUTOS_AGENDAMIENTO;
         $recordset = $this->_db->prepare($sqlLlamadaAtributos);
-        $recordset->execute(array($infoLlamada['callid']));
+        $recordset->execute(array($callid));
         $attrLlamada = array();
         foreach ($recordset as $tupla) {
         	$attrLlamada[$tupla['column_number']] = array($tupla['columna'], $tupla['value']);
@@ -2744,7 +2752,7 @@ SELECT id_form_field, value FROM form_data_recolected
 WHERE id_calls = ?
 SQL_LLAMADA_FORM_STATIC;
         $recordset = $this->_db->prepare($sqlLlamadaForm);
-        $recordset->execute(array($infoLlamada['callid']));
+        $recordset->execute(array($callid));
         $formLlamada = array();
         foreach ($recordset as $tupla) {
             $formLlamada[$tupla['id_form_field']] = $tupla['value'];

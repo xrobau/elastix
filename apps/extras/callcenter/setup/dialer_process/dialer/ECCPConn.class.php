@@ -2541,6 +2541,16 @@ LEER_STATS_CAMPANIA;
         $xml_response = new SimpleXMLElement('<response />');
         $xml_scheduleResponse = $xml_response->addChild('schedulecall_response');
 
+        // Verificar si se especifica un callid explícito
+        $sTipoCampania = NULL;
+        $idLlamada = NULL;
+        if (isset($comando->campaign_type) && isset($comando->call_id)) {
+            $sTipoCampania = (string)$comando->campaign_type;
+            if (!in_array($sTipoCampania, array('outgoing')))
+                return $this->_generarRespuestaFallo(400, 'Bad request');
+            $idLlamada = (int)$comando->call_id;
+        }
+
         // Verificar si el agente está siendo monitoreado
         $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
         if (is_null($infoSeguimiento)) {
@@ -2590,7 +2600,7 @@ LEER_STATS_CAMPANIA;
 
         // Ejecutar el agendamiento de la llamada
         $errcode = $errdesc = NULL;
-        $bExito = $this->_agendarLlamadaAgente($sAgente, $horario,
+        $bExito = $this->_agendarLlamadaAgente($sTipoCampania, $idLlamada, $sAgente, $horario,
             $bMismoAgente, $sNuevoTelefono, $sNuevoNombre, $errcode, $errdesc);
         if (!$bExito) {
             $this->_agregarRespuestaFallo($xml_scheduleResponse, $errcode, $errdesc);
@@ -2621,7 +2631,7 @@ LEER_STATS_CAMPANIA;
      *
      * @return bool VERDADERO en caso de éxito, FALSO en caso de error
      */
-    private function _agendarLlamadaAgente($sAgente, $horario, $bMismoAgente,
+    private function _agendarLlamadaAgente($calltype, $callid, $sAgente, $horario, $bMismoAgente,
         $sNuevoTelefono, $sNuevoNombre, &$errcode, &$errdesc)
     {
         $errcode = 0; $errdesc = 'Success';
@@ -2672,15 +2682,38 @@ LEER_STATS_CAMPANIA;
         }
 
         // Información de la llamada atendida por el agente
-        $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
-        if (is_null($infoLlamada)) {
-            $errcode = 417; $errdesc = 'Not in outgoing call';
-            return FALSE;
+        if (!is_null($calltype) && !is_null($callid)) {
+            // Verificar si la llamada existe y el agente está autorizado
+            switch ($calltype) {
+            case 'outgoing':
+                $sql = 'SELECT COUNT(*) AS N FROM calls WHERE id = ?';
+                $params = array($callid);
+                break;
+            }
+            $recordset = $this->_db->prepare($sql);
+            $recordset->execute($params);
+            $tuplaCheck = $recordset->fetch(PDO::FETCH_ASSOC);
+            $recordset->closeCursor();
+            if ($tuplaCheck['N'] <= 0) {
+                $this->_log->output('WARN: '.__METHOD__.': llamada '.$calltype.' con callid='.$callid.
+                    ' no se encuentra para agent='.$sAgente.', se ignoran valores...');
+                $calltype = NULL;
+                $callid = NULL;
+            }
+        }
+        if (is_null($calltype) || is_null($callid)) {
+            $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
+            if (is_null($infoLlamada)) {
+                $errcode = 417; $errdesc = 'Not in outgoing call';
+                return FALSE;
+            }
+            $calltype = $infoLlamada['calltype'];
+            $callid = $infoLlamada['callid'];
         }
 
-        switch ($infoLlamada['calltype']) {
+        switch ($calltype) {
         case 'outgoing':
-            return $this->_agendarLlamadaAgente_outgoing($infoLlamada['callid'], $sAgente, $horario, $bMismoAgente,
+            return $this->_agendarLlamadaAgente_outgoing($callid, $sAgente, $horario, $bMismoAgente,
                 $sNuevoTelefono, $sNuevoNombre, $errcode, $errdesc);
         default:
             $errcode = 417; $errdesc = 'Not in outgoing call';

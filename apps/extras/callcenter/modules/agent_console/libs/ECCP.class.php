@@ -500,7 +500,8 @@ class ECCP
         return $xml_response->getrequestlist_response;
     }
 
-    public function schedulecall($schedule, $sameagent, $newphone, $newcontactname)
+    public function schedulecall($schedule, $sameagent, $newphone, $newcontactname,
+        $campaign_type = NULL, $call_id = NULL)
     {
         $xml_request = new SimpleXMLElement("<request />");
         $xml_cmdRequest = $xml_request->addChild('schedulecall');
@@ -517,6 +518,10 @@ class ECCP
             $xml_cmdRequest->addChild('newphone', str_replace('&', '&amp;', $newphone));
         if (!is_null($newcontactname))
             $xml_cmdRequest->addChild('newcontactname', str_replace('&', '&amp;', $newcontactname));
+        if (!is_null($campaign_type))
+            $xml_cmdRequest->addChild('campaign_type', str_replace('&', '&amp;', $campaign_type));
+        if (!is_null($call_id))
+            $xml_cmdRequest->addChild('call_id', str_replace('&', '&amp;', $call_id));
 
         $xml_response = $this->send_request($xml_request);
         return $xml_response->schedulecall_response;

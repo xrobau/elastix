@@ -252,6 +252,12 @@ function apply_ui_styles(uidata)
     if (uidata.no_call) {
         $('#btn_hangup').button('disable');
         $('#btn_transfer').button('disable');
+
+        /* Esta llamada generalmente se realiza cuando el agente recién carga
+         * la consola y no ha recibido una llamada todavía. Se debe de modificar
+         * si se requiere que el agente recargue frecuentemente la consola y
+         * preserve el hecho de que atendió previamente una llamada en la misma
+         * sesión. */
         $('#btn_agendar_llamada').button('disable');
     }
     if (!uidata.can_confirm_contact) {
@@ -750,7 +756,9 @@ function manejarRespuestaStatus(respuesta)
 
 			$('#btn_hangup').button('disable');
 	        $('#btn_transfer').button('disable');
-	        $('#btn_agendar_llamada').button('disable');
+	        if (l_calltype == 'incoming') {
+	            $('#btn_agendar_llamada').button('disable');
+	        }
 	        $('#elastix-callcenter-cronometro').text('00:00:00');
 
 	        // Vaciar las áreas para la llamada

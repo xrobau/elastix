@@ -761,11 +761,13 @@ class PaloSantoConsola
         }
     }
 
-    function agendarLlamada($schedule, $sameagent, $newphone, $newcontactname)
+    function agendarLlamada($schedule, $sameagent, $newphone, $newcontactname,
+        $calltype = NULL, $callid = NULL)
     {
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $respuesta = $oECCP->schedulecall($schedule, $sameagent, $newphone, $newcontactname);
+            $respuesta = $oECCP->schedulecall($schedule, $sameagent, $newphone,
+                $newcontactname, $calltype, $callid);
             if (isset($respuesta->failure)) {
                 $this->errMsg = _tr('Unable to schedule call').' - '.$this->_formatoErrorECCP($respuesta);
                 return FALSE;

@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: allow scheduling of terminated outgoing call. Ported
+  from CallCenterPRO.
+  SVN Rev[7358]
 - CHANGED: Dialer (ECCP): implement scheduling of call to number not currently
   on-call, by specifying call ID. Ported from CallCenterPRO.
   SVN Rev[7357]

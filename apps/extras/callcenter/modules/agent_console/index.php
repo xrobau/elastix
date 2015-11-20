@@ -1028,6 +1028,21 @@ function manejarSesionActiva_schedule($module_name, $smarty, $sDirLocalPlantilla
         'message'   =>  _tr('Call successfully scheduled'),
     );
 
+    /* El orden de prioridad del uso de IDs es: parámetros especificados, luego
+     * los parámetros almacenados en la sesión, y por último NULL para usar los
+     * parámetros de la llamada activa. */
+    $calltype = NULL;
+    $callid = NULL;
+    if (isset($_SESSION['callcenter']['ultimo_calltype']) &&
+        isset($_SESSION['callcenter']['ultimo_callid'])) {
+        $calltype = $_SESSION['callcenter']['ultimo_calltype'];
+        $callid = $_SESSION['callcenter']['ultimo_callid'];
+    }
+    if (isset($_POST['calltype']) && isset($_POST['callid'])) {
+        $calltype = $_POST['calltype'];
+        $callid = $_POST['callid'];
+    }
+
     $infoAgendar = getParameter('data');
     foreach (array('schedule_new_phone', 'schedule_new_name',
         'schedule_use_daterange', 'schedule_use_sameagent',
@@ -1052,7 +1067,8 @@ function manejarSesionActiva_schedule($module_name, $smarty, $sDirLocalPlantilla
             'message'   =>  _tr('Invalid or incomplete schedule'),
         );
     } else {
-        $bExito = $oPaloConsola->agendarLlamada($schedule, $sameagent, $newphone, $newname);
+        $bExito = $oPaloConsola->agendarLlamada($schedule, $sameagent, $newphone,
+            $newname, $calltype, $callid);
         if (!$bExito) {
             $respuesta['action'] = 'error';
             $respuesta['message'] = _tr('Error while scheduling call').' - '.$oPaloConsola->errMsg;

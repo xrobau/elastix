@@ -387,10 +387,15 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: introduce new table acl_notification. Make it known to
+  paloACL::deleteUser() method.
+  SVN Rev[7359]
+
 * Sat Nov 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix corner case in main menu handling in elastixneo theme
   where the selected item would cause the overflow menu to overflow itself after
-  being re-added to the main menul.
+  being re-added to the main menu.
   SVN Rev[7355]
 
 * Wed Nov 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>

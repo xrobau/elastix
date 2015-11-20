@@ -388,6 +388,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: create new class paloNotification.
+  SVN Rev[7360]
 - CHANGED: Framework: introduce new table acl_notification. Make it known to
   paloACL::deleteUser() method.
   SVN Rev[7359]
@@ -395,7 +397,7 @@ rm -rf $RPM_BUILD_ROOT
 * Sat Nov 14 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: fix corner case in main menu handling in elastixneo theme
   where the selected item would cause the overflow menu to overflow itself after
-  being re-added to the main menul.
+  being re-added to the main menu.
   SVN Rev[7355]
 
 * Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3

@@ -388,6 +388,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: create new class paloNotification.
+  SVN Rev[7360]
 - CHANGED: Framework: introduce new table acl_notification. Make it known to
   paloACL::deleteUser() method.
   SVN Rev[7359]

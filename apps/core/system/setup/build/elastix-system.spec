@@ -180,6 +180,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: switch to JustGage for Hard Disk applet.
+  SVN Rev[7361]
+
 * Mon Nov  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: remove height:800px CSS rule for FTP backup panel.
   SVN Rev[7346]

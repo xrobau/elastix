@@ -181,6 +181,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dashboard: switch to JustGage for Hard Disk applet.
+  SVN Rev[7361]
+
 * Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.

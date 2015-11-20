@@ -2,15 +2,24 @@
 <script type='text/javascript' src='modules/{$module_name}/applets/HardDrives/js/javascript.js'></script>
 {foreach from=$part item=particion}
 <div>
-    {if $fastgauge}
-	<div style="width: {$htmldiskuse_width}px; height: {$htmldiskuse_height}px;">
-		<div style="position: relative; left: 33%; width: 33%; background: #6e407e;  height: 100%; border: 1px solid #000000;">
-			<div style="position: relative; background: #3184d5; top: {$particion.height_free}%; height: {$particion.height_used}%">&nbsp;</div>
-		</div>
-	</div>
-	{else}
-	<img alt="ObtenerInfo_Particion" src="?menu={$module_name}&amp;rawmode=yes&amp;applet=HardDrives&amp;action=graphic&amp;percent={$particion.porcentaje_usado}" width="140" />	
-	{/if}
+    <div id="dashboard-applet-hd-usage" style="width:160px; height:160px;"></div>
+    <script>
+        {literal}
+        var ram = new JustGage({
+          id: "dashboard-applet-hd-usage", {/literal}
+          value: {$particion.porcentaje_usado}, {literal}
+          min: 0,
+          max: 100,
+          donut: true,
+          startAnimationType : 'bounce',
+          shadowSize: 0,
+          shadowVerticalOffset: 0,
+          valueFontColor: '#666666',
+          levelColors : ['#3184d5'],
+          gaugeColor : '#6e407e',
+          label: "%"
+        }); {/literal}
+    </script>
     <div class="neo-applet-hd-innerbox">
       <div class="neo-applet-hd-innerbox-top">
        <img src="modules/{$module_name}/applets/HardDrives/images/light_usedspace.png" width="13" height="11" alt="used" /> {$particion.formato_porcentaje_usado}% {$LABEL_PERCENT_USED} &nbsp;&nbsp;<img src="modules/{$module_name}/applets/HardDrives/images/light_freespace.png" width="13" height="11" alt="used" /> {$particion.formato_porcentaje_libre}% {$LABEL_PERCENT_AVAILABLE}

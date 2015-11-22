@@ -387,6 +387,13 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sat Nov 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: completely rewrite elastixwave theme. This rewrite is
+  based on the elastixneo theme and fixes the spilling of menu items past the
+  right edge of the browser window. A best-effort attempt is made to preserve
+  key aspects of L&F, particularly the mini-menu feature.
+  SVN Rev[7362]
+
 * Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Framework: create new class paloNotification.
   SVN Rev[7360]

@@ -30,9 +30,24 @@
 function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
 {
     $smarty->assign(array(
-        "ABOUT_ELASTIX2"    =>  _tr('About Elastix2'),
-        "HELP"              =>  _tr('HELP'),
-        "USER_LOGIN"        =>  $_SESSION['elastix_user'],
+        "ABOUT_ELASTIX2"            =>  _tr('About Elastix2'),
+        "HELP"                      =>  _tr('HELP'),
+        "USER_LOGIN"                =>  $_SESSION['elastix_user'],
+        "CHANGE_PASSWORD"           =>  _tr("Change Elastix Password"),
+        "MODULES_SEARCH"            =>  _tr("Search modules"),
+        "ADD_BOOKMARK"              =>  _tr("Add Bookmark"),
+        "REMOVE_BOOKMARK"           =>  _tr("Remove Bookmark"),
+        "ADDING_BOOKMARK"           =>  _tr("Adding Bookmark"),
+        "REMOVING_BOOKMARK"         =>  _tr("Removing Bookmark"),
+        "HIDING_IZQTAB"             =>  _tr("Hiding left panel"),
+        "SHOWING_IZQTAB"            =>  _tr("Loading left panel"),
+        "HIDE_IZQTAB"               =>  _tr("Hide left panel"),
+        "SHOW_IZQTAB"               =>  _tr("Load left panel"),
+
+        'viewMenuTab'               =>  getStatusNeoTabToggle($pdbACL, $idUser),
+        'MENU_COLOR'                =>  getMenuColorByMenu($pdbACL, $idUser),
+        'IMG_BOOKMARKS'             =>  menuIsBookmark($pdbACL, $idUser, $selectedMenu) ? 'bookmarkon.png' : 'bookmark.png',
+        'SHORTCUT'                  =>  loadShortcut($pdbACL, $idUser, $smarty),
     ));
 }
 

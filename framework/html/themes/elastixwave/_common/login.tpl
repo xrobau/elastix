@@ -1,11 +1,19 @@
 <html>
-<head>
-<title>Elastix - {$PAGE_NAME}</title>
-<!--<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">-->
-<link rel="stylesheet" href="themes/{$THEMENAME}/styles.css">
-</head>
-
-<body bgcolor="#ffffff" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+  <head>
+	<title>Elastix - {$PAGE_NAME}</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" href="themes/{$THEMENAME}/styles.css">
+    {$HEADER_LIBS_JQUERY}
+    {literal}
+    <script type="text/javascript">
+        $(document).ready(function() {
+             $("#neo-login-box").draggable();
+             $("#input_user").focus();
+        });
+    </script>
+    {/literal}
+  </head>
+  <body>
   <table cellspacing="0" cellpadding="0" width="100%" border="0" class="menulogo2" height="74">
     <tr>
        <td class="menulogo" valign="top">
@@ -75,5 +83,5 @@
 <script type="text/javascript">
     document.getElementById("input_user").focus();
 </script>
-</body>
+  </body>
 </html>

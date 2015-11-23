@@ -388,6 +388,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Nov 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: the method Installer::addModuleLanguage() is apparently
+  dead code not used anywhere. Removed. This removes a dependency on the
+  ModuloXML class from paloSantoInstaller.class.php.
+  SVN Rev[7366]
 - CHANGED: Framework: create new program elastix-notification to insert new
   notifications from the command line. Fix bugs discovered through exercise of
   this program.

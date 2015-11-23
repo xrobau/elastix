@@ -24,7 +24,6 @@
 */
 
 require_once "paloSantoDB.class.php";
-require_once "paloSantoModuloXML.class.php";
 require_once "misc.lib.php";
 
 // La presencia de MYSQL_ROOT_PASSWORD es parte del API global.
@@ -57,7 +56,7 @@ class Installer
         else
           $type="framed";
     }
-   
+
     //creo el menu
     $bExito = $oMenu->createMenu($menuid,$tag,$parentId,$type,$link,$order);
     if (!$bExito){
@@ -75,7 +74,7 @@ class Installer
         $order    = isset($arrTmp['order'])?$arrTmp['order']:"-1";
         $tag      = isset($arrTmp['tag'])?$arrTmp['tag']:"";
         $menuid   = isset($arrTmp['menuid'])?$arrTmp['menuid']:"";
-    
+
         if ($parentId=="")
             $type="";
         else{
@@ -84,7 +83,7 @@ class Installer
             else
             $type="framed";
         }
-    
+
         //creo el menu
         $bExito = $oMenu->updateItemMenu($menuid,$tag,$parentId,$type,$link,$order);
         if (!$bExito){
@@ -175,47 +174,6 @@ class Installer
         return $retval;
     }
 
-    function addModuleLanguage($tmpDir,$DocumentRoot)
-    {
-        require_once("configs/languages.conf.php");
-        //array que incluye todos los lenguages que existan en /html/lang
-        $languages = array_keys($languages);
-
-        $oModuloXML= new ModuloXML("$tmpDir/module.xml");
-        //Se recorre por cada lenguaje
-        foreach ($languages as $lang)
-        {
-            if (file_exists("$DocumentRoot/lang/$lang.lang")) {
-                require_once("$DocumentRoot/lang/$lang.lang");
-                global $arrLang;
-                //Se realiza por cada modulo
-                if (count(($oModuloXML->_arbolMenu))>0) {
-                    foreach (($oModuloXML->_arbolMenu) as $menulist) {
-                        foreach ($menulist['ITEMS'] as $item_modules) {
-                                $menuid = $item_modules['MENUID'];
-        //                         echo "MENUID".$menuid;
-                                if (!empty($menuid))
-                                {
-                                    $nodo = array($item_modules['DESC'] => $item_modules['DESC']);
-                                    $result = array_merge($arrLang,$nodo);
-                                    $arrLang = $result;
-                                }
-                        }
-                    }
-                }
-                $gestor = fopen("$DocumentRoot/lang/$lang.lang", "w");
-                $contenido = "<?php \nglobal \$arrLang; \n\$arrLang =";
-                $contenido .= var_export($arrLang,TRUE)."?>";
-                if (fwrite($gestor, $contenido) === FALSE) {
-                        echo "Error al escribir archivo";
-                }
-                fclose($gestor);
-            } else {
-                echo "No existe";
-            }
-        }
-    }
-
     function refresh($documentRoot='')
     {
         if($documentRoot == ''){
@@ -224,7 +182,7 @@ class Installer
         }
 
         //STEP 1: Delete tmp templates of smarty.
-        exec("rm -rf $documentRoot/var/templates_c/*",$arrConsole,$flagStatus); 
+        exec("rm -rf $documentRoot/var/templates_c/*",$arrConsole,$flagStatus);
 
         //STEP 2: Update menus elastix permission.
         if(isset($_SESSION['elastix_user_permission']))

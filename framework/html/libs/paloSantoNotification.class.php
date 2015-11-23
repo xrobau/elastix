@@ -143,7 +143,7 @@ class paloNotification
 
         // Verificar ID de recurso
         if (!is_null($id_resource)) {
-            $field = (ctype_digit("$id_user")) ? 'id' : 'name';
+            $field = (ctype_digit("$id_resource")) ? 'id' : 'name';
             $sql = "SELECT id FROM acl_resource WHERE {$field} = ?";
             $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, array($id_resource));
             if (!is_array($tupla)) {
@@ -158,7 +158,7 @@ class paloNotification
         }
 
         $sql = 'INSERT INTO acl_notification (datetime_create, level, id_user, id_resource, content) VALUES (?, ?, ?, ?, ?)';
-        $param = array(date('Y-m-d H:i:s', $level, $id_user, $id_resource, $content));
+        $param = array(date('Y-m-d H:i:s'), $level, $id_user, $id_resource, $content);
         if (!$this->_DB->genQuery($sql, $param)) {
             $this->errMsg = $this->_DB->errMsg;
             return FALSE;

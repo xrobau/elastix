@@ -388,6 +388,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Nov 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: create new program elastix-notification to insert new
+  notifications from the command line. Fix bugs discovered through exercise of
+  this program.
+  SVN Rev[7365]
 - CHANGED: Framework: make id_resource column known to paloACL and
   paloNotification classes. Allow insertion of notifications without id_user.
   SVN Rev[7364]

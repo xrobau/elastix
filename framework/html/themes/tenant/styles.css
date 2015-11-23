@@ -1398,5 +1398,5 @@ ol.breadcrumb > li#tenant-help
     font-size: 16px;
 }
 ol.breadcrumb > li + li#tenant-help:before {
-    content: "";
+    content: normal !important;
 }

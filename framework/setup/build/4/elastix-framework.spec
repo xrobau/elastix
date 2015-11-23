@@ -387,6 +387,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Nov 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add id_resource column to acl_notification table.
+  SVN Rev[7363]
+
 * Sat Nov 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: completely rewrite elastixwave theme. This rewrite is
   based on the elastixneo theme and fixes the spilling of menu items past the

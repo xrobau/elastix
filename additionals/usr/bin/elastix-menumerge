@@ -34,7 +34,7 @@ file. This file indicates the menus that are to be merged into an Elastix menu
 installation. The corresponding folders in /var/www/html/modules/MENU must exist.
 */
 
-if ($argc < 2) die("Please specify path to menu.xml for module to be installed.\n");
+if ($argc < 2) die("Usage: {$_SERVER['argv'][0]} menu.xml\n");
 if (!is_readable($argv[1])) die("FATAL: unable to read $argv[1] \n");
 
 if (!($documentRoot = getenv('ELASTIX_ROOT'))) $documentRoot="/var/www/html";
@@ -47,72 +47,82 @@ global $arrLang;
 require_once("$arrConf[basePath]/libs/paloSantoDB.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoMenu.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
-require_once("$arrConf[basePath]/libs/paloSantoModuloXML.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoInstaller.class.php");
 
 $pDB = new paloDB($arrConf['elastix_dsn']['menu']);
 $pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
 
-if(!empty($pDB->errMsg)) echo "ERROR DE DB: {$pDB->errMsg}\n";
-if(!empty($pDBACL->errMsg)) echo "ERROR DE DB: {$pDBACL->errMsg}\n";
+if (!empty($pDB->errMsg)) error_exit("FATAL: menu dsn: {$pDB->errMsg}\n");
+if (!empty($pDBACL->errMsg)) error_exit("FATAL: acl dsn: {$pDBACL->errMsg}\n");
 
 $oMenu = new paloMenu($pDB);
 $oACL = new paloACL($pDBACL);
 $oInstaller = new Installer();
 
-if(isset($_SERVER['argv'][1])){
-    $file_xml = $_SERVER['argv'][1];
-    $oModuloXML= new ModuloXML($file_xml);
+libxml_use_internal_errors(TRUE);
+$xml = simplexml_load_file($argv[1]);
+if ($xml === FALSE) {
+    $err = 'ERR: failed to load '.$argv[1].": \n";
+    foreach(libxml_get_errors() as $error) {
+        $err .= "\t".$error->message."\n";
+    }
+    error_exit($err);
+}
 
-    if(count($oModuloXML->_arbolMenu)>0){
-        foreach ($oModuloXML->_arbolMenu as $menuitem){
-            $idmenu=$menuitem['menuid'];
-            echo "Menu: $idmenu found\n";
-            if(!empty($idmenu)){
-                //buscar si ya existe ese menu
-                if(!$oMenu->existeMenu($idmenu)){
-                    $newMenu["menuid"]=$idmenu;
-                    $newMenu["module"]=$menuitem['module'];
-                    $newMenu["parent"]=$menuitem['parent'];
-                    $newMenu["tag"]=$menuitem['desc'];
-                    $newMenu["link"]=$menuitem['link'];
-                    $newMenu["order"]=$menuitem['order'];
-                    $newPermission = array();
-                    $newPermission = $menuitem['groups'];
-
-                    $oInstaller->addMenu($oMenu,$newMenu);
-                    if($newMenu['parent']!="") //agregar los permisos
-                        $oInstaller->addResourceMembership($oACL,$newMenu,$newPermission);
-                }else{// si ya existe solo se debe actualizar el Parent, tag, link y order
-                    echo "Updating: $idmenu found\n";
-                    $newMenu["menuid"]=$idmenu;
-                    $newMenu["module"]=$menuitem['module'];
-                    $newMenu["parent"]=$menuitem['parent'];
-                    $newMenu["tag"]=$menuitem['desc'];
-                    $newMenu["link"]=$menuitem['link'];
-                    $newMenu["order"]=$menuitem['order'];
-                    $oInstaller->UpdateMenu($oMenu,$newMenu);
-					if($newMenu['parent']!="") //agregar los permisos
-                        $oInstaller->updateResourceMembership($oACL,$newMenu);
-                }
-            }
-            else{
-                echo "Menu for module is not defined\n";
-                return 1;
-            }
+// El documento <module> tiene al menos un <menulist> que contiene al menos un <menuitem>
+if (!isset($xml->menulist)) error_exit("ERR: no menulist found in module document!\n");
+if (!isset($xml->menulist->menuitem)) error_exit("ERR: no menuitem found in menulist!\n");
+foreach ($xml->menulist->menuitem as $xml_menuitem) {
+    // Atributos del elemento <menuitem>
+    $menuitem = array();
+    foreach (array('menuid', 'module', 'parent', 'link', 'order') as $k)
+        $menuitem[$k] = (string)$xml_menuitem[$k];
+    $menuitem['tag'] = (string)$xml_menuitem['desc'];
+    if (empty($menuitem['menuid'])) error_exit("ERR: resource for menuitem is not defined!\n");
+    
+    // Permisos para el <menuitem>
+    $groups = array();
+    if (isset($xml_menuitem->permissions) && isset($xml_menuitem->permissions->group)) {
+        foreach ($xml_menuitem->permissions->group as $xml_group) {
+            $group = array();
+            foreach (array('id', 'name', 'desc') as $k) $group[$k] = (string)$xml_group[$k];
+            $groups[] = $group;
+        }
+    }
+    
+    if ($oMenu->existeMenu($menuitem['menuid'])) {
+        if (!$oInstaller->UpdateMenu($oMenu, $menuitem)) {
+            error_exit("ERR: failed to update menuitem {$menuitem['menuid']} - {$oInstaller->_errMsg}\n");
+        }
+        
+        // TODO: updateResourceMembership crea el recurso ACL pero no modifica grupos, heredado de implementación anterior
+        if ($menuitem['parent'] != '' && !$oInstaller->updateResourceMembership($oACL, $menuitem, $groups)) {
+            error_exit("ERR: failed to update group permissions for menuitem {$menuitem['menuid']} - {$oInstaller->_errMsg}\n");
+        }
+    } else {
+        if (!$oInstaller->addMenu($oMenu, $menuitem)) {
+            error_exit("ERR: failed to create menuitem {$menuitem['menuid']} - {$oInstaller->_errMsg}\n");
+        }
+        
+        if ($menuitem['parent'] != '' && !$oInstaller->addResourceMembership($oACL, $menuitem, $groups)) {
+            error_exit("ERR: failed to add group permissions for menuitem {$menuitem['menuid']} - {$oInstaller->_errMsg}\n");
         }
     }
 }
-else{
-    echo "Error: File xml not defined. Usage: {$_SERVER['argv'][0]} menu.xml\n";
-    return 1;
-}
 
 deleteSmartyCompileFiles();
+exit(0);
+
 function deleteSmartyCompileFiles()
 {
     $files="/var/www/html/var/templates_c/*.php";
     foreach(glob($files) as $filename)
         unlink($filename);
+}
+
+function error_exit($sMsg, $errorcode = 1)
+{
+    fwrite(STDERR, $sMsg);
+    exit($errorcode);
 }
 ?>

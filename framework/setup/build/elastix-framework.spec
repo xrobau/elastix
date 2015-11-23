@@ -388,6 +388,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Nov 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: file paloSantoModuloXML.class.php was removed. The
+  menu.xml loading is now reimplemented using SimpleXML and contained entirely
+  in /usr/bin/elastix-menumerge. Additionally more error conditions are detected
+  and reported.
+  SVN Rev[7367]
 - CHANGED: Framework: the method Installer::addModuleLanguage() is apparently
   dead code not used anywhere. Removed. This removes a dependency on the
   ModuloXML class from paloSantoInstaller.class.php.

@@ -1234,6 +1234,7 @@ class paloACL {
     {
         $this->errMsg = "";
         $listaSQL = array(
+            "DELETE FROM acl_notification WHERE id_resource = ?",
             "DELETE FROM acl_group_permission WHERE id_resource = ?",
             "DELETE FROM acl_user_permission WHERE id_resource = ?",
             "DELETE FROM acl_user_profile WHERE id_resource = ?",

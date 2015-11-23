@@ -53,7 +53,7 @@ class paloNotification
 
     function listPublicNotifications($limit = NULL)
     {
-        $sql = 'SELECT id, datetime_create, level, id_user, content '.
+        $sql = 'SELECT id, datetime_create, level, id_user, id_resource, content '.
             'FROM acl_notification WHERE id_user IS NULL ORDER BY datetime_create DESC';
         $param = array();
         if (!is_null($limit)) {
@@ -70,7 +70,7 @@ class paloNotification
 
     function listUserNotifications($id_user, $limit)
     {
-        $sql = 'SELECT id, datetime_create, level, id_user, content '.
+        $sql = 'SELECT id, datetime_create, level, id_user, id_resource, content '.
             'FROM acl_notification WHERE id_user = ? ORDER BY datetime_create DESC';
         $param = array($id_user);
         if (!is_null($limit)) {
@@ -87,7 +87,7 @@ class paloNotification
 
     function getNotification($id_user, $id_notification)
     {
-        $sql = 'SELECT id, datetime_create, level, id_user, content '.
+        $sql = 'SELECT id, datetime_create, level, id_user, id_resource, content '.
                 'FROM acl_notification WHERE AND id = ?';
         $param = array($id_notification);
         $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, $param);
@@ -118,7 +118,7 @@ class paloNotification
         return TRUE;
     }
 
-    function insertNotification($id_user, $level, $content)
+    function insertNotification($level, $content, $id_user = NULL, $id_resource = NULL)
     {
         if (!in_array($level, array('info', 'warning', 'error'))) {
             $this->errMsg = _tr('Invalid notification level');
@@ -126,22 +126,39 @@ class paloNotification
         }
 
         // Verificar ID de usuario
-        $sql = (ctype_digit("$id_user"))
-            ? 'SELECT id FROM acl_user WHERE id = ?'
-            : 'SELECT id FROM acl_user WHERE name = ?';
-        $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, array($id_user));
-        if (!is_array($tupla)) {
-            $this->errMsg = $this->_DB->errMsg;
-            return FALSE;
+        if (!is_null($id_user)) {
+            $field = (ctype_digit("$id_user")) ? 'id' : 'name';
+            $sql = "SELECT id FROM acl_user WHERE {$field} = ?";
+            $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, array($id_user));
+            if (!is_array($tupla)) {
+                $this->errMsg = $this->_DB->errMsg;
+                return FALSE;
+            }
+            if (count($tupla) <= 0) {
+                $this->errMsg = _tr('Invalid user');
+                return FALSE;
+            }
+            $id_user = (int)$tupla['id'];
         }
-        if (count($tupla) <= 0) {
-            $this->errMsg = _tr('Invalid user');
-            return FALSE;
-        }
-        $id_user = (int)$tupla['id'];
 
-        $sql = 'INSERT INTO acl_notification (datetime_create, level, id_user, content) VALUES (?, ?, ?, ?)';
-        $param = array(date('Y-m-d H:i:s', $level, $id_user, $content));
+        // Verificar ID de recurso
+        if (!is_null($id_resource)) {
+            $field = (ctype_digit("$id_user")) ? 'id' : 'name';
+            $sql = "SELECT id FROM acl_resource WHERE {$field} = ?";
+            $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, array($id_resource));
+            if (!is_array($tupla)) {
+                $this->errMsg = $this->_DB->errMsg;
+                return FALSE;
+            }
+            if (count($tupla) <= 0) {
+                $this->errMsg = _tr('Invalid resource');
+                return FALSE;
+            }
+            $id_resource = (int)$tupla['id'];
+        }
+
+        $sql = 'INSERT INTO acl_notification (datetime_create, level, id_user, id_resource, content) VALUES (?, ?, ?, ?, ?)';
+        $param = array(date('Y-m-d H:i:s', $level, $id_user, $id_resource, $content));
         if (!$this->_DB->genQuery($sql, $param)) {
             $this->errMsg = $this->_DB->errMsg;
             return FALSE;

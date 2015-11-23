@@ -388,6 +388,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Nov 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: make id_resource column known to paloACL and
+  paloNotification classes. Allow insertion of notifications without id_user.
+  SVN Rev[7364]
 - CHANGED: Framework: add id_resource column to acl_notification table.
   SVN Rev[7363]
 

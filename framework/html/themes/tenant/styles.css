@@ -1391,3 +1391,12 @@ label[data-tooltip]:hover:before, label[data-tooltip]:hover:after {
 a.setadminpassword {
     cursor: pointer;
 }
+
+ol.breadcrumb > li#tenant-help
+{
+    float: right;
+    font-size: 16px;
+}
+ol.breadcrumb > li + li#tenant-help:before {
+    content: "";
+}

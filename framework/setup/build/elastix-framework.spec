@@ -390,6 +390,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Nov 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: move help icon from toolbar to breadcrumb bar and change
+  icon.
+  SVN Rev[7369]
 - CHANGED: Framework: add /usr/bin/elastix-notification to installed files.
   SVN Rev[7368]
 - DELETED: Framework: file paloSantoModuloXML.class.php was removed. The

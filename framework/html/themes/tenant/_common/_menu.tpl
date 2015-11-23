@@ -243,11 +243,13 @@ function removeNeoDisplayOnMouseOver(ref){
             </ul>
         </li>
 
+{*
         <li id="header_notification_bar" class="dropdown">
-            <a {*data-toggle="dropdown"*} class="" href="#" onclick="popUp('help/?id_nodo={if !empty($idSubMenu2Selected)}{$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}{else}{$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}{/if}','1000','460')">
-                <i class="fa fa-question"></i>
+            <a class="" href="#" onclick="popUp('help/?id_nodo={if !empty($idSubMenu2Selected)}{$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}{else}{$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}{/if}','1000','460')">
+                <i class="fa fa-support"></i>
             </a>
         </li>
+*}
 
         <li id="header_notification_bar" class="dropdown">
             <a {*data-toggle="dropdown"*} class="" href="index.php?menu=addons">
@@ -288,6 +290,11 @@ function removeNeoDisplayOnMouseOver(ref){
             <li><a href="#">{$value}</a></li>
         {/if}
    {/foreach}
+   <li id="tenant-help">
+    <a class="" href="#" onclick="popUp('help/?id_nodo={if !empty($idSubMenu2Selected)}{$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}{else}{$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}{/if}','1000','460')">
+        <i class="fa fa-support"></i>
+    </a>
+   </li>
 </ol>
 
 <!-- contenido del modulo-->

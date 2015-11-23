@@ -154,6 +154,7 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-dbprocess       
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/compareVersion		   $RPM_BUILD_ROOT/usr/bin/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/search_ami_admin_pwd             $RPM_BUILD_ROOT/usr/bin/
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-add-yum-exclude             $RPM_BUILD_ROOT/usr/bin/
+mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-notification             $RPM_BUILD_ROOT/usr/bin/
 chmod 755 $RPM_BUILD_ROOT/usr/bin/compareVersion
 chmod 755 $RPM_BUILD_ROOT/usr/bin/search_ami_admin_pwd
 
@@ -363,6 +364,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-dbprocess
 /usr/bin/elastix-helper
 /usr/bin/elastix-add-yum-exclude
+/usr/bin/elastix-notification
 /usr/bin/compareVersion
 /usr/bin/search_ami_admin_pwd
 /usr/sbin/elastix-helper
@@ -388,6 +390,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Nov 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add /usr/bin/elastix-notification to installed files.
+  SVN Rev[7368]
 - DELETED: Framework: file paloSantoModuloXML.class.php was removed. The
   menu.xml loading is now reimplemented using SimpleXML and contained entirely
   in /usr/bin/elastix-menumerge. Additionally more error conditions are detected

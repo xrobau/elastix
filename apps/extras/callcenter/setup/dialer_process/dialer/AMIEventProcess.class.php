@@ -843,27 +843,27 @@ class AMIEventProcess extends TuberiaProcess
 
     private function _agentesAgendables($listaAgendables)
     {
-    	$entraronPausa = array();
+        $entraronPausa = array();
         $ociosos = array();
         foreach ($this->_listaAgentes as $a) if ($a->estado_consola == 'logged-in') {
-    		$sAgente = $a->channel;
+            $sAgente = $a->channel;
             if (in_array($sAgente, $listaAgendables)) {
-            	// Agente sí está agendado
+                // Agente sí está agendado
                 if (!$a->reservado) {
-                	$a->reservado = TRUE;
+                    $a->reservado = TRUE;
                     if ($a->num_pausas == 1) $entraronPausa[] = $sAgente;
                 }
-            }
 
-            /* Un agente ocioso para agendamiento debe estar reservado, sin
-             * llamada activa, sin llamada agendada, y sin ninguna otra pausa.
-             */
-            if ($a->reservado &&
-                is_null($a->llamada) &&
-                is_null($a->llamada_agendada) &&
-                $a->num_pausas == 1)
-                $ociosos[] = $sAgente;
-    	}
+                /* Un agente ocioso para agendamiento debe estar reservado, sin
+                 * llamada activa, sin llamada agendada, y sin ninguna otra pausa.
+                 */
+                if ($a->reservado &&
+                    is_null($a->llamada) &&
+                    is_null($a->llamada_agendada) &&
+                    $a->num_pausas == 1)
+                    $ociosos[] = $sAgente;
+            }
+        }
         return array(
             'entraron'  =>  $entraronPausa,
             'ociosos'   =>  $ociosos,

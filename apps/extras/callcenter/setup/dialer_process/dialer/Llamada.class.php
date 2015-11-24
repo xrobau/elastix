@@ -307,7 +307,7 @@ class Llamada
                 // Si la llamada era entrante, entonces puede que hayan actualizaciones pendientes
                 if (count($this->_actualizacionesPendientes) > 0) {
                     if (isset($this->_actualizacionesPendientes['sqlupdatecalls'])) {
-                        $this->_log->output('INFO: '.__METHOD__.': ya se tiene ID de llamada, actualizando call_entry...');
+                        //$this->_log->output('INFO: '.__METHOD__.': ya se tiene ID de llamada, actualizando call_entry...');
                     	$paramActualizar = $this->_actualizacionesPendientes['sqlupdatecalls'];
                         unset($this->_actualizacionesPendientes['sqlupdatecalls']);
 
@@ -323,7 +323,7 @@ class Llamada
                             $this->trunk, $this->_queuenumber);
                     }
                     if (isset($this->_actualizacionesPendientes['sqlinsertcurrentcalls'])) {
-                        $this->_log->output('INFO: '.__METHOD__.': ya se tiene ID de llamada, insertando current_call_entry...');
+                        //$this->_log->output('INFO: '.__METHOD__.': ya se tiene ID de llamada, insertando current_call_entry...');
                         $paramInsertarCC = $this->_actualizacionesPendientes['sqlinsertcurrentcalls'];
                         unset($this->_actualizacionesPendientes['sqlinsertcurrentcalls']);
 
@@ -792,7 +792,7 @@ class Llamada
              * actualizaciones hasta que se asigne a la propiedad id_llamada. */
             $this->_actualizacionesPendientes['sqlupdatecalls'] = $paramActualizar;
             $this->_actualizacionesPendientes['sqlinsertcurrentcalls'] = $paramInsertarCC;
-            $this->_log->output('INFO: '.__METHOD__.': actualizaciones pendientes por faltar id_llamada.');
+            //$this->_log->output('INFO: '.__METHOD__.': actualizaciones pendientes por faltar id_llamada.');
         }
 
         // Actualizar el canal remoto en caso de que no se conozca a estas alturas

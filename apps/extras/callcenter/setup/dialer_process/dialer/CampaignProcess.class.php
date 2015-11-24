@@ -540,18 +540,22 @@ PETICION_CAMPANIAS_ENTRANTES;
                 count($listaCampaniasAvisar['incoming_queue_old']) == 0))
                 $this->_tuberia->AMIEventProcess_nuevasCampanias($listaCampaniasAvisar);
 
-            // Se recogen todas las colas referenciadas por las campañas
-            $queueout = array();
-            foreach ($listaCampanias['outgoing'] as $tuplaCampania) {
-                $queueout[] = $tuplaCampania['queue'];
-            }
-            $queueout = array_unique($queueout);
-            $oPredictor = new Predictor($this->_ami);
-            $oPredictor->examinarColas($queueout);
-
             // Generar las llamadas para todas las campañas salientes activas
             foreach ($listaCampanias['outgoing'] as $tuplaCampania) {
-            	$this->_actualizarLlamadasCampania($tuplaCampania, $oPredictor);
+                /* Se debe crear el predictor para cada campaña porque la
+                 * generación de llamadas toma tiempo debido a las consultas a
+                 * la base de datos, y para cuando pasa a la siguiente campaña
+                 * que usa esa cola, la información podría estar obsoleta. */
+                $oPredictor = new Predictor($this->_ami);
+                $oPredictor->examinarColas(array($tuplaCampania['queue']));
+                $this->_actualizarLlamadasCampania($tuplaCampania, $oPredictor);
+
+                /* Debido a las consultas a la base de datos realizadas para
+                 * generar las llamadas a la campaña, es posible que se acumulen
+                 * eventos pendientes de AMIEventProcess. Se despachan algunos
+                 * eventos aquí para paliar la acumulación. */
+                $this->_ociosoSinEventos = !$this->_multiplex->procesarPaquetes();
+                $this->_multiplex->procesarActividad(0);
             }
 
             $this->_iTimestampUltimaRevisionCampanias = $iTimestamp;

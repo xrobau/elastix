@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Tue Nov 24 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: undo queue optimization for outgoing calls. This introduces
+  unacceptable delays and risks evaluation of campaigns with stale data.
+  Additionally attempt to run some messages after each campaign evaluation to
+  reduce instances of queued updates from AMIEventProcess.
+  SVN Rev[7372]
 - CHANGED: Dialer: silence messages about missing incoming call ID - they
   clutter the log on heavy load without actually being useful.
   SVN Rev[7371]

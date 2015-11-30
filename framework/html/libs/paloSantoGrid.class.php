@@ -386,7 +386,11 @@ class paloSantoGrid {
             $iconclass = "entypo-{$icon}";
             $icon = NULL;
         }
-        if (!is_null($icon) && !file_exists($icon)) {
+
+        /* Los módulos de CallCenterPRO dependen de que no se anule el valor de
+         * action.icon que es una sola letra mostrada con el tipo de letra
+         * elastix_icons.ttf . Por eso se verifica con strlen(). */
+        if (!is_null($icon) && strlen($icon) > 1 && !file_exists($icon)) {
             $icon = NULL;
         }
 

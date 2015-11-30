@@ -389,6 +389,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Nov 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: relax icon file validation in paloSantoGrid class. The
+  CallCenterPRO custom templates depend on legacy non-validation of the icon
+  path and require the single-letter fonticon to not be scrubbed-out.
+  SVN Rev[7375]
+
 * Mon Nov 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: move help icon from toolbar to breadcrumb bar and change
   icon.

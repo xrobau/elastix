@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Dec  1 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: optimize event wait so timeouts to select() calls are
+  as long as possible (up to 30s) instead of looping at 1/10s as before. Ported
+  from CallCenterPRO.
+  SVN Rev[7376]
+
 * Tue Nov 24 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: restrict schedulable agent report to the agents actually
   listed in the parameters. This prevents looking up nonexistent scheduled calls

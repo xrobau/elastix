@@ -137,12 +137,20 @@ class ECCP
      */
     public function wait_response($timeout = NULL)
     {
-        $iTimestampInicio = time();
+        $iTotalPaquetes = 0;
+        $iTimestampInicio = microtime(TRUE);
         do {
+            if (is_null($timeout)) {
+                $sec = $usec = NULL;
+            } else {
+                $sec = (int)$timeout;
+                $usec = (int)(($timeout - $sec) * 1000000);
+            }
+
             $listoLeer = array($this->_hConn);
             $listoEscribir = array();
             $listoErr = array();
-            $iNumCambio = @stream_select($listoLeer, $listoEscribir, $listoErr, 0, 100000);
+            $iNumCambio = @stream_select($listoLeer, $listoEscribir, $listoErr, $sec, $usec);
             if ($iNumCambio === FALSE) {
                 throw new ECCPIOException('input');
             } elseif (count($listoErr) > 0) {
@@ -150,9 +158,15 @@ class ECCP
             } elseif ($iNumCambio > 0 || count($listoLeer) > 0) {
                 $s = fread($this->_hConn, 65536);
                 if ($s == '') throw new ECCPIOException('input');
-                $this->_parsearPaquetesXML($s);
+                $iTotalPaquetes += $this->_parsearPaquetesXML($s);
             }
-        } while (is_null($this->_response) && (is_null($timeout) || time() - $iTimestampInicio < $timeout));
+
+            if (!is_null($timeout)) {
+                $iTimestampFinal = microtime(TRUE);
+                $timeout -= $iTimestampFinal - $iTimestampInicio;
+                $iTimestampInicio = $iTimestampFinal;
+            }
+        } while (is_null($this->_response) && (is_null($timeout) || ($timeout > 0 && $iTotalPaquetes == 0)));
 
         // Devolver lo que haya de respuesta
         $r = $this->_response;
@@ -168,11 +182,13 @@ class ECCP
     // Parsear y separar tantos paquetes XML como sean posibles
     private function _parsearPaquetesXML($data)
     {
+        $iNumPaquetes = 0;
         if (is_null($this->_parser)) $this->_resetParser();
 
         $this->_bufferXML .= $data;
         $r = xml_parse($this->_parser, $data);
         while (!is_null($this->_iPosFinal)) {
+            $iNumPaquetes++;
             if ($this->_sTipoDoc == 'event') {
                 $this->_listaEventos[] = simplexml_load_string(substr($this->_bufferXML, 0, $this->_iPosFinal));
             } elseif ($this->_sTipoDoc == 'response') {
@@ -201,7 +217,7 @@ class ECCP
             );
             throw new ECCPMalformedXMLException();
         }
-        return $r;
+        return $iNumPaquetes;
     }
 
     // Resetear el parseador, para iniciarlo, o luego de parsear un paquete

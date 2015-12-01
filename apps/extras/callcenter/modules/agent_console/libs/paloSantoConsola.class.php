@@ -800,7 +800,7 @@ class PaloSantoConsola
         $this->errMsg = '';
         try {
             $oECCP = $this->_obtenerConexion('ECCP');
-            $oECCP->wait_response(1);
+            $oECCP->wait_response(30);
             $listaEventos = array();
             while ($e = $oECCP->getEvent()) {
                 foreach ($e->children() as $ee) $evt = $ee;

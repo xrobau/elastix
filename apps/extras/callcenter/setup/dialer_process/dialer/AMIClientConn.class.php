@@ -71,6 +71,7 @@ class AMIClientConn extends MultiplexConn
 
         /* Paquetes Event se van a la lista de eventos. El paquete Response se
          * guarda individualmente. */
+        $local_timestamp_received = NULL;
         foreach ($listaPaquetes as $paquete) {
         	if (isset($paquete['Event'])) {
                 $e = strtolower($paquete['Event']);
@@ -78,7 +79,9 @@ class AMIClientConn extends MultiplexConn
                     $this->cuentaEventos[$e] = 0;
                 $this->cuentaEventos[$e]++;
                 if (isset($this->event_handlers[$e]) || isset($this->event_handlers['*'])) {
-                    $paquete['local_timestamp_received'] = microtime(TRUE);
+                    if (is_null($local_timestamp_received))
+                        $local_timestamp_received = microtime(TRUE);
+                    $paquete['local_timestamp_received'] = $local_timestamp_received;
                     $this->_listaEventos[] = $paquete;
                 }
             } elseif (isset($paquete['Response'])) {

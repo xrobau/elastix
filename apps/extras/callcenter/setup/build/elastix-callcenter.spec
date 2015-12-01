@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Tue Dec  1 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: cache local_timestamp_received for entire event batch.
+  SVN Rev[7377]
 - CHANGED: Agent Console: optimize event wait so timeouts to select() calls are
   as long as possible (up to 30s) instead of looping at 1/10s as before. Ported
   from CallCenterPRO.

@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Dec  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign In, Campaign Out: fix some i18n.
+  SVN Rev[7378]
+
 * Tue Dec  1 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: cache local_timestamp_received for entire event batch.
   SVN Rev[7377]

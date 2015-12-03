@@ -75,7 +75,7 @@ $arrLangModule = array(
 "Invalid CSV File Line" => "Archivo CSV inválido Línea ",
 "CSV Data" => "Datos CSV",
 "Phone Customer" => "Teléfono",
-"Name Customer" => "Nombre",    
+"Name Customer" => "Nombre",
 "Status Call"=>"Estado Llamada",
 "Status"=>"Estado",
 "Options"=>"Opciones",
@@ -166,5 +166,6 @@ $arrLangModule = array(
 'Call file not specified or failed to be uploaded' => 'Archivo de llamadas no especificado o falló la transferencia',
 'Change Status' => 'Cambiar Estado',
 '(Leave as 0 to disable channel limit)' => '(Dejar en 0 para desactivar límite de canales)',
+'(No external URL)'=>'(Sin URL externo)',
 );
 ?>

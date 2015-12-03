@@ -75,7 +75,7 @@ $arrLangModule=array(
 "Invalid CSV File Line" => "Invalid CSV File Line ",
 "CSV Data" => "CSV Data",
 "Phone Customer" => "Phone",
-"Name Customer" => "Name Customer",    
+"Name Customer" => "Name Customer",
 "Status Call"=>"Status Call",
 "Status"=>"Status",
 "Options"=>"Options",
@@ -167,5 +167,6 @@ $arrLangModule=array(
 'Call file not specified or failed to be uploaded' => 'Call file not specified or failed to be uploaded',
 'Change Status' => 'Change Status',
 '(Leave as 0 to disable channel limit)' => '(Leave as 0 to disable channel limit)',
+'(No external URL)'=>'(No external URL)',
 );
 ?>

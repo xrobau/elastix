@@ -75,7 +75,7 @@ $arrLangModule = array(
 "Invalid CSV File Line" => "Archivo CSV inválido Línea ",
 "CSV Data" => "Datos CSV",
 "Phone Customer" => "Teléfono",
-"Name Customer" => "Nombre",    
+"Name Customer" => "Nombre",
 "Status Call"=>"Estado Llamada",
 "Status"=>"Estado",
 "Options"=>"Opciones",
@@ -120,7 +120,8 @@ $arrLangModule = array(
 'External URLs' => 'URLs Externos',
 'Manage External URLs' => 'Administrar URLs Externos',
 "Deactivate" => "Desactivar",
-"Campaign Name" => "Nombre Campaña", 
+"Campaign Name" => "Nombre Campaña",
 'Change Status' => 'Cambiar Estado',
+'(No external URL)'=>'(Sin URL externo)',
 );
 ?>

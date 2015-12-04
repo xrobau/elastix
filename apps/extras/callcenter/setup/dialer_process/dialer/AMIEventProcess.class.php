@@ -603,6 +603,7 @@ class AMIEventProcess extends TuberiaProcess
             $c->daytime_end = $tupla['daytime_end'];
             $c->trunk = $tupla['trunk'];
             $c->context = $tupla['context'];
+            $c->formpause = $tupla['formpause'];
             $c->estadisticasIniciales($tupla['num_completadas'], $tupla['promedio'], $tupla['desviacion']);
         }
 
@@ -675,6 +676,7 @@ class AMIEventProcess extends TuberiaProcess
                 $c->daytime_end = $tupla['daytime_end'];
                 $c->id_queue_call_entry = $tupla['id_queue_call_entry'];
                 $this->_colasEntrantes[$tupla['queue']]['campania'] = $c;
+                $c->formpause = $tupla['formpause'];
 
                 if ($this->DEBUG) {
                     $this->_log->output('DEBUG: '.__METHOD__.': nueva campaña entrante: '.print_r($tupla, 1));

@@ -439,7 +439,7 @@ PETICION_DESACTIVAR_CADUCAS;
             $sPeticionCampanias = <<<PETICION_CAMPANIAS_SALIENTES
 SELECT id, name, trunk, context, queue, max_canales, num_completadas,
     promedio, desviacion, retries, datetime_init, datetime_end, daytime_init,
-    daytime_end
+    daytime_end, formpause
 FROM campaign
 WHERE datetime_init <= ? AND datetime_end >= ? AND estatus = "A"
     AND (
@@ -466,7 +466,7 @@ PETICION_DESACTIVAR_CADUCAS;
             // Leer la lista de campañas entrantes que entran en actividad ahora
             $sPeticionCampanias = <<<PETICION_CAMPANIAS_ENTRANTES
 SELECT c.id, c.name, c.id_queue_call_entry, q.queue, c.datetime_init, c.datetime_end, c.daytime_init,
-    c.daytime_end
+    c.daytime_end, formpause
 FROM campaign_entry c, queue_call_entry q
 WHERE q.id = c.id_queue_call_entry AND c.datetime_init <= ?
     AND c.datetime_end >= ? AND c.estatus = "A"

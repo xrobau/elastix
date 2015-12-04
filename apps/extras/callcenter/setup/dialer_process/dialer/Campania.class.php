@@ -27,7 +27,7 @@
   +----------------------------------------------------------------------+
   $Id: Campania.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
 
-/* Número de llamadas por campaña para las que se lleva la cuenta de cuánto 
+/* Número de llamadas por campaña para las que se lleva la cuenta de cuánto
  * tardó en ser contestada */
 define('NUM_LLAMADAS_HISTORIAL_CONTESTADA', 20);
 
@@ -45,7 +45,8 @@ class Campania
     var $daytime_init;      // Hora hh:mm:ss del inicio del horario de la campaña
     var $daytime_end;       // Hora hh:mm:ss del final del horario de la campaña
     var $tipo_campania;     // Tipo de campaña 'outgoing' o 'incoming'
-    
+    var $formpause = 0;     // NULL si no hay pausa, 0 si pausa infinita, o seg. pausa
+
     // Variables sólo para campañas salientes
     var $trunk;             // Troncal a usar para la campaña, o NULL para plan marcado
     var $context;           // Contexto para marcado de la campaña
@@ -53,7 +54,7 @@ class Campania
     private $_promedio;          // Promedio de la duración de la llamada, en segundos
     private $_desviacion;        // Desviación estándar en el promedio de duración
     private $_variancia = 0;
-    
+
     // Muestra de cuánto se tardaron las últimas llamadas en ser contestadas
     private $_historial_contestada = array();
     private $_iTiempoContestacion = 8;
@@ -71,7 +72,7 @@ class Campania
     {
         return "ID={$this->id} {$this->tipo_campania} name={$this->name}";
     }
-    
+
     public function dump($log)
     {
         $s = "----- CAMPAÑA -----\n";
@@ -92,14 +93,15 @@ class Campania
             $s .= "\t_promedio...............".(is_null($this->_promedio) ? 'N/D' : $this->_promedio)."\n";
             $s .= "\t_desviacion.............".(is_null($this->_desviacion) ? 'N/D' : $this->_desviacion)."\n";
             $s .= "\t_variancia..............".(is_null($this->_variancia) ? 'N/D' : $this->_variancia)."\n";
-            
+
         } elseif ($this->tipo_campania == 'incoming') {
             $s .= "\tid_queue_call_entry.....".$this->id_queue_call_entry."\n";
         }
+        $s .= "\tformpause...............".(is_null($this->formpause) ? 'NINGUNA' : (($this->formpause > 0) ? $this->formpause.' s.' : '(infinita)'))."\n";
 
         $log->output($s);
     }
-    
+
     function estadisticasIniciales($num, $prom, $stddev)
     {
     	$this->_num_completadas = $num;
@@ -110,8 +112,8 @@ class Campania
 
     function tiempoContestarOmision($i) { $this->_iTiempoContestacion = (int)$i; }
 
-    /* Procedimiento que actualiza la lista de las últimas llamadas que fueron 
-     * contestadas o perdidas. 
+    /* Procedimiento que actualiza la lista de las últimas llamadas que fueron
+     * contestadas o perdidas.
      */
     function agregarTiempoContestar($iMuestra)
     {
@@ -140,15 +142,15 @@ class Campania
 
         return $iTiempoContestar;
     }
-    
+
     // Calcular promedio y desviación estándar
     function actualizarEstadisticas($iDuracionLlamada)
     {
     	if (is_null($this->_num_completadas)) $this->_num_completadas = 0;
-        
+
         // Calcular nuevo promedio
         if ($this->_num_completadas > 0) {
-            $iNuevoPromedio = $this->_nuevoPromedio($this->_promedio, 
+            $iNuevoPromedio = $this->_nuevoPromedio($this->_promedio,
                 $this->_num_completadas, $iDuracionLlamada);
         } else {
             $iNuevoPromedio = $iDuracionLlamada;
@@ -161,13 +163,13 @@ class Campania
                 $iDuracionLlamada);
         } else if ($this->_num_completadas == 1) {
             $iViejoPromedio = $this->_promedio;
-            $iNuevaVariancia = 
-                ($iViejoPromedio - $iNuevoPromedio) * ($iViejoPromedio - $iNuevoPromedio) + 
+            $iNuevaVariancia =
+                ($iViejoPromedio - $iNuevoPromedio) * ($iViejoPromedio - $iNuevoPromedio) +
                 ($iDuracionLlamada - $iNuevoPromedio) * ($iDuracionLlamada - $iNuevoPromedio);
         } else {
             $iNuevaVariancia = 0;
         }
-        
+
         $this->_num_completadas++;
         $this->_promedio = $iNuevoPromedio;
         $this->_variancia = $iNuevaVariancia;
@@ -176,14 +178,14 @@ class Campania
         /*
         if ($this->DEBUG) {
             $this->_log->output("DEBUG: luego de ".($this->_num_completadas)." llamadas: ".
-                sprintf('prom: %.2f var: %.2f std.dev: %.2f', 
+                sprintf('prom: %.2f var: %.2f std.dev: %.2f',
                     $this->_promedio,
                     $this->_variancia,
                     $this->_desviacion));
         }
         */
-        
-        $this->_tuberia->msg_CampaignProcess_sqlupdatestatcampaign($this->id, 
+
+        $this->_tuberia->msg_CampaignProcess_sqlupdatestatcampaign($this->id,
             $this->_num_completadas, $this->_promedio, $this->_desviacion);
     }
 
@@ -191,29 +193,29 @@ class Campania
     {
         return $iViejoProm + ($x - $iViejoProm) / ($n + 1);
     }
-    
-    private function _nuevaVarianciaMuestra($iViejoProm, $iNuevoProm, $n, $iViejaVar, $x) 
+
+    private function _nuevaVarianciaMuestra($iViejoProm, $iNuevoProm, $n, $iViejaVar, $x)
     {
         return ($n * $iViejaVar + ($x - $iNuevoProm) * ($x - $iViejoProm)) / ($n + 1);
     }
-    
+
     public function enHorarioVigencia($iTimestamp)
     {
         $sFecha = date('Y-m-d', $iTimestamp);
         $sHora = date('H:i:s', $iTimestamp);
         return (
-            $this->datetime_init <= $sFecha && 
+            $this->datetime_init <= $sFecha &&
             $sFecha <= $this->datetime_end &&
-            (   ($this->daytime_init <= $this->daytime_end && 
-                $this->daytime_init <= $sHora && 
-                $sHora <= $this->daytime_end) 
-                || 
+            (   ($this->daytime_init <= $this->daytime_end &&
+                $this->daytime_init <= $sHora &&
+                $sHora <= $this->daytime_end)
+                ||
                 ($this->daytime_init > $this->daytime_end &&
-                ($this->daytime_init <= $sHora || 
+                ($this->daytime_init <= $sHora ||
                 $sHora <= $this->daytime_end))
             )
         );
-    	
+
     }
 }
 ?>

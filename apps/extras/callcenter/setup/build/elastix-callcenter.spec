@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Dec  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: load formpause flag from campaigns.
+  SVN Rev[7380]
+
 * Thu Dec  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign In, Campaign Out: fix some i18n.
   SVN Rev[7378]

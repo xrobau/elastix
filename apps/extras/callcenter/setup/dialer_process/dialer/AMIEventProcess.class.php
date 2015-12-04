@@ -94,7 +94,8 @@ class AMIEventProcess extends TuberiaProcess
         // Registro de manejadores de eventos desde ECCPWorkerProcess
         foreach (array('idNuevaSesionAgente', 'idNuevoBreakAgente',
             'quitarBreakAgente', 'idNuevoHoldAgente', 'quitarHoldAgente',
-            'llamadaSilenciada', 'llamadaSinSilencio') as $k)
+            'llamadaSilenciada', 'llamadaSinSilencio',
+            'idNuevoFormPauseAgente', 'quitarFormPauseAgente') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente',
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
@@ -384,6 +385,46 @@ class AMIEventProcess extends TuberiaProcess
         if (!is_null($a)) {
             if (!is_null($a->id_hold)) {
                 $a->clearHold();
+            }
+        }
+    }
+
+    private function _idNuevoFormPauseAgente($sAgente, $idBreak, $idAuditBreak)
+    {
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (!is_null($a)) {
+            if (!$a->formpause) {
+                $this->_log->output('ERR: '.__METHOD__."agente $sAgente no está en pausa de formulario.");
+                return;
+            }
+            if (!is_null($a->id_formpause)) {
+                if ($a->id_formpause == $idBreak && $a->id_audit_formpause == $idAuditBreak) {
+                    $this->_log->output('ERR: '.__METHOD__." - formpause duplicado para $sAgente, no debería pasar.");
+                } else {
+                    $this->_log->output('ERR: '.__METHOD__." - formpause activo para $sAgente, se pierde anterior.");
+                }
+
+                // TODO: escribir el final de la pausa anterior que quedó colgada
+            }
+            if (!is_null($idAuditBreak)) {
+                // Funcionamiento ordinario de pausa de formulario
+                $a->setIdFormPause($idBreak, $idAuditBreak);
+            } else {
+                // Recuperación en caso de error - quitar pausa
+                $a->clearFormPause();
+                if ($a->num_pausas == 0) {
+                    $this->_tuberia->msg_CampaignProcess_asyncQueuePause($this->agente->channel, 'false');
+                }
+            }
+        }
+    }
+
+    private function _quitarFormPauseAgente($sAgente)
+    {
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (!is_null($a)) {
+            if (!is_null($a->formpause)) {
+                $a->clearFormPause();
             }
         }
     }
@@ -1386,6 +1427,24 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
         }
         call_user_func_array(array($this, '_quitarHoldAgente'), $datos);
+    }
+
+    public function msg_idNuevoFormPauseAgente($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_idNuevoFormPauseAgente'), $datos);
+    }
+
+    public function msg_quitarFormPauseAgente($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_quitarFormPauseAgente'), $datos);
     }
 
     public function msg_quitarReservaAgente($sFuente, $sDestino,

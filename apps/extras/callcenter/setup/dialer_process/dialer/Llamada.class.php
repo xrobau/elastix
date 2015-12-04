@@ -554,7 +554,7 @@ class Llamada
             $this->status = $sStatus;
         if (!in_array($this->status, array('Placing', 'Ringing', 'Dialing', 'Failure'))) {
             $this->_log->output("WARN: ".__METHOD__." llamada recibe OriginateResponse con status=".
-                    $this->status." inesperado, se asume Ringing");
+                $this->status." inesperado, se asume Ringing");
             $this->status = 'Ringing';
         }
 
@@ -800,6 +800,17 @@ class Llamada
             $this->_tuberia->msg_CampaignProcess_actualizarCanalRemoto(
                 $this->agente->number, $this->tipo_llamada, $this->uniqueid);
 
+        // Verificar si se debe pausar al agente para llenar su formulario
+        if (!is_null($this->campania) && !is_null($this->campania->formpause) &&
+            in_array($this->campania->tipo_campania, array('incoming', 'outgoing'))) {
+
+            $this->agente->setFormPause();
+            if ($this->agente->num_pausas == 1) {
+                // La pausa por formulario es la primera pausa
+                $this->_tuberia->msg_CampaignProcess_asyncQueuePause($this->agente->channel, 'true');
+            }
+        }
+
         // Verificación de consistencia
         if ($this->agente->estado_consola != 'logged-in') {
             $this->_log->output("WARN: llamada ha sido asignada a agente en estado ".
@@ -955,6 +966,17 @@ class Llamada
                     date('Y-m-d H:i:s', $this->timestamp_hangup),
                     $this->duration, ($this->status == 'ShortCall'),
                     $paramProgreso);
+
+                /* Si la pausa de formulario sigue activa, empieza a contar la
+                 * auditoría de la pausa por formulario. */
+                if ($this->agente->formpause) {
+                    $this->_tuberia->msg_ECCPProcess_formpause_auditstart(
+                        $this->agente->channel, $this->agente->id_agent,
+                        date('Y-m-d H:i:s', $this->timestamp_hangup));
+                    /* Se espera que ECCPProcess envíe un evento idNuevoFormPauseAgente
+                     * con el ID de auditoría de la pausa de formulario. */
+                }
+
             } else {
             	// Emitir el evento directamente
                 $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);

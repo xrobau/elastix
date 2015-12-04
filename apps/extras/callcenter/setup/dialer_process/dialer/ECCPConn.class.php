@@ -3746,5 +3746,60 @@ LOG_CAMPANIA_SALIENTE;
         return $xml_response;
     }
 
+    private function Request_agentauth_unpauseform($comando)
+    {
+        if (is_null($this->_ami))
+            return $this->_generarRespuestaFallo(500, 'No AMI connection');
+
+        $sAgente = (string)$comando->agent_number;
+
+        $xml_response = new SimpleXMLElement('<response />');
+        $xml_unpauseAgentResponse = $xml_response->addChild('unpauseform_response');
+
+        // Verificar si el agente está siendo monitoreado
+        $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
+        if (is_null($infoSeguimiento)) {
+            $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 404, 'Agent not found or not logged in through ECCP');
+            return $xml_response;
+        }
+        if ($infoSeguimiento['estado_consola'] != 'logged-in') {
+            $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 417, 'Agent currently not logged in');
+            return $xml_response;
+        }
+        if (!$infoSeguimiento['formpause']) {
+            // Si el agente no estaba en break, se devuelve éxito sin hacer nada
+            $xml_unpauseAgentResponse->addChild('success');
+            return $xml_response;
+        }
+
+        // Ejecutar el final de pausa a través del AMI
+        if ($infoSeguimiento['num_pausas'] > 0) {
+            $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
+            if ($r['Response'] != 'Success') {
+                $this->_log->output('ERR: (internal) no se puede sacar al agente de pausa: '.
+                    $sAgente.' - '.$r['Message']);
+                $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 500, 'Unable to stop agent form pause');
+                return $xml_response;
+            }
+        }
+        $this->_tuberia->msg_AMIEventProcess_quitarFormPauseAgente($sAgente);
+
+        // Sólo se emite el evento de fin de pausa si hay auditoría que cerrar
+        $eventos = array();
+        if (!is_null($infoSeguimiento['id_formpause'])) {
+            $iTimestampFinalPausa = time();
+            marcarFinalBreakAgente($this->_db,
+                $infoSeguimiento['id_audit_formpause'], $iTimestampFinalPausa);
+
+            $eventos[] = construirEventoPauseEnd($this->_db, $sAgente,
+                $infoSeguimiento['id_audit_formpause'], 'form');
+        }
+        $xml_unpauseAgentResponse->addChild('success');
+
+        return array(
+            'response'  =>  $xml_response,
+            'eventos'   =>  $eventos,
+        );
+    }
 }
 ?>

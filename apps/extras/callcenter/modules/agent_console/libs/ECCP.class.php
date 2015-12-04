@@ -466,6 +466,16 @@ class ECCP
         return $xml_response->unhold_response;
     }
 
+    public function unpauseform()
+    {
+        $xml_request = new SimpleXMLElement("<request />");
+        $xml_cmdRequest = $xml_request->addChild('unpauseform');
+        $xml_cmdRequest->addChild('agent_number', $this->_agentNumber);
+        $xml_cmdRequest->addChild('agent_hash', $this->agentHash($this->_agentNumber, $this->_agentPass));
+        $xml_response = $this->send_request($xml_request);
+        return $xml_response->unpauseform_response;
+    }
+
     public function transfercall($extension)
     {
         $xml_request = new SimpleXMLElement("<request />");

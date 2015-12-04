@@ -114,7 +114,7 @@ class CampaignProcess extends TuberiaProcess
             'sqlupdatecalls', 'sqlinsertcurrentcalls', 'sqldeletecurrentcalls',
             'sqlupdatecurrentcalls', 'sqlupdatestatcampaign',
             'actualizarCanalRemoto', 'finalsql', 'verificarFinLlamadasAgendables',
-            'forzarLogoffAgente', 'asyncQueueAdd', 'asyncQueueRemove',
+            'forzarLogoffAgente', 'asyncQueueAdd', 'asyncQueueRemove', 'asyncQueuePause',
             'agregarArchivoGrabacion', 'asyncMixMonitorUnmute') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
@@ -1515,6 +1515,15 @@ PETICION_LLAMADAS_AGENTE;
         call_user_func_array(array($this, '_asyncQueueRemove'), $datos);
     }
 
+    public function msg_asyncQueuePause($sFuente, $sDestino,
+            $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_asyncQueuePause'), $datos);
+    }
+
     public function msg_asyncMixMonitorUnmute($sFuente, $sDestino,
             $sNombreMensaje, $iTimestamp, $datos)
     {
@@ -1864,6 +1873,14 @@ PETICION_LLAMADAS_AGENTE;
             if ($r['Response'] != 'Success') {
                 $this->_log->output("ERR: falla al quitar $channel de cola $q: ".print_r($r, TRUE));
             }
+        }
+    }
+
+    private function _asyncQueuePause($channel, $nstate)
+    {
+        $r = $this->_ami->QueuePause(NULL, $channel, $nstate);
+        if ($r['Response'] != 'Success') {
+            $this->_log->output("ERR: falla al cambiar pausa $channel a $nstate: ".print_r($r, TRUE));
         }
     }
 

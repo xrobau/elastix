@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Fri Dec  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): implement initial support for form pause. This pause
+  will stop call delivery until agent fills the form completely. Pause timeout
+  not yet implemented. Unpause-on-logoff not yet implemented. Unpause-on-shutdown
+  not yet implemented. Unpause on successful form save not yet implemented.
+  SVN Rev[7381]
 - CHANGED: Dialer: load formpause flag from campaigns.
   SVN Rev[7380]
 

@@ -50,15 +50,15 @@ function _moduleContent(&$smarty, $module_name)
     $relative_dir_rich_text = "modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
     $smarty->assign("relative_dir_rich_text", $relative_dir_rich_text);
 
-    // Conexión a la base de datos CallCenter y Asterisk (se utiliza root para pruebas)        
+    // Conexión a la base de datos CallCenter y Asterisk (se utiliza root para pruebas)
     $pDB = new paloDB($cadena_dsn); // $cadena_dsn está ubicado en configs/default.conf.php
     if ($pDB->connStatus) return "ERR: failed to connect to database: ".$pDB->errMsg;
-    
+
     // Mostrar pantalla correspondiente
     $contenidoModulo = '';
     $sAction = 'list_agents';
     if (isset($_GET['action'])) $sAction = $_GET['action'];
-    
+
     switch ($sAction) {
     case 'new_agent':
         $contenidoModulo = newAgent($pDB, $smarty, $module_name, $local_templates_dir);
@@ -78,7 +78,7 @@ function _moduleContent(&$smarty, $module_name)
 function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
 {
     global $arrLang;
-    
+
     $oAgentes = new Agentes($pDB);
 
     // Operaciones de manipulación de agentes
@@ -110,12 +110,13 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
         "Online"    =>  _tr("Online"),
         "Offline"   =>  _tr("Offline"),
     );
-    if (isset($_GET['cbo_estado'])) $sEstadoAgente = $_GET['cbo_estado'];
-    if (isset($_POST['cbo_estado'])) $sEstadoAgente = $_POST['cbo_estado'];
-    if (!in_array($sEstadoAgente, array_keys($listaEstados))) $sEstadoAgente = 'All';
+    $tmpEstado = getParameter('cbo_estado');
+    if (isset($listaEstados[$tmpEstado])) {
+        $sEstadoAgente = $tmpEstado;
+    }
 
     $listaAgentes = $oAgentes->getAgents();
-    
+
     // Listar todos los agentes que están conectados
     $listaOnline = $oAgentes->getOnlineAgents();
     if (is_array($listaOnline)) {
@@ -125,19 +126,16 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     } else {
         $smarty->assign("mb_title", 'Unable to read agent');
         $smarty->assign("mb_message", 'Cannot read agent - '.$oAgentes->errMsg);
-        foreach (array_keys($listaAgentes) as $k) 
+        foreach (array_keys($listaAgentes) as $k)
             $listaAgentes[$k]['online'] = NULL;
     }
-    
+
     // Filtrar los agentes conocidos según el estado que se requiera
     function estado_Online($t)  { return ($t['online']); }
     function estado_Offline($t) { return (!$t['online']); }
     if ($sEstadoAgente != 'All') $listaAgentes = array_filter($listaAgentes, "estado_$sEstadoAgente");
-    
+
     $arrData = array();
-    $sImgVisto = "<img src='modules/$module_name/themes/images/visto.gif' border='0' />";
-    $sImgErrorCC = "<img src='modules/$module_name/themes/images/error_small.png' border='0' title=\""._tr("Agent doesn't exist in configuration file")."\" />";
-    $sImgErrorAst = "<img src='modules/$module_name/themes/images/error_small.png' border='0' title=\""._tr("Agent doesn't exist in database")."\" />";
     $smarty->assign(array(
         'PREGUNTA_BORRAR_AGENTE_CONF'   =>  _tr("To rapair is necesary delete agent from configuration file. Do you want to continue?"),
         'PREGUNTA_AGREGAR_AGENTE_CONF'  =>  _tr("To rapair is necesary add an agent in configuration file. Do you want to continue?"),
@@ -155,7 +153,7 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
 
     $url = construirURL(array('menu' => $module_name, 'cbo_estado' => $sEstadoAgente), array('nav', 'start'));
 
-    $arrColumns = array('', _tr("Number"), _tr("Name"), _tr("Status"), _tr("Options"));    
+    $arrColumns = array('', _tr("Number"), _tr("Name"), _tr("Status"), _tr("Options"));
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->pagingShow(true);
     $oGrid->setLimit(50);
@@ -166,10 +164,10 @@ function listAgent($pDB, $smarty, $module_name, $local_templates_dir)
     $oGrid->setURL($url);
     $oGrid->setTitle(_tr('Callback Extensions'));
     $oGrid->setIcon('images/user.png');
-    
+
     $_REQUEST['cbo_estado'] = $sEstadoAgente;
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." = ".$listaEstados[$sEstadoAgente], $_REQUEST, array("cbo_estado" =>'A'),true);
-    
+
     $oGrid->setTotal(count($arrData));
     $offset = $oGrid->calculateOffset();
     $arrData = array_slice($arrData, $offset, $oGrid->getLimit());
@@ -209,13 +207,16 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
     if (isset($_POST['cancel'])) {
         Header("Location: ?menu=$module_name");
         return '';
-    }    
+    }
+
+    $bDoCreate = isset($_POST['submit_save_agent']);
+    $bDoUpdate = isset($_POST['submit_apply_changes']);
+    $oAgentes = new Agentes($pDB);
 
     $smarty->assign('FRAMEWORK_TIENE_TITULO_MODULO', existeSoporteTituloFramework());
 
     // Leer los datos de la campaña, si es necesario
     $arrAgente = NULL;
-    $oAgentes = new Agentes($pDB);
     if (!is_null($id_agent)) {
         $arrAgente = $oAgentes->getAgents($id_agent);
         if (!is_array($arrAgente) || count($arrAgente) == 0) {
@@ -227,7 +228,7 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
 
     require_once("libs/paloSantoForm.class.php");
     $arrFormElements = getFormAgent($smarty, $oAgentes, $arrAgente, !is_null($id_agent));
-    
+
     // Valores por omisión para primera carga
     if (is_null($id_agent)) {
         // Creación de nuevo agente
@@ -245,7 +246,7 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
         if (!isset($_POST['password2']))    $_POST['password2'] = $arrAgente['password'];
         if (!isset($_POST['eccpwd1']))      $_POST['eccpwd1'] = $arrAgente['eccp_password'];
         if (!isset($_POST['eccpwd2']))      $_POST['eccpwd2'] = $arrAgente['eccp_password'];
-        
+
         // Volver opcional el cambio de clave de acceso
         $arrFormElements['password1']['REQUIRED'] = 'no';
         $arrFormElements['password2']['REQUIRED'] = 'no';
@@ -255,22 +256,20 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
         $oForm->setEditMode();
         $smarty->assign("id_agent", $id_agent);
     }
-    
-    $bDoCreate = isset($_POST['submit_save_agent']);
-    $bDoUpdate = isset($_POST['submit_apply_changes']);
+
     if ($bDoCreate || $bDoUpdate) {
         if(!$oForm->validateForm($_POST)) {
-	    
+
             // Falla la validación básica del formulario
             $smarty->assign("mb_title", _tr("Validation Error"));
             $arrErrores = $oForm->arrErroresValidacion;
-	    
+
             $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br>";
             foreach($arrErrores as $k=>$v) {
                 $strErrorMsg .= "$k, ";
             }
             $strErrorMsg .= "";
-            $smarty->assign("mb_message", $strErrorMsg);	    
+            $smarty->assign("mb_message", $strErrorMsg);
         } else {
             foreach (array('extension', 'password1', 'password2', 'description', 'eccpwd1', 'eccpwd2') as $k)
                 $_POST[$k] = trim($_POST[$k]);
@@ -283,16 +282,16 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
             } elseif (!preg_match('/^[[:digit:]]+$/', $_POST['password1'])) {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("The passwords aren't numeric values"));
-            } 
+            }
 	      /* Se asume que esta validación no es necesaria.
 		elseif (!preg_match('/^[[:digit:]]+$/', $_POST['extension'])) {
-		
+
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr("Error Agent Number"));
             } */
 	      else {
                 $bExito = TRUE;
-                
+
                 if ($bDoUpdate && $_POST['password1'] == '')
                     $_POST['password1'] = $arrAgente['password'];
                 $agente = array(
@@ -315,10 +314,10 @@ function formEditAgent($pDB, $smarty, $module_name, $local_templates_dir, $id_ag
             }
         }
     }
-    
+
     $smarty->assign('icon', 'images/user.png');
     $contenidoModulo = $oForm->fetchForm(
-        "$local_templates_dir/new.tpl", 
+        "$local_templates_dir/new.tpl",
         is_null($id_agent) ? _tr("New callback extension") : _tr('Edit agent').' "'.$_POST['description'].'"',
         $_POST);
     return $contenidoModulo;
@@ -337,7 +336,7 @@ function getFormAgent(&$smarty, $oAgentes, $arrAgente, $bEdit)
     $arrExtensions = $oAgentes->getUnusedExtensions();
     if (!is_array($arrExtensions)) {
     	$smarty->assign(array(
-            'mb_title' => 'Fallo al leer extensiones', 
+            'mb_title' => 'Fallo al leer extensiones',
             'mb_message' => $oAgentes->errMsg));
         $arrExtensions = array('Unavailable extensions.');
     }
@@ -346,7 +345,7 @@ function getFormAgent(&$smarty, $oAgentes, $arrAgente, $bEdit)
         $arrExtensions[$sChannel] = $sChannel;
         asort($arrExtensions);
     }
-    
+
     $arrFormElements = array(
         "description" => array(
             "LABEL"                  => ""._tr('Name')."",
@@ -363,7 +362,7 @@ function getFormAgent(&$smarty, $oAgentes, $arrAgente, $bEdit)
             "REQUIRED"               => "yes",
             "INPUT_TYPE"             => "SELECT",
             'EDITABLE'              => $bEdit ? 'no' : 'yes',
-            "INPUT_EXTRA_PARAM"      => $arrExtensions,            
+            "INPUT_EXTRA_PARAM"      => $arrExtensions,
             "VALIDATION_TYPE"        => "text",
             "VALIDATION_EXTRA_PARAM" => ""),
         "password1"   => array(

@@ -1741,7 +1741,7 @@ LEER_CAMPANIA;
         }
 
         // Ejecutar el final de pausa a través del AMI
-        if ($infoSeguimiento['num_pausas'] > 0) {
+        if ($infoSeguimiento['num_pausas'] == 1) {
             $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
             if ($r['Response'] != 'Success') {
                 $this->_log->output('ERR: (internal) no se puede sacar al agente de pausa: '.
@@ -3773,7 +3773,7 @@ LOG_CAMPANIA_SALIENTE;
         }
 
         // Ejecutar el final de pausa a través del AMI
-        if ($infoSeguimiento['num_pausas'] > 0) {
+        if ($infoSeguimiento['num_pausas'] == 1) {
             $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
             if ($r['Response'] != 'Success') {
                 $this->_log->output('ERR: (internal) no se puede sacar al agente de pausa: '.

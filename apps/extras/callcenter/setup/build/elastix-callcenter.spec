@@ -102,6 +102,12 @@ fi
 
 %changelog
 * Sat Dec  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): when unpausing an agent, the agent was issued a
+  QueuePause(FALSE) when the pause count was nonzero. This is incorrect because
+  the agent might be simultaneously in other states that require the pause to
+  be maintained. Instead, unpause when the agent count is exactly one, as was
+  already done on return from hold.
+  SVN Rev[7384]
 - CHANGED: Dialer: clear form pause state on logoff, and validate auditable
   pause states before decrementing pause count.
   SVN Rev[7383]

@@ -252,6 +252,15 @@ class Agente
         case 'formpause':       return $this->_form_pause;
         case 'id_formpause':    return $this->_id_fp;
         case 'id_audit_formpause':return $this->_id_audit_fp;
+        case 'auditpauses':
+            $pauses = array();
+            if (!is_null($this->_id_audit_hold))
+                $pauses['hold'] = $this->_id_audit_hold;
+            if (!is_null($this->_id_audit_fp))
+                $pauses['form'] = $this->_id_audit_fp;
+            if (!is_null($this->_id_audit_break))
+                $pauses['break'] = $this->_id_audit_break;
+            return $pauses;
         default:
             die(__METHOD__.' - propiedad no implementada: '.$s);
         }

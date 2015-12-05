@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Dec  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): remove redundant code invoked on agent logoff and
+  formalize closing of multiple auditable pauses. This implicitly implements
+  form unpause-on-logoff and should also implement unpause-on-shutdown.
+  SVN Rev[7382]
+
 * Fri Dec  4 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): implement initial support for form pause. This pause
   will stop call delivery until agent fills the form completely. Pause timeout

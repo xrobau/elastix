@@ -452,29 +452,6 @@ SQL_EXISTE_AUDIT;
         }
     }
 
-    /**
-     * Método para marcar en las tablas de auditoría que el agente ha terminado
-     * su sesión principal y está haciendo logout.
-     *
-     * @param   int     $idAuditSesion  ID de sesión devuelto por marcarInicioSesionAgente()
-     * @param   int     $idAuditBreak   ID del break devuelto por marcarInicioBreakAgente().
-     *                                  Si es NULL, se ignora (no estaba en break).
-     *
-     * @return  bool    VERDADERO en éxito, FALSE en error.
-     */
-    private function _marcarFinalSesionAgente($sAgente, $iTimestampLogout, $idAuditSesion, $idAuditBreak)
-    {
-        // Quitar posibles pausas sobre el agente
-        $this->_ami->QueuePause(NULL, $sAgente, 'false');
-
-        if (!is_null($idAuditBreak))
-            marcarFinalBreakAgente($this->_db, $idAuditBreak, $iTimestampLogout);
-        $sTimeStamp = date('Y-m-d H:i:s', $iTimestampLogout);
-        $sth = $this->_db->prepare(
-            'UPDATE audit SET datetime_end = ?, duration = TIMEDIFF(?, datetime_init) WHERE id = ?');
-        $sth->execute(array($sTimeStamp, $sTimeStamp, $idAuditSesion));
-    }
-
     /**************************************************************************/
 
     public function msg_AgentLogin($sFuente, $sDestino, $sNombreMensaje,
@@ -512,21 +489,22 @@ SQL_EXISTE_AUDIT;
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
         }
-        list($sAgente, $iTimestampLogout, $id_agent, $id_sesion, $id_break, $id_hold) = $datos;
+        list($sAgente, $iTimestampLogout, $id_agent, $id_sesion, $pausas) = $datos;
 
         try {
             $eventos = array();
 
             // Escribir la información de auditoría en la base de datos
             $this->_db->beginTransaction();
-            if (!is_null($id_hold)) {
+            foreach ($pausas as $tipo_pausa => $id_pausa) if (!is_null($id_pausa)) {
                 // TODO: ¿Qué ocurre con la posible llamada parqueada?
-                marcarFinalBreakAgente($this->_db, $id_hold, $iTimestampLogout);
-                $eventos[] = construirEventoPauseEnd($this->_db, $sAgente, $id_hold, 'hold');
+                marcarFinalBreakAgente($this->_db, $id_pausa, $iTimestampLogout);
+                $eventos[] = construirEventoPauseEnd($this->_db, $sAgente, $id_pausa, $tipo_pausa);
             }
-            $this->_marcarFinalSesionAgente($sAgente, $iTimestampLogout, $id_sesion, $id_break);
-            if (!is_null($id_break))
-                $eventos[] = construirEventoPauseEnd($this->_db, $sAgente, $id_break, 'break');
+            marcarFinalBreakAgente($this->_db, $id_sesion, $iTimestampLogout);
+
+            // Quitar posibles pausas sobre el agente
+            $this->_ami->QueuePause(NULL, $sAgente, 'false');
 
             // Notificar a todas las conexiones abiertas
             $eventos[] = array('AgentLogoff', array($sAgente));

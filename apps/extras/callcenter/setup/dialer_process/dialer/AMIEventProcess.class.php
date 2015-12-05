@@ -166,8 +166,7 @@ class AMIEventProcess extends TuberiaProcess
                         microtime(TRUE),
                         $a->id_agent,
                         $a->id_sesion,
-                        $a->id_audit_break,
-                        $a->id_audit_hold);
+                        $a->auditpauses);
                     $a->terminarLoginAgente();
                 }
             }
@@ -2527,8 +2526,7 @@ Uniqueid: 1429642067.241008
             $timestamp,
             $a->id_agent,
             $a->id_sesion,
-            $a->id_audit_break,
-            $a->id_audit_hold);
+            $a->auditpauses);
 
         if (!is_null($a->llamada)) {
             $this->_log->output('WARN: agente '.$a->channel.' todavía tiene una '.

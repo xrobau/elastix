@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Sat Dec  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: clear form pause state on logoff, and validate auditable
+  pause states before decrementing pause count.
+  SVN Rev[7383]
 - CHANGED: Dialer (ECCP): remove redundant code invoked on agent logoff and
   formalize closing of multiple auditable pauses. This implicitly implements
   form unpause-on-logoff and should also implement unpause-on-shutdown.

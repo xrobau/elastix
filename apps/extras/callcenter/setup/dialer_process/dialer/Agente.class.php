@@ -318,9 +318,11 @@ class Agente
 
     public function clearBreak()
     {
-        $this->_id_break = NULL;
-        $this->_id_audit_break = NULL;
-        if ($this->_num_pausas >= 0) $this->_num_pausas--;
+        if (!is_null($this->_id_audit_break)) {
+            $this->_id_break = NULL;
+            $this->_id_audit_break = NULL;
+            if ($this->_num_pausas >= 0) $this->_num_pausas--;
+        }
         $this->resetTimeout();
     }
 
@@ -340,9 +342,11 @@ class Agente
 
     public function clearHold()
     {
-        $this->_id_hold = NULL;
-        $this->_id_audit_hold = NULL;
-        if ($this->_num_pausas >= 0) $this->_num_pausas--;
+        if (!is_null($this->_id_audit_hold)) {
+            $this->_id_hold = NULL;
+            $this->_id_audit_hold = NULL;
+            if ($this->_num_pausas >= 0) $this->_num_pausas--;
+        }
         if (!is_null($this->_llamada)) {
             $this->_llamada->request_hold = FALSE;
             $this->_llamada->status = 'Success';
@@ -368,10 +372,12 @@ class Agente
 
     public function clearFormPause()
     {
-        $this->_form_pause = FALSE;
-        $this->_id_fp = NULL;
-        $this->_id_audit_fp = NULL;
-        if ($this->_num_pausas >= 0) $this->_num_pausas--;
+        if ($this->_form_pause) {
+            $this->_form_pause = FALSE;
+            $this->_id_fp = NULL;
+            $this->_id_audit_fp = NULL;
+            if ($this->_num_pausas >= 0) $this->_num_pausas--;
+        }
         $this->resetTimeout();
     }
 
@@ -423,6 +429,7 @@ class Agente
     {
         $this->clearBreak();
         $this->clearHold();
+        $this->clearFormPause();
         $this->_estado_consola = 'logged-out';
         $this->_num_pausas = 0;
         if (!is_null($this->_Uniqueid))

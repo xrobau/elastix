@@ -45,7 +45,7 @@ class Campania
     var $daytime_init;      // Hora hh:mm:ss del inicio del horario de la campaña
     var $daytime_end;       // Hora hh:mm:ss del final del horario de la campaña
     var $tipo_campania;     // Tipo de campaña 'outgoing' o 'incoming'
-    var $formpause = 0;     // NULL si no hay pausa, 0 si pausa infinita, o seg. pausa
+    var $formpause = NULL;  // NULL si no hay pausa, 0 si pausa infinita, o seg. pausa
 
     // Variables sólo para campañas salientes
     var $trunk;             // Troncal a usar para la campaña, o NULL para plan marcado

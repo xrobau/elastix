@@ -412,7 +412,7 @@ class AMIEventProcess extends TuberiaProcess
                 // Recuperación en caso de error - quitar pausa
                 $a->clearFormPause();
                 if ($a->num_pausas == 0) {
-                    $this->_tuberia->msg_CampaignProcess_asyncQueuePause($this->agente->channel, 'false');
+                    $this->_tuberia->msg_CampaignProcess_asyncQueuePause($a->channel, 'false');
                 }
             }
         }

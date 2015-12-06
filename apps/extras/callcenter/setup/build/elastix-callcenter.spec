@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Sat Dec  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix error recovery using invalid object due to copy/paste error
+  when trying to start audit without having a Form pause created.
+  SVN Rev[7385]
 - FIXED: Dialer (ECCP): when unpausing an agent, the agent was issued a
   QueuePause(FALSE) when the pause count was nonzero. This is incorrect because
   the agent might be simultaneously in other states that require the pause to

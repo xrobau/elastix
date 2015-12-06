@@ -1194,7 +1194,44 @@ LEER_CAMPANIA;
             }
         }
 
-        return $xml_response;
+        $eventos = $this->_verificarFinPausaFormulario((string)$comando->agent_number);
+        return array(
+            'response'  =>  $xml_response,
+            'eventos'   =>  $eventos,
+        );
+    }
+
+    private function _verificarFinPausaFormulario($sAgente)
+    {
+        // Verificar si el agente está siendo monitoreado
+        $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
+        if (is_null($infoSeguimiento) ||
+            $infoSeguimiento['estado_consola'] != 'logged-in' ||
+            !$infoSeguimiento['formpause'])
+            return array();
+
+        // Ejecutar el final de pausa a través del AMI
+        if ($infoSeguimiento['num_pausas'] == 1) {
+            $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
+            if ($r['Response'] != 'Success') {
+                $this->_log->output('ERR: (internal) no se puede sacar al agente de pausa: '.
+                    $sAgente.' - '.$r['Message']);
+                return array();
+            }
+        }
+        $this->_tuberia->msg_AMIEventProcess_quitarFormPauseAgente($sAgente);
+
+        // Sólo se emite el evento de fin de pausa si hay auditoría que cerrar
+        $eventos = array();
+        if (!is_null($infoSeguimiento['id_formpause'])) {
+            $iTimestampFinalPausa = time();
+            marcarFinalBreakAgente($this->_db,
+                $infoSeguimiento['id_audit_formpause'], $iTimestampFinalPausa);
+
+            $eventos[] = construirEventoPauseEnd($this->_db, $sAgente,
+                $infoSeguimiento['id_audit_formpause'], 'form');
+        }
+        return $eventos;
     }
 
     private function Request_eccpauth_getpauses($comando)

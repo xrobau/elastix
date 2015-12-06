@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Sat Dec  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): implement end of form pause when successfully saving
+  form data.
+  SVN Rev[7386]
 - FIXED: Dialer: fix error recovery using invalid object due to copy/paste error
   when trying to start audit without having a Form pause created.
   SVN Rev[7385]

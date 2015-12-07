@@ -875,6 +875,8 @@ class Llamada
 
     public function llamadaFinalizaSeguimiento($timestamp, $iUmbralLlamadaCorta)
     {
+        $paramAlarma = NULL;
+
         if (is_null($this->id_llamada)) {
         	$this->_log->output('ERR: '.__METHOD__.': todavía no ha llegado '.
                 'ID de llamada, no se garantiza integridad de datos para esta llamada.');
@@ -975,6 +977,12 @@ class Llamada
                         date('Y-m-d H:i:s', $this->timestamp_hangup));
                     /* Se espera que ECCPProcess envíe un evento idNuevoFormPauseAgente
                      * con el ID de auditoría de la pausa de formulario. */
+
+                    // Preparar parámetros de timeout de pausa de formulario
+                    if (!is_null($this->campania) && !is_null($this->campania->formpause) &&
+                        $this->campania->formpause > 0) {
+                        $paramAlarma = array($this->agente, $this->campania->formpause);
+                    }
                 }
 
             } else {
@@ -1029,6 +1037,8 @@ class Llamada
             !($this->status == 'Failure' && is_null($this->failure_cause))) {
             $this->_listaLlamadas->remover($this);
         }
+
+        return $paramAlarma;
     }
 
     public function agregarArchivoGrabacion($uniqueid, $channel, $recordingfile)

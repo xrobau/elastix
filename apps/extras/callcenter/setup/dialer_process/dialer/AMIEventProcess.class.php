@@ -70,6 +70,7 @@ class AMIEventProcess extends TuberiaProcess
     private $_pendiente_QueueStatus = FALSE;
 
     // Lista de alarmas
+    private $_nalarma = 0;
     private $_alarmas = array();
 
     public function inicioPostDemonio($infoConfig, &$oMainLog)
@@ -410,6 +411,8 @@ class AMIEventProcess extends TuberiaProcess
                 $a->setIdFormPause($idBreak, $idAuditBreak);
             } else {
                 // Recuperación en caso de error - quitar pausa
+                if (!is_null($a->alarma_formpause))
+                    $this->_cancelarAlarma($a->alarma_formpause);
                 $a->clearFormPause();
                 if ($a->num_pausas == 0) {
                     $this->_tuberia->msg_CampaignProcess_asyncQueuePause($a->channel, 'false');
@@ -423,6 +426,8 @@ class AMIEventProcess extends TuberiaProcess
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (!is_null($a)) {
             if (!is_null($a->formpause)) {
+                if (!is_null($a->alarma_formpause))
+                    $this->_cancelarAlarma($a->alarma_formpause);
                 $a->clearFormPause();
             }
         }
@@ -1992,9 +1997,10 @@ Uniqueid: 1429642067.241008
                         ', se finaliza seguimiento...');
                 }
             }
-            $llamada->llamadaFinalizaSeguimiento(
+            $al = $llamada->llamadaFinalizaSeguimiento(
                 $params['local_timestamp_received'],
                 $this->_config['dialer']['llamada_corta']);
+            $this->_prepararAlarmaFormPause($al);
             return FALSE;
         }
 
@@ -2256,9 +2262,44 @@ Uniqueid: 1429642067.241008
                 }
             } else {
                 // Llamada ha sido enlazada al menos una vez
-                $llamada->llamadaFinalizaSeguimiento(
+                $al = $llamada->llamadaFinalizaSeguimiento(
                     $params['local_timestamp_received'],
                     $this->_config['dialer']['llamada_corta']);
+                $this->_prepararAlarmaFormPause($al);
+            }
+        }
+    }
+
+    private function _prepararAlarmaFormPause($al)
+    {
+        if (is_null($al)) return;
+
+        if (!is_null($al[0]->alarma_formpause)) {
+            $this->_log->output('WARN: '.__METHOD__.': alarma '.$al[0]->alarma_formpause.
+                ' no ha sido anulada todavía al momento de setear otra alarma, se cancela...');
+            $this->_cancelarAlarma($al[0]->alarma_formpause);
+            $al[0]->alarma_formpause = NULL;
+        }
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.': agente '.$al[0]->channel.
+                ' debe despausarse luego de '.$al[1].' segundos...');
+        }
+        $k = $this->_agregarAlarma($al[1],
+            array($this, '_timeoutAlarmaFormPause'),
+            array($al[0]));
+        $al[0]->alarma_formpause = $k;
+    }
+
+    private function _timeoutAlarmaFormPause($a)
+    {
+        if ($a->formpause) {
+            if (!is_null($a->id_audit_formpause)) {
+                $this->_tuberia->msg_ECCPProcess_formpause_auditend($a->channel,
+                    $a->id_audit_formpause, time());
+            }
+            $a->clearFormPause();
+            if ($a->num_pausas == 0) {
+                $this->_tuberia->msg_CampaignProcess_asyncQueuePause($a->channel, 'false');
             }
         }
     }
@@ -2587,7 +2628,15 @@ Uniqueid: 1429642067.241008
 
     private function _agregarAlarma($timeout, $callback, $arglist)
     {
-        $this->_alarmas[] = array(microtime(TRUE) + $timeout, $callback, $arglist);
+        $k = 'K_'.$this->_nalarma;
+        $this->_nalarma++;
+        $this->_alarmas[$k] = array(microtime(TRUE) + $timeout, $callback, $arglist);
+        return $k;
+    }
+
+    private function _cancelarAlarma($k)
+    {
+        if (isset($this->_alarmas[$k])) unset($this->_alarmas[$k]);
     }
 
     private function _ejecutarAlarmas()

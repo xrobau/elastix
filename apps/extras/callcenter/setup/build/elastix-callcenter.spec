@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sun Dec  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): implement form pause timeout when campaign.formpause
+  is nonzero. As part of this change, the ability to cancel internal alarms is
+  implemented.
+  SVN Rev[7388]
+
 * Sat Dec  5 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): implement end of form pause when successfully saving
   form data.

@@ -128,6 +128,7 @@ class Agente
     private $_form_pause = FALSE;
     private $_id_fp = NULL;
     private $_id_audit_fp = NULL;
+    var $alarma_formpause = NULL;
 
     function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
         $bEstatus, $sType = 'Agent')
@@ -376,6 +377,7 @@ class Agente
             $this->_form_pause = FALSE;
             $this->_id_fp = NULL;
             $this->_id_audit_fp = NULL;
+            $this->alarma_formpause = NULL;
             if ($this->_num_pausas >= 0) $this->_num_pausas--;
         }
         $this->resetTimeout();

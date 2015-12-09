@@ -425,7 +425,7 @@ class AMIEventProcess extends TuberiaProcess
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (!is_null($a)) {
-            if (!is_null($a->formpause)) {
+            if ($a->formpause) {
                 if (!is_null($a->alarma_formpause))
                     $this->_cancelarAlarma($a->alarma_formpause);
                 $a->clearFormPause();

@@ -602,6 +602,7 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
         'timer_seconds' =>  '',
         'url'           =>  NULL,
         'urlopentype'   =>  NULL,
+        'waitingcall'   =>  FALSE,
     );
 
     // Decidir estado del break a mostrar
@@ -703,6 +704,19 @@ function manejarSesionActiva_HTML($module_name, &$smarty, $sDirLocalPlantillas, 
             'agent_number'      =>  $estado['callinfo']['agent_number'],
             'remote_channel'    =>  $estado['callinfo']['remote_channel']),
             $chanvars);
+    } elseif (!is_null($estado['waitedcallinfo'])) {
+        $estadoInicial['waitingcall'] = TRUE;
+
+
+        $smarty->assign(array(
+            'CLASS_ESTADO_AGENTE_INICIAL'   =>  'elastix-callcenter-class-estado-esperando',
+            'TEXTO_ESTADO_AGENTE_INICIAL'   =>  _tr('Waiting for call'),
+            'CONTENIDO_LLAMADA_FORMULARIO'  =>  is_null($_SESSION['callcenter']['ultimo_calltype'])
+                ? ''
+                : _manejarSesionActiva_HTML_generarFormulario($smarty, $sDirLocalPlantillas,
+                        $_SESSION['callcenter']['ultimo_callsurvey'],
+                        $_SESSION['callcenter']['ultimo_campaignform']),
+        ));
     } else {
     	$bInactivarBotonColgar = true; // Se usa para botón hangup y botón transfer
         $smarty->assign(array(
@@ -1156,6 +1170,9 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
     } elseif (is_null($estadoCliente['campaign_id']) && $estadoCliente['calltype'] != 'incoming') {
         $estadoCliente['calltype'] = $estadoCliente['callid'] = NULL;
     }
+    $estadoCliente['waitingcall'] = isset($estadoCliente['waitingcall'])
+        ? ($estadoCliente['waitingcall'] == 'true')
+        : false;
 
     _debug(__FUNCTION__.' after sanitizing clientstate='.print_r($estadoCliente, TRUE));
 
@@ -1263,6 +1280,15 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
         _debug(__FUNCTION__.' initial: agent has ended call');
     }
 
+    // Verificación de espera de llamada
+    if (!is_null($estado['waitedcallinfo']) && !$estadoCliente['waitingcall']) {
+        $respuesta[] = construirRespuesta_waitingenter($oPaloConsola, $estado['waitedcallinfo']);
+        _debug(__FUNCTION__.' initial: agent is waiting for manual call');
+    } elseif (is_null($estado['waitedcallinfo']) && $estadoCliente['waitingcall']) {
+        $respuesta[] = construirRespuesta_waitingexit();
+        _debug(__FUNCTION__.' initial: agent stops waiting for manual call');
+    }
+
     _debug(__FUNCTION__.' initial list of changes: '.print_r($respuesta, TRUE));
 
     // Ciclo de verificación para Server-sent Events
@@ -1298,9 +1324,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
                 break;
             }
 
-            foreach ($listaEventos as $evento)
-            if (isset($evento['agent_number']) && $evento['agent_number'] == $sAgente)
-            switch ($evento['event']) {
+            foreach ($listaEventos as $evento) switch ($evento['event']) {
             case 'agentloggedout':
                 // Reiniciar la sesión para poder modificar las variables
                 @session_start();
@@ -1314,6 +1338,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
                 $bReinicioSesion = TRUE;
                 break;
             case 'pausestart':
+                if (!(isset($evento['agent_number']) && $evento['agent_number'] == $sAgente)) break;
                 unset($respuestaEventos[$evento['pause_class']]);
                 switch ($evento['pause_class']) {
                 case 'break':
@@ -1335,6 +1360,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
                 }
                 break;
             case 'pauseend':
+                if (!(isset($evento['agent_number']) && $evento['agent_number'] == $sAgente)) break;
                 unset($respuestaEventos[$evento['pause_class']]);
                 switch ($evento['pause_class']) {
                 case 'break':
@@ -1355,6 +1381,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
                 }
                 break;
             case 'agentlinked':
+                if (!(isset($evento['agent_number']) && $evento['agent_number'] == $sAgente)) break;
                 unset($respuestaEventos['llamada']);
                 /* Actualizar la interfaz si entra una nueva llamada, o si
                  * la llamada activa anterior es reemplazada. */
@@ -1390,12 +1417,35 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
                     $respuestaEventos['llamada'] = construirRespuesta_agentlinked(
                         $smarty, $sDirLocalPlantillas, $oPaloConsola, $nuevoEstado,
                         $evento, $infoCampania);
+
+                    // Si la llamada fue enlazada, entonces ya no está esperando
+                    if ($estadoCliente['waitingcall']) {
+                        $respuestaEventos['waitingcall'] = construirRespuesta_waitingexit();
+                    }
                 }
                 break;
             case 'agentunlinked':
+                if (!(isset($evento['agent_number']) && $evento['agent_number'] == $sAgente)) break;
                 unset($respuestaEventos['llamada']);
                 if (!is_null($estadoCliente['calltype'])) {
                     $respuestaEventos['llamada'] = construirRespuesta_agentunlinked();
+                }
+                break;
+            case 'schedulecallstart':
+                if (!(isset($evento['agent_number']) && $evento['agent_number'] == $sAgente)) break;
+                if (!$estadoCliente['waitingcall']) {
+                    $respuestaEventos['waitingcall'] = construirRespuesta_waitingenter($oPaloConsola, array(
+                        'calltype'          => $evento['calltype'],
+                        'campaign_id'       => $evento['campaign_id'],
+                        'callid'            => $evento['call_id'],
+                        //'status'            => $evento['new_status'],
+                    ));
+                }
+                break;
+            case 'schedulecallfailed':
+                if (!(isset($evento['agent_number']) && $evento['agent_number'] == $sAgente)) break;
+                if ($estadoCliente['waitingcall']) {
+                    $respuestaEventos['waitingcall'] = construirRespuesta_waitingexit();
                 }
                 break;
             }
@@ -1405,10 +1455,13 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
         if (isset($respuestaEventos['break'])) $respuesta[] = $respuestaEventos['break'];
         if (isset($respuestaEventos['hold'])) $respuesta[] = $respuestaEventos['hold'];
         if (isset($respuestaEventos['llamada'])) $respuesta[] = $respuestaEventos['llamada'];
+        if (isset($respuestaEventos['waitingcall'])) $respuesta[] = $respuestaEventos['waitingcall'];
+
+        // Acumular todos los eventos que no deben de ser únicos
+        if (isset($respuestaEventos['other'])) $respuesta = array_merge($respuesta, $respuestaEventos['other']);
 
         // Agregar los textos a cambiar en la interfaz
         $sDescInicial = describirEstadoBarra($estadoCliente);
-        $estadoFinal = $estadoCliente;
         foreach ($respuesta as $evento) switch ($evento['event']) {
         case 'holdenter':
             $estadoCliente['onhold'] = TRUE;
@@ -1417,28 +1470,34 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
             $estadoCliente['onhold'] = FALSE;
             break;
         case 'breakenter':
-            $estadoFinal['break_id'] = $evento['break_id'];
             $estadoCliente['break_id'] = $evento['break_id'];
             break;
         case 'breakexit':
-            $estadoFinal['break_id'] = NULL;
             $estadoCliente['break_id'] = NULL;
             break;
         case 'agentlinked':
-            $estadoFinal['calltype'] = $evento['calltype'];
             $estadoCliente['calltype'] = $evento['calltype'];
             $estadoCliente['campaign_id'] = $evento['campaign_id'];
             $estadoCliente['callid'] = $evento['callid'];
             break;
         case 'agentunlinked':
-            $estadoFinal['calltype'] = NULL;
             $estadoCliente['calltype'] = NULL;
             $estadoCliente['campaign_id'] = NULL;
             $estadoCliente['callid'] = NULL;
             break;
+        case 'waitingenter':
+            $estadoCliente['waitingcall'] = TRUE;
+            break;
+        case 'waitingexit':
+            $estadoCliente['waitingcall'] = FALSE;
+            break;
+        default:
+            _debug(__FUNCTION__.' '.$evento['event'].': does not modify clientstate');
+            break;
         }
-        $sDescFinal = describirEstadoBarra($estadoFinal);
+        $sDescFinal = describirEstadoBarra($estadoCliente);
         $iPosEvento = count($respuesta) - 1;
+        _debug(__FUNCTION__.' old barstate '.$sDescInicial.' new barstate '.$sDescFinal);
         if ($iPosEvento >= 0 && $sDescInicial != $sDescFinal) switch ($sDescFinal) {
         case 'llamada':
             $respuesta[$iPosEvento]['txt_estado_agente_inicial'] = _tr('Connected to call');
@@ -1449,6 +1508,11 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
             $respuesta[$iPosEvento]['txt_estado_agente_inicial'] = _tr('On break').': '.$sNombrePausa;
             $respuesta[$iPosEvento]['class_estado_agente_inicial'] = 'elastix-callcenter-class-estado-break';
             $respuesta[$iPosEvento]['timer_seconds'] = $iDuracionPausa;
+            break;
+        case 'esperando':
+            $respuesta[$iPosEvento]['txt_estado_agente_inicial'] = _tr('Waiting for call');
+            $respuesta[$iPosEvento]['class_estado_agente_inicial'] = 'elastix-callcenter-class-estado-esperando';
+            $respuesta[$iPosEvento]['timer_seconds'] = '';
             break;
         case 'ocioso':
             $respuesta[$iPosEvento]['txt_estado_agente_inicial'] = _tr('No active call');
@@ -1490,6 +1554,8 @@ function describirEstadoBarra($estado)
 {
     if (!is_null($estado['calltype']))
         return 'llamada';
+    if ($estado['waitingcall'])
+        return 'esperando';
     if (!is_null($estado['break_id']))
         return 'break';
     return 'ocioso';
@@ -1635,6 +1701,29 @@ function construirRespuesta_agentunlinked()
 {
     return array(
         'event'     =>  'agentunlinked',
+    );
+}
+
+function construirRespuesta_waitingenter($oPaloConsola, $waitedcallinfo)
+{
+    $registroCambio = array(
+        'event'         =>  'waitingenter',
+        'urlopentype'   =>  NULL,
+        'url'           =>  NULL,
+        // Etiquetas a modificar en la interfaz
+        //'txt_btn_hold' =>  _tr('End Hold'),
+    );
+
+    return $registroCambio;
+}
+
+function construirRespuesta_waitingexit()
+{
+    return array(
+        'event'         =>  'waitingexit',
+
+        // Etiquetas a modificar en la interfaz
+        //'txt_btn_hold' =>  _tr('Hold'),
     );
 }
 

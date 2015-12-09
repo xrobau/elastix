@@ -42,11 +42,20 @@
 .elastix-callcenter-class-estado-ocioso {
     background-color: #094895;
 }
+.elastix-callcenter-class-estado-esperando {
+    background-color: #75507b;
+}
 .elastix-callcenter-class-estado-activo {
     background-color: #06640D;
 }
 .elastix-callcenter-class-estado-break {
     background-color: #BD0000;
+}
+
+td.elastix-callcenter-class-estado-esperando,
+td.elastix-callcenter-class-estado-activo {
+    background-image: none;
+    color: #ffffff;
 }
 
 #elastix-callcenter-wrap {

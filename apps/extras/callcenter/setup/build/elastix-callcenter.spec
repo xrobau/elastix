@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Wed Dec  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: introduce partial waitingenter/waitingexit support
+  from CallCenterPRO in order to show visual notification of scheduled call
+  activity.
+  SVN Rev[7391]
 - CHANGED: Dialer (ECCP): introduce schedulecallstart and schedulecallfailed
   events to notify that a scheduled call has been started on behalf of a
   particular agent. This is required for the next commit on the agent console

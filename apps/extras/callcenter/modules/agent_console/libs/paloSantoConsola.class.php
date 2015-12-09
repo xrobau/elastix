@@ -424,6 +424,12 @@ class PaloSantoConsola
                     'queuestart'    =>  (string)$connStatus->callinfo->queuestart,
                     'linkstart'     =>  (string)$connStatus->callinfo->linkstart,
                 ) : NULL,
+                'waitedcallinfo'    =>  isset($connStatus->waitedcallinfo) ? array(
+                    'calltype'          =>  (string)$connStatus->waitedcallinfo->calltype,
+                    'campaign_id'       =>  (int)$connStatus->waitedcallinfo->campaign_id,
+                    'callid'            =>  (int)$connStatus->waitedcallinfo->callid,
+                    'status'            =>  (string)$connStatus->waitedcallinfo->status,
+                ) : NULL,
             );
 
             if (!is_null($estado['pauseinfo'])) foreach (array('pausestart') as $k) {
@@ -878,6 +884,13 @@ class PaloSantoConsola
                     foreach ($evt->queues->queue as $xml_q) {
                         $evento['queues'][] = (string)$xml_q;
                     }
+                    break;
+                case 'schedulecallstart':
+                case 'schedulecallfailed':
+                    foreach (array('agent_number', 'calltype') as $k)
+                        $evento[$k] = isset($evt->$k) ? (string) $evt->$k : NULL;
+                    foreach (array('campaign_id', 'call_id') as $k)
+                        $evento[$k] = isset($evt->$k) ? (int) $evt->$k : NULL;
                     break;
                 }
                 $listaEventos[] = $evento;

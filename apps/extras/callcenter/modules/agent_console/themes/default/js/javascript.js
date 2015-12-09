@@ -14,7 +14,10 @@ var estadoCliente =
 	break_id:	null,	// Si != null, el ID del break en que está el agente
 	calltype:	null,	// Si != null, tipo de llamada incoming/outgoing
 	campaign_id:null,	// ID de la campaña a que pertenece la llamada atendida
-	callid:		null	// Si != null, ID de llamada que se está atendiendo
+	callid:		null,	// Si != null, ID de llamada que se está atendiendo
+
+	// Por ahora sólo se modela si se espera o no una llamada manual
+	waitingcall: false
 };
 
 /* Al cargar la página, o al recibir un evento AJAX, si timer_seconds tiene un
@@ -202,6 +205,7 @@ function initialize_client_state(nuevoEstado)
 	estadoCliente.calltype = nuevoEstado.calltype;
 	estadoCliente.campaign_id = nuevoEstado.campaign_id;
 	estadoCliente.callid = nuevoEstado.callid;
+	estadoCliente.waitingcall = nuevoEstado.waitingcall;
 
 	// Lanzar el callback que actualiza el estado de la llamada
     setTimeout(do_checkstatus, 1);
@@ -371,7 +375,7 @@ function do_hangup()
 		verificar_error_session(respuesta);
         if (respuesta['action'] == 'error') {
         	mostrar_mensaje_error(respuesta['message']);
-        	if (estadoCliente.campaign_id != null)
+        	if (estadoCliente.campaign_id != null || estadoCliente.waitingcall)
                 $('#btn_hangup').button('enable');
         }
 
@@ -672,6 +676,7 @@ function manejarRespuestaStatus(respuesta)
 				.removeClass('elastix-callcenter-class-estado-ocioso')
 				.removeClass('elastix-callcenter-class-estado-break')
 				.removeClass('elastix-callcenter-class-estado-activo')
+				.removeClass('elastix-callcenter-class-estado-esperando')
 				.addClass(respuesta[i].class_estado_agente_inicial);
 		if (respuesta[i].timer_seconds != null) {
 			if (respuesta[i].timer_seconds !== '') {
@@ -750,6 +755,8 @@ function manejarRespuestaStatus(respuesta)
 			break;
 		case 'agentunlinked':
 	        // El agente se ha desconectado de la llamada
+		    var l_calltype = estadoCliente.calltype;
+		    var l_campaign_id = estadoCliente.campaign_id;
 			estadoCliente.calltype = null;
 			estadoCliente.campaign_id = null;
 			estadoCliente.callid = null;
@@ -764,6 +771,12 @@ function manejarRespuestaStatus(respuesta)
 	        // Vaciar las áreas para la llamada
 			$('#elastix-callcenter-llamada-info').empty();
 			$('#elastix-callcenter-llamada-script').empty();
+			break;
+		case 'waitingenter':
+			estadoCliente.waitingcall = true;
+			break;
+		case 'waitingexit':
+			estadoCliente.waitingcall = false;
 			break;
 		}
 	}

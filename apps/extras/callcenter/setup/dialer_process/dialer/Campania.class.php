@@ -45,6 +45,7 @@ class Campania
     var $daytime_init;      // Hora hh:mm:ss del inicio del horario de la campaña
     var $daytime_end;       // Hora hh:mm:ss del final del horario de la campaña
     var $tipo_campania;     // Tipo de campaña 'outgoing' o 'incoming'
+
     var $formpause = NULL;  // NULL si no hay pausa, 0 si pausa infinita, o seg. pausa
 
     // Variables sólo para campañas salientes
@@ -86,14 +87,13 @@ class Campania
         $s .= "\ttipo_campania...........".$this->tipo_campania."\n";
         $s .= "\t_iTiempoContestacion....".$this->_iTiempoContestacion."\n";
         $s .= "\t_historial_contestada...[".implode(' ', $this->_historial_contestada)."]\n";
-        if ($this->tipo_campania == 'outgoing') {
+        if ($this->tipo_campania != 'incoming') {
             $s .= "\ttrunk...................".(is_null($this->trunk) ? '(por plan de marcado)' : $this->trunk)."\n";
             $s .= "\tcontext.................".$this->context."\n";
             $s .= "\t_num_completadas........".$this->_num_completadas."\n";
             $s .= "\t_promedio...............".(is_null($this->_promedio) ? 'N/D' : $this->_promedio)."\n";
             $s .= "\t_desviacion.............".(is_null($this->_desviacion) ? 'N/D' : $this->_desviacion)."\n";
             $s .= "\t_variancia..............".(is_null($this->_variancia) ? 'N/D' : $this->_variancia)."\n";
-
         } elseif ($this->tipo_campania == 'incoming') {
             $s .= "\tid_queue_call_entry.....".$this->id_queue_call_entry."\n";
         }
@@ -132,14 +132,6 @@ class Campania
         }
         $iTiempoContestar = $iSuma / $iNumElems;
 
-        /*
-        if ($this->DEBUG) {
-            $this->_log->output("DEBUG: con ".count($this->_historial_contestada).
-                " de ".NUM_LLAMADAS_HISTORIAL_CONTESTADA." muestras y {$this->_iTiempoContestacion} por omisión, ".
-                "campaña {$this->id} tiene ".sprintf('%.2f', $iTiempoContestar)." segundos de marcado.");
-        }
-        */
-
         return $iTiempoContestar;
     }
 
@@ -174,16 +166,6 @@ class Campania
         $this->_promedio = $iNuevoPromedio;
         $this->_variancia = $iNuevaVariancia;
         $this->_desviacion = sqrt($this->_variancia);
-
-        /*
-        if ($this->DEBUG) {
-            $this->_log->output("DEBUG: luego de ".($this->_num_completadas)." llamadas: ".
-                sprintf('prom: %.2f var: %.2f std.dev: %.2f',
-                    $this->_promedio,
-                    $this->_variancia,
-                    $this->_desviacion));
-        }
-        */
 
         $this->_tuberia->msg_CampaignProcess_sqlupdatestatcampaign($this->id,
             $this->_num_completadas, $this->_promedio, $this->_desviacion);

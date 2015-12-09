@@ -540,6 +540,7 @@ class Llamada
     public function llamadaFueOriginada($timestamp, $uniqueid, $channel,
         $sStatus)
     {
+        $sAgente_agendado = NULL;
         $this->_timestamp_originateend = $timestamp;
 
         /* No se acepta un canal NULL ni el mismo canal del agente (para
@@ -599,6 +600,7 @@ class Llamada
                  * luego de quitar la pausa del agente. */
                 $this->_tuberia->msg_CampaignProcess_verificarFinLlamadasAgendables(
                     $a->channel, $this->campania->id, $a->resumenSeguimiento());
+                $sAgente_agendado = $a->channel;
             }
 
             /* Remover llamada que no se pudo colocar si ya se recibió
@@ -645,6 +647,8 @@ class Llamada
         $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
         if (!is_null($this->campania))
             $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
+        if (!is_null($sAgente_agendado))
+            $paramProgreso['agente_agendado'] = $sAgente_agendado;
         $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
     }
 
@@ -875,6 +879,7 @@ class Llamada
 
     public function llamadaFinalizaSeguimiento($timestamp, $iUmbralLlamadaCorta)
     {
+        $sAgente_agendado = NULL;
         $paramAlarma = NULL;
 
         if (is_null($this->id_llamada)) {
@@ -968,6 +973,7 @@ class Llamada
                     date('Y-m-d H:i:s', $this->timestamp_hangup),
                     $this->duration, ($this->status == 'ShortCall'),
                     $paramProgreso);
+                $paramProgreso = NULL;
 
                 /* Si la pausa de formulario sigue activa, empieza a contar la
                  * auditoría de la pausa por formulario. */
@@ -984,11 +990,10 @@ class Llamada
                         $paramAlarma = array($this->agente, $this->campania->formpause);
                     }
                 }
-
-            } else {
-            	// Emitir el evento directamente
-                $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
             }
+        } else {
+            // Esto no debería ocurrir en condiciones normales
+            $paramProgreso = NULL;
         }
 
         if (!is_null($this->agente_agendado)) {
@@ -1024,8 +1029,16 @@ class Llamada
              * llamada manual. */
             $this->agente_agendado->llamada_agendada = NULL;
             $this->agente_agendado->quitarLlamadaAtendida();
+            $sAgente_agendado = $this->agente_agendado->channel;
         }
         $this->agente_agendado = NULL;
+
+        if (!is_null($paramProgreso)) {
+            // Emitir el evento directamente en caso necesario
+            if (!is_null($sAgente_agendado))
+                $paramProgreso['agente_agendado'] = $sAgente_agendado;
+            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+        }
 
         /* Para las llamadas exitosas, ya se ha recibido OriginateResponse y
          * por lo tanto, ya se tiene timestamp_originateend. Si no está, la

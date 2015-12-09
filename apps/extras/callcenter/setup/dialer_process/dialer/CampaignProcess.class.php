@@ -904,14 +904,16 @@ SQL_LLAMADA_COLOCADA;
             }
 
             // Notificar el progreso de la llamada
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada(array(
+            $prop = array(
                 'datetime_entry'        =>  date('Y-m-d H:i:s', $iTimestampInicioOriginate),
                 'new_status'            =>  ($resultado['Response'] == 'Success') ? 'Placing' : 'Failure',
                 'id_campaign_outgoing'  =>  $infoCampania['id'],
                 'id_call_outgoing'      =>  $tupla['id'],
                 'retry'                 =>  (is_null($tupla['retries']) ? 0 : $tupla['retries']) + 1,
                 'trunk'                 =>  $infoCampania['trunk'],
-            ));
+            );
+            if (!is_null($tupla['agent'])) $prop['agente_agendado'] = $tupla['agent'];
+            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($prop);
         }
 
         /* Si se llega a este punto, se presume que, con agentes disponibles, y

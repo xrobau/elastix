@@ -717,8 +717,7 @@ SQL_EXISTE_AUDIT;
 
     private function _notificarProgresoLlamada($prop)
     {
-        list($id_campaignlog, $ev) = construirEventoProgresoLlamada($this->_db, $prop);
-        $eventos = array($ev);
+        list($id_campaignlog, $eventos) = construirEventoProgresoLlamada($this->_db, $prop);
         $this->_lanzarEventos($eventos);
         return $id_campaignlog;
     }

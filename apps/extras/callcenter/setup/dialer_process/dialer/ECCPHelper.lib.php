@@ -302,6 +302,7 @@ function construirEventoProgresoLlamada($db, $prop)
 {
     $id_campaignlog = NULL;
     $ev = NULL;
+    $evlist = array();
 
     $campaign_type = NULL;
     foreach (array('incoming', 'outgoing') as $ct) {
@@ -330,6 +331,13 @@ function construirEventoProgresoLlamada($db, $prop)
         );
     }
 
+    // Obtener agente agendado avisado por CampaignProcess o AMIEventProcess
+    $agente_agendado = NULL;
+    if (isset($prop['agente_agendado'])) {
+        $agente_agendado = $prop['agente_agendado'];
+        unset($prop['agente_agendado']);
+    }
+
     // Si el número de reintento es distinto, se anulan datos anteriores
     if (isset($prop['retry']) && $tuplaAnterior['retry'] != $prop['retry']) {
         $tuplaAnterior['uniqueid'] = NULL;
@@ -351,6 +359,20 @@ function construirEventoProgresoLlamada($db, $prop)
     $sth->execute($paramSQL);
 
     $id_campaignlog = $tuplaAnterior['id'] = $db->lastInsertId();
+
+    // Avisar el inicio del marcado de la llamada saliente agendada
+    if ($campaign_type == 'outgoing' && !is_null($agente_agendado)) {
+        if ($tuplaAnterior['new_status'] == 'Placing') {
+            $ev = array('ScheduledCallStart', array($agente_agendado, $campaign_type,
+                $tuplaAnterior['id_campaign_outgoing'], $tuplaAnterior['id_call_outgoing']));
+            $evlist[] = $ev;
+        }
+        if (in_array($tuplaAnterior['new_status'], array('NoAnswer', 'Failure'))) {
+            $ev = array('ScheduledCallFailed', array($agente_agendado, $campaign_type,
+                $tuplaAnterior['id_campaign_outgoing'], $tuplaAnterior['id_call_outgoing']));
+            $evlist[] = $ev;
+        }
+    }
 
     /* Emitir el evento a las conexiones ECCP. Para mantener la
      * consistencia con el resto del API, se quitan los valores de
@@ -384,8 +406,9 @@ function construirEventoProgresoLlamada($db, $prop)
         $tuplaAnterior['phone'] = $tuplaNumero['phone'];
         $tuplaAnterior['queue'] = $tuplaNumero['queue'];
         $ev = array('CallProgress', array($tuplaAnterior));
+        $evlist[] = $ev;
     }
 
-    return array($id_campaignlog, $ev);
+    return array($id_campaignlog, $evlist);
 }
 ?>

@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Wed Dec  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): introduce schedulecallstart and schedulecallfailed
+  events to notify that a scheduled call has been started on behalf of a
+  particular agent. This is required for the next commit on the agent console
+  to implement visual notification of scheduled call start.
+  SVN Rev[7390]
 - FIXED: Dialer: fix incorrect validation on number of agent pauses.
 - FIXED: Dialer: reset reservation flag to FALSE on agent logout.
   SVN Rev[7389]

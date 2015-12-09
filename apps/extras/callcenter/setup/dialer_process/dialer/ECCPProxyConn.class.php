@@ -356,7 +356,7 @@ class ECCPProxyConn extends MultiplexConn
 
         $xml_recordingMute->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
         $xml_recordingMute->addChild('calltype', $sTipoLlamada);
-        if (!is_null($idCampaign)) $xml_recordingMute->addChild('id_campaign', $idCampaign);
+        if (!is_null($idCampaign)) $xml_recordingMute->addChild('campaign_id', $idCampaign);
         $xml_recordingMute->addChild('call_id', $idLlamada);
 
         $s = $xml_response->asXML();
@@ -373,8 +373,42 @@ class ECCPProxyConn extends MultiplexConn
 
         $xml_recordingUnmute->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
         $xml_recordingUnmute->addChild('calltype', $sTipoLlamada);
-        if (!is_null($idCampaign)) $xml_recordingUnmute->addChild('id_campaign', $idCampaign);
+        if (!is_null($idCampaign)) $xml_recordingUnmute->addChild('campaign_id', $idCampaign);
         $xml_recordingUnmute->addChild('call_id', $idLlamada);
+
+        $s = $xml_response->asXML();
+        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
+    }
+
+    function notificarEvento_ScheduledCallStart($sAgente, $sTipoLlamada, $idCampaign, $idLlamada)
+    {
+        if (is_null($this->_sUsuarioECCP)) return;
+        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
+
+        $xml_response = new SimpleXMLElement('<event />');
+        $xml_scheduleCallStart = $xml_response->addChild('schedulecallstart');
+
+        $xml_scheduleCallStart->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
+        $xml_scheduleCallStart->addChild('calltype', $sTipoLlamada);
+        if (!is_null($idCampaign)) $xml_scheduleCallStart->addChild('campaign_id', $idCampaign);
+        $xml_scheduleCallStart->addChild('call_id', $idLlamada);
+
+        $s = $xml_response->asXML();
+        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);
+    }
+
+    function notificarEvento_ScheduledCallFailed($sAgente, $sTipoLlamada, $idCampaign, $idLlamada)
+    {
+        if (is_null($this->_sUsuarioECCP)) return;
+        if (!is_null($this->_sAgenteFiltrado) && $this->_sAgenteFiltrado != $sAgente) return;
+
+        $xml_response = new SimpleXMLElement('<event />');
+        $xml_scheduleCallFailed = $xml_response->addChild('schedulecallfailed');
+
+        $xml_scheduleCallFailed->addChild('agent_number', str_replace('&', '&amp;', $sAgente));
+        $xml_scheduleCallFailed->addChild('calltype', $sTipoLlamada);
+        if (!is_null($idCampaign)) $xml_scheduleCallFailed->addChild('campaign_id', $idCampaign);
+        $xml_scheduleCallFailed->addChild('call_id', $idLlamada);
 
         $s = $xml_response->asXML();
         $this->multiplexSrv->encolarDatosEscribir($this->sKey, $s);

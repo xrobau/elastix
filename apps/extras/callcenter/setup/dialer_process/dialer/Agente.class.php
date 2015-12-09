@@ -464,6 +464,14 @@ class Agente
             'login_channel'     =>  $this->login_channel,
             'oncall'            =>  !is_null($this->llamada),
             'clientchannel'     =>  is_null($this->llamada) ? NULL : $this->llamada->actualchannel,
+            'waitedcallinfo'    =>  ((!is_null($this->llamada_agendada))
+                ? array(
+                    'calltype'          =>  $this->llamada_agendada->tipo_llamada,
+                    'campaign_id'       =>  $this->llamada_agendada->campania->id,
+                    'callid'            =>  $this->llamada_agendada->id_llamada,
+                    'status'            =>  $this->llamada_agendada->status,
+                )
+                : NULL),
         );
     }
 

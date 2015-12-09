@@ -3139,8 +3139,8 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $paramProgreso['id_campaign_outgoing'] = $infoLlamada['campaign_id'];
                 $paramProgreso['id_call_outgoing'] = $infoLlamada['callid'];
             }
-            list($id_campaignlog, $ev) = construirEventoProgresoLlamada($this->_db, $paramProgreso);
-            $eventos[] = $ev;
+            list($id_campaignlog, $evlist) = construirEventoProgresoLlamada($this->_db, $paramProgreso);
+            $eventos = array_merge($eventos, $evlist);
 
             $this->_db->commit();
         } catch (PDOException $e) {

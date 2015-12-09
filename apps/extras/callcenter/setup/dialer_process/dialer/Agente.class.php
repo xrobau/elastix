@@ -294,7 +294,7 @@ class Agente
                 if ($this->_reservado) {
                 	$this->_num_pausas++;
                 } else {
-                	if ($this->_num_pausas >= 0) $this->_num_pausas--;
+                	if ($this->_num_pausas > 0) $this->_num_pausas--;
                 }
             }
             break;
@@ -322,7 +322,7 @@ class Agente
         if (!is_null($this->_id_audit_break)) {
             $this->_id_break = NULL;
             $this->_id_audit_break = NULL;
-            if ($this->_num_pausas >= 0) $this->_num_pausas--;
+            if ($this->_num_pausas > 0) $this->_num_pausas--;
         }
         $this->resetTimeout();
     }
@@ -346,7 +346,7 @@ class Agente
         if (!is_null($this->_id_audit_hold)) {
             $this->_id_hold = NULL;
             $this->_id_audit_hold = NULL;
-            if ($this->_num_pausas >= 0) $this->_num_pausas--;
+            if ($this->_num_pausas > 0) $this->_num_pausas--;
         }
         if (!is_null($this->_llamada)) {
             $this->_llamada->request_hold = FALSE;
@@ -378,7 +378,7 @@ class Agente
             $this->_id_fp = NULL;
             $this->_id_audit_fp = NULL;
             $this->alarma_formpause = NULL;
-            if ($this->_num_pausas >= 0) $this->_num_pausas--;
+            if ($this->_num_pausas > 0) $this->_num_pausas--;
         }
         $this->resetTimeout();
     }
@@ -432,6 +432,7 @@ class Agente
         $this->clearBreak();
         $this->clearHold();
         $this->clearFormPause();
+        $this->reservado = FALSE;
         $this->_estado_consola = 'logged-out';
         $this->_num_pausas = 0;
         if (!is_null($this->_Uniqueid))

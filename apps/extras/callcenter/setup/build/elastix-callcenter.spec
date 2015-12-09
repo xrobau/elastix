@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Dec  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix incorrect validation on number of agent pauses.
+- FIXED: Dialer: reset reservation flag to FALSE on agent logout.
+  SVN Rev[7389]
+
 * Sun Dec  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): implement form pause timeout when campaign.formpause
   is nonzero. As part of this change, the ability to cancel internal alarms is

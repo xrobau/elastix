@@ -243,14 +243,6 @@ function removeNeoDisplayOnMouseOver(ref){
             </ul>
         </li>
 
-{*
-        <li id="header_notification_bar" class="dropdown">
-            <a class="" href="#" onclick="popUp('help/?id_nodo={if !empty($idSubMenu2Selected)}{$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}{else}{$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}{/if}','1000','460')">
-                <i class="fa fa-support"></i>
-            </a>
-        </li>
-*}
-
         <li id="header_notification_bar" class="dropdown">
             <a {*data-toggle="dropdown"*} class="" href="index.php?menu=addons">
                 <i class="fa fa-cubes"></i>
@@ -264,10 +256,40 @@ function removeNeoDisplayOnMouseOver(ref){
             </a>
         </li>
         <!-- notification dropdown end -->
-        <li id="header_notification_bar" class="dropdown">
+        <li id="header_notification_bar" class="profile-info dropdown pull-right notifications" style="float: none !important;">
             <a data-toggle="dropdown" class="" href="#">
                 <i class="fa fa-bell-o"></i>
             </a>
+            <ul class="dropdown-menu">
+
+                <!-- Reverse Caret -->
+                <li class="caret"></li>
+
+                        <li><p>{$NOTIFICATIONS.LBL_NOTIFICATION_SYSTEM}</p></li>
+                <li>
+                    <ul>
+                        {foreach from=$NOTIFICATIONS.NOTIFICATIONS_PUBLIC item=NOTI}
+                            <li class="{if $NOTI.level == "info"}notification-info{elseif $NOTI.level == "warning"}notification-warning{elseif $NOTI.level == "error"}notification-danger{/if}">
+                                <a href="#"><i class="{if $NOTI.level == "info"}fa fa-info{elseif $NOTI.level == "warning"}fa fa-warning{elseif $NOTI.level == "error"}fa fa-ban{/if}"></i>{$NOTI.content}</a>
+                            </li>
+                        {foreachelse}
+                            <li><p>{$NOTIFICATIONS.TXT_NO_NOTIFICATIONS}</p></li>
+                        {/foreach}
+                    </ul>
+                </li>
+                        <li><p>{$NOTIFICATIONS.LBL_NOTIFICATION_USER}</p></li>
+                <li>
+                    <ul>
+                        {foreach from=$NOTIFICATIONS.NOTIFICATIONS_PRIVATE item=NOTI}
+                            <li class="{if $NOTI.level == "info"}notification-info{elseif $NOTI.level == "warning"}notification-warning{elseif $NOTI.level == "error"}notification-danger{/if}">
+                                <a href="#"><i class="{if $NOTI.level == "info"}fa fa-info{elseif $NOTI.level == "warning"}fa fa-warning{elseif $NOTI.level == "error"}fa fa-ban{/if}"></i>{$NOTI.content}</a>
+                            </li>
+                        {foreachelse}
+                            <li><p>{$NOTIFICATIONS.TXT_NO_NOTIFICATIONS}</p></li>
+                        {/foreach}
+                    </ul>
+                </li>
+            </ul>
         </li>
         </ul>
     </span>

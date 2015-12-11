@@ -390,6 +390,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Dec 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add support in tenant theme for notification display with
+  no icon for removal (yet).
+  SVN Rev[7395]
 - FIXED: Framework: reverse LIMIT filter on SQL because of SQLITE errors.
   SVN Rev[7394]
 

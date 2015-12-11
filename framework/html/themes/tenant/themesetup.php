@@ -95,7 +95,8 @@ function themeSetup(&$smarty, $selectedMenu, $pdbACL, $pACL, $idUser)
         'MENU_COLOR'                =>  getMenuColorByMenu($pdbACL, $idUser),
         'IMG_BOOKMARKS'             =>  menuIsBookmark($pdbACL, $idUser, $selectedMenu) ? 'bookmarkon.png' : 'bookmark.png',
         'SHORTCUT'                  =>  loadShortcut($pdbACL, $idUser, $smarty),
-        'BREADCRUMB'                =>  setBreadcrumb($arrMainMenu,$selectedMenu)
+        'BREADCRUMB'                =>  setBreadcrumb($arrMainMenu,$selectedMenu),
+        'NOTIFICATIONS'             =>  loadSystemNotifications($pdbACL, $idUser),
     ));
 }
 function setIcon($idMenu){
@@ -156,5 +157,21 @@ function setIcon1($idSubMenu){
                  }
             }
       }
- }
+}
+
+function loadSystemNotifications($pdbACL, $idUser)
+{
+    require_once 'libs/paloSantoNotification.class.php';
+
+    $pNot = new paloNotification($pdbACL);
+    $a = array(
+        'LBL_NOTIFICATION_SYSTEM'   =>  _tr('System'),
+        'LBL_NOTIFICATION_USER'     =>  _tr('User'),
+        'NOTIFICATIONS_PUBLIC'      =>  $pNot->listPublicNotifications(3),
+        'NOTIFICATIONS_PRIVATE'     =>  $pNot->listUserNotifications($idUser, 3),
+        'TXT_NO_NOTIFICATIONS'      =>  _tr('No notifications'),
+    );
+    file_put_contents('/tmp/debug-noti.txt', $pNot->errMsg.print_r($a, true));
+    return $a;
+}
 ?>

@@ -57,7 +57,7 @@ class paloNotification
             'FROM acl_notification WHERE id_user IS NULL ORDER BY datetime_create DESC';
         $param = array();
         if (!is_null($limit)) {
-            $sql .= ' OFFSET 0 LIMIT ?';
+            $sql .= ' LIMIT ? OFFSET 0';
             $param[] = $limit;
         }
         $recordset = $this->_DB->fetchTable($sql, TRUE, $param);
@@ -74,7 +74,7 @@ class paloNotification
             'FROM acl_notification WHERE id_user = ? ORDER BY datetime_create DESC';
         $param = array($id_user);
         if (!is_null($limit)) {
-            $sql .= ' OFFSET 0 LIMIT ?';
+            $sql .= ' LIMIT ? OFFSET 0';
             $param[] = $limit;
         }
         $recordset = $this->_DB->fetchTable($sql, TRUE, $param);

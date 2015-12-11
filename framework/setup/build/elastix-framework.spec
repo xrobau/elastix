@@ -389,6 +389,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Dec 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: reverse LIMIT filter on SQL because of SQLITE errors.
+  SVN Rev[7394]
+
 * Mon Nov 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: relax icon file validation in paloSantoGrid class. The
   CallCenterPRO custom templates depend on legacy non-validation of the icon

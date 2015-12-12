@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Sat Dec 12 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): extend the getmultipleagentstatus to report the pause
+  information for the agent, using the structure already used for
+  getagentstatus. Ported from CallCenterPRO.
+  SVN Rev[7398]
 - CHANGED: Dialer (ECCP): add new column calls.scheduled and use it to mark
   scheduled calls as distinct from calls loaded through CSV. Ported from
   CallCenterPRO.

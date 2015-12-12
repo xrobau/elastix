@@ -1965,6 +1965,10 @@ LEER_CAMPANIA;
         }
         $il = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($agentlist);
 
+        $recordset_breakinfo = $this->_db->prepare(
+            'SELECT audit.datetime_init, break.name FROM audit, break '.
+            'WHERE audit.id = ? AND audit.id_break = break.id');
+
         // Conversión a XML
         $xml_agents = $xml_getAgentStatusResponse->addChild('agents');
         foreach ($agentlist as $sAgente) {
@@ -2011,7 +2015,16 @@ LEER_CAMPANIA;
             if ($infoSeguimiento['estado_consola'] == 'logged-in')
                 $xml_agent->addChild('onhold', is_null($infoSeguimiento['id_hold']) ? 0 : 1);
 
-            // Por ahora no se reporta el estado de break
+            // Reportar los estados de break, si aplica
+            if (!is_null($infoSeguimiento['id_break'])) {
+                $xml_pauseInfo = $xml_agent->addChild('pauseinfo');
+                $xml_pauseInfo->addChild('pauseid', $infoSeguimiento['id_break']);
+                $recordset_breakinfo->execute(array($infoSeguimiento['id_audit_break']));
+                $tupla = $recordset_breakinfo->fetch(PDO::FETCH_ASSOC);
+                $recordset_breakinfo->closeCursor();
+                $xml_pauseInfo->addChild('pausename', str_replace('&', '&amp;', $tupla['name']));
+                $xml_pauseInfo->addChild('pausestart', str_replace(date('Y-m-d '), '', $tupla['datetime_init']));
+            }
 
             $infoLlamada = $il[$sAgente];
             if (!is_null($infoLlamada)) {

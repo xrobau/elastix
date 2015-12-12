@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Dec 12 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): add new column calls.scheduled and use it to mark
+  scheduled calls as distinct from calls loaded through CSV. Ported from
+  CallCenterPRO.
+  SVN Rev[7397]
+
 * Wed Dec  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: introduce partial waitingenter/waitingexit support
   from CallCenterPRO in order to show visual notification of scheduled call

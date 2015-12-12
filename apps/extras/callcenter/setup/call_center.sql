@@ -138,6 +138,9 @@ CREATE TABLE IF NOT EXISTS `calls` (
   /* 2012-12-07: Store trunk used to route outgoing call */
   `trunk`               varchar(20),
 
+  /* 2015-12-12: Tell apart calls loaded from CSV and scheduled calls */
+  `scheduled` BOOLEAN NOT NULL DEFAULT 0,
+
   PRIMARY KEY  (`id`),
   KEY `id_campaign` (`id_campaign`),
   KEY `calls_ibfk_2` (`id_agent`),
@@ -979,6 +982,35 @@ DELIMITER ; ++
 
 CALL temp_campaign_formpause_2015_10_12();
 DROP PROCEDURE IF EXISTS temp_campaign_formpause_2015_10_12;
+
+
+/* Procedimiento para agregar columnas de distinción de llamada agendada */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_campaign_scheduled_2015_12_12 ++
+CREATE PROCEDURE temp_campaign_scheduled_2015_12_12 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_columna tinyint(1);
+
+    SET l_existe_columna = 0;
+
+    /* Verificar existencia de columna calls.scheduled que debe agregarse */
+    SELECT COUNT(*) INTO l_existe_columna
+    FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'calls'
+        AND COLUMN_NAME = 'scheduled';
+    IF l_existe_columna = 0 THEN
+        ALTER TABLE calls ADD COLUMN scheduled BOOLEAN NOT NULL DEFAULT 0;
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_campaign_scheduled_2015_12_12();
+DROP PROCEDURE IF EXISTS temp_campaign_scheduled_2015_12_12;
 
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;

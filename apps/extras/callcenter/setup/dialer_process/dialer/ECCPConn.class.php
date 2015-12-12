@@ -2850,8 +2850,8 @@ SQL_LLAMADA_PREVIA;
             // Agregar agente a agendar, si es necesario, e insertar
             $paramNuevaLlamadaSQL[] = $bMismoAgente ? $sAgente : NULL;
             $sqlInsertarLlamadaAgendada = <<<SQL_INSERTAR_AGENDAMIENTO
-INSERT INTO calls (id_campaign, phone, date_init, date_end, time_init, time_end, agent)
-VALUES (?, ?, ?, ?, ?, ?, ?)
+INSERT INTO calls (scheduled, id_campaign, phone, date_init, date_end, time_init, time_end, agent)
+VALUES (1, ?, ?, ?, ?, ?, ?, ?)
 SQL_INSERTAR_AGENDAMIENTO;
             $sth = $this->_db->prepare($sqlInsertarLlamadaAgendada);
             $sth->execute($paramNuevaLlamadaSQL);

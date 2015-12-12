@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Sat Dec 12 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Monitoring: display pause name when agent enters a break.
+  Ported from CallCenterPRO.
+  SVN Rev[7399]
 - CHANGED: Dialer (ECCP): extend the getmultipleagentstatus to report the pause
   information for the agent, using the structure already used for
   getagentstatus. Ported from CallCenterPRO.

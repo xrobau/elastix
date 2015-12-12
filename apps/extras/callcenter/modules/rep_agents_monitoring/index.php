@@ -38,7 +38,7 @@ function _moduleContent(&$smarty, $module_name)
     require_once "modules/agent_console/libs/paloSantoConsola.class.php";
     require_once "modules/agent_console/libs/JSON.php";
     require_once "modules/$module_name/configs/default.conf.php";
-    
+
     // Directorio de este módulo
     $sDirScript = dirname($_SERVER['SCRIPT_FILENAME']);
 
@@ -52,7 +52,7 @@ function _moduleContent(&$smarty, $module_name)
     load_language_module($module_name);
 
     // Asignación de variables comunes y directorios de plantillas
-    $sDirPlantillas = (isset($arrConf['templates_dir'])) 
+    $sDirPlantillas = (isset($arrConf['templates_dir']))
         ? $arrConf['templates_dir'] : 'themes';
     $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['theme'];
     $smarty->assign("MODULE_NAME", $module_name);
@@ -75,7 +75,7 @@ function _moduleContent(&$smarty, $module_name)
         break;
     }
     $oPaloConsola->desconectarTodo();
-    
+
     return $sContenido;
 }
 
@@ -90,53 +90,53 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
     ));
 
     /*
-     * Un agente puede pertenecer a múltiples colas, y puede o no estar 
+     * Un agente puede pertenecer a múltiples colas, y puede o no estar
      * atendiendo una llamada, la cual puede haber llegado de como máximo una
      * cola. Hay 3 cronómetros que se pueden actualizar:
-     * 
+     *
      * último estado:   el tiempo transcurrido desde el último cambio de estado
      * total de login:  el tiempo durante el cual el agente ha estado logoneado
      * total de llamadas: el tiempo que el agente pasa atendiendo llamadas
-     * 
+     *
      * Para el monitoreo de este módulo, los estados en que puede estar
      * una fila (que muestra un agente en una cola) pueden ser los siguientes:
-     * 
-     * offline: el tiempo total de login y el tiempo de llamadas no se 
-     *  actualizan. Si el cliente estuvo en otro estado previamente 
+     *
+     * offline: el tiempo total de login y el tiempo de llamadas no se
+     *  actualizan. Si el cliente estuvo en otro estado previamente
      *  (lastsessionend) entonces se actualiza regularmente el cronómetro de
      *  último estado. De otro modo el cronómetro de último estado está vacío.
-     * online: se actualiza el tiempo total de login y el tiempo de último 
+     * online: se actualiza el tiempo total de login y el tiempo de último
      *  estado, y el tiempo total de llamadas no se actualiza. El cronómetro de
      *  último estado cuenta desde el inicio de sesión.
      * paused: igual que online, pero el cronómentro de último estado cuenta
      *  desde el inicio de la pausa.
-     * oncall: se actualiza el tiempo total de login. El cronómetro de último 
-     *  estado cuenta desde el inicio de la llamada únicamente para la cola que 
-     *  proporcionó la llamada que atiende el agente actualmente. De otro modo 
+     * oncall: se actualiza el tiempo total de login. El cronómetro de último
+     *  estado cuenta desde el inicio de la llamada únicamente para la cola que
+     *  proporcionó la llamada que atiende el agente actualmente. De otro modo
      *  el cronómetro no se actualiza. De manera similar, el total de tiempo de
      *  llamadas se actualiza únicamente para la cola que haya proporcionado la
      *  llamada que atiende el agente.
-     * 
+     *
      * El estado del cliente consiste en un arreglo de tantos elementos como
      * agentes haya pertenecientes a cada cola. Si un agente pertenece a más de
      * una cola, hay un elemento por cada pertenencia del mismo agente a cada
-     * cola. Cada elemento es una estructura que contiene los siguientes 
+     * cola. Cada elemento es una estructura que contiene los siguientes
      * valores:
-     * 
+     *
      * status:          {offline|online|oncall|paused}
      * sec_laststatus:  integer|null
      * sec_calls:       integer
      * logintime:       integer
      * num_calls:       integer
      * oncallupdate:    boolean
-     * 
+     *
      * Cada elemento del arreglo se posiciona por 'queue-{NUM_COLA}-member-{NUM_AGENTE}'
-     * 
-     * El estado enviado por el cliente para detectar cambios es también un 
-     * arreglo con el mismo número de elementos que el arreglo anterior, 
-     * posicionado de la misma manera. Cada elemento es una estructura que 
+     *
+     * El estado enviado por el cliente para detectar cambios es también un
+     * arreglo con el mismo número de elementos que el arreglo anterior,
+     * posicionado de la misma manera. Cada elemento es una estructura que
      * contiene los siguientes valores:
-     * 
+     *
      * status:          {offline|online|oncall|paused}
      * oncallupdate:    boolean
      */
@@ -157,7 +157,7 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
     $sPrevQueue = NULL;
     foreach ($jsonData as $jsonKey => $jsonRow) {
         list($d1, $sQueue, $d2, $sTipoAgente, $sNumeroAgente) = explode('-', $jsonKey);
-        
+
         $sEstadoTag = '(unimplemented)';
         switch ($jsonRow['status']) {
         case 'offline':
@@ -171,6 +171,8 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
             break;
         case 'paused':
             $sEstadoTag = '<img src="modules/'.$module_name.'/images/break.png" border="0" alt="'._tr('BREAK').'"/>';
+            if (!is_null($jsonRow['pausename']))
+                $sEstadoTag .= '<span>'.htmlentities($jsonRow['pausename'], ENT_COMPAT, 'UTF-8').'</span>';
             break;
         }
         $sEstadoTag = '<span id="'.$jsonKey.'-statuslabel">'.$sEstadoTag.'</span>';
@@ -288,9 +290,9 @@ function generarEstadoHash($module_name, $estadoCliente)
 
 function timestamp_format($i)
 {
-	return sprintf('%02d:%02d:%02d', 
-        ($i - ($i % 3600)) / 3600, 
-        (($i - ($i % 60)) / 60) % 60, 
+	return sprintf('%02d:%02d:%02d',
+        ($i - ($i % 3600)) / 3600,
+        (($i - ($i % 60)) / 60) % 60,
         $i % 60);
 }
 
@@ -329,16 +331,17 @@ function construirDatosJSON(&$estadoMonitor)
                 'agentname'         =>  $infoAgente['agentname'],
                 'status'            =>  $infoAgente['agentstatus'],
                 'sec_laststatus'    =>  is_null($iTimestampEstado) ? NULL : ($iTimestampActual - $iTimestampEstado),
-                'sec_calls'         =>  $infoAgente['sec_calls'] + 
-                    (is_null($infoAgente['linkstart']) 
-                        ? 0 
+                'sec_calls'         =>  $infoAgente['sec_calls'] +
+                    (is_null($infoAgente['linkstart'])
+                        ? 0
                         : $iTimestampActual - strtotime($infoAgente['linkstart'])),
                 'logintime'         =>  $infoAgente['logintime'] + (
-                    (is_null($infoAgente['lastsessionend']) && !is_null($infoAgente['lastsessionstart'])) 
+                    (is_null($infoAgente['lastsessionend']) && !is_null($infoAgente['lastsessionstart']))
                         ? $iTimestampActual - strtotime($infoAgente['lastsessionstart'])
                         : 0),
                 'num_calls'         =>  $infoAgente['num_calls'],
                 'oncallupdate'      =>  !is_null($infoAgente['linkstart']),
+                'pausename'         =>  $infoAgente['pausename'],
             );
         }
     }
@@ -348,33 +351,33 @@ function construirDatosJSON(&$estadoMonitor)
 function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola)
 {
     $respuesta = array();
-    
+
     ignore_user_abort(true);
     set_time_limit(0);
 
     // Estado del lado del cliente
     $estadoHash = getParameter('clientstatehash');
     if (!is_null($estadoHash)) {
-        $estadoCliente = isset($_SESSION[$module_name]['estadoCliente']) 
-            ? $_SESSION[$module_name]['estadoCliente'] 
-            : array();        
+        $estadoCliente = isset($_SESSION[$module_name]['estadoCliente'])
+            ? $_SESSION[$module_name]['estadoCliente']
+            : array();
     } else {
         $estadoCliente = getParameter('clientstate');
         if (!is_array($estadoCliente)) return;
     }
-    foreach (array_keys($estadoCliente) as $k) 
-        $estadoCliente[$k]['oncallupdate'] = ($estadoCliente[$k]['oncallupdate'] == 'true'); 
+    foreach (array_keys($estadoCliente) as $k)
+        $estadoCliente[$k]['oncallupdate'] = ($estadoCliente[$k]['oncallupdate'] == 'true');
 
     // Modo a funcionar: Long-Polling, o Server-sent Events
     $sModoEventos = getParameter('serverevents');
-    $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
+    $bSSE = (!is_null($sModoEventos) && $sModoEventos);
     if ($bSSE) {
         Header('Content-Type: text/event-stream');
         printflush("retry: 5000\n");
     } else {
         Header('Content-Type: application/json');
     }
-    
+
     // Verificar hash correcto
     if (!is_null($estadoHash) && $estadoHash != $_SESSION[$module_name]['estadoClienteHash']) {
     	$respuesta['estadoClienteHash'] = 'mismatch';
@@ -402,7 +405,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                 $respuesta[$jsonKey] = $jsonRow;
                 $estadoCliente[$jsonKey]['status'] = $jsonRow['status'];
                 $estadoCliente[$jsonKey]['oncallupdate'] = $jsonRow['oncallupdate'];
-                unset($respuesta[$jsonKey]['agentname']); 
+                unset($respuesta[$jsonKey]['agentname']);
             }
     	}
     }
@@ -410,12 +413,12 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
     do {
         $oPaloConsola->desconectarEspera();
-        
+
         // Se inicia espera larga con el navegador...
         session_commit();
         $iTimestampInicio = time();
-        
-        while (connection_status() == CONNECTION_NORMAL && count($respuesta) <= 0 
+
+        while (connection_status() == CONNECTION_NORMAL && count($respuesta) <= 0
             && time() - $iTimestampInicio <  $iTimeoutPoll) {
 
             $listaEventos = $oPaloConsola->esperarEventoSesionActiva();
@@ -425,7 +428,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                 $oPaloConsola->desconectarTodo();
                 return;
             }
-            
+
             $iTimestampActual = time();
             foreach ($listaEventos as $evento) {
                 $sNumeroAgente = $sCanalAgente = $evento['agent_number'];
@@ -437,22 +440,22 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
                         	$jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
                             if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] == 'offline') {
-                            	
+
                                 // Estado en el estado de monitor
                                 $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'online';
                                 $estadoMonitor[$sQueue][$sCanalAgente]['lastsessionstart'] = date('Y-m-d H:i:s', $iTimestampActual);
                                 $estadoMonitor[$sQueue][$sCanalAgente]['lastsessionend'] = NULL;
-                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']) && 
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']) &&
                                     is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'])) {
                                 	$estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'] = date('Y-m-d H:i:s', $iTimestampActual);
                                 }
                                 $estadoMonitor[$sQueue][$sCanalAgente]['linkstart'] = NULL;
-                                
+
                                 // Estado en la estructura JSON
                                 $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
                                 $jsonData[$jsonKey]['sec_laststatus'] = 0;
                                 $jsonData[$jsonKey]['oncallupdate'] = FALSE;
-                                
+
                                 // Estado del cliente
                                 $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
                                 $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
@@ -469,11 +472,11 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
                             $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
                             if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
-                                
+
                                 // Estado en el estado de monitor
                                 $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'offline';
                                 $estadoMonitor[$sQueue][$sCanalAgente]['lastsessionend'] = date('Y-m-d H:i:s', $iTimestampActual);
-                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']) && 
+                                if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']) &&
                                     is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'])) {
                                     $estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'] = date('Y-m-d H:i:s', $iTimestampActual);
                                 }
@@ -485,13 +488,13 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                                     	$estadoMonitor[$sQueue][$sCanalAgente]['logintime'] += $iDuracionSesion;
                                     }
                                 }
-                                
+
                                 // Estado en la estructura JSON
                                 $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
                                 $jsonData[$jsonKey]['sec_laststatus'] = 0;
                                 $jsonData[$jsonKey]['oncallupdate'] = FALSE;
                                 $jsonData[$jsonKey]['logintime'] = $estadoMonitor[$sQueue][$sCanalAgente]['logintime'];
-                                
+
                                 // Estado del cliente
                                 $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
                                 $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
@@ -508,13 +511,13 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
                             $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
                             if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
-                                
+
                                 // Estado en el estado de monitor
                                 if ($estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] != 'oncall')
                                     $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'paused';
                                 $estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart'] = date('Y-m-d H:i:s', $iTimestampActual);
                                 $estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'] = NULL;
-                                
+
                                 // Estado en la estructura JSON
                                 $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
                                 if ($jsonData[$jsonKey]['status'] == 'oncall') {
@@ -523,8 +526,8 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                                         $iDuracionLlamada = $iTimestampActual - $iTimestampInicio;
                                         if ($iDuracionLlamada >= 0) {
                                             $jsonData[$jsonKey]['sec_laststatus'] = $iDuracionLlamada;
-                                            $jsonData[$jsonKey]['sec_calls'] = 
-                                                $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] + $iDuracionLlamada; 
+                                            $jsonData[$jsonKey]['sec_calls'] =
+                                                $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] + $iDuracionLlamada;
                                         }
                                     }
                                 } else {
@@ -538,10 +541,13 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                                         $jsonData[$jsonKey]['logintime'] += $iDuracionSesion;
                                     }
                                 }
-                                
+
                                 // Estado del cliente
                                 $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
                                 $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
+
+                                // Nombre de la pausa
+                                $jsonData[$jsonKey]['pausename'] = $evento['pause_name'];
 
                                 // Estado a emitir al cliente
                                 $respuesta[$jsonKey] = $jsonData[$jsonKey];
@@ -555,12 +561,12 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
                             $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
                             if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
-                            
+
                                 // Estado en el estado de monitor
                                 if ($estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] != 'oncall')
                                     $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'online';
                                 $estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend'] = date('Y-m-d H:i:s', $iTimestampActual);
-                                
+
                                 // Estado en la estructura JSON
                                 $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
                                 if ($jsonData[$jsonKey]['status'] == 'oncall') {
@@ -569,8 +575,8 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                                         $iDuracionLlamada = $iTimestampActual - $iTimestampInicio;
                                         if ($iDuracionLlamada >= 0) {
                                             $jsonData[$jsonKey]['sec_laststatus'] = $iDuracionLlamada;
-                                            $jsonData[$jsonKey]['sec_calls'] = 
-                                                $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] + $iDuracionLlamada; 
+                                            $jsonData[$jsonKey]['sec_calls'] =
+                                                $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] + $iDuracionLlamada;
                                         }
                                     }
                                 } else {
@@ -585,7 +591,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                                         $jsonData[$jsonKey]['logintime'] += $iDuracionSesion;
                                     }
                                 }
-                                
+
                                 // Estado del cliente
                                 $estadoCliente[$jsonKey]['status'] = $jsonData[$jsonKey]['status'];
                                 $estadoCliente[$jsonKey]['oncallupdate'] = $jsonData[$jsonKey]['oncallupdate'];
@@ -606,12 +612,12 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                             $evento['campaign_id']);
                         if (!is_null($infoCampania)) $sCallQueue = $infoCampania['queue'];
                     }
-                    
+
                     foreach (array_keys($estadoMonitor) as $sQueue) {
                         if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
                             $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
                             if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
-                            
+
                                 // Estado en el estado de monitor
                                 $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 'oncall';
                                 $estadoMonitor[$sQueue][$sCanalAgente]['linkstart'] = NULL;
@@ -622,14 +628,14 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
                                 // Estado en la estructura JSON
                                 $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
-                                $jsonData[$jsonKey]['sec_laststatus'] = 
-                                    is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']) 
+                                $jsonData[$jsonKey]['sec_laststatus'] =
+                                    is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart'])
                                         ? NULL
                                         : $iTimestampActual - strtotime($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']);
                                 $jsonData[$jsonKey]['num_calls'] = $estadoMonitor[$sQueue][$sCanalAgente]['num_calls'];
                                 $jsonData[$jsonKey]['sec_calls'] = $estadoMonitor[$sQueue][$sCanalAgente]['sec_calls'] +
-                                    (is_null($jsonData[$jsonKey]['sec_laststatus']) 
-                                        ? 0 
+                                    (is_null($jsonData[$jsonKey]['sec_laststatus'])
+                                        ? 0
                                         : $jsonData[$jsonKey]['sec_laststatus']);
                                 $jsonData[$jsonKey]['oncallupdate'] = !is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart']);
                                 $jsonData[$jsonKey]['logintime'] = $estadoMonitor[$sQueue][$sCanalAgente]['logintime'];
@@ -657,9 +663,9 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                         if (isset($estadoMonitor[$sQueue][$sCanalAgente])) {
                             $jsonKey = 'queue-'.$sQueue.'-member-'.$sNumeroAgente;
                             if (isset($jsonData[$jsonKey]) && $jsonData[$jsonKey]['status'] != 'offline') {
-                            
+
                                 // Estado en el estado de monitor
-                                $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] = 
+                                $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'] =
                                     (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpausestart']) && is_null($estadoMonitor[$sQueue][$sCanalAgente]['lastpauseend']))
                                     ? 'paused' : 'online';
                                 if (!is_null($estadoMonitor[$sQueue][$sCanalAgente]['linkstart'])) {
@@ -670,7 +676,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                                     }
                                 }
                                 $estadoMonitor[$sQueue][$sCanalAgente]['linkstart'] = NULL;
-                                
+
                                 // Estado en la estructura JSON
                                 $jsonData[$jsonKey]['status'] = $estadoMonitor[$sQueue][$sCanalAgente]['agentstatus'];
                                 if ($jsonData[$jsonKey]['status'] == 'paused') {
@@ -705,8 +711,8 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                     break;
             	}
             }
-            
-            
+
+
         }
         if (count($respuesta) > 0) {
             @session_start();
@@ -715,7 +721,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             session_commit();
         }
         jsonflush($bSSE, $respuesta);
-        
+
         $respuesta = array();
 
     } while ($bSSE && connection_status() == CONNECTION_NORMAL);

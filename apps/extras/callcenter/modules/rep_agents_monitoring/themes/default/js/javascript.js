@@ -1,7 +1,7 @@
 var module_name = 'rep_agents_monitoring';
 
 /* El siguiente objeto es el estado de la interfaz del CallCenter. Al comparar
- * este objeto con los cambios de estado producto de eventos del ECCP, se 
+ * este objeto con los cambios de estado producto de eventos del ECCP, se
  * consigue detectar los cambios requeridos a la interfaz sin tener que recurrir
  * a llamadas repetidas al servidor.
  * Este objeto se inicializa en initialize_client_state() */
@@ -29,7 +29,7 @@ function initialize_client_state(nuevoEstado, nuevoEstadoHash)
 {
 	estadoCliente = nuevoEstado;
 	estadoClienteHash = nuevoEstadoHash;
-	
+
 	var fechaInicio = new Date();
 	var regexp = /^(queue-\d+)/;
 	for (var k in estadoCliente) {
@@ -43,7 +43,7 @@ function initialize_client_state(nuevoEstado, nuevoEstadoHash)
 				estadoCliente[k][ktimestamp] = d;
 			}
 		}
-		
+
 		// Registrar a qué total de cola contribuye esta fila
 		var kq = regexp.exec(k);
 		estadoCliente[k]['queuetotal'] = null;
@@ -54,7 +54,7 @@ function initialize_client_state(nuevoEstado, nuevoEstadoHash)
 
 	// Lanzar el callback que actualiza el estado de la llamada
     setTimeout(do_checkstatus, 1);
-	
+
 	timer = setTimeout(actualizar_cronometro, 1);
 }
 
@@ -89,14 +89,14 @@ function actualizar_valores_cronometro()
 		if (estadoCliente[k]['sec_laststatus'] != null) {
 			formatoCronometro('#'+k+'-sec_laststatus', estadoCliente[k]['sec_laststatus']);
 		}
-		
+
 		// El tiempo total de login se actualiza si el estado no es offline
 		if (estadoCliente[k]['status'] != 'offline') {
 			totalesCola[kq]['logintime'] += formatoCronometro('#'+k+'-logintime', estadoCliente[k]['logintime']);
 		} else {
 			totalesCola[kq]['logintime'] += estadoCliente[k]['orig_logintime'] * 1000;
 		}
-		
+
 		// El tiempo total de llamadas se actualiza si el estado es oncall y si
 		// está activa la bandera oncallupdate
 		if (estadoCliente[k]['status'] == 'oncall' && estadoCliente[k]['oncallupdate']) {
@@ -138,7 +138,7 @@ function formatoMilisegundo(selector, msec)
 function do_checkstatus()
 {
 /*
-	var clientstate = {}; 
+	var clientstate = {};
 	for (var k in estadoCliente) {
 		clientstate[k] = {
 			status:			estadoCliente[k]['status'],
@@ -147,7 +147,7 @@ function do_checkstatus()
 	}
 */
 	var params = {
-			menu:		module_name, 
+			menu:		module_name,
 			rawmode:	'yes',
 			action:		'checkStatus',
 			//clientstate: clientstate
@@ -173,7 +173,7 @@ function do_checkstatus()
 		function (respuesta) {
 			verificar_error_session(respuesta);
 			manejarRespuestaStatus(respuesta);
-			
+
 			// Lanzar el método de inmediato
 			setTimeout(do_checkstatus, 1);
 		}, 'json');
@@ -184,14 +184,14 @@ function manejarRespuestaStatus(respuesta)
 {
 	var fechaInicio = new Date();
 	var keys = ['sec_laststatus', 'logintime', 'sec_calls'];
-	
+
 	// Intentar recargar la página en caso de error
 	if (respuesta['error'] != null) {
 		window.alert(respuesta['error']);
 		location.reload();
 		return;
 	}
-	
+
 	for (var k in respuesta) {
 		if (k == 'estadoClienteHash') {
 			// Caso especial - actualizar hash de estado
@@ -208,7 +208,7 @@ function manejarRespuestaStatus(respuesta)
 				var statuslabel = $('#'+k+'-statuslabel');
 				statuslabel.empty();
 				switch (respuesta[k]['status']) {
-				case 'offline':					
+				case 'offline':
 					statuslabel.text('LOGOUT'); // TODO: i18n
 					break;
 				case 'online':
@@ -219,11 +219,12 @@ function manejarRespuestaStatus(respuesta)
 					break;
 				case 'paused':
 					statuslabel.append('<img src="modules/'+module_name+'/images/break.png" border="0" alt="'+'BREAK'+'"/>');
+					if (typeof respuesta[k].pausename == 'string') statuslabel.append($('<span></span>').text(respuesta[k].pausename));
 					break;
 				}
 				estadoCliente[k]['status'] = respuesta[k]['status'];
 			}
-			
+
 			// Actualizar los cronómetros con los nuevos valores
 			for (var j = 0; j < keys.length; j++) {
 				var ktimestamp = keys[j];
@@ -245,7 +246,7 @@ function manejarRespuestaStatus(respuesta)
 			// TODO: no se maneja todavía aparición de agente en nueva cola
 		}
 	}
-	
+
 	// Actualizar número de llamadas por cola
 	var totalesCola = {};
 	for (var k in estadoCliente) {
@@ -261,7 +262,7 @@ function manejarRespuestaStatus(respuesta)
 	for (var kq in totalesCola) {
 		$('#'+kq+'-num_calls').text(totalesCola[kq]);
 	}
-	
+
 	// Actualizar los totales de tiempo por cola
 	actualizar_valores_cronometro();
 }

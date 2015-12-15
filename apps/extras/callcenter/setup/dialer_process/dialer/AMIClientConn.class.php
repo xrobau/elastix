@@ -43,6 +43,12 @@ class AMIClientConn extends MultiplexConn
 
     public $cuentaEventos = array();    // Cuenta de eventos recibidos
 
+    /* El siguiente miembro sólo se usa por los comandos database_* que evaluan
+     * response[data] como una respuesta. En caso de error se devuelve NULL o
+     * FALSE como corresponda, y el cliente debe examinar raw_response para
+     * obtener más detalles. */
+    public $raw_response = NULL;
+
    /**
     * Event Handlers
     *
@@ -1008,6 +1014,12 @@ class AMIClientConn extends MultiplexConn
         if (!is_null($keytree)) $c .= ' '.$keytree;
         $r = $this->command($c);
 
+        $this->raw_response = NULL;
+        if (!is_array($r) || !isset($r['data'])) {
+            $this->raw_response = $r;
+            return NULL;
+        }
+
         $data = explode("\n",$r["data"]);
         $db = array();
 
@@ -1022,8 +1034,14 @@ class AMIClientConn extends MultiplexConn
     {
         $r = $this->command("database showkey $key");
         $data = explode("\n",$r["data"]);
-        $db = array();
 
+        $this->raw_response = NULL;
+        if (!is_array($r) || !isset($r['data'])) {
+            $this->raw_response = $r;
+            return NULL;
+        }
+
+        $db = array();
         foreach ($data as $line) {
             $temp = explode(":",$line);
             if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);
@@ -1039,6 +1057,13 @@ class AMIClientConn extends MultiplexConn
      */
     function database_put($family, $key, $value) {
         $r = $this->command("database put ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key)." ".$value);
+
+        $this->raw_response = NULL;
+        if (!is_array($r) || !isset($r['data'])) {
+            $this->raw_response = $r;
+            return FALSE;
+        }
+
         return (bool)strstr($r["data"], "success");
     }
 
@@ -1049,6 +1074,13 @@ class AMIClientConn extends MultiplexConn
      */
     function database_get($family, $key) {
         $r = $this->command("database get ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key));
+
+        $this->raw_response = NULL;
+        if (!is_array($r) || !isset($r['data'])) {
+            $this->raw_response = $r;
+            return FALSE;
+        }
+
         $lineas = explode("\r\n", $r["data"]);
         while (count($lineas) > 0) {
             if (substr($lineas[0],0,6) == "Value:") {
@@ -1066,6 +1098,13 @@ class AMIClientConn extends MultiplexConn
      */
     function database_del($family, $key) {
         $r = $this->command("database del ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key));
+
+        $this->raw_response = NULL;
+        if (!is_array($r) || !isset($r['data'])) {
+            $this->raw_response = $r;
+            return FALSE;
+        }
+
         return (bool)strstr($r["data"], "removed");
     }
 

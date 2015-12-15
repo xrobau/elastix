@@ -101,6 +101,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Dec 15 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: add proper error handling support when invoking database_*
+  methods through AMI. This prevents an error condition from being mistaken for
+  an empty response, as observed in a production system. Ported from
+  CallCenterPRO.
+  SVN Rev[7400]
+
 * Sat Dec 12 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Monitoring: display pause name when agent enters a break.
   Ported from CallCenterPRO.

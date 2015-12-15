@@ -402,6 +402,11 @@ class CampaignProcess extends TuberiaProcess
 
         $dynmembers = array();
         $db_output = $this->_ami->database_show('QPENALTY');
+        if (!is_array($db_output)) {
+            $this->_log->output('ERR: '.__METHOD__.': fallo al ejecutar database show QPENALTY : '.
+                print_r($this->_ami->raw_response, TRUE));
+            return;
+        }
         foreach (array_keys($db_output) as $k) {
             $regs = NULL;
             if (preg_match('|^/QPENALTY/(\d+)/agents/(\S+)$|', $k, $regs)) {

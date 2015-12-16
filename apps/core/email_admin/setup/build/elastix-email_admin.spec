@@ -202,6 +202,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Dec 16 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Remote SMTP: display SMTP base error along with high level error on
+  failure to check SMTP information.
+  SVN Rev[7401]
+
 * Mon Nov  9 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Vacations: implement substitution of {END_DATE} in Subject line. Add
   empty line between MIME headers and body in order to fix failure of body to

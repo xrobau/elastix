@@ -202,6 +202,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Dec 16 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Remote SMTP: display SMTP base error along with high level error on
+  failure to check SMTP information.
+  SVN Rev[7401]
+
 * Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

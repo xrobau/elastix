@@ -166,7 +166,7 @@ function saveNewEmailRelay($smarty, $module_name, $local_templates_dir, &$pDB, $
         if(is_array($isOK)){ //hay errores al tratar de verificar datos
             $errors = $isOK["ERROR"];
             $smarty->assign("mb_title", _tr("ERROR"));
-            $smarty->assign("mb_message", _tr($errors));
+            $smarty->assign("mb_message", _tr($errors).': '.print_r($isOK["SMTP_ERROR"], TRUE));
             $content= viewFormEmailRelay($smarty,$module_name,$local_templates_dir,$pDB,$arrConf);
             return $content;
         }

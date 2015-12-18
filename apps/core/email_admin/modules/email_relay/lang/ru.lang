@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 2.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,23 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: ru.lang,v 1.7 2015/10/30 14:26:42 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
 "main.cf file was updated successfully but when restarting the mail service failed" => "Файл main.cf было успешно обновлён но после перезагрузки сервис почты не запустился",
 "Relay" => "Relay",
-"message about email relay" => "These networks are allowed to send e-mail to external domains through the Elastix <br> using the SMTP protocol.
-You must insert one network per row and each network <br>must have the format
-<b>IP/MASK</b>.<br>For example, to allow RELAY from the Elastix you must insert
-127.0.0.1/32. <br> We recommend keeping the 127.0.0.1/32 network in the 
-configuration <br>because some processes need it.",
-"Networks which can RELAY" => "Сети поддерживающие RELAY",
+"message about email relay" => "Эти сети могут отправлять электронную почту на внешние домены через Elastix <br> с использованием протокола SMTP.
+Вы должны вставить одну сеть на строку и каждая сеть <br> должна иметь формат
+<b>IP/MASK</b>.<br>Для примера, чтобы разрешить RELAY из Elastix вы должны вставить 127.0.0.1/32. <br> Мы рекомендуем сохранить сеть 127.0.0.1/32 в конфигурации, <br>потому что это требуется для некоторых процессов.",
+"Networks which can RELAY" => "Сети, для которых разрешен RELAY",
 "Could not read the relay configuration." => "Невозможно прочитать конфигурацию Relay",
 "No network entered, you must keep at least the net 127.0.0.1/32" => "Ни одной сети не прописано, Вы должны иметь как минимум сеть 127.0.0.1/32",
 "Configuration updated successfully" => "Конфигурация обновлена успешно",
 "Write error when writing the new configuration." => "Ошибка при записи новой конфигурации",
 "Network" => "Сеть",
-"Error" => "Error",
-"Message" => "Message",
+"Error" => "Ошибка",
+"Message" => "Сообщение",
 );
 ?>

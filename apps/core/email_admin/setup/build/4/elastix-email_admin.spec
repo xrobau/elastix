@@ -202,6 +202,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Dec 18 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Email Admin, Email Accounts, Email Relay: add and improve Russian
+  translation. Supplied by user Russian.
+  SVN Rev[7402]
+
 * Wed Dec 16 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Remote SMTP: display SMTP base error along with high level error on
   failure to check SMTP information.

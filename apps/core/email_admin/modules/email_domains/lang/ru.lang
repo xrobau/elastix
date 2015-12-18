@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 2.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,7 +25,7 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2009/01/29 00:36:42 aflores Exp $ */
+  $Id: ru.lang,v 1.7 2015/10/27 17:29:42 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
 "Email" => "Email",
@@ -38,9 +38,11 @@ $arrLangModule=array(
 "New Domain" => "Новый Домен",
 "View Domain" => "Просмотр Домена",
 "Edit Domain" => "Редактировать Домен",
-"Domain has been deleted" => "Domain has been deleted",
-"Domain has been created" => "Domain has been created",
-"Please before to delete a domain delete all email lists asociated to " => "Please before to delete a domain delete all email lists asociated to ",
-"Please before to delete a domain delete all email accounts asociated to " => "Please before to delete a domain delete all email accounts asociated to ",
+"Domain has been deleted" => "Домен был удалён",
+"Domain has been created" => "Домен был создан",
+"Please before to delete a domain delete all email lists asociated to " => "Пожалуйста, перед удалением домена удалите все Списки Рассылки ассоциированные с доменом ",
+"Please before to delete a domain delete all email accounts asociated to " => "Пожалуйста, перед удалением домена удалите все Учётные Записи ассоциированные с доменом ",
+"Error" => "Ошибка",
+"Domain name already exists" => "Доменное имя уже существует",
 );
 ?>

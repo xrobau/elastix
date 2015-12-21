@@ -21,6 +21,8 @@ Requires: php-PHPMailer
 # sieveshell requires at least plain authentication method
 Requires: cyrus-sasl-plain
 
+Requires: /usr/sbin/saslpasswd2
+
 %description
 Elastix Module Email
 
@@ -202,6 +204,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Dec 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Email Accounts: saslpasswd2 is required for Email Accounts.
+  SVN Rev[7403]
+
 * Fri Dec 18 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Email Admin, Email Accounts, Email Relay: add and improve Russian
   translation. Supplied by user Russian.

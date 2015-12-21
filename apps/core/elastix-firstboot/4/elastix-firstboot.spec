@@ -13,6 +13,9 @@ Requires: coreutils
 Conflicts: elastix-mysqldbdata
 Requires(post): chkconfig, /bin/cp
 
+# commands: /bin/chvt
+Requires: kbd
+
 Requires: /usr/sbin/saslpasswd2
 
 %description
@@ -133,6 +136,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Dec 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: chvt is required for VT switching for password request on Elastix 4.
+  SVN Rev[7405]
 - FIXED: elastix-admin-passwords: saslpasswd2 is required for
   elastix-admin-passwords.
   SVN Rev[7404]

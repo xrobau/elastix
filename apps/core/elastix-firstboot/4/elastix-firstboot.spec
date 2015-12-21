@@ -13,6 +13,8 @@ Requires: coreutils
 Conflicts: elastix-mysqldbdata
 Requires(post): chkconfig, /bin/cp
 
+Requires: /usr/sbin/saslpasswd2
+
 %description
 This module contains (or should contain) utilities and configurations that
 cannot be prepared at install time from the ISO image, and are therefore
@@ -77,8 +79,8 @@ if [ ! -d /var/lib/mysql/asteriskcdrdb ] ; then
 	cp /usr/share/elastix-firstboot/compat-dbscripts/01-asteriskcdrdb.sql /usr/share/elastix-firstboot/compat-dbscripts/02-asteriskuser-password.sql /var/spool/elastix-mysqldbscripts/
 fi
 
-# If installing, the system might have mysql running (upgrading from a RC). 
-# The default password is written to the configuration file. 
+# If installing, the system might have mysql running (upgrading from a RC).
+# The default password is written to the configuration file.
 if [ $1 -eq 1 ] ; then
 	if [ -e /var/lib/mysql/mysql ] ; then
 		if [ ! -e /etc/elastix.conf ] ; then
@@ -130,11 +132,16 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Mon Dec 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: elastix-admin-passwords: saslpasswd2 is required for
+  elastix-admin-passwords.
+  SVN Rev[7404]
+
 * Tue Oct 27 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-2
 - CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
   SVN history. Bumped Version and Release in specfile.
 
-* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: firstboot: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7234]
 
@@ -146,7 +153,7 @@ rm -rf $RPM_BUILD_ROOT
 - CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
   SVN history. Bumped Version and Release in specfile.
 
-* Fri Feb 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Fri Feb 13 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
   Framework: create systemd service file for elastix-firstboot
   SVN Rev[6848]
 
@@ -174,7 +181,7 @@ rm -rf $RPM_BUILD_ROOT
   SVN history. Bumped Release in specfile.
   SVN Rev[5914]
 
-* Mon Sep 09 2013 Luis Abarca <labarca@palosanto.com> 
+* Mon Sep 09 2013 Luis Abarca <labarca@palosanto.com>
 - FIXED: Now the update of the passwords made in the asterisk database for ami,
   ari and fop its working properly.
   SVN Rev[5845]
@@ -184,23 +191,23 @@ rm -rf $RPM_BUILD_ROOT
   SVN history. Bumped Release in specfile.
   SVN Rev[5784]
 
-* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com>
 - CHANGED: elastix-admin-passwords: Reversed and fixed some changes in this
   file, Applying the new changes for compatibility with the new freePBX.
   SVN Rev[5780]
 
-* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com> 
+* Wed Aug 21 2013 Luis Abarca <labarca@palosanto.com>
 - CHANGED: elastix-admin-passwords: It was changed the way that its stored the
   password for FreePBX admin for a better interaction with freePBX.
   SVN Rev[5779]
 
 * Thu Jan 31 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: elastix-firstboot: make update of password in manager.conf more 
+- CHANGED: elastix-firstboot: make update of password in manager.conf more
   robust in the case it falls out of sync with /etc/elastix.conf.
   SVN Rev[4658]
 
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
-- CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in 
+- CHANGED: firstboot - Build/elastix-firstboot.spec: Changed Version and Release in
   specfile according to the current branch.
   SVN Rev[4639]
 
@@ -224,7 +231,7 @@ rm -rf $RPM_BUILD_ROOT
 - CHANGED: elastix-firstboot: Revert SVN commit 4161 and fix the proper way.
   Original bug was caused by forgotten blanking of password after regexp failed.
   SVN Rev[4526]
-- CHANGED: elastix-firstboot: Remove ampersand from accepted characters in 
+- CHANGED: elastix-firstboot: Remove ampersand from accepted characters in
   passwords, since freePBX update chokes on these. Fixes Elastix bug #1432.
   SVN Rev[4525]
 
@@ -243,7 +250,7 @@ rm -rf $RPM_BUILD_ROOT
   SVN Rev[4023]
 
 * Fri Jun 15 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Optimization: do not attempt to start mysql unconditionally. It 
+- CHANGED: Optimization: do not attempt to start mysql unconditionally. It
   should be started only when a database configuration is required. Also, since
   elastix-admin-passwords starts mysql if required, there is no need to start
   it on the init script too.
@@ -256,8 +263,8 @@ rm -rf $RPM_BUILD_ROOT
 * Fri May 04 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Rewrite the password assignment as a PHP script. This allows the use
   of native preg_match() and proper string escaping instead of potentially
-  flawed shell escaping. Both initial password assignment and subsequent 
-  password changing are now handled by the PHP script. May fix Elastix 
+  flawed shell escaping. Both initial password assignment and subsequent
+  password changing are now handled by the PHP script. May fix Elastix
   bug #1260.
   SVN Rev[3928]
 
@@ -310,20 +317,20 @@ rm -rf $RPM_BUILD_ROOT
 
 * Fri Mar 09 2012 Alex Villacis Lasso <a_villacis@palosanto.com> 2.3.0-1
 - CHANGED: Remove fix for Elastix bug 595. This workaround is rendered obsolete
-  with the use of kmod-dahdi. 
+  with the use of kmod-dahdi.
   SVN Rev[3726]
 
 * Wed Dec 22 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-9
 - CHANGED: In spec file remove actions over vtiger database because the
   package vtiger do that task.
-- FIXED: Elastix-firstboot: Changes in elastix-firstboot script to fix 
-  the bug with elastix.conf where is created that file by elastix-framework 
+- FIXED: Elastix-firstboot: Changes in elastix-firstboot script to fix
+  the bug with elastix.conf where is created that file by elastix-framework
   for adding "amiadminpwd" to ami password.
   SVN Rev[3480]
-- FIXED: Fixed bug in  "elastix-firstboot" after intallation of an iso 
+- FIXED: Fixed bug in  "elastix-firstboot" after intallation of an iso
   where all passwords are never changed after the first reboot. SVN Rev[3478]
-- CHANGED: Elastix-Firstboot: Support update change password to 
-  vtigercrm 510 and 521. This changes was applied in elastix-firstboot 
+- CHANGED: Elastix-Firstboot: Support update change password to
+  vtigercrm 510 and 521. This changes was applied in elastix-firstboot
   and change-passwords scripts. SVN Rev[3476]
 
 * Mon Dec 05 2011 Alex Villacis Lasso <a_villacis@palosanto.com> 2.2.0-8
@@ -353,7 +360,7 @@ rm -rf $RPM_BUILD_ROOT
   SVN Rev[2993]
 
 * Fri Sep 09 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-3
-- CHANGED: elastix-firstboot and change-passwords, the 
+- CHANGED: elastix-firstboot and change-passwords, the
   ARI_ADMIN_PASSWORD is also changed with the password for freePBX admin
   SVN Rev[2942]
 
@@ -363,7 +370,7 @@ rm -rf $RPM_BUILD_ROOT
   SVN Rev[2926]
 
 * Wed Aug 24 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-1
-- NEW: new script that change the passwords of mysql, freePBX, 
+- NEW: new script that change the passwords of mysql, freePBX,
   user admin, fop, cyrus
   SVN Rev[2894]
 - CHANGED: elastix-firstboot, if mysql is not running, elastix-firstboot
@@ -392,25 +399,25 @@ rm -rf $RPM_BUILD_ROOT
   authenticatication. SVN Rev[2497]
 
 * Thu Mar 31 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-6
-- ADD:     elastix-firsboot, Add comment to show the possible 
-  bug in the future when the process to execute scripts throw 
+- ADD:     elastix-firsboot, Add comment to show the possible
+  bug in the future when the process to execute scripts throw
   an error of sql this error don't permit to execute the next
   step and ask the admin web passwords. SVN Rev[2476]
-- DELETED: Additional - elastix-firstboot, script mya2billing 
-  was deleted because is not necessary, elastixdbprocess 
+- DELETED: Additional - elastix-firstboot, script mya2billing
+  was deleted because is not necessary, elastixdbprocess
   administration databases. SVN Rev[2475]
 
 * Sat Mar 19 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-5
-- CHANGED: Change permissions of "/etc/sasldb2" after to execute 
+- CHANGED: Change permissions of "/etc/sasldb2" after to execute
   "saslpasswd2 -c cyrus -u example.com" to create user cyrus admin
 
 * Thu Mar 03 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
-- CHANGED: File elastix-firstboot was modified because the logic 
+- CHANGED: File elastix-firstboot was modified because the logic
   changed due to a2billing password
 
 * Wed Mar 02 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-3
-- CHANGED: In elastix-firstboot add new password in elastix.conf for 
-  cyrus admin user, this fixes the bug where any user could connect remotely 
+- CHANGED: In elastix-firstboot add new password in elastix.conf for
+  cyrus admin user, this fixes the bug where any user could connect remotely
   to the console using cyrus admin user and password known
 
 * Mon Jan  7 2011 Alex Villacis Lasso <a_villacis@palosanto.com> 2.0.4-2
@@ -423,8 +430,8 @@ rm -rf $RPM_BUILD_ROOT
 
 * Fri Dec  3 2010 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Remove Prereq: elastix from spec file, since this module does not
-  actually use any files from the Elastix framework, and also to remove a 
-  circular dependency with elastix package. 
+  actually use any files from the Elastix framework, and also to remove a
+  circular dependency with elastix package.
 
 - FIXED: Escape ampersand in admin password since the ampersand is a special
   character for sed. Should fix Elastix bug #598.
@@ -444,7 +451,7 @@ rm -rf $RPM_BUILD_ROOT
   the FreePBX database password.
 
 * Wed Aug 11 2010 Alex Villacis Lasso <a_villacis@palosanto.com> 2.0.0-11
-- ADDED: set FreePBX database password along with the other passwords, and 
+- ADDED: set FreePBX database password along with the other passwords, and
   update /etc/amportal.conf accordingly.
 
 * Wed Aug 04 2010 Alex Villacis Lasso <a_villacis@palosanto.com> 2.0.0-10

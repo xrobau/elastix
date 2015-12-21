@@ -13,6 +13,8 @@ Requires: coreutils
 Conflicts: elastix-mysqldbdata
 Requires(post): chkconfig, /bin/cp
 
+Requires: /usr/sbin/saslpasswd2
+
 %description
 This module contains (or should contain) utilities and configurations that
 cannot be prepared at install time from the ISO image, and are therefore
@@ -130,6 +132,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Mon Dec 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: elastix-admin-passwords: saslpasswd2 is required for
+  elastix-admin-passwords.
+  SVN Rev[7404]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: firstboot: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7234]

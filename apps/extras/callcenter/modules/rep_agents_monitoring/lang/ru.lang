@@ -25,22 +25,25 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
+  $Id: ru.lang,v 2.5 2015/12/19 14:48:19 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Agents Monitoring" => "Agents Monitoring",
-"Queue" => "Queue",
-"Agent" => "Agent",
-"Current status" => "Current status",
-"Total calls" => "Total calls",
-"Total login time" => "Total login time",
-"Total talk time" => "Total talk time",
-"No registered" => "No registered",
-"LOGOUT" => "LOGOUT",
-"Agent" => "Agent",
-"Agents" => "Agents",
-"Total" => "Total",
-"Number" => "Number",
+"Agents Monitoring" => "Мониторинг Агентов",
+"Queue" => "Очередь",
+"Agent" => "Агент",
+"Current status" => "Текущий статус",
+"Total calls" => "Всего вызовов",
+"Total login time" => "Общее время в системе",
+"Total talk time" => "Общее время разговоров",
+"No registered" => "Не зарегистрирован",
+"LOGOUT" => "ВЫШЕЛ",
+"Agent" => "Агент",
+"Agents" => "Агенты",
+"Total" => "Всего",
+"Number" => "Номер",
+"Page" => "Страница",
+"records" => "записей",
+"TOTAL" => "ВСЕГО",
 
 
 );?>

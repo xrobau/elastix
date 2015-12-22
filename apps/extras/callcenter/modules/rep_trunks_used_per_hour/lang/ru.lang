@@ -25,20 +25,27 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
+  $Id: ru.lang,v 2.5 2015/12/19 14:59:19 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Reporte de Troncales usadas por Hora en el dia" => "Reporte de Troncales usadas por Hora en el dia",
-"Time Period " => "Time Period ",
-"Entered" => "Entered",
-"Answered" => "Answered",
-"Abandoned" => "Abandoned",
-"In queue" => "In queue",
-"Without monitoring " => "Without monitoring ",
-"Queue" => "Queue",
-"Start date" => "Start date",
-"End date" => "End date",
-"Total" => "Total",
-"Trunk"=>"Trunk",
+"Reporte de Troncales usadas por Hora en el dia" => "Отчет Занятость транков за час",
+"Time Period " => "Временной Интервал ",
+"Entered" => "Входящие",
+"Answered" => "Отвеченные",
+"Abandoned" => "Потерянные",
+"In queue" => "В очереди",
+"Without monitoring " => "Без мониторинга ",
+"Queue" => "Очередь",
+"Start date" => "Начальная дата",
+"End date" => "Конечная дата",
+"TOTAL" => "ВСЕГО",
+"Trunk" => "Транк",
+"Show" => "Показать",
+"Show Filter" => "Показать Фильтр",
+"Hide Filter" => "Скрыть Фильтр",
+"Download" => "Скачать",
+"Page" => "Страница",
+"records" => "записей",
+"(All)" => "(Все)",
 );
 ?>

@@ -1,16 +1,23 @@
 <?php
-global $arrLangModule; 
+global $arrLangModule;
  $arrLangModule = array(
-"List Calls"     => "List Calls",
-"Queue"          => "Queue",
-"Successful"     => "Successful",
-"Left"           => "Left",
-"Time Hopes"     => "Time Hopes",
-"Find"           => "Find",
-"Date Init"      => "Date Init",
-"Date End"       => "Date End",
-"Error"          => "Error",
-"Error when connecting to database"          => "Error when connecting to database",
-"Error when creating object paloSantoReportsCalls" => "Error when creating object paloSantoReportsCalls",
+"List Calls"     => "Список вызовов",
+"Queue"          => "Очередь",
+"Successful"     => "Успешно",
+"Left"           => "Потерянных",
+"Time Hopes"     => "Время Ожидания",
+"Find"           => "Найти",
+"Date Init"      => "Начальная дата",
+"Date End"       => "Конечная дата",
+"Total Calls"    => "Всего Вызовов",
+"Total"		 => "Всего",
+"Show Filter"    => "Показать Фильтр",
+"Hide Filter"    => "Скрыть Фильтр",
+"Download"       => "Скачать",
+"Page"           => "Страница",
+"records"        => "записей",
+"Error"          => "Ошибка",
+"Error when connecting to database"          => "Ошибка соединения с базой данных",
+"Error when creating object paloSantoReportsCalls" => "Ошибка создания объекта paloSantoReportsCalls",
 );
 ?>

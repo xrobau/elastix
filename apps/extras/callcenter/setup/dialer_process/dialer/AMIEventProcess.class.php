@@ -2472,38 +2472,51 @@ Uniqueid: 1429642067.241008
         foreach ($this->_tmp_estadoAgenteCola as $sAgente => $estadoCola) {
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (!is_null($a)) {
-
-                // Para agentes estáticos, cambio de membresía debe reportarse
-                $bCambioColas = $a->asignarEstadoEnColas($estadoCola);
-                if ($bCambioColas && $a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
-
-                if ($a->estado_consola == 'logged-in') {
-                    $diffcolas = $a->diferenciaColasDinamicas();
-                    if (is_array($diffcolas)) {
-                        // Colas a las que no pertenece y debería pertenecer
-                        if (count($diffcolas[0]) > 0) {
-                            $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
-                                'agregado a las colas ['.implode(' ', array_keys($diffcolas[0])).']');
-                            $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
-                                $diffcolas[0], $a->name, ($a->num_pausas > 0));
-                        }
-
-                        // Colas a las que pertenece y no debe pertenecer
-                        if (count($diffcolas[1]) > 0) {
-                            $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
-                                'quitado de las colas ['.implode(' ', $diffcolas[1]).']');
-                            $this->_tuberia->msg_CampaignProcess_asyncQueueRemove($sAgente, $diffcolas[1]);
-                        }
-                    }
-                }
+                $this->_evaluarPertenenciaColas($a, $estadoCola);
             } else {
                 if ($this->DEBUG) {
                     $this->_log->output('WARN: agente '.$sAgente.' no es un agente registrado en el callcenter, se ignora');
                 }
             }
         }
+
+        /* Verificación de agentes que estén logoneados y deban tener colas,
+         * pero no aparecen en la enumeración de miembros de colas. */
+        foreach ($this->_listaAgentes as $a) {
+            if (!isset($this->_tmp_estadoAgenteCola[$a->channel])) {
+                $this->_evaluarPertenenciaColas($a, array());
+            }
+        }
+
         if ($this->DEBUG) $this->_log->output("DEBUG: fin de verificación de pertenencia a colas con QueueStatus.");
         $this->_tmp_estadoAgenteCola = NULL;
+    }
+
+    private function _evaluarPertenenciaColas($a, $estadoCola)
+    {
+        // Para agentes estáticos, cambio de membresía debe reportarse
+        $bCambioColas = $a->asignarEstadoEnColas($estadoCola);
+        if ($bCambioColas && $a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
+
+        if ($a->estado_consola == 'logged-in') {
+            $diffcolas = $a->diferenciaColasDinamicas();
+            if (is_array($diffcolas)) {
+                // Colas a las que no pertenece y debería pertenecer
+                if (count($diffcolas[0]) > 0) {
+                    $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
+                        'agregado a las colas ['.implode(' ', array_keys($diffcolas[0])).']');
+                    $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
+                        $diffcolas[0], $a->name, ($a->num_pausas > 0));
+                }
+
+                // Colas a las que pertenece y no debe pertenecer
+                if (count($diffcolas[1]) > 0) {
+                    $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
+                        'quitado de las colas ['.implode(' ', $diffcolas[1]).']');
+                    $this->_tuberia->msg_CampaignProcess_asyncQueueRemove($sAgente, $diffcolas[1]);
+                }
+            }
+        }
     }
 
     // En Asterisk 11 e inferior, este evento se emite sólo si eventmemberstatus

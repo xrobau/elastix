@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Wed Dec 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: evaluate queue membership for agents that are not mentioned
+  in queue enumeration.
+  SVN Rev[7408]
 - FIXED: Dialer: allow refreshing agents from worker process. Ported from
   CallCenterPRO.
   SVN Rev[7407]

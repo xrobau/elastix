@@ -120,7 +120,7 @@ class CampaignProcess extends TuberiaProcess
 
         // Registro de manejadores de eventos desde ECCPProcess
         foreach (array('requerir_nuevaListaAgentes') as $k)
-            $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "msg_$k"));
+            $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
         $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));

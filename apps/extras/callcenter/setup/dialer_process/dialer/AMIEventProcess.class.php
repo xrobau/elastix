@@ -2501,6 +2501,8 @@ Uniqueid: 1429642067.241008
         if ($a->estado_consola == 'logged-in') {
             $diffcolas = $a->diferenciaColasDinamicas();
             if (is_array($diffcolas)) {
+                $sAgente = $a->channel;
+
                 // Colas a las que no pertenece y debería pertenecer
                 if (count($diffcolas[0]) > 0) {
                     $this->_log->output('INFO: agente '.$sAgente.' debe ser '.

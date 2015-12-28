@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Dec 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix undefined variable error introduced in previous commit.
+  SVN Rev[7409]
+
 * Wed Dec 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: evaluate queue membership for agents that are not mentioned
   in queue enumeration.

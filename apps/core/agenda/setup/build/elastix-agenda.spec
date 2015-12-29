@@ -101,6 +101,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Dec 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book: report on registration status of internal contact if
+  using SIP or IAX2 technology.
+  SVN Rev[7410]
+
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Calendar: use 204 No Content instead of 205 Reset Content when saving
   event. This fixes the refresh after saving an existing contact.

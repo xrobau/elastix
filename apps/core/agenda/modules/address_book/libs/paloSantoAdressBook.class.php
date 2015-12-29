@@ -386,6 +386,25 @@ a array with the field "total" containing the total of records.
                     $device['directory']     = "internal";
                     $device['exists_on_address_book_db'] = isset($arrContact[$device['id']])?true:false;
                     $device['id_on_address_book_db']     = isset($arrContact[$device['id']]['id'])?$arrContact[$device['id']]['id']:false;
+
+                    $device['device_status'] = 'UNKNOWN';
+                    if ($field_name == 'telefono') {
+                        /* Sólo se hará la consulta usando el comando cuando se lista el
+                         * detalle de un sólo número, y sólo para SIP o IAX2. */
+                        $astcmd = NULL;
+                        if (in_array(strtolower($device['tech']), array('sip'))) {
+                            $astcmd = 'sip show peer '.$device['user'];
+                        }
+                        if (in_array(strtolower($device['tech']), array('iax', 'iax2'))) {
+                            $astcmd = 'iax2 show peer '.$device['user'];
+                        }
+                        $output = $retval = NULL;
+                        exec('/usr/sbin/asterisk -rnx '.escapeshellarg($astcmd), $output, $retval);
+                        $regs = NULL;
+                        if ($retval == 0) foreach ($output as $s) if (preg_match('/Status\s*:\s*(.+?)\s*$/', $s, $regs)) {
+                            $device['device_status'] = $regs[1];
+                        }
+                    }
                 }
                 return $arrDevices;
             }

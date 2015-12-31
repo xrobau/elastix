@@ -101,6 +101,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Dec 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book: extend registration status report for list of all
+  internal contacts. Tweak so that only one external command is required per
+  tech.
+  SVN Rev[7411]
+
 * Tue Dec 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Address Book: report on registration status of internal contact if
   using SIP or IAX2 technology.

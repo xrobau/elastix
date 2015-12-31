@@ -362,6 +362,12 @@ a array with the field "total" containing the total of records.
             $arrVMs     = $this->getMailsFromVoicemail();
             $arrContact = $this->getInternalContacts($arrDevices);
 
+            $extstatus = array('sip' => NULL, 'iax2' => NULL);
+            $rx_tech = array(
+                'sip'   =>  '|^(\d.+?)(/\S+)?\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+\d+\s+(\S+)|',
+                'iax2'  =>  '|^(\d.+?)(/\S+)?\s+\S+\s+\S+\s+\S+\s+\d+\s+(\S+)|',
+            );
+
             if(is_array($arrDevices)){
                 foreach($arrDevices as &$device){
                     $device['name']          = $device['description'];
@@ -388,22 +394,20 @@ a array with the field "total" containing the total of records.
                     $device['id_on_address_book_db']     = isset($arrContact[$device['id']]['id'])?$arrContact[$device['id']]['id']:false;
 
                     $device['device_status'] = 'UNKNOWN';
-                    if ($field_name == 'telefono') {
-                        /* Sólo se hará la consulta usando el comando cuando se lista el
-                         * detalle de un sólo número, y sólo para SIP o IAX2. */
-                        $astcmd = NULL;
-                        if (in_array(strtolower($device['tech']), array('sip'))) {
-                            $astcmd = 'sip show peer '.$device['user'];
-                        }
-                        if (in_array(strtolower($device['tech']), array('iax', 'iax2'))) {
-                            $astcmd = 'iax2 show peer '.$device['user'];
-                        }
+                    if (!is_array($extstatus[$device['tech']])) {
+                        $extstatus[$device['tech']] = array();
+                        $astcmd = $device['tech'].' show peers';
                         $output = $retval = NULL;
-                        exec('/usr/sbin/asterisk -rnx '.escapeshellarg($astcmd), $output, $retval);
+                        exec('/usr/sbin/asterisk -rnx '.escapeshellarg($astcmd).' | grep -v -i monitored', $output, $retval);
                         $regs = NULL;
-                        if ($retval == 0) foreach ($output as $s) if (preg_match('/Status\s*:\s*(.+?)\s*$/', $s, $regs)) {
-                            $device['device_status'] = $regs[1];
+                        if ($retval == 0) foreach ($output as $s) {
+                            if (preg_match($rx_tech[$device['tech']], $s, $regs)) {
+                                $extstatus[$device['tech']][$regs[1]] = $regs[3];
+                            }
                         }
+                    }
+                    if (isset($extstatus[$device['tech']][$device['user']])) {
+                        $device['device_status'] = $extstatus[$device['tech']][$device['user']];
                     }
                 }
                 return $arrDevices;

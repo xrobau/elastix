@@ -36,7 +36,6 @@ if (isset($arrConf['basePath'])) {
 */
 
 define('PALOACL_MSG_ERROR_1', 'Username or password is empty');
-define('PALOACL_MSG_ERROR_2', 'Invalid characters found in username');
 define('PALOACL_MSG_ERROR_3', 'Invalid characters found in password hash');
 
 class paloACL {
@@ -801,9 +800,6 @@ class paloACL {
 
             if($user == "" or $pass == "") {
                 $this->errMsg = PALOACL_MSG_ERROR_1;
-                return FALSE;
-            } else if (!preg_match("/^[[:alnum:]\.\\-_]+$/", $user)) {
-                $this->errMsg = PALOACL_MSG_ERROR_2;
                 return FALSE;
             } else if (!preg_match("/^[[:alnum:]]{32}$/", $pass)) {
                 $this->errMsg = PALOACL_MSG_ERROR_3;

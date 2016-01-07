@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Thu Jan  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: remove regexp check for username. This check was required
+  back when SQL parameters were not used and should not be necessary now.
+  SVN Rev[7412]
+
 * Fri Dec 11 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: add support in tenant theme for notification display with
   no icon for removal (yet).

@@ -221,7 +221,7 @@ rm -f /usr/share/elastix/sudoers
 
 # ** Change content of CentOS-Base.repo ** #
 if [ -e /etc/yum.repos.d/CentOS-Base.repo ] ; then
-    /usr/bin/elastix-add-yum-exclude /etc/yum.repos.d/CentOS-Base.repo 'redhat-logos' 'php53*'
+    /usr/bin/elastix-add-yum-exclude /etc/yum.repos.d/CentOS-Base.repo 'redhat-logos' 'php53*' 'kernel*'
 fi
 
 # Patch httpd.conf so that User and Group directives in elastix.conf take effect
@@ -390,6 +390,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Jan  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: block kernel updates. The CentOS 7 kernel ABI is changing
+  too quickly to follow reliably and continuously breaks the DAHDI modules. At
+  this point in time, the tested kernel version is 3.10.0-229.14.1.el7.x86_64 .
+  SVN Rev[7414]
 - CHANGED: Framework: remove regexp check for username. This check was required
   back when SQL parameters were not used and should not be necessary now.
   SVN Rev[7412]

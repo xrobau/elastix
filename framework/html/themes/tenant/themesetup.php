@@ -171,7 +171,6 @@ function loadSystemNotifications($pdbACL, $idUser)
         'NOTIFICATIONS_PRIVATE'     =>  $pNot->listUserNotifications($idUser, 3),
         'TXT_NO_NOTIFICATIONS'      =>  _tr('No notifications'),
     );
-    file_put_contents('/tmp/debug-noti.txt', $pNot->errMsg.print_r($a, true));
     return $a;
 }
 ?>

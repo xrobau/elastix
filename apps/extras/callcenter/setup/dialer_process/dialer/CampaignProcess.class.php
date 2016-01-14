@@ -325,7 +325,11 @@ class CampaignProcess extends TuberiaProcess
                 $this->_log->output("INFO: no hay soporte CoreSettings en Asterisk Manager, se asume Asterisk 1.4.x.");
             }
 
-            // CampaignProcess no tiene manejadores de eventos AMI
+            /* CampaignProcess no tiene manejadores de eventos AMI. Aunque el
+             * objeto Predictor hace uso de eventos para recoger el resultado
+             * de QueueStatus, tales eventos caen fuera del filtro manipulado
+             * por Events(), y por lo tanto siempre se emiten.  */
+            $astman->Events('off');
 
             $this->_ami = $astman;
             return TRUE;

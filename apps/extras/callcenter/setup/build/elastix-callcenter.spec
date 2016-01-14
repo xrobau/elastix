@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Thu Jan 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: disable AMI event notification on CampaignProcess. The events
+  emitted in response to QueueStatus are still received.
+  SVN Rev[7417]
 - CHANGED: Dialer: disable AMI event notification on ECCPWorkerProcess and
   ECCPProcess. These two do not have any event handlers installed, and disabling
   events saves on CPU time and network bandwidth to Asterisk.

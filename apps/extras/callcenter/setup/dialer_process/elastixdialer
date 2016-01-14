@@ -47,7 +47,7 @@ start() {
 
 stop () {
     echo -n $"Stopping $PROGRAMA: "
-    killproc $DAEMON -TERM
+    killproc -d 20 $DAEMON
     RETVAL=$?
     echo
     if [ $RETVAL = 0 ] ; then

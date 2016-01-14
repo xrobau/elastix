@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Thu Jan 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: fix SysV script to wait for daemon by NOT specifying signal
+  to use. Otherwise the system might shut down before the daemon cleans up.
+  SVN Rev[7418]
 - CHANGED: Dialer: disable AMI event notification on CampaignProcess. The events
   emitted in response to QueueStatus are still received.
   SVN Rev[7417]

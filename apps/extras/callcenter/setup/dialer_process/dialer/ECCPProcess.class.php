@@ -369,6 +369,7 @@ LISTA_AUDITORIAS_AGENTE;
             return FALSE;
         } else {
             // ECCPProcess no tiene manejadores de eventos AMI
+            $astman->Events('off');
 
             $this->_ami = $astman;
             return TRUE;

@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Jan 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: disable AMI event notification on ECCPWorkerProcess and
+  ECCPProcess. These two do not have any event handlers installed, and disabling
+  events saves on CPU time and network bandwidth to Asterisk.
+  SVN Rev[7416]
+
 * Mon Dec 28 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: fix undefined variable error introduced in previous commit.
   SVN Rev[7409]

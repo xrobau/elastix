@@ -220,7 +220,8 @@ class ECCPWorkerProcess extends TuberiaProcess
                 $this->_log->output("INFO: no hay soporte CoreSettings en Asterisk Manager, se asume Asterisk 1.4.x.");
             }
 
-            // ECCPProcess no tiene manejadores de eventos AMI
+            // ECCPWorkerProcess no tiene manejadores de eventos AMI
+            $astman->Events('off');
 
             $this->_eccpconn->setAstConn($astman, $asteriskVersion);
             $this->_ami = $astman;

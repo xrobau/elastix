@@ -1,7 +1,7 @@
 Summary: Elastix First Boot Setup
 Name:    elastix-firstboot
 Version: 4.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{name}-%{version}.tar.bz2
@@ -135,6 +135,16 @@ rm -rf $RPM_BUILD_ROOT
 /usr/bin/elastix-admin-passwords
 
 %changelog
+* Thu Jan 14 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-3
+- CHANGED: firstboot - Build/elastix-firstboot.spec:  update specfile with latest
+  SVN history. Bumped Version and Release in specfile.
+
+* Tue Jan 12 2016 Luis Abarca <labarca@palosanto.com> 
+- ADDED - elastix-admin-passwords: Now there is a new way of update the admin
+  passwords via command line using the flag --cli (init|change) mysqlpasswd
+  adminpasswd.
+  SVN Rev[7415]
+
 * Mon Dec 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: chvt is required for VT switching for password request on Elastix 4.
   SVN Rev[7405]

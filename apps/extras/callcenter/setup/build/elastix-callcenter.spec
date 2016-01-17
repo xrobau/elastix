@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Jan 16 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: implement static Agent enumeration from Asterisk in order to
+  catch instances where the in-memory login status falls out of sync with the
+  actual Asterisk status.
+  SVN Rev[7421]
+
 * Thu Jan 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: fix SysV script to wait for daemon by NOT specifying signal
   to use. Otherwise the system might shut down before the daemon cleans up.

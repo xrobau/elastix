@@ -69,6 +69,9 @@ class AMIEventProcess extends TuberiaProcess
      * se pierde la conexión a Asterisk. */
     private $_pendiente_QueueStatus = FALSE;
 
+    private $_tmp_actionid_agents = NULL;
+    private $_tmp_estadoLoginAgente = NULL;
+
     // Lista de alarmas
     private $_nalarma = 0;
     private $_alarmas = array();
@@ -263,7 +266,7 @@ class AMIEventProcess extends TuberiaProcess
                 'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
                 'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved','VarSet',
                 'QueueMemberStatus', 'QueueParams', 'QueueMember', 'QueueEntry',
-                'QueueStatusComplete', 'Leave', 'Reload') as $k)
+                'QueueStatusComplete', 'Leave', 'Reload', 'Agents', 'AgentsComplete') as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
             $astman->add_event_handler('Bridge', array($this, "msg_Link")); // Visto en Asterisk 1.6.2.x
             if ($this->DEBUG && $this->_config['dialer']['allevents'])
@@ -1370,13 +1373,20 @@ class AMIEventProcess extends TuberiaProcess
     private function _iniciarQueueStatus()
     {
         // Iniciar actualización del estado de las colas activas
-        $this->_tmp_actionid_queuestatus = posix_getpid().'-'.time();
+        $this->_tmp_actionid_queuestatus = 'QueueStatus-'.posix_getpid().'-'.time();
         $this->_tmp_estadoAgenteCola = array();
         $this->_tmp_numLlamadasEnCola = array();
 
         $this->_ami->QueueStatus(NULL, $this->_tmp_actionid_queuestatus);
 
         // En msg_QueueStatusComplete se valida pertenencia a colas dinámicas
+    }
+
+    private function _iniciarAgents()
+    {
+        $this->_tmp_actionid_agents = 'Agents-'.posix_getpid().'-'.time();
+        $this->_tmp_estadoLoginAgente = array();
+        $this->_ami->Agents($this->_tmp_actionid_agents);
     }
 
     public function msg_avisoInicioOriginate($sFuente, $sDestino, $sNombreMensaje,
@@ -2490,6 +2500,8 @@ Uniqueid: 1429642067.241008
 
         if ($this->DEBUG) $this->_log->output("DEBUG: fin de verificación de pertenencia a colas con QueueStatus.");
         $this->_tmp_estadoAgenteCola = NULL;
+
+        $this->_iniciarAgents();
     }
 
     private function _evaluarPertenenciaColas($a, $estadoCola)
@@ -2573,6 +2585,69 @@ Uniqueid: 1429642067.241008
 
         $this->_log->output('INFO: se ha recargado configuración de Asterisk, se refresca agentes...');
         $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+    }
+
+    public function msg_Agents($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        if (is_null($this->_tmp_actionid_agents)) return;
+        if ($params['ActionID'] != $this->_tmp_actionid_agents) return;
+
+        $this->_tmp_estadoLoginAgente[$params['Agent']] = $params['Status'];
+    }
+
+    public function msg_AgentsComplete($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        if (is_null($this->_tmp_actionid_agents)) return;
+        if ($params['ActionID'] != $this->_tmp_actionid_agents) return;
+
+        foreach ($this->_tmp_estadoLoginAgente as $sAgentNum => $sAgentStatus) {
+            $sAgente = 'Agent/'.$sAgentNum;
+            $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+            if (!is_null($a)) {
+                if ($sAgentStatus == 'AGENT_LOGGEDOFF') {
+                    /* Según Asterisk, el agente está deslogoneado. Se verifica
+                     * si también es así en el estado del objeto Agente. Si no,
+                     * se lo manda a deslogonear. */
+
+                    if ($a->estado_consola != 'logged-out') {
+                        $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
+                            ' está logoneado en dialer pero en estado AGENT_LOGGEDOFF,'.
+                            ' se deslogonea en dialer...');
+                        $this->_ejecutarLogoffAgente($sAgente, $a, $params['local_timestamp_received'], $params['Event']);
+                    }
+                } else {
+                    /* Según Asterisk, el agente está logoneado. Se verifica si
+                     * el estado de agente es logoneado, y si no, se lo deslogonea. */
+                    if ($a->estado_consola == 'logged-out') {
+                        $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
+                            ' está deslogoneado en dialer pero en estado '.$sAgentStatus.','.
+                            ' se deslogonea en Asterisk...');
+                        $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->colas_actuales);
+                    }
+                }
+            } else {
+                if ($this->DEBUG) {
+                    $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.' no es un agente registrado en el callcenter, se ignora');
+                }
+            }
+        }
+
+        $this->_tmp_estadoLoginAgente = NULL;
+        $this->_tmp_actionid_agents = NULL;
     }
 
     private function _ejecutarLogoffAgente($sAgente, $a, $timestamp, $evtname)

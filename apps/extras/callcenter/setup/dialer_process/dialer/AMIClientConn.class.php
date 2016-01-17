@@ -72,14 +72,14 @@ class AMIClientConn extends MultiplexConn
         $iLongInicial = strlen($sDatos);
 
         // Encontrar los paquetes y determinar longitud de búfer procesado
-        $listaPaquetes = $this->encontrarPaquetes($sDatos);
+        $listaPaquetes =& $this->encontrarPaquetes($sDatos);
         $iLongFinal = strlen($sDatos);
 
         /* Paquetes Event se van a la lista de eventos. El paquete Response se
          * guarda individualmente. */
         $local_timestamp_received = NULL;
         foreach ($listaPaquetes as $paquete) {
-        	if (isset($paquete['Event'])) {
+            if (isset($paquete['Event'])) {
                 $e = strtolower($paquete['Event']);
                 if (!isset($this->cuentaEventos[$e]))
                     $this->cuentaEventos[$e] = 0;
@@ -91,32 +91,17 @@ class AMIClientConn extends MultiplexConn
                     $this->_listaEventos[] = $paquete;
                 }
             } elseif (isset($paquete['Response'])) {
-            	if (!is_null($this->_response)) {
-            		$this->oLogger->output("ERR: segundo Response sobreescribe primer Response no procesado: ".
+                if (!is_null($this->_response)) {
+                    $this->oLogger->output("ERR: segundo Response sobreescribe primer Response no procesado: ".
                         print_r($this->_response, 1));
-            	}
+                }
                 $this->_response = $paquete;
             } else {
-            	$this->oLogger->output("ERR: el siguiente paquete no se reconoce como Event o Response: ".
+                $this->oLogger->output("ERR: el siguiente paquete no se reconoce como Event o Response: ".
                     print_r($paquete, 1));
             }
         }
         return $iLongInicial - $iLongFinal;
-    }
-
-    private function dividirLineas(&$sDatos)
-    {
-        /* Dividir el búfer por salto de línea. Si el último elemento es vacío, el
-           búfer terminaba en \n. Luego se restaura el \n en cada línea para que se
-           cumpla que implode("", $lineas) == $sDatos */
-        $lineas = explode("\n", $sDatos);
-        if (count($lineas) > 0) {
-            for ($i = 0; $i < count($lineas) - 1; $i++) $lineas[$i] .= "\n";
-            if($lineas[count($lineas) - 1] == '')
-                array_pop($lineas);
-        }
-        assert('implode("", $lineas) == $sDatos');
-        return $lineas;
     }
 
     /**
@@ -131,58 +116,70 @@ class AMIClientConn extends MultiplexConn
      *
      * @return  array   Lista de paquetes que fueron extraídos del texto.
      */
-    private function encontrarPaquetes(&$sDatos)
+    private function & encontrarPaquetes(&$sDatos)
     {
-        $lineas = $this->dividirLineas($sDatos);
+        $len = strlen($sDatos);
+        $p_paquetes = 0;// offset de paquetes válidos
+        $p1 = 0;        // offset de línea actual a procesar
+        $p2 = FALSE;    // posición de siguiente \n o FALSE
+        $bEsperando_END_COMMAND = FALSE;
 
         $listaPaquetes = array();
         $paquete = array();
         $bIncompleto = FALSE;
-        $iLongPaquete = 0;
-        while (!$bIncompleto && count($lineas) > 0) {
-            $s = array_shift($lineas);
-            $iLongPaquete += strlen($s);
-            if (substr($s, strlen($s) - 1, 1) != "\n") {
-                /* A la última línea le falta el salto de línea - búfer termina en
-                   medio de la línea */
-                $bIncompleto = TRUE;
-            } else {
-                $s = trim($s);  // Remover salto de línea al final
-                $a = strpos($s, ':');
+        while (!$bIncompleto && $p1 < $len) {
+            $p2 = strpos($sDatos, "\r\n", $p1);
+            $bIncompleto = ($p2 === FALSE);
+            if (!$bIncompleto) {
+                $s = substr($sDatos, $p1, $p2 - $p1);
+                $p2 += 2; // saltar el \r\n
+                $a = strpos($s, ': ');
+                $sClave = $sValor = NULL;
+                $bProcesando_END_COMMAND = FALSE;
                 if ($a) {
                     $sClave = substr($s, 0, $a);
                     $sValor = substr($s, $a + 2);
-                    // Si hay una respuesta Follows, es la primera línea
-                    if (!count($paquete)) {
-                        if ($sValor == 'Follows') {
-                            $paquete['data'] = '';
-                            while (!$bIncompleto && substr($s, 0, 6) != '--END ') {
-                                if (count($lineas) <= 0) {
-                                    $bIncompleto = TRUE;
-                                } else {
-                                    $s = array_shift($lineas);
-                                    $iLongPaquete += strlen($s);
-                                    if (substr($s, 0, 6) != '--END ') {
-                                        $paquete['data'] .= $s;
-                                    }
-                                }
-                            }
-                        }
+                    if (!$bEsperando_END_COMMAND && $sClave == 'Response' && $sValor == 'Follows') {
+                        $bEsperando_END_COMMAND = TRUE;
+                    } elseif ($bEsperando_END_COMMAND && !in_array($sClave, array('Privilege', 'ActionID'))) {
+                        $sClave = $sValor = NULL;
+                        $bProcesando_END_COMMAND = TRUE;
                     }
+                } else {
+                    if ($bEsperando_END_COMMAND)
+                        $bProcesando_END_COMMAND = TRUE;
+                }
+
+                if ($bProcesando_END_COMMAND) {
+                    $sCmdEnd = "--END COMMAND--\r\n";
+                    $p2 = strpos($sDatos, $sCmdEnd, $p1);
+                    if ($p2 === FALSE) {
+                        $bIncompleto = TRUE;
+                    } else {
+                        $bEsperando_END_COMMAND = FALSE;
+                        $paquete['data'] = substr($sDatos, $p1, $p2 - $p1);
+                        $p2 += strlen($sCmdEnd);
+                        $p1 = $p2;
+                    }
+                } elseif (!is_null($sClave)) {
                     $paquete[$sClave] = $sValor;
-                } elseif ($s == "") {
+                    $p1 = $p2;
+                } elseif ($s == '') {
                     // Se ha encontrado el final de un paquete
                     if (count($paquete)) $listaPaquetes[] = $paquete;
+                    $p1 = $p2;
+                    $p_paquetes = $p1;
                     $paquete = array();
-                    $sDatos = substr($sDatos, $iLongPaquete);
-                    $iLongPaquete = 0;
+                } else {
+                    // Se ignora error de protocolo
+                    $p1 = $p2;
                 }
             }
         }
 
+        $sDatos = substr($sDatos, $p_paquetes);
         return $listaPaquetes;
     }
-
 
     // Procesar cierre de la conexión
     function procesarCierre()
@@ -226,7 +223,7 @@ class AMIClientConn extends MultiplexConn
             }
         }
         if (!is_null($this->_response)) {
-        	$r = $this->_response;
+            $r = $this->_response;
             $this->_response = NULL;
             return $r;
         }
@@ -238,7 +235,7 @@ class AMIClientConn extends MultiplexConn
 
     function connect($server, $username, $secret)
     {
-    	// Determinar servidor y puerto a usar
+        // Determinar servidor y puerto a usar
         $iPuerto = AMI_PORT;
         if(strpos($server, ':') !== false) {
             $c = explode(':', $server);
@@ -254,7 +251,7 @@ class AMIClientConn extends MultiplexConn
         $hConn = @stream_socket_client($sUrlConexion, $errno, $errstr);
         if (!$hConn) {
             $this->oLogger->output("ERR: no se puede conectar a puerto AMI en $sUrlConexion: ($errno) $errstr");
-        	return FALSE;
+            return FALSE;
         }
 
         // Leer la cabecera de Asterisk
@@ -286,9 +283,9 @@ class AMIClientConn extends MultiplexConn
 
     function finalizarConexion()
     {
-    	if (!is_null($this->sKey)) {
-    		$this->disconnect();
-    	}
+        if (!is_null($this->sKey)) {
+            $this->disconnect();
+        }
     }
 
    // *********************************************************************************************************
@@ -307,6 +304,41 @@ class AMIClientConn extends MultiplexConn
     function AbsoluteTimeout($channel, $timeout)
     {
       return $this->send_request('AbsoluteTimeout', array('Channel'=>$channel, 'Timeout'=>$timeout));
+    }
+
+    // Deprecated
+    function AgentCallbackLogin($agent,$exten,$context)
+    {
+        $this->send_request('AgentCallbackLogin', array('Agent'=>$agent, 'Exten'=>$exten, 'Context'=>$context, 'AckCall'=>'true'));
+    }
+
+    function AgentLogin($agent,$canal)
+    {
+        $this->send_request('AgentLogin', array('Agent'=>$agent,'Channel'=>$canal));
+    }
+
+    /**
+    * Agent Logoff
+    *
+    * @link http://www.voip-info.org/wiki/index.php?page=Asterisk+Manager+API+AgentLogoff
+    * @param Agent: Agent ID of the agent to login
+    */
+    function Agentlogoff($agent)
+    {
+      return $this->send_request('Agentlogoff', array('Agent'=>$agent));
+    }
+
+    /**
+     * Start enumeration of Agent channels using "Agents" event. The
+     * "AgentsComplete" event marks the end of enumeration.
+     *
+     * @param string $actionid message matching variable
+     */
+    function Agents($actionid=NULL)
+    {
+        $parameters = array();
+        if($actionid) $parameters['ActionID'] = $actionid;
+        return $this->send_request('Agents', $parameters);
     }
 
     /**
@@ -389,6 +421,12 @@ class AMIClientConn extends MultiplexConn
       return $this->send_request('ExtensionState', $parameters);
     }
 
+    function Filter($filter, $operation = 'Add')
+    {
+      $parameters = array('Filter'=>$filter, 'Operation'=>$operation);
+      return $this->send_request('Filter', $parameters);
+    }
+
    /**
     * Gets a Channel Variable
     *
@@ -416,7 +454,12 @@ class AMIClientConn extends MultiplexConn
       return $this->send_request('Hangup', array('Channel'=>$channel));
     }
 
-   /**
+    function Hold()
+    {
+      return $this->send_request('Hold',array());
+    }
+
+    /**
     * List IAX Peers
     *
     * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+IAXpeers
@@ -886,32 +929,6 @@ class AMIClientConn extends MultiplexConn
         return $this->send_request('ZapShowChannels', array('ActionID'=>$actionid));
       else
         return $this->send_request('ZapShowChannels');
-    }
-
-   /**
-    * Agent Logoff
-    *
-    * @link http://www.voip-info.org/wiki/index.php?page=Asterisk+Manager+API+AgentLogoff
-    * @param Agent: Agent ID of the agent to login
-    */
-    function Agentlogoff($agent)
-    {
-      return $this->send_request('Agentlogoff', array('Agent'=>$agent));
-    }
-
-    function Hold()
-    {
-      return $this->send_request('Hold',array());
-    }
-
-    function AgentCallbackLogin($agent,$exten,$context)
-    {
-        $this->send_request('AgentCallbackLogin', array('Agent'=>$agent, 'Exten'=>$exten, 'Context'=>$context, 'AckCall'=>'true'));
-    }
-
-    function AgentLogin($agent,$canal)
-    {
-        $this->send_request('AgentLogin', array('Agent'=>$agent,'Channel'=>$canal));
     }
 
 

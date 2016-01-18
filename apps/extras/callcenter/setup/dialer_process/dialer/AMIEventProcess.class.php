@@ -261,6 +261,10 @@ class AMIEventProcess extends TuberiaProcess
                 $this->_bReinicioAsterisk = TRUE;
             }
 
+            // Los siguientes eventos de alta frecuencia no son de interés
+            foreach (array('Newexten', 'RTCPSent', 'RTCPReceived') as $k)
+                $astman->Filter('!Event: '.$k);
+
             // Instalación de los manejadores de eventos
             foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join',
                 'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',

@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Jan 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: blacklist high-frequency events not necessary for the dialer.
+  SVN Rev[7425]
+
 * Sat Jan 16 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: implement static Agent enumeration from Asterisk in order to
   catch instances where the in-memory login status falls out of sync with the

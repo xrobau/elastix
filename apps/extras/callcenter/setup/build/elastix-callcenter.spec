@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Mon Jan 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: remove duplicate SQL in call update after generation.
+  SVN Rev[7427]
 - CHANGED: Dialer: set ticks=8 for slightly better performance.
   SVN Rev[7426]
 - CHANGED: Dialer: blacklist high-frequency events not necessary for the dialer.

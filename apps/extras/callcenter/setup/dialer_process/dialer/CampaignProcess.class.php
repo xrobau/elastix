@@ -830,15 +830,6 @@ UPDATE calls SET status = ?, datetime_originate = ?, fecha_llamada = NULL,
 WHERE id_campaign = ? AND id = ?
 SQL_LLAMADA_COLOCADA;
         $sth = $this->_db->prepare($sPeticionLlamadaColocada);
-        $sPeticionLlamadaFallida = <<<SQL_LLAMADA_COLOCADA
-UPDATE calls SET status = ?, datetime_originate = ?, fecha_llamada = NULL,
-    datetime_entry_queue = NULL, start_time = NULL, end_time = NULL,
-    duration_wait = NULL, duration = NULL, failure_cause = NULL,
-    failure_cause_txt = NULL, uniqueid = NULL, id_agent = NULL,
-    retries = retries + 1
-WHERE id_campaign = ? AND id = ?
-SQL_LLAMADA_COLOCADA;
-        $sth_fallo = $this->_db->prepare($sPeticionLlamadaFallida);
         foreach ($listaLlamadas as $tupla) {
             $listaVars = array(
                 'ID_CAMPAIGN'   =>  $infoCampania['id'],
@@ -907,7 +898,7 @@ SQL_LLAMADA_COLOCADA;
                 $this->_log->output(
                     "ERR: (campania {$infoCampania['id']} cola {$infoCampania['queue']}) ".
                     "no se puede llamar a número - ".print_r($resultado, TRUE));
-                $sth_fallo->execute(array('Failure', date('Y-m-d H:i:s', $iTimestampInicioOriginate),
+                $sth->execute(array('Failure', date('Y-m-d H:i:s', $iTimestampInicioOriginate),
                     $infoCampania['id'], $tupla['id']));
                 $this->_tuberia->msg_AMIEventProcess_avisoInicioOriginate($tupla['actionid'], NULL);
             }

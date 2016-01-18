@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 4.0.0
-Release: 3
+Release: 5
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -389,6 +389,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Jan 18 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Thu Jan  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: block kernel updates. The CentOS 7 kernel ABI is changing
   too quickly to follow reliably and continuously breaks the DAHDI modules. At
@@ -404,6 +408,10 @@ rm -rf $RPM_BUILD_ROOT
   SVN Rev[7395]
 - FIXED: Framework: reverse LIMIT filter on SQL because of SQLITE errors.
   SVN Rev[7394]
+
+* Mon Dec 07 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-4
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
 
 * Mon Nov 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: relax icon file validation in paloSantoGrid class. The
@@ -459,6 +467,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[7353]
 
 * Wed Nov 10 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: introduce methods paloACL::getUserProfileProperty() and

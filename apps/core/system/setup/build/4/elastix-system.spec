@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -181,6 +181,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jan 18 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: switch to JustGage for Hard Disk applet.
   SVN Rev[7361]

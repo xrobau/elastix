@@ -23,6 +23,8 @@ Requires: cyrus-sasl-plain
 
 Requires: /usr/sbin/saslpasswd2
 
+Prereq: /usr/sbin/saslauthd
+
 %description
 Elastix Module Email
 
@@ -204,6 +206,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Jan 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Email_admin: post-installation requires saslauthd service.
+  SVN Rev[7422]
+
 * Mon Dec 21 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Email Accounts: saslpasswd2 is required for Email Accounts.
   SVN Rev[7403]

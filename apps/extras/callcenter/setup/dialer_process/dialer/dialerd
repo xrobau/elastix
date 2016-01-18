@@ -27,7 +27,7 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: dialerd,v 1.2 2008/09/08 18:29:36 alex Exp $ */
-declare(ticks=1);
+declare(ticks=8);
 ini_set('memory_limit', -1);        // Permitir al programa usar toda la memoria que necesite
 ini_set('display_errors', 0);       // Impedir que los errores de STDERR se copien en STDOUT
 ini_set('error_reporting', E_ALL & ~E_STRICT);  // Mostrar advertencias además de errores
@@ -122,16 +122,16 @@ function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
     // Intentar cargar el archivo de configuración
     $infoConfig = parse_ini_file($sArchivoConfig, TRUE);
     if (count($infoConfig) == 0) {
-        if (function_exists('error_get_last')) 
+        if (function_exists('error_get_last'))
             $e = error_get_last();
         else $e = array('message' => 'Failed to open file, error_get_last() not available.');
         die("Could not load configuration file: $e[message]\n");
     }
     if (!isset($infoConfig['basedir'])) $infoConfig['basedir'] = $sRutaTrabajo;
-    
+
     // Esperar hasta que finalice la instancia previa
     finalizarInstanciaPrevia($sArchivoPID);
-    
+
     // Si no se indica depuración del programa, se vuelve un demonio
     $bDepuracion = FALSE;
     if (is_array($paramConfig) && isset($paramConfig[0]) && is_array($paramConfig[0])) {
@@ -164,7 +164,7 @@ function main($paramConfig, $sDescDemonio, $sNombreDemonio /* , ... */)
 
         // Conectar sistema de mensajes de error de PHP al log
         $old_errorHandler = set_error_handler('daemonErrorHandler');
-        
+
         $sBannerLog = str_pad($sDescDemonio, 40, ' ', STR_PAD_BOTH);
         $sBanner = <<<BANNEREND
 Main log opened correctly
@@ -203,7 +203,7 @@ BANNEREND;
                         $iRcvSignal = pcntl_wifsignaled($iStatus) ? pcntl_wtermsig($iStatus) : 0;
                         if ($iRcvSignal != 0) { $oMainLog->output("WARNING: $sTarea terminated due to signal $iRcvSignal..."); }
                         if ($iErrCode != 0) { $oMainLog->output("WARNING: $sTarea returned error code $iErrCode..."); }
-                        $tablaProcesos[$sTarea] = NULL;                        
+                        $tablaProcesos[$sTarea] = NULL;
                     }
                 }
 
@@ -212,11 +212,11 @@ BANNEREND;
                     $tablaProcesos[$sTarea] = iniciarTarea($sNombreDemonio, $sTarea, $infoConfig, $oMainLog);
                 }
             }
-            
-            // Revisar si existe señal que indique finalización del programa 
-            if (!is_null($gsNombreSignal) && 
+
+            // Revisar si existe señal que indique finalización del programa
+            if (!is_null($gsNombreSignal) &&
             	in_array($gsNombreSignal, array(SIGTERM, SIGINT, SIGQUIT, SIGHUP))) {
-            
+
                 // Mandar la señal a todos los procesos controlados
                 $oMainLog->output("PID = ".posix_getpid().", $sNombreDemonio received signal #$gsNombreSignal, ".
                 	(($gsNombreSignal == SIGHUP) ? 'switching logs' : 'terminating')."...");
@@ -263,7 +263,7 @@ BANNEREND;
 
     // Borrar el PID del proceso actual
     borrarPID($sArchivoPID);
-    
+
 }
 
 // Implementación de daemon() usando pcntl_fork()
@@ -287,8 +287,8 @@ function daemon($nochdir, $noclose)
     }
 }
 
-/* Si existe el archivo de PID indicado, se manda una señal SIGINT y se espera 
-   a que el otro programa finalice 
+/* Si existe el archivo de PID indicado, se manda una señal SIGINT y se espera
+   a que el otro programa finalice
  */
 function finalizarInstanciaPrevia($sNombrePID)
 {
@@ -300,7 +300,7 @@ function finalizarInstanciaPrevia($sNombrePID)
         if (count($contenido) > 0 && preg_match('/^(\d+)/', $contenido[0], $regs)) {
             $iPid = $regs[1];
             if (posix_kill($iPid, 0)) {
-                /* El siguiente método es específico de Linux y no funcionará 
+                /* El siguiente método es específico de Linux y no funcionará
                    con otro OS. Se verifica si el proceso fue iniciado con PHP
                    y si contiene como primer parámetro la cadena  */
                 $bValidoPID = TRUE;
@@ -352,8 +352,8 @@ function manejadorPrimarioSignal($signo)
     $gsNombreSignal = $signo;
 }
 
-/* Iniciar una tarea específica en un proceso separado. Para el proceso padre, 
-   devuelve el PID del proceso hijo. 
+/* Iniciar una tarea específica en un proceso separado. Para el proceso padre,
+   devuelve el PID del proceso hijo.
  */
 function iniciarTarea($sNombreDemonio, $sNombreTarea, $infoConfig, &$oMainLog)
 {
@@ -364,7 +364,7 @@ function iniciarTarea($sNombreDemonio, $sNombreTarea, $infoConfig, &$oMainLog)
     // Verificar que el nombre de la clase que implementa el proceso es válido
     if (!class_exists($sNombreTarea)) {
         $oMainLog->output("FATAL: (internal) Invalid process classname '$sNombreTarea'");
-        die("(internal) Invalid process classname '$sNombreTarea'\n");    
+        die("(internal) Invalid process classname '$sNombreTarea'\n");
     }
 
     // Iniciar tarea en proceso separado
@@ -390,7 +390,7 @@ function iniciarTarea($sNombreDemonio, $sNombreTarea, $infoConfig, &$oMainLog)
                 $oMainLog->output("ERR: while creating $sNombreTarea - uncaught exception: ".$ex->getMessage());
                 die("ERR: while instantiating $sNombreTarea - ".$ex->getMessage()."\n");
             }
-            
+
             // Realizar inicialización adicional de la tarea
             try {
                 $bContinuar = $oProceso->inicioPostDemonio($infoConfig, $oMainLog);
@@ -399,7 +399,7 @@ function iniciarTarea($sNombreDemonio, $sNombreTarea, $infoConfig, &$oMainLog)
                 $bContinuar = FALSE;
                 $oMainLog->output("ERR: while initializing $sNombreTarea - uncaught exception: ".$ex->getMessage());
             }
-            
+
             // Continuar la tarea hasta que se finalice
             while ($bContinuar) {
                 // Ejecutar el procedimiento de trabajo del demonio
@@ -411,9 +411,9 @@ function iniciarTarea($sNombreDemonio, $sNombreTarea, $infoConfig, &$oMainLog)
                         $oMainLog->output("ERR: while running $sNombreTarea - uncaught exception: ".$ex->getMessage());
                     }
                 }
-                
+
                 // Revisar si existe señal que indique finalización del programa
-                if (!is_null($gsNombreSignal)) {                    
+                if (!is_null($gsNombreSignal)) {
                     if (in_array($gsNombreSignal, array(SIGTERM, SIGINT, SIGQUIT))) {
                     	$oMainLog->output("PID = ".posix_getpid().", process received signal $gsNombreSignal, terminating...");
                     	$bContinuar = FALSE;

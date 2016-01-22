@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Jan 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign In: also delete from call_recording as done in outgoing
+  campaigns. Fixes Elastix bug #2436.
+  SVN Rev[7428]
+
 * Mon Jan 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: remove duplicate SQL in call update after generation.
   SVN Rev[7427]

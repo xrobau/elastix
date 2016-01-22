@@ -53,7 +53,7 @@ class paloSantoIncomingCampaign
             }
         }
     }
-    
+
     function activar_campaign($id_campaign, $sNuevoEstado)
     {
     	if (!in_array($sNuevoEstado, array('A', 'I'))) {
@@ -61,7 +61,7 @@ class paloSantoIncomingCampaign
     		return FALSE;
     	}
         $r = $this->_DB->genQuery(
-            'UPDATE campaign_entry SET estatus = ? WHERE id = ?', 
+            'UPDATE campaign_entry SET estatus = ? WHERE id = ?',
             array($sNuevoEstado, $id_campaign));
         if (!$r) {
         	$this->errMsg = $this->_DB->errMsg;
@@ -88,7 +88,7 @@ class paloSantoIncomingCampaign
             return NULL;
         }
         $tupla = $this->_DB->getFirstRowQuery(
-            'SELECT COUNT(*) AS N FROM campaign_entry'.((count($listaWhere) > 0) ? ' WHERE '.implode(' AND ', $listaWhere) : ''), 
+            'SELECT COUNT(*) AS N FROM campaign_entry'.((count($listaWhere) > 0) ? ' WHERE '.implode(' AND ', $listaWhere) : ''),
             TRUE, $paramSQL);
         if (!is_array($tupla)) {
             $this->errMsg = $this->_DB->errMsg;
@@ -97,11 +97,11 @@ class paloSantoIncomingCampaign
         return $tupla['N'];
     }
 
-    function getCampaigns($limit, $offset, $id_campaign, $sEstado = 'all') 
+    function getCampaigns($limit, $offset, $id_campaign, $sEstado = 'all')
     {
         $listaWhere = array('ce.id_queue_call_entry = qce.id');
         $paramSQL = array();
-        
+
         // Verificación de estado para filtrar
         switch ($sEstado) {
         case 'all':
@@ -129,12 +129,12 @@ class paloSantoIncomingCampaign
         // Construcción de la sentencia SQL
         $sWhere = implode(' AND ', $listaWhere);
         $sPeticionSQL = <<<SQL_CAMPANIAS
-SELECT ce.id, ce.name, qce.queue, ce.datetime_init, ce.datetime_end, 
-    ce.daytime_init, ce.daytime_end, ce.script, 
+SELECT ce.id, ce.name, qce.queue, ce.datetime_init, ce.datetime_end,
+    ce.daytime_init, ce.daytime_end, ce.script,
     COUNT(call_entry.id) AS num_completadas, NULL as promedio, ce.estatus,
-    ce.id_form, ce.id_url 
-FROM (campaign_entry ce, queue_call_entry qce) 
-LEFT JOIN (call_entry) ON (ce.id = call_entry.id_campaign) 
+    ce.id_form, ce.id_url
+FROM (campaign_entry ce, queue_call_entry qce)
+LEFT JOIN (call_entry) ON (ce.id = call_entry.id_campaign)
 WHERE $sWhere GROUP BY ce.id ORDER BY ce.datetime_init, ce.daytime_init
 SQL_CAMPANIAS;
         if (!is_null($limit)) {
@@ -151,7 +151,7 @@ SQL_CAMPANIAS;
     }
 
     /**
-     * Procedimiento para crear una nueva campaña, vacía e inactiva. Esta campaña 
+     * Procedimiento para crear una nueva campaña, vacía e inactiva. Esta campaña
      * debe luego llenarse con números de teléfono en sucesivas operaciones.
      *
      * @param   $sNombre            Nombre de la campaña
@@ -162,7 +162,7 @@ SQL_CAMPANIAS;
      * @param   $sHoraFinal         Hora del día (HH:MM militar) en que se debe dejar de hacer llamadas
      * @param   $script             Diálogo a asociar a esta campaña
      * @param   $id_form            ID del formulario a asociar a esta campaña, o NULL
-     * 
+     *
      * @return  int    El ID de la campaña recién creada, o NULL en caso de error
      */
     function createEmptyCampaign($sNombre, $sQueue, $sFechaInicial, $sFechaFinal,
@@ -232,7 +232,7 @@ SQL_CAMPANIAS;
         // Obtener el ID de la cola entrante correspondiente al número
         $idQueue = NULL;
         $tupla = $this->_DB->getFirstRowQuery(
-            'SELECT id FROM queue_call_entry WHERE queue = ? AND estatus = "A"', 
+            'SELECT id FROM queue_call_entry WHERE queue = ? AND estatus = "A"',
             FALSE, array($sQueue));
         if (!is_array($tupla) || count($tupla) <= 0) {
         	// No se encuentra la cola indicada
@@ -242,7 +242,7 @@ SQL_CAMPANIAS;
         $idQueue = $tupla[0];
 
         // Construir y ejecutar la orden de inserción SQL
-        $sPeticionSQL = 
+        $sPeticionSQL =
             'INSERT INTO campaign_entry (name, id_queue_call_entry, '.
                 'id_form, datetime_init, datetime_end, daytime_init, '.
                 'daytime_end, estatus, script, id_url) '.
@@ -255,7 +255,7 @@ SQL_CAMPANIAS;
             $this->errMsg = $this->_DB->errMsg;
             return NULL;
         }
-        
+
         // Leer el ID insertado por la operación
         $sPeticionSQL = 'SELECT LAST_INSERT_ID()';
         $tupla =& $this->_DB->getFirstRowQuery($sPeticionSQL);
@@ -291,11 +291,11 @@ SQL_CAMPANIAS;
         }
         return TRUE;
     }
-    
+
     function updateCampaignForm($id_campania,$formularios)
     {
     	if (!$this->_DB->genQuery(
-                'DELETE FROM campaign_form_entry WHERE id_campaign = ?', 
+                'DELETE FROM campaign_form_entry WHERE id_campaign = ?',
                 array($id_campania))) {
     		$this->errMsg = $this->_DB->errMsg;
             return FALSE;
@@ -306,7 +306,7 @@ SQL_CAMPANIAS;
     function obtenerCampaignForm($id_campania)
     {
     	$recordset = $this->_DB->fetchTable(
-            'SELECT id_form FROM campaign_form_entry WHERE id_campaign = ?', 
+            'SELECT id_form FROM campaign_form_entry WHERE id_campaign = ?',
             FALSE, array($id_campania));
         if (!is_array($recordset)) {
             $this->errMsg = $this->_DB->errMsg;
@@ -406,7 +406,7 @@ SQL_CAMPANIAS;
         // Obtener el ID de la cola entrante correspondiente al número
         $idQueue = NULL;
         $tupla = $this->_DB->getFirstRowQuery(
-            'SELECT id FROM queue_call_entry WHERE queue = ? AND estatus = "A"', 
+            'SELECT id FROM queue_call_entry WHERE queue = ? AND estatus = "A"',
             FALSE, array($sQueue));
         if (!is_array($tupla) || count($tupla) <= 0) {
             // No se encuentra la cola indicada
@@ -416,7 +416,7 @@ SQL_CAMPANIAS;
         $idQueue = $tupla[0];
 
         // Construir y ejecutar la orden de inserción SQL
-        $sPeticionSQL = 
+        $sPeticionSQL =
             'UPDATE campaign_entry SET name = ?, id_queue_call_entry = ?, '.
                 'id_form = ?, datetime_init = ?, datetime_end = ?, '.
                 'daytime_init = ?, daytime_end = ?, script = ?, id_url = ? '.
@@ -431,18 +431,19 @@ SQL_CAMPANIAS;
         return true;
     }
 
-    function delete_campaign($id_campaign) 
+    function delete_campaign($id_campaign)
     {
         $listaSQL = array(
             // TODO: si se implementan contactos por campaña, meter SQL aquí
             'DELETE FROM campaign_form_entry WHERE id_campaign = ?',
+            'DELETE FROM call_recording WHERE id_call_incoming IN (SELECT id from call_entry WHERE id_campaign = ?)',
             'DELETE FROM form_data_recolected_entry WHERE id_call_entry IN (SELECT id from call_entry WHERE id_campaign = ?)',
             'DELETE call_progress_log FROM call_progress_log, call_entry '.
                 'WHERE call_progress_log.id_call_incoming = call_entry.id AND call_entry.id_campaign = ?',
             'DELETE FROM call_entry WHERE id_campaign = ?',
             'DELETE FROM campaign_entry WHERE id = ?'
         );
-        
+
         $this->_DB->beginTransaction();
         foreach ($listaSQL as $sql) {
             $r = $this->_DB->genQuery($sql, array($id_campaign));
@@ -457,7 +458,7 @@ SQL_CAMPANIAS;
     }
 
     /**
-     * Procedimiento para leer la totalidad de los datos de una campaña terminada, 
+     * Procedimiento para leer la totalidad de los datos de una campaña terminada,
      * incluyendo todos los datos recogidos en los diversos formularios asociados.
      *
      * @param   object  $pDB            Conexión paloDB a la base de datos call_center
@@ -511,7 +512,7 @@ SELECT
     c.duration          AS duracion,
     c.uniqueid          AS uniqueid
 FROM call_entry c
-LEFT JOIN agent a 
+LEFT JOIN agent a
     ON c.id_agent = a.id
 WHERE
     c.id_campaign = ? AND
@@ -564,7 +565,7 @@ SELECT
     contact.name,
     contact.apellido
 FROM call_entry, contact
-WHERE call_entry.id_contact = contact.id AND call_entry.id_campaign = ? 
+WHERE call_entry.id_contact = contact.id AND call_entry.id_campaign = ?
     AND (call_entry.status='terminada' OR call_entry.status='abandonada')
 SQL_ATRIBUTOS;
         $datosAtributos = $this->_DB->fetchTable($sqlAtributos, TRUE, array($id_campaign));
@@ -591,7 +592,7 @@ SQL_ATRIBUTOS;
 
         // Leer los datos de los formularios asociados a esta campaña
         $sqlFormularios = <<<SQL_FORMULARIOS
-(SELECT 
+(SELECT
     f.id        AS id_form,
     ff.id       AS id_form_field,
     ff.etiqueta AS campo_nombre,
@@ -600,7 +601,7 @@ SQL_ATRIBUTOS;
 FROM campaign_entry ce, form f, form_field ff
 WHERE ce.id_form = f.id AND f.id = ff.id_form AND ff.tipo <> 'LABEL' AND ce.id = ?)
 UNION DISTINCT
-(SELECT 
+(SELECT
     f.id        AS id_form,
     ff.id       AS id_form_field,
     ff.etiqueta AS campo_nombre,

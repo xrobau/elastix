@@ -101,6 +101,7 @@ chmod +x setup/etc/init.d/festival
 mv setup/etc/asterisk/sip_notify_custom_elastix.conf      $RPM_BUILD_ROOT/etc/asterisk/
 mv setup/etc/init.d/festival                              $RPM_BUILD_ROOT/etc/init.d/
 mv setup/usr/share/elastix/privileged/*                   $RPM_BUILD_ROOT/usr/share/elastix/privileged/
+mv setup/etc/httpd/                                       $RPM_BUILD_ROOT/etc/
 rmdir setup/etc/init.d
 rmdir setup/etc/asterisk
 rmdir setup/usr/share/elastix/privileged
@@ -289,6 +290,8 @@ fi
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
 /usr/share/elastix/module_installer/*
+%defattr(644, root, root)
+%config(noreplace) /etc/httpd/conf.d/*
 %defattr(755, root, root)
 /etc/init.d/festival
 /bin/asterisk.reload
@@ -297,6 +300,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Jan 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: pbx - install httpd mod_proxy_wstunnel configuration to expose SIP
+  websocket URL through the HTTPS space.
+  SVN Rev[7429]
+
 * Wed Nov 11 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-3
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

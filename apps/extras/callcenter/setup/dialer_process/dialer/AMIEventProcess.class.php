@@ -1019,7 +1019,7 @@ class AMIEventProcess extends TuberiaProcess
 
                 $this->_log->output('INFO: deslogoneando a '.$a->channel.' debido a inactividad...');
                 $a->resetTimeout();
-                $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->colas_actuales);
+                $a->forzarLogoffAgente($this->_ami, $this->_log);
             }
             if (!is_null($a->logging_inicio) && time() - $a->logging_inicio > 5 * 60) {
                 $this->_log->output('ERR: proceso de login trabado para '.$a->channel.', se indica fallo...');
@@ -2387,7 +2387,7 @@ Uniqueid: 1429642067.241008
             	// La extensión usada para login se ha desregistrado - deslogonear al agente
                 $this->_log->output('INFO: '.__METHOD__.' se detecta desregistro de '.
                     $params['Peer'].' - deslogoneando '.$a->channel.'...');
-                $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->colas_actuales);
+                $a->forzarLogoffAgente($this->_ami, $this->_log);
             }
     	}
     }
@@ -2640,7 +2640,7 @@ Uniqueid: 1429642067.241008
                         $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
                             ' está deslogoneado en dialer pero en estado '.$sAgentStatus.','.
                             ' se deslogonea en Asterisk...');
-                        $this->_tuberia->msg_CampaignProcess_forzarLogoffAgente($a->type, $a->number, $a->colas_actuales);
+                        $a->forzarLogoffAgente($this->_ami, $this->_log);
                     }
                 }
             } else {

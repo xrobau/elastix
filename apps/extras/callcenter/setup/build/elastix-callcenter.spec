@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Jan 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: by using asynchronous AMI requests, forced agent logoff is
+  now reimplemented without bouncing off CampaignProcess.
+  SVN Rev[7431]
+
 * Mon Jan 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: big rewrite of AMIClientConn. This rewrite allows for
   asynchronous AMI requests. Instead of waiting for the response, the code can

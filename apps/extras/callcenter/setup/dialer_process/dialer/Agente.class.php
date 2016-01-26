@@ -589,5 +589,37 @@ class Agente
             $this->resumenSeguimientoLlamada(),
             $colasAtencion);
     }
+
+    // Iniciar el proceso de logoff desde el punto de vista de Asterisk
+    public function forzarLogoffAgente($ami, $log)
+    {
+        if ($this->type == 'Agent') {
+            $ami->asyncAgentlogoff(
+                array($this, '_cb_Agentlogoff'),
+                array($log),
+                $this->number);
+        } else {
+            foreach ($this->colas_actuales as $q) {
+                $ami->asyncQueueRemove(
+                    array($this, '_cb_QueueRemove'),
+                    array($log, $q),
+                    $q, $this->channel);
+            }
+        }
+    }
+
+    public function _cb_Agentlogoff($r, $log)
+    {
+        if ($r['Response'] != 'Success') {
+            $this->_log->output('ERR: No se puede completar Agentlogoff('.$this->number.'): '.$r['Message']);
+        }
+    }
+
+    public function _cb_QueueRemove($r, $log, $q)
+    {
+        if ($r['Response'] != 'Success') {
+            $this->_log->output("ERR: falla al quitar {$this->channel} de cola {$q}: ".print_r($r, TRUE));
+        }
+    }
 }
 ?>

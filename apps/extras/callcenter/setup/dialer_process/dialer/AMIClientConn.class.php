@@ -57,6 +57,132 @@ class AMIClientConn extends MultiplexConn
     */
     private $event_handlers;
 
+    // Lista de peticiones AMI encoladas con su respectivo callback.
+    private $_queue_requests = array();
+    private $_sync_wait = FALSE;
+
+    // Definiciones de los comandos AMI conocidos
+    private $_ami_cmds = array(
+        'AbsoluteTimeout' =>
+            array('Channel' => TRUE, 'Timeout' => TRUE),
+        'AgentCallbackLogin' =>
+            array('Agent' => TRUE, 'Exten' => TRUE, 'Context' => TRUE,
+                'AckCall' => array('required' => FALSE, 'default' => 'true')),
+        'AgentLogin' =>
+            array('Agent'=> TRUE, 'Channel' => TRUE),
+        'Agentlogoff' =>
+            array('Agent' => TRUE),
+        'Agents' =>
+            array('ActionID' => FALSE),
+        'Atxfer' =>
+            array('Channel' => TRUE, 'Exten' => TRUE, 'Priority' => TRUE, 'Context' => TRUE),
+        'ChangeMonitor' =>
+            array('Channel' => TRUE, 'File' => TRUE),
+        'Command' =>
+            array('Command' => TRUE, 'ActionID' => FALSE),
+        'CoreSettings' =>
+            array(),
+        'CoreShowChannels' =>
+            array('ActionID' => FALSE),
+        'CoreStatus' =>
+            array(),
+        'DAHDIShowChannels' =>
+            array('DAHDIChannel' => FALSE, 'ActionID' => FALSE),
+        'Events' =>
+            array('EventMask' => TRUE),
+        'ExtensionState' =>
+            array('Exten' => TRUE, 'Context' => TRUE, 'ActionID' => FALSE),
+        'Filter' =>
+            array('Filter' => TRUE, 'Operation' => array('required' => FALSE, 'default' => 'Add')),
+        'GetVar' =>
+            array('Channel' => TRUE, 'Variable' => TRUE, 'ActionID' => FALSE),
+        'Hangup' =>
+            array('Channel' => TRUE),
+        //'Hold' =>
+        //    array(),
+        'IAXPeers' =>
+            array(),
+        'IAXpeerlist' =>
+            array('ActionID' => FALSE),
+        'ListCommands' =>
+            array('ActionID' => FALSE),
+        'Login' =>
+            array('Username' => TRUE, 'Secret' => TRUE),
+        'Logoff' =>
+            array(),
+        'MailboxCount' =>
+            array('Mailbox' => TRUE, 'ActionID' => FALSE),
+        'MailboxStatus' =>
+            array('Mailbox' => TRUE, 'ActionID' => FALSE),
+        'MeetmeList' =>
+            array('Conference' => FALSE, 'ActionID' => FALSE),
+        'MixMonitor' =>
+            array('Channel' => TRUE, 'File' => FALSE, 'Options' => FALSE, 'ActionID' => FALSE),
+        'MixMonitorMute' =>
+            array('Channel' => TRUE,
+                'State' => array('required' => TRUE, 'cast' => 'bool'),
+                'Direction' => array('required' => FALSE, 'default' => 'read'),
+                'ActionID' => FALSE),
+        'Monitor' =>
+            array('Channel' => TRUE, 'File' => FALSE, 'Format' => FALSE,
+                'Mix' => array('depends' => 'File', 'required' => TRUE, 'default' => FALSE, 'cast' => 'bool'),
+            ),
+        'Originate' =>
+            array('Channel' => TRUE, 'Exten' => FALSE, 'Context' => FALSE,
+                'Priority' => FALSE, 'Application' => FALSE, 'Data' => FALSE,
+                'Timeout' => FALSE, 'CallerID' => FALSE, 'Variable' => FALSE,
+                'Account' => FALSE, 'Async' => array('required' => FALSE, 'cast' => 'bool'),
+                'ActionID' => FALSE),
+        'ParkedCalls' =>
+            array('ActionID' => FALSE),
+        'Ping' =>
+            array(),
+        'QueueAdd' =>
+            array('Queue' => TRUE, 'Interface' => TRUE,
+                'Penalty' => array('required' => FALSE, 'default' => 0, 'cast' => 'int'),
+                'MemberName' => FALSE,
+                'Paused' => array('required' => FALSE, 'default' => FALSE, 'cast' => 'bool')),
+        'QueueRemove' =>
+            array('Queue' => TRUE, 'Interface' => TRUE),
+        'Queues' =>
+            array(),
+        'QueuePause' =>
+            array('Queue' => FALSE, 'Interface' => TRUE,
+                'Paused' => array('required' => FALSE, 'default' => TRUE, 'cast' => 'bool')),
+        'QueueStatus' =>
+            array('Queue' => FALSE, 'ActionID' => FALSE),
+        'Redirect' =>
+            array('Channel' => TRUE, 'ExtraChannel' => TRUE, 'Exten' => TRUE,
+                'Context' => TRUE, 'Priority' => TRUE),
+        'SetCDRUserField' =>
+            array('UserField' => TRUE, 'Channel' => TRUE, 'Append' => FALSE),
+        'SetVar' =>
+            array('Channel' => TRUE, 'Variable' => TRUE, 'Value' => TRUE),
+        'SIPnotify' =>
+            array('Channel' => TRUE, 'Variable' => array('required' => TRUE, 'cast' => 'sipnotify'),
+                'ActionID' => FALSE),
+        'SIPPeers' =>
+            array('ActionID' => FALSE),
+        'Status' =>
+            array('Channel' => TRUE, 'ActionID' => FALSE),
+        'StopMixMonitor' =>
+            array('Channel' => TRUE, 'MixMonitorID' => FALSE, 'ActionID' => FALSE),
+        'StopMonitor' =>
+            array('Channel' => TRUE),
+        'ZapDialOffhook' =>
+            array('ZapChannel' => TRUE, 'Number' => TRUE),
+        'ZapDNDoff' =>
+            array('ZapChannel' => TRUE),
+        'ZapDNDon' =>
+            array('ZapChannel' => TRUE),
+        'ZapHangup' =>
+            array('ZapChannel' => TRUE),
+        'ZapTransfer' =>
+            array('ZapChannel' => TRUE),
+        'ZapShowChannels' =>
+            array('ActionID' => FALSE),
+    );
+
     function AMIClientConn($dialSrv, $oMainLog)
     {
         $this->oLogger = $oMainLog;
@@ -91,16 +217,13 @@ class AMIClientConn extends MultiplexConn
                     $this->_listaEventos[] = $paquete;
                 }
             } elseif (isset($paquete['Response'])) {
-                if (!is_null($this->_response)) {
-                    $this->oLogger->output("ERR: segundo Response sobreescribe primer Response no procesado: ".
-                        print_r($this->_response, 1));
-                }
-                $this->_response = $paquete;
+                $this->_listaEventos[] = $paquete;
             } else {
                 $this->oLogger->output("ERR: el siguiente paquete no se reconoce como Event o Response: ".
                     print_r($paquete, 1));
             }
         }
+
         return $iLongInicial - $iLongFinal;
     }
 
@@ -202,25 +325,24 @@ class AMIClientConn extends MultiplexConn
         }
     }
 
-    // Implementación de send_request para compatibilidad con phpagi-asmanager
-    private function send_request($action, $parameters=array())
-    {
-        if (!is_null($this->sKey)) {
-            $req = "Action: $action\r\n";
-            foreach($parameters as $var => $val) $req .= "$var: $val\r\n";
-            $req .= "\r\n";
-            $this->multiplexSrv->encolarDatosEscribir($this->sKey, $req);
-            return $this->wait_response();
-        } else return NULL;
-    }
-
     // Implementación de wait_response para compatibilidad con phpagi-asmanager
     private function wait_response()
     {
         while (!is_null($this->sKey) && is_null($this->_response)) {
-            if (!$this->multiplexSrv->procesarActividad()) {
-                usleep(100000);
+            $this->multiplexSrv->procesarActividad(1);
+
+            /* Se requiere recorrer la lista de eventos recogiendo los
+             * paquetes Response en el orden que fueron insertados, para
+             * mantener el orden de procesamiento. */
+            $t = array();
+            foreach ($this->_listaEventos as $paquete) {
+                if (isset($paquete['Event'])) {
+                    $t[] = $paquete;
+                } else {
+                    $this->process_event($paquete);
+                }
             }
+            $this->_listaEventos = $t;
         }
         if (!is_null($this->_response)) {
             $r = $this->_response;
@@ -228,8 +350,8 @@ class AMIClientConn extends MultiplexConn
             return $r;
         }
         if (is_null($this->sKey)) {
-            $this->oLogger->output("ERR: conexión AMI cerrada mientras se esperaba respuesta.");
-        	return NULL;
+            $this->oLogger->output('ERR: '.__METHOD__.' conexión AMI cerrada mientras se esperaba respuesta.');
+            return NULL;
         }
     }
 
@@ -260,13 +382,12 @@ class AMIClientConn extends MultiplexConn
             $this->oLogger->output("ERR: No se ha recibido la cabecera de Asterisk Manager");
             return false;
         }
-        //$this->oLogger->output("DEBUG: cabecera recibida es: $str");
 
         // Registrar el socket con el objeto de conexiones
         $this->multiplexSrv->agregarNuevaConexion($this, $hConn);
 
         // Iniciar login con Asterisk
-        $res = $this->send_request('login', array('Username'=>$username, 'Secret'=>$secret));
+        $res = $this->Login($username, $secret);
         if($res['Response'] != 'Success') {
             $this->oLogger->output("ERR: Fallo en login de AMI.");
             $this->disconnect();
@@ -277,7 +398,7 @@ class AMIClientConn extends MultiplexConn
 
     function disconnect()
     {
-        $this->logoff();
+        $this->Logoff();
         $this->multiplexSrv->marcarCerrado($this->sKey);
     }
 
@@ -292,649 +413,152 @@ class AMIClientConn extends MultiplexConn
    // **                       COMMANDS                                                                      **
    // *********************************************************************************************************
 
-   /**
-    * Set Absolute Timeout
-    *
-    * Hangup a channel after a certain time.
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+AbsoluteTimeout
-    * @param string $channel Channel name to hangup
-    * @param integer $timeout Maximum duration of the call (sec)
-    */
-    function AbsoluteTimeout($channel, $timeout)
+    private function _die_log($msg)
     {
-      return $this->send_request('AbsoluteTimeout', array('Channel'=>$channel, 'Timeout'=>$timeout));
+        if (!is_null($this->oLogger))
+            $this->oLogger->output('FATAL: '.$msg);
+        die("$msg\n");
     }
 
-    // Deprecated
-    function AgentCallbackLogin($agent,$exten,$context)
+    private function _ami_encode_param($v, $cast = NULL)
     {
-        $this->send_request('AgentCallbackLogin', array('Agent'=>$agent, 'Exten'=>$exten, 'Context'=>$context, 'AckCall'=>'true'));
-    }
-
-    function AgentLogin($agent,$canal)
-    {
-        $this->send_request('AgentLogin', array('Agent'=>$agent,'Channel'=>$canal));
-    }
-
-    /**
-    * Agent Logoff
-    *
-    * @link http://www.voip-info.org/wiki/index.php?page=Asterisk+Manager+API+AgentLogoff
-    * @param Agent: Agent ID of the agent to login
-    */
-    function Agentlogoff($agent)
-    {
-      return $this->send_request('Agentlogoff', array('Agent'=>$agent));
-    }
-
-    /**
-     * Start enumeration of Agent channels using "Agents" event. The
-     * "AgentsComplete" event marks the end of enumeration.
-     *
-     * @param string $actionid message matching variable
-     */
-    function Agents($actionid=NULL)
-    {
-        $parameters = array();
-        if($actionid) $parameters['ActionID'] = $actionid;
-        return $this->send_request('Agents', $parameters);
-    }
-
-    /**
-     * Initiate an attended transfer
-     *
-     * @param string $channel The transferer channel's name
-     * @param string $exten The extension to transfer to
-     * @param string $context The context to transfer to
-     * @param string $priority The priority to transfer to
-     */
-    function Atxfer($channel, $exten, $context, $priority)
-    {
-      return $this->send_request('Atxfer', array('Channel'=>$channel, 'Exten'=>$exten, 'Priority'=>$priority, 'Context'=>$context));
-    }
-
-   /**
-    * Change monitoring filename of a channel
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ChangeMonitor
-    * @param string $channel the channel to record.
-    * @param string $file the new name of the file created in the monitor spool directory.
-    */
-    function ChangeMonitor($channel, $file)
-    {
-      return $this->send_request('ChangeMonitor', array('Channel'=>$channel, 'File'=>$file));
-    }
-
-   /**
-    * Execute Command
-    *
-    * @example examples/sip_show_peer.php Get information about a sip peer
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Command
-    * @link http://www.voip-info.org/wiki-Asterisk+CLI
-    * @param string $command
-    * @param string $actionid message matching variable
-    */
-    function Command($command, $actionid=NULL)
-    {
-      $parameters = array('Command'=>$command);
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('Command', $parameters);
-    }
-
-    /**
-     * List status of all active channels
-     *
-     * @param string $actionid
-     */
-    function CoreShowChannels($actionid=NULL)
-    {
-      if($actionid)
-        return $this->send_request('CoreShowChannels', array('ActionID'=>$actionid));
-      else
-        return $this->send_request('CoreShowChannels');
-    }
-
-   /**
-    * Enable/Disable sending of events to this manager
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Events
-    * @param string $eventmask is either 'on', 'off', or 'system,call,log'
-    */
-    function Events($eventmask)
-    {
-      return $this->send_request('Events', array('EventMask'=>$eventmask));
-    }
-
-   /**
-    * Check Extension Status
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ExtensionState
-    * @param string $exten Extension to check state on
-    * @param string $context Context for extension
-    * @param string $actionid message matching variable
-    */
-    function ExtensionState($exten, $context, $actionid=NULL)
-    {
-      $parameters = array('Exten'=>$exten, 'Context'=>$context);
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('ExtensionState', $parameters);
-    }
-
-    function Filter($filter, $operation = 'Add')
-    {
-      $parameters = array('Filter'=>$filter, 'Operation'=>$operation);
-      return $this->send_request('Filter', $parameters);
-    }
-
-   /**
-    * Gets a Channel Variable
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+GetVar
-    * @link http://www.voip-info.org/wiki-Asterisk+variables
-    * @param string $channel Channel to read variable from
-    * @param string $variable
-    * @param string $actionid message matching variable
-    */
-    function GetVar($channel, $variable, $actionid=NULL)
-    {
-      $parameters = array('Channel'=>$channel, 'Variable'=>$variable);
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('GetVar', $parameters);
-    }
-
-   /**
-    * Hangup Channel
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Hangup
-    * @param string $channel The channel name to be hungup
-    */
-    function Hangup($channel)
-    {
-      return $this->send_request('Hangup', array('Channel'=>$channel));
-    }
-
-    function Hold()
-    {
-      return $this->send_request('Hold',array());
-    }
-
-    /**
-    * List IAX Peers
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+IAXpeers
-    */
-    function IAXPeers()
-    {
-      return $this->send_request('IAXPeers');
-    }
-
-   /**
-    * List available manager commands
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ListCommands
-    * @param string $actionid message matching variable
-    */
-    function ListCommands($actionid=NULL)
-    {
-      if($actionid)
-        return $this->send_request('ListCommands', array('ActionID'=>$actionid));
-      else
-        return $this->send_request('ListCommands');
-    }
-
-   /**
-    * Logoff Manager
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Logoff
-    */
-    function Logoff()
-    {
-      return $this->send_request('Logoff');
-    }
-
-   /**
-    * Check Mailbox Message Count
-    *
-    * Returns number of new and old messages.
-    *   Message: Mailbox Message Count
-    *   Mailbox: <mailboxid>
-    *   NewMessages: <count>
-    *   OldMessages: <count>
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+MailboxCount
-    * @param string $mailbox Full mailbox ID <mailbox>@<vm-context>
-    * @param string $actionid message matching variable
-    */
-    function MailboxCount($mailbox, $actionid=NULL)
-    {
-      $parameters = array('Mailbox'=>$mailbox);
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('MailboxCount', $parameters);
-    }
-
-   /**
-    * Check Mailbox
-    *
-    * Returns number of messages.
-    *   Message: Mailbox Status
-    *   Mailbox: <mailboxid>
-    *   Waiting: <count>
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+MailboxStatus
-    * @param string $mailbox Full mailbox ID <mailbox>@<vm-context>
-    * @param string $actionid message matching variable
-    */
-    function MailboxStatus($mailbox, $actionid=NULL)
-    {
-      $parameters = array('Mailbox'=>$mailbox);
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('MailboxStatus', $parameters);
-    }
-
-    /**
-     * Record a call and mix the audio during the recording. Use of StopMixMonitor
-     * is required to guarantee the audio file is available for processing
-     * during dialplan execution.
-     *
-     * @param string $channel   Used to specify the channel to record
-     * @param string $file      Is the name of the file created in the monitor
-     *                          spool directory. Defaults to the same name as the
-     *                          channel (with slashes replaced with dashes). This
-     *                          argument is optional if you specify to record
-     *                          unidirectional audio with either the r(filename)
-     *                          or t(filename) options in the options field. If
-     *                          neither MIXMONITOR_FILENAME or this parameter is
-     *                          set, the mixed stream won't be recorded.
-     * @param string $options   Options that apply to the MixMonitor in the same
-     *                          way as they would apply if invoked from the
-     *                          MixMonitor application. For a list of available
-     *                          options, see the documentation for the mixmonitor
-     *                          application.
-     * @param string $actionid  ActionID for this transaction. Will be returned.
-     *
-     */
-    function MixMonitor($channel, $file=NULL, $options=NULL, $actionid=NULL)
-    {
-      $parameters = array('Channel'=>$channel);
-      if($file) $parameters['File'] = $file;
-      if($options) $parameters['Options'] = $options;
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('MixMonitor', $parameters);
-    }
-
-    /**
-     * Mute / unMute a Mixmonitor recording.
-     *
-     * @link https://wiki.asterisk.org/wiki/display/AST/ManagerAction_MixMonitorMute
-     * @param string $channel   Used to specify the channel to mute.
-     * @param boolean $state    Turn mute on or off : 1 to turn on, 0 to turn off.
-     * @param string $direction Which part of the recording to mute: read, write or both (from channel, to channel or both channels).
-     * @param string $actionid  ActionID for this transaction. Will be returned.
-     */
-    function MixMonitorMute($channel, $state, $direction='read', $actionid=NULL)
-    {
-      $parameters = array('Channel'=>$channel, 'State'=>($state ? 'true' : 'false'), 'Direction'=>$direction);
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('MixMonitorMute', $parameters);
-    }
-
-    /**
-     * Monitor a channel
-     *
-     * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Monitor
-     * @param string $channel
-     * @param string $file
-     * @param string $format
-     * @param boolean $mix
-     */
-    function Monitor($channel, $file=NULL, $format=NULL, $mix=NULL)
-    {
-      $parameters = array('Channel'=>$channel);
-      if($file) $parameters['File'] = $file;
-      if($format) $parameters['Format'] = $format;
-      if(!is_null($file)) $parameters['Mix'] = ($mix) ? 'true' : 'false';
-      return $this->send_request('Monitor', $parameters);
-    }
-
-   /**
-    * Originate Call
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Originate
-    * @param string $channel Channel name to call
-    * @param string $exten Extension to use (requires 'Context' and 'Priority')
-    * @param string $context Context to use (requires 'Exten' and 'Priority')
-    * @param string $priority Priority to use (requires 'Exten' and 'Context')
-    * @param string $application Application to use
-    * @param string $data Data to use (requires 'Application')
-    * @param integer $timeout How long to wait for call to be answered (in ms)
-    * @param string $callerid Caller ID to be set on the outgoing channel
-    * @param string $variable Channel variable to set (VAR1=value1|VAR2=value2)
-    * @param string $account Account code
-    * @param boolean $async true fast origination
-    * @param string $actionid message matching variable
-    */
-    function Originate($channel,
-                       $exten=NULL, $context=NULL, $priority=NULL,
-                       $application=NULL, $data=NULL,
-                       $timeout=NULL, $callerid=NULL, $variable=NULL, $account=NULL, $async=NULL, $actionid=NULL)
-    {
-      $parameters = array('Channel'=>$channel);
-
-      if($exten) $parameters['Exten'] = $exten;
-      if($context) $parameters['Context'] = $context;
-      if($priority) $parameters['Priority'] = $priority;
-
-      if($application) $parameters['Application'] = $application;
-      if($data) $parameters['Data'] = $data;
-
-      if($timeout) $parameters['Timeout'] = $timeout;
-      if($callerid) $parameters['CallerID'] = $callerid;
-      if($variable) $parameters['Variable'] = $variable;
-      if($account) $parameters['Account'] = $account;
-      if(!is_null($async)) $parameters['Async'] = ($async) ? 'true' : 'false';
-      if($actionid) $parameters['ActionID'] = $actionid;
-
-      return $this->send_request('Originate', $parameters);
-    }
-
-   /**
-    * List parked calls
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ParkedCalls
-    * @param string $actionid message matching variable
-    */
-    function ParkedCalls($actionid=NULL)
-    {
-      if($actionid)
-        return $this->send_request('ParkedCalls', array('ActionID'=>$actionid));
-      else
-        return $this->send_request('ParkedCalls');
-    }
-
-   /**
-    * Ping
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Ping
-    */
-    function Ping()
-    {
-      return $this->send_request('Ping');
-    }
-
-   /**
-    * Queue Add
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+QueueAdd
-    * @param string $queue
-    * @param string $interface
-    * @param integer $penalty
-    * @param string $membername
-    */
-    function QueueAdd($queue, $interface, $penalty=0, $membername=NULL)
-    {
-      $parameters = array('Queue'=>$queue, 'Interface'=>$interface, 'Paused'=>'false');
-      if($penalty) $parameters['Penalty'] = $penalty;
-      if(!is_null($membername)) $parameters['MemberName'] = (string)$membername;
-      return $this->send_request('QueueAdd', $parameters);
-    }
-
-   /**
-    * Queue Remove
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+QueueRemove
-    * @param string $queue
-    * @param string $interface
-    */
-    function QueueRemove($queue, $interface)
-    {
-      return $this->send_request('QueueRemove', array('Queue'=>$queue, 'Interface'=>$interface));
-    }
-
-   /**
-    * Queues
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Queues
-    */
-    function Queues()
-    {
-      return $this->send_request('Queues');
-    }
-
-   /**
-    * Queue Pause
-    *
-    * @link http://www.voipinfo.org/wiki/index.php?page=Asterisk+Manager+API+Action+QueuePause
-    * Se asume que el formato de la variable member es por ej: Agent/2000
-    */
-    function QueuePause($queue=NULL, $member=NULL, $paused=true)
-    {
-      if(!empty($member) and !empty($queue))
-        return $this->send_request('QueuePause', array('Queue'=>$queue, 'Interface'=>$member, 'Paused' => $paused));
-      elseif(!empty($member) and empty($queue))
-        return $this->send_request('QueuePause', array('Interface'=>$member, 'Paused' => $paused));
-      else
-        return false;
-    }
-
-   /**
-    * Queue Status
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+QueueStatus
-    * @param string $actionid message matching variable
-    */
-    function QueueStatus($queue=NULL, $actionid=NULL)
-    {
-      $parameters = array();
-      if($queue) $parameters['Queue'] = $queue;
-      if($actionid) $parameters['ActionID'] = $actionid;
-      if(count($parameters) > 0)
-        return $this->send_request('QueueStatus', $parameters);
-      else
-        return $this->send_request('QueueStatus');
-    }
-
-   /**
-    * Redirect
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Redirect
-    * @param string $channel
-    * @param string $extrachannel
-    * @param string $exten
-    * @param string $context
-    * @param string $priority
-    */
-    function Redirect($channel, $extrachannel, $exten, $context, $priority)
-    {
-      return $this->send_request('Redirect', array('Channel'=>$channel, 'ExtraChannel'=>$extrachannel, 'Exten'=>$exten,
-                                                   'Context'=>$context, 'Priority'=>$priority));
-    }
-
-   /**
-    * Set the CDR UserField
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+SetCDRUserField
-    * @param string $userfield
-    * @param string $channel
-    * @param string $append
-    */
-    function SetCDRUserField($userfield, $channel, $append=NULL)
-    {
-      $parameters = array('UserField'=>$userfield, 'Channel'=>$channel);
-      if($append) $parameters['Append'] = $append;
-      return $this->send_request('SetCDRUserField', $parameters);
-    }
-
-   /**
-    * Set Channel Variable
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+SetVar
-    * @param string $channel Channel to set variable for
-    * @param string $variable name
-    * @param string $value
-    */
-    function SetVar($channel, $variable, $value)
-    {
-      return $this->send_request('SetVar', array('Channel'=>$channel, 'Variable'=>$variable, 'Value'=>$value));
-    }
-
-    /**
-     * Send a SIP notify.
-     *
-     * @param string $channel   Peer to receive the notify.
-     * @param mixed $variable   Associative array of variables for SIP headers
-     * @param string $actionid  ActionID for this transaction. Will be returned.
-     */
-    function SIPnotify($channel, $variable, $actionid=NULL)
-    {
-      $parameters = array('Channel'=>$channel);
-      if (is_array($variable))
-      {
-        /* Each key specifies a SIP header and is encoded as key=value. The
-         * 'Content' key is a special case in that it specifies the body of the
-         * SIP NOTIFY, and also that it must be encoded as multiple Content=
-         * tokens, one per line. The double-quote, backslash, bracket and
-         * parentheses characters are special and must be escaped. Additionally
-         * the comma is escaped if it appears in the value. */
-        $vl = array();
-        $escapelist = "[](),\"\\";
-        foreach($variable as $k => $v)
-        {
-          if($k == 'Content')
-          {
-            // This will cause \n between lines to be reassembled as \r\n
-            foreach(preg_split("/\r?\n/", $v) as $s)
-              $vl[] = addcslashes($k, $escapelist).'='.addcslashes($s, $escapelist);
-          }
-          else
-            $vl[] = addcslashes($k, $escapelist).'='.addcslashes($v, $escapelist);
+        if (!is_null($cast)) switch ($cast) {
+        case 'bool':
+            if (!in_array($v, array('true', 'false')))
+                $v = $v ? TRUE : FALSE;
+            break;
+        case 'int':
+            $v = (int)$v;
+            break;
+        case 'sipnotify':
+            if (is_array($v)) {
+                /* Each key specifies a SIP header and is encoded as key=value. The
+                 * 'Content' key is a special case in that it specifies the body of the
+                 * SIP NOTIFY, and also that it must be encoded as multiple Content=
+                 * tokens, one per line. The double-quote, backslash, bracket and
+                 * parentheses characters are special and must be escaped. Additionally
+                 * the comma is escaped if it appears in the value. */
+                $vl = array();
+                $escapelist = "[](),\"\\";
+                foreach($v as $k => $v) {
+                    if($k == 'Content') {
+                        // This will cause \n between lines to be reassembled as \r\n
+                        foreach(preg_split("/\r?\n/", $v) as $s)
+                            $vl[] = addcslashes($k, $escapelist).'='.addcslashes($s, $escapelist);
+                    }
+                    else
+                        $vl[] = addcslashes($k, $escapelist).'='.addcslashes($v, $escapelist);
+                }
+                $v = implode(',', $vl);
+            }
+            break;
         }
-        $variable = implode(',', $vl);
-      }
-      $parameters['Variable'] = $variable;
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('SIPnotify', $parameters);
+        if (is_bool($v)) return $v ? 'true' : 'false';
+        return "$v";
     }
 
-    /**
-     * Channel Status
-     *
-     * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+Status
-     * @param string $channel
-     * @param string $actionid message matching variable
-     */
-    function Status($channel, $actionid=NULL)
+    public function __call($name, $args)
     {
-      $parameters = array('Channel'=>$channel);
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('Status', $parameters);
+        $async = FALSE;
+        $callback = array($this, '_emulate_sync_response');
+        $callback_params = array();
+        if (strlen($name) > 5 && substr($name, 0, 5) == 'async') {
+            $callback = array_shift($args);
+            $callback_params = array_shift($args);
+            if (is_null($callback_params)) $callback_params = array();
+            $name = substr($name, 5);
+            $async = TRUE;
+        }
+
+        if (!isset($this->_ami_cmds[$name]))
+            $this->_die_log('Undefined AMI request: '.$name);
+
+        if (!$async && $this->_sync_wait > 0) {
+            return array(
+                'Response'  => 'Failure',
+                'Message' => '(internal) Avoided reentrant synchronous command.',
+            );
+        }
+
+        $i = 0; $parameters = array();
+        foreach ($this->_ami_cmds[$name] as $k => $prop) {
+            $required = FALSE;
+            $default = NULL;
+            $cast = NULL;
+            $depends = NULL;
+            if (is_bool($prop)) {
+                $required = $prop;
+            } elseif (is_array($prop)) {
+                if (isset($prop['required'])) $required = $prop['required'];
+                if (isset($prop['default'])) $default = $prop['default'];
+                if (isset($prop['cast'])) $cast = $prop['cast'];
+                if (isset($prop['depends'])) $depends = $prop['depends'];
+            }
+
+            if (is_null($depends) || isset($parameters[$depends])) {
+                if ($i < count($args) && !is_null($args[$i]))
+                    $parameters[$k] = $this->_ami_encode_param($args[$i], $cast);
+                elseif (!is_null($default))
+                    $parameters[$k] = $this->_ami_encode_param($default, $cast);
+                elseif ($required)
+                    $this->_die_log('AMI request '.$name.' requires value for '.$k);
+            }
+            $i++;
+        }
+
+        // Cadena de petición
+        $req = "Action: $name\r\n";
+        foreach($parameters as $var => $val) $req .= "$var: $val\r\n";
+        $req .= "\r\n";
+
+        $request_info = array($req, $callback, $callback_params);
+
+        if (!$async) $this->_sync_wait++;
+        if ($async) {
+            // Poner la petición asíncrona al final de la cola
+            array_push($this->_queue_requests, $request_info);
+        } else {
+            // Poner la petición síncrona como primera de las NO enviadas
+            $head_req = NULL;
+            if (count($this->_queue_requests) > 0 && is_null($this->_queue_requests[0][0]))
+                $head_req = array_shift($this->_queue_requests);
+            array_unshift($this->_queue_requests, $request_info);
+            if (!is_null($head_req))
+                array_unshift($this->_queue_requests, $head_req);
+            $head_req = NULL;
+        }
+        $r = $this->_send_next_request();
+        $r = ($r && !$async) ? $this->wait_response() : NULL;
+        if (!$async) $this->_sync_wait--;
+        return $r;
     }
 
-    /**
-     * Record a call and mix the audio during the recording. Use of StopMixMonitor
-     * is required to guarantee the audio file is available for processing
-     * during dialplan execution.
-     *
-     * @param string $channel   The name of the channel monitored.
-     * @param string $mixmonitorid If a valid ID is provided (returned from earlier
-     *                          MixMonitor), then this command will stop only that
-     *                          specific MixMonitor.
-     * @param string $actionid  ActionID for this transaction. Will be returned.
-     *
-     */
-    function StopMixMonitor($channel, $mixmonitorid=NULL, $actionid=NULL)
+    private function _emulate_sync_response($paquete)
     {
-      $parameters = array('Channel'=>$channel);
-      if($mixmonitorid) $parameters['MixMonitorID'] = $mixmonitorid;
-      if($actionid) $parameters['ActionID'] = $actionid;
-      return $this->send_request('StopMixMonitor', $parameters);
+        if (!is_null($this->_response)) {
+            $this->oLogger->output("ERR: '.__METHOD__.' segundo Response sobreescribe primer Response no procesado: ".
+                print_r($this->_response, 1));
+        }
+        $this->_response = $paquete;
     }
 
-    /**
-    * Stop monitoring a channel
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+StopMonitor
-    * @param string $channel
-    */
-    function StopMonitor($channel)
+    private function _send_next_request()
     {
-      return $this->send_request('StopMonitor', array('Channel'=>$channel));
+        if (count($this->_queue_requests) <= 0) return TRUE;    // no hay más peticiones
+        if (is_null($this->_queue_requests[0][0])) return TRUE; // petición en progreso
+        if (is_null($this->sKey)) {
+            if (!is_null($this->oLogger))
+                $this->oLogger->output('ERR: '.__METHOD__.' conexión AMI cerrada mientras se enviaba petición.');
+            return FALSE;
+        }
+        $this->multiplexSrv->encolarDatosEscribir($this->sKey, $this->_queue_requests[0][0]);
+        $this->_queue_requests[0][0] = NULL;
+        return TRUE;
     }
 
-   /**
-    * Dial over Zap channel while offhook
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ZapDialOffhook
-    * @param string $zapchannel
-    * @param string $number
-    */
-    function ZapDialOffhook($zapchannel, $number)
-    {
-      return $this->send_request('ZapDialOffhook', array('ZapChannel'=>$zapchannel, 'Number'=>$number));
-    }
-
-   /**
-    * Toggle Zap channel Do Not Disturb status OFF
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ZapDNDoff
-    * @param string $zapchannel
-    */
-    function ZapDNDoff($zapchannel)
-    {
-      return $this->send_request('ZapDNDoff', array('ZapChannel'=>$zapchannel));
-    }
-
-   /**
-    * Toggle Zap channel Do Not Disturb status ON
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ZapDNDon
-    * @param string $zapchannel
-    */
-    function ZapDNDon($zapchannel)
-    {
-      return $this->send_request('ZapDNDon', array('ZapChannel'=>$zapchannel));
-    }
-
-   /**
-    * Hangup Zap Channel
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ZapHangup
-    * @param string $zapchannel
-    */
-    function ZapHangup($zapchannel)
-    {
-      return $this->send_request('ZapHangup', array('ZapChannel'=>$zapchannel));
-    }
-
-   /**
-    * Transfer Zap Channel
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ZapTransfer
-    * @param string $zapchannel
-    */
-    function ZapTransfer($zapchannel)
-    {
-      return $this->send_request('ZapTransfer', array('ZapChannel'=>$zapchannel));
-    }
-
-   /**
-    * Zap Show Channels
-    *
-    * @link http://www.voip-info.org/wiki-Asterisk+Manager+API+Action+ZapShowChannels
-    * @param string $actionid message matching variable
-    */
-    function ZapShowChannels($actionid=NULL)
-    {
-      if($actionid)
-        return $this->send_request('ZapShowChannels', array('ActionID'=>$actionid));
-      else
-        return $this->send_request('ZapShowChannels');
-    }
-
-
-   // *********************************************************************************************************
-   // **                       MISC                                                                          **
-   // *********************************************************************************************************
+    // *********************************************************************************************************
+    // **                       MISC                                                                          **
+    // *********************************************************************************************************
 
 
    /**
@@ -1006,20 +630,44 @@ class AMIClientConn extends MultiplexConn
     */
     private function process_event($parameters)
     {
-      $ret = false;
-      $e = strtolower($parameters['Event']);
+        $ret = false;
+        $handler = '';
 
-      $handler = '';
-      if(isset($this->event_handlers[$e])) $handler = $this->event_handlers[$e];
-      elseif(isset($this->event_handlers['*'])) $handler = $this->event_handlers['*'];
+        if (isset($parameters['Event'])) {
+            $e = strtolower($parameters['Event']);
 
-      if ((is_array($handler) && count($handler) >= 2 && is_object($handler[0]) &&
-        method_exists($handler[0], $handler[1])) || function_exists($handler))
-      {
-        $ret = call_user_func($handler, $e, $parameters, $this->server, $this->port);
-        $ret = ($ret !== 'AMI_EVENT_DISCARD');
-      }
-      return $ret;
+            if (isset($this->event_handlers[$e]))
+                $handler = $this->event_handlers[$e];
+            elseif (isset($this->event_handlers['*']))
+                $handler = $this->event_handlers['*'];
+            $handler_params = array($e, $parameters, $this->server, $this->port);
+        } elseif (isset($parameters['Response'])) {
+            if (count($this->_queue_requests) <= 0) {
+                if (!is_null($this->oLogger)) {
+                    $this->oLogger->output('ERR: '.__METHOD__.' se pierde respuesta porque no hay callback encolado: '.
+                        print_r($parameters, TRUE));
+                }
+                return FALSE;
+            }
+
+            $callback_info = array_shift($this->_queue_requests);
+            if (!is_null($callback_info[0])) {
+                if (!is_null($this->oLogger))
+                    $this->oLogger->output('ERR: '.__METHOD__.' petición head NO ha sido enviada: '.$callback_info[0]);
+            }
+            $handler = $callback_info[1];
+            $handler_params = $callback_info[2];
+            array_unshift($handler_params, $parameters);
+
+            $this->_send_next_request();
+        }
+
+        if ((is_array($handler) && count($handler) >= 2 && is_object($handler[0]) &&
+            method_exists($handler[0], $handler[1])) || function_exists($handler)) {
+            $ret = call_user_func_array($handler, $handler_params);
+            $ret = ($ret !== 'AMI_EVENT_DISCARD');
+        }
+        return $ret;
     }
 
     /** Show all entries in the asterisk database
@@ -1029,7 +677,7 @@ class AMIClientConn extends MultiplexConn
         $c = 'database show';
         if (!is_null($family)) $c .= ' '.$family;
         if (!is_null($keytree)) $c .= ' '.$keytree;
-        $r = $this->command($c);
+        $r = $this->Command($c);
 
         $this->raw_response = NULL;
         if (!is_array($r) || !isset($r['data'])) {
@@ -1049,7 +697,7 @@ class AMIClientConn extends MultiplexConn
 
     function database_showkey($key)
     {
-        $r = $this->command("database showkey $key");
+        $r = $this->Command("database showkey $key");
         $data = explode("\n",$r["data"]);
 
         $this->raw_response = NULL;
@@ -1073,7 +721,7 @@ class AMIClientConn extends MultiplexConn
      * @return bool True if successful
      */
     function database_put($family, $key, $value) {
-        $r = $this->command("database put ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key)." ".$value);
+        $r = $this->Command("database put ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key)." ".$value);
 
         $this->raw_response = NULL;
         if (!is_array($r) || !isset($r['data'])) {
@@ -1090,7 +738,7 @@ class AMIClientConn extends MultiplexConn
      * @return mixed Value of the key, or false if error
      */
     function database_get($family, $key) {
-        $r = $this->command("database get ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key));
+        $r = $this->Command("database get ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key));
 
         $this->raw_response = NULL;
         if (!is_array($r) || !isset($r['data'])) {
@@ -1114,7 +762,7 @@ class AMIClientConn extends MultiplexConn
      * @return bool True if successful
      */
     function database_del($family, $key) {
-        $r = $this->command("database del ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key));
+        $r = $this->Command("database del ".str_replace(" ","/",$family)." ".str_replace(" ","/",$key));
 
         $this->raw_response = NULL;
         if (!is_array($r) || !isset($r['data'])) {
@@ -1123,27 +771,6 @@ class AMIClientConn extends MultiplexConn
         }
 
         return (bool)strstr($r["data"], "removed");
-    }
-
-    /**
-     * Fetch core settings from the running Asterisk server.
-     * Only available in Asterisk 1.6.0 and later.
-     *
-     * @return array Response with requested data, if successful
-     */
-    function CoreSettings()
-    {
-        return $this->send_request('CoreSettings');
-    }
-
-    /**
-     * Fetch core status from the running Asterisk server.
-     *
-     * @return array Response with requested data, if successful
-     */
-    function CoreStatus()
-    {
-    	return $this->send_request('CoreStatus');
     }
 }
 ?>

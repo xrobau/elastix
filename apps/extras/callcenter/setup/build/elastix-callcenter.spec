@@ -101,6 +101,14 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Jan 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: big rewrite of AMIClientConn. This rewrite allows for
+  asynchronous AMI requests. Instead of waiting for the response, the code can
+  register a callback to be run once the response to the command arrives. In
+  this way Queue operations from AMIEventProcess do not need to be bounced off
+  CampaignProcess anymore.
+  SVN Rev[7430]
+
 * Fri Jan 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Campaign In: also delete from call_recording as done in outgoing
   campaigns. Fixes Elastix bug #2436.

@@ -2523,17 +2523,40 @@ Uniqueid: 1429642067.241008
                 if (count($diffcolas[0]) > 0) {
                     $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
                         'agregado a las colas ['.implode(' ', array_keys($diffcolas[0])).']');
-                    $this->_tuberia->msg_CampaignProcess_asyncQueueAdd($sAgente,
-                        $diffcolas[0], $a->name, ($a->num_pausas > 0));
+                    foreach ($diffcolas[0] as $q => $p) {
+                        $this->_ami->asyncQueueAdd(
+                            array($this, '_cb_QueueAdd'),
+                            NULL,
+                            $q, $sAgente, $p, $a->name, ($a->num_pausas > 0));
+                    }
                 }
 
                 // Colas a las que pertenece y no debe pertenecer
                 if (count($diffcolas[1]) > 0) {
                     $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
                         'quitado de las colas ['.implode(' ', $diffcolas[1]).']');
-                    $this->_tuberia->msg_CampaignProcess_asyncQueueRemove($sAgente, $diffcolas[1]);
+                    foreach ($diffcolas[1] as $q) {
+                        $this->_ami->asyncQueueRemove(
+                            array($this, '_cb_QueueRemove'),
+                            NULL,
+                            $q, $sAgente);
+                    }
                 }
             }
+        }
+    }
+
+    public function _cb_QueueAdd($r)
+    {
+        if ($r['Response'] != 'Success') {
+            $this->_log->output("ERR: falla al agregar a cola: ".print_r($r, TRUE));
+        }
+    }
+
+    public function _cb_QueueRemove($r)
+    {
+        if ($r['Response'] != 'Success') {
+            $this->_log->output("ERR: falla al quitar de cola: ".print_r($r, TRUE));
         }
     }
 

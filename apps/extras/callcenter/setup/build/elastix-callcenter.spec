@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Tue Jan 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: by using asynchronous AMI requests, dynamic addition and
+  removal of dynamic agents from queues on configuration refresh is now
+  reimplemented without bouncing off CampaignProcess.
+  SVN Rev[7432]
 - CHANGED: Dialer: by using asynchronous AMI requests, forced agent logoff is
   now reimplemented without bouncing off CampaignProcess.
   SVN Rev[7431]

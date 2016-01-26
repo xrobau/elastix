@@ -1126,8 +1126,20 @@ class AMIEventProcess extends TuberiaProcess
     private function _quitarSilencio($llamada)
     {
         if (count($llamada->mutedchannels) > 0) {
-            $this->_tuberia->msg_CampaignProcess_asyncMixMonitorUnmute($llamada->mutedchannels);
+            foreach ($llamada->mutedchannels as $chan) {
+                $this->_ami->asyncMixMonitorMute(
+                    array($this, '_cb_MixMonitorMute'),
+                    NULL,
+                    $chan, false);
+            }
             $llamada->borrarCanalesSilenciados();
+        }
+    }
+
+    public function _cb_MixMonitorMute($r)
+    {
+        if ($r['Response'] != 'Success') {
+            $this->_log->output('ERR: No se puede cambiar mute de la grabacion: '.$r['Message']);
         }
     }
 

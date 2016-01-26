@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Tue Jan 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix scenario in which an agent refresh right in the middle of
+  a static agent login would undo the login attempt and leave the dialer in
+  an inconsistent state.
+  SVN Rev[7435]
 - CHANGED: Dialer: by using asynchronous AMI requests, channel unmuting is now
   reimplemented without bouncing off CampaignProcess.
   SVN Rev[7434]

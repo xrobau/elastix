@@ -2660,9 +2660,14 @@ Uniqueid: 1429642067.241008
                 if ($sAgentStatus == 'AGENT_LOGGEDOFF') {
                     /* Según Asterisk, el agente está deslogoneado. Se verifica
                      * si también es así en el estado del objeto Agente. Si no,
-                     * se lo manda a deslogonear. */
+                     * se lo manda a deslogonear.
+                     *
+                     * ATENCIÓN: el estado intermedio durante el cual se introduce
+                     * la contraseña se ve como AGENT_LOGGEDOFF y no debe de
+                     * tocarse.
+                     */
 
-                    if ($a->estado_consola != 'logged-out') {
+                    if ($a->estado_consola == 'logged-in') {
                         $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
                             ' está logoneado en dialer pero en estado AGENT_LOGGEDOFF,'.
                             ' se deslogonea en dialer...');
@@ -2671,7 +2676,7 @@ Uniqueid: 1429642067.241008
                 } else {
                     /* Según Asterisk, el agente está logoneado. Se verifica si
                      * el estado de agente es logoneado, y si no, se lo deslogonea. */
-                    if ($a->estado_consola == 'logged-out') {
+                    if ($a->estado_consola != 'logged-in') {
                         $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
                             ' está deslogoneado en dialer pero en estado '.$sAgentStatus.','.
                             ' se deslogonea en Asterisk...');

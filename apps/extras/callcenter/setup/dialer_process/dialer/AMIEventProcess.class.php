@@ -2380,11 +2380,11 @@ Uniqueid: 1429642067.241008
                 );
         }
 
-    	if ($params['PeerStatus'] == 'Unregistered') {
-    		// Alguna extensión se ha desregistrado. Verificar si es un agente logoneado
+        if ($params['PeerStatus'] == 'Unregistered') {
+            // Alguna extensión se ha desregistrado. Verificar si es un agente logoneado
             $a = $this->_listaAgentes->buscar('extension', $params['Peer']);
             if (!is_null($a)) {
-            	// La extensión usada para login se ha desregistrado - deslogonear al agente
+                // La extensión usada para login se ha desregistrado - deslogonear al agente
                 $this->_log->output('INFO: '.__METHOD__.' se detecta desregistro de '.
                     $params['Peer'].' - deslogoneando '.$a->channel.'...');
                 $a->forzarLogoffAgente($this->_ami, $this->_log);

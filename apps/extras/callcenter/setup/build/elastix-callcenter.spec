@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Jan 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: CallCenter: add index to agent table for queries by agent number.
+  SVN Rev[7436]
+
 * Tue Jan 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: fix scenario in which an agent refresh right in the middle of
   a static agent login would undo the login attempt and leave the dialer in

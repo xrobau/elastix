@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS `agent` (
   `password` varchar(250) NOT NULL,
   `estatus` enum('A','I') default 'A',
   `eccp_password` varchar(128),
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  KEY `agent_type` (`estatus`,`type`,`number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -1011,6 +1012,35 @@ DELIMITER ; ++
 
 CALL temp_campaign_scheduled_2015_12_12();
 DROP PROCEDURE IF EXISTS temp_campaign_scheduled_2015_12_12;
+
+
+/* Procedimiento para agregar índices necesarios para acelerar agent */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_indice_agent_2016_01_27 ++
+CREATE PROCEDURE temp_indice_agent_2016_01_27 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_indice tinyint(1);
+
+    SET l_existe_indice = 0;
+
+    /* Verificar existencia de índices que deben agregarse */
+    SELECT COUNT(*) INTO l_existe_indice
+    FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'agent'
+        AND INDEX_NAME = 'agent_type';
+    IF l_existe_indice = 0 THEN
+        ALTER TABLE agent ADD KEY `agent_type` (`estatus`,`type`,`number`);
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_indice_agent_2016_01_27();
+DROP PROCEDURE IF EXISTS temp_indice_agent_2016_01_27;
 
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;

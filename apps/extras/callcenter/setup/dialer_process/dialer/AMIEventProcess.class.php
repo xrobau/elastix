@@ -96,7 +96,7 @@ class AMIEventProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde ECCPWorkerProcess
-        foreach (array('idNuevaSesionAgente', 'idNuevoBreakAgente',
+        foreach (array('idNuevaSesionAgente',
             'quitarBreakAgente', 'idNuevoHoldAgente', 'quitarHoldAgente',
             'llamadaSilenciada', 'llamadaSinSilencio',
             'idNuevoFormPauseAgente', 'quitarFormPauseAgente') as $k)
@@ -105,7 +105,8 @@ class AMIEventProcess extends TuberiaProcess
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
             'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante',
             'pingAgente', 'dumpstatus', 'listarTotalColasTrabajoAgente',
-            'infoSeguimientoAgentesCola', 'reportarInfoLlamadaAgendada') as $k)
+            'infoSeguimientoAgentesCola', 'reportarInfoLlamadaAgendada',
+            'iniciarBreakAgente') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -349,18 +350,6 @@ class AMIEventProcess extends TuberiaProcess
                     "ID anterior={$a->id_sesion} ID nuevo={$id_sesion}");
             }
             $a->id_sesion = $id_sesion;
-        }
-    }
-
-    private function _idNuevoBreakAgente($sAgente, $idBreak, $idAuditBreak)
-    {
-        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (!is_null($a)) {
-            if (!is_null($a->id_break)) {
-            	$this->_log->output('ERR: '.__METHOD__." - posible carrera, ".
-                    "id_break ya asignado para $sAgente, se pierde anterior.");
-            }
-            $a->setBreak($idBreak, $idAuditBreak);
         }
     }
 
@@ -1334,6 +1323,44 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_listarTotalColasTrabajoAgente'), $datos));
     }
 
+    public function rpc_iniciarBreakAgente($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+
+        list($sAgente, $idBreak, $idAuditBreak) = $datos;
+        $r = array(0, '');
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (is_null($a)) {
+            $r = array(404, 'Agent not found or not logged in through ECCP');
+        } elseif ($a->estado_consola != 'logged-in') {
+            $r = array(417, 'Agent currently not logged in');
+        } elseif (!is_null($a->id_break)) {
+            $r = array(417, 'Agent already in break');
+        } else {
+            if ($a->num_pausas == 0 && count($a->colas_actuales) > 0) {
+                // Se manda a pausar el agente
+                $this->_ami->asyncQueuePause(
+                    array($this, '_cb_QueuePause'),
+                    array($sAgente, TRUE),
+                    NULL, $sAgente, TRUE);
+            }
+            $a->setBreak($idBreak, $idAuditBreak);
+        }
+        $this->_tuberia->enviarRespuesta($sFuente, $r);
+    }
+
+    public function _cb_QueuePause($r, $sAgente, $nstate)
+    {
+        if ($r['Response'] != 'Success') {
+            $this->_log->output('ERR: '.__METHOD__.' (internal) no se puede '.
+                ($nstate ? 'pausar' : 'despausar').' al agente '.$sAgente.': '.
+                $sAgente.' - '.$r['Message']);
+        }
+    }
+
     /**************************************************************************/
 
     public function msg_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje,
@@ -1421,15 +1448,6 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
         }
         call_user_func_array(array($this, '_idNuevaSesionAgente'), $datos);
-    }
-
-    public function msg_idNuevoBreakAgente($sFuente, $sDestino,
-        $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_idNuevoBreakAgente'), $datos);
     }
 
     public function msg_quitarBreakAgente($sFuente, $sDestino,

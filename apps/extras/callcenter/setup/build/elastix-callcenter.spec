@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Wed Jan 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): reimplement pauseagent in order to recover from TOCTOU
+  condition. Agent status is verified in AMIEventProcess a second time in order
+  to signal ECCPWorkerProcess to remove just-inserted pause audit if agent state
+  becomes invalid.
+  SVN Rev[7439]
 - CHANGED: Dialer: add timestamp fields to AMI Response packets in order to find
   out which AMI requests are more costly.
   SVN Rev[7438]

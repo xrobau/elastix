@@ -182,16 +182,7 @@ class ECCPConn
                         }
                     } catch (PDOException $e) {
                         $response = $this->_generarRespuestaFallo(503, 'Internal server error - database failure');
-                        $this->_log->output('ERR: '.__METHOD__.
-                            ': no se puede realizar operación de base de datos: '.
-                            implode(' - ', $e->errorInfo));
-                        $this->_log->output("ERR: traza de pila: \n".$e->getTraceAsString());
-                        if ($e->errorInfo[0] == 'HY000' && $e->errorInfo[1] == 2006) {
-                            // Códigos correspondientes a pérdida de conexión de base de datos
-                            $this->_log->output('WARN: '.__METHOD__.
-                                ': conexión a DB parece ser inválida, se cierra...');
-                            $this->multiplexSrv->setDBConn(NULL);
-                        }
+                        $this->_stdManejoExcepcionDB($e, 'no se puede realizar operación de base de datos');
                     }
                 }
 
@@ -208,6 +199,18 @@ class ECCPConn
         $s = $response->asXML();
 
         return array($s, $nuevos_valores, $eventos);
+    }
+
+    private function _stdManejoExcepcionDB($e, $s)
+    {
+        $this->_log->output('ERR: '.__METHOD__.": $s: ".implode(' - ', $e->errorInfo));
+        $this->_log->output("ERR: traza de pila: \n".$e->getTraceAsString());
+        if ($e->errorInfo[0] == 'HY000' && $e->errorInfo[1] == 2006) {
+            // Códigos correspondientes a pérdida de conexión de base de datos
+            $this->_log->output('WARN: '.__METHOD__.
+                ': conexión a DB parece ser inválida, se cierra...');
+            $this->multiplexSrv->setDBConn(NULL);
+        }
     }
 
     // Función que construye una respuesta de petición incorrecta
@@ -1674,6 +1677,17 @@ LEER_CAMPANIA;
         $xml_response = new SimpleXMLElement('<response />');
         $xml_pauseAgentResponse = $xml_response->addChild('pauseagent_response');
 
+        // Verificar si la pausa indicada existe y está activa
+        $recordset = $this->_db->prepare(
+            'SELECT id, name FROM break WHERE tipo = "B" AND status = "A" AND id = ?');
+        $recordset->execute(array($idBreak));
+        $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
+        $recordset->closeCursor();
+        if (!$tupla) {
+            $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 404, 'Break ID not found or not active');
+            return $xml_response;
+        }
+
         // Verificar si el agente está siendo monitoreado y que no esté en pausa
         $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
         if (is_null($infoSeguimiento)) {
@@ -1690,50 +1704,36 @@ LEER_CAMPANIA;
                 $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 417, 'Agent already in incompatible break');
             } else {
                 // Agente ya estaba en el mismo break
-            	$xml_pauseAgentResponse->addChild('success');
+                $xml_pauseAgentResponse->addChild('success');
             }
             return $xml_response;
         }
 
-        // Verificar si la pausa indicada existe y está activa
-        $recordset = $this->_db->prepare(
-            'SELECT id, name FROM break WHERE tipo = "B" AND status = "A" AND id = ?');
-        $recordset->execute(array($idBreak));
-        $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
-        $recordset->closeCursor();
-        if (!$tupla) {
-            $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 404, 'Break ID not found or not active');
-            return $xml_response;
-        }
-
-        // Ejecutar la pausa a través del AMI.
-        /* TODO: puede haber una carrera si dos o más conexiones intentan hacer
-         * que el mismo agente entre en break al mismo tiempo.
-         */
-        if ($infoSeguimiento['num_pausas'] == 0) {
-            $r = $this->_ami->QueuePause(NULL, $sAgente, 'true');
-            if ($r['Response'] != 'Success') {
-                $this->_log->output('ERR: '.__METHOD__.' (internal) no se puede poner al agente en pausa: '.
-                    $sAgente.' - '.$r['Message']);
-                $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 500, 'Unable to start agent break');
-                return $xml_response;
-            }
-        }
+        // Se escribe el inicio provisional de la pausa en la base de datos
         $iTimestampInicioPausa = time();
-
-        // Mandar a escribir el inicio de la pausa a la base de datos
         $idAuditBreak = $this->_marcarInicioBreakAgente(
             $infoSeguimiento['id_agent'], $idBreak, $iTimestampInicioPausa);
         if (is_null($idAuditBreak)) {
-            if ($infoSeguimiento['num_pausas'] == 0) {
-            	$r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
-            }
             $this->_agregarRespuestaFallo($xml_pauseAgentResponse, 500, 'Unable to start agent break');
             return $xml_response;
         }
 
-        // Notificar éxito en inicio de break
-        $this->_tuberia->msg_AMIEventProcess_idNuevoBreakAgente($sAgente, $idBreak, $idAuditBreak);
+        // Se comunica a AMIEventProcess la pausa elegida para que la inicie.
+        // Esto puede fallar si el estado del agente ha cambiado.
+        list($errcode, $errdesc) = $this->_tuberia->AMIEventProcess_iniciarBreakAgente(
+            $sAgente, $idBreak, $idAuditBreak);
+        if ($errcode != 0) {
+            // Ha fallado el inicio de pausa, se deshace auditoría
+            try {
+                $sth = $this->_db->prepare('DELETE FROM audit WHERE id = ?');
+                $sth->execute(array($idAuditBreak));
+                $sth = NULL;
+            } catch (PDOException $e) {
+                $this->_stdManejoExcepcionDB($e, 'no se puede quitar auditoría provisional!');
+            }
+            $this->_agregarRespuestaFallo($xml_pauseAgentResponse, $errcode, $errdesc.' (collision)');
+            return $xml_response;
+        }
 
         $xml_pauseAgentResponse->addChild('success');
         return array(

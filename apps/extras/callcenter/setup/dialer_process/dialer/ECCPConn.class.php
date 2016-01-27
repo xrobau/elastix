@@ -158,8 +158,7 @@ class ECCPConn
                                     $response = $xml_response;
                                 } else {
                                     // Verificar que el agente sea válido en el sistema
-                                    $listaAgentes = $this->_listarAgentes();
-                                    if (!in_array($sAgente, array_keys($listaAgentes))) {
+                                    if (!$this->_existeAgente($sAgente)) {
                                         $this->_agregarRespuestaFallo($xml_reqresponse, 404, 'Specified agent not found');
                                         $response = $xml_response;
                                     } elseif (!$this->_hashValidoAgenteECCP($comando, $comando['appcookie'])) {
@@ -1316,8 +1315,7 @@ LEER_CAMPANIA;
         if (!is_array($listaExtensiones)) {
             return $this->Response_LoginAgentResponse('logged-out', 500, 'Failed to list extensions');
         }
-        $listaAgentes = $this->_listarAgentes();
-        if (!in_array($sAgente, array_keys($listaAgentes))) {
+        if (!$this->_existeAgente($sAgente)) {
             return $this->Response_LoginAgentResponse('logged-out', 404, 'Specified agent not found');
         } elseif (!in_array($sExtension, array_keys($listaExtensiones))) {
             return $this->Response_LoginAgentResponse('logged-out', 404, 'Specified extension not found');
@@ -1463,11 +1461,22 @@ LEER_CAMPANIA;
      */
     private function _listarAgentes()
     {
-        $sPeticion = "SELECT type, number, name FROM agent WHERE estatus = 'A' ORDER BY number";
+        $sPeticion = "SELECT type, number, name FROM agent WHERE estatus = 'A'";
         foreach ($this->_db->query($sPeticion) as $tupla) {
-        	$listaAgentes[$tupla['type'].'/'.$tupla['number']] = $tupla['number'].' - '.$tupla['name'];
+            $listaAgentes[$tupla['type'].'/'.$tupla['number']] = $tupla['number'].' - '.$tupla['name'];
         }
         return $listaAgentes;
+    }
+
+    private function _existeAgente($sAgente)
+    {
+        $agentFields = $this->_parseAgent($sAgente);
+        if (is_null($agentFields)) return FALSE;
+        $recordset = $this->_db->prepare('SELECT COUNT(*) AS n FROM agent WHERE estatus = ? AND type = ? AND number = ?');
+        $recordset->execute(array('A', $agentFields['type'], $agentFields['number']));
+        $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
+        $recordset->closeCursor();
+        return ($tupla['n'] > 0);
     }
 
     /**
@@ -1576,9 +1585,11 @@ LEER_CAMPANIA;
             return $this->_generarRespuestaFallo(400, 'Bad request');
         $sAgente = (string)$comando->agent_number;
 
-        // Verificar que el agente sea válido en el sistema
-        $listaAgentes = $this->_listarAgentes();
-        if (!in_array($sAgente, array_keys($listaAgentes))) {
+        /* Verificar que el agente sea válido en el sistema. Se duplica la
+         * verificación de la decoración agentauth porque se debe de agregar
+         * el estatus de agente 'logged-out'.
+         */
+        if (!$this->_existeAgente($sAgente)) {
             return $this->Response_LogoutAgentResponse('logged-out', 404, 'Specified agent not found');
         }
 
@@ -3353,18 +3364,8 @@ Privilege: Command
         $xml_response = new SimpleXMLElement('<response />');
         $xml_getagentqueuesResponse = $xml_response->addChild('getagentqueues_response');
 
-        // El siguiente código asume formato Agent/9000
-        $agentFields = $this->_parseAgent($sAgente);
-        if ($sAgente == 'any') {
-            $sAgente = NULL;
-        } elseif (is_null($agentFields)) {
-            $this->_agregarRespuestaFallo($xml_getagentqueuesResponse, 417, 'Invalid agent number');
-            return $xml_response;
-        }
-
         // Verificar que la extensión y el agente son válidos en el sistema
-        $listaAgentes = $this->_listarAgentes();
-        if (!in_array($sAgente, array_keys($listaAgentes))) {
+        if (!$this->_existeAgente($sAgente)) {
             $this->_agregarRespuestaFallo($xml_getagentqueuesResponse, 404, 'Specified agent not found');
             return $xml_response;
         }

@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Wed Jan 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): optimize agent existence verification in DB. This
+  change removes a number of cases in which the entire list of active agents is
+  read just to check for one of them.
+  SVN Rev[7437]
 - CHANGED: CallCenter: add index to agent table for queries by agent number.
   SVN Rev[7436]
 

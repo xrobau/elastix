@@ -217,6 +217,9 @@ class AMIClientConn extends MultiplexConn
                     $this->_listaEventos[] = $paquete;
                 }
             } elseif (isset($paquete['Response'])) {
+                if (is_null($local_timestamp_received))
+                    $local_timestamp_received = microtime(TRUE);
+                $paquete['local_timestamp_received'] = $local_timestamp_received;
                 $this->_listaEventos[] = $paquete;
             } else {
                 $this->oLogger->output("ERR: el siguiente paquete no se reconoce como Event o Response: ".
@@ -511,7 +514,7 @@ class AMIClientConn extends MultiplexConn
         foreach($parameters as $var => $val) $req .= "$var: $val\r\n";
         $req .= "\r\n";
 
-        $request_info = array($req, $callback, $callback_params);
+        $request_info = array($req, $callback, $callback_params, microtime(TRUE));
 
         if (!$async) $this->_sync_wait++;
         if ($async) {
@@ -657,6 +660,7 @@ class AMIClientConn extends MultiplexConn
             }
             $handler = $callback_info[1];
             $handler_params = $callback_info[2];
+            $parameters['local_timestamp_sent'] = $callback_info[3];
             array_unshift($handler_params, $parameters);
 
             $this->_send_next_request();

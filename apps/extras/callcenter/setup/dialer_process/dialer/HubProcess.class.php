@@ -63,7 +63,7 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
 
     /* Verificar si la tarea indicada sigue activa. Devuelve VERDADERO si la
      * tarea sigue corriendo, FALSO si inactiva o si se detecta que terminó. */
-    private function _revisarTareaActiva($sTarea)
+    private function _revisarTareaActiva($sTarea, $finalizando = FALSE)
     {
         $bTareaActiva = FALSE;
 
@@ -72,7 +72,7 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
             $iStatus = NULL;
             $iPidDevuelto = pcntl_waitpid($this->_tareas[$sTarea], $iStatus, WNOHANG);
             if ($iPidDevuelto > 0) {
-                if (in_array($sTarea, $this->_tareasFijas)) {
+                if (!$finalizando && in_array($sTarea, $this->_tareasFijas)) {
                     $this->_log->output("WARN: $sTarea (PID=$iPidDevuelto) ha terminado inesperadamente (status=$iStatus), se agenda reinicio...");
                 }
                 $iErrCode = pcntl_wifexited($iStatus) ? pcntl_wexitstatus($iStatus) : 255;
@@ -352,7 +352,7 @@ XML_CRASH_MSG;
         $this->_log->output('INFO: esperando respuesta de todos los procesos...');
         while ($this->_hub->numFinalizados() < count(array_filter($this->_tareas))) {
             foreach (array_keys($this->_tareas) as $sTarea)
-                $this->_revisarTareaActiva($sTarea);
+                $this->_revisarTareaActiva($sTarea, TRUE);
             if ($this->_hub->procesarPaquetes())
                 $this->_hub->procesarActividad(0);
             else $this->_hub->procesarActividad(1);
@@ -362,19 +362,30 @@ XML_CRASH_MSG;
 
         $this->_log->output('INFO: esperando a que todas las tareas terminen...');
         $bTodosTerminaron = FALSE;
+        $t1 = time();
         do {
             $bTodosTerminaron = TRUE;
             foreach (array_keys($this->_tareas) as $sTarea) {
                 // Si está definido el PID del proceso, se verifica si se ejecuta.
-                if ($this->_revisarTareaActiva($sTarea)) {
+                if ($this->_revisarTareaActiva($sTarea, TRUE)) {
                     // Este proceso aún no termina...
                     $bTodosTerminaron = FALSE;
                 }
             }
 
-            // Rutear todos los mensajes pendientes entre tareas
-            if (!$this->_hub->procesarPaquetes())
-                $this->_hub->procesarActividad();
+            if (!$bTodosTerminaron) {
+                $t2 = time();
+                if ($t2 - $t1 >= 4) {
+                    $this->_log->output('WARN: no todas las tareas han terminado, se vuelve a enviar señal...');
+                    $this->_propagarSIG($signum);
+                    $t1 = $t2;
+                }
+
+                // Rutear todos los mensajes pendientes entre tareas
+                if ($this->_hub->procesarPaquetes())
+                    $this->_hub->procesarActividad(0);
+                else $this->_hub->procesarActividad(1);
+            }
         } while (!$bTodosTerminaron);
         $this->_log->output('INFO: todas las tareas han terminado.');
 

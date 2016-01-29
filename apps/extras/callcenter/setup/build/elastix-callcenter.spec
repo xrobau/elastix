@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Jan 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: repeat signal propagation on shutdown in case child process
+  has trouble processing it. Also silence warning message on shutdown of core
+  process when the shutdown is intended. Ported from CallCenterPRO.
+  SVN Rev[7441]
+
 * Thu Jan 28 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: remove logged-off agent from all known queues on which it is
   present outside dialer control. This prevents calls from being assigned from

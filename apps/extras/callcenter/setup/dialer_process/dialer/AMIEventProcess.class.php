@@ -2544,10 +2544,10 @@ Uniqueid: 1429642067.241008
         $bCambioColas = $a->asignarEstadoEnColas($estadoCola);
         if ($bCambioColas && $a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
 
+        $sAgente = $a->channel;
         if ($a->estado_consola == 'logged-in') {
             $diffcolas = $a->diferenciaColasDinamicas();
             if (is_array($diffcolas)) {
-                $sAgente = $a->channel;
 
                 // Colas a las que no pertenece y debería pertenecer
                 if (count($diffcolas[0]) > 0) {
@@ -2566,6 +2566,21 @@ Uniqueid: 1429642067.241008
                     $this->_log->output('INFO: agente '.$sAgente.' debe ser '.
                         'quitado de las colas ['.implode(' ', $diffcolas[1]).']');
                     foreach ($diffcolas[1] as $q) {
+                        $this->_ami->asyncQueueRemove(
+                            array($this, '_cb_QueueRemove'),
+                            NULL,
+                            $q, $sAgente);
+                    }
+                }
+            }
+        } else {
+            // El agente dinámico no debería estar metido en ninguna de las colas
+            if ($a->type != 'Agent') {
+                $diffcolas = array_intersect($a->colas_actuales, $a->colas_dinamicas);
+                if (count($diffcolas) > 0) {
+                    $this->_log->output('INFO: agente DESLOGONEADO '.$sAgente.' debe ser '.
+                        'quitado de las colas ['.implode(' ', $diffcolas).']');
+                    foreach ($diffcolas as $q) {
                         $this->_ami->asyncQueueRemove(
                             array($this, '_cb_QueueRemove'),
                             NULL,

@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Jan 28 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: remove logged-off agent from all known queues on which it is
+  present outside dialer control. This prevents calls from being assigned from
+  the queue to the logged-off agent.
+  SVN Rev[7440]
+
 * Wed Jan 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): reimplement pauseagent in order to recover from TOCTOU
   condition. Agent status is verified in AMIEventProcess a second time in order

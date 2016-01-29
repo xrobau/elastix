@@ -806,6 +806,12 @@ function _manejarSesionActiva_HTML_generarInformacion($smarty, $sDirLocalPlantil
 
     // Asignaciones independientes del tipo de llamada
     $smarty->assign(array(
+        'LBL_NOMBRE_CAMPANIA'           =>  _tr('Campaign'),
+        'LBL_CALL_ID'                   =>  _tr('Internal Call ID'),
+        'TEXTO_NOMBRE_CAMPANIA'         =>  (isset($infoCampania['name']) ? $infoCampania['name'] : '(none)'),
+        'TEXTO_CALL_ID'                 =>  $infoLlamada['calltype'].'-'.
+            (isset($infoLlamada['campaign_id']) ? $infoLlamada['campaign_id'] : 'q'.$infoLlamada['queue']).'-'.
+            (isset($infoLlamada['contact_id']) ? 'c'.$infoLlamada['contact_id'] : (isset($infoLlamada['callid']) ? $infoLlamada['callid'] : $infoLlamada['call_id'])),
         'CALLINFO_CALLTYPE'             =>  $infoLlamada['calltype'],
         'LBL_CONTACTO_TELEFONO'         =>  _tr('Phone number'),
         'TEXTO_CONTACTO_TELEFONO'       =>  $infoLlamada['phone'],

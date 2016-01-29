@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Jan 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: add campaign name and call ID to the call information
+  panel. Ported from CallCenterPRO.
+  SVN Rev[7442]
 - CHANGED: Dialer: repeat signal propagation on shutdown in case child process
   has trouble processing it. Also silence warning message on shutdown of core
   process when the shutdown is intended. Ported from CallCenterPRO.

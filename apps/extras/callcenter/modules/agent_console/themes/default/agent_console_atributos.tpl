@@ -1,5 +1,13 @@
 <table border="0">
     <tbody>
+        <tr>
+            <td><label>{$LBL_NOMBRE_CAMPANIA|escape:"html"}: </label></td>
+            <td>{$TEXTO_NOMBRE_CAMPANIA|escape:"html"}</td>
+        </tr>
+        <tr>
+            <td><label>{$LBL_CALL_ID|escape:"html"}: </label></td>
+            <td>{$TEXTO_CALL_ID|escape:"html"}</td>
+        </tr>
     {if $CALLINFO_CALLTYPE == 'incoming'}
         <tr>
             <td><label for="llamada_entrante_contacto_telefono">{$LBL_CONTACTO_TELEFONO|escape:"html"}: </label></td>

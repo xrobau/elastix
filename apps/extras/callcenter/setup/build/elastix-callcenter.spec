@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Fri Jan 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: CallCenter: add index to calls table for queries by schedule date.
+  SVN Rev[7443]
 - CHANGED: Agent Console: add campaign name and call ID to the call information
   panel. Ported from CallCenterPRO.
   SVN Rev[7442]

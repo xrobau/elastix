@@ -115,6 +115,9 @@ if (file_exists($path_script_db))
     crearIndiceSiNoExiste($pDB, 'call_center', 'agent',
         'agent_type',
         "ADD KEY `agent_type` (`estatus`,`type`,`number`)");
+    crearIndiceSiNoExiste($pDB, 'call_center', 'calls',
+        'campaign_date_schedule',
+        "ADD KEY `campaign_date_schedule` (`id_campaign`, `date_init`, `date_end`, `time_init`, `time_end`)");
 
     // Asegurarse de que todo agente tiene una contraseña de ECCP
     $pDB->genQuery('UPDATE agent SET eccp_password = SHA1(CONCAT(NOW(), RAND(), number)) WHERE eccp_password IS NULL');

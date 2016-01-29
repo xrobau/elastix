@@ -145,6 +145,7 @@ CREATE TABLE IF NOT EXISTS `calls` (
   PRIMARY KEY  (`id`),
   KEY `id_campaign` (`id_campaign`),
   KEY `calls_ibfk_2` (`id_agent`),
+  KEY `campaign_date_schedule` (`id_campaign`, `date_init`, `date_end`, `time_init`, `time_end`),
   CONSTRAINT `calls_ibfk_1` FOREIGN KEY (`id_campaign`) REFERENCES `campaign` (`id`),
   CONSTRAINT `calls_ibfk_2` FOREIGN KEY (`id_agent`) REFERENCES `agent` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -1041,6 +1042,35 @@ DELIMITER ; ++
 
 CALL temp_indice_agent_2016_01_27();
 DROP PROCEDURE IF EXISTS temp_indice_agent_2016_01_27;
+
+
+/* Procedimiento para agregar índices necesarios para acelerar agent */
+DELIMITER ++ ;
+
+DROP PROCEDURE IF EXISTS temp_indice_agent_2016_01_29 ++
+CREATE PROCEDURE temp_indice_agent_2016_01_29 ()
+    READS SQL DATA
+    MODIFIES SQL DATA
+BEGIN
+    DECLARE l_existe_indice tinyint(1);
+
+    SET l_existe_indice = 0;
+
+    /* Verificar existencia de índices que deben agregarse */
+    SELECT COUNT(*) INTO l_existe_indice
+    FROM INFORMATION_SCHEMA.STATISTICS
+    WHERE TABLE_SCHEMA = 'call_center'
+        AND TABLE_NAME = 'calls'
+        AND INDEX_NAME = 'campaign_date_schedule';
+    IF l_existe_indice = 0 THEN
+        ALTER TABLE calls ADD KEY `campaign_date_schedule` (`id_campaign`, `date_init`, `date_end`, `time_init`, `time_end`);
+    END IF;
+END;
+++
+DELIMITER ; ++
+
+CALL temp_indice_agent_2016_01_29();
+DROP PROCEDURE IF EXISTS temp_indice_agent_2016_01_29;
 
 
 /*!40000 ALTER TABLE `queue_call_entry` ENABLE KEYS */;

@@ -624,5 +624,14 @@ class Agente
             $this->_log->output("ERR: falla al quitar {$this->channel} de cola {$q}: ".print_r($r, TRUE));
         }
     }
+
+    public function _cb_QueuePause($r, $sAgente, $nstate)
+    {
+        if ($r['Response'] != 'Success') {
+            $this->_log->output('ERR: '.__METHOD__.' (internal) no se puede '.
+                ($nstate ? 'pausar' : 'despausar').' al agente '.$sAgente.': '.
+                $sAgente.' - '.$r['Message']);
+        }
+    }
 }
 ?>

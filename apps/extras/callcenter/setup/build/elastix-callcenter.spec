@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add QueuePause callback to Agent object for future commits.
+  SVN Rev[7446]
 - CHANGED: Dialer: the Agent object now needs a reference to the log.
   SVN Rev[7445]
 - CHANGED: Dialer: by using asynchronous AMI request, form pause removal is now

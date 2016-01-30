@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGE: Dialer: by using asynchronous AMI request, form pause removal is now
+  reimplemented without bouncing off CampaignProcess.
+  SVN Rev[7444]
+
 * Fri Jan 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: CallCenter: add index to calls table for queries by schedule date.
   SVN Rev[7443]

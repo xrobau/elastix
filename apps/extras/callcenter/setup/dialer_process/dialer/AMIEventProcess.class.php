@@ -411,7 +411,10 @@ class AMIEventProcess extends TuberiaProcess
                     $this->_cancelarAlarma($a->alarma_formpause);
                 $a->clearFormPause();
                 if ($a->num_pausas == 0) {
-                    $this->_tuberia->msg_CampaignProcess_asyncQueuePause($a->channel, 'false');
+                    $this->_ami->asyncQueuePause(
+                        array($this, '_cb_QueuePause'),
+                        array($a->channel, FALSE),
+                        NULL, $a->channel, FALSE);
                 }
             }
         }
@@ -2343,7 +2346,10 @@ Uniqueid: 1429642067.241008
             }
             $a->clearFormPause();
             if ($a->num_pausas == 0) {
-                $this->_tuberia->msg_CampaignProcess_asyncQueuePause($a->channel, 'false');
+                $this->_ami->asyncQueuePause(
+                    array($this, '_cb_QueuePause'),
+                    array($a->channel, FALSE),
+                    NULL, $a->channel, FALSE);
             }
         }
     }

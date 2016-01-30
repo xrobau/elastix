@@ -102,7 +102,9 @@ fi
 
 %changelog
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGE: Dialer: by using asynchronous AMI request, form pause removal is now
+- CHANGED: Dialer: the Agent object now needs a reference to the log.
+  SVN Rev[7445]
+- CHANGED: Dialer: by using asynchronous AMI request, form pause removal is now
   reimplemented without bouncing off CampaignProcess.
   SVN Rev[7444]
 

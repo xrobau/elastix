@@ -38,25 +38,25 @@ class ListaAgentes implements IteratorAggregate
     );
 
     function numLlamadas() { return count($this->_agentes); }
-    
-    function nuevoAgente($idAgente, $iNumero, $sNombre, $bEstatus, $sType = 'Agent')
+
+    function nuevoAgente($idAgente, $iNumero, $sNombre, $bEstatus, $sType, $log)
     {
-        $o = new Agente($this, $idAgente, $iNumero, $sNombre, $bEstatus, $sType);
+        $o = new Agente($this, $idAgente, $iNumero, $sNombre, $bEstatus, $sType, $log);
         $this->_agentes[] = $o;
         return $o;
     }
-    
+
     function getIterator() {
         return new ArrayIterator($this->_agentes);
     }
-    
+
     function agregarIndice($sIndice, $key, Agente $obj)
     {
         if (!isset($this->_indices[$sIndice]))
             die(__METHOD__.' - índice no implementado: '.$sIndice);
         $this->_indices[$sIndice][$key] = $obj;
     }
-    
+
     function removerIndice($sIndice, $key)
     {
         if (!isset($this->_indices[$sIndice]))
@@ -68,10 +68,10 @@ class ListaAgentes implements IteratorAggregate
     {
         if (!isset($this->_indices[$sIndice]))
             die(__METHOD__.' - índice no implementado: '.$sIndice);
-        return isset($this->_indices[$sIndice][$key]) 
+        return isset($this->_indices[$sIndice][$key])
             ? $this->_indices[$sIndice][$key] : NULL;
     }
-    
+
     function remover(Agente $obj)
     {
         foreach (array_keys($this->_agentes) as $k) {
@@ -88,7 +88,7 @@ class ListaAgentes implements IteratorAggregate
             }
         }
     }
-    
+
     function dump($log)
     {
         foreach ($this->_agentes as &$agente) $agente->dump($log);

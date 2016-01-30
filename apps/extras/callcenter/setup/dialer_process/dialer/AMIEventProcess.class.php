@@ -1384,7 +1384,7 @@ class AMIEventProcess extends TuberiaProcess
             	// Agente nuevo por registrar
                 $a = $this->_listaAgentes->nuevoAgente($tupla['id'],
                     $tupla['number'], $tupla['name'], ($tupla['estatus'] == 'A'),
-                    $tupla['type']);
+                    $tupla['type'], $this->_log);
             } elseif ($a->id_agent != $tupla['id']) {
             	// Agente ha cambiado de ID de base de datos, y está deslogoneado
                 if ($a->estado_consola == 'logged-out') {

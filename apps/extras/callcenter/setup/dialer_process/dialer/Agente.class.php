@@ -40,6 +40,8 @@ define('AST_DEVICE_ONHOLD',     8);
 
 class Agente
 {
+    private $_log;
+
     private $_listaAgentes;
 
     /* Referencia a la llamada atendida por el agente, o NULL si no atiende.
@@ -131,13 +133,14 @@ class Agente
     var $alarma_formpause = NULL;
 
     function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
-        $bEstatus, $sType = 'Agent')
+        $bEstatus, $sType, $log)
     {
         $this->_listaAgentes = $lista;
         $this->_id_agent = (int)$idAgente;
         $this->_name = (string)$sNombre;
         $this->_estatus = (bool)$bEstatus;
         $this->_type = (string)$sType;
+        $this->_log = $log;
         $this->resetTimeout();
 
         // Se setea vía interfaz pública para invocar __set()

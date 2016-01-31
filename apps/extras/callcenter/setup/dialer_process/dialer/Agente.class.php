@@ -389,7 +389,7 @@ class Agente
     {
         $this->_num_pausas++;
         if ($this->_num_pausas == 1) {
-            $this->_ami->asyncQueuePause(
+            $ami->asyncQueuePause(
                 array($this, '_cb_QueuePause'),
                 array($this->channel, TRUE),
                 NULL, $this->channel, TRUE);

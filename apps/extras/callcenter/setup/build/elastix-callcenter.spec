@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: by using asynchronous AMI requests, agent reservation for scheduled
+  calls is now reimplemented race-free in AMIEventProcess.
+  SVN Rev[7453]
 - CHANGED: Dialer: bind the act of QueuePause to setBreak and clearBreak.
   SVN Rev[7452]
 - CHANGED: Dialer: bind the act of QueueUnpause to clearFormPause. Also prepare
@@ -121,7 +124,7 @@ fi
   SVN Rev[7446]
 - CHANGED: Dialer: the Agent object now needs a reference to the log.
   SVN Rev[7445]
-- CHANGED: Dialer: by using asynchronous AMI request, form pause removal is now
+- CHANGED: Dialer: by using asynchronous AMI requests, form pause removal is now
   reimplemented without bouncing off CampaignProcess.
   SVN Rev[7444]
 

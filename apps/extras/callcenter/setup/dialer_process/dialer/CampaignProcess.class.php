@@ -943,11 +943,11 @@ SQL_LLAMADA_COLOCADA;
 
     private function _actualizarLlamadasAgendables($infoCampania, $datosTrunk)
     {
-    	$listaAgentesAgendados = $this->_listarAgentesAgendadosReserva($infoCampania['id']);
+        $listaAgentesAgendados = $this->_listarAgentesAgendadosReserva($infoCampania['id']);
         if (count($listaAgentesAgendados) <= 0) return array();
 
         if ($this->DEBUG) {
-        	$this->_log->output('DEBUG: '.__METHOD__.': lista de agentes con llamadas agendadas: '.
+            $this->_log->output('DEBUG: '.__METHOD__.': lista de agentes con llamadas agendadas: '.
                 print_r($listaAgentesAgendados, 1));
         }
         $resultado = $this->_tuberia->AMIEventProcess_agentesAgendables($listaAgentesAgendados);
@@ -956,27 +956,11 @@ SQL_LLAMADA_COLOCADA;
                 print_r($resultado, 1));
         }
 
-        // Poner en pausa a todos los agentes que no estén en pausa ya
-        foreach ($resultado['entraron'] as $sAgente) {
-        	if ($this->DEBUG) {
-        		$this->_log->output('DEBUG: '.__METHOD__.': pausando agente '.$sAgente);
-        	}
-            $r = $this->_ami->QueuePause(NULL /*$infoCampania['queue']*/, $sAgente, 'true');
-            if ($this->DEBUG) {
-                $this->_log->output('DEBUG: '.__METHOD__.': resultado de pausa es: '.print_r($r, 1));
-                /*
-                $this->_log->output("DEBUG: (campania $infoCampania->id cola $infoCampania->queue) " .
-                    "resultado de QueuePause($infoCampania->queue, \"Agent/$idAgente\", 'true') : ".
-                    print_r($resultado, TRUE));
-                */
-            }
-        }
-
         // Leer una llamada para cada agente que se puede usar en agendamiento
         $listaLlamadas = array();
         $pid = posix_getpid();
-        foreach ($resultado['ociosos'] as $sAgente) {
-        	$tupla = $this->_listarLlamadasAgendables($infoCampania['id'], $sAgente);
+        foreach ($resultado as $sAgente) {
+            $tupla = $this->_listarLlamadasAgendables($infoCampania['id'], $sAgente);
             if (is_array($tupla)) {
                 $tupla['actionid'] = sprintf('%d-%d-%d', $pid, $infoCampania['id'], $tupla['id']);
                 $tupla['dialstring'] = str_replace('$OUTNUM$', $tupla['phone'], $datosTrunk['TRUNK']);
@@ -998,7 +982,7 @@ SQL_LLAMADA_COLOCADA;
                         "usado por llamada a punto de originar.");
                 }
             } else {
-            	$this->_log->output('WARN: '.__METHOD__.': no se encontró '.
+                $this->_log->output('WARN: '.__METHOD__.': no se encontró '.
                     'llamada agendada esperada para agente: '.$sAgente);
             }
         }
@@ -1781,18 +1765,15 @@ PETICION_LLAMADAS_AGENTE;
 
     private function _verificarFinLlamadasAgendables($sAgente, $id_campania, $infoSeguimiento)
     {
-    	if (is_null($this->_ami)) return;
+        if (is_null($this->_ami)) return;
         $l = $this->_contarLlamadasAgendablesReserva($id_campania, $sAgente);
         if ($l['AHORA'] == 0 && $l['RESERVA'] == 0) {
-        	/* Por ahora el agente ya no tiene llamadas agendables y se debe
+            /* Por ahora el agente ya no tiene llamadas agendables y se debe
              * reducir la cuenta de pausas del agente. Si la cuenta es 1,
              * entonces se debe quitar la pausa real. */
             if ($this->DEBUG) {
-            	$this->_log->output('DEBUG: '.__METHOD__.': el siguiente agente '.
+                $this->_log->output('DEBUG: '.__METHOD__.': el siguiente agente '.
                     'no tiene más llamadas agendadas: '.$sAgente);
-            }
-            if ($infoSeguimiento['num_pausas'] == 1 && !is_null($this->_ami)) {
-            	$r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
             }
             $this->_tuberia->msg_AMIEventProcess_quitarReservaAgente($sAgente);
         }

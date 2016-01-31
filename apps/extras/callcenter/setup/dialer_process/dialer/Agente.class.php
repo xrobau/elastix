@@ -290,17 +290,6 @@ class Agente
                 $this->_listaAgentes->agregarIndice('agentchannel', $sCanalNuevo, $this);
             }
             break;
-        case 'reservado':
-            $v = (bool)$v;
-            if ($this->_reservado != $v) {
-            	$this->_reservado = $v;
-                if ($this->_reservado) {
-                	$this->_num_pausas++;
-                } else {
-                	if ($this->_num_pausas > 0) $this->_num_pausas--;
-                }
-            }
-            break;
         default:
             die(__METHOD__.' - propiedad no implementada: '.$s);
         }
@@ -325,6 +314,31 @@ class Agente
             $this->_id_audit_break = NULL;
             $this->_decrementarPausas($ami);
         }
+        $this->resetTimeout();
+    }
+
+    public function setReserved($ami)
+    {
+        if (!$this->_reservado) {
+            $this->_reservado = TRUE;
+            $this->_incrementarPausas($ami);
+        }
+        $this->resetTimeout();
+    }
+
+    public function clearReserved($ami)
+    {
+        if ($this->_reservado) {
+            $this->_reservado = FALSE;
+            $this->_decrementarPausas($ami);
+        }
+
+        // ATENCIÓN: la implementación anterior anulaba llamada_agendada siempre
+        if (!is_null($this->llamada_agendada)) {
+            $this->llamada_agendada->agente_agendado = NULL;
+            $this->llamada_agendada = NULL;
+        }
+
         $this->resetTimeout();
     }
 
@@ -456,7 +470,7 @@ class Agente
         $this->clearBreak($ami);
         $this->clearHold();
         $this->clearFormPause($ami);
-        $this->reservado = FALSE;
+        $this->clearReserved($ami);
         $this->_estado_consola = 'logged-out';
         $this->_num_pausas = 0;
         if (!is_null($this->_Uniqueid))

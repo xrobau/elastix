@@ -430,11 +430,7 @@ class AMIEventProcess extends TuberiaProcess
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (!is_null($a)) {
-            $a->reservado = FALSE;
-            if (!is_null($a->llamada_agendada)) {
-                $a->llamada_agendada->agente_agendado = NULL;
-            	$a->llamada_agendada = NULL;
-            }
+            $a->clearReserved($this->_ami);
         }
     }
 
@@ -883,16 +879,12 @@ class AMIEventProcess extends TuberiaProcess
 
     private function _agentesAgendables($listaAgendables)
     {
-        $entraronPausa = array();
         $ociosos = array();
         foreach ($this->_listaAgentes as $a) if ($a->estado_consola == 'logged-in') {
             $sAgente = $a->channel;
             if (in_array($sAgente, $listaAgendables)) {
                 // Agente sí está agendado
-                if (!$a->reservado) {
-                    $a->reservado = TRUE;
-                    if ($a->num_pausas == 1) $entraronPausa[] = $sAgente;
-                }
+                $a->setReserved($this->_ami);
 
                 /* Un agente ocioso para agendamiento debe estar reservado, sin
                  * llamada activa, sin llamada agendada, y sin ninguna otra pausa.
@@ -904,10 +896,7 @@ class AMIEventProcess extends TuberiaProcess
                     $ociosos[] = $sAgente;
             }
         }
-        return array(
-            'entraron'  =>  $entraronPausa,
-            'ociosos'   =>  $ociosos,
-        );
+        return $ociosos;
     }
 
     private function _actualizarConfig($k, $v)

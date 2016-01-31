@@ -114,7 +114,6 @@ class CampaignProcess extends TuberiaProcess
             'sqlupdatecalls', 'sqlinsertcurrentcalls', 'sqldeletecurrentcalls',
             'sqlupdatecurrentcalls', 'sqlupdatestatcampaign',
             'actualizarCanalRemoto', 'finalsql', 'verificarFinLlamadasAgendables',
-            'asyncQueuePause',
             'agregarArchivoGrabacion') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
@@ -1490,15 +1489,6 @@ PETICION_LLAMADAS_AGENTE;
         call_user_func_array(array($this, '_agregarArchivoGrabacion'), $datos);
     }
 
-    public function msg_asyncQueuePause($sFuente, $sDestino,
-            $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_asyncQueuePause'), $datos);
-    }
-
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
     	$this->_log->output('INFO: recibido mensaje de finalización, se detienen campañas...');
@@ -1805,14 +1795,6 @@ PETICION_LLAMADAS_AGENTE;
             	$r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
             }
             $this->_tuberia->msg_AMIEventProcess_quitarReservaAgente($sAgente);
-        }
-    }
-
-    private function _asyncQueuePause($channel, $nstate)
-    {
-        $r = $this->_ami->QueuePause(NULL, $channel, $nstate);
-        if ($r['Response'] != 'Success') {
-            $this->_log->output("ERR: falla al cambiar pausa $channel a $nstate: ".print_r($r, TRUE));
         }
     }
 

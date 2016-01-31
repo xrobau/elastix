@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: remove CampaignProcess_asyncQueuePause.
+  SVN Rev[7448]
 - CHANGED: Dialer: bind the act of QueuePause to setFormPause. This also makes
   the CampaignProcess_asyncQueuePause message unnecessary.
   SVN Rev[7447]

@@ -2106,7 +2106,7 @@ Uniqueid: 1429642067.241008
                 $llamada->llamadaEnlazadaAgente(
                     $params['local_timestamp_received'], $a, $sRemChannel,
                     ($llamada->uniqueid == $params['Uniqueid1']) ? $params['Uniqueid2'] : $params['Uniqueid1'],
-                    $sAgentChannel);
+                    $sAgentChannel, $this->_ami);
             }
         } else {
         	/* El Link de la pata auxiliar con otro canal puede indicar el

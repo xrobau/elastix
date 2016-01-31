@@ -358,18 +358,24 @@ class Agente
         $this->resetTimeout();
     }
 
-    public function setFormPause()
+    public function setFormPause($ami)
     {
         if (!$this->_form_pause) {
             $this->_form_pause = TRUE;
             $this->_num_pausas++;
+            if ($this->_num_pausas == 1) {
+                // La pausa por formulario es la primera pausa
+                $this->_ami->asyncQueuePause(
+                    array($this, '_cb_QueuePause'),
+                    array($this->channel, TRUE),
+                    NULL, $this->channel, TRUE);
+            }
         }
         $this->resetTimeout();
     }
 
     public function setIdFormPause($id_fp, $id_audit_fp)
     {
-        $this->setFormPause();
         $this->_id_fp = $id_fp;
         $this->_id_audit_fp = $id_audit_fp;
     }

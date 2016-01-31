@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: bind the act of QueuePause to setFormPause. This also makes
+  the CampaignProcess_asyncQueuePause message unnecessary.
+  SVN Rev[7447]
 - CHANGED: Dialer: add QueuePause callback to Agent object for future commits.
   SVN Rev[7446]
 - CHANGED: Dialer: the Agent object now needs a reference to the log.

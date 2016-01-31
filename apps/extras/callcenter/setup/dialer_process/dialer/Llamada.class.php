@@ -708,7 +708,7 @@ class Llamada
     }
 
     public function llamadaEnlazadaAgente($timestamp, $agent, $sRemChannel,
-        $uniqueid_agente, $sAgentChannel)
+        $uniqueid_agente, $sAgentChannel, $ami)
     {
         $this->agente = $agent;
         $this->agente->asignarLlamadaAtendida($this, $uniqueid_agente);
@@ -808,11 +808,7 @@ class Llamada
         if (!is_null($this->campania) && !is_null($this->campania->formpause) &&
             in_array($this->campania->tipo_campania, array('incoming', 'outgoing'))) {
 
-            $this->agente->setFormPause();
-            if ($this->agente->num_pausas == 1) {
-                // La pausa por formulario es la primera pausa
-                $this->_tuberia->msg_CampaignProcess_asyncQueuePause($this->agente->channel, 'true');
-            }
+            $this->agente->setFormPause($ami);
         }
 
         // Verificación de consistencia

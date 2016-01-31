@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: bind the act of QueuePause to setBreak and clearBreak.
+  SVN Rev[7452]
 - CHANGED: Dialer: bind the act of QueueUnpause to clearFormPause. Also prepare
   methods to increment and decrement pause counts with associated
   asyncQueuePause for later refactoring.

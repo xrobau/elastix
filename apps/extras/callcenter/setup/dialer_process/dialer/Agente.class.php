@@ -308,24 +308,22 @@ class Agente
 
     public function resetTimeout() { $this->_ultima_actividad = time(); }
 
-    public function setBreak($id_break, $id_audit_break)
+    public function setBreak($ami, $id_break, $id_audit_break)
     {
-    	if (!is_null($id_break) && !is_null($id_audit_break)) {
-    		$this->_id_break = (int)$id_break;
+        if (!is_null($id_break) && !is_null($id_audit_break)) {
+            $this->_id_break = (int)$id_break;
             $this->_id_audit_break = (int)$id_audit_break;
-            $this->_num_pausas++;
-    	} else {
-            $this->clearBreak();
-    	}
+            $this->_incrementarPausas($ami);
+        }
         $this->resetTimeout();
     }
 
-    public function clearBreak()
+    public function clearBreak($ami)
     {
         if (!is_null($this->_id_audit_break)) {
             $this->_id_break = NULL;
             $this->_id_audit_break = NULL;
-            if ($this->_num_pausas > 0) $this->_num_pausas--;
+            $this->_decrementarPausas($ami);
         }
         $this->resetTimeout();
     }
@@ -388,7 +386,7 @@ class Agente
     private function _incrementarPausas($ami)
     {
         $this->_num_pausas++;
-        if ($this->_num_pausas == 1) {
+        if ($this->_num_pausas == 1 && count($this->colas_actuales) > 0) {
             $ami->asyncQueuePause(
                 array($this, '_cb_QueuePause'),
                 array($this->channel, TRUE),
@@ -400,7 +398,7 @@ class Agente
     {
         if ($this->_num_pausas > 0) {
             $this->_num_pausas--;
-            if ($this->_num_pausas == 0) {
+            if ($this->_num_pausas == 0 && count($this->colas_actuales) > 0) {
                 $ami->asyncQueuePause(
                     array($this, '_cb_QueuePause'),
                     array($this->channel, FALSE),
@@ -455,7 +453,7 @@ class Agente
     // Se llama en Agentlogoff
     public function terminarLoginAgente($ami)
     {
-        $this->clearBreak();
+        $this->clearBreak($ami);
         $this->clearHold();
         $this->clearFormPause($ami);
         $this->reservado = FALSE;

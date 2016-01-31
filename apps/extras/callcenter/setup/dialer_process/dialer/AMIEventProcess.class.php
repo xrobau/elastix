@@ -358,7 +358,7 @@ class AMIEventProcess extends TuberiaProcess
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
         if (!is_null($a)) {
             if (!is_null($a->id_break)) {
-                $a->clearBreak();
+                $a->clearBreak($this->_ami);
             }
         }
     }
@@ -1337,14 +1337,7 @@ class AMIEventProcess extends TuberiaProcess
         } elseif (!is_null($a->id_break)) {
             $r = array(417, 'Agent already in break');
         } else {
-            if ($a->num_pausas == 0 && count($a->colas_actuales) > 0) {
-                // Se manda a pausar el agente
-                $this->_ami->asyncQueuePause(
-                    array($this, '_cb_QueuePause'),
-                    array($sAgente, TRUE),
-                    NULL, $sAgente, TRUE);
-            }
-            $a->setBreak($idBreak, $idAuditBreak);
+            $a->setBreak($this->_ami, $idBreak, $idAuditBreak);
         }
         $this->_tuberia->enviarRespuesta($sFuente, $r);
     }

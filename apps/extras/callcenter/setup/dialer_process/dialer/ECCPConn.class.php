@@ -1779,16 +1779,6 @@ LEER_CAMPANIA;
         	return $xml_response;
         }
 
-        // Ejecutar el final de pausa a través del AMI
-        if ($infoSeguimiento['num_pausas'] == 1) {
-            $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
-            if ($r['Response'] != 'Success') {
-                $this->_log->output('ERR: (internal) no se puede sacar al agente de pausa: '.
-                    $sAgente.' - '.$r['Message']);
-                $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 500, 'Unable to stop agent break');
-                return $xml_response;
-            }
-        }
         $iTimestampFinalPausa = time();
         $this->_tuberia->msg_AMIEventProcess_quitarBreakAgente($sAgente);
         marcarFinalBreakAgente($this->_db,

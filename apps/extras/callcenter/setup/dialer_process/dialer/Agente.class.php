@@ -362,14 +362,7 @@ class Agente
     {
         if (!$this->_form_pause) {
             $this->_form_pause = TRUE;
-            $this->_num_pausas++;
-            if ($this->_num_pausas == 1) {
-                // La pausa por formulario es la primera pausa
-                $this->_ami->asyncQueuePause(
-                    array($this, '_cb_QueuePause'),
-                    array($this->channel, TRUE),
-                    NULL, $this->channel, TRUE);
-            }
+            $this->_incrementarPausas($ami);
         }
         $this->resetTimeout();
     }
@@ -380,16 +373,40 @@ class Agente
         $this->_id_audit_fp = $id_audit_fp;
     }
 
-    public function clearFormPause()
+    public function clearFormPause($ami)
     {
         if ($this->_form_pause) {
             $this->_form_pause = FALSE;
             $this->_id_fp = NULL;
             $this->_id_audit_fp = NULL;
             $this->alarma_formpause = NULL;
-            if ($this->_num_pausas > 0) $this->_num_pausas--;
+            $this->_decrementarPausas($ami);
         }
         $this->resetTimeout();
+    }
+
+    private function _incrementarPausas($ami)
+    {
+        $this->_num_pausas++;
+        if ($this->_num_pausas == 1) {
+            $this->_ami->asyncQueuePause(
+                array($this, '_cb_QueuePause'),
+                array($this->channel, TRUE),
+                NULL, $this->channel, TRUE);
+        }
+    }
+
+    private function _decrementarPausas($ami)
+    {
+        if ($this->_num_pausas > 0) {
+            $this->_num_pausas--;
+            if ($this->_num_pausas == 0) {
+                $ami->asyncQueuePause(
+                    array($this, '_cb_QueuePause'),
+                    array($this->channel, FALSE),
+                    NULL, $this->channel, FALSE);
+            }
+        }
     }
 
     public function iniciarLoginAgente($sExtension)
@@ -436,11 +453,11 @@ class Agente
     }
 
     // Se llama en Agentlogoff
-    public function terminarLoginAgente()
+    public function terminarLoginAgente($ami)
     {
         $this->clearBreak();
         $this->clearHold();
-        $this->clearFormPause();
+        $this->clearFormPause($ami);
         $this->reservado = FALSE;
         $this->_estado_consola = 'logged-out';
         $this->_num_pausas = 0;

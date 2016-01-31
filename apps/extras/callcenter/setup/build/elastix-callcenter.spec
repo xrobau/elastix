@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: bind the act of QueueUnpause to clearFormPause. Also prepare
+  methods to increment and decrement pause counts with associated
+  asyncQueuePause for later refactoring.
+  SVN Rev[7450]
 - CHANGED: Dialer (ECCP): move responsibility to unpause agent from
   ECCPWorkerProcess to AMIEventProcess to expose a pattern of asyncQueuePause
   right after clearFormPause.

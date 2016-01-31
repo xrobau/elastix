@@ -172,7 +172,7 @@ class AMIEventProcess extends TuberiaProcess
                         $a->id_agent,
                         $a->id_sesion,
                         $a->auditpauses);
-                    $a->terminarLoginAgente();
+                    $a->terminarLoginAgente($this->_ami);
                 }
             }
 
@@ -409,13 +409,7 @@ class AMIEventProcess extends TuberiaProcess
                 // Recuperación en caso de error - quitar pausa
                 if (!is_null($a->alarma_formpause))
                     $this->_cancelarAlarma($a->alarma_formpause);
-                $a->clearFormPause();
-                if ($a->num_pausas == 0) {
-                    $this->_ami->asyncQueuePause(
-                        array($this, '_cb_QueuePause'),
-                        array($a->channel, FALSE),
-                        NULL, $a->channel, FALSE);
-                }
+                $a->clearFormPause($this->_ami);
             }
         }
     }
@@ -427,13 +421,7 @@ class AMIEventProcess extends TuberiaProcess
             if ($a->formpause) {
                 if (!is_null($a->alarma_formpause))
                     $this->_cancelarAlarma($a->alarma_formpause);
-                $a->clearFormPause();
-                if ($a->num_pausas == 0) {
-                    $this->_ami->asyncQueuePause(
-                        array($this, '_cb_QueuePause'),
-                        array($a->channel, FALSE),
-                        NULL, $a->channel, FALSE);
-                }
+                $a->clearFormPause($this->_ami);
             }
         }
     }
@@ -2350,13 +2338,7 @@ Uniqueid: 1429642067.241008
                 $this->_tuberia->msg_ECCPProcess_formpause_auditend($a->channel,
                     $a->id_audit_formpause, time());
             }
-            $a->clearFormPause();
-            if ($a->num_pausas == 0) {
-                $this->_ami->asyncQueuePause(
-                    array($this, '_cb_QueuePause'),
-                    array($a->channel, FALSE),
-                    NULL, $a->channel, FALSE);
-            }
+            $a->clearFormPause($this->_ami);
         }
     }
 
@@ -2758,7 +2740,7 @@ Uniqueid: 1429642067.241008
             }
         }
 
-        $a->terminarLoginAgente();
+        $a->terminarLoginAgente($this->_ami);
     }
 
     private function _dumpstatus()

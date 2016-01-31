@@ -1212,15 +1212,6 @@ LEER_CAMPANIA;
             !$infoSeguimiento['formpause'])
             return array();
 
-        // Ejecutar el final de pausa a través del AMI
-        if ($infoSeguimiento['num_pausas'] == 1) {
-            $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
-            if ($r['Response'] != 'Success') {
-                $this->_log->output('ERR: (internal) no se puede sacar al agente de pausa: '.
-                    $sAgente.' - '.$r['Message']);
-                return array();
-            }
-        }
         $this->_tuberia->msg_AMIEventProcess_quitarFormPauseAgente($sAgente);
 
         // Sólo se emite el evento de fin de pausa si hay auditoría que cerrar
@@ -3823,16 +3814,6 @@ LOG_CAMPANIA_SALIENTE;
             return $xml_response;
         }
 
-        // Ejecutar el final de pausa a través del AMI
-        if ($infoSeguimiento['num_pausas'] == 1) {
-            $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
-            if ($r['Response'] != 'Success') {
-                $this->_log->output('ERR: (internal) no se puede sacar al agente de pausa: '.
-                    $sAgente.' - '.$r['Message']);
-                $this->_agregarRespuestaFallo($xml_unpauseAgentResponse, 500, 'Unable to stop agent form pause');
-                return $xml_response;
-            }
-        }
         $this->_tuberia->msg_AMIEventProcess_quitarFormPauseAgente($sAgente);
 
         // Sólo se emite el evento de fin de pausa si hay auditoría que cerrar

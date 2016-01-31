@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): move responsibility to unpause agent from
+  ECCPWorkerProcess to AMIEventProcess to expose a pattern of asyncQueuePause
+  right after clearFormPause.
+  SVN Rev[7449]
 - CHANGED: Dialer: remove CampaignProcess_asyncQueuePause.
   SVN Rev[7448]
 - CHANGED: Dialer: bind the act of QueuePause to setFormPause. This also makes

@@ -428,6 +428,12 @@ class AMIEventProcess extends TuberiaProcess
                 if (!is_null($a->alarma_formpause))
                     $this->_cancelarAlarma($a->alarma_formpause);
                 $a->clearFormPause();
+                if ($a->num_pausas == 0) {
+                    $this->_ami->asyncQueuePause(
+                        array($this, '_cb_QueuePause'),
+                        array($a->channel, FALSE),
+                        NULL, $a->channel, FALSE);
+                }
             }
         }
     }

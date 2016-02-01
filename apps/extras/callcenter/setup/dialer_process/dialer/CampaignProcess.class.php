@@ -113,7 +113,7 @@ class CampaignProcess extends TuberiaProcess
         foreach (array('requerir_nuevaListaAgentes', 'sqlinsertcalls',
             'sqlupdatecalls', 'sqlinsertcurrentcalls', 'sqldeletecurrentcalls',
             'sqlupdatecurrentcalls', 'sqlupdatestatcampaign',
-            'actualizarCanalRemoto', 'finalsql', 'verificarFinLlamadasAgendables',
+            'finalsql', 'verificarFinLlamadasAgendables',
             'agregarArchivoGrabacion') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
@@ -1399,14 +1399,6 @@ PETICION_LLAMADAS_AGENTE;
         $this->_actualizarInformacionRemota_agentes();
     }
 
-    public function msg_actualizarCanalRemoto($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_actualizarCanalRemoto'), $datos);
-    }
-
     public function msg_sqlinsertcalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
         if ($this->DEBUG) {
@@ -1732,35 +1724,6 @@ PETICION_LLAMADAS_AGENTE;
     	$sth = $this->_db->prepare(
             'UPDATE campaign SET num_completadas = ?, promedio = ?, desviacion = ? WHERE id = ?');
         $sth->execute(array($num_completadas, $promedio, $desviacion, $id_campaign));
-    }
-
-    private function _actualizarCanalRemoto($sAgentNum, $tipo_llamada, $uniqueid)
-    {
-    	if (is_null($this->_ami)) return;
-        $sCanalRemoto = NULL;
-        $r = $this->_ami->Command('agent show online');
-        if (is_array($r) && isset($r['data'])) {
-            $lineasRespuesta = explode("\n", $r['data']);
-            foreach ($lineasRespuesta as $sLinea) {
-                if (preg_match('/^(\d{2,})\s+\(/', $sLinea, $regs)) {
-                    if ($regs[1] == $sAgentNum) {
-                        if (preg_match('|talking to (\w+/\S{2,})|', $sLinea, $regs)) {
-                            $sCanalRemoto = $regs[1];
-                            break;
-                        }
-                    }
-                }
-            }
-            if (!is_null($sCanalRemoto)) {
-                if (strpos($sCanalRemoto, 'Local/') === 0) {
-                	$this->_log->output('WARN: '.__METHOD__.": el agente ".
-                        "Agent/$sAgentNum está hablando con canal $sCanalRemoto ".
-                        "según 'agent show online'");
-                }
-            	$this->_tuberia->msg_AMIEventProcess_canalRemotoAgente(
-                    $sAgentNum, $tipo_llamada, $uniqueid, $sCanalRemoto);
-            }
-        }
     }
 
     private function _verificarFinLlamadasAgendables($sAgente, $id_campania, $infoSeguimiento)

@@ -1406,9 +1406,11 @@ class AMIEventProcess extends TuberiaProcess
 
     private function _iniciarAgents()
     {
-        $this->_tmp_actionid_agents = 'Agents-'.posix_getpid().'-'.time();
-        $this->_tmp_estadoLoginAgente = array();
-        $this->_ami->Agents($this->_tmp_actionid_agents);
+        if (is_null($this->_tmp_actionid_agents)) {
+            $this->_tmp_actionid_agents = 'Agents-'.posix_getpid().'-'.time();
+            $this->_tmp_estadoLoginAgente = array();
+            $this->_ami->Agents($this->_tmp_actionid_agents);
+        }
     }
 
     public function msg_avisoInicioOriginate($sFuente, $sDestino, $sNombreMensaje,
@@ -2083,9 +2085,19 @@ Uniqueid: 1429642067.241008
                     $params['local_timestamp_received'], $a, $sRemChannel,
                     ($llamada->uniqueid == $params['Uniqueid1']) ? $params['Uniqueid2'] : $params['Uniqueid1'],
                     $sAgentChannel, $this->_ami);
+                if (is_null($llamada->actualchannel)) {
+                    if ($llamada->agente->type == 'Agent') {
+                        $this->_log->output('DEBUG: identificación debería iniciar ahora...');
+                        $this->_iniciarAgents();
+                    } else {
+                        $this->_log->output('WARN: '.__METHOD__.
+                            ' actualchannel no identificado, identificación no implementada para agente dinámico.'.
+                            "\nResumen de llamada asociada es: ".print_r($llamada->resumenLlamada(), 1));
+                    }
+                }
             }
         } else {
-        	/* El Link de la pata auxiliar con otro canal puede indicar el
+            /* El Link de la pata auxiliar con otro canal puede indicar el
              * ActualChannel requerido para poder manipular la llamada. */
             $sCanalCandidato = NULL;
             if (is_null($llamada)) {
@@ -2647,7 +2659,10 @@ Uniqueid: 1429642067.241008
         if (is_null($this->_tmp_actionid_agents)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_agents) return;
 
-        $this->_tmp_estadoLoginAgente[$params['Agent']] = $params['Status'];
+        $this->_tmp_estadoLoginAgente[$params['Agent']] = array(
+            'Status'        =>  $params['Status'],
+            'TalkingToChan' =>  $params['TalkingToChan'],
+        );
     }
 
     public function msg_AgentsComplete($sEvent, $params, $sServer, $iPort)
@@ -2662,8 +2677,9 @@ Uniqueid: 1429642067.241008
         if (is_null($this->_tmp_actionid_agents)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_agents) return;
 
-        foreach ($this->_tmp_estadoLoginAgente as $sAgentNum => $sAgentStatus) {
+        foreach ($this->_tmp_estadoLoginAgente as $sAgentNum => $agentdata) {
             $sAgente = 'Agent/'.$sAgentNum;
+            $sAgentStatus = $agentdata['Status'];
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (!is_null($a)) {
                 if ($sAgentStatus == 'AGENT_LOGGEDOFF') {
@@ -2690,6 +2706,33 @@ Uniqueid: 1429642067.241008
                             ' está deslogoneado en dialer pero en estado '.$sAgentStatus.','.
                             ' se deslogonea en Asterisk...');
                         $a->forzarLogoffAgente($this->_ami, $this->_log);
+                    } elseif ($sAgentStatus == 'AGENT_ONCALL') {
+                        if (is_null($a->llamada)) {
+                            $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
+                                ' en llamada con canal '.$agentdata['TalkingToChan'].
+                                ' pero no hay (todavía) llamada monitoreada.');
+                        } else {
+                            if ($this->DEBUG) {
+                                if (!is_null($a->llamada->actualchannel)) {
+                                    $this->_log->output('DEBUG: '.__METHOD__.': canal esperado '.
+                                        $a->llamada->actualchannel.' real '.$agentdata['TalkingToChan']);
+                                }
+                            }
+                            if (is_null($a->llamada->actualchannel) &&
+                                strpos($agentdata['TalkingToChan'], 'Local/') === 0) {
+                                $this->_log->output('WARN: '.__METHOD__.": el agente ".
+                                    "$sAgente está hablando con canal ".$agentdata['TalkingToChan'].
+                                    " según eventos Agents.");
+                            }
+                            if (!is_null($a->llamada->actualchannel) &&
+                                $a->llamada->actualchannel != $agentdata['TalkingToChan']) {
+                                $this->_log->output('WARN: '.__METHOD__.
+                                    ': llamada con canal remoto recogido en Link auxiliar fue '.
+                                    $a->llamada->actualchannel.' pero realmente es '.$agentdata['TalkingToChan']);
+                                $a->llamada->dump($this->_log);
+                            }
+                            $a->llamada->actualchannel = $agentdata['TalkingToChan'];
+                        }
                     }
                 }
             } else {

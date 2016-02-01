@@ -789,7 +789,7 @@ class Llamada
                 date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent'],
                 $this->trunk, $this->_queuenumber);
         } else {
-        	/* En el caso de llamadas entrantes, puede ocurrir que el evento
+            /* En el caso de llamadas entrantes, puede ocurrir que el evento
              * Link se reciba ANTES de haber recibido el ID de inserción en
              * call_entry. Entonces no se puede mandar a actualizar hasta tener
              * este ID, ni tampoco lanzar el evento AgentLinked. Se delegan las
@@ -798,11 +798,6 @@ class Llamada
             $this->_actualizacionesPendientes['sqlinsertcurrentcalls'] = $paramInsertarCC;
             //$this->_log->output('INFO: '.__METHOD__.': actualizaciones pendientes por faltar id_llamada.');
         }
-
-        // Actualizar el canal remoto en caso de que no se conozca a estas alturas
-        if (is_null($this->actualchannel))
-            $this->_tuberia->msg_CampaignProcess_actualizarCanalRemoto(
-                $this->agente->number, $this->tipo_llamada, $this->uniqueid);
 
         // Verificar si se debe pausar al agente para llenar su formulario
         if (!is_null($this->campania) && !is_null($this->campania->formpause) &&

@@ -101,6 +101,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Feb  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: do not use CampaignProcess to invoke "agent show online" from
+  AMIEventProcess. Instead, piggyback on existing AgentsComplete callback to
+  check every call associated to a logged-in agent when one call is missing
+  actualchannel.
+  SVN Rev[7454]
+
 * Sat Jan 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: by using asynchronous AMI requests, agent reservation for scheduled
   calls is now reimplemented race-free in AMIEventProcess.

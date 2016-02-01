@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Feb  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: added new _elastixutils action to expose telephony user
+  and password. Intended to be used with Elastix Webphone.
+  SVN Rev[7456]
+
 * Thu Jan  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: remove regexp check for username. This check was required
   back when SQL parameters were not used and should not be necessary now.

@@ -45,6 +45,8 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir'] : 'themes';
     $local_templates_dir = "$base_dir/modules/$module_name/" . $templates_dir . '/' . $arrConf['theme'];
 
+    Header('Content-Type: application/json');
+
     $smarty->assign('module_name', $module_name);
     $sFuncName = 'handleJSON_'.getParameter('action');
     if (function_exists($sFuncName))
@@ -58,8 +60,6 @@ function _moduleContent(&$smarty, $module_name)
 
 function handleJSON_dialogRPM($smarty, $local_templates_dir, $module_name)
 {
-    Header('Content-Type: application/json');
-
     $smarty->assign(array(
         'VersionDetails'    =>  _tr('VersionDetails'),
         'VersionPackage'    =>  _tr('VersionPackage'),
@@ -77,15 +77,12 @@ function handleJSON_dialogRPM($smarty, $local_templates_dir, $module_name)
 
 function handleJSON_versionRPM($smarty, $local_templates_dir, $module_name)
 {
-    Header('Content-Type: application/json');
-	$json = new Services_JSON();
+    $json = new Services_JSON();
     return $json->encode(obtenerDetallesRPMS());
 }
 
 function handleJSON_dialogPasswordElastix($smarty, $local_templates_dir, $module_name)
 {
-    Header('Content-Type: application/json');
-
     $smarty->assign(array(
         'CURRENT_PASSWORD'      =>  _tr('Current Password'),
         'NEW_PASSWORD'          =>  _tr('New Password'),
@@ -141,7 +138,6 @@ function handleJSON_addBookmark($smarty, $local_templates_dir, $module_name)
         $jsonObject->set_message($output['data']);
     }
 
-    Header('Content-Type: application/json');
     return $jsonObject->createJSON();
 }
 
@@ -210,8 +206,6 @@ function handleJSON_showAboutUs($smarty, $local_templates_dir, $module_name)
 {
     global $arrConf;
 
-    Header('Content-Type: application/json');
-
     $jsonObject = new PaloSantoJSON();
     $smarty->assign('ABOUT_ELASTIX_CONTENT', _tr('About Elastix Content'));
     $jsonObject->set_message(array(
@@ -220,6 +214,60 @@ function handleJSON_showAboutUs($smarty, $local_templates_dir, $module_name)
                 : _tr('About Elastix') . " " . $arrConf['elastix_version']),
         'html'  =>  $smarty->fetch("$local_templates_dir/_aboutus.tpl"),
     ));
+    return $jsonObject->createJSON();
+}
+
+function handleJSON_extension_current_user($smarty, $local_templates_dir, $module_name)
+{
+    global $pACL;
+    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    $extension = $pACL->getUserExtension($user);
+
+    $msg = array(
+        'tech'              =>  NULL,
+        'authorizationUser' =>  NULL,
+        'password'          =>  NULL,
+    );
+    $jsonObject = new PaloSantoJSON();
+    $jsonObject->set_status('ERROR');
+    if (!is_numeric($extension)) {
+        $jsonObject->set_message(_tr('Extension not set!'));
+    } else {
+        // esto asume account==extension en FreePBX
+        $msg['authorizationUser'] = $extension;
+
+        // Leer tecnología y password de FreePBX
+        $pDB = new paloDB(generarDSNSistema('asteriskuser', 'asterisk'));
+        if ($pDB->errMsg != '') {
+            $jsonObject->set_message($pDB->errMsg);
+        } else {
+            $tupla = $pDB->getFirstRowQuery('SELECT id, tech FROM devices WHERE id = ? AND devicetype = "fixed"',
+                TRUE, array($extension));
+            if (!is_array($tupla)) {
+                $jsonObject->set_message($pDB->errMsg);
+            } elseif (count($tupla) <= 0) {
+                $jsonObject->set_message(_tr('Extension not set or not found'));
+            } elseif (!in_array($tupla['tech'], array('sip', 'iax2'))) {
+                $jsonObject->set_message(_tr('Unsupported technology'));
+            } else {
+                $msg['tech'] = $tupla['tech'];
+
+                $techtable = array('sip' => 'sip', 'iax2' => 'iax');
+                $tupla = $pDB->getFirstRowQuery('SELECT data FROM '.$techtable[$msg['tech']].' WHERE id = ? AND keyword = "secret"',
+                    TRUE, array($extension));
+                if (!is_array($tupla)) {
+                    $jsonObject->set_message($pDB->errMsg);
+                } elseif (count($tupla) <= 0) {
+                    $jsonObject->set_message(_tr('Extension not set or not found'));
+                } else {
+                    $msg['password'] = $tupla['data'];
+                    $jsonObject->set_status('OK');
+                }
+            }
+        }
+    }
+
+    $jsonObject->set_message($msg);
     return $jsonObject->createJSON();
 }
 ?>

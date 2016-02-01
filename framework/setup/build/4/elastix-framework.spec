@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Feb  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: added new _elastixutils action to expose telephony user
+  and password. Intended to be used with Elastix Webphone.
+  SVN Rev[7456]
+
 * Mon Jan 18 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

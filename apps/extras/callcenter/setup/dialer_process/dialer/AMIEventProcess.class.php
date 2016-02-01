@@ -2087,7 +2087,6 @@ Uniqueid: 1429642067.241008
                     $sAgentChannel, $this->_ami);
                 if (is_null($llamada->actualchannel)) {
                     if ($llamada->agente->type == 'Agent') {
-                        $this->_log->output('DEBUG: identificación debería iniciar ahora...');
                         $this->_iniciarAgents();
                     } else {
                         $this->_log->output('WARN: '.__METHOD__.

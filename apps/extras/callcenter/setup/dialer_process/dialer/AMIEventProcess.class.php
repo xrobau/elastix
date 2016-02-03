@@ -2699,13 +2699,19 @@ Uniqueid: 1429642067.241008
                     }
                 } else {
                     /* Según Asterisk, el agente está logoneado. Se verifica si
-                     * el estado de agente es logoneado, y si no, se lo deslogonea. */
-                    if ($a->estado_consola != 'logged-in') {
+                     * el estado de agente es logoneado, y si no, se lo
+                     * deslogonea.
+                     *
+                     * ATENCIÓN: si el agente está logoneado, puede que el valor
+                     * de estado_consola sea 'logging', el cual no debe de
+                     * tocarse porque todavía no llega el evento Agentlogin.
+                     * */
+                    if ($a->estado_consola == 'logged-out') {
                         $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
                             ' está deslogoneado en dialer pero en estado '.$sAgentStatus.','.
                             ' se deslogonea en Asterisk...');
                         $a->forzarLogoffAgente($this->_ami, $this->_log);
-                    } elseif ($sAgentStatus == 'AGENT_ONCALL') {
+                    } elseif ($a->estado_consola == 'logged-in' && $sAgentStatus == 'AGENT_ONCALL') {
                         if (is_null($a->llamada)) {
                             $this->_log->output('WARN: '.__METHOD__.' agente '.$sAgente.
                                 ' en llamada con canal '.$agentdata['TalkingToChan'].
@@ -2724,13 +2730,23 @@ Uniqueid: 1429642067.241008
                                     " según eventos Agents.");
                             }
                             if (!is_null($a->llamada->actualchannel) &&
-                                $a->llamada->actualchannel != $agentdata['TalkingToChan']) {
+                                $a->llamada->actualchannel != $agentdata['TalkingToChan'] &&
+                                !is_null($a->llamada->channel) &&
+                                $a->llamada->channel != $agentdata['TalkingToChan']) {
                                 $this->_log->output('WARN: '.__METHOD__.
                                     ': llamada con canal remoto recogido en Link auxiliar fue '.
                                     $a->llamada->actualchannel.' pero realmente es '.$agentdata['TalkingToChan']);
                                 $a->llamada->dump($this->_log);
                             }
-                            $a->llamada->actualchannel = $agentdata['TalkingToChan'];
+
+                            /* Se asigna actualchannel si actualchannel es NULL o
+                             * si el valor es distinto de channel. El estado en el
+                             * que TalkingToChan es distinto de channel y actualchannel
+                             * se avisa arriba. */
+                            if (is_null($a->llamada->actualchannel) ||
+                                (!is_null($a->llamada->channel) && $a->llamada->channel != $agentdata['TalkingToChan'])) {
+                                $a->llamada->actualchannel = $agentdata['TalkingToChan'];
+                            }
                         }
                     }
                 }

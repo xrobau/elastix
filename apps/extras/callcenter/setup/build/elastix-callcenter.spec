@@ -101,6 +101,14 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Feb  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: fix incorrect logging-out of static agent when msg_AgentsComplete is
+  received while agent is AGENT_LOGGEDIN but state is "logging" because the
+  Agentlogin message was not yet received.
+- FIXED: fix condition in which actualchannel is incorrectly assigned with the
+  same value as channel when different from actualchannel.
+  SVN Rev[7457]
+
 * Mon Feb  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: do not use CampaignProcess to invoke "agent show online" from
   AMIEventProcess. Instead, piggyback on existing AgentsComplete callback to

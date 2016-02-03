@@ -55,7 +55,7 @@ class ECCPWorkerProcess extends TuberiaProcess
 
     public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
-    	$this->_log = $oMainLog;
+        $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
         $this->_tuberia->registrarMultiplexHijo($this->_multiplex);
         $this->_tuberia->setLog($this->_log);
@@ -71,7 +71,7 @@ class ECCPWorkerProcess extends TuberiaProcess
             $this->_configDB = new ConfigDB($this->_db, $this->_log);
         } catch (PDOException $e) {
             $this->_log->output("FATAL: no se puede leer configuración DB - ".$e->getMessage());
-        	return FALSE;
+            return FALSE;
         }
         $this->DEBUG = $this->_configDB->dialer_debug;
         $this->_eccpconn->DEBUG = $this->DEBUG;
@@ -84,7 +84,8 @@ class ECCPWorkerProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('ECCPProcess', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
-        $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
+        foreach (array('finalizando', 'finalizarWorker') as $k)
+            $this->_tuberia->registrarManejador('HubProcess', $k, array($this, "msg_$k"));
 
         return TRUE;
     }
@@ -129,10 +130,10 @@ class ECCPWorkerProcess extends TuberiaProcess
         if (is_null($this->_db)) {
             $this->_log->output('INFO: intentando volver a abrir conexión a DB...');
             if (!$this->_iniciarConexionDB()) {
-            	$this->_log->output('ERR: no se puede restaurar conexión a DB, se espera...');
+                $this->_log->output('ERR: no se puede restaurar conexión a DB, se espera...');
                 usleep(5000000);
             } else {
-            	$this->_log->output('INFO: conexión a DB restaurada, se reinicia operación normal.');
+                $this->_log->output('INFO: conexión a DB restaurada, se reinicia operación normal.');
                 $this->_configDB->setDBConn($this->_db);
                 $this->_eccpconn->setDbConn($this->_db);
             }
@@ -173,7 +174,7 @@ class ECCPWorkerProcess extends TuberiaProcess
             else $this->_multiplex->procesarActividad(1);
         }
 
-    	return ($this->_numPeticionesAtendidas < MAX_PETICIONES_ATENDIDAS);
+        return !$this->_finalizandoPrograma;
     }
 
     public function limpiezaDemonio($signum)
@@ -269,7 +270,7 @@ class ECCPWorkerProcess extends TuberiaProcess
         }
 
         $this->_numPeticionesAtendidas++;
-    	list($connkey, $request, $connvars) = $datos;
+        list($connkey, $request, $connvars) = $datos;
         list($s, $nuevos_valores, $eventos) = $this->_eccpconn->do_eccprequest($request, $connvars);
         $this->_tuberia->msg_ECCPProcess_eccpresponse(
             ($this->_numPeticionesAtendidas >= MAX_PETICIONES_ATENDIDAS),
@@ -281,6 +282,12 @@ class ECCPWorkerProcess extends TuberiaProcess
         $this->_log->output('INFO: recibido mensaje de finalización, se desconectan conexiones...');
         $this->_finalizandoPrograma = TRUE;
         $this->_tuberia->msg_HubProcess_finalizacionTerminada();
+    }
+
+    public function msg_finalizarWorker($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        $this->_log->output('INFO: se permite terminar luego de última petición ECCP...');
+        $this->_finalizandoPrograma = TRUE;
     }
 }
 ?>

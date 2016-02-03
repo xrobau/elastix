@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Wed Feb  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: fix race in which ECCPWorkerProcess sent the response to the last ECCP
+  request and immediately terminated but HubProcess caught the process
+  termination before having a chance to receive and route the ECCP response.
+  SVN Rev[7458]
 - FIXED: fix incorrect logging-out of static agent when msg_AgentsComplete is
   received while agent is AGENT_LOGGEDIN but state is "logging" because the
   Agentlogin message was not yet received.

@@ -53,7 +53,7 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
 
     public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
-    	$this->_log =& $oMainLog;
+        $this->_log =& $oMainLog;
         $this->_config =& $infoConfig;
         $this->_tareas = array();
         $this->_hub = new HubServer($this->_log);
@@ -86,7 +86,7 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
                 // Quitar la tubería del proceso que ha terminado
                 $this->_hub->quitarTuberia($sTarea);
             } else {
-            	$bTareaActiva = TRUE;
+                $bTareaActiva = TRUE;
             }
         }
 
@@ -302,6 +302,14 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
             $bUltimaPeticion = array_shift($datos);
             if ($bUltimaPeticion) {
                 $this->_tareasUltimaPeticion[] = $sFuente;
+
+                // Permitir al proceso ECCPWorkerProcess que finalice
+                $this->_hub->rutearMensaje(
+                    'HubProcess',
+                    $sFuente,
+                    'finalizarWorker',
+                    microtime(TRUE),
+                    array());
             }
         }
     }
@@ -342,7 +350,7 @@ XML_CRASH_MSG;
             // Mandar la señal a todos los procesos controlados
             $this->_log->output("PID = ".posix_getpid().", se ha recibido señal #$signum, terminando...");
         } else {
-        	$signum = SIGTERM;
+            $signum = SIGTERM;
             $this->_log->output("Término normal del programa, se terminará procesos hijos...");
         }
 

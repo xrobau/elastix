@@ -3,7 +3,7 @@
 Summary: Elastix Addons 
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -136,6 +136,15 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Thu Feb 04 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-3
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
+* Thu Feb 04 2016 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: addons - comercial-addons.repo: Modified a version of repo for
+  compatibility with Elx 4.
+  SVN Rev[7460]
+
 * Tue Oct 27 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-2
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

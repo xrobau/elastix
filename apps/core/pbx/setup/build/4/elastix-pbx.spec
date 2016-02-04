@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -300,6 +300,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Feb 04 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Mon Jan 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: pbx - install httpd mod_proxy_wstunnel configuration to expose SIP
   websocket URL through the HTTPS space.

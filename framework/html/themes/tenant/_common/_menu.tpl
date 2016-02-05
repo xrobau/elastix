@@ -220,11 +220,6 @@ function removeNeoDisplayOnMouseOver(ref){
     <!-- Raw Links -->
     <span style='float:right; width:400px;'>
         <ul style="padding-top:12px;" class="list-inline links-list pull-right neo-topbar-notification">
-        <li id="header_notification_bar" class="dropdown">
-            <a id="togglestickynote1" href="#">
-                <i class="fa fa-sticky-note"></i>
-            </a>
-        </li>
 
         <li id="header_notification_bar" class="profile-info dropdown">
             <a data-toggle="dropdown" class="" href="#">
@@ -243,18 +238,18 @@ function removeNeoDisplayOnMouseOver(ref){
             </ul>
         </li>
 
-        <li id="header_notification_bar" class="dropdown">
+        <!--li id="header_notification_bar" class="dropdown">
             <a {*data-toggle="dropdown"*} class="" href="index.php?menu=addons">
                 <i class="fa fa-cubes"></i>
             </a>
-        </li>
+        </li-->
 
         <!-- notification dropdown start-->
-        <li id="header_notification_bar" class="dropdown">
+        <!--li id="header_notification_bar" class="dropdown">
             <a data-toggle="dropdown" class="" href="#">
                 <i class="fa fa-heartbeat"></i>
             </a>
-        </li>
+        </li-->
         <!-- notification dropdown end -->
         <li id="header_notification_bar" class="profile-info dropdown pull-right notifications" style="float: none !important;">
             <a data-toggle="dropdown" class="" href="#">
@@ -316,6 +311,11 @@ function removeNeoDisplayOnMouseOver(ref){
     <a class="" href="#" onclick="popUp('help/?id_nodo={if !empty($idSubMenu2Selected)}{$idSubMenu2Selected}&name_nodo={$nameSubMenu2Selected}{else}{$idSubMenuSelected}&name_nodo={$nameSubMenuSelected}{/if}','1000','460')">
         <i class="fa fa-support"></i>
     </a>
+   </li>
+   <li id="tenant-sticky" class="dropdown">
+   	<a id="togglestickynote1" href="#">
+   		<i class="fa fa-sticky-note"></i>
+   	</a>
    </li>
 </ol>
 

@@ -1400,3 +1400,8 @@ ol.breadcrumb > li#tenant-help
 ol.breadcrumb > li + li#tenant-help:before {
     content: normal !important;
 }
+ol.breadcrumb > li#tenant-sticky
+{
+    float: right;
+    font-size: 16px;
+}

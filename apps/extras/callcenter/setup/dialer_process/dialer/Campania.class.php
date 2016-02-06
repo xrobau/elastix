@@ -46,8 +46,6 @@ class Campania
     var $daytime_end;       // Hora hh:mm:ss del final del horario de la campaña
     var $tipo_campania;     // Tipo de campaña 'outgoing' o 'incoming'
 
-    var $formpause = NULL;  // NULL si no hay pausa, 0 si pausa infinita, o seg. pausa
-
     // Variables sólo para campañas salientes
     var $trunk;             // Troncal a usar para la campaña, o NULL para plan marcado
     var $context;           // Contexto para marcado de la campaña
@@ -97,8 +95,6 @@ class Campania
         } elseif ($this->tipo_campania == 'incoming') {
             $s .= "\tid_queue_call_entry.....".$this->id_queue_call_entry."\n";
         }
-        $s .= "\tformpause...............".(is_null($this->formpause) ? 'NINGUNA' : (($this->formpause > 0) ? $this->formpause.' s.' : '(infinita)'))."\n";
-
         $log->output($s);
     }
 

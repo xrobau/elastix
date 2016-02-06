@@ -708,7 +708,7 @@ class Llamada
     }
 
     public function llamadaEnlazadaAgente($timestamp, $agent, $sRemChannel,
-        $uniqueid_agente, $sAgentChannel, $ami)
+        $uniqueid_agente, $sAgentChannel)
     {
         $this->agente = $agent;
         $this->agente->asignarLlamadaAtendida($this, $uniqueid_agente);
@@ -799,13 +799,6 @@ class Llamada
             //$this->_log->output('INFO: '.__METHOD__.': actualizaciones pendientes por faltar id_llamada.');
         }
 
-        // Verificar si se debe pausar al agente para llenar su formulario
-        if (!is_null($this->campania) && !is_null($this->campania->formpause) &&
-            in_array($this->campania->tipo_campania, array('incoming', 'outgoing'))) {
-
-            $this->agente->setFormPause($ami);
-        }
-
         // Verificación de consistencia
         if ($this->agente->estado_consola != 'logged-in') {
             $this->_log->output("WARN: llamada ha sido asignada a agente en estado ".
@@ -871,7 +864,6 @@ class Llamada
     public function llamadaFinalizaSeguimiento($timestamp, $iUmbralLlamadaCorta)
     {
         $sAgente_agendado = NULL;
-        $paramAlarma = NULL;
 
         if (is_null($this->id_llamada)) {
         	$this->_log->output('ERR: '.__METHOD__.': todavía no ha llegado '.
@@ -965,22 +957,6 @@ class Llamada
                     $this->duration, ($this->status == 'ShortCall'),
                     $paramProgreso);
                 $paramProgreso = NULL;
-
-                /* Si la pausa de formulario sigue activa, empieza a contar la
-                 * auditoría de la pausa por formulario. */
-                if ($this->agente->formpause) {
-                    $this->_tuberia->msg_ECCPProcess_formpause_auditstart(
-                        $this->agente->channel, $this->agente->id_agent,
-                        date('Y-m-d H:i:s', $this->timestamp_hangup));
-                    /* Se espera que ECCPProcess envíe un evento idNuevoFormPauseAgente
-                     * con el ID de auditoría de la pausa de formulario. */
-
-                    // Preparar parámetros de timeout de pausa de formulario
-                    if (!is_null($this->campania) && !is_null($this->campania->formpause) &&
-                        $this->campania->formpause > 0) {
-                        $paramAlarma = array($this->agente, $this->campania->formpause);
-                    }
-                }
             }
         } else {
             // Esto no debería ocurrir en condiciones normales
@@ -1041,8 +1017,6 @@ class Llamada
             !($this->status == 'Failure' && is_null($this->failure_cause))) {
             $this->_listaLlamadas->remover($this);
         }
-
-        return $paramAlarma;
     }
 
     public function agregarArchivoGrabacion($uniqueid, $channel, $recordingfile)

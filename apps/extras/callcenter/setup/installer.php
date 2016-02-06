@@ -84,12 +84,6 @@ if (file_exists($path_script_db))
     crearColumnaSiNoExiste($pDB, 'call_center', 'agent',
         'type',
         "ADD COLUMN type enum('Agent','SIP','IAX2') DEFAULT 'Agent' NOT NULL AFTER id");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'campaign',
-        'formpause',
-        "ALTER TABLE campaign ADD COLUMN formpause int unsigned");
-    crearColumnaSiNoExiste($pDB, 'call_center', 'campaign_entry',
-        'formpause',
-        "ALTER TABLE campaign ADD COLUMN formpause int unsigned");
     crearColumnaSiNoExiste($pDB, 'call_center', 'calls',
         'scheduled',
         "ALTER TABLE calls ADD COLUMN scheduled BOOLEAN NOT NULL DEFAULT 0");

@@ -79,8 +79,7 @@ class ECCPProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('AgentLogin', 'AgentLogoff', 'AgentLinked',
             'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada',
-            'nuevaMembresiaCola', 'recordingMute', 'recordingUnmute',
-            'formpause_auditstart', 'formpause_auditend') as $k)
+            'nuevaMembresiaCola', 'recordingMute', 'recordingUnmute') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
         foreach (array('eccpresponse') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
@@ -625,72 +624,6 @@ SQL_EXISTE_AUDIT;
         } catch (PDOException $e) {
             $this->_db->rollBack();
             $this->_stdManejoExcepcionDB($e, 'no se puede actualizar el final de HOLD');
-        }
-    }
-
-    public function msg_formpause_auditstart($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($sAgente, $idAgente, $sTimeStamp) = $datos;
-
-        try {
-            // Verificar si la pausa indicada existe y está activa
-            $recordset = $this->_db->prepare(
-                'SELECT id, name FROM break WHERE tipo = "F" AND status = "A" ORDER BY id LIMIT 0,1');
-            $recordset->execute();
-            $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
-            $recordset->closeCursor();
-            if (!$tupla) {
-                $this->_log->output('ERR: '.__METHOD__.': no se encuentra ID de pausa de formulario!');
-                $this->_tuberia->msg_AMIEventProcess_idNuevoFormPauseAgente($sAgente, NULL, NULL);
-                return;
-            }
-            $idBreak = $tupla['id'];
-
-            // Mandar a escribir el inicio de la pausa a la base de datos
-            $sth = $this->_db->prepare(
-                'INSERT INTO audit (id_agent, id_break, datetime_init) VALUES (?, ?, ?)');
-            $sth->execute(array($idAgente, $idBreak, $sTimeStamp));
-            $idAuditBreak = $this->_db->lastInsertId();
-
-            // Notificar éxito en inicio de pausa de formulario
-            $this->_tuberia->msg_AMIEventProcess_idNuevoFormPauseAgente($sAgente, $idBreak, $idAuditBreak);
-
-            $eventos = array(
-                array('PauseStart', array($sAgente, array(
-                    'pause_class'   =>  'form',
-                    'pause_type'    =>  $idBreak,
-                    'pause_name'    =>  $tupla['name'],
-                    'pause_start'   =>  $sTimeStamp,
-                ))),
-            );
-            $this->_lanzarEventos($eventos);
-
-        } catch (PDOException $e) {
-            $this->_stdManejoExcepcionDB($e, 'no se puede escribir inicio de pausa de formulario');
-            $this->_tuberia->msg_AMIEventProcess_idNuevoFormPauseAgente($sAgente, NULL, NULL);
-        }
-    }
-
-    public function msg_formpause_auditend($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($sAgente, $id_pausa, $iTimestampEnd) = $datos;
-
-        try {
-            /* Se asume que sólo AMIEventProcess envía este evento, y que por
-             * todas las rutas de ejecución ya se envió asyncQueuePause(false)
-             * en caso necesario. */
-            $eventos = array();
-            marcarFinalBreakAgente($this->_db, $id_pausa, $iTimestampEnd);
-            $eventos[] = construirEventoPauseEnd($this->_db, $sAgente, $id_pausa, 'form');
-            $this->_lanzarEventos($eventos);
-        } catch (PDOException $e) {
-            $this->_stdManejoExcepcionDB($e, 'no se puede escribir final de pausa de formulario');
         }
     }
 

@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Feb  5 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- DELETED: remove formpause support.
+  SVN Rev[7464]
+
 * Wed Feb  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: fix race in which ECCPWorkerProcess sent the response to the last ECCP
   request and immediately terminated but HubProcess caught the process

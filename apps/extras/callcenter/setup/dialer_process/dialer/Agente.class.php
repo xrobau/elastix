@@ -123,15 +123,6 @@ class Agente
     // Timestamp de inicio de login, debe setearse a NULL al entrar a estado logged-in
     private $_logging_inicio = NULL;
 
-    /* Si la campaña usa pausa de formulario, entonces se debe poder indicar que
-     * el agente está pausado por formulario incluso si el ID de auditoría es
-     * NULL, porque la auditoría sólo empieza a contar desde que se cierra la
-     * llamada estando el agente pausado. */
-    private $_form_pause = FALSE;
-    private $_id_fp = NULL;
-    private $_id_audit_fp = NULL;
-    var $alarma_formpause = NULL;
-
     function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
         $bEstatus, $sType, $log)
     {
@@ -253,15 +244,10 @@ class Agente
         case 'colas_dinamicas': return array_keys($this->_colas_dinamicas);
         case 'colas_actuales':  return array_keys($this->_estado_agente_colas);
         case 'colas_penalty':   return $this->_colas_dinamicas;
-        case 'formpause':       return $this->_form_pause;
-        case 'id_formpause':    return $this->_id_fp;
-        case 'id_audit_formpause':return $this->_id_audit_fp;
         case 'auditpauses':
             $pauses = array();
             if (!is_null($this->_id_audit_hold))
                 $pauses['hold'] = $this->_id_audit_hold;
-            if (!is_null($this->_id_audit_fp))
-                $pauses['form'] = $this->_id_audit_fp;
             if (!is_null($this->_id_audit_break))
                 $pauses['break'] = $this->_id_audit_break;
             return $pauses;
@@ -370,33 +356,6 @@ class Agente
         $this->resetTimeout();
     }
 
-    public function setFormPause($ami)
-    {
-        if (!$this->_form_pause) {
-            $this->_form_pause = TRUE;
-            $this->_incrementarPausas($ami);
-        }
-        $this->resetTimeout();
-    }
-
-    public function setIdFormPause($id_fp, $id_audit_fp)
-    {
-        $this->_id_fp = $id_fp;
-        $this->_id_audit_fp = $id_audit_fp;
-    }
-
-    public function clearFormPause($ami)
-    {
-        if ($this->_form_pause) {
-            $this->_form_pause = FALSE;
-            $this->_id_fp = NULL;
-            $this->_id_audit_fp = NULL;
-            $this->alarma_formpause = NULL;
-            $this->_decrementarPausas($ami);
-        }
-        $this->resetTimeout();
-    }
-
     private function _incrementarPausas($ami)
     {
         $this->_num_pausas++;
@@ -469,7 +428,6 @@ class Agente
     {
         $this->clearBreak($ami);
         $this->clearHold();
-        $this->clearFormPause($ami);
         $this->clearReserved($ami);
         $this->_estado_consola = 'logged-out';
         $this->_num_pausas = 0;
@@ -494,9 +452,6 @@ class Agente
             'id_audit_break'    =>  $this->id_audit_break,
             'id_hold'           =>  $this->id_hold,
             'id_audit_hold'     =>  $this->id_audit_hold,
-            'id_formpause'      =>  $this->id_formpause,
-            'id_audit_formpause'=>  $this->id_audit_formpause,
-            'formpause'         =>  $this->formpause,
             'num_pausas'        =>  $this->num_pausas,
             'extension'         =>  $this->extension,
             'login_channel'     =>  $this->login_channel,

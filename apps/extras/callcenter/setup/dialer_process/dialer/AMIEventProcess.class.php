@@ -98,8 +98,7 @@ class AMIEventProcess extends TuberiaProcess
         // Registro de manejadores de eventos desde ECCPWorkerProcess
         foreach (array('idNuevaSesionAgente',
             'quitarBreakAgente', 'idNuevoHoldAgente', 'quitarHoldAgente',
-            'llamadaSilenciada', 'llamadaSinSilencio',
-            'idNuevoFormPauseAgente', 'quitarFormPauseAgente') as $k)
+            'llamadaSilenciada', 'llamadaSinSilencio') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente',
             'reportarInfoLlamadaAtendida', 'reportarInfoLlamadasCampania',
@@ -385,47 +384,6 @@ class AMIEventProcess extends TuberiaProcess
         }
     }
 
-    private function _idNuevoFormPauseAgente($sAgente, $idBreak, $idAuditBreak)
-    {
-        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (!is_null($a)) {
-            if (!$a->formpause) {
-                $this->_log->output('ERR: '.__METHOD__."agente $sAgente no está en pausa de formulario.");
-                return;
-            }
-            if (!is_null($a->id_formpause)) {
-                if ($a->id_formpause == $idBreak && $a->id_audit_formpause == $idAuditBreak) {
-                    $this->_log->output('ERR: '.__METHOD__." - formpause duplicado para $sAgente, no debería pasar.");
-                } else {
-                    $this->_log->output('ERR: '.__METHOD__." - formpause activo para $sAgente, se pierde anterior.");
-                }
-
-                // TODO: escribir el final de la pausa anterior que quedó colgada
-            }
-            if (!is_null($idAuditBreak)) {
-                // Funcionamiento ordinario de pausa de formulario
-                $a->setIdFormPause($idBreak, $idAuditBreak);
-            } else {
-                // Recuperación en caso de error - quitar pausa
-                if (!is_null($a->alarma_formpause))
-                    $this->_cancelarAlarma($a->alarma_formpause);
-                $a->clearFormPause($this->_ami);
-            }
-        }
-    }
-
-    private function _quitarFormPauseAgente($sAgente)
-    {
-        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (!is_null($a)) {
-            if ($a->formpause) {
-                if (!is_null($a->alarma_formpause))
-                    $this->_cancelarAlarma($a->alarma_formpause);
-                $a->clearFormPause($this->_ami);
-            }
-        }
-    }
-
     private function _quitarReservaAgente($sAgente)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -637,7 +595,6 @@ class AMIEventProcess extends TuberiaProcess
             $c->daytime_end = $tupla['daytime_end'];
             $c->trunk = $tupla['trunk'];
             $c->context = $tupla['context'];
-            $c->formpause = $tupla['formpause'];
             $c->estadisticasIniciales($tupla['num_completadas'], $tupla['promedio'], $tupla['desviacion']);
         }
 
@@ -710,7 +667,6 @@ class AMIEventProcess extends TuberiaProcess
                 $c->daytime_end = $tupla['daytime_end'];
                 $c->id_queue_call_entry = $tupla['id_queue_call_entry'];
                 $this->_colasEntrantes[$tupla['queue']]['campania'] = $c;
-                $c->formpause = $tupla['formpause'];
 
                 if ($this->DEBUG) {
                     $this->_log->output('DEBUG: '.__METHOD__.': nueva campaña entrante: '.print_r($tupla, 1));
@@ -1458,24 +1414,6 @@ class AMIEventProcess extends TuberiaProcess
         call_user_func_array(array($this, '_quitarHoldAgente'), $datos);
     }
 
-    public function msg_idNuevoFormPauseAgente($sFuente, $sDestino,
-        $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_idNuevoFormPauseAgente'), $datos);
-    }
-
-    public function msg_quitarFormPauseAgente($sFuente, $sDestino,
-        $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_quitarFormPauseAgente'), $datos);
-    }
-
     public function msg_quitarReservaAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
@@ -2022,10 +1960,9 @@ Uniqueid: 1429642067.241008
                         ', se finaliza seguimiento...');
                 }
             }
-            $al = $llamada->llamadaFinalizaSeguimiento(
+            $llamada->llamadaFinalizaSeguimiento(
                 $params['local_timestamp_received'],
                 $this->_config['dialer']['llamada_corta']);
-            $this->_prepararAlarmaFormPause($al);
             return FALSE;
         }
 
@@ -2084,7 +2021,7 @@ Uniqueid: 1429642067.241008
                 $llamada->llamadaEnlazadaAgente(
                     $params['local_timestamp_received'], $a, $sRemChannel,
                     ($llamada->uniqueid == $params['Uniqueid1']) ? $params['Uniqueid2'] : $params['Uniqueid1'],
-                    $sAgentChannel, $this->_ami);
+                    $sAgentChannel);
                 if (is_null($llamada->actualchannel)) {
                     if ($llamada->agente->type == 'Agent') {
                         $this->_iniciarAgents();
@@ -2296,42 +2233,10 @@ Uniqueid: 1429642067.241008
                 }
             } else {
                 // Llamada ha sido enlazada al menos una vez
-                $al = $llamada->llamadaFinalizaSeguimiento(
+                $llamada->llamadaFinalizaSeguimiento(
                     $params['local_timestamp_received'],
                     $this->_config['dialer']['llamada_corta']);
-                $this->_prepararAlarmaFormPause($al);
             }
-        }
-    }
-
-    private function _prepararAlarmaFormPause($al)
-    {
-        if (is_null($al)) return;
-
-        if (!is_null($al[0]->alarma_formpause)) {
-            $this->_log->output('WARN: '.__METHOD__.': alarma '.$al[0]->alarma_formpause.
-                ' no ha sido anulada todavía al momento de setear otra alarma, se cancela...');
-            $this->_cancelarAlarma($al[0]->alarma_formpause);
-            $al[0]->alarma_formpause = NULL;
-        }
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.': agente '.$al[0]->channel.
-                ' debe despausarse luego de '.$al[1].' segundos...');
-        }
-        $k = $this->_agregarAlarma($al[1],
-            array($this, '_timeoutAlarmaFormPause'),
-            array($al[0]));
-        $al[0]->alarma_formpause = $k;
-    }
-
-    private function _timeoutAlarmaFormPause($a)
-    {
-        if ($a->formpause) {
-            if (!is_null($a->id_audit_formpause)) {
-                $this->_tuberia->msg_ECCPProcess_formpause_auditend($a->channel,
-                    $a->id_audit_formpause, time());
-            }
-            $a->clearFormPause($this->_ami);
         }
     }
 

@@ -29,33 +29,33 @@
 
 class MultiplexServer
 {
-	protected $_oLog;		// Objeto log para reportar problemas
-	protected $_hEscucha;		// Socket de escucha para nuevas conexiones
-	private $_conexiones;	// Lista de conexiones atendidas con clientes
-	private $_uniqueid;
+    protected $_oLog;        // Objeto log para reportar problemas
+    protected $_hEscucha;    // Socket de escucha para nuevas conexiones
+    private $_conexiones;    // Lista de conexiones atendidas con clientes
+    private $_uniqueid;
 
     // Lista de objetos escucha, de tipos variados
     protected $_listaConn = array();
-	
+
     /**
      * Constructor del objeto. Se esperan los siguientes parámetros:
-     * @param	string	$sUrlSocket		Especificación del socket de escucha
-     * @param	object	$oLog			Referencia a objeto de log
-     * 
+     * @param    string    $sUrlSocket        Especificación del socket de escucha
+     * @param    object    $oLog            Referencia a objeto de log
+     *
      * El constructor abre el socket de escucha (p.ej. tcp://127.0.0.1:20005
      * o unix:///tmp/dialer.sock) y desactiva el bloqueo para poder usar
-     * stream_select() sobre el socket. 
+     * stream_select() sobre el socket.
      */
     function __construct($sUrlSocket, &$oLog)
     {
-    	$this->_oLog =& $oLog;
-    	$this->_conexiones = array();
-    	$this->_uniqueid = 0;
-    	$errno = $errstr = NULL;
+        $this->_oLog =& $oLog;
+        $this->_conexiones = array();
+        $this->_uniqueid = 0;
+        $errno = $errstr = NULL;
         $this->_hEscucha = FALSE;
-        if (!is_null($sUrlSocket)) {    	
-        	$this->_hEscucha = stream_socket_server($sUrlSocket, $errno, $errstr);
-        	if (!$this->_hEscucha) {
+        if (!is_null($sUrlSocket)) {
+            $this->_hEscucha = stream_socket_server($sUrlSocket, $errno, $errstr);
+            if (!$this->_hEscucha) {
                 $this->_oLog->output("ERR: no se puede iniciar socket de escucha $sUrlSocket: ($errno) $errstr");
             } else {
                 // No bloquearse en escucha de conexiones
@@ -64,23 +64,23 @@ class MultiplexServer
             }
         }
     }
-    
+
     /**
      * Función que verifica si la escucha está activa.
-     * 
-     * @return	bool	VERDADERO si escucha está activa, FALSO si no.
+     *
+     * @return    bool    VERDADERO si escucha está activa, FALSO si no.
      */
     function escuchaActiva()
     {
-    	return ($this->_hEscucha !== FALSE);
+        return ($this->_hEscucha !== FALSE);
     }
-    
+
     /**
      * Procedimiento que revisa los sockets para llenar los búferes de lectura
-     * y vaciar los búferes de escritura según sea necesario. También se 
+     * y vaciar los búferes de escritura según sea necesario. También se
      * verifica si hay nuevas conexiones para preparar.
-     * 
-     * @return	VERDADERO si alguna conexión tuvo actividad
+     *
+     * @return    VERDADERO si alguna conexión tuvo actividad
      */
     function procesarActividad($iMaxTimeout = 1)
     {
@@ -95,7 +95,7 @@ class MultiplexServer
         foreach ($this->_conexiones as &$conexion) {
             if (!$conexion['exit_request']) $listoLeer[] = $conexion['socket'];
             if (strlen($conexion['pendiente_escribir']) > 0) {
-                $listoEscribir[] = $conexion['socket'];                
+                $listoEscribir[] = $conexion['socket'];
             }
         }
         $iNumCambio = @stream_select($listoLeer, $listoEscribir, $listoErr, $iMaxTimeout);
@@ -117,11 +117,11 @@ class MultiplexServer
                         $this->_cerrarConexion($sKey);
                     } else {
                         $conexion['pendiente_escribir'] = substr($conexion['pendiente_escribir'], $iBytesEscritos);
-                        $bNuevosDatos = TRUE;                        
+                        $bNuevosDatos = TRUE;
                     }
                 }
                 if (in_array($conexion['socket'], $listoLeer)) {
-					// Leer datos de la conexión lista para leer
+                    // Leer datos de la conexión lista para leer
                     $this->_procesarEntradaConexion($sKey);
                     $bNuevosDatos = TRUE;
                 }
@@ -138,15 +138,15 @@ class MultiplexServer
             // Remover todos los elementos seteados a FALSE
             $this->_conexiones = array_filter($this->_conexiones);
         }
-        
+
         return $bNuevosDatos;
     }
 
     /**
      * Procedimiento que intenta vaciar los búferes de escritura con un timeout
-     * de 0. Si ningún búfer está pendiente de escribir, se regresa 
+     * de 0. Si ningún búfer está pendiente de escribir, se regresa
      * inmediatamente.
-     * 
+     *
      * @return  VERDADERO si alguna conexión tuvo actividad
      */
     function vaciarBuferesEscritura()
@@ -159,7 +159,7 @@ class MultiplexServer
         // Recolectar todos los descriptores que se monitorean
         foreach ($this->_conexiones as &$conexion) {
             if (strlen($conexion['pendiente_escribir']) > 0) {
-                $listoEscribir[] = $conexion['socket'];                
+                $listoEscribir[] = $conexion['socket'];
             }
         }
         if (count($listoEscribir) <= 0) return FALSE;
@@ -177,7 +177,7 @@ class MultiplexServer
                         $this->_cerrarConexion($sKey);
                     } else {
                         $conexion['pendiente_escribir'] = substr($conexion['pendiente_escribir'], $iBytesEscritos);
-                        $bNuevosDatos = TRUE;                        
+                        $bNuevosDatos = TRUE;
                     }
                 }
             }
@@ -193,17 +193,17 @@ class MultiplexServer
             // Remover todos los elementos seteados a FALSE
             $this->_conexiones = array_filter($this->_conexiones);
         }
-        
+
         return $bNuevosDatos;
     }
 
     /**
      * Procedimiento para agregar un objeto instancia de MultiplexConn, que abre
      * un socket arbitrario y desea estar asociado con tal socket.
-     * 
+     *
      * @param   object      $oNuevaConn Objeto que hereda de DialerConn
      * @param   resource    $hSock      Conexión a un socket TCP o UNIX
-     * 
+     *
      * @return void
      */
     function agregarNuevaConexion($oNuevaConn, $hSock)
@@ -228,7 +228,7 @@ class MultiplexServer
             $this->descartarDatosLeidos($sKey, $iLongProcesado);
         }
     }
-    
+
     function procesarCierre($sKey)
     {
         if (isset($this->_listaConn[$sKey])) {
@@ -236,7 +236,7 @@ class MultiplexServer
             unset($this->_listaConn[$sKey]);
         }
     }
-    
+
     function procesarPaquetes()
     {
         $bHayProcesados = FALSE;
@@ -251,20 +251,20 @@ class MultiplexServer
     }
 
 
-	// Procesar una nueva conexión que ingresa al servidor
+    // Procesar una nueva conexión que ingresa al servidor
     private function _procesarConexionNueva()
     {
         $hConexion = stream_socket_accept($this->_hEscucha);
         $sKey = $this->agregarConexion($hConexion);
-        $this->procesarInicial($sKey); 
+        $this->procesarInicial($sKey);
     }
 
     /**
      * Procedimiento que agrega una conexión socket arbitraria a la lista de los
-     * sockets que hay que monitorear para escucha. 
-     * 
+     * sockets que hay que monitorear para escucha.
+     *
      * @param mixed $hConexion Conexión socket a agregar a la lista
-     * 
+     *
      * @return Clave a usar para identificar la conexión
      */
     protected function agregarConexion($hConexion)
@@ -275,7 +275,7 @@ class MultiplexServer
             'pendiente_escribir'    =>  '',
             'exit_request'          =>  FALSE,
         );
-        stream_set_blocking($nuevaConn['socket'], 0);                
+        stream_set_blocking($nuevaConn['socket'], 0);
 
         $sKey = "K_{$this->_uniqueid}";
         $this->_uniqueid++;
@@ -289,79 +289,79 @@ class MultiplexServer
         $sNuevaEntrada = fread($this->_conexiones[$sKey]['socket'], 128 * 1024);
         if ($sNuevaEntrada == '') {
             // Lectura de cadena vacía indica que se ha cerrado la conexión remotamente
-	        $this->_cerrarConexion($sKey);
-	        return ;
+            $this->_cerrarConexion($sKey);
+            return ;
         }
         $this->_conexiones[$sKey]['pendiente_leer'] .= $sNuevaEntrada;
-		$this->procesarNuevosDatos($sKey);
+        $this->procesarNuevosDatos($sKey);
     }
 
-	/**
-	 * Recuperar los primeros $iMaxBytes del búfer de lectura. Por omisión se
-	 * devuelve la totalidad del búfer.
-	 * @param	string	$sKey		Clave de la conexión pasada a procesarNuevosDatos()
-	 * @param	int		$iMaxBytes	Longitud máxima en bytes a devolver (por omisión todo)
-	 * 
-	 * @return	string	Cadena con los datos del bufer 
-	 */ 
-	protected function obtenerDatosLeidos($sKey, $iMaxBytes = 0)
-	{
-		$iMaxBytes = (int)$iMaxBytes;
-		if (!isset($this->_conexiones[$sKey])) return NULL;
-		return ($iMaxBytes > 0) 
-			? substr($this->_conexiones[$sKey]['pendiente_leer'], 0, $iMaxBytes) 
-			: $this->_conexiones[$sKey]['pendiente_leer'];
-	}
+    /**
+     * Recuperar los primeros $iMaxBytes del búfer de lectura. Por omisión se
+     * devuelve la totalidad del búfer.
+     * @param    string    $sKey        Clave de la conexión pasada a procesarNuevosDatos()
+     * @param    int        $iMaxBytes    Longitud máxima en bytes a devolver (por omisión todo)
+     *
+     * @return    string    Cadena con los datos del bufer
+     */
+    protected function obtenerDatosLeidos($sKey, $iMaxBytes = 0)
+    {
+        $iMaxBytes = (int)$iMaxBytes;
+        if (!isset($this->_conexiones[$sKey])) return NULL;
+        return ($iMaxBytes > 0)
+            ? substr($this->_conexiones[$sKey]['pendiente_leer'], 0, $iMaxBytes)
+            : $this->_conexiones[$sKey]['pendiente_leer'];
+    }
 
-	/**
-	 * Descartar los $iMaxBytes primeros bytes de datos del búfer de lectura
-	 * pendiente, bajo la suposición de que ya han sido procesados.
-	 * @param	string	$sKey		Clave de la conexión pasada a procesarNuevosDatos()
-	 * @param	int		$iMaxBytes	Número de bytes a descartar del inicio del búfer.
-	 * 
-	 * @return	void
-	 */
-	protected function descartarDatosLeidos($sKey, $iMaxBytes)
-	{
-		$iMaxBytes = (int)$iMaxBytes;
-		if (!isset($this->_conexiones[$sKey])) return;
-		if ($iMaxBytes < 0) return;		
-		$this->_conexiones[$sKey]['pendiente_leer'] = 
-			(strlen($this->_conexiones[$sKey]['pendiente_leer']) > $iMaxBytes)
-			? substr($this->_conexiones[$sKey]['pendiente_leer'], $iMaxBytes)
-			: '';
-	}
+    /**
+     * Descartar los $iMaxBytes primeros bytes de datos del búfer de lectura
+     * pendiente, bajo la suposición de que ya han sido procesados.
+     * @param    string    $sKey        Clave de la conexión pasada a procesarNuevosDatos()
+     * @param    int        $iMaxBytes    Número de bytes a descartar del inicio del búfer.
+     *
+     * @return    void
+     */
+    protected function descartarDatosLeidos($sKey, $iMaxBytes)
+    {
+        $iMaxBytes = (int)$iMaxBytes;
+        if (!isset($this->_conexiones[$sKey])) return;
+        if ($iMaxBytes < 0) return;
+        $this->_conexiones[$sKey]['pendiente_leer'] =
+            (strlen($this->_conexiones[$sKey]['pendiente_leer']) > $iMaxBytes)
+            ? substr($this->_conexiones[$sKey]['pendiente_leer'], $iMaxBytes)
+            : '';
+    }
 
-	/**
-	 * Agregar datos al búfer de escritura pendiente, los cuales serán escritos
-	 * al cliente durante la siguiente llamada a procesarActividad()
-	 * @param	string	$sKey	Clave de la conexión pasada a procesarNuevosDatos()
-	 * @param	string	$s		Búfer de datos a agregar a los datos a escribir.
-	 * 
-	 * @return	void
-	 */
-	public function encolarDatosEscribir($sKey, &$s)
-	{
-		if (!isset($this->_conexiones[$sKey])) return;
+    /**
+     * Agregar datos al búfer de escritura pendiente, los cuales serán escritos
+     * al cliente durante la siguiente llamada a procesarActividad()
+     * @param    string    $sKey    Clave de la conexión pasada a procesarNuevosDatos()
+     * @param    string    $s        Búfer de datos a agregar a los datos a escribir.
+     *
+     * @return    void
+     */
+    public function encolarDatosEscribir($sKey, &$s)
+    {
+        if (!isset($this->_conexiones[$sKey])) return;
         $this->_conexiones[$sKey]['pendiente_escribir'] .= $s;
-	}
+    }
 
-	/**
-	 * Marcar que el socket indicado debe de cerrarse. Ya no se procesarán más
-	 * datos de entrada del socket indicado, desde el punto de vista de la
-	 * aplicación. Todos los datos pendientes por escribir se escribirán antes
-	 * de cerrar el socket.
-	 * @param	string	$sKey	Clave de la conexión pasada a procesarNuevosDatos()
-	 * 
-	 * @return	void
-	 */
-	public function marcarCerrado($sKey)
-	{
-		if (!isset($this->_conexiones[$sKey])) return;
-		$this->_conexiones[$sKey]['exit_request'] = TRUE;
-	}
+    /**
+     * Marcar que el socket indicado debe de cerrarse. Ya no se procesarán más
+     * datos de entrada del socket indicado, desde el punto de vista de la
+     * aplicación. Todos los datos pendientes por escribir se escribirán antes
+     * de cerrar el socket.
+     * @param    string    $sKey    Clave de la conexión pasada a procesarNuevosDatos()
+     *
+     * @return    void
+     */
+    public function marcarCerrado($sKey)
+    {
+        if (!isset($this->_conexiones[$sKey])) return;
+        $this->_conexiones[$sKey]['exit_request'] = TRUE;
+    }
 
-	// Procesar realmente una conexión que debe cerrarse
+    // Procesar realmente una conexión que debe cerrarse
     private function _cerrarConexion($sKey)
     {
         fclose($this->_conexiones[$sKey]['socket']);
@@ -372,13 +372,13 @@ class MultiplexServer
     /**
      * Procedimiento que se debe implementar en la subclase, para manejar la
      * apertura inicial del socket, para poder escribir datos antes de recibir
-     * peticiones del cliente. En este punto no hay hay datos leidos del 
+     * peticiones del cliente. En este punto no hay hay datos leidos del
      * cliente.
-	 * @param	string	$sKey	Clave de la conexión recién creada.
-	 * 
-	 * @return	void
+     * @param    string    $sKey    Clave de la conexión recién creada.
+     *
+     * @return    void
      */
-	protected function procesarInicial($sKey) {}
+    protected function procesarInicial($sKey) {}
 
     function finalizarServidor()
     {
@@ -392,20 +392,20 @@ class MultiplexServer
         $this->procesarActividad();
     }
 
-	/**
-	 * Procedimiento que se debe implementar en la subclase, para manejar datos
-	 * nuevos enviados desde el cliente.
-	 * @param	string	$sKey	Clave de la conexión con datos nuevos
-	 * 
-	 * @return	void
-	 */
-	//abstract protected function procesarNuevosDatos($sKey);
+    /**
+     * Procedimiento que se debe implementar en la subclase, para manejar datos
+     * nuevos enviados desde el cliente.
+     * @param    string    $sKey    Clave de la conexión con datos nuevos
+     *
+     * @return    void
+     */
+    //abstract protected function procesarNuevosDatos($sKey);
 
     /**
-     * Procedimiento que se debe implementar en la subclase, para manejar el 
+     * Procedimiento que se debe implementar en la subclase, para manejar el
      * cierre de la conexión.
      * @param   string  $sKey   Clave de la conexión cerrada
-     * 
+     *
      * @return  void
      */
     //abstract protected function procesarCierre($sKey);

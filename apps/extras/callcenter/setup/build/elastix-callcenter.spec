@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Sun Feb  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: allow Dialing as a valid state for Llamada->status property.
+  Otherwise Llamada->status might remain NULL, which propagates to the
+  call_progress_log insertion and causes a SQL failure.
+  SVN Rev[7468]
 - CHANGED: Dialer: tweak MultiplexServer class to perform reading and writing
   of buffers at every possible opportunity, and therefore reduce the chance of
   remote available data to read lingering too long.

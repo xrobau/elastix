@@ -284,8 +284,8 @@ class Llamada
                 $this->_tipo_llamada = (string)$v;
             break;
         case 'status':
-            if (in_array($v, array('Placing', 'Ringing', 'OnQueue', 'Success',
-                'OnHold', 'Hangup', 'Failure', 'ShortCall', 'NoAnswer',
+            if (in_array($v, array('Placing', 'Dialing', 'Ringing', 'OnQueue',
+                'Success', 'OnHold', 'Hangup', 'Failure', 'ShortCall', 'NoAnswer',
                 'Abandoned')))
                 $this->_status = (string)$v;
             break;

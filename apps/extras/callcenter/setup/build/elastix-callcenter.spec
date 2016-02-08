@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sun Feb  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: tweak MultiplexServer class to perform reading and writing
+  of buffers at every possible opportunity, and therefore reduce the chance of
+  remote available data to read lingering too long.
+  SVN Rev[7467]
+
 * Fri Feb  5 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - DELETED: remove formpause support.
   SVN Rev[7464]

@@ -82,15 +82,37 @@ class MultiplexServer
      *
      * @return    VERDADERO si alguna conexión tuvo actividad
      */
-    function procesarActividad($iMaxTimeout = 1)
+    function procesarActividad($tv_sec = 1, $tv_usec = 0)
+    {
+        $bNuevosDatos = $this->_ejecutarIO($tv_sec, $tv_usec, TRUE);
+
+        if ($bNuevosDatos) {
+            foreach ($this->_conexiones as $sKey => &$conexion) {
+                if ($conexion['nuevos_datos_leer']) {
+                    $this->_procesarNuevosDatos($sKey);
+                    $conexion['nuevos_datos_leer'] = FALSE;
+                    $this->_ejecutarIO(0, 0);
+                }
+            }
+        }
+
+        return $bNuevosDatos;
+    }
+
+    private function _ejecutarIO($tv_sec, $tv_usec, $listen = FALSE)
     {
         $bNuevosDatos = FALSE;
         $listoLeer = array();
         $listoEscribir = array();
         $listoErr = NULL;
 
+        // Se recogen bandera de datos no procesados pendientes
+        foreach ($this->_conexiones as $sKey => &$conexion) {
+            if ($conexion['nuevos_datos_leer']) $bNuevosDatos = TRUE;
+        }
+
         // Recolectar todos los descriptores que se monitorean
-        if ($this->_hEscucha)
+        if ($listen && $this->_hEscucha)
             $listoLeer[] = $this->_hEscucha;        // Escucha de nuevas conexiones
         foreach ($this->_conexiones as &$conexion) {
             if (!$conexion['exit_request']) $listoLeer[] = $conexion['socket'];
@@ -98,7 +120,8 @@ class MultiplexServer
                 $listoEscribir[] = $conexion['socket'];
             }
         }
-        $iNumCambio = @stream_select($listoLeer, $listoEscribir, $listoErr, $iMaxTimeout);
+        $iNumCambio = @stream_select($listoLeer, $listoEscribir, $listoErr,
+                $tv_sec, $tv_usec);
         if ($iNumCambio === false) {
             // Interrupción, tal vez una señal
             $this->_oLog->output("INFO: select() finaliza con fallo - señal pendiente?");
@@ -122,63 +145,15 @@ class MultiplexServer
                 }
                 if (in_array($conexion['socket'], $listoLeer)) {
                     // Leer datos de la conexión lista para leer
-                    $this->_procesarEntradaConexion($sKey);
-                    $bNuevosDatos = TRUE;
-                }
-            }
-
-            // Cerrar todas las conexiones que no tienen más datos que mostrar
-            // y que han marcado que deben terminarse
-            foreach ($this->_conexiones as $sKey => &$conexion) {
-                if (is_array($conexion) && $conexion['exit_request'] && strlen($conexion['pendiente_escribir']) <= 0) {
-                    $this->_cerrarConexion($sKey);
-                }
-            }
-
-            // Remover todos los elementos seteados a FALSE
-            $this->_conexiones = array_filter($this->_conexiones);
-        }
-
-        return $bNuevosDatos;
-    }
-
-    /**
-     * Procedimiento que intenta vaciar los búferes de escritura con un timeout
-     * de 0. Si ningún búfer está pendiente de escribir, se regresa
-     * inmediatamente.
-     *
-     * @return  VERDADERO si alguna conexión tuvo actividad
-     */
-    function vaciarBuferesEscritura()
-    {
-        $bNuevosDatos = FALSE;
-        $listoLeer = NULL;
-        $listoEscribir = array();
-        $listoErr = NULL;
-
-        // Recolectar todos los descriptores que se monitorean
-        foreach ($this->_conexiones as &$conexion) {
-            if (strlen($conexion['pendiente_escribir']) > 0) {
-                $listoEscribir[] = $conexion['socket'];
-            }
-        }
-        if (count($listoEscribir) <= 0) return FALSE;
-        $iNumCambio = stream_select($listoLeer, $listoEscribir, $listoErr, 0);
-        if ($iNumCambio === false) {
-            // Interrupción, tal vez una señal
-            $this->_oLog->output("INFO: select() finaliza con fallo - señal pendiente?");
-        } elseif ($iNumCambio > 0 || count($listoEscribir) > 0) {
-            foreach ($this->_conexiones as $sKey => &$conexion) {
-                if (in_array($conexion['socket'], $listoEscribir)) {
-                    // Escribir lo más que se puede de los datos pendientes por mostrar
-                    $iBytesEscritos = fwrite($conexion['socket'], $conexion['pendiente_escribir']);
-                    if ($iBytesEscritos === FALSE) {
-                        $this->_oLog->output("ERR: error al escribir datos a ".$conexion['socket']);
+                    $sNuevaEntrada = fread($conexion['socket'], 128 * 1024);
+                    if ($sNuevaEntrada == '') {
+                        // Lectura de cadena vacía indica que se ha cerrado la conexión remotamente
                         $this->_cerrarConexion($sKey);
                     } else {
-                        $conexion['pendiente_escribir'] = substr($conexion['pendiente_escribir'], $iBytesEscritos);
-                        $bNuevosDatos = TRUE;
+                        $conexion['pendiente_leer'] .= $sNuevaEntrada;
+                        $conexion['nuevos_datos_leer'] = TRUE;
                     }
+                    $bNuevosDatos = TRUE;
                 }
             }
 
@@ -220,12 +195,18 @@ class MultiplexServer
     }
 
     /* Enviar los datos recibidos para que sean procesados por la conexión */
-    function procesarNuevosDatos($sKey)
+    private function _procesarNuevosDatos($sKey)
     {
         if (isset($this->_listaConn[$sKey])) {
             $sDatos = $this->obtenerDatosLeidos($sKey);
             $iLongProcesado = $this->_listaConn[$sKey]->parsearPaquetes($sDatos);
-            $this->descartarDatosLeidos($sKey, $iLongProcesado);
+
+            if (!isset($this->_conexiones[$sKey])) return;
+            if ($iLongProcesado < 0) return;
+            $this->_conexiones[$sKey]['pendiente_leer'] =
+                (strlen($this->_conexiones[$sKey]['pendiente_leer']) > $iLongProcesado)
+                ? substr($this->_conexiones[$sKey]['pendiente_leer'], $iLongProcesado)
+                : '';
         }
     }
 
@@ -244,7 +225,7 @@ class MultiplexServer
             if ($oConn->hayPaquetes()) {
                 $bHayProcesados = TRUE;
                 $oConn->procesarPaquete();
-                $this->vaciarBuferesEscritura();
+                $this->_ejecutarIO(0, 0);
             }
         }
         return $bHayProcesados;
@@ -274,6 +255,7 @@ class MultiplexServer
             'pendiente_leer'        =>  '',
             'pendiente_escribir'    =>  '',
             'exit_request'          =>  FALSE,
+            'nuevos_datos_leer'     =>  FALSE,
         );
         stream_set_blocking($nuevaConn['socket'], 0);
 
@@ -281,19 +263,6 @@ class MultiplexServer
         $this->_uniqueid++;
         $this->_conexiones[$sKey] =& $nuevaConn;
         return $sKey;
-    }
-
-    // Procesar datos nuevos recibidos en una conexión existente
-    private function _procesarEntradaConexion($sKey)
-    {
-        $sNuevaEntrada = fread($this->_conexiones[$sKey]['socket'], 128 * 1024);
-        if ($sNuevaEntrada == '') {
-            // Lectura de cadena vacía indica que se ha cerrado la conexión remotamente
-            $this->_cerrarConexion($sKey);
-            return ;
-        }
-        $this->_conexiones[$sKey]['pendiente_leer'] .= $sNuevaEntrada;
-        $this->procesarNuevosDatos($sKey);
     }
 
     /**
@@ -311,25 +280,6 @@ class MultiplexServer
         return ($iMaxBytes > 0)
             ? substr($this->_conexiones[$sKey]['pendiente_leer'], 0, $iMaxBytes)
             : $this->_conexiones[$sKey]['pendiente_leer'];
-    }
-
-    /**
-     * Descartar los $iMaxBytes primeros bytes de datos del búfer de lectura
-     * pendiente, bajo la suposición de que ya han sido procesados.
-     * @param    string    $sKey        Clave de la conexión pasada a procesarNuevosDatos()
-     * @param    int        $iMaxBytes    Número de bytes a descartar del inicio del búfer.
-     *
-     * @return    void
-     */
-    protected function descartarDatosLeidos($sKey, $iMaxBytes)
-    {
-        $iMaxBytes = (int)$iMaxBytes;
-        if (!isset($this->_conexiones[$sKey])) return;
-        if ($iMaxBytes < 0) return;
-        $this->_conexiones[$sKey]['pendiente_leer'] =
-            (strlen($this->_conexiones[$sKey]['pendiente_leer']) > $iMaxBytes)
-            ? substr($this->_conexiones[$sKey]['pendiente_leer'], $iMaxBytes)
-            : '';
     }
 
     /**

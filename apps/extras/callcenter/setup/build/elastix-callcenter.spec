@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Sun Feb  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: move contact loading to a separate action. Phase one of
+  pluggable contact source changeset. Also display all campaigns by default,
+  instead of active only, since campaigns now are created in in inactive state.
+  SVN Rev[7469]
 - FIXED: Dialer: allow Dialing as a valid state for Llamada->status property.
   Otherwise Llamada->status might remain NULL, which propagates to the
   call_progress_log insertion and causes a SQL failure.

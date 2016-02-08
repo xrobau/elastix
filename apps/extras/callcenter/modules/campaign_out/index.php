@@ -78,6 +78,9 @@ function _moduleContent(&$smarty, $module_name)
     case 'csv_data':
         $contenidoModulo = displayCampaignCSV($pDB, $smarty, $module_name, $local_templates_dir);
         break;
+    case 'load_contacts':
+        $contenidoModulo = loadCampaignContacts($pDB, $smarty, $module_name, $local_templates_dir);
+        break;
     case 'list_campaign':
     default:
         $contenidoModulo = listCampaign($pDB, $smarty, $module_name, $local_templates_dir);
@@ -135,7 +138,7 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
         "T" => _tr("Finish"),
         "I" => _tr("Inactive")
     );
-    $sEstado = 'A';
+    $sEstado = 'all';
     if (isset($_GET['cbo_estado']) && isset($estados[$_GET['cbo_estado']])) {
         $sEstado = $_GET['cbo_estado'];
     }
@@ -176,7 +179,9 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
             } elseif ($campaign['estatus']=='T') {
                 $arrTmp[9] = _tr('Finish');
             }
-            $arrTmp[10] = "<a href='?menu=$module_name&amp;action=csv_data&amp;id_campaign=".$campaign['id']."&amp;rawmode=yes'>["._tr('CSV Data')."]</a>";
+            $arrTmp[10] =
+                "<a href='?menu=$module_name&amp;action=load_contacts&amp;id_campaign=".$campaign['id']."'>["._tr('Load Contacts')."]</a> ".
+                "<a href='?menu=$module_name&amp;action=csv_data&amp;id_campaign=".$campaign['id']."&amp;rawmode=yes'>["._tr('CSV Data')."]</a>";
             $arrData[] = $arrTmp;
         }
     }
@@ -190,7 +195,11 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
         _tr('Schedule per Day'), _tr('Retries'), _tr('Trunk'), _tr('Queue'),
         _tr('Completed Calls'), _tr('Average Time'), _tr('Status'), _tr('Options')));
     $_POST['cbo_estado']=$sEstado;
-    $oGrid->addFilterControl(_tr("Filter applied ")._tr("Status")." = ".$estados[$sEstado], $_POST, array("cbo_estado" =>'A'),true);
+    $oGrid->addFilterControl(
+        _tr("Filter applied ")._tr("Status")." = ".$estados[$sEstado],
+        $_POST,
+        array("cbo_estado" =>'all'),
+        TRUE);
     $smarty->assign(array(
         'MODULE_NAME'                   =>  $module_name,
         'LABEL_CAMPAIGN_STATE'          =>  _tr('Campaign state'),
@@ -216,11 +225,15 @@ function newCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 
 function editCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 {
+    $id_campaign = (isset($_REQUEST['id_campaign']) && ctype_digit($_REQUEST['id_campaign']))
+        ? (int)$_REQUEST['id_campaign'] : NULL;
+/*
     $id_campaign = NULL;
     if (isset($_GET['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_GET['id_campaign']))
         $id_campaign = $_GET['id_campaign'];
     if (isset($_POST['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_POST['id_campaign']))
         $id_campaign = $_POST['id_campaign'];
+*/
     if (is_null($id_campaign)) {
         Header("Location: ?menu=$module_name");
         return '';
@@ -231,8 +244,8 @@ function editCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 
 function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id_campaign = NULL)
 {
-    include_once "libs/paloSantoQueue.class.php";
-    include_once "modules/form_designer/libs/paloSantoDataForm.class.php";
+    require_once "libs/paloSantoQueue.class.php";
+    require_once "modules/form_designer/libs/paloSantoDataForm.class.php";
 
     // Si se ha indicado cancelar, volver a listado sin hacer nada más
     if (isset($_POST['cancel'])) {
@@ -417,12 +430,6 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
             } elseif ((int)$_POST['reintentos'] <= 0) {
                 $smarty->assign("mb_title", _tr("Validation Error"));
                 $smarty->assign("mb_message", _tr('Campaign must allow at least one call retry'));
-            } elseif ($bDoCreate && !in_array($_POST['encoding'], mb_list_encodings())) {
-                $smarty->assign("mb_title", _tr('Validation Error'));
-                $smarty->assign("mb_message", _tr('Invalid character encoding'));
-            } elseif ($bDoCreate && empty($_FILES['phonefile']['tmp_name'])) {
-                $smarty->assign("mb_title", _tr('Validation Error'));
-                $smarty->assign("mb_message", _tr('Call file not specified or failed to be uploaded'));
             } else {
                 $time_ini = $_POST['hora_ini_HH'].":".$_POST['hora_ini_MM'];
                 $time_fin = $_POST['hora_fin_HH'].":".$_POST['hora_fin_MM'];
@@ -444,77 +451,66 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                     $smarty->assign("mb_message", _tr('Unable to parse end time specification'));
                 } else {
 
-                    if(!$pDB->genQuery("SET AUTOCOMMIT=0")) {
-                        $smarty->assign("mb_message", $pDB->errMsg);
-                    } else {
-                        $bExito = TRUE;
+                    $pDB->beginTransaction();
+                    $bExito = TRUE;
+                    if ($bDoCreate) {
+                        $id_campaign = $oCamp->createEmptyCampaign(
+                            $_POST['nombre'],
+                            $_POST['max_canales'],
+                            $_POST['reintentos'],
+                            $_POST['trunk'],
+                            $_POST['context'],
+                            $_POST['queue'],
+                            date('Y-m-d', $iFechaIni),
+                            date('Y-m-d', $iFechaFin),
+                            $time_ini,
+                            $time_fin,
+                            $_POST['rte_script'],
+                            ($_POST['external_url'] == '') ? NULL : (int)$_POST['external_url']);
+                        if (is_null($id_campaign)) $bExito = FALSE;
+                    } elseif ($bDoUpdate) {
+                        $bExito = $oCamp->updateCampaign(
+                            $id_campaign,
+                            $_POST['nombre'],
+                            $_POST['max_canales'],
+                            $_POST['reintentos'],
+                            $_POST['trunk'],
+                            $_POST['context'],
+                            $_POST['queue'],
+                            date('Y-m-d', $iFechaIni),
+                            date('Y-m-d', $iFechaFin),
+                            $time_ini,
+                            $time_fin,
+                            $_POST['rte_script'],
+                            ($_POST['external_url'] == '') ? NULL : (int)$_POST['external_url']);
+                    }
+
+                    // Introducir o actualizar formularios
+                    if ($bExito && isset($_POST['values_form'])) {
                         if ($bDoCreate) {
-                            $id_campaign = $oCamp->createEmptyCampaign(
-                                            $_POST['nombre'],
-                                            $_POST['max_canales'],
-                                            $_POST['reintentos'],
-                                            $_POST['trunk'],
-                                            $_POST['context'],
-                                            $_POST['queue'],
-                                            date('Y-m-d', $iFechaIni),
-                                            date('Y-m-d', $iFechaFin),
-                                            $time_ini,
-                                            $time_fin,
-                                            $_POST['rte_script'],
-                                            ($_POST['external_url'] == '') ? NULL : (int)$_POST['external_url']);
-                            if (is_null($id_campaign)) $bExito = FALSE;
+                            $bExito = $oCamp->addCampaignForm($id_campaign, $_POST['values_form']);
                         } elseif ($bDoUpdate) {
-                            $bExito = $oCamp->updateCampaign(
-                                            $id_campaign,
-                                            $_POST['nombre'],
-                                            $_POST['max_canales'],
-                                            $_POST['reintentos'],
-                                            $_POST['trunk'],
-                                            $_POST['context'],
-                                            $_POST['queue'],
-                                            date('Y-m-d', $iFechaIni),
-                                            date('Y-m-d', $iFechaFin),
-                                            $time_ini,
-                                            $time_fin,
-                                            $_POST['rte_script'],
-                                            ($_POST['external_url'] == '') ? NULL : (int)$_POST['external_url']);
-                        }
-
-                        // Introducir o actualizar formularios
-                        if ($bExito && isset($_POST['values_form'])) {
-                            if ($bDoCreate) {
-                                $bExito = $oCamp->addCampaignForm($id_campaign, $_POST['values_form']);
-                            } elseif ($bDoUpdate) {
-                                $bExito = $oCamp->updateCampaignForm($id_campaign, $_POST['values_form']);
-                            }
-                        }
-
-                        // Para creación, se introduce lista de valores CSV
-                        if ($bExito && !empty($_FILES['phonefile']['tmp_name'])) {
-                            // Se puede tardar mucho tiempo en la inserción
-                            ini_set('max_execution_time', 3600);
-                            $sEncoding = $_POST['encoding'];
-                            $bExito = $oCamp->addCampaignNumbersFromFile(
-                                $id_campaign,
-                                $_FILES['phonefile']['tmp_name'],
-                                $sEncoding);
-                            if ($bExito && $bDoUpdate && $arrCampaign[0]['estatus'] == 'T') {
-                            	// Agregar números a una campaña terminada debe volverla a activar
-                                $oCamp->activar_campaign($id_campaign, 'A');
-                            }
-                        }
-
-                        // Confirmar o deshacer la transacción según sea apropiado
-                        if ($bExito) {
-                            $pDB->genQuery("COMMIT");
-                            header("Location: ?menu=$module_name");
-                        } else {
-                            $pDB->genQuery("ROLLBACK");
-                            $smarty->assign("mb_title", _tr("Validation Error"));
-                            $smarty->assign("mb_message", $oCamp->errMsg);
+                            $bExito = $oCamp->updateCampaignForm($id_campaign, $_POST['values_form']);
                         }
                     }
-                    $pDB->genQuery("SET AUTOCOMMIT=1");
+
+                    if ($bExito && $bDoCreate) {
+                        /* La campaña se crea vacía e inactiva para tener la
+                         * oportunidad de llenar contactos antes de activarla.
+                         */
+                        $bExito = $oCamp->activar_campaign($id_campaign, 'I');
+                    }
+
+                    // Confirmar o deshacer la transacción según sea apropiado
+                    if ($bExito) {
+                        $pDB->commit();
+                        header("Location: ?menu=$module_name");
+                        return '';
+                    } else {
+                        $pDB->rollBack();
+                        $smarty->assign("mb_title", _tr("Validation Error"));
+                        $smarty->assign("mb_message", $oCamp->errMsg);
+                    }
                 }
             }
         }
@@ -526,6 +522,97 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
         is_null($id_campaign) ? _tr("New Campaign") : _tr("Edit Campaign").' "'.$_POST['nombre'].'"',
         $_POST);
     return $contenidoModulo;
+}
+
+function loadCampaignContacts($pDB, $smarty, $module_name, $local_templates_dir)
+{
+    $id_campaign = (isset($_REQUEST['id_campaign']) && ctype_digit($_REQUEST['id_campaign']))
+        ? (int)$_REQUEST['id_campaign'] : NULL;
+    if (is_null($id_campaign)) {
+        Header("Location: ?menu=$module_name");
+        return '';
+    }
+
+    // Si se ha indicado cancelar, volver a listado sin hacer nada más
+    if (isset($_POST['cancel'])) {
+        Header("Location: ?menu=$module_name");
+        return '';
+    }
+
+    // Leer los datos de la campaña, si es necesario
+    $oCamp = new paloSantoCampaignCC($pDB);
+    $arrCampaign = $oCamp->getCampaigns(null, null, $id_campaign);
+    if (!is_array($arrCampaign) || count($arrCampaign) == 0) {
+        $smarty->assign("mb_title", 'Unable to read campaign');
+        $smarty->assign("mb_message", 'Cannot read campaign - '.$oCamp->errMsg);
+        return '';
+    }
+
+    $smarty->assign('id_campaign', $id_campaign);
+    $smarty->assign('FRAMEWORK_TIENE_TITULO_MODULO', existeSoporteTituloFramework());
+    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
+    $smarty->assign("CANCEL", _tr("Cancel"));
+    $smarty->assign("SAVE", _tr("Save"));
+    $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
+
+    $oForm = new paloForm($smarty, array(
+        'encoding'          =>  array(
+            'LABEL'                     =>  _tr('Call File Encoding'),
+            'REQUIRED'                  =>  'yes',
+            'INPUT_TYPE'                =>  'SELECT',
+            'INPUT_EXTRA_PARAM'         =>  listarCodificaciones(),
+            'VALIDATION_TYPE'           =>  'text',
+            'VALIDATION_EXTRA_PARAM'    =>  '',
+        ),
+        'phonefile'          =>  array(
+            'LABEL'                     =>  _tr('Call File'),
+            'REQUIRED'                  =>  'yes',
+            'INPUT_TYPE'                =>  'FILE',
+            'INPUT_EXTRA_PARAM'         =>  '',
+            'VALIDATION_TYPE'           =>  'text',
+            'VALIDATION_EXTRA_PARAM'    =>  '',
+        ),
+    ));
+
+    if (isset($_POST['save'])) {
+        if (!in_array($_POST['encoding'], mb_list_encodings())) {
+            $smarty->assign("mb_title", _tr('Validation Error'));
+            $smarty->assign("mb_message", _tr('Invalid character encoding'));
+        } elseif (empty($_FILES['phonefile']['tmp_name'])) {
+            $smarty->assign("mb_title", _tr('Validation Error'));
+            $smarty->assign("mb_message", _tr('Call file not specified or failed to be uploaded'));
+        } else {
+            $pDB->beginTransaction();
+
+            // Se puede tardar mucho tiempo en la inserción
+            set_time_limit(0);
+            $bExito = $oCamp->addCampaignNumbersFromFile(
+                $id_campaign,
+                $_FILES['phonefile']['tmp_name'],
+                $_POST['encoding']);
+            if ($bExito && $arrCampaign[0]['estatus'] == 'T') {
+                // Agregar números a una campaña terminada debe volverla a activar
+                $oCamp->activar_campaign($id_campaign, 'A');
+            }
+
+            // Confirmar o deshacer la transacción según sea apropiado
+            if ($bExito) {
+                $pDB->commit();
+                header("Location: ?menu=$module_name");
+                return '';
+            } else {
+                $pDB->rollBack();
+                $smarty->assign("mb_title", _tr("Validation Error"));
+                $smarty->assign("mb_message", $oCamp->errMsg);
+            }
+        }
+    }
+
+    $smarty->assign('icon', 'images/kfaxview.png');
+    return $oForm->fetchForm(
+        "$local_templates_dir/load_contacts.tpl",
+        _tr("Load Contacts for Campaign").': '.$arrCampaign[0]['name'],
+        $_POST);
 }
 
 function getFormCampaign($arrDataTrunks, $arrDataQueues, $arrSelectForm,
@@ -699,14 +786,6 @@ function getFormCampaign($arrDataTrunks, $arrDataQueues, $arrSelectForm,
             "INPUT_EXTRA_PARAM"      => $arrUrlsExternos,
             "VALIDATION_TYPE"        => "text",
             "VALIDATION_EXTRA_PARAM" => "",
-        ),
-        'encoding'          =>  array(
-            'LABEL'                     =>  _tr('Call File Encoding'),
-            'REQUIRED'                  =>  'yes',
-            'INPUT_TYPE'                =>  'SELECT',
-            'INPUT_EXTRA_PARAM'         =>  listarCodificaciones(),
-            'VALIDATION_TYPE'           =>  'text',
-            'VALIDATION_EXTRA_PARAM'    =>  '',
         ),
     );
 

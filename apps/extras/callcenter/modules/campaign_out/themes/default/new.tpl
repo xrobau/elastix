@@ -39,8 +39,8 @@ var rte_script = new richTextEditor('rte_script');
           <input class="button" type="submit" name="cancel" value="{$CANCEL}" />
         </td>
           {else}
-{* Removido para eliminar xajax *}        
-          {/if}          
+{* Removido para eliminar xajax *}
+          {/if}
      </tr>
    </table>
   </td>
@@ -77,7 +77,7 @@ var rte_script = new richTextEditor('rte_script');
 			<br><br>
 			<a href="?menu=form_designer">
 			<b>{$label_manage_forms}</b>
-			</a><br><br><hr>			
+			</a><br><br><hr>
 		</td>
           <td  colspan='2'>
            {if $mode eq 'edit' or $mode eq 'input'}
@@ -93,7 +93,7 @@ var rte_script = new richTextEditor('rte_script');
                     <tr>
                         <td><input type='button' name='quitar_formulario' value="&lt;&lt;" onclick='drop_form()'/></td>
                     </tr>
-                </table>                
+                </table>
            {else}
                {$formulario.INPUT}
             {/if}
@@ -133,16 +133,8 @@ var rte_script = new richTextEditor('rte_script');
 	    <td  colspan='4'>{$reintentos.INPUT}</td>
       </tr>
       <tr>
-    	<td align='right'>{$LABEL_CALL_FILE}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
-    	<td  colspan='4'><input type='file' name='phonefile' /></td>
-      </tr>
-      <tr>
-        <td align='right'>{$encoding.LABEL}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
-        <td  colspan='4'>{$encoding.INPUT}</td>
-      </tr>
-      <tr>
         <td align='right' valign='top'>{$script.LABEL}: <span  class="required">*</span></td>
-        <td  colspan='2'> 
+        <td  colspan='2'>
             {if $mode eq 'edit' or $mode eq 'input'}
                <script language="JavaScript" type="text/javascript">
                    rte_script.html ="{$rte_script}";
@@ -151,7 +143,7 @@ var rte_script = new richTextEditor('rte_script');
                </script>
             {else}
                 {$script.INPUT}
-            {/if} 
+            {/if}
         </td>
       </tr>
       </table>
@@ -159,20 +151,20 @@ var rte_script = new richTextEditor('rte_script');
   </tr>
 </table>
 <input type="hidden" name="id_campaign" id='id_campaign' value="{$id_campaign}" />
-<input type="hidden" name="values_form" id='values_form' value="" />    
+<input type="hidden" name="values_form" id='values_form' value="" />
 </form>
 
 {literal}
 <script type="text/javascript">
 /* Función para recoger todas las variables del formulario y procesarlas. Sólo
-   se requiere atención especial para el RTF del script, y para la lista de 
+   se requiere atención especial para el RTF del script, y para la lista de
    formularios elegidos. */
 function enviar_datos()
-{   
+{
 	var lc = listaControlesFormularios();
 	var select_form = lc[1]; /* Formularios elegidos */
     var values = "";
-    
+
     for(var i=0; i < select_form.length; i++) {
         values = values + select_form[i].value + ",";
     }
@@ -229,19 +221,19 @@ function drop_form()
     }
 }
 
-/* Esta función es necesaria para lidiar con el cambio en los nombres de los 
+/* Esta función es necesaria para lidiar con el cambio en los nombres de los
    controles generados por Elastix entre 1.6-12 y 1.6.2-1 */
 function listaControlesFormularios()
 {
 	var listaControles;
 	var select_formularios;
 	var select_formularios_elegidos;
-	
+
 	listaControles = document.getElementsByName('formulario');
 	if (listaControles.length == 0)
 		listaControles = document.getElementsByName('formulario[]');
     select_formularios = listaControles[0];
-    
+
 	listaControles = document.getElementsByName('formularios_elegidos');
 	if (listaControles.length == 0)
 		listaControles = document.getElementsByName('formularios_elegidos[]');

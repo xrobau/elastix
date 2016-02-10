@@ -98,17 +98,14 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 
     // Recoger ID de campaña para operación
     $id_campaign = NULL;
-    if (isset($_POST['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_POST['id_campaign']))
+    if (isset($_POST['id_campaign']) && ctype_digit($_POST['id_campaign']))
         $id_campaign = $_POST['id_campaign'];
 
     // Revisar si se debe de borrar una campaña elegida
     if (isset($_POST['delete']) && !is_null($id_campaign)) {
         if($oCampaign->delete_campaign($id_campaign)) {
-            if ($oCampaign->errMsg!="") {
-                $smarty->assign("mb_title",_tr('Validation Error'));
-                $smarty->assign("mb_message", $oCampaign->errMsg);
-            } else {
-            }
+            $smarty->assign("mb_title",_tr('Message'));
+            $smarty->assign("mb_message", _tr('Campaign was deleted successfully'));
         } else {
             $msg_error = ($oCampaign->errMsg!="") ? "<br/>".$oCampaign->errMsg:"";
             $smarty->assign("mb_title", _tr('Delete Error'));
@@ -160,29 +157,21 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 
     if (is_array($arrCampaign)) {
         foreach($arrCampaign as $campaign) {
-            $arrTmp    = array();
-            $arrTmp[0] = "<input class=\"button\" type=\"radio\" name=\"id_campaign\" value=\"$campaign[id]\" />";
-            $arrTmp[1] = "<a href='?menu=$module_name&amp;action=edit_campaign&amp;id_campaign=".$campaign['id']."'>".
-                htmlentities($campaign['name'], ENT_COMPAT, 'UTF-8').'</a>';
-            $arrTmp[2] = $campaign['datetime_init'].' - '.$campaign['datetime_end'];
-            $arrTmp[3] = $campaign['daytime_init'].' - '.$campaign['daytime_end'];
-            $arrTmp[4] = ($campaign['retries']!="")?$campaign['retries']:"&nbsp;";
-            $arrTmp[5] = is_null($campaign['trunk']) ? '(Dialplan)' : $campaign['trunk'];
-            $arrTmp[6] = $campaign['queue'];
-            $arrTmp[7] = ($campaign['num_completadas']!="") ? $campaign['num_completadas'] : "N/A";
-            $arrTmp[8] = ($campaign['promedio']!="") ? number_format($campaign['promedio'],0) : "N/A";
-
-            if($campaign['estatus']=='I'){
-                $arrTmp[9] = _tr('Inactive');
-            } elseif($campaign['estatus']=='A'){
-                $arrTmp[9] = _tr('Active');
-            } elseif ($campaign['estatus']=='T') {
-                $arrTmp[9] = _tr('Finish');
-            }
-            $arrTmp[10] =
+            $arrData[] = array(
+                "<input class=\"button\" type=\"radio\" name=\"id_campaign\" value=\"$campaign[id]\" />",
+                "<a href='?menu=$module_name&amp;action=edit_campaign&amp;id_campaign=".$campaign['id']."'>".
+                    htmlentities($campaign['name'], ENT_COMPAT, 'UTF-8').'</a>',
+                $campaign['datetime_init'].' - '.$campaign['datetime_end'],
+                $campaign['daytime_init'].' - '.$campaign['daytime_end'],
+                ($campaign['retries'] != "") ? $campaign['retries'] : "&nbsp;",
+                is_null($campaign['trunk']) ? '(Dialplan)' : $campaign['trunk'],
+                $campaign['queue'],
+                ($campaign['num_completadas'] != "") ? $campaign['num_completadas'] : "N/A",
+                ($campaign['promedio'] != "") ? number_format($campaign['promedio'],0) : "N/A",
+                campaignStatusLabel($campaign['estatus']),
                 "<a href='?menu=$module_name&amp;action=load_contacts&amp;id_campaign=".$campaign['id']."'>["._tr('Load Contacts')."]</a> ".
-                "<a href='?menu=$module_name&amp;action=csv_data&amp;id_campaign=".$campaign['id']."&amp;rawmode=yes'>["._tr('CSV Data')."]</a>";
-            $arrData[] = $arrTmp;
+                    "<a href='?menu=$module_name&amp;action=csv_data&amp;id_campaign=".$campaign['id']."&amp;rawmode=yes'>["._tr('CSV Data')."]</a>",
+            );
         }
     }
 
@@ -218,6 +207,16 @@ function listCampaign($pDB, $smarty, $module_name, $local_templates_dir)
     return $oGrid->fetchGrid();
 }
 
+function campaignStatusLabel($st)
+{
+    switch ($st) {
+    case 'A': return _tr('Active');
+    case 'I': return _tr('Inactive');
+    case 'T': return _tr('Finish');
+    default: return '???';
+    }
+}
+
 function newCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 {
     return formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, NULL);
@@ -227,13 +226,6 @@ function editCampaign($pDB, $smarty, $module_name, $local_templates_dir)
 {
     $id_campaign = (isset($_REQUEST['id_campaign']) && ctype_digit($_REQUEST['id_campaign']))
         ? (int)$_REQUEST['id_campaign'] : NULL;
-/*
-    $id_campaign = NULL;
-    if (isset($_GET['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_GET['id_campaign']))
-        $id_campaign = $_GET['id_campaign'];
-    if (isset($_POST['id_campaign']) && preg_match('/^[[:digit:]]+$/', $_POST['id_campaign']))
-        $id_campaign = $_POST['id_campaign'];
-*/
     if (is_null($id_campaign)) {
         Header("Location: ?menu=$module_name");
         return '';
@@ -504,7 +496,7 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
                     // Confirmar o deshacer la transacción según sea apropiado
                     if ($bExito) {
                         $pDB->commit();
-                        header("Location: ?menu=$module_name");
+                        Header("Location: ?menu=$module_name");
                         return '';
                     } else {
                         $pDB->rollBack();

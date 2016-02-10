@@ -111,6 +111,12 @@ class MultiplexServer
             if ($conexion['nuevos_datos_leer']) $bNuevosDatos = TRUE;
         }
 
+        // Si ya hay datos pendientes, no hay que esperar en select
+        if ($bNuevosDatos) {
+            $tv_sec = 0;
+            $tv_usec = 0;
+        }
+
         // Recolectar todos los descriptores que se monitorean
         if ($listen && $this->_hEscucha)
             $listoLeer[] = $this->_hEscucha;        // Escucha de nuevas conexiones

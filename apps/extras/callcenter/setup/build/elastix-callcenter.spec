@@ -101,10 +101,16 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Feb 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: zero out wait interval in MultiplexServer when pending
+  unparsed data is present right before the select() call. This removes a
+  nonzero wait before dealing with the unparsed data.
+  SVN Rev[7470]
+
 * Sun Feb  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: move contact loading to a separate action. Phase one of
   pluggable contact source changeset. Also display all campaigns by default,
-  instead of active only, since campaigns now are created in in inactive state.
+  instead of active only, since campaigns now are created in inactive state.
   SVN Rev[7469]
 - FIXED: Dialer: allow Dialing as a valid state for Llamada->status property.
   Otherwise Llamada->status might remain NULL, which propagates to the

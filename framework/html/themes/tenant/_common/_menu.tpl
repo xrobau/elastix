@@ -223,7 +223,7 @@ function removeNeoDisplayOnMouseOver(ref){
 
         <li id="header_notification_bar" class="profile-info dropdown">
             <a data-toggle="dropdown" class="" href="#">
-                <i class="fa fa-info"></i>
+                <i class="fa fa-info-circle"></i>
             </a>
             <ul class="dropdown-menu">
 

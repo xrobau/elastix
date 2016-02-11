@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Wed Feb 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: fixed scenario in which events received in the same
+  buffer as a <response> packet would remain undelivered if a wait_response()
+  call is issued immediately after.
+  SVN Rev[7472]
 - CHANGED: Dialer: zero out wait interval in MultiplexServer when pending
   unparsed data is present right before the select() call. This removes a
   nonzero wait before dealing with the unparsed data.

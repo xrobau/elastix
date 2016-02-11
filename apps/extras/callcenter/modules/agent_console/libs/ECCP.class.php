@@ -142,9 +142,11 @@ class ECCP
         do {
             if (is_null($timeout)) {
                 $sec = $usec = NULL;
-            } else {
+            } elseif (count($this->_listaEventos) == 0) {
                 $sec = (int)$timeout;
                 $usec = (int)(($timeout - $sec) * 1000000);
+            } else {
+                $timeout = $sec = $usec = 0;
             }
 
             $listoLeer = array($this->_hConn);

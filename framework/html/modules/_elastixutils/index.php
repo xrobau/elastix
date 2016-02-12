@@ -231,7 +231,7 @@ function handleJSON_extension_current_user($smarty, $local_templates_dir, $modul
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status('ERROR');
     if (!is_numeric($extension)) {
-        $jsonObject->set_message(_tr('Extension not set!'));
+        $jsonObject->set_error(_tr('Extension not set!'));
     } else {
         // esto asume account==extension en FreePBX
         $msg['authorizationUser'] = $extension;
@@ -239,16 +239,16 @@ function handleJSON_extension_current_user($smarty, $local_templates_dir, $modul
         // Leer tecnología y password de FreePBX
         $pDB = new paloDB(generarDSNSistema('asteriskuser', 'asterisk'));
         if ($pDB->errMsg != '') {
-            $jsonObject->set_message($pDB->errMsg);
+            $jsonObject->set_error($pDB->errMsg);
         } else {
             $tupla = $pDB->getFirstRowQuery('SELECT id, tech FROM devices WHERE id = ? AND devicetype = "fixed"',
                 TRUE, array($extension));
             if (!is_array($tupla)) {
-                $jsonObject->set_message($pDB->errMsg);
+                $jsonObject->set_error($pDB->errMsg);
             } elseif (count($tupla) <= 0) {
-                $jsonObject->set_message(_tr('Extension not set or not found'));
+                $jsonObject->set_error(_tr('Extension not set or not found'));
             } elseif (!in_array($tupla['tech'], array('sip', 'iax2'))) {
-                $jsonObject->set_message(_tr('Unsupported technology'));
+                $jsonObject->set_error(_tr('Unsupported technology'));
             } else {
                 $msg['tech'] = $tupla['tech'];
 
@@ -256,9 +256,9 @@ function handleJSON_extension_current_user($smarty, $local_templates_dir, $modul
                 $tupla = $pDB->getFirstRowQuery('SELECT data FROM '.$techtable[$msg['tech']].' WHERE id = ? AND keyword = "secret"',
                     TRUE, array($extension));
                 if (!is_array($tupla)) {
-                    $jsonObject->set_message($pDB->errMsg);
+                    $jsonObject->set_error($pDB->errMsg);
                 } elseif (count($tupla) <= 0) {
-                    $jsonObject->set_message(_tr('Extension not set or not found'));
+                    $jsonObject->set_error(_tr('Extension not set or not found'));
                 } else {
                     $msg['password'] = $tupla['data'];
                     $jsonObject->set_status('OK');

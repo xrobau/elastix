@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Feb 12 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: use correct method set_error to report problems on user
+  extension report.
+  SVN Rev[7476]
+
 * Mon Feb  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: added new _elastixutils action to expose telephony user
   and password. Intended to be used with Elastix Webphone.

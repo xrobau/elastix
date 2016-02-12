@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Feb 12 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: use correct method set_error to report problems on user
+  extension report.
+  SVN Rev[7476]
+
 * Wed Feb 10 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-8
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

@@ -101,11 +101,15 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Feb 12 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: i18n for contact loading.
+  SVN Rev[7475]
+
 * Wed Feb 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Agent Console: fixed scenario in which events received in the same
   buffer as a <response> packet would remain undelivered if a wait_response()
   call is issued immediately after.
-  SVN Rev[7472]
+  SVN Rev[7474]
 - CHANGED: Dialer: zero out wait interval in MultiplexServer when pending
   unparsed data is present right before the select() call. This removes a
   nonzero wait before dealing with the unparsed data.

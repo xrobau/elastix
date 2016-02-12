@@ -168,5 +168,7 @@ $arrLangModule=array(
 'Change Status' => 'Change Status',
 '(Leave as 0 to disable channel limit)' => '(Leave as 0 to disable channel limit)',
 '(No external URL)'=>'(No external URL)',
+'Load Contacts'=>'Load Contacts',
+'Load Contacts for Campaign'=>'Load Contacts for Campaign',
 );
 ?>

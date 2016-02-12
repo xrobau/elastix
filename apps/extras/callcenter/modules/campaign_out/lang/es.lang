@@ -167,5 +167,7 @@ $arrLangModule = array(
 'Change Status' => 'Cambiar Estado',
 '(Leave as 0 to disable channel limit)' => '(Dejar en 0 para desactivar límite de canales)',
 '(No external URL)'=>'(Sin URL externo)',
+'Load Contacts'=>'Cargar Contactos',
+'Load Contacts for Campaign'=>'Cargar Contactos para Campaña',
 );
 ?>

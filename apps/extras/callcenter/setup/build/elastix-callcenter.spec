@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Feb 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: i18n for scheduled call waiting state.
+  SVN Rev[7477]
+
 * Fri Feb 12 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: i18n for contact loading.
   SVN Rev[7475]

@@ -125,5 +125,6 @@ $arrLangModule = array(
 'Call' => 'Llamada',
 'Information' => 'Información',
 'Script' => 'Diálogo',
+'Waiting for call'=>'Esperando llamada',
 );
 ?>

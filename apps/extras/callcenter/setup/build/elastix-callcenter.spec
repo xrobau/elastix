@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Sat Feb 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): refactoring of common code: get[multiple]agentstatus.
+  SVN Rev[7478]
 - CHANGED: Agent Console: i18n for scheduled call waiting state.
   SVN Rev[7477]
 

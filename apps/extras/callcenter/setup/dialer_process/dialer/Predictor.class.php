@@ -204,9 +204,8 @@ BridgedUniqueID: 1441991139.3
 
             // Miembro ocupado, se verifica si se desocupará
             if (in_array($miembro['Status'], array(AST_DEVICE_INUSE, AST_DEVICE_BUSY, AST_DEVICE_RINGINUSE)) &&
-                !is_null($prob_atencion) && isset($this->_agentsAppQueue[$interface])) {
-
-                $iTiempoTotal = $avg_contestar + $this->_agentsAppQueue[$interface];
+                !is_null($prob_atencion) && isset($this->_agentesAppQueue[$interface])) {
+                $iTiempoTotal = $avg_contestar + $this->_agentesAppQueue[$interface];
 
                 // Probabilidad de que 1 llamada haya terminado al cabo de $iTiempoTotal s.
                 $iProbabilidad = $this->_probabilidadErlangAcumulada(

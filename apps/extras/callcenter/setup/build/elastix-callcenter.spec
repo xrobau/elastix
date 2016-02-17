@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Wed Feb 17 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix typo that broke call prediction since AMI rewrite.
+  SVN Rev[7480]
 - FIXED: Dialer: fix incorrect parameter ordering of AMI Atxfer call.
   SVN Rev[7479]
 

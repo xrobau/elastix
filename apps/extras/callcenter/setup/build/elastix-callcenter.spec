@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Feb 17 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix incorrect parameter ordering of AMI Atxfer call.
+  SVN Rev[7479]
+
 * Sat Feb 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): refactoring of common code: get[multiple]agentstatus.
   SVN Rev[7478]

@@ -75,7 +75,7 @@ class AMIClientConn extends MultiplexConn
         'Agents' =>
             array('ActionID' => FALSE),
         'Atxfer' =>
-            array('Channel' => TRUE, 'Exten' => TRUE, 'Priority' => TRUE, 'Context' => TRUE),
+            array('Channel' => TRUE, 'Exten' => TRUE, 'Context' => TRUE, 'Priority' => TRUE),
         'ChangeMonitor' =>
             array('Channel' => TRUE, 'File' => TRUE),
         'Command' =>

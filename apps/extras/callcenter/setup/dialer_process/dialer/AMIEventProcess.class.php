@@ -484,21 +484,8 @@ class AMIEventProcess extends TuberiaProcess
             assert('$llamada->agente === $a');
             assert('$llamada === $a->llamada');
             $estadoCola[$sAgente] = $a->resumenSeguimientoLlamada();
-        } elseif (in_array($llamada->status, array('Placing', 'Ringing', 'OnQueue'))) {
-            $callStatus = array(
-                'dialnumber'    =>  $llamada->phone,
-                'callid'        =>  $llamada->id_llamada,
-                'callstatus'    =>  $llamada->status,
-            );
-            if (!is_null($llamada->timestamp_originatestart))
-                $callStatus['datetime_dialstart'] = date('Y-m-d H:i:s', $llamada->timestamp_originatestart);
-            if (!is_null($llamada->timestamp_originateend))
-                $callStatus['datetime_dialend'] = date('Y-m-d H:i:s', $llamada->timestamp_originateend);
-            if (!is_null($llamada->timestamp_enterqueue))
-                $callStatus['datetime_enterqueue'] = date('Y-m-d H:i:s', $llamada->timestamp_enterqueue);
-            if (!is_null($llamada->trunk)) $callStatus['trunk'] = $llamada->trunk;
-
-            $llamadasPendientes[] = $callStatus;
+        } elseif (in_array($llamada->status, array('Placing', 'Dialing', 'Ringing', 'OnQueue'))) {
+            $llamadasPendientes[] = $llamada->resumenLlamada();
         }
     }
 

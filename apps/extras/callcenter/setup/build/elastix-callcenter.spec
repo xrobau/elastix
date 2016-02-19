@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Fri Feb 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: part 3 of refactoring between getcampaignstatus and getagentstatus.
+  The _agregarAgentStatusInfo method is reimplemented through the method
+  getcampaignstatus_setagent after unifying the use of resumenLlamada to get
+  the connected call information. Ported from CallCenterPRO.
+  SVN Rev[7483]
 - CHANGED: part 2 of refactoring between getcampaignstatus and getagentstatus.
   Llamada::resumenLlamada() now reports additional fields in order to replace
   Agente::resumenSeguimientoLlamada(). In this process, a few bugs were

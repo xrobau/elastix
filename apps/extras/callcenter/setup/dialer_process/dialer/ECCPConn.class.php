@@ -1889,80 +1889,29 @@ LEER_CAMPANIA;
     private function _agregarAgentStatusInfo($xml_agent, &$infoSeguimiento,
         &$infoLlamada)
     {
-        // Canal que hizo el logoneo hacia la cola
-        $sExtension = NULL;
-        $sCanalExt = $infoSeguimiento['login_channel'];
-        if (is_null($sCanalExt)) $sCanalExt = $infoSeguimiento['extension'];
-        if (!is_null($sCanalExt)) {
-            // Hay un canal de login. Se separa la extensión que hizo el login
-            $sRegexp = "|^\w+/(\\d+)-?|"; $regs = NULL;
-            if (preg_match($sRegexp, $sCanalExt, $regs)) {
-                $sExtension = $regs[1];
-            }
-        }
-
-        // Reportar los estados conocidos
-        $sAgentStatus = NULL;
-        if ($infoSeguimiento['num_pausas'] > 0) {
-            $sAgentStatus = 'paused';
-        } elseif ($infoSeguimiento['oncall']) {
-            $sAgentStatus = 'oncall';
-        } elseif ($infoSeguimiento['estado_consola'] == 'logged-in') {
-            $sAgentStatus = 'online';
-        } else {
-            $sAgentStatus = 'offline';
-        }
-        if (!is_null($sAgentStatus)) {
-            $xml_agent->addChild('status', $sAgentStatus);
-            if (!is_null($sCanalExt)) $xml_agent->addChild('channel', str_replace('&', '&amp;', $sCanalExt));
-            if (!is_null($sExtension)) $xml_agent->addChild('extension', $sExtension);
-        }
-
-        // Reportar el canal remoto al cual está conectado el agente
-        if (!is_null($infoSeguimiento['clientchannel'])) {
-            $xml_agent->addChild('remote_channel', $infoSeguimiento['clientchannel']);
-        }
-
-        // Reportar la información de la llamada que el agente está esperando, si aplica
-        if (!is_null($infoSeguimiento['waitedcallinfo'])) {
-            $xml_wci = $xml_agent->addChild('waitedcallinfo');
-            foreach ($infoSeguimiento['waitedcallinfo'] as $k => $v)
-                $xml_wci->addChild($k, $v);
-        }
-
-        // Reportar el estado de hold, si aplica
-        if ($infoSeguimiento['estado_consola'] == 'logged-in')
-            $xml_agent->addChild('onhold', is_null($infoSeguimiento['id_hold']) ? 0 : 1);
-
-        // Reportar los estados de break, si aplica
-        if (!is_null($infoSeguimiento['id_break'])) {
-            $xml_pauseInfo = $xml_agent->addChild('pauseinfo');
-            $xml_pauseInfo->addChild('pauseid', $infoSeguimiento['id_break']);
-            $xml_pauseInfo->addChild('pausename', str_replace('&', '&amp;', $infoSeguimiento['pausename']));
-            $xml_pauseInfo->addChild('pausestart', str_replace(date('Y-m-d '), '', $infoSeguimiento['pausestart']));
-        }
-
-        if (!is_null($infoLlamada)) {
-            $this->_agregarCallInfo($xml_agent, $infoLlamada);
-        }
+        list($sAgentStatus, $sExtension) = self::getcampaignstatus_setagent(
+            $xml_agent, $infoSeguimiento, FALSE, $infoLlamada);
 
         if (!is_null($sAgentStatus)) {
             if ($sAgentStatus != 'offline' && is_null($sExtension)) {
-                $this->_log->output("ERR: (internal) estado inconsistente (status=$sAgentStatus extension=null) para agente $sAgente\n".
-                        "\tinfoSeguimiento => ".print_r($infoSeguimiento, TRUE).
-                        "\tinfoLlamada => ".print_r($infoLlamada, TRUE));
+                $this->_log->output("ERR: (internal) estado inconsistente de agente (status=$sAgentStatus extension=null)\n".
+                    "\tinfoSeguimiento => ".print_r($infoSeguimiento, TRUE).
+                    "\tinfoLlamada => ".print_r($infoLlamada, TRUE));
             }
         } else {
             $xml_agent->addChild('status', 'offline');
         }
+
     }
 
-    private function _agregarCallInfo($xml_getAgentStatusResponse, &$infoLlamada)
+    private static function _agregarCallInfo($xml_callInfo, &$infoLlamada)
     {
-        $xml_callInfo = $xml_getAgentStatusResponse->addChild('callinfo');
         foreach (array('calltype', 'callid', 'campaign_id', 'queuenumber', 'callnumber') as $k) {
             if (!is_null($infoLlamada[$k])) $xml_callInfo->addChild($k, $infoLlamada[$k]);
         }
+        $xml_callInfo->addChild('callstatus', $infoLlamada['status']);
+        if (isset($infoLlamada['trunk']))
+            $xml_callInfo->addChild('trunk', $infoLlamada['trunk']);
 
         $date_prefix = date('Y-m-d ');
         foreach (array('dialstart', 'dialend', 'queuestart', 'linkstart') as $k) {
@@ -2238,17 +2187,7 @@ LEER_CAMPANIA;
         $xml_activecalls = $xml_statusresponse->addChild('activecalls');
         foreach ($statusCampania_AMI['activecalls'] as $infoLlamada) {
             $xml_activecall = $xml_activecalls->addChild('activecall');
-            $xml_activecall->addChild('callnumber', $infoLlamada['dialnumber']);
-            $xml_activecall->addChild('callid', $infoLlamada['callid']);
-            $xml_activecall->addChild('callstatus', $infoLlamada['callstatus']);
-            if (isset($infoLlamada['datetime_dialstart']))
-                $xml_activecall->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialstart']));
-            if (isset($infoLlamada['datetime_dialend']))
-                $xml_activecall->addChild('dialend', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialend']));
-            if (isset($infoLlamada['datetime_enterqueue']))
-                $xml_activecall->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_enterqueue']));
-            if (isset($infoLlamada['trunk']))
-                $xml_activecall->addChild('trunk', $infoLlamada['trunk']);
+            self::_agregarCallInfo($xml_activecall, $infoLlamada);
         }
 
         // Contadores para estadísticas
@@ -2257,40 +2196,82 @@ LEER_CAMPANIA;
             $xml_stats->addChild(strtolower($statKey), $statCount);
     }
 
-    static function getcampaignstatus_setagent($xml_agent, $infoAgente)
+    static function getcampaignstatus_setagent($xml_agent, $infoAgente, $flattened = TRUE, $infoLlamada = NULL)
     {
+        // Canal que hizo el logoneo hacia la cola
+        $sExtension = NULL;
+        $sCanalExt = $infoAgente['login_channel'];
+        if (is_null($sCanalExt)) $sCanalExt = $infoAgente['extension'];
+        if (!is_null($sCanalExt)) {
+            // Hay un canal de login. Se separa la extensión que hizo el login
+            $sRegexp = "|^\w+/(\\d+)-?|"; $regs = NULL;
+            if (preg_match($sRegexp, $sCanalExt, $regs)) {
+                $sExtension = $regs[1];
+            }
+        }
+
+        // Reportar los estados conocidos
+        $sAgentStatus = NULL;
         if ($infoAgente['num_pausas'] > 0) {
-            $xml_agent->addChild('status', 'paused');
+            $sAgentStatus = 'paused';
         } elseif ($infoAgente['oncall']) {
-            $xml_agent->addChild('status', 'oncall');
+            $sAgentStatus = 'oncall';
         } elseif ($infoAgente['estado_consola'] == 'logged-in') {
-            $xml_agent->addChild('status', 'online');
+            $sAgentStatus = 'online';
         } else {
-            $xml_agent->addChild('status', 'offline');
+            $sAgentStatus = 'offline';
         }
-        if (isset($infoAgente['callid']))
-            $xml_agent->addChild('callid', $infoAgente['callid']);
-        if (isset($infoAgente['dialnumber']))
-            $xml_agent->addChild('callnumber', $infoAgente['dialnumber']);
-        if (isset($infoAgente['clientchannel']))
-            $xml_agent->addChild('callchannel', str_replace('&', '&amp;', $infoAgente['clientchannel']));
-        if (isset($infoAgente['datetime_dialstart']))
-            $xml_agent->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialstart']));
-        if (isset($infoAgente['datetime_dialend']))
-            $xml_agent->addChild('dialend', str_replace(date('Y-m-d '), '', $infoAgente['datetime_dialend']));
-        if (isset($infoAgente['datetime_enterqueue']))
-            $xml_agent->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_enterqueue']));
-        if (isset($infoAgente['datetime_linkstart']))
-            $xml_agent->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoAgente['datetime_linkstart']));
-        if (isset($infoAgente['trunk']))
-            $xml_agent->addChild('trunk', $infoAgente['trunk']);
+        if (!is_null($sAgentStatus)) {
+            $xml_agent->addChild('status', $sAgentStatus);
+            if (!is_null($sCanalExt)) $xml_agent->addChild('channel', str_replace('&', '&amp;', $sCanalExt));
+            if (!is_null($sExtension)) $xml_agent->addChild('extension', $sExtension);
+        }
+
+        // Reportar el canal remoto al cual está conectado el agente
+        if (isset($infoAgente['clientchannel'])) {
+            /* TODO: si clientchannel está definido, es idéntico a actualchannel de
+             * Llamada::resumenLlamada() pero también está disponible en
+             * Agente::resumenSeguimiento().
+             */
+            $xml_agent->addChild(($flattened ? 'callchannel' : 'remote_channel'),
+                str_replace('&', '&amp;', $infoAgente['clientchannel']));
+        }
+
+        // Reportar la información de la llamada que el agente está esperando, si aplica
+        if (!is_null($infoAgente['waitedcallinfo'])) {
+            $xml_wci = $xml_agent->addChild('waitedcallinfo');
+            foreach ($infoAgente['waitedcallinfo'] as $k => $v)
+                $xml_wci->addChild($k, $v);
+        }
+
+        // Reportar el estado de hold, si aplica
+        if ($infoAgente['estado_consola'] == 'logged-in')
+            $xml_agent->addChild('onhold', is_null($infoAgente['id_hold']) ? 0 : 1);
+
+        // Reportar los estados de break, si aplica
         if (!is_null($infoAgente['id_break'])) {
-            $xml_agent->addChild('pauseid', $infoAgente['id_break']);
+            $xml_pauseInfo = $flattened ? $xml_agent : $xml_agent->addChild('pauseinfo');
+            $xml_pauseInfo->addChild('pauseid', $infoAgente['id_break']);
             if (isset($infoAgente['pausename']))
-                $xml_agent->addChild('pausename', str_replace('&', '&amp;', $infoAgente['pausename']));
+                $xml_pauseInfo->addChild('pausename', str_replace('&', '&amp;', $infoAgente['pausename']));
             if (isset($infoAgente['pausestart']))
-                $xml_agent->addChild('pausestart', str_replace(date('Y-m-d '), '', $infoAgente['pausestart']));
+                $xml_pauseInfo->addChild('pausestart', str_replace(date('Y-m-d '), '', $infoAgente['pausestart']));
         }
+
+        if ($flattened) {
+            // FIXME: compatibilidad requiere mezclar campos de callinfo y agent
+            if (isset($infoAgente['callinfo'])) {
+                self::_agregarCallInfo($xml_agent, $infoAgente['callinfo']);
+                $infoLlamada = $infoAgente['callinfo'];
+            }
+        } else {
+            if (!is_null($infoLlamada)) {
+                $xml_callInfo = $xml_agent->addChild('callinfo');
+                self::_agregarCallInfo($xml_callInfo, $infoLlamada);
+            }
+        }
+
+        return array($sAgentStatus, $sExtension);
     }
 
     /**

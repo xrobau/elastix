@@ -471,18 +471,7 @@ class Agente
     public function resumenSeguimientoLlamada()
     {
         $r = $this->resumenSeguimiento();
-        if (!is_null($this->llamada)) {
-            // Agregar información básica sobre la llamada
-            $r['dialnumber'] = $this->llamada->phone;
-            $r['callid'] = $this->llamada->id_llamada;
-            if (!is_null($this->llamada->timestamp_originatestart))
-                $r['datetime_dialstart'] = date('Y-m-d H:i:s', $this->llamada->timestamp_originatestart);
-            if (!is_null($this->llamada->timestamp_originateend))
-                $r['datetime_dialend'] = date('Y-m-d H:i:s', $this->llamada->timestamp_originateend);
-            $r['datetime_enterqueue'] = date('Y-m-d H:i:s', $this->llamada->timestamp_enterqueue);
-            $r['datetime_linkstart'] = date('Y-m-d H:i:s', $this->llamada->timestamp_link);
-            if (!is_null($this->llamada->trunk)) $r['trunk'] = $this->llamada->trunk;
-        }
+        if (!is_null($this->llamada)) $r['callinfo'] = $this->llamada->resumenLlamada();
         return $r;
     }
 

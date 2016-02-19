@@ -1816,11 +1816,10 @@ LEER_CAMPANIA;
 
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
 
-        $recordset_breakinfo = $this->_db->prepare(
-            'SELECT audit.datetime_init, break.name FROM audit, break '.
-            'WHERE audit.id = ? AND audit.id_break = break.id');
+        $recordset_breakinfo = NULL;
+        cargarInfoPausa($this->_db, $infoSeguimiento, $recordset_breakinfo);
         $this->_agregarAgentStatusInfo($xml_getAgentStatusResponse,
-            $infoSeguimiento, $infoLlamada, $recordset_breakinfo);
+            $infoSeguimiento, $infoLlamada);
 
         return $xml_response;
     }
@@ -1868,9 +1867,7 @@ LEER_CAMPANIA;
         }
         $il = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($agentlist);
 
-        $recordset_breakinfo = $this->_db->prepare(
-            'SELECT audit.datetime_init, break.name FROM audit, break '.
-            'WHERE audit.id = ? AND audit.id_break = break.id');
+        $recordset_breakinfo = NULL;
 
         // Conversión a XML
         $xml_agents = $xml_getAgentStatusResponse->addChild('agents');
@@ -1881,15 +1878,16 @@ LEER_CAMPANIA;
             $infoSeguimiento = $is[$sAgente];
             $infoLlamada = $il[$sAgente];
 
+            cargarInfoPausa($this->_db, $infoSeguimiento, $recordset_breakinfo);
             $this->_agregarAgentStatusInfo($xml_agent, $infoSeguimiento,
-                $infoLlamada, $recordset_breakinfo);
+                $infoLlamada);
         }
 
         return $xml_response;
     }
 
     private function _agregarAgentStatusInfo($xml_agent, &$infoSeguimiento,
-        &$infoLlamada, $recordset_breakinfo)
+        &$infoLlamada)
     {
         // Canal que hizo el logoneo hacia la cola
         $sExtension = NULL;
@@ -1940,11 +1938,8 @@ LEER_CAMPANIA;
         if (!is_null($infoSeguimiento['id_break'])) {
             $xml_pauseInfo = $xml_agent->addChild('pauseinfo');
             $xml_pauseInfo->addChild('pauseid', $infoSeguimiento['id_break']);
-            $recordset_breakinfo->execute(array($infoSeguimiento['id_audit_break']));
-            $tupla = $recordset_breakinfo->fetch(PDO::FETCH_ASSOC);
-            $recordset_breakinfo->closeCursor();
-            $xml_pauseInfo->addChild('pausename', str_replace('&', '&amp;', $tupla['name']));
-            $xml_pauseInfo->addChild('pausestart', str_replace(date('Y-m-d '), '', $tupla['datetime_init']));
+            $xml_pauseInfo->addChild('pausename', str_replace('&', '&amp;', $infoSeguimiento['pausename']));
+            $xml_pauseInfo->addChild('pausestart', str_replace(date('Y-m-d '), '', $infoSeguimiento['pausestart']));
         }
 
         if (!is_null($infoLlamada)) {
@@ -2218,6 +2213,8 @@ LEER_CAMPANIA;
         foreach ($statusCampania_DB['status'] as $statusKey => $statusCount)
             $xml_statusCount->addChild(strtolower($statusKey), $statusCount);
 
+        $recordset_breakinfo = NULL;
+
         // Estado de los agentes
         $xml_agents = $xml_statusresponse->addChild('agents');
         foreach ($statusCampania_AMI['queuestatus'] as $sAgente => $infoAgente) {
@@ -2225,7 +2222,7 @@ LEER_CAMPANIA;
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
 
-            cargarInfoPausa($this->_db, $infoAgente);
+            cargarInfoPausa($this->_db, $infoAgente, $recordset_breakinfo);
             self::getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
 
@@ -2236,7 +2233,7 @@ LEER_CAMPANIA;
             $xml_agent = $xml_agents->addChild('agent');
             $xml_agent->addChild('agentchannel', $sAgente);
 
-            cargarInfoPausa($this->_db, $infoAgente);
+            cargarInfoPausa($this->_db, $infoAgente, $recordset_breakinfo);
             self::getcampaignstatus_setagent($xml_agent, $infoAgente);
         }
 

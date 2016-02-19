@@ -664,7 +664,8 @@ SQL_EXISTE_AUDIT;
         list($sAgente, $infoSeguimiento, $listaColas) = $datos;
 
         try {
-            cargarInfoPausa($this->_db, $infoSeguimiento);
+            $recordset_breakinfo = NULL;
+            cargarInfoPausa($this->_db, $infoSeguimiento, $recordset_breakinfo);
             $this->_multiplex->notificarEvento_QueueMembership($sAgente, $infoSeguimiento, $listaColas);
         } catch (PDOException $e) {
             $this->_stdManejoExcepcionDB($e, 'no se puede cargar información de pausa');

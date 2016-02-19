@@ -101,6 +101,14 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Feb 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: part 1 of refactoring between getcampaignstatus and getagentstatus.
+  These two requests expose the agent status in different formats using separate
+  code paths. This commit unifies the use of a single method to load the break
+  name for both code paths without external API changes. Ported from
+  CallCenterPRO.
+  SVN Rev[7481]
+
 * Wed Feb 17 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: fix typo that broke call prediction since AMI rewrite.
   SVN Rev[7480]

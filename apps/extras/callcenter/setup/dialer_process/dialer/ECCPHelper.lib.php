@@ -282,12 +282,16 @@ function construirEventoPauseEnd($db, $sAgente, $id_audit_break, $pause_class)
     return array('PauseEnd', array($sAgente, $paramsEvento));
 }
 
-function cargarInfoPausa($db, &$infoAgente)
+function cargarInfoPausa($db, &$infoAgente, &$recordset)
 {
-    if (!is_null($infoAgente['id_break'])) {
-        $recordset = $db->prepare(
-                'SELECT audit.datetime_init, break.name, break.id '.
+    if (!is_null($infoAgente['id_audit_break'])) {
+        if (is_null($recordset)) {
+            $recordset = $db->prepare(
+                'SELECT audit.datetime_init, break.name '.
                 'FROM audit, break WHERE audit.id_break = break.id AND audit.id = ?');
+        }
+    }
+    if (!is_null($infoAgente['id_audit_break'])) {
         $recordset->execute(array($infoAgente['id_audit_break']));
         $tupla = $recordset->fetch(PDO::FETCH_ASSOC);
         $recordset->closeCursor();

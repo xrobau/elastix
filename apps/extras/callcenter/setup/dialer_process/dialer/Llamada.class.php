@@ -463,11 +463,9 @@ class Llamada
         $resumen = array(
             'calltype'              =>  $this->tipo_llamada,
             'campaign_id'           =>  is_null($this->campania) ? NULL : $this->campania->id,
-            'dialnumber'            =>  $this->phone,
+            'callnumber'            =>  $this->phone,
             'callid'                =>  $this->id_llamada,
             'currentcallid'         =>  $this->id_current_call,
-            'datetime_enterqueue'   => date('Y-m-d H:i:s', $this->timestamp_enterqueue),
-            'datetime_linkstart'    => date('Y-m-d H:i:s', $this->timestamp_link),
             'queuenumber'           =>  $this->_queuenumber,
             'agentchannel'          =>  $this->_agentchannel,
             'status'                =>  $this->_status,
@@ -476,11 +474,19 @@ class Llamada
             'mutedchannels'         =>  $this->mutedchannels,
         );
         if (is_null($resumen['queuenumber']) && !is_null($this->campania)) {
-        	$resumen['queuenumber'] = $this->campania->queue;
+            // $this->campania->queue es NULL en caso manualdialing
+            $resumen['queuenumber'] = $this->campania->queue;
         }
-        if ($this->tipo_llamada == 'outgoing') {
-        	$resumen['datetime_dialstart'] = date('Y-m-d H:i:s', $this->timestamp_originatestart);
-            $resumen['datetime_dialstart'] = date('Y-m-d H:i:s', $this->timestamp_originateend);
+        if (!is_null($this->trunk))
+            $resumen['trunk'] = $this->trunk;
+
+        foreach (array(
+            'timestamp_originatestart'  =>  'dialstart',
+            'timestamp_originateend'    =>  'dialend',
+            'timestamp_enterqueue'      =>  'queuestart',
+            'timestamp_link'            =>  'linkstart',
+        ) as $k => $v) if (!is_null($this->$k)) {
+            $resumen[$v] = date('Y-m-d H:i:s', $this->$k);
         }
         return $resumen;
     }

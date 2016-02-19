@@ -1960,19 +1960,16 @@ LEER_CAMPANIA;
     private function _agregarCallInfo($xml_getAgentStatusResponse, &$infoLlamada)
     {
         $xml_callInfo = $xml_getAgentStatusResponse->addChild('callinfo');
-        $xml_callInfo->addChild('calltype', $infoLlamada['calltype']);
-        $xml_callInfo->addChild('callid', $infoLlamada['callid']);
-        if (!is_null($infoLlamada['campaign_id']))
-            $xml_callInfo->addChild('campaign_id', $infoLlamada['campaign_id']);
-        $xml_callInfo->addChild('callnumber', $infoLlamada['dialnumber']);
-        if (isset($infoLlamada['datetime_dialstart']))
-            $xml_callInfo->addChild('dialstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialstart']));
-        if (isset($infoLlamada['datetime_dialend']))
-            $xml_callInfo->addChild('dialend', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_dialend']));
-        $xml_callInfo->addChild('queuestart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_enterqueue']));
-        $xml_callInfo->addChild('linkstart', str_replace(date('Y-m-d '), '', $infoLlamada['datetime_linkstart']));
-        if (!is_null($infoLlamada['queuenumber']))
-            $xml_callInfo->addChild('queuenumber', $infoLlamada['queuenumber']);
+        foreach (array('calltype', 'callid', 'campaign_id', 'queuenumber', 'callnumber') as $k) {
+            if (!is_null($infoLlamada[$k])) $xml_callInfo->addChild($k, $infoLlamada[$k]);
+        }
+
+        $date_prefix = date('Y-m-d ');
+        foreach (array('dialstart', 'dialend', 'queuestart', 'linkstart') as $k) {
+            if (isset($infoLlamada[$k])) {
+                $xml_callInfo->addChild($k, str_replace($date_prefix, '', $infoLlamada[$k]));
+            }
+        }
     }
 
     private function Request_agentauth_mixmonitormute($comando)

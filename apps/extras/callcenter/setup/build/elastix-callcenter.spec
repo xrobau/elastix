@@ -101,6 +101,15 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Feb 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: part 2 of refactoring between getcampaignstatus and getagentstatus.
+  Llamada::resumenLlamada() now reports additional fields in order to replace
+  Agente::resumenSeguimientoLlamada(). In this process, a few bugs were
+  uncovered and fixed. Also, the fields reported were unified to allow for
+  XML conversion via loops instead of successive calls. Ported from
+  CallCenterPRO.
+  SVN Rev[7482]
+
 * Thu Feb 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: part 1 of refactoring between getcampaignstatus and getagentstatus.
   These two requests expose the agent status in different formats using separate

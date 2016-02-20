@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Feb 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer (ECCP): oncall status must take priority over paused status.
+  SVN Rev[7484]
+
 * Fri Feb 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: part 3 of refactoring between getcampaignstatus and getagentstatus.
   The _agregarAgentStatusInfo method is reimplemented through the method

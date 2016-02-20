@@ -2212,10 +2212,10 @@ LEER_CAMPANIA;
 
         // Reportar los estados conocidos
         $sAgentStatus = NULL;
-        if ($infoAgente['num_pausas'] > 0) {
-            $sAgentStatus = 'paused';
-        } elseif ($infoAgente['oncall']) {
+        if ($infoAgente['oncall']) {
             $sAgentStatus = 'oncall';
+        } elseif ($infoAgente['num_pausas'] > 0) {
+            $sAgentStatus = 'paused';
         } elseif ($infoAgente['estado_consola'] == 'logged-in') {
             $sAgentStatus = 'online';
         } else {

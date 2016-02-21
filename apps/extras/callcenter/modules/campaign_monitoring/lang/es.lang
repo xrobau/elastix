@@ -103,7 +103,7 @@ $arrLangModule=array(
 'LOG_FMT_RINGING'
     =>  'Timbrando {phone}, esperando respuesta ...',
 'LOG_FMT_ONQUEUE'
-    =>  'Llamada a {phone} conectada a cola {queue}, esperando agente ...',    
+    =>  'Llamada a {phone} conectada a cola {queue}, esperando agente ...',
 'LOG_FMT_SUCCESS'
     =>  'Llamada a {phone} asignada a agente {agentchannel}',
 'LOG_FMT_HANGUP'
@@ -115,9 +115,9 @@ $arrLangModule=array(
 'LOG_FMT_FAILURE'
     =>  'Llamada a {phone} no pudo ser colocada',
 'LOG_FMT_ABANDONED'
-    =>  'Llamada a {phone} en cola {queue} se desconectó y no ha sido asignada',    
+    =>  'Llamada a {phone} en cola {queue} se desconectó y no ha sido asignada',
 'LOG_FMT_SHORTCALL'
-    =>  'Llamada corta a {phone} desconectada del agente {agentchannel}, duración fue {duration}',    
+    =>  'Llamada corta a {phone} desconectada del agente {agentchannel}, duración fue {duration}',
 'LOG_FMT_NOANSWER'
     =>  'Llamada a {phone} desconectada antes de entrar a una cola',
 'outgoing'  =>  'Campaña saliente',
@@ -128,5 +128,6 @@ $arrLangModule=array(
 'Campaign Monitoring'  =>  'Monitoreo de Campaña',
 'Average Call Duration'  =>  'Promedio Duración de Llamada',
 'Maximum Call Duration'  =>  'Duración Máxima de Llamada',
+'Hold'=>'Hold',
 );
 ?>

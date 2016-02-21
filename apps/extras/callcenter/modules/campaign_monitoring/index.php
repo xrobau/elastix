@@ -554,26 +554,42 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                     break;
                 case 'pausestart':
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
-                        // Agente ha entrado en pausa
-                        $estadoCliente['agents'][$sCanalAgente]['status'] = 'paused';
-                        //$estadoCliente['agents'][$sCanalAgente]['pausestart'] = $evento['pause_start'];
-                        $estadoCliente['agents'][$sCanalAgente]['pauseinfo'] = array(
-                            'pauseid'   =>  $evento['pause_type'],
-                            'pausename' =>  $evento['pause_name'],
-                            'pausestart'=>  $evento['pause_start'],
-                        );
-                        // TODO: pause_class [break hold form]
-
+                        switch ($evento['pause_class']) {
+                        case 'break':
+                            $estadoCliente['agents'][$sCanalAgente]['pauseinfo'] = array(
+                                'pauseid'   =>  $evento['pause_type'],
+                                'pausename' =>  $evento['pause_name'],
+                                'pausestart'=>  $evento['pause_start'],
+                            );
+                            break;
+                        case 'hold':
+                            $estadoCliente['agents'][$sCanalAgente]['onhold'] = TRUE;
+                            // TODO: desde cuándo empieza la pausa hold?
+                            break;
+                        // TODO: pausa de llamada agendada
+                        }
+                        if ($estadoCliente['agents'][$sCanalAgente]['status'] != 'oncall')
+                            $estadoCliente['agents'][$sCanalAgente]['status'] = 'paused';
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
                     break;
                 case 'pauseend':
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
-                        // Agente ha salido de pausa
-                        // TODO: si hay hold o form además de break, todavía está pausado
-                        $estadoCliente['agents'][$sCanalAgente]['status'] =
-                            is_null($estadoCliente['agents'][$sCanalAgente]['callinfo']['linkstart']) ? 'online' : 'oncall';
-                        $estadoCliente['agents'][$sCanalAgente]['pauseinfo'] = NULL;
+                        switch ($evento['pause_class']) {
+                        case 'break':
+                            $estadoCliente['agents'][$sCanalAgente]['pauseinfo'] = NULL;
+                            break;
+                        case 'hold':
+                            $estadoCliente['agents'][$sCanalAgente]['onhold'] = FALSE;
+                            // TODO: anular inicio de pausa hold
+                            break;
+                        }
+                        if ($estadoCliente['agents'][$sCanalAgente]['status'] != 'oncall') {
+                            $estadoCliente['agents'][$sCanalAgente]['status'] = (
+                                !is_null($estadoCliente['agents'][$sCanalAgente]['pauseinfo']) ||
+                                $estadoCliente['agents'][$sCanalAgente]['onhold'])
+                            ? 'paused' : 'online';
+                        }
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
@@ -589,7 +605,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
                     // Si el agente es uno de los de la campaña, modificar
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
-                        $estadoCliente['agents'][$sCanalAgente]['status'] = is_null($estadoCliente['agents'][$sCanalAgente]['pausestart']) ? 'oncall' : 'paused';
+                        $estadoCliente['agents'][$sCanalAgente]['status'] = 'oncall';
                         $estadoCliente['agents'][$sCanalAgente]['callinfo'] = array(
                             'callnumber'    =>  $evento['phone'],
                             'linkstart'     =>  $evento['datetime_linkstart'],
@@ -637,9 +653,10 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                          * del evento agentloggedout si el agente se desconecta con
                          * una llamada activa. */
                         if ($estadoCliente['agents'][$sCanalAgente]['status'] != 'offline') {
-                            // TODO: manejar permanencia de form hold
-                            $estadoCliente['agents'][$sCanalAgente]['status'] =
-                                is_null($estadoCliente['agents'][$sCanalAgente]['pauseinfo']) ? 'online' : 'paused';
+                            $estadoCliente['agents'][$sCanalAgente]['status'] = (
+                                !is_null($estadoCliente['agents'][$sCanalAgente]['pauseinfo']) ||
+                                $estadoCliente['agents'][$sCanalAgente]['onhold'])
+                            ? 'paused' : 'online';
                         }
                         $estadoCliente['agents'][$sCanalAgente]['callinfo'] = NULL;
 
@@ -789,17 +806,30 @@ function formatoLlamadaNoConectada($activecall)
 
 function formatoAgente($agent)
 {
+    $sEtiquetaStatus = _tr($agent['status']);
     $sFechaHoy = date('Y-m-d');
     $sDesde = '-';
-    if ($agent['status'] == 'paused')
-        $sDesde = $agent['pauseinfo']['pausestart'];
-    elseif ($agent['status'] == 'oncall')
+    switch ($agent['status']) {
+    case 'paused':
+        // Prioridad de pausa: hold, break, agendada
+        if ($agent['onhold']) {
+            $sEtiquetaStatus = _tr('Hold');
+            // TODO: desde cuándo está en hold?
+        } elseif (!is_null($agent['pauseinfo'])) {
+            $sDesde = $agent['pauseinfo']['pausestart'];
+            $sEtiquetaStatus .= ': '.$agent['pauseinfo']['pausename'];
+        }
+        // TODO: exponer pausa de agendamiento
+        break;
+    case 'oncall':
         $sDesde = $agent['callinfo']['linkstart'];
+        break;
+    }
     if (strpos($sDesde, $sFechaHoy) === 0)
         $sDesde = substr($sDesde, strlen($sFechaHoy) + 1);
     return array(
         'agent'         =>  $agent['agentchannel'],
-        'status'        =>  _tr($agent['status']),
+        'status'        =>  $sEtiquetaStatus,
         'callnumber'    =>  is_null($agent['callinfo']['callnumber']) ? '-' : $agent['callinfo']['callnumber'],
         'trunk'         =>  is_null($agent['callinfo']['trunk']) ? '-' : $agent['callinfo']['trunk'],
         'desde'         =>  $sDesde,

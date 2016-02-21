@@ -103,7 +103,7 @@ $arrLangModule=array(
 'LOG_FMT_RINGING'
     =>  'Ringing {phone}, waiting for answer ...',
 'LOG_FMT_ONQUEUE'
-    =>  'Phone call to {phone} connected to queue {queue}, waiting for agent ...',    
+    =>  'Phone call to {phone} connected to queue {queue}, waiting for agent ...',
 'LOG_FMT_SUCCESS'
     =>  'Phone call to {phone} handled by agent {agentchannel}',
 'LOG_FMT_HANGUP'
@@ -115,9 +115,9 @@ $arrLangModule=array(
 'LOG_FMT_FAILURE'
     =>  'Phone call to {phone} failed to be placed',
 'LOG_FMT_ABANDONED'
-    =>  'Phone call to {phone} on queue {queue} disconnected and was never handled',    
+    =>  'Phone call to {phone} on queue {queue} disconnected and was never handled',
 'LOG_FMT_SHORTCALL'
-    =>  'Short phone call to {phone} disconnected from agent {agentchannel}, duration was {duration}',    
+    =>  'Short phone call to {phone} disconnected from agent {agentchannel}, duration was {duration}',
 'LOG_FMT_NOANSWER'
     =>  'Phone call to {phone} disconnected before entering queue',
 'outgoing'  =>  'Outgoing campaign',
@@ -125,5 +125,6 @@ $arrLangModule=array(
 'incomingqueue' =>  'Incoming queue',
 'N/A' => 'N/A', /* Not Available */
 'Previous 100 entries' => 'Previous 100 entries',
+'Hold'=>'Hold',
 );
 ?>

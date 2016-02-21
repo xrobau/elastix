@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Sun Feb 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: fix agent formatting. Now oncall status has
+  priority over paused status. Also, pause name is now displayed next to the
+  "On Break" status label.
+  SVN Rev[7486]
 - CHANGED: Campaign Monitoring: refactoring of agent extraction into a single
   method, used by campaign and agent formatting. The main affected module is
   Campaign Monitoring.

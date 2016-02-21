@@ -401,36 +401,8 @@ class PaloSantoConsola
                 return array('estadofinal' => 'error');
             }
 
-            $estado = array(
-                'estadofinal'       =>  'logged-in',    // A modificar por condiciones
-                'status'            =>  (string)$connStatus->status,
-                'channel'           =>  isset($connStatus->channel) ? (string)$connStatus->channel : NULL,
-                'extension'         =>  isset($connStatus->extension) ? (string)$connStatus->extension : NULL,
-                'onhold'            =>  isset($connStatus->onhold) ? ($connStatus->onhold == 1) : FALSE,
-                'pauseinfo'         =>  isset($connStatus->pauseinfo) ? array(
-                    'pauseid'       =>  (int)$connStatus->pauseinfo->pauseid,
-                    'pausename'     =>  (string)$connStatus->pauseinfo->pausename,
-                    'pausestart'    =>  (string)$connStatus->pauseinfo->pausestart,
-                ) : NULL,
-                'callinfo'          =>  isset($connStatus->callinfo) ? array(
-                    'agent_number'  =>  $this->_agent,
-                    'remote_channel'    =>  isset($connStatus->remote_channel) ? (string)$connStatus->remote_channel : NULL,
-                    'calltype'      =>  (string)$connStatus->callinfo->calltype,
-                    'campaign_id'   =>  isset($connStatus->callinfo->campaign_id) ? (int)$connStatus->callinfo->campaign_id : NULL,
-                    'callid'        =>  (int)$connStatus->callinfo->callid,
-                    'callnumber'    =>  (string)$connStatus->callinfo->callnumber,
-                    'dialstart'     =>  isset($connStatus->callinfo->dialstart) ? (string)$connStatus->callinfo->dialstart : NULL,
-                    'dialend'       =>  isset($connStatus->callinfo->dialend) ? (string)$connStatus->callinfo->dialend : NULL,
-                    'queuestart'    =>  (string)$connStatus->callinfo->queuestart,
-                    'linkstart'     =>  (string)$connStatus->callinfo->linkstart,
-                ) : NULL,
-                'waitedcallinfo'    =>  isset($connStatus->waitedcallinfo) ? array(
-                    'calltype'          =>  (string)$connStatus->waitedcallinfo->calltype,
-                    'campaign_id'       =>  (int)$connStatus->waitedcallinfo->campaign_id,
-                    'callid'            =>  (int)$connStatus->waitedcallinfo->callid,
-                    'status'            =>  (string)$connStatus->waitedcallinfo->status,
-                ) : NULL,
-            );
+            $estado = $this->_traducirEstadoAgente($connStatus);
+            $estado['estadofinal'] = 'logged-in';   // A modificar por condiciones
 
             if (!is_null($estado['pauseinfo'])) foreach (array('pausestart') as $k) {
                 if (!is_null($estado['pauseinfo'][$k]) && preg_match('/^\d+:\d+:\d+$/', $estado['pauseinfo'][$k]))
@@ -453,6 +425,67 @@ class PaloSantoConsola
             $this->errMsg = '(internal) getagentstatus: '.$e->getMessage();
             return array('estadofinal' => 'error');
         }
+    }
+
+    private function _traducirEstadoAgente($connStatus)
+    {
+        $estado = array(
+            'status'            =>  (string)$connStatus->status,
+            'channel'           =>  isset($connStatus->channel) ? (string)$connStatus->channel : NULL,
+            'extension'         =>  isset($connStatus->extension) ? (string)$connStatus->extension : NULL,
+            'onhold'            =>  isset($connStatus->onhold) ? ($connStatus->onhold == 1) : FALSE,
+            'callchannel'       =>  isset($connStatus->callchannel) ? (string)$connStatus->callchannel : NULL, // <-- duplicado en remote_channel
+            'pauseinfo'         =>  isset($connStatus->pauseinfo) ? array(
+                'pauseid'       =>  (int)$connStatus->pauseinfo->pauseid,
+                'pausename'     =>  (string)$connStatus->pauseinfo->pausename,
+                'pausestart'    =>  (string)$connStatus->pauseinfo->pausestart,
+            ) : NULL,
+            'callinfo'          =>  isset($connStatus->callinfo) ? array_merge(
+                $this->_traducirEstadoLlamada($connStatus->callinfo),
+                array(
+                    'agent_number'  =>  $this->_agent,
+                    'remote_channel'    =>  isset($connStatus->remote_channel) ? (string)$connStatus->remote_channel : NULL,
+                )
+            ) : NULL,
+            'waitedcallinfo'    =>  isset($connStatus->waitedcallinfo) ? array(
+                'calltype'          =>  (string)$connStatus->waitedcallinfo->calltype,
+                'campaign_id'       =>  (int)$connStatus->waitedcallinfo->campaign_id,
+                'callid'            =>  (int)$connStatus->waitedcallinfo->callid,
+                'status'            =>  (string)$connStatus->waitedcallinfo->status,
+            ) : NULL,
+        );
+        if (isset($connStatus->agentchannel))
+            $estado['agentchannel'] = (string)$connStatus->agentchannel;
+        if (is_null($estado['pauseinfo']) && isset($connStatus->pauseid)) {
+            $estado['pauseinfo'] = array(
+                'pauseid'       =>  (int)$connStatus->pauseid,
+                'pausename'     =>  (string)$connStatus->pausename,
+                'pausestart'    =>  (string)$connStatus->pausestart,
+            );
+        }
+        if (is_null($estado['callinfo']) && isset($connStatus->callchannel)) {
+            $estado['callinfo'] = array_merge($this->_traducirEstadoLlamada($connStatus), array(
+                'agent_number'  =>  $this->_agent,
+                'remote_channel'=>  $connStatus->callchannel,
+            ));
+        }
+        return $estado;
+    }
+
+    private function _traducirEstadoLlamada($xml_callinfo)
+    {
+        return array(
+            'callstatus'    =>  (string)$xml_callinfo->callstatus,
+            'calltype'      =>  (string)$xml_callinfo->calltype,
+            'campaign_id'   =>  isset($xml_callinfo->campaign_id) ? (int)$xml_callinfo->campaign_id : NULL,
+            'callid'        =>  (int)$xml_callinfo->callid,
+            'callnumber'    =>  (string)$xml_callinfo->callnumber,
+            'queuenumber'   =>  isset($xml_callinfo->queuenumber) ? (string)$xml_callinfo->queuenumber : NULL,
+            'dialstart'     =>  isset($xml_callinfo->dialstart) ? (string)$xml_callinfo->dialstart : NULL,
+            'dialend'       =>  isset($xml_callinfo->dialend) ? (string)$xml_callinfo->dialend : NULL,
+            'queuestart'    =>  isset($xml_callinfo->queuestart) ? (string)$xml_callinfo->queuestart : NULL,
+            'linkstart'     =>  isset($xml_callinfo->linkstart) ? (string)$xml_callinfo->linkstart : NULL,
+        );
     }
 
     /**
@@ -875,11 +908,7 @@ class PaloSantoConsola
                     $evento['queue'] = isset($evt->queue) ? (string)$evt->queue : NULL;
                     break;
                 case 'queuemembership':
-                    foreach (array('status', 'callid', 'callnumber',
-                        'callchannel', 'dialstart', 'dialend', 'queuestart',
-                        'linkstart', 'pauseid', 'pausename', 'pausestart',
-                        'trunk') as $k)
-                        $evento[$k] = isset($evt->$k) ? (string) $evt->$k : NULL;
+                    $evento = array_merge($evento, $this->_traducirEstadoAgente($evt));
                     $evento['queues'] = array();
                     foreach ($evt->queues->queue as $xml_q) {
                         $evento['queues'][] = (string)$xml_q;
@@ -1088,29 +1117,15 @@ class PaloSantoConsola
                 case 'agents':
                     foreach ($xml_node->agent as $xml_agent) {
                         $sAgente = (string)$xml_agent->agentchannel;
-                        $reporte['agents'][$sAgente] = array();
-                        foreach (array('agentchannel', 'status', 'callid', 'callnumber',
-                            'callchannel', 'dialstart', 'dialend', 'queuestart',
-                            'linkstart', 'pauseid', 'pausename', 'pausestart',
-                            'trunk') as $k)
-                            $reporte['agents'][$sAgente][$k] =
-                                isset($xml_agent->$k) ? (string) $xml_agent->$k : NULL;
-                        if (isset($xml_agent->callnumber)) $iNumLlamadasAtendidas++;
+                        $reporte['agents'][$sAgente] = $this->_traducirEstadoAgente($xml_agent);
+                        if (isset($reporte['agents'][$sAgente]['callnumber'])) $iNumLlamadasAtendidas++;
                     }
                     ksort($reporte['agents']);
                     break;
                 case 'activecalls':
                     foreach ($xml_node->activecall as $xml_activecall) {
                         $idCall = (int)$xml_activecall->callid;
-                        $reporte['activecalls'][$idCall] = array(
-                            'callid'        =>  $idCall,
-                            'callnumber'    =>  (string)$xml_activecall->callnumber,
-                            'callstatus'    =>  (string)$xml_activecall->callstatus,
-                            'dialstart'     =>  isset($xml_activecall->dialstart) ? (string)$xml_activecall->dialstart : NULL,
-                            'dialend'       =>  isset($xml_activecall->dialend) ? (string)$xml_activecall->dialend : NULL,
-                            'queuestart'    =>  isset($xml_activecall->queuestart) ? (string)$xml_activecall->queuestart : NULL,
-                            'trunk'         =>  isset($xml_activecall->trunk) ? (string)$xml_activecall->trunk : NULL,
-                        );
+                        $reporte['activecalls'][$idCall] = $this->_traducirEstadoLlamada($xml_activecall);
                     }
                     break;
                 }

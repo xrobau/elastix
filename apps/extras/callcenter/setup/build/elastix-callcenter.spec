@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sun Feb 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Monitoring: refactoring of agent extraction into a single
+  method, used by campaign and agent formatting. The main affected module is
+  Campaign Monitoring.
+  SVN Rev[7485]
+
 * Sat Feb 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer (ECCP): oncall status must take priority over paused status.
   SVN Rev[7484]

@@ -28,8 +28,6 @@
   $Id: default.conf.php,v 1.1.1.1 2007/03/23 00:13:58 elandivar Exp $ */
 
 
-include_once "libs/paloSantoConfig.class.php";
-
 require_once "modules/agent_console/libs/elastix2.lib.php";
 require_once "modules/agent_console/libs/JSON.php";
 require_once "modules/agent_console/libs/paloSantoConsola.class.php";
@@ -469,10 +467,8 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                          * visualización. Otros campos quedan con sus valores
                          * antiguos, si tenían */
                         $estadoCliente['agents'][$sCanalAgente]['status'] = 'online';
-                        $estadoCliente['agents'][$sCanalAgente]['callnumber'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['linkstart'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['trunk'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['pauseinfo'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['callinfo'] = NULL;
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
@@ -484,10 +480,8 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                          * visualización. Otros campos quedan con sus valores
                          * antiguos, si tenían */
                         $estadoCliente['agents'][$sCanalAgente]['status'] = 'offline';
-                        $estadoCliente['agents'][$sCanalAgente]['callnumber'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['linkstart'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['trunk'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['pauseinfo'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['callinfo'] = NULL;
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
@@ -562,7 +556,13 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
                         // Agente ha entrado en pausa
                         $estadoCliente['agents'][$sCanalAgente]['status'] = 'paused';
-                        $estadoCliente['agents'][$sCanalAgente]['pausestart'] = $evento['pause_start'];
+                        //$estadoCliente['agents'][$sCanalAgente]['pausestart'] = $evento['pause_start'];
+                        $estadoCliente['agents'][$sCanalAgente]['pauseinfo'] = array(
+                            'pauseid'   =>  $evento['pause_type'],
+                            'pausename' =>  $evento['pause_name'],
+                            'pausestart'=>  $evento['pause_start'],
+                        );
+                        // TODO: pause_class [break hold form]
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
@@ -570,9 +570,10 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                 case 'pauseend':
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
                         // Agente ha salido de pausa
+                        // TODO: si hay hold o form además de break, todavía está pausado
                         $estadoCliente['agents'][$sCanalAgente]['status'] =
-                            is_null($estadoCliente['agents'][$sCanalAgente]['linkstart']) ? 'online' : 'oncall';
-                        $estadoCliente['agents'][$sCanalAgente]['pausestart'] = NULL;
+                            is_null($estadoCliente['agents'][$sCanalAgente]['callinfo']['linkstart']) ? 'online' : 'oncall';
+                        $estadoCliente['agents'][$sCanalAgente]['pauseinfo'] = NULL;
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
@@ -589,10 +590,22 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                     // Si el agente es uno de los de la campaña, modificar
                     if (isset($estadoCliente['agents'][$sCanalAgente])) {
                         $estadoCliente['agents'][$sCanalAgente]['status'] = is_null($estadoCliente['agents'][$sCanalAgente]['pausestart']) ? 'oncall' : 'paused';
-                        $estadoCliente['agents'][$sCanalAgente]['callnumber'] = $evento['phone'];
-                        $estadoCliente['agents'][$sCanalAgente]['linkstart'] = $evento['datetime_linkstart'];
-                        $estadoCliente['agents'][$sCanalAgente]['trunk'] = $evento['trunk'];
-                        $estadoCliente['agents'][$sCanalAgente]['callid'] = $evento['call_id'];
+                        $estadoCliente['agents'][$sCanalAgente]['callinfo'] = array(
+                            'callnumber'    =>  $evento['phone'],
+                            'linkstart'     =>  $evento['datetime_linkstart'],
+                            'trunk'         =>  $evento['trunk'],
+                            'callid'        =>  $evento['call_id'],
+
+                            // Campos que (todavía) no se usan
+                            'calltype'      =>  $evento['call_type'],
+                            'campaign_id'   =>  $evento['campaign_id'],
+                            'queuenumber'   =>  $evento['queue'],
+                            'remote_channel'=>  $evento['remote_channel'],
+                            'status'        =>  $evento['status'],
+                            'queuestart'    =>  (is_null($evento['datetime_join']) || $evento['datetime_join'] == '') ? NULL : $evento['datetime_join'],
+                            'dialstart'     =>  $evento['datetime_originate'],
+                            'dialend'       =>  $evento['datetime_originateresponse'],
+                        );
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
@@ -624,13 +637,11 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                          * del evento agentloggedout si el agente se desconecta con
                          * una llamada activa. */
                         if ($estadoCliente['agents'][$sCanalAgente]['status'] != 'offline') {
+                            // TODO: manejar permanencia de form hold
                             $estadoCliente['agents'][$sCanalAgente]['status'] =
-                                is_null($estadoCliente['agents'][$sCanalAgente]['pausestart']) ? 'online' : 'paused';
+                                is_null($estadoCliente['agents'][$sCanalAgente]['pauseinfo']) ? 'online' : 'paused';
                         }
-                        $estadoCliente['agents'][$sCanalAgente]['callnumber'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['linkstart'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['trunk'] = NULL;
-                        $estadoCliente['agents'][$sCanalAgente]['callid'] = NULL;
+                        $estadoCliente['agents'][$sCanalAgente]['callinfo'] = NULL;
 
                         $respuesta['agents']['update'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     }
@@ -678,14 +689,9 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                     if (in_array($estadoCliente['queue'], $evento['queues']) &&
                         !isset($estadoCliente['agents'][$sCanalAgente])) {
                         // Este nuevo agente acaba de ingresar a la cola de campañas
-                        $estadoCliente['agents'][$sCanalAgente] = array(
-                            'agentchannel'      =>  $sCanalAgente,
-                        );
-                        foreach (array('status', 'callid', 'callnumber',
-                            'callchannel', 'dialstart', 'dialend', 'queuestart',
-                            'linkstart', 'pauseid', 'pausename', 'pausestart',
-                            'trunk') as $k)
-                            $estadoCliente['agents'][$sCanalAgente][$k] = $evento[$k];
+                        $estadoCliente['agents'][$sCanalAgente] = array_merge(
+                            array('agentchannel' => $sCanalAgente), $evento);
+                        unset($estadoCliente['agents'][$sCanalAgente]['queues']);
 
                         $respuesta['agents']['add'][] = formatoAgente($estadoCliente['agents'][$sCanalAgente]);
                     } elseif (!in_array($estadoCliente['queue'], $evento['queues']) &&
@@ -786,16 +792,16 @@ function formatoAgente($agent)
     $sFechaHoy = date('Y-m-d');
     $sDesde = '-';
     if ($agent['status'] == 'paused')
-        $sDesde = $agent['pausestart'];
+        $sDesde = $agent['pauseinfo']['pausestart'];
     elseif ($agent['status'] == 'oncall')
-        $sDesde = $agent['linkstart'];
+        $sDesde = $agent['callinfo']['linkstart'];
     if (strpos($sDesde, $sFechaHoy) === 0)
         $sDesde = substr($sDesde, strlen($sFechaHoy) + 1);
     return array(
         'agent'         =>  $agent['agentchannel'],
         'status'        =>  _tr($agent['status']),
-        'callnumber'    =>  is_null($agent['callnumber']) ? '-' : $agent['callnumber'],
-        'trunk'         =>  is_null($agent['trunk']) ? '-' : $agent['trunk'],
+        'callnumber'    =>  is_null($agent['callinfo']['callnumber']) ? '-' : $agent['callinfo']['callnumber'],
+        'trunk'         =>  is_null($agent['callinfo']['trunk']) ? '-' : $agent['callinfo']['trunk'],
         'desde'         =>  $sDesde,
     );
 }

@@ -140,7 +140,7 @@ class MultiplexServer
             foreach ($this->_conexiones as $sKey => &$conexion) {
                 if (in_array($conexion['socket'], $listoEscribir)) {
                     // Escribir lo más que se puede de los datos pendientes por mostrar
-                    $iBytesEscritos = fwrite($conexion['socket'], $conexion['pendiente_escribir']);
+                    $iBytesEscritos = @fwrite($conexion['socket'], $conexion['pendiente_escribir']);
                     if ($iBytesEscritos === FALSE) {
                         $this->_oLog->output("ERR: error al escribir datos a ".$conexion['socket']);
                         $this->_cerrarConexion($sKey);

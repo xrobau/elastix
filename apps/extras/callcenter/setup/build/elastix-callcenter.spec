@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Feb 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: silence useless messages that appear on EAGAIN when not all
+  8K chunks of data can be written to socket.
+  SVN Rev[7487]
+
 * Sun Feb 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Monitoring: fix agent formatting. Now oncall status has
   priority over paused status. Also, pause name is now displayed next to the

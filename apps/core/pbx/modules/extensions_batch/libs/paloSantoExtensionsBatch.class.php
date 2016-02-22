@@ -36,14 +36,14 @@ class paloSantoExtensionsBatch
     private $_astconfig;
     private $_DB;
     var $errMsg;
-    
+
     private $_colRequeridas = array('name', 'extension', 'secret', 'tech');
     private $_batch = array();
 
     /**
      * Procedimiento para reunir en un solo lugar el título a asignar a cada
      * etiqueta interna
-     * 
+     *
      * @return  arreglo tag=>título
      */
     function getFieldTitles()
@@ -108,15 +108,15 @@ class paloSantoExtensionsBatch
             }
         }
     }
-    
+
     /**
      * Procedimiento para leer la información de todas las extensiones del
      * sistema, y devolver la lista. Esta función se usa para la descarga CSV.
-     * 
+     *
      * @return  NULL en caso de error, o un arreglo con la siguiente estructura:
             [extension] => 1086
             [name] => P Cuenta SIP
-            [outboundcid] => 
+            [outboundcid] =>
             [tech] => sip
             [parameters] => Array
                 (
@@ -127,12 +127,12 @@ class paloSantoExtensionsBatch
                     [port] => 5060
                     [nat] => yes
                     [qualify] => yes
-                    [callgroup] => 
-                    [pickupgroup] => 
-                    [disallow] => 
-                    [allow] => 
+                    [callgroup] =>
+                    [pickupgroup] =>
+                    [disallow] =>
+                    [allow] =>
                     [dial] => SIP/1086
-                    [accountcode] => 
+                    [accountcode] =>
                     [type] => friend
                     [host] => dynamic
                     [mailbox] => 1086@device
@@ -149,17 +149,17 @@ class paloSantoExtensionsBatch
                 )
 
             [callwaiting] => DISABLED
-            [directdid] => 
+            [directdid] =>
             [voicemail] => disable
-            [vm_secret] => 
-            [email_address] => 
-            [pager_email_address] => 
-            [vm_options] => 
+            [vm_secret] =>
+            [email_address] =>
+            [pager_email_address] =>
+            [vm_options] =>
             [email_attachment] => no
             [play_cid] => no
             [play_envelope] => no
             [delete_vmail] => no
-     * 
+     *
      */
     function queryExtensions()
     {
@@ -167,8 +167,8 @@ class paloSantoExtensionsBatch
         if (!$astman->connect("127.0.0.1", 'admin' , obtenerClaveAMIAdmin())) {
             $this->errMsg = "Error connect AGI_AsteriskManager";
             return NULL;
-        }       
-        
+        }
+
         // Lista básica de extensiones
     	$sql = 'SELECT u.extension, u.name, u.outboundcid, d.tech '.
             'FROM users u, devices d WHERE u.extension = d.id';
@@ -177,7 +177,7 @@ class paloSantoExtensionsBatch
             $this->errMsg = $this->_DB->errMsg;
         	return NULL;
         }
-        
+
         // Parámetros de las extensiones
         $sql =  '(SELECT "sip" AS tech, id, keyword, data FROM sip) UNION '.
                 '(SELECT "iax2" AS tech, id, keyword, data FROM iax)';
@@ -191,7 +191,7 @@ class paloSantoExtensionsBatch
         	$prop[$tupla['tech']][$tupla['id']][$tupla['keyword']] = $tupla['data'];
         }
         unset($r);
-        
+
         // Parámetros de llamada en espera
         $callwait = array();
         foreach ($astman->database_show('CW') as $cw_key => $status) {
@@ -199,12 +199,12 @@ class paloSantoExtensionsBatch
             $regs = NULL;
             if (preg_match('|^/CW/(\w+)|', $cw_key, $regs)) $callwait[$regs[1]] = $status;
         }
-        
+
         // FreePBX 2.11: ahora los parámetros de recording están en astdb
         $recording = array();
         foreach ($astman->database_show('AMPUSER') as $ampuser_key => $status) {
         	$regs = NULL;
-            if (trim($status) != '' && 
+            if (trim($status) != '' &&
                 preg_match('|^/AMPUSER/(\w+)/recording(/(\w+)(/(\w+))?)?|', $ampuser_key, $regs)) {
             	if (!isset($recording[$regs[1]])) {
             		// Valores por omisión para extensión
@@ -258,8 +258,8 @@ class paloSantoExtensionsBatch
             $tech = $recordset[$i]['tech'];
             $ext = $recordset[$i]['extension'];
             $recordset[$i] = array_merge($recordset[$i], array(
-                'callwaiting'           =>  (isset($callwait[$ext]) 
-                                            ? $callwait[$ext] 
+                'callwaiting'           =>  (isset($callwait[$ext])
+                                            ? $callwait[$ext]
                                             : 'DISABLED'),
                 'directdid'             =>  $this->_queryDIDByExt($ext),
                 'voicemail'             => 'disable',
@@ -274,7 +274,7 @@ class paloSantoExtensionsBatch
                 'parameters'            =>  array(),
             ));
             if (isset($prop[$tech][$ext]))  $recordset[$i]['parameters'] = $prop[$tech][$ext];
-            if (isset($recording[$ext])) 
+            if (isset($recording[$ext]))
                 $recordset[$i]['parameters'] = array_merge($recordset[$i]['parameters'], $recording[$ext]);
 
             if (isset($voicemailData[$ext])) {
@@ -302,7 +302,7 @@ class paloSantoExtensionsBatch
         $astman->disconnect();
         return $recordset;
     }
-    
+
     private function _queryDIDByExt($extension)
     {
         $sql = 'SELECT description, extension FROM incoming WHERE destination LIKE ?';
@@ -315,15 +315,15 @@ class paloSantoExtensionsBatch
         if (!empty($tupla['description'])) return $tupla['description'];
         return '';
     }
-    
+
     /**
      * Procedimiento para cargar extensiones desde un archivo CSV. Las claves de
      * las opciones de la extensión se deducen a partir de las cabeceras de la
      * primera fila. La mayoría de las validaciones sobre los valores de las
      * propiedades se delegan a addExtension()
-     * 
+     *
      * @param   string  $sFilePath  Ruta al archivo CSV a procesar
-     * 
+     *
      * @return  bool    VERDADERO en carga exitosa, FALSO en error
      */
     function loadExtensionsCSV($sFilePath)
@@ -343,9 +343,9 @@ class paloSantoExtensionsBatch
         foreach ($tupla as $i => $h) {
         	if (isset($fieldTags[$h])) $mapaCol[$i] = $fieldTags[$h];
         }
-        
+
         $exito = TRUE;
-        
+
         // Verificación de columnas requeridas
         if ($exito) {
             if (count(array_intersect($this->_colRequeridas, $mapaCol)) < 4) {
@@ -355,41 +355,41 @@ class paloSantoExtensionsBatch
             	$exito = FALSE;
             }
         }
-        
+
         // Cargar el resto del archivo
         if ($exito) {
             $numLinea = 2;
             while ($exito && $tupla = fgetcsv($hArchivo, 4096, ',')) {
             	$extension = array('line_number' => $numLinea);
                 foreach ($tupla as $i => $v) if (trim($v) != '') $extension[$mapaCol[$i]] = trim($v);
-                
+
                 if (!$this->addExtension($extension)) {
                 	$this->errMsg = _tr('Line')." $numLinea: ".$this->errMsg;
                     $exito = FALSE;
                 }
-                
+
                 $numLinea++;
             }
         }
-        
+
         fclose($hArchivo);
         return $exito;
     }
-    
-    function getNumBatch() { return count($this->_batch); } 
-    
+
+    function getNumBatch() { return count($this->_batch); }
+
     /**
      * Procedimiento para agregar una nueva extensión a la lista de extensiones
      * a procesar, luego de validar que sus propiedades sean consistentes.
-     * 
+     *
      * @param   array   $extension  Tupla de las propiedades de la extensión
-     * 
+     *
      * @return  bool    VERDADERO si la extensión nueva se acepta, FALSO si no.
      */
     function addExtension($extension)
     {
     	$numLinea = isset($extension['line_number']) ? $extension['line_number'] : _tr('(unavailable)');
-        
+
         // Valores por omisión
         if (!isset($extension['deny'])) $extension['deny'] = '0.0.0.0/0.0.0.0';
         if (!isset($extension['permit'])) $extension['permit'] = '0.0.0.0/0.0.0.0';
@@ -400,14 +400,16 @@ class paloSantoExtensionsBatch
             'recording_in_internal', 'recording_out_internal') as $k) {
             if (!isset($extension[$k])) $extension[$k] = 'dontcare';
             $extension[$k] = strtolower($extension[$k]);
-            if (!in_array($extension[$k], array('enabled', 'dontcare', 'disabled')))
+            if ($extension[$k] == 'enabled') $extension[$k] = 'always';
+            if ($extension[$k] == 'disabled') $extension[$k] = 'never';
+            if (!in_array($extension[$k], array('always', 'dontcare', 'never')))
                 $extension[$k] = 'dontcare';
         }
         if (!isset($extension['recording_ondemand'])) $extension['recording_ondemand'] = 'disabled';
         $extension['recording_ondemand'] = strtolower($extension['recording_ondemand']);
         if (!in_array($extension['recording_ondemand'], array('enabled', 'disabled')))
             $extension[$k] = 'disabled';
-        if (!isset($extension['recording_priority']) || 
+        if (!isset($extension['recording_priority']) ||
             !ctype_digit($extension['recording_priority']))
             $extension['recording_priority'] = 10;
         if ($extension['recording_priority'] < 0 || $extension['recording_priority'] > 20)
@@ -415,19 +417,19 @@ class paloSantoExtensionsBatch
 
         // TODO: mapear parámetros antiguos 'record_in', 'record_out' Adhoc|Always|Never
 
-        $extension['voicemail'] = (isset($extension['voicemail']) && 
+        $extension['voicemail'] = (isset($extension['voicemail']) &&
             stripos($extension['voicemail'], 'enable') === 0)
             ? 'enable' : 'disable';
         $extension['callwaiting'] = (isset($extension['callwaiting']) &&
             stripos($extension['callwaiting'], 'ENABLE') === 0)
             ? 'ENABLED' : 'DISABLED';
-        
+
         // Esta transformación estaba presente en implementación anterior
         if (isset($extension['outboundcid'])) {
         	$extension['outboundcid'] = str_replace('“', '"', $extension['outboundcid']);
             $extension['outboundcid'] = str_replace('”', '"', $extension['outboundcid']);
         }
-        
+
         if (!isset($extension['extension'])) {
             $this->errMsg = _tr("Can't exist a extension empty. Line").": $numLinea";
         	return FALSE;
@@ -450,7 +452,7 @@ class paloSantoExtensionsBatch
             return FALSE;
         }
         if ($extension['tech'] == 'iax') $extension['tech'] = 'iax2';
-        
+
         // Ninguno de los valores admite saltos de línea
         foreach ($extension as $k => $v) {
         	if (strpbrk($v, "\r\n") !== FALSE) {
@@ -458,13 +460,13 @@ class paloSantoExtensionsBatch
         		return FALSE;
         	}
         }
-        
+
         // El número de extensión debe ser numérico
         if (!ctype_digit($extension['extension'])) {
             $this->errMsg = _tr('Invalid extension, must be numeric');
         	return FALSE;
         }
-        
+
         // Si el password de voicemail está definido, debe ser numérico (Elastix bug #1238)
         if (isset($extension['vm_secret']) && !ctype_digit($extension['vm_secret'])) {
             $this->errMsg = _tr('Voicemail password must be numeric');
@@ -485,14 +487,14 @@ class paloSantoExtensionsBatch
 
         // No se admiten extensiones repetidas
         if (isset($this->_batch[$extension['extension']])) {
-            $n2 = isset($this->_batch[$extension['extension']]['line_number']) 
-                ? $this->_batch[$extension['extension']]['line_number'] 
+            $n2 = isset($this->_batch[$extension['extension']]['line_number'])
+                ? $this->_batch[$extension['extension']]['line_number']
                 : _tr('(unavailable)');
             $this->errMsg = _tr("Error, extension")." ".$extension['extension'].
                 " "._tr("repeat in lines")." $n2";
         	return FALSE;
         }
-        
+
         $this->_batch[$extension['extension']] = $extension;
 
         return TRUE;
@@ -501,41 +503,41 @@ class paloSantoExtensionsBatch
     /**
      * Procedimiento para validar un Secret de cuenta de SIP/IAX. La regla usada
      * por FreePBX es: el secreto debe ser de al menos 6 caracteres, y debe de
-     * tener al menos dos dígitos y dos letras. Pero se admiten caracteres 
-     * arbitrarios fuera de estas restricciones.  
-     * 
+     * tener al menos dos dígitos y dos letras. Pero se admiten caracteres
+     * arbitrarios fuera de estas restricciones.
+     *
      * @param   string  $Secret Secreto a validar
-     * 
+     *
      * @return  VERDADERO si el secreto es válido, FALSO si no.
      */
     private function _valida_password($Secret)
     {
         if(strlen($Secret) <= 5)
             return false;
-            
-        return (preg_match('/[[:alpha:]].*[[:alpha:]]/', $Secret) 
+
+        return (preg_match('/[[:alpha:]].*[[:alpha:]]/', $Secret)
             && preg_match('/[[:digit:]].*[[:digit:]]/', $Secret));
     }
 
     /**
-     * Procedimiento para realizar todos los cambios correspondientes a las 
+     * Procedimiento para realizar todos los cambios correspondientes a las
      * extensiones agregadas con addExtension().
-     * 
+     *
      * @return  bool    VERDADERO en caso de éxito, FALSO si fallo.
      */
     function applyExtensions()
     {
         ksort($this->_batch);
-        
+
         $astman = new AGI_AsteriskManager();
         if (!$astman->connect("127.0.0.1", 'admin' , obtenerClaveAMIAdmin())) {
             $this->errMsg = "Error connect AGI_AsteriskManager";
             return FALSE;
-        }    	
-        
+        }
+
         $exito = TRUE;
         $this->_DB->beginTransaction();
-        
+
         if ($exito) foreach ($this->_batch as $extension) {
         	$exito = $this->_updateTechDevices($extension); if (!$exito) break;
             $exito = $this->_updateUsers($extension); if (!$exito) break;
@@ -546,19 +548,19 @@ class paloSantoExtensionsBatch
         }
 
         if ($exito) $exito = $this->_updateVoicemailConf();
-        
+
         // Aplicar cambios a la base de datos
         if (!$exito) {
             $this->_DB->rollBack();
             return FALSE;
         }
         $this->_DB->commit();
-        
+
         $exito = $this->_recargarAsterisk($astman);
         $astman->disconnect();
         return $exito;
     }
-    
+
     private function _updateTechDevices($extension)
     {
     	/* Para la tecnología indicada, se borra la información de la misma
@@ -569,14 +571,14 @@ class paloSantoExtensionsBatch
             $this->errMsg = $this->_DB->errMsg;
         	return FALSE;
         }
-        
+
         // Sentencias a usar para probar y actualizar cada propiedad
         if ($extension['tech'] == 'sip') $tabla = 'sip';
         if ($extension['tech'] == 'iax2') $tabla = 'iax';
         $sqlleer = "SELECT COUNT(*) AS n FROM $tabla WHERE id = ? AND keyword = ?";
         $sqlupdate = "UPDATE $tabla SET data = ? WHERE id = ? AND keyword = ?";
         $sqlinsert = "INSERT INTO $tabla (data, id, keyword) VALUES (?, ?, ?)";
-        
+
         // Las propiedades a insertar o actualizar para la extensión
         $prop = array(
             'callerid'      =>  'device <'.$extension['extension'].'>',
@@ -606,7 +608,7 @@ class paloSantoExtensionsBatch
 
                 // FreePBX 2.11: parámetro ya no aparece
                 //'notransfer'        =>  'yes',
-                
+
                 // FreePBX 2.11: nuevos parámetros IAX2
                 'transfer'  =>  'yes',
             ));
@@ -619,7 +621,7 @@ class paloSantoExtensionsBatch
                 'nat'               =>  'yes',
                 'canreinvite'       =>  'no',
                 'dtmfmode'          =>  'rfc2833',
-                
+
                 // FreePBX 2.11: nuevos parámetros SIP
                 'encryption'        =>  'no',
                 'qualifyfreq'       =>  '60',
@@ -630,7 +632,7 @@ class paloSantoExtensionsBatch
                 'sendrpid'          =>  'no',
             ));
         }
-        
+
         // Insertar o modificar todas las propiedades
         foreach ($prop as $k => $v) {
         	$tupla = $this->_DB->getFirstRowQuery($sqlleer, TRUE, array($extension['extension'], $k));
@@ -648,7 +650,7 @@ class paloSantoExtensionsBatch
         }
         return TRUE;
     }
-    
+
     private function _updateUsers($extension)
     {
     	$tupla = $this->_DB->getFirstRowQuery(
@@ -658,7 +660,7 @@ class paloSantoExtensionsBatch
             $this->errMsg = $this->_DB->errMsg;
             return FALSE;
         }
-        $sql = ($tupla['n'] > 0) 
+        $sql = ($tupla['n'] > 0)
             ? 'UPDATE users SET name = ?, voicemail = ?, recording = ?, outboundcid = ? '.
               'WHERE extension = ?'
             : 'INSERT INTO users (password, ringtimer, noanswer, mohclass, sipname, '.
@@ -678,7 +680,7 @@ class paloSantoExtensionsBatch
         }
         return TRUE;
     }
-    
+
     private function _updateDevices($extension)
     {
     	if ($extension['tech'] == 'sip') $dial = 'SIP/'.$extension['extension'];
@@ -691,13 +693,13 @@ class paloSantoExtensionsBatch
             $this->errMsg = $this->_DB->errMsg;
             return FALSE;
         }
-        $sql = ($tupla['n'] > 0) 
+        $sql = ($tupla['n'] > 0)
             ? 'UPDATE devices SET tech = ?, dial = ?, description = ?, user = ? WHERE id = ?'
             : 'INSERT INTO devices (devicetype, emergency_cid, tech, dial, description, user, id) '.
               'VALUES ("fixed", "", ?, ?, ?, ?, ?)';
         $params = array(
             $extension['tech'],
-            $dial,            
+            $dial,
             $extension['name'],
             $extension['extension'],
             $extension['extension']);
@@ -707,7 +709,7 @@ class paloSantoExtensionsBatch
         }
         return TRUE;
     }
-    
+
     private function _updateDirectDID($extension)
     {
     	if (!isset($extension['directdid'])) return TRUE;
@@ -772,7 +774,7 @@ class paloSantoExtensionsBatch
                 // Parámetros obsoletos en FreePBX 2.11
                 //'recording'     =>  'out='.$extension['record_out'].'|in='.$extension['record_in'],
                 'recording'     =>  '',
-                
+
                 // FreePBX 2.11: nuevos parámetros (dontcare|always|never)
                 'recording/in/external' =>  $extension['recording_in_external'],
                 'recording/in/internal' =>  $extension['recording_in_internal'],
@@ -793,7 +795,7 @@ class paloSantoExtensionsBatch
                 'dial'          =>  $dial,
                 'type'          =>  'fixed',
                 'user'          =>  $extension['extension'],
-            ), 
+            ),
         );
         foreach ($dbprops as $family => $keyvals) foreach ($keyvals as $key => $value) {
             if (!$astman->database_put($family, $extension['extension'].'/'.$key, $value)) {
@@ -811,7 +813,7 @@ class paloSantoExtensionsBatch
             $this->errMsg = _tr('Failed to open voicemail config');
         	return FALSE;
         }
-        
+
         // Quitar referencias anteriores a extensiones nuevas
         $l2 = array();
         for ($i = 0; $i < count($lineas); $i++) {
@@ -820,11 +822,11 @@ class paloSantoExtensionsBatch
             if (preg_match('/^(\d+)\s+=>/', $lineas[$i], $regs)) {
             	if (isset($this->_batch[$regs[1]])) $remover = TRUE;
             }
-            
+
             if (!$remover) $l2[] = $lineas[$i];
         }
         $lineas = $l2;
-        
+
         // Agregar líneas de voicemail
         foreach ($this->_batch as $extension) if ($extension['voicemail'] == 'enable') {
             foreach (array('email_attachment', 'play_cid', 'play_envelope', 'delete_vmail') as $k)
@@ -842,7 +844,7 @@ class paloSantoExtensionsBatch
                         'delete='.$extension['delete_vmail']))
             ))."\n";
         }
-        
+
         return (file_put_contents(VOICEMAIL_CONFIG, $lineas) !== FALSE);
     }
 
@@ -852,11 +854,11 @@ class paloSantoExtensionsBatch
         if (!$astman->connect("127.0.0.1", 'admin' , obtenerClaveAMIAdmin())) {
             $this->errMsg = "Error connect AGI_AsteriskManager";
             return FALSE;
-        }       
-        
+        }
+
         $exito = TRUE;
         $this->_DB->beginTransaction();
-        
+
         // Lista de extensiones a borrar
         $sql = "SELECT id FROM devices WHERE tech = 'sip' OR tech = 'iax2'";
         $recordset = $this->_DB->fetchTable($sql);
@@ -867,7 +869,7 @@ class paloSantoExtensionsBatch
         $extlist = array();
         foreach ($recordset as $tupla) $extlist[] = $tupla[0];
         unset($recordset);
-    	
+
         foreach ($extlist as $ext) {
         	// Borrar propiedades en base de datos de Asterisk
             foreach (array('AMPUSER', 'DEVICE', 'CW', 'CF', 'CFB', 'CFU') as $family) {
@@ -875,7 +877,7 @@ class paloSantoExtensionsBatch
             }
             if (!$exito) break;
         }
-        
+
         if ($exito) {
         	foreach (array(
                 "DELETE s FROM sip s INNER JOIN devices d ON s.id=d.id and d.tech='sip'",
@@ -885,18 +887,18 @@ class paloSantoExtensionsBatch
                 ) as $sql) {
             	if (!$this->_DB->genQuery($sql)) {
                     $this->errMsg = $this->_DB->errMsg;
-            		$exito = FALSE; break;                    
+            		$exito = FALSE; break;
             	}
             }
         }
-        
+
         // Aplicar cambios a la base de datos
         if (!$exito) {
             $this->_DB->rollBack();
             return FALSE;
         }
         $this->_DB->commit();
-        
+
         $exito = $this->_recargarAsterisk($astman);
         $astman->disconnect();
         return $exito;

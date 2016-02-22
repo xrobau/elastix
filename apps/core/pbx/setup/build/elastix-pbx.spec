@@ -300,6 +300,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Feb 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Extension Batch: recording parameters are always/never, not
+  enabled/disabled.
+  SVN Rev[7488]
+
 * Mon Jan 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: pbx - install httpd mod_proxy_wstunnel configuration to expose SIP
   websocket URL through the HTTPS space.

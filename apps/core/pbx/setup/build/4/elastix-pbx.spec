@@ -300,6 +300,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Feb 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Extension Batch: recording parameters are always/never, not
+  enabled/disabled.
+  SVN Rev[7488]
+
 * Thu Feb 04 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

@@ -3,7 +3,7 @@
 Summary: Elastix Module Email
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -206,6 +206,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-4
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Mon Jan 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Email_admin: post-installation requires saslauthd service.
   SVN Rev[7422]

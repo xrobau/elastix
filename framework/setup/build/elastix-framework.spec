@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.5.0
-Release: 10
+Release: 11
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -389,10 +389,25 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Tue Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-11
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Feb 12 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: use correct method set_error to report problems on user
   extension report.
   SVN Rev[7476]
+
+* Wed Feb 10 2016 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: branches/2.5.0 - _menu.tpl: Corrected icons in the notification
+  header of Tenant theme.
+  SVN Rev[7472]
+
+* Fri Feb 05 2016 Luis Abarca <labarca@palosanto.com> 
+- CHANGED: branches/2.5.0 - styles.css-_menu.tpl: Corrected positions in
+  framework about sticky note and hide some icons of functionalities currently
+  in development.
+  SVN Rev[7462]
 
 * Mon Feb  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: added new _elastixutils action to expose telephony user
@@ -400,6 +415,10 @@ rm -rf $RPM_BUILD_ROOT
   SVN Rev[7456]
 
 * Thu Jan  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: block kernel updates. The CentOS 7 kernel ABI is changing
+  too quickly to follow reliably and continuously breaks the DAHDI modules. At
+  this point in time, the tested kernel version is 3.10.0-229.14.1.el7.x86_64 .
+  SVN Rev[7414]
 - CHANGED: Framework: remove regexp check for username. This check was required
   back when SQL parameters were not used and should not be necessary now.
   SVN Rev[7412]
@@ -700,6 +719,7 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-10
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[7156]
 
 * Wed Jul 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: javascript method showPopupElastix has been replaced by

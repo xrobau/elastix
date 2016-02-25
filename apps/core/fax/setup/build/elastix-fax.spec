@@ -3,7 +3,7 @@
 Summary: Elastix Module Fax
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-5.tgz
@@ -193,6 +193,10 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
+  history. Changed Version and Release in specfile.
+
 * Mon Nov  2 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Send Fax: switch all uses of $arrLang to _tr() and replace
   hand-coded translation loading with load_language_module().

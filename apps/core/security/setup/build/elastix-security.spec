@@ -3,7 +3,7 @@
 Summary: Elastix Security
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -133,6 +133,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: security: replace hand-coded translation loading with
   load_language_module().
@@ -150,6 +154,7 @@ fi
 * Fri Sep 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[7156]
 
 * Sun Mar 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Advanced Settings - jQuery-1.11.2 migration: fix incorrect use of

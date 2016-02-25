@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -180,6 +180,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-3
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Fri Nov 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dashboard: switch to JustGage for Hard Disk applet.
   SVN Rev[7361]
@@ -259,6 +263,7 @@ fi
 * Tue Oct 20 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: netconfig: allow network devices not of the form ethN in validation.
   Part of fix for Elastix bug #2376.
+  SVN Rev[7211]
 - CHANGED: Dashboard: switch to JustGage for System Resources applet.
   SVN Rev[7210]
 - CHANGED: Dashboard: cleanup and proper JSON encoding for Performance Graphic.
@@ -286,6 +291,12 @@ fi
 - ADDED: Applet Admin: add Russian translation provided by user Russian.
   SVN Rev[7180]
 
+* Mon Oct 05 2015 Luis Abarca <labarca@palosanto.com> 
+- FIXED: db - system/sql_version: One of the scripts in charge of handling the
+  update of database in the module, it was not working correctly, leaving the
+  dashboard module showing only one applet after updating the whole module.
+  SVN Rev[7165]
+
 * Wed Sep 30 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: remove an incorrect DELETE statement that has been dormant
   in the SQL update scripts since 2.0.4 (SVN commit #2543). This statement
@@ -297,6 +308,7 @@ fi
 * Thu Apr 09 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-2
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.
+  SVN Rev[6972]
 
 * Mon Apr 06 2015 Bruno Macias <bmacias@palosanto.com>
 - FIXED: module backup_restore, Missing argument 5 for downloadBackup() was

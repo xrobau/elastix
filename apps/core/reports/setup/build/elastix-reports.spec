@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports
 Name:    elastix-reports
 Version: 2.5.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -93,6 +93,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-5
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Tue Nov  3 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Summary by Extension: switch all uses of $arrLang to _tr() and
   replace hand-coded translation loading with load_language_module().

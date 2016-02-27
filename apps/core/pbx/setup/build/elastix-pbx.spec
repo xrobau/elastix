@@ -300,6 +300,14 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sat Feb 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: (WIP) tweak macro-hangupcall to check if CDR(recordingfile) is set,
+  and if so, test if file exists, either under ${ASTSPOOLDIR}/monitor/ or under
+  ${ASTSPOOLDIR}/monitor/${MIXMON_DIR}${YEAR}/${MONTH}/${DAY}/ , fixing the
+  path stored under CDR(recordingfile) if necessary. This skips over a possibly
+  incorrect unsetting of CDR(recordingfile). NEEDS MORE WORK.
+  SVN Rev[7490]
+
 * Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-6
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

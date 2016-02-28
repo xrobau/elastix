@@ -182,16 +182,16 @@ BridgedUniqueID: 1441991139.3
         $this->_enum_complete = TRUE;
     }
 
-    function predecirNumeroLlamadas($cola, $prob_atencion = NULL, $avg_duracion = NULL, $avg_contestar = NULL)
+    function infoPrediccionCola($cola)
     {
+        if (!isset($this->_infoColas[$cola])) return NULL;
+
         $iNumLlamadasColocar = array(
             'AGENTES_LIBRES'        =>  0,
-            'AGENTES_POR_DESOCUPAR' =>  0,
+            'AGENTES_POR_DESOCUPAR' =>  array(),
             'CLIENTES_ESPERA'       =>  0,
         );
-        if (!isset($this->_infoColas[$cola])) return $iNumLlamadasColocar;
 
-        // Clasificar miembros de la cola en: ociosos, ocupados, no-disponibles
         $iNumLlamadasColocar['CLIENTES_ESPERA'] = $this->_infoColas[$cola]['callers'];
         foreach ($this->_infoColas[$cola]['members'] as $interface => $miembro) {
 
@@ -204,21 +204,29 @@ BridgedUniqueID: 1441991139.3
 
             // Miembro ocupado, se verifica si se desocupará
             if (in_array($miembro['Status'], array(AST_DEVICE_INUSE, AST_DEVICE_BUSY, AST_DEVICE_RINGINUSE)) &&
-                !is_null($prob_atencion) && isset($this->_agentesAppQueue[$interface])) {
-                $iTiempoTotal = $avg_contestar + $this->_agentesAppQueue[$interface];
-
-                // Probabilidad de que 1 llamada haya terminado al cabo de $iTiempoTotal s.
-                $iProbabilidad = $this->_probabilidadErlangAcumulada(
-                    $iTiempoTotal,
-                    1,
-                    1 / $avg_duracion);
-                if ($iProbabilidad >= $prob_atencion) {
-                    $iNumLlamadasColocar['AGENTES_POR_DESOCUPAR']++;
-                }
+                isset($this->_agentesAppQueue[$interface])) {
+                $iNumLlamadasColocar['AGENTES_POR_DESOCUPAR'][] = $this->_agentesAppQueue[$interface];
             }
         }
-
         return $iNumLlamadasColocar;
+    }
+
+    function predecirNumeroLlamadas($infoCola, $prob_atencion = NULL, $avg_duracion = NULL, $avg_contestar = NULL)
+    {
+        $n = 0;
+        // Miembro ocupado, se verifica si se desocupará
+        if (!is_null($prob_atencion)) foreach ($infoCola['AGENTES_POR_DESOCUPAR'] as $t) {
+            $iTiempoTotal = $avg_contestar + $t;
+
+            // Probabilidad de que 1 llamada haya terminado al cabo de $iTiempoTotal s.
+            $iProbabilidad = $this->_probabilidadErlangAcumulada(
+                $iTiempoTotal,
+                1,
+                1 / $avg_duracion);
+            if ($iProbabilidad >= $prob_atencion) $n++;
+        }
+        $infoCola['AGENTES_POR_DESOCUPAR'] = $n;
+        return $infoCola;
     }
 
     private function _probabilidadErlangAcumulada($x, $k, $lambda)

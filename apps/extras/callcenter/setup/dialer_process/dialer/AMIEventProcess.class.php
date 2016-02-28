@@ -53,11 +53,6 @@ class AMIEventProcess extends TuberiaProcess
     // Contadores para actividades ejecutadas regularmente
     private $_iTimestampVerificacionLlamadasViejas = 0; // Última verificación de llamadas viejas
 
-    // Número de llamadas esperando atención por cola, inicializado por
-    // QueueEntry y actualizado en Join y Leave
-    private $_numLlamadasEnCola = array();
-    // Este temporal se intercambia por _numLlamadasEnCola en QueueStatusComplete
-    private $_tmp_numLlamadasEnCola = NULL;
     // Estado de agente, por agente y luego por cola, inicializado por
     // QueueMember y actualizado en QueueMemberStatus y QueueMemberAdded
     private $_tmp_estadoAgenteCola = NULL;
@@ -76,9 +71,11 @@ class AMIEventProcess extends TuberiaProcess
     private $_nalarma = 0;
     private $_alarmas = array();
 
+    private $_queueshadow = NULL;
+
     public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
-    	$this->_log = $oMainLog;
+        $this->_log = $oMainLog;
         $this->_multiplex = new MultiplexServer(NULL, $this->_log);
         $this->_tuberia->registrarMultiplexHijo($this->_multiplex);
         $this->_tuberia->setLog($this->_log);
@@ -92,7 +89,8 @@ class AMIEventProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('informarCredencialesAsterisk', 'nuevasCampanias',
             'leerTiempoContestar', 'nuevasLlamadasMarcar',
-            'contarLlamadasEsperandoRespuesta', 'agentesAgendables') as $k)
+            'contarLlamadasEsperandoRespuesta', 'agentesAgendables',
+            'infoPrediccionCola') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde ECCPWorkerProcess
@@ -110,6 +108,8 @@ class AMIEventProcess extends TuberiaProcess
 
         // Registro de manejadores de eventos desde HubProcess
         $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
+
+        $this->_queueshadow = new QueueShadow($this->_log);
 
         return TRUE;
     }
@@ -270,7 +270,10 @@ class AMIEventProcess extends TuberiaProcess
                 'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
                 'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved','VarSet',
                 'QueueMemberStatus', 'QueueParams', 'QueueMember', 'QueueEntry',
-                'QueueStatusComplete', 'Leave', 'Reload', 'Agents', 'AgentsComplete') as $k)
+                'QueueStatusComplete', 'Leave', 'Reload', 'Agents', 'AgentsComplete',
+                'AgentCalled', 'AgentDump', 'AgentConnect', 'AgentComplete',
+                'QueueMemberPaused',
+            ) as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
             $astman->add_event_handler('Bridge', array($this, "msg_Link")); // Visto en Asterisk 1.6.2.x
             if ($this->DEBUG && $this->_config['dialer']['allevents'])
@@ -873,6 +876,7 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('INFO: actualizando DEBUG...');
             $this->_config['dialer']['debug'] = $v;
             $this->DEBUG = $this->_config['dialer']['debug'];
+            $this->_queueshadow->DEBUG = $this->DEBUG;
             break;
         case 'dialer_allevents':
             $this->_config['dialer']['allevents'] = $v;
@@ -1073,6 +1077,7 @@ class AMIEventProcess extends TuberiaProcess
         $bExito = $this->_iniciarConexionAMI();
 
         $this->DEBUG = $this->_config['dialer']['debug'];
+        $this->_queueshadow->DEBUG = $this->DEBUG;
 
         // Informar a la fuente que se ha terminado de procesar
         $this->_tuberia->enviarRespuesta($sFuente, $bExito);
@@ -1283,6 +1288,18 @@ class AMIEventProcess extends TuberiaProcess
         }
     }
 
+    public function rpc_infoPrediccionCola($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+
+        list($queue) = $datos;
+
+        $this->_tuberia->enviarRespuesta($sFuente, $this->_queueshadow->infoPrediccionCola($queue));
+    }
+
     /**************************************************************************/
 
     public function msg_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje,
@@ -1340,9 +1357,9 @@ class AMIEventProcess extends TuberiaProcess
         // Iniciar actualización del estado de las colas activas
         $this->_tmp_actionid_queuestatus = 'QueueStatus-'.posix_getpid().'-'.time();
         $this->_tmp_estadoAgenteCola = array();
-        $this->_tmp_numLlamadasEnCola = array();
 
         $this->_ami->QueueStatus(NULL, $this->_tmp_actionid_queuestatus);
+        $this->_queueshadow->QueueStatus_start();
 
         // En msg_QueueStatusComplete se valida pertenencia a colas dinámicas
     }
@@ -1766,9 +1783,11 @@ Uniqueid: 1429642067.241008
                 );
         }
 
-       $sAgente = $params['Location'];
+        $this->_queueshadow->msg_QueueMemberAdded($params);
 
-       /* tomado de msg_agentLogin */
+        $sAgente = $params['Location'];
+
+        /* tomado de msg_agentLogin */
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
 
         /* if (is_null($a) || $a->estado_consola == 'logged-out') { // Línea original */
@@ -1823,6 +1842,8 @@ Uniqueid: 1429642067.241008
                 );
         }
 
+        $this->_queueshadow->msg_QueueMemberRemoved($params);
+
         $a = $this->_listaAgentes->buscar('agentchannel', $params['Location']);
 
         if (is_null($a)) {
@@ -1875,9 +1896,7 @@ Uniqueid: 1429642067.241008
                 );
         }
 
-        if (!isset($this->_numLlamadasEnCola[$params['Queue']]))
-            $this->_numLlamadasEnCola[$params['Queue']] = 0;
-        $this->_numLlamadasEnCola[$params['Queue']]++;
+        $this->_queueshadow->msg_Join($params);
 
         $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid']);
         if (is_null($llamada) && isset($this->_colasEntrantes[$params['Queue']])) {
@@ -2303,6 +2322,21 @@ Uniqueid: 1429642067.241008
 
     public function msg_QueueParams($sEvent, $params, $sServer, $iPort)
     {
+        /*
+        [Event] => QueueParams
+        [Queue] => 8001
+        [Max] => 0
+        [Strategy] => ringall
+        [Calls] => 0
+        [Holdtime] => 0
+        [TalkTime] => 0
+        [Completed] => 0
+        [Abandoned] => 0
+        [ServiceLevel] => 60
+        [ServicelevelPerf] => 0.0
+        [Weight] => 0
+        [ActionID] => QueueStatus-4899-1456607980
+        */
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
@@ -2312,8 +2346,8 @@ Uniqueid: 1429642067.241008
 
         if (is_null($this->_tmp_actionid_queuestatus)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
-        if (!isset($this->_tmp_numLlamadasEnCola[$params['Queue']]))
-            $this->_tmp_numLlamadasEnCola[$params['Queue']] = 0;
+
+        $this->_queueshadow->msg_QueueParams($params);
     }
 
     public function msg_QueueMember($sEvent, $params, $sServer, $iPort)
@@ -2342,6 +2376,8 @@ Uniqueid: 1429642067.241008
         if (is_null($this->_tmp_actionid_queuestatus)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
 
+        $this->_queueshadow->msg_QueueMember($params);
+
         /* Se debe usar Location porque Name puede ser el nombre amistoso */
         $this->_tmp_estadoAgenteCola[$params['Location']][$params['Queue']] = $params['Status'];
     }
@@ -2369,9 +2405,8 @@ Uniqueid: 1429642067.241008
 
         if (is_null($this->_tmp_actionid_queuestatus)) return;
         if ($params['ActionID'] != $this->_tmp_actionid_queuestatus) return;
-        if (!isset($this->_tmp_numLlamadasEnCola[$params['Queue']]))
-            $this->_tmp_numLlamadasEnCola[$params['Queue']] = 0;
-        $this->_tmp_numLlamadasEnCola[$params['Queue']]++;
+
+        $this->_queueshadow->msg_QueueEntry($params);
     }
 
     public function msg_QueueStatusComplete($sEvent, $params, $sServer, $iPort)
@@ -2389,8 +2424,7 @@ Uniqueid: 1429642067.241008
         /* Finalizó la enumeración. Ahora se puede actualizar el estado de los
          * agentes de forma atómica.
          */
-        $this->_numLlamadasEnCola = $this->_tmp_numLlamadasEnCola;
-        $this->_tmp_numLlamadasEnCola = NULL;
+        $this->_queueshadow->msg_QueueStatusComplete($params);
         $this->_tmp_actionid_queuestatus = NULL;
         foreach ($this->_tmp_estadoAgenteCola as $sAgente => $estadoCola) {
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -2495,6 +2529,8 @@ Uniqueid: 1429642067.241008
             );
         }
 
+        $this->_queueshadow->msg_QueueMemberStatus($params);
+
         $a = $this->_listaAgentes->buscar('agentchannel', $params['Location']);
         if (!is_null($a)) {
             // TODO: existe $params['Paused'] que indica si está en pausa
@@ -2515,11 +2551,7 @@ Uniqueid: 1429642067.241008
             );
         }
 
-        if (!isset($this->_numLlamadasEnCola[$params['Queue']]))
-            $this->_numLlamadasEnCola[$params['Queue']] = 0;
-        if ($this->_numLlamadasEnCola[$params['Queue']] > 0)
-            $this->_numLlamadasEnCola[$params['Queue']]--;
-        else {
+        if (!$this->_queueshadow->msg_Leave($params)) {
             $this->_log->output('ERR: número de llamadas en espera fuera de sincronía, se intenta refrescar...');
             $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
         }
@@ -2653,6 +2685,66 @@ Uniqueid: 1429642067.241008
         $this->_tmp_actionid_agents = NULL;
     }
 
+    public function msg_QueueMemberPaused($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        $this->_queueshadow->msg_QueueMemberPaused($params);
+    }
+
+    public function msg_AgentCalled($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        $this->_queueshadow->msg_AgentCalled($params);
+    }
+
+    public function msg_AgentDump($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        $this->_queueshadow->msg_AgentDump($params);
+    }
+
+    public function msg_AgentConnect($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        $this->_queueshadow->msg_AgentConnect($params);
+    }
+
+    public function msg_AgentComplete($sEvent, $params, $sServer, $iPort)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        $this->_queueshadow->msg_AgentComplete($params);
+    }
+
     private function _ejecutarLogoffAgente($sAgente, $a, $timestamp, $evtname)
     {
         $this->_tuberia->msg_ECCPProcess_AgentLogoff(
@@ -2704,7 +2796,8 @@ Uniqueid: 1429642067.241008
         $this->_listaLlamadas->dump($this->_log);
 
         $this->_log->output("\n\nLlamadas en espera en colas:");
-        foreach ($this->_numLlamadasEnCola as $q => $n) {
+        $llamadasEspera = $this->_queueshadow->llamadasEnEspera();
+        foreach ($llamadasEspera as $q => $n) {
             $this->_log->output("\t$q.....$n");
         }
 

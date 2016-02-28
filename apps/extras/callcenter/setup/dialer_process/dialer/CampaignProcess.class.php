@@ -555,7 +555,6 @@ PETICION_CAMPANIAS_ENTRANTES;
                  * la base de datos, y para cuando pasa a la siguiente campaña
                  * que usa esa cola, la información podría estar obsoleta. */
                 $oPredictor = new Predictor($this->_ami);
-                $oPredictor->examinarColas(array($tuplaCampania['queue']));
                 $this->_actualizarLlamadasCampania($tuplaCampania, $oPredictor);
 
                 /* Debido a las consultas a la base de datos realizadas para
@@ -601,13 +600,13 @@ PETICION_CAMPANIAS_ENTRANTES;
         }
 
         // Parámetros requeridos para predicción de colocación de llamadas
-        $iRetrasoPrediccion = microtime(TRUE) - $oPredictor->timestamp_examen;
-        if ($iRetrasoPrediccion >= 1.5 * INTERVALO_REVISION_CAMPANIAS) {
-            $this->_log->output('WARN: '.__METHOD__." (campania {$infoCampania['id']} ".
-                "cola {$infoCampania['queue']}) evaluada luego de ".$iRetrasoPrediccion." segundos.");
+        $infoCola = $this->_tuberia->AMIEventProcess_infoPrediccionCola($infoCampania['queue']);
+        if (is_null($infoCola)) {
+            $oPredictor->examinarColas(array($infoCampania['queue']));
+            $infoCola = $oPredictor->infoPrediccionCola($infoCampania['queue']);
         }
         $resumenPrediccion = ($this->_configDB->dialer_predictivo && ($infoCampania['num_completadas'] >= MIN_MUESTRAS))
-            ? $oPredictor->predecirNumeroLlamadas($infoCampania['queue'],
+            ? $oPredictor->predecirNumeroLlamadas($infoCola,
                 $this->_configDB->dialer_qos,
                 $infoCampania['promedio'],
                 $this->_leerTiempoContestar($infoCampania['id']))

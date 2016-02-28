@@ -101,6 +101,14 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sat Feb 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: implement opportunistic use of Agent* and QueueMemberStatus
+  messages if enabled. These messages allow keeping a shadow status of the
+  queues so that CampaignProcess does not have to invoke AND parse the output
+  of CoreShowChannels and QueueStatus every 3 seconds, and burden the asterisk
+  process on the way.
+  SVN Rev[7491]
+
 * Mon Feb 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: silence useless messages that appear on EAGAIN when not all
   8K chunks of data can be written to socket.

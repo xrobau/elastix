@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Feb 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: refactor event firing on agent login to Agente class. Ported
+  from CallCenterPRO.
+  SVN Rev[7492]
+
 * Sat Feb 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: implement opportunistic use of Agent* and QueueMemberStatus
   messages if enabled. These messages allow keeping a shadow status of the

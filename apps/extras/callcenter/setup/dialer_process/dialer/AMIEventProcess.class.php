@@ -338,7 +338,7 @@ class AMIEventProcess extends TuberiaProcess
     private function _cancelarIntentoLoginAgente($sAgente)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (!is_null($a)) $a->respuestaLoginAgente('Failure', NULL, NULL);
+        if (!is_null($a)) $a->respuestaLoginAgente($this->_tuberia, 'Failure', NULL, NULL);
         return !is_null($a);
     }
 
@@ -510,7 +510,7 @@ class AMIEventProcess extends TuberiaProcess
                         "cargado información de agente {$listaECCP[4]}");
                     $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
                 } else {
-                    $a->respuestaLoginAgente(
+                    $a->respuestaLoginAgente($this->_tuberia,
                         $params['Response'], $params['Uniqueid'], $params['Channel']);
                     if ($params['Response'] == 'Success') {
                         if ($this->DEBUG) {
@@ -522,10 +522,6 @@ class AMIEventProcess extends TuberiaProcess
                             $this->_log->output("DEBUG: AgentLogin({$listaECCP[4]}) ".
                                 "llamada ha fallado.");
                         }
-                        $this->_tuberia->msg_ECCPProcess_AgentLogin(
-                            $listaECCP[4],
-                            $params['local_timestamp_received'],
-                            NULL);
                     }
                 }
                 return TRUE;
@@ -549,11 +545,7 @@ class AMIEventProcess extends TuberiaProcess
     {
         $a = $this->_listaAgentes->buscar('uniqueidlogin', $params['Uniqueid']);
         if (is_null($a)) return FALSE;
-        $a->respuestaLoginAgente('Failure', NULL, NULL);
-        $this->_tuberia->msg_ECCPProcess_AgentLogin(
-            $a->channel,
-            $params['local_timestamp_received'],
-            NULL);
+        $a->respuestaLoginAgente($this->_tuberia, 'Failure', NULL, NULL);
         if ($this->DEBUG) {
             $this->_log->output("DEBUG: AgentLogin({$a->channel}) cuelga antes de ".
                 "introducir contraseña");
@@ -945,11 +937,7 @@ class AMIEventProcess extends TuberiaProcess
             }
             if (!is_null($a->logging_inicio) && time() - $a->logging_inicio > 5 * 60) {
                 $this->_log->output('ERR: proceso de login trabado para '.$a->channel.', se indica fallo...');
-                $a->respuestaLoginAgente('Failure', NULL, NULL);
-                $this->_tuberia->msg_ECCPProcess_AgentLogin(
-                    $a->channel,
-                    time(),
-                    NULL);
+                $a->respuestaLoginAgente($this->_tuberia, 'Failure', NULL, NULL);
             }
         }
     }
@@ -1809,11 +1797,7 @@ Uniqueid: 1429642067.241008
         if ($a->estado_consola != 'logged-in') {
             if (!is_null($a->extension)) {
                 if (in_array($params['Queue'], $a->colas_dinamicas)) {
-                    $a->completarLoginAgente();
-                    $this->_tuberia->msg_ECCPProcess_AgentLogin(
-                        $sAgente,
-                        $params['local_timestamp_received'],
-                        $a->id_agent);
+                    $a->completarLoginAgente($this->_tuberia);
                 } else {
                     $this->_log->output('WARN: '.__METHOD__.': se ignora ingreso a '.
                         'cola '.$params['Queue'].' de '.$sAgente.
@@ -2265,11 +2249,7 @@ Uniqueid: 1429642067.241008
             }
             return FALSE;
         }
-        $a->completarLoginAgente();
-        $this->_tuberia->msg_ECCPProcess_AgentLogin(
-            $sAgente,
-            $params['local_timestamp_received'],
-            $a->id_agent);
+        $a->completarLoginAgente($this->_tuberia);
     }
 
     public function msg_Agentlogoff($sEvent, $params, $sServer, $iPort)

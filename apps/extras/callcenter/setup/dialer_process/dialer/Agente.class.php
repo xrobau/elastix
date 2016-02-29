@@ -393,16 +393,23 @@ class Agente
     }
 
     // Se llama en OriginateResponse exitoso, o en Hangup antes de completar login
-    public function respuestaLoginAgente($response, $uniqueid, $channel)
+    public function respuestaLoginAgente($tuberia, $response, $uniqueid, $channel)
     {
-    	if ($response == 'Success') {
-    		// El sistema espera ahora la contraseña del agente
+        if ($response == 'Success') {
+            // El sistema espera ahora la contraseña del agente
             $this->_estado_consola = 'logging';
             $this->_Uniqueid = $uniqueid;
             $this->_listaAgentes->agregarIndice('uniqueidlogin', $uniqueid, $this);
             $this->_login_channel = $channel;
-    	} else {
-    		// El agente no ha podido responder la llamada de login
+        } else {
+            if ($this->_estado_consola != 'logged-out') {
+                $tuberia->msg_ECCPProcess_AgentLogin(
+                    $this->channel,
+                    microtime(TRUE),
+                    NULL);
+            }
+
+            // El agente no ha podido responder la llamada de login
             $this->_estado_consola = 'logged-out';
             if (!is_null($this->_Uniqueid))
                 $this->_listaAgentes->removerIndice('uniqueidlogin', $this->_Uniqueid);
@@ -416,11 +423,15 @@ class Agente
     }
 
     // Se llama en Agentlogin al confirmar que agente está logoneado
-    public function completarLoginAgente()
+    public function completarLoginAgente($tuberia)
     {
-    	$this->_estado_consola = 'logged-in';
+        $this->_estado_consola = 'logged-in';
         $this->resetTimeout();
         $this->_logging_inicio = NULL;
+        $tuberia->msg_ECCPProcess_AgentLogin(
+            $this->channel,
+            microtime(TRUE),
+            $this->id_agent);
     }
 
     // Se llama en Agentlogoff

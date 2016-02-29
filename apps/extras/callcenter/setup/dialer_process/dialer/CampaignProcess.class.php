@@ -419,8 +419,34 @@ class CampaignProcess extends TuberiaProcess
             }
         }
 
+        /* Leer el estado de las banderas de activación de eventos de las colas
+         * a partir del archivo de configuración. El código a continuación
+         * depende de la existencia de queues_additional.conf de una instalación
+         * FreePBX, y además asume Asterisk 11 o inferior. Se debe modificar
+         * esto cuando se migre a una versión superior de Asterisk que siempre
+         * emite los eventos. */
+        $queueflags = array();
+        if (file_exists('/etc/asterisk/queues_additional.conf')) {
+            $queue = NULL;
+            foreach (file('/etc/asterisk/queues_additional.conf') as $s) {
+                $regs = NULL;
+                if (preg_match('/^\[(\S+)\]/', $s, $regs)) {
+                    $queue = $regs[1];
+                    $queueflags[$queue]['eventmemberstatus'] = FALSE;
+                    $queueflags[$queue]['eventwhencalled'] = FALSE;
+                } elseif (preg_match('/^(\w+)\s*=\s*(.*)/', trim($s), $regs)) {
+                    if (in_array($regs[1], array('eventmemberstatus', 'eventwhencalled'))) {
+                        $queueflags[$queue][$regs[1]] = in_array($regs[2], array('yes', 'true', 'y', 't', 'on', '1'));
+                    } elseif ($regs[1] == 'member' && (stripos($regs[2], 'SIP/') === 0 || stripos($regs[2], 'IAX2/') === 0)) {
+                        $this->_log->output('WARN: '.__METHOD__.': agente estático '.
+                            $regs[2].' encontrado en cola '.$queue.' - puede causar problemas.');
+                    }
+                }
+            }
+        }
+
         // Mandar el recordset a AMIEventProcess como un mensaje
-        $this->_tuberia->msg_AMIEventProcess_nuevaListaAgentes($lista, $dynmembers);
+        $this->_tuberia->msg_AMIEventProcess_nuevaListaAgentes($lista, $dynmembers, $queueflags);
     }
 
     private function _actualizarCampanias()

@@ -36,6 +36,7 @@ class QueueShadow
     private $_log;
 
     private $_queues = array();
+    private $_queueflags = NULL;
 
     function __construct($log)
     {
@@ -47,8 +48,9 @@ class QueueShadow
      * colas. Se invalidan todos los elementos esperando que los eventos
      * recibidos los vuelvan a validar.
      */
-    function QueueStatus_start()
+    function QueueStatus_start($queueflags)
     {
+        $this->_queueflags = $queueflags;
         foreach (array_keys($this->_queues) as $q) {
             $this->_queues[$q]['removed'] = TRUE;
             foreach (array_keys($this->_queues[$q]['members']) as $m) {
@@ -74,6 +76,11 @@ class QueueShadow
             // ¿Cómo puedo saber si es seguro heredar event* ?
             $this->_queues[$params['Queue']]['eventmemberstatus'] = FALSE;
             $this->_queues[$params['Queue']]['eventwhencalled'] = FALSE;
+        }
+
+        if (isset($this->_queueflags[$params['Queue']])) {
+            foreach (array('eventmemberstatus', 'eventwhencalled') as $k)
+                $this->_queues[$params['Queue']][$k] = $this->_queueflags[$params['Queue']][$k];
         }
     }
 
@@ -104,16 +111,34 @@ class QueueShadow
      */
     function msg_QueueStatusComplete($params)
     {
+        $colasSinEventos = array();
+
         foreach (array_keys($this->_queues) as $q) {
             if ($this->_queues[$q]['removed']) {
                 unset($this->_queues[$q]);
             } else {
+                // Acumular colas sin banderas activas
+                if (!($this->_queues[$q]['eventwhencalled'] && $this->_queues[$q]['eventmemberstatus'])) {
+                    if ($q != 'default') $colasSinEventos[] = $q;
+                }
+
                 foreach (array_keys($this->_queues[$q]['members']) as $m) {
                     if ($this->_queues[$q]['members'][$m]['removed']) {
                         unset($this->_queues[$q]['members'][$m]);
                     }
                 }
             }
+        }
+        $this->_queueflags = NULL;
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.': estado de colas: '.print_r($this->_queues, TRUE));
+        }
+        if (count($colasSinEventos) > 0) {
+            sort($colasSinEventos);
+            $this->_log->output('WARN: '.__METHOD__.': para mejorar el desempeño de '.
+                'campañas salientes, se recomienda activar eventwhencalled y '.
+                'eventmemberstatus en las siguientes colas: ['.
+                implode(' ', $colasSinEventos).']');
         }
     }
 

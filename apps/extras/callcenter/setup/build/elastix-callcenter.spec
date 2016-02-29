@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Mon Feb 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: attempt to load queue configuration flags from the file
+  queues_additional.conf. This saves AMIEventProcess from having to reject calls
+  from CampaignProcess until events are received to validate the queue flags.
+  Ported from CallCenterPRO.
+  SVN Rev[7493]
 - CHANGED: Dialer: refactor event firing on agent login to Agente class. Ported
   from CallCenterPRO.
   SVN Rev[7492]

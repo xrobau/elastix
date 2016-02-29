@@ -62,7 +62,7 @@ class AMIEventProcess extends TuberiaProcess
      * la conexión AMI no está disponible, lo cual puede ocurrir si
      * CampaignProcess termina de iniciarse antes que AMIEventProcess, o si
      * se pierde la conexión a Asterisk. */
-    private $_pendiente_QueueStatus = FALSE;
+    private $_pendiente_QueueStatus = NULL;
 
     private $_tmp_actionid_agents = NULL;
     private $_tmp_estadoLoginAgente = NULL;
@@ -132,14 +132,14 @@ class AMIEventProcess extends TuberiaProcess
         }
 
         // Verificar si existen peticiones QueueStatus pendientes
-        if (!is_null($this->_ami) && $this->_pendiente_QueueStatus && !$this->_finalizandoPrograma) {
+        if (!is_null($this->_ami) && !is_null($this->_pendiente_QueueStatus) && !$this->_finalizandoPrograma) {
             if (is_null($this->_tmp_actionid_queuestatus)) {
                 $this->_log->output("INFO: conexión AMI disponible, se ejecuta consulta QueueStatus retrasada...");
-                $this->_pendiente_QueueStatus = FALSE;
-                $this->_iniciarQueueStatus();
+                $this->_iniciarQueueStatus($this->_pendiente_QueueStatus);
+                $this->_pendiente_QueueStatus = NULL;
             } else {
                 $this->_log->output("INFO: conexión AMI disponible, QueueStatus en progreso, se olvida consulta QueueStatus retrasada...");
-                $this->_pendiente_QueueStatus = FALSE;
+                $this->_pendiente_QueueStatus = NULL;
             }
         }
 
@@ -1300,17 +1300,19 @@ class AMIEventProcess extends TuberiaProcess
             return;
         }
 
-        foreach ($datos[0] as $tupla) {
+        list($total_agents, $dyn_agents, $queueflags) = $datos;
+
+        foreach ($total_agents as $tupla) {
             // id type number name estatus
-        	$sAgente = $tupla['type'].'/'.$tupla['number'];
+            $sAgente = $tupla['type'].'/'.$tupla['number'];
             $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
             if (is_null($a)) {
-            	// Agente nuevo por registrar
+                // Agente nuevo por registrar
                 $a = $this->_listaAgentes->nuevoAgente($tupla['id'],
                     $tupla['number'], $tupla['name'], ($tupla['estatus'] == 'A'),
                     $tupla['type'], $this->_log);
             } elseif ($a->id_agent != $tupla['id']) {
-            	// Agente ha cambiado de ID de base de datos, y está deslogoneado
+                // Agente ha cambiado de ID de base de datos, y está deslogoneado
                 if ($a->estado_consola == 'logged-out') {
                     $this->_log->output("INFO: agente deslogoneado $sAgente cambió de ID de base de datos");
                     $a->id_agent = $tupla['id'];
@@ -1318,36 +1320,36 @@ class AMIEventProcess extends TuberiaProcess
                     $a->name = $tupla['name'];
                     $a->estatus = ($tupla['estatus'] == 'A');
                 } else {
-                	$this->_log->output("INFO: agente $sAgente cambió de ID de base de datos pero está ".
+                    $this->_log->output("INFO: agente $sAgente cambió de ID de base de datos pero está ".
                         $a->estado_consola);
                 }
             }
 
             // Iniciar pertenencia de agentes dinámicos
             $dyn = array();
-            if (isset($datos[1][$sAgente]))
-                $dyn = $datos[1][$sAgente];
+            if (isset($dyn_agents[$sAgente]))
+                $dyn = $dyn_agents[$sAgente];
             if ($a->asignarColasDinamicas($dyn)) $a->nuevaMembresiaCola($this->_tuberia);
         }
 
         if (!is_null($this->_ami)) {
             if ($this->DEBUG) $this->_log->output("DEBUG: iniciando verificación de pertenencia a colas con QueueStatus...");
-            $this->_iniciarQueueStatus();
+            $this->_iniciarQueueStatus($queueflags);
         } else {
             $this->_log->output("INFO: conexión AMI no disponible, se retrasa consulta QueueStatus...");
-            $this->_pendiente_QueueStatus = TRUE;
+            $this->_pendiente_QueueStatus = $queueflags;
         }
 
     }
 
-    private function _iniciarQueueStatus()
+    private function _iniciarQueueStatus($queueflags)
     {
         // Iniciar actualización del estado de las colas activas
         $this->_tmp_actionid_queuestatus = 'QueueStatus-'.posix_getpid().'-'.time();
         $this->_tmp_estadoAgenteCola = array();
 
         $this->_ami->QueueStatus(NULL, $this->_tmp_actionid_queuestatus);
-        $this->_queueshadow->QueueStatus_start();
+        $this->_queueshadow->QueueStatus_start($queueflags);
 
         // En msg_QueueStatusComplete se valida pertenencia a colas dinámicas
     }

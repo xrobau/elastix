@@ -1317,9 +1317,10 @@ LEER_CAMPANIA;
         } else {
             // No hay canal de login. Se inicia login a través de Originate
             $r = $this->_loginAgente($listaExtensiones[$sExtension], $sAgente, $infoSeguimiento['name'], $iTimeout);
-            return ($r['Response'] == 'Success')
+            return $r
                 ? $this->Response_LoginAgentResponse('logging')
-                : $this->Response_LoginAgentResponse('logged-out', 500, 'Failed to login - '.$r['Message']);
+                : $this->Response_LoginAgentResponse('logged-out', 500,
+                    'Failed to start login process on Asterisk');
         }
     }
 
@@ -1473,8 +1474,10 @@ LEER_CAMPANIA;
                 TRUE,               // async
                 'ECCP:1.0:'.posix_getpid().':AgentLogin:'.$sAgente     // action-id
                 );
-            if ($r['Response'] != 'Success')
+            if ($r['Response'] != 'Success') {
                 $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
+                return FALSE;
+            }
         } else {
             /*
              * Las colas dinámicas a las que debe pertenecer el agente las sabe
@@ -1494,9 +1497,18 @@ LEER_CAMPANIA;
                 $this->_tuberia->AMIEventProcess_agregarIntentoLoginAgente($sAgente, $sExtension, $iTimeout);
 
                 $bIngresoCola = FALSE;
+                if (count($listaColas[$sAgente][0]) > 0) {
+                    $this->_log->output('WARN: '.__METHOD__.': agente '.$sAgente.
+                        ' que intenta logonearse ya está en colas: ['.
+                        implode(' ', $listaColas[$sAgente][0]).']');
+                }
                 foreach ($listaColas[$sAgente][0] as $cola) {
                     // Lo saco de todas las colas ...
                     $r = $this->_ami->QueueRemove($cola, $sAgente);
+                    if ($r['Response'] != 'Success') {
+                        $this->_log->output('WARN: '.__METHOD__.': falla al quitar agente '.
+                            $sAgente.' de cola '.$cola.': '.print_r($r, TRUE));
+                    }
                 }
                 foreach ($listaColas[$sAgente][2] as $cola => $penalty) {
                     // Para volverlos a agregar aqui.
@@ -1508,12 +1520,11 @@ LEER_CAMPANIA;
                 }
                 if (!$bIngresoCola) {
                     $this->_tuberia->AMIEventProcess_cancelarIntentoLoginAgente($sAgente);
-                } else {
-                    $r['Response'] = 'Success'; // asumir éxito aunque alguna cola haya fallado
+                    return FALSE;
                 }
             }
         }
-        return $r;
+        return TRUE;
     }
 
     /**

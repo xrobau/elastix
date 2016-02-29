@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Mon Feb 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): synchronize login process with CallCenterPRO and add
+  warning when dynamic agent is already in some queues at login time.
+  SVN Rev[7495]
 - CHANGED: Dialer: show PID of process that writes log message. Ported from
   CallCenterPRO.
   SVN Rev[7494]

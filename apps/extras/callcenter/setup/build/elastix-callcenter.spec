@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Mon Feb 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: show PID of process that writes log message. Ported from
+  CallCenterPRO.
+  SVN Rev[7494]
 - CHANGED: Dialer: attempt to load queue configuration flags from the file
   queues_additional.conf. This saves AMIEventProcess from having to reject calls
   from CampaignProcess until events are received to validate the queue flags.

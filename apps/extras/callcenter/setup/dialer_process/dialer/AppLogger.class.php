@@ -32,14 +32,14 @@ class AppLogger
     private $LOGHANDLE;
     private $PREFIJO;
     private $sNombreArchivo;
-    
+
     // Crear una nueva instancia de AppLogger
     function AppLogger()
     {
         $this->LOGHANDLE = NULL;
         $this->PREFIJO = NULL;
     }
-    
+
     // Abrir una bitácora, dado el nombre de archivo
     function open($sNombreArchivo)
     {
@@ -47,7 +47,7 @@ class AppLogger
         if (is_null($this->LOGHANDLE)) {
             $hLogHandle = fopen($sNombreArchivo, 'at');
             if (!$hLogHandle) {
-                if (function_exists('error_get_last')) 
+                if (function_exists('error_get_last'))
                     $e = error_get_last();
                 else $e = array('message' => 'Failed to open file, error_get_last() not available.');
                 throw new Exception("AppLogger::open() - No se puede abrir archivo de log '$sNombreArchivo' - $e[message]");
@@ -80,7 +80,10 @@ class AppLogger
     // formato YYYY-MM-DD hh:mm
     function output($sCadena)
     {
-        fwrite($this->LOGHANDLE, date('Y-m-d H:i:s')." : ".(is_null($this->PREFIJO) ? '' : "($this->PREFIJO) ").$sCadena."\n");
+        fprintf($this->LOGHANDLE, "%s PID=%6d : %s%s\n",
+            date('Y-m-d H:i:s'), posix_getpid(),
+            (is_null($this->PREFIJO) ? '' : "($this->PREFIJO) "),
+            $sCadena);
     }
 
     // Cerrar la bitácora del programa

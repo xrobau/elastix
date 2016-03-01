@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Mar  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: reject channel assigment if agent channel is prefix of it.
+  This is a stronger check than equality and is required to handle dynamic
+  agents. Ported from CallCenterPRO.
+  SVN Rev[7496]
+
 * Mon Feb 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer (ECCP): synchronize login process with CallCenterPRO and add
   warning when dynamic agent is already in some queues at login time.

@@ -552,7 +552,7 @@ class Llamada
         /* No se acepta un canal NULL ni el mismo canal del agente (para
          * llamadas manuales). */
         if (is_null($this->channel) && !is_null($channel) &&
-            (is_null($this->agente_agendado) || $this->agente_agendado->channel != $channel)) {
+            (is_null($this->agente_agendado) || strpos($channel, $this->agente_agendado->channel) !== 0)) {
             $this->channel = $channel;
         }
 

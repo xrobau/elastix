@@ -424,7 +424,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     unset($estadoCampania);
 
     $oPaloConsola->escucharProgresoLlamada(TRUE);
-    $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
+    $iTimeoutPoll = $oPaloConsola->recomendarIntervaloEsperaAjax();
     do {
         $oPaloConsola->desconectarEspera();
 

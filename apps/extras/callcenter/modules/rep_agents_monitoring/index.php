@@ -410,7 +410,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     	}
     }
 
-    $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
+    $iTimeoutPoll = $oPaloConsola->recomendarIntervaloEsperaAjax();
     do {
         $oPaloConsola->desconectarEspera();
 

@@ -44,7 +44,7 @@ function _moduleContent(&$smarty, $module_name)
     require_once "modules/agent_console/libs/paloSantoConsola.class.php";
     require_once "modules/agent_console/libs/JSON.php";
     require_once "modules/$module_name/configs/default.conf.php";
-    
+
     // Directorio de este módulo
     $sDirScript = dirname($_SERVER['SCRIPT_FILENAME']);
 
@@ -58,7 +58,7 @@ function _moduleContent(&$smarty, $module_name)
     load_language_module($module_name);
 
     // Asignación de variables comunes y directorios de plantillas
-    $sDirPlantillas = (isset($arrConf['templates_dir'])) 
+    $sDirPlantillas = (isset($arrConf['templates_dir']))
         ? $arrConf['templates_dir'] : 'themes';
     $sDirLocalPlantillas = "$sDirScript/modules/$module_name/".$sDirPlantillas.'/'.$arrConf['theme'];
     $smarty->assign("MODULE_NAME", $module_name);
@@ -81,7 +81,7 @@ function _moduleContent(&$smarty, $module_name)
         break;
     }
     $oPaloConsola->desconectarTodo();
-    
+
     return $sContenido;
 }
 
@@ -112,14 +112,14 @@ function manejarMonitoreo_HTML($module_name, $smarty, $sDirLocalPlantillas, $oPa
 
     // Construcción del estado de monitoreo
     $estadoMonitor = obtenerEstadoMonitor($oPaloConsola);
-    
+
     $jsonData = construirDatosJSON($estadoMonitor);
-    
+
     $arrData = array();
     $tuplaTotal = array();
     foreach ($jsonData as $jsonKey => $jsonRow) {
         list($d1, $sQueue) = explode('-', $jsonKey);
-        
+
         $tupla = array($sQueue);
         foreach ($keylist as $k) {
             $tupla[] = '<span style="'.manejarMonitoreo_HTML_estiloestado($k).'" id="'.$jsonKey.'-'.$k.'">'.$jsonRow[$k].'</span>';
@@ -190,7 +190,7 @@ function obtenerEstadoMonitor($oPaloConsola)
 function agregarInformacionColaCampania($oPaloConsola, $sFechaHoy, $tuplaCampania, &$infoColas)
 {
     global $keylist;
-    
+
     // Leer la cola para la campaña e iniciar fila de cola si no existe
     $infoCampania = $oPaloConsola->leerInfoCampania($tuplaCampania['type'], $tuplaCampania['id']);
     if (!isset($infoColas[$infoCampania['queue']])) {
@@ -217,7 +217,7 @@ function generarEstadoHash($module_name, $estadoCliente)
 function construirDatosJSON(&$estadoMonitor)
 {
     global $keylist;
-    
+
     $jsonData = array();
     foreach ($estadoMonitor as $sQueue => $statusList)
     {
@@ -231,16 +231,16 @@ function construirDatosJSON(&$estadoMonitor)
 function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantillas, $oPaloConsola)
 {
     $respuesta = array();
-    
+
     ignore_user_abort(true);
     set_time_limit(0);
 
     // Estado del lado del cliente
     $estadoHash = getParameter('clientstatehash');
     if (!is_null($estadoHash)) {
-        $estadoCliente = isset($_SESSION[$module_name]['estadoCliente']) 
-            ? $_SESSION[$module_name]['estadoCliente'] 
-            : array();        
+        $estadoCliente = isset($_SESSION[$module_name]['estadoCliente'])
+            ? $_SESSION[$module_name]['estadoCliente']
+            : array();
     } else {
         $estadoCliente = getParameter('clientstate');
         if (!is_array($estadoCliente)) return;
@@ -248,14 +248,14 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
     // Modo a funcionar: Long-Polling, o Server-sent Events
     $sModoEventos = getParameter('serverevents');
-    $bSSE = (!is_null($sModoEventos) && $sModoEventos); 
+    $bSSE = (!is_null($sModoEventos) && $sModoEventos);
     if ($bSSE) {
         Header('Content-Type: text/event-stream');
         printflush("retry: 5000\n");
     } else {
         Header('Content-Type: application/json');
     }
-    
+
     // Verificar hash correcto
     if (!is_null($estadoHash) && $estadoHash != $_SESSION[$module_name]['estadoClienteHash']) {
     	$respuesta['estadoClienteHash'] = 'mismatch';
@@ -284,15 +284,15 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
     }
 
     $oPaloConsola->escucharProgresoLlamada(TRUE);
-    $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
+    $iTimeoutPoll = $oPaloConsola->recomendarIntervaloEsperaAjax();
     do {
         $oPaloConsola->desconectarEspera();
-        
+
         // Se inicia espera larga con el navegador...
         session_commit();
         $iTimestampInicio = time();
-        
-        while (connection_status() == CONNECTION_NORMAL && count($respuesta) <= 0 
+
+        while (connection_status() == CONNECTION_NORMAL && count($respuesta) <= 0
             && time() - $iTimestampInicio <  $iTimeoutPoll) {
 
             $listaEventos = $oPaloConsola->esperarEventoSesionActiva();
@@ -302,7 +302,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                 $oPaloConsola->desconectarTodo();
                 return;
             }
-            
+
             $iTimestampActual = time();
             foreach ($listaEventos as $evento) {
                 switch ($evento['event']) {
@@ -325,14 +325,14 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                             $bProcesado = FALSE;
                             break;
                         }
-                        
+
                         if ($bProcesado) {
                             // Estado en la estructura JSON
                             $jsonData[$jsonKey] = $estadoMonitor[$sCallQueue];
-                            
+
                             // Estado del cliente
                             $estadoCliente[$jsonKey] = $estadoMonitor[$sCallQueue];
-                            
+
                             // Estado a emitir al cliente
                             $respuesta[$jsonKey] = $estadoMonitor[$sCallQueue];
                         }
@@ -347,7 +347,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                             $evento['campaign_id']);
                         if (!is_null($infoCampania)) $sCallQueue = $infoCampania['queue'];
                     }
-                    
+
                     if (isset($estadoMonitor[$sCallQueue])) {
                         $jsonKey = 'queue-'.$sCallQueue;
                         if ($estadoMonitor[$sCallQueue]['onqueue'] > 0)
@@ -356,10 +356,10 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
 
                         // Estado en la estructura JSON
                         $jsonData[$jsonKey] = $estadoMonitor[$sCallQueue];
-                        
+
                         // Estado del cliente
                         $estadoCliente[$jsonKey] = $estadoMonitor[$sCallQueue];
-                        
+
                         // Estado a emitir al cliente
                         $respuesta[$jsonKey] = $estadoMonitor[$sCallQueue];
                     }
@@ -367,19 +367,19 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
                 case 'agentunlinked':
                     // Averiguar la cola por la que entró la llamada nueva
                     $sCallQueue = $evento['queue'];
-                                    
+
                     if (isset($estadoMonitor[$sCallQueue])) {
                         $jsonKey = 'queue-'.$sCallQueue;
                         if ($estadoMonitor[$sCallQueue]['success'] > 0)
                             $estadoMonitor[$sCallQueue]['success']--;
                         $estadoMonitor[$sCallQueue]['finished']++;
-                        
+
                         // Estado en la estructura JSON
                         $jsonData[$jsonKey] = $estadoMonitor[$sCallQueue];
-                        
+
                         // Estado del cliente
                         $estadoCliente[$jsonKey] = $estadoMonitor[$sCallQueue];
-                        
+
                         // Estado a emitir al cliente
                         $respuesta[$jsonKey] = $estadoMonitor[$sCallQueue];
                     }
@@ -395,7 +395,7 @@ function manejarMonitoreo_checkStatus($module_name, $smarty, $sDirLocalPlantilla
             session_commit();
         }
         jsonflush($bSSE, $respuesta);
-        
+
         $respuesta = array();
 
     } while ($bSSE && connection_status() == CONNECTION_NORMAL);

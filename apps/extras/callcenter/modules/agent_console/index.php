@@ -410,10 +410,10 @@ function manejarLogin_checkLogin()
     }
 
     if ($bContinuar && $respuesta['action'] == 'wait') {
+        $iTimeoutPoll = $oPaloConsola->recomendarIntervaloEsperaAjax();
         $oPaloConsola->desconectarEspera();
 
         // Se inicia espera larga con el navegador...
-        $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
         session_commit();
         set_time_limit(0);
         $iTimestampInicio = time();
@@ -1299,7 +1299,7 @@ function manejarSesionActiva_checkStatus($module_name, $smarty,
 
     // Ciclo de verificación para Server-sent Events
     $sAgente = $_SESSION['callcenter']['agente'];
-    $iTimeoutPoll = PaloSantoConsola::recomendarIntervaloEsperaAjax();
+    $iTimeoutPoll = $oPaloConsola->recomendarIntervaloEsperaAjax();
     $bReinicioSesion = FALSE;
     do {
         $oPaloConsola->desconectarEspera();

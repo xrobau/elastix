@@ -494,7 +494,7 @@ class PaloSantoConsola
      *
      * @return  integer     El valor en segundos recomendado según el navegador.
      */
-    static function recomendarIntervaloEsperaAjax()
+    function recomendarIntervaloEsperaAjax()
     {
         $iTimeoutPoll = 2 * 60;
 /*
@@ -503,6 +503,21 @@ class PaloSantoConsola
             $iTimeoutPoll = 2;
         }
 */
+        /* El intervalo de inactividad debe ser al menos 1.5 veces el intervalo
+         * de espera AJAX. Si esto no se cumple, se reduce el intervalo de
+         * espera AJAX. */
+        $oDB = $this->_obtenerConexion('call_center');
+        $tupla = $oDB->getFirstRowQuery(
+            'SELECT config_value FROM valor_config WHERE config_key = ?',
+            TRUE, array('dialer.timeout_inactivity'));
+        if (!is_array($tupla) || count($tupla) <= 0)
+            $iTimeoutMin = 15;
+        else $iTimeoutMin = (int)$tupla['config_value'];
+
+        $iTimeoutSec = $iTimeoutMin * 60;
+        if ($iTimeoutSec <= $iTimeoutPoll * 1.5)
+            $iTimeoutPoll = (int)($iTimeoutSec / 2);
+
         return $iTimeoutPoll;
     }
 

@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Tue Mar  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): do not depend on currentcallid for call verification,
+  and explicitly test for outgoing campaign on hold. Ported from CallCenterPRO.
+  SVN Rev[7497]
 - FIXED: Dialer: reject channel assigment if agent channel is prefix of it.
   This is a stronger check than equality and is required to handle dynamic
   agents. Ported from CallCenterPRO.

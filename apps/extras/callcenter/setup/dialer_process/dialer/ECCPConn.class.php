@@ -2841,7 +2841,7 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         // Obtener la información de la llamada atendida por el agente
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
-        if (is_null($infoLlamada) || is_null($infoLlamada['currentcallid'])) {
+        if (is_null($infoLlamada) || is_null($infoLlamada['callid'])) {
             $this->_agregarRespuestaFallo($xml_transferResponse, 417, 'Agent not in call');
             return $xml_response;
         }
@@ -2963,7 +2963,7 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         // Obtener la información de la llamada atendida por el agente
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
-        if (is_null($infoLlamada) || is_null($infoLlamada['currentcallid'])) {
+        if (is_null($infoLlamada) || is_null($infoLlamada['callid'])) {
             $this->_agregarRespuestaFallo($xml_holdResponse, 417, 'Agent not in call');
             return $xml_response;
         }
@@ -3035,7 +3035,7 @@ SQL_INSERTAR_AGENDAMIENTO;
                 $sth->execute(array('S', $infoLlamada['currentcallid']));
                 $sth = $this->_db->prepare('UPDATE call_entry set status = ? WHERE id = ?');
                 $sth->execute(array('hold', $infoLlamada['callid']));
-            } else {
+            } elseif ($infoLlamada['calltype'] == 'outgoing') {
                 $sth = $this->_db->prepare(
                     'UPDATE current_calls SET hold = ? WHERE id = ?');
                 $sth->execute(array('S', $infoLlamada['currentcallid']));
@@ -3137,7 +3137,7 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         // Obtener la información de la llamada atendida por el agente
         $infoLlamada = $this->_tuberia->AMIEventProcess_reportarInfoLlamadaAtendida($sAgente);
-        if (is_null($infoLlamada) || is_null($infoLlamada['currentcallid'])) {
+        if (is_null($infoLlamada) || is_null($infoLlamada['callid'])) {
             $this->_agregarRespuestaFallo($xml_unholdResponse, 417, 'Agent not in call');
             return $xml_response;
         }

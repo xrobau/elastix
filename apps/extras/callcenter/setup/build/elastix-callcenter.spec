@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Tue Mar  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix incomplete parameter replacement on call prediction after
+  QueueShadow patch that caused newly created outgoing campaigns to remain
+  stalled even with free agents.
+  SVN Rev[7500]
 - FIXED: Agent Console: ensure that the inactivity timeout value is never lower
   than the AJAX poll interval, to prevent inactivity logouts.
   SVN Rev[7499]

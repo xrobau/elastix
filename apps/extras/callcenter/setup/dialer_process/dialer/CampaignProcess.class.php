@@ -636,7 +636,7 @@ PETICION_CAMPANIAS_ENTRANTES;
                 $this->_configDB->dialer_qos,
                 $infoCampania['promedio'],
                 $this->_leerTiempoContestar($infoCampania['id']))
-            : $oPredictor->predecirNumeroLlamadas($infoCampania['queue']);
+            : $oPredictor->predecirNumeroLlamadas($infoCola);
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__." (campania {$infoCampania['id']} ".
                 "cola {$infoCampania['queue']}): resumen de predicción:\n".

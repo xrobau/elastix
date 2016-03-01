@@ -69,7 +69,11 @@ $(document).ready(function() {
     });
 
     // Verificar versión de jQueryUI para manejo de tabs
-    var curr_uiversion = $.ui.version.split('.').map(function(x) { return parseInt(x); });
+    // map() sobre Array no existe en IE8
+    //var curr_uiversion = t_curr_uiversion.map(function(x) { return parseInt(x); });
+    var curr_uiversion = [];
+    var t_curr_uiversion = $.ui.version.split('.');
+    for (var i = 0; i < t_curr_uiversion.length; i++) curr_uiversion[i] = parseInt(t_curr_uiversion[i]);
     var min_uiversion = [1,9,0];
     while (curr_uiversion.length > min_uiversion.length) min_uiversion.push(0);
     while (curr_uiversion.length < min_uiversion.length) curr_uiversion.push(0);

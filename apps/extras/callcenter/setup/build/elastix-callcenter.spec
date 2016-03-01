@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Tue Mar  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Agent Console: work around missing Array.map() on IE8.
+  SVN Rev[7498]
 - CHANGED: Dialer (ECCP): do not depend on currentcallid for call verification,
   and explicitly test for outgoing campaign on hold. Ported from CallCenterPRO.
   SVN Rev[7497]

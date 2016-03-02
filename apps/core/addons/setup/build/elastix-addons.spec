@@ -3,7 +3,7 @@
 Summary: Elastix Addons
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -137,6 +137,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Wed Mar 02 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-4
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Tue Oct 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Addons: explicitly spell out previously hidden package requirements
   that provide system commands.

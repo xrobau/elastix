@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 14
+Release: 15
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz

@@ -93,14 +93,17 @@ fi
 /opt/elastix/dialer
 %defattr(-, root, root)
 %{_localstatedir}/www/html/*
-/usr/share/elastix/module_installer/*
+%{_datadir}/elastix/module_installer/*
 /opt/elastix/dialer/*
-/etc/rc.d/init.d/elastixdialer
-/etc/logrotate.d/elastixdialer
+%{_sysconfdir}/rc.d/init.d/elastixdialer
+%{_sysconfdir}/logrotate.d/elastixdialer
 %defattr(0775, root, root)
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Mar  4 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- Bump version for release
+
 * Tue Mar  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: fix incomplete parameter replacement on call prediction after
   QueueShadow patch that caused newly created outgoing campaigns to remain

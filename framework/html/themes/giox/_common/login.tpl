@@ -1,22 +1,26 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
-<head>
-<title>Elastix - {$PAGE_NAME}</title>
-<!--<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">-->
-<link rel="stylesheet" href="themes/{$THEMENAME}/styles.css">
-</head>
-
-<body bgcolor="#ffffff" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
-  <table cellspacing=0 cellpadding=0 width="100%" border=0>
+  <head>
+	<title>Elastix - {$PAGE_NAME}</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" href="themes/{$THEMENAME}/styles.css">
+    {$HEADER_LIBS_JQUERY}
+    {literal}
+    <script type="text/javascript">
+        $(document).ready(function() {
+             $("#neo-login-box").draggable();
+             $("#input_user").focus();
+        });
+    </script>
+    {/literal}
+  </head>
+  <body>
+  <table cellspacing="0" cellpadding="0" width="100%" border="0" class="menulogo2">
     <tr>
-      <td>
-        <table cellSpacing="0" cellPadding="0" width="100%" border="0">
-          <tr>
-            <td class="menulogo" width=380><img src="images/logo_elastix.png" width="233" height="75" /></td>
-          </tr>
-        </table>
-      </td>
+       <td class="menulogo" valign="top">
+           <a target="_blank" href="http://www.elastix.com"><img width="233" height="75" border="0" src="images/logo_elastix.png"/></a>
+       </td>
     </tr>
   </table>
 <form method="POST">
@@ -74,10 +78,10 @@
 </table>
 </form>
 <br>
- <div align="center" class="copyright"><a href="http://www.elastix.com" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.</div>
+<div align="center" class="copyright"><a href="http://www.elastix.com" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.</div>
 <br>
 <script type="text/javascript">
     document.getElementById("input_user").focus();
 </script>
-</body>
+  </body>
 </html>

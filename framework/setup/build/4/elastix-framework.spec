@@ -389,6 +389,13 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sat Mar  5 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: completely rewrite giox theme starting from elastixwave
+  rewrite. This rewrite is based on the elastixneo theme and fixes the spilling
+  of menu items past the right edge of the browser window. A best-effort attempt
+  is made to preserve key aspects of L&F, particularly the mini-menu feature.
+  SVN Rev[7504]
+
 * Fri Feb 12 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: use correct method set_error to report problems on user
   extension report.

@@ -389,6 +389,13 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sat Mar  5 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: completely rewrite giox theme starting from elastixwave
+  rewrite. This rewrite is based on the elastixneo theme and fixes the spilling
+  of menu items past the right edge of the browser window. A best-effort attempt
+  is made to preserve key aspects of L&F, particularly the mini-menu feature.
+  SVN Rev[7504]
+
 * Tue Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-11
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
@@ -398,12 +405,12 @@ rm -rf $RPM_BUILD_ROOT
   extension report.
   SVN Rev[7476]
 
-* Wed Feb 10 2016 Luis Abarca <labarca@palosanto.com> 
+* Wed Feb 10 2016 Luis Abarca <labarca@palosanto.com>
 - CHANGED: branches/2.5.0 - _menu.tpl: Corrected icons in the notification
   header of Tenant theme.
   SVN Rev[7472]
 
-* Fri Feb 05 2016 Luis Abarca <labarca@palosanto.com> 
+* Fri Feb 05 2016 Luis Abarca <labarca@palosanto.com>
 - CHANGED: branches/2.5.0 - styles.css-_menu.tpl: Corrected positions in
   framework about sticky note and hide some icons of functionalities currently
   in development.

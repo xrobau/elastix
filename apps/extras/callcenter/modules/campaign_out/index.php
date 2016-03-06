@@ -518,6 +518,8 @@ function formEditCampaign($pDB, $smarty, $module_name, $local_templates_dir, $id
 
 function loadCampaignContacts($pDB, $smarty, $module_name, $local_templates_dir)
 {
+    require_once "modules/$module_name/libs/paloContactInsert.class.php";
+
     $id_campaign = (isset($_REQUEST['id_campaign']) && ctype_digit($_REQUEST['id_campaign']))
         ? (int)$_REQUEST['id_campaign'] : NULL;
     if (is_null($id_campaign)) {

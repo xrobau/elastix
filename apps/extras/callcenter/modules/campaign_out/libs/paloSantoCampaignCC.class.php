@@ -343,6 +343,8 @@ SQL_INSERT_CAMPAIGN;
             return FALSE;
         }
 
+        $inserter = new paloContactInsert($this->_DB->conn, $idCampaign);
+
         $iNumLinea = 0;
         $clavesColumnas = array();
         while ($tupla = fgetcsv($hArchivo, 8192, ',')) {
@@ -369,49 +371,20 @@ SQL_INSERT_CAMPAIGN;
                 }
             } else {
                 // Como efecto colateral, $tupla pierde su primer elemento
-                $tuplaNumero = array(
-                    'NUMERO'    =>  array_shift($tupla),
-                    'ATRIBUTOS' =>  array(),
-                );
+                $numero = array_shift($tupla);
+                $atributos = array();
                 for ($i = 0; $i < count($tupla); $i++) {
-                    $tuplaNumero['ATRIBUTOS'][$i + 1] = array(
-                        'CLAVE' =>  ($i < count($clavesColumnas) && $clavesColumnas[$i] != '') ? $clavesColumnas[$i] : ($i + 1),
-                        'VALOR' =>  $tupla[$i],
+                    $atributos[$i + 1] = array(
+                        ($i < count($clavesColumnas) && $clavesColumnas[$i] != '') ? $clavesColumnas[$i] : ($i + 1),
+                        $tupla[$i],
                     );
                 }
-
-                // Buscar número en lista DNC. Esto es más rápido si hay índice sobre dont_call(caller_id).
-                $sql = 'SELECT COUNT(*) FROM dont_call WHERE caller_id = ? AND status = ?';
-                $tupla = $this->_DB->getFirstRowQuery($sql, FALSE, array($tuplaNumero['NUMERO'], 'A'));
-                $iDNC = ($tupla[0] != 0) ? 1 : 0;
-
-                // Inserción del número principal
-                $sql = 'INSERT INTO calls (id_campaign, phone, status, dnc) VALUES (?, ?, NULL, ?)';
-                $result = $this->_DB->genQuery($sql, array($idCampaign, $tuplaNumero['NUMERO'], $iDNC));
-                if (!$result) {
-                    // TODO: internacionalizar
-                    $this->errMsg = sprintf('(internal) Cannot insert phone %s - %s',
-                        $tuplaNumero['NUMERO'], $this->_DB->errMsg);
+                $idCall = $inserter->insertOneContact($numero, $atributos);
+                if (is_null($idCall)) {
+                    $this->errMsg = sprintf('(internal) Cannot insert phone %s at line %d - %s',
+                        $numero, $iNumLinea, $inserter->errMsg);
                     fclose($hArchivo);
                     return FALSE;
-                }
-
-                // Recuperar el ID de inserción para insertar atributos. Esto asume MySQL.
-                $idCall = $this->_DB->getLastInsertId();
-
-                // Insertar atributos adicionales.
-                foreach ($tuplaNumero['ATRIBUTOS'] as $iNumColumna => $atributos) {
-                    $sClave = $atributos['CLAVE'];
-                    $sValor = $atributos['VALOR'];
-                    $sql = 'INSERT INTO call_attribute (id_call, columna, value, column_number) VALUES (?, ?, ?, ?)';
-                    $result = $this->_DB->genQuery($sql, array($idCall, $sClave, $sValor, $iNumColumna));
-                    if (!$result) {
-                        // TODO: internacionalizar
-                        $this->errMsg = sprintf('(internal) Cannot insert attribute %s=%s for phone %s - %s',
-                            $sClave, $sValor, $tuplaNumero['NUMERO'], $this->_DB->errMsg);
-                        fclose($hArchivo);
-                        return FALSE;
-                    }
                 }
             }
         }

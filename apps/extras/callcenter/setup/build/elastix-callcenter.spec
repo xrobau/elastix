@@ -101,7 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
-* Fri Mar  4 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Sun Mar  6 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: isolate database inserts for outgoing campaign from
+  CSV import code. Phase 2 of pluggable contact import support.
+  SVN Rev[7506]
+
+* Fri Mar  4 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 2.2.0-15
 - Bump version for release
 
 * Tue Mar  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>

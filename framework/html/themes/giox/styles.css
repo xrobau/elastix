@@ -433,7 +433,7 @@ div#elxneo-mmenu-overflow>div>div.elxneo-menu
     padding-top: 13px;
 }
 
-#elxneo-wrap
+div#elxneo-wrap
 {
     position: absolute;
     left: 0;
@@ -443,6 +443,10 @@ div#elxneo-mmenu-overflow>div>div.elxneo-menu
     overflow: auto;
     padding: 0px;
     background-color:#ffffff;
+}
+div#elxneo-wrap.elxneo-wrap-minimenu
+{
+    top: 44px;  /* para modo minimenu */
 }
 
 /* Definición del contenido de la página */

@@ -136,13 +136,19 @@ $(document).ready(function() {
 	        $('div#elxneo-topnav-toolbar').hide();
 	        $('div#elxneo-leftcolumn').addClass('hidden-minimenu');
 	        $('div#elxneo-topnav-minitoolbar').show();
-	        $('div#elxneo-wrap').css('top', '44px');
+	        $('div#elxneo-wrap').addClass('elxneo-wrap-minimenu');
+	        $('div#neo-lengueta-minimized').hide();
+	        $('div#elxneo-maincolumn').css('margin-left', '0');
 	    } else {
 	        // Modo de menú mini, se muestra
 	        $('div#elxneo-topnav-minitoolbar').hide();
 	        $('div#elxneo-topnav-toolbar').show();
 	        $('div#elxneo-leftcolumn').removeClass('hidden-minimenu');
-	        $('div#elxneo-wrap').css('top', '107px');
+	        $('div#elxneo-wrap').removeClass('elxneo-wrap-minimenu');
+	        if ($('div#elxneo-leftcolumn').hasClass('hidden-menutab')) {
+	            $('div#neo-lengueta-minimized').show();
+	            $('div#elxneo-maincolumn').css('margin-left', '15px'); // TODO: ancho de lengueta
+	        }
 	    }
 	    elxneo_resize_jcresizer_table();
 	});

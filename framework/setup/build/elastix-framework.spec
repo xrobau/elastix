@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sun Mar  6 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Frameork: remove space for expand tab when in mini-menu mode in
+  rewritten elastixwave and giox themes.
+  SVN Rev[7505]
+
 * Sat Mar  5 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: completely rewrite giox theme starting from elastixwave
   rewrite. This rewrite is based on the elastixneo theme and fixes the spilling

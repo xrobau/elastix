@@ -751,6 +751,7 @@ Installing for dependencies:
         if ($this->_estadoPaquete['status'] != 'error' && count($this->_estadoPaquete['progreso']) <= 0) {
             $this->_estadoPaquete['action'] = 'none';
             $this->_estadoPaquete['warning'][] = 'No packages to install or update';
+            $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
         }
 
         /* La información de tamaño que proporciona yum es demasiado poco detallada
@@ -907,6 +908,7 @@ Installing for dependencies:
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['iniciales'] = $listaArgs;
         $this->_estadoPaquete['testonly'] = FALSE;
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
@@ -942,6 +944,7 @@ Installing for dependencies:
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['iniciales'] = $listaArgs;
         $this->_estadoPaquete['testonly'] = TRUE;
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
@@ -969,6 +972,7 @@ Installing for dependencies:
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['iniciales'] = $listaArgs;
         $this->_estadoPaquete['testonly'] = FALSE;
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
@@ -1003,6 +1007,7 @@ Installing for dependencies:
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['iniciales'] = $listaArgs;
         $this->_estadoPaquete['testonly'] = TRUE;
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
@@ -1028,6 +1033,7 @@ Installing for dependencies:
         $this->_estadoPaquete['warning'] = array();
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['testonly'] = FALSE;
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
@@ -1050,6 +1056,7 @@ Installing for dependencies:
         $this->_estadoPaquete['progreso'] = array();
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['testonly'] = FALSE;
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
@@ -1078,6 +1085,7 @@ Installing for dependencies:
         posix_kill($infoYum['pid'], SIGINT);
         $this->_estadoPaquete['status'] = 'busy';
         $this->_estadoPaquete['action'] = 'cancelling';
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         return  "OK Cancelled\n";
     }
@@ -1095,6 +1103,7 @@ Installing for dependencies:
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['testonly'] = FALSE;
         $this->_estadoPaquete['autoconfirm'] = FALSE;
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
@@ -1128,6 +1137,7 @@ Installing for dependencies:
         $this->_estadoPaquete['warning'] = array();
         $this->_estadoPaquete['instalado'] = array();
         $this->_estadoPaquete['testonly'] = FALSE;
+        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
 
         if (!$this->_asegurarYumShellIniciado())
             return "ERR Unable to start Yum Shell\n";
@@ -1179,6 +1189,7 @@ Installing for dependencies:
                 if (!is_null($salidaCmd)) {
                     $this->_estadoPaquete['status'] = 'idle';
                     $this->_estadoPaquete['action'] = 'none';
+                    $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                     $lineas = explode("\n", $salidaCmd);
                     $bReporteInstalado = FALSE;
                     foreach ($lineas as $sLinea) {
@@ -1206,6 +1217,7 @@ Installing for dependencies:
                 $salidaCmd = $this->_salidaComandoLote('ts list repoload');
                 if (!is_null($salidaCmd)) {
                     $this->_estadoPaquete['action'] = 'depsolving';
+                    $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                 }
                 break;
             case 'depsolving':
@@ -1218,11 +1230,13 @@ Installing for dependencies:
                         $this->_estadoPaquete['status'] = 'idle';
                         if ($this->_estadoPaquete['testonly']) {
                             $this->_estadoPaquete['action'] = 'none';
+                            $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                             $this->_estadoPaquete['testonly'] = FALSE;
                             $this->_recogerPaquetesTransaccion($salidaCmdTs);
                             $this->_iniciarLoteComandos(array('ts reset'));
                         } else {
                             $this->_estadoPaquete['action'] = 'confirm';
+                            $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                             $this->_estadoPaquete['testonly'] = FALSE;
                             $this->_recogerPaquetesTransaccion($salidaCmdTs);
 
@@ -1243,6 +1257,7 @@ Installing for dependencies:
                         // Recoger los errores de dependencias que han ocurrido
                         $this->_estadoPaquete['status'] = 'idle';
                         $this->_estadoPaquete['action'] = 'none';
+                        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                         $this->_estadoPaquete['testonly'] = FALSE;
                         $this->_estadoPaquete['warning'] = array();
                         $this->_estadoPaquete['errores'] = array();
@@ -1434,8 +1449,9 @@ Installing for dependencies:
             case 'downloading':
                 // Descargando paquetes. Se monitorea el tamaño del archivo RPM descargado
                 $this->_revisarProgresoPaquetes();
-                if (strpos(/*$this->_sContenido*/$this->_concatenarSalidaCompletaLote(TRUE), 'Running Transaction Test') !== FALSE) {
+                if (stripos($this->_concatenarSalidaCompletaLote(TRUE), 'Running Transaction Test') !== FALSE) {
                     $this->_estadoPaquete['action'] = 'applying';
+                    $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                 }
                 break;
             case 'applying':
@@ -1454,9 +1470,14 @@ Installing for dependencies:
                     if (preg_match('/^\s+Installing\s+:\s+(\S+)/', $sLinea, $regs)) {
                         // Instalando un paquete
                         foreach ($this->_estadoPaquete['progreso'] as $iPos => &$infoPaquete) {
-                            if ($infoPaquete['nombre'] == $regs[1] &&
+                            $nombresPosibles = array(
+                                $infoPaquete['nombre'],
+                                $infoPaquete['nombre'].'-'.$infoPaquete['version'].'.'.$infoPaquete['arch'],
+                            );
+                            if (in_array($regs[1], $nombresPosibles) &&
                                 $infoPaquete['pkgaction'] == 'install' &&
                                 $infoPaquete['currstatus'] == 'downloaded') {
+
                                 if (!is_null($iPosPaquete)) {
                                     if ($this->_estadoPaquete['progreso'][$iPosPaquete]['currstatus'] == 'installing')
                                         $this->_estadoPaquete['progreso'][$iPosPaquete]['currstatus'] = 'installed';
@@ -1471,7 +1492,11 @@ Installing for dependencies:
                     } elseif (preg_match('/^\s+Updating\s+:\s+(\S+)/', $sLinea, $regs)) {
                         // Actualizando un paquete
                         foreach ($this->_estadoPaquete['progreso'] as $iPos => &$infoPaquete) {
-                            if ($infoPaquete['nombre'] == $regs[1] &&
+                            $nombresPosibles = array(
+                                $infoPaquete['nombre'],
+                                $infoPaquete['nombre'].'-'.$infoPaquete['version'].'.'.$infoPaquete['arch'],
+                            );
+                            if (in_array($regs[1], $nombresPosibles) &&
                                 $infoPaquete['pkgaction'] == 'update' &&
                                 $infoPaquete['currstatus'] == 'downloaded') {
                                 if (!is_null($iPosPaquete)) {
@@ -1488,7 +1513,11 @@ Installing for dependencies:
                     } elseif (preg_match('/^\s+Erasing\s+:\s+(\S+)/', $sLinea, $regs)) {
                         // Removiendo un paquete
                         foreach ($this->_estadoPaquete['progreso'] as $iPos => &$infoPaquete) {
-                            if ($infoPaquete['nombre'] == $regs[1] &&
+                            $nombresPosibles = array(
+                                $infoPaquete['nombre'],
+                                $infoPaquete['nombre'].'-'.$infoPaquete['version'].'.'.$infoPaquete['arch'],
+                            );
+                            if (in_array($regs[1], $nombresPosibles) &&
                                 $infoPaquete['pkgaction'] == 'remove' &&
                                 $infoPaquete['currstatus'] == 'installed') {
                                 if (!is_null($iPosPaquete)) {
@@ -1500,9 +1529,10 @@ Installing for dependencies:
                                 break;
                             }
                         }
-                    } elseif (strpos($sLinea, 'Finished Transaction') === 0 && strpos($sLinea, 'Finished Transaction Test') === FALSE) {
+                    } elseif (stripos($sLinea, 'Finished Transaction') === 0 && stripos($sLinea, 'Finished Transaction Test') === FALSE) {
                         $this->_estadoPaquete['status'] = 'idle';
                         $this->_estadoPaquete['action'] = 'none';
+                        $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                         $this->_estadoPaquete['progreso'] = array();
                         $this->_estadoPaquete['errores'] = array();
                         $this->_estadoPaquete['warning'] = array();
@@ -1538,6 +1568,7 @@ Installing for dependencies:
                     $bDownloadError = TRUE;
                     $this->_estadoPaquete['status'] = 'error';
                     $this->_estadoPaquete['action'] = 'none';
+                    $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                     $this->_estadoPaquete['progreso'] = array();
                     $this->_estadoPaquete['errores'] = array();
                     $this->_estadoPaquete['warning'] = array();
@@ -1559,6 +1590,7 @@ Installing for dependencies:
                     $bDownloadError = TRUE;
                     $this->_estadoPaquete['status'] = 'error';
                     $this->_estadoPaquete['action'] = 'none';
+                    $this->oMainLog->output('INFO: switched to status: '.$this->_estadoPaquete['action']);
                     $this->_estadoPaquete['progreso'] = array();
                     $this->_estadoPaquete['errores'] = array();
                     $this->_estadoPaquete['warning'] = array();

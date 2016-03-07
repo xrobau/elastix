@@ -35,6 +35,8 @@ mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 # Additional (module-specific) files that can be handled by RPM
 mkdir -p $RPM_BUILD_ROOT/opt/elastix/
+chmod 644 setup/elastix-moduleconf/*
+chmod 755 setup/elastix-moduleconf/elxupdaterd
 mv setup/elastix-moduleconf $RPM_BUILD_ROOT/opt/elastix/elastix-updater
 mkdir -p $RPM_BUILD_ROOT/etc/init.d/
 mv $RPM_BUILD_ROOT/opt/elastix/elastix-updater/elastix-updaterd $RPM_BUILD_ROOT/etc/init.d/
@@ -137,6 +139,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Mar  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: fix differences in yum shell output that break addon
+  installation in CentOS 7. Should fix Elastix bug #2471.
+  SVN Rev[7509]
+
 * Wed Mar 02 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Release in specfile.

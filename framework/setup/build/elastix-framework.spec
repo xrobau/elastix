@@ -389,6 +389,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Mar  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: prevent string-to-int conversion on database write if
+  resulting int would exceed INT_MAX on the current system. Fixes Elastix
+  bug #2477.
+  SVN Rev[7507]
+
 * Sun Mar  6 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Frameork: remove space for expand tab when in mini-menu mode in
   rewritten elastixwave and giox themes.

@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Tue Mar  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Console: instead of blanking the call information panel, it is
+  now colored in a "disabled" color.
+  SVN Rev[7513]
+
 * Sun Mar  6 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: isolate database inserts for outgoing campaign from
   CSV import code. Phase 2 of pluggable contact import support.

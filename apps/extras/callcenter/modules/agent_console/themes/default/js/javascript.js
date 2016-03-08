@@ -728,6 +728,7 @@ function manejarRespuestaStatus(respuesta)
 			$('#btn_transfer').button('enable');
 			$('#elastix-callcenter-cronometro').text(respuesta[i].cronometro);
 			$('#elastix-callcenter-llamada-info')
+			    .css('color', '')
 				.empty()
 				.append(respuesta[i].llamada_informacion);
 			$('#elastix-callcenter-llamada-script')
@@ -773,8 +774,8 @@ function manejarRespuestaStatus(respuesta)
 	        $('#elastix-callcenter-cronometro').text('00:00:00');
 
 	        // Vaciar las áreas para la llamada
-			$('#elastix-callcenter-llamada-info').empty();
 			$('#elastix-callcenter-llamada-script').empty();
+			$('#elastix-callcenter-llamada-info').css("color", "#778899");
 			break;
 		case 'waitingenter':
 			estadoCliente.waitingcall = true;

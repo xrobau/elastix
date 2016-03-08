@@ -181,6 +181,14 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Mar  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: fix various issues on restore under CentOS 7: cyrus
+  user no longer has a shell and therefore "su" must specify one; work around
+  mysqldump inserting IF NOT EXISTS twice on some system tables; the
+  a2b-callback-daemon service must now be stopped and restarted around the
+  a2billing_db component restore.
+  SVN Rev[7512]
+
 * Mon Jan 18 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.

@@ -339,6 +339,8 @@ $BACKUP_PLAN = array(
                     'backupfile'=>  'mya2billing_mysql.tgz',
                 ),
             ),
+            'prerestore'    => 'prerestore_a2billing_db',
+            'postrestore'   => 'postrestore_a2billing_db',
         ),
         'mysql_db'          =>  array(
             'desc'          =>  'Mysql Database',
@@ -1273,6 +1275,13 @@ function restoreComponent_mysqldb($sLevelTag, &$backupComponent, $sWorkingDir)
         fprintf(STDERR, "WARN: $sLevelTag: $sSchemaPath not found, not restoring database...\n");
         return TRUE;
     }
+    
+    // BUG de mysqldump en CentOS 7: algunas tablas tienen IF NOT EXISTS dos veces
+    $sCommand = 'sed -ie '.escapeshellarg('s/CREATE TABLE IF NOT EXISTS IF NOT EXISTS/CREATE TABLE IF NOT EXISTS/').
+        ' '.escapeshellarg($sSchemaPath);
+    $output = $retval = NULL;
+    exec($sCommand, $output, $retval);
+    
     $sCommand = 'mysql -h localhost -u root '.escapeshellarg('-p'.$sMysqlRootPass).
         ' '.escapeshellarg($backupComponent['database']).' < '.escapeshellarg($sSchemaPath);
     $output = $retval = NULL;
@@ -1350,11 +1359,11 @@ function postrestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
     
     // Simulate refreshing of configuration
     if (isset($fpbxConf['PRE_RELOAD'])) {
-        exec('su - asterisk -c '.escapeshellarg($fpbxConf['PRE_RELOAD']));
+        exec('su -s /bin/sh - asterisk -c '.escapeshellarg($fpbxConf['PRE_RELOAD']));
     }
-    exec('su - asterisk -c '.escapeshellarg($fpbxConf['AMPBIN'].'/retrieve_conf'));
+    exec('su -s /bin/sh - asterisk -c '.escapeshellarg($fpbxConf['AMPBIN'].'/retrieve_conf'));
     if (isset($fpbxConf['FOPRUN'])) {
-        exec('su - asterisk -c '.escapeshellarg($fpbxConf['AMPBIN'].'/bounce_op.sh &> '.$astConf['astlogdir'].'/freepbx-bounce_op.log'));
+        exec('su -s /bin/sh - asterisk -c '.escapeshellarg($fpbxConf['AMPBIN'].'/bounce_op.sh &> '.$astConf['astlogdir'].'/freepbx-bounce_op.log'));
     }
     try {
         // Reset the pending-changes flag
@@ -1376,7 +1385,7 @@ function postrestore_as_db($sLevelTag, &$backupComponent, $sWorkingDir)
         fwrite(STDERR, "WARN: $sLevelTag: failed to reset FreePBX update flag!\n");
     }
     if (isset($fpbxConf['POST_RELOAD'])) {
-        exec('su - asterisk -c '.escapeshellarg($fpbxConf['POST_RELOAD']));
+        exec('su -s /bin/sh - asterisk -c '.escapeshellarg($fpbxConf['POST_RELOAD']));
     }
     
     // Finally restart everything
@@ -1758,7 +1767,7 @@ function postrestore_em_mailbox($sLevelTag, &$backupComponent, $sWorkingDir)
                 $username = $fields[0].'@'.$row['domain_name'];
                 $sMailboxPath = escapeshellarg("user/$username");
                 $sCmdReconstruct = escapeshellarg("/usr/lib/cyrus-imapd/reconstruct -r -f $sMailboxPath");
-                $sCmdSu = "su - cyrus -c $sCmdReconstruct";
+                $sCmdSu = "su -s /bin/sh - cyrus -c $sCmdReconstruct";
                 //print "$sCmdSu\n";
                 $output = $retval = NULL;
                 exec($sCmdSu, $output, $retval);
@@ -1776,15 +1785,51 @@ function postrestore_em_mailbox($sLevelTag, &$backupComponent, $sWorkingDir)
 
     // Fix quota usage for all the mailboxes
     $retval = NULL;
-    system('su - cyrus -c '.escapeshellarg('/usr/lib/cyrus-imapd/quota -f'), $retval);
+    system('su -s /bin/sh - cyrus -c '.escapeshellarg('/usr/lib/cyrus-imapd/quota -f'), $retval);
     if ($retval != 0) {
         fwrite(STDERR, "ERR: $sLevelTag: failed to repair quotas for mailboxes\n");
         $bSuccess = FALSE;
     }
     
-    exec("/etc/init.d/cyrus-imapd restart", $output, $ret);
+    exec("/sbin/service cyrus-imapd restart", $output, $ret);
 
     return $bSuccess;
+}
+
+/* Need to shut down a2b_callback_daemon if found running, then restart it. This
+   prevents database restore hanging due to "Waiting for table metadata lock".
+ */
+$a2b_callback_running = FALSE;
+function prerestore_a2billing_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    global $a2b_callback_running;
+
+    $output = $retval = NULL;
+    exec("/sbin/service a2b-callback-daemon status", $output, $retval);
+    if ($retval == 0) {
+        $a2b_callback_running = TRUE;
+        exec("/sbin/service a2b-callback-daemon stop", $output, $retval);
+        if ($retval != 0) {
+            fwrite(STDERR, "ERR: $sLevelTag: failed to stop a2b-callback-daemon prior to restore, schema restore might hang!\n");
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+function postrestore_a2billing_db($sLevelTag, &$backupComponent, $sWorkingDir)
+{
+    global $a2b_callback_running;
+
+    if ($a2b_callback_running) {
+        $output = $retval = NULL;
+        exec("/sbin/service a2b-callback-daemon start", $output, $retval);
+        if ($retval != 0) {
+            fwrite(STDERR, "ERR: $sLevelTag: failed to restart a2b-callback-daemon after restore!\n");
+            return FALSE;
+        }
+    }
+    return TRUE;
 }
 
 /* Custom processing before restoring mysql database. The mysql schema contains

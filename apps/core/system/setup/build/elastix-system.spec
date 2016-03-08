@@ -180,6 +180,14 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Mar  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Backup/Restore: fix various issues on restore under CentOS 7: cyrus
+  user no longer has a shell and therefore "su" must specify one; work around
+  mysqldump inserting IF NOT EXISTS twice on some system tables; the
+  a2b-callback-daemon service must now be stopped and restarted around the
+  a2billing_db component restore.
+  SVN Rev[7512]
+
 * Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.
@@ -291,7 +299,7 @@ fi
 - ADDED: Applet Admin: add Russian translation provided by user Russian.
   SVN Rev[7180]
 
-* Mon Oct 05 2015 Luis Abarca <labarca@palosanto.com> 
+* Mon Oct 05 2015 Luis Abarca <labarca@palosanto.com>
 - FIXED: db - system/sql_version: One of the scripts in charge of handling the
   update of database in the module, it was not working correctly, leaving the
   dashboard module showing only one applet after updating the whole module.

@@ -3,7 +3,7 @@
 Summary: Elastix Addons
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -136,6 +136,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Mar 08 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Mon Mar  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: fix differences in yum shell output that break addon
   installation in CentOS 7. Should fix Elastix bug #2471.
@@ -144,6 +148,7 @@ fi
 * Thu Feb 04 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-3
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[7461]
 
 * Thu Feb 04 2016 Luis Abarca <labarca@palosanto.com>
 - CHANGED: addons - comercial-addons.repo: Modified a version of repo for

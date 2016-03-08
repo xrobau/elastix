@@ -3,7 +3,7 @@
 Summary: Elastix Addons
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -139,6 +139,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Tue Mar 08 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-5
+- CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon Mar  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: fix differences in yum shell output that break addon
   installation in CentOS 7. Should fix Elastix bug #2471.

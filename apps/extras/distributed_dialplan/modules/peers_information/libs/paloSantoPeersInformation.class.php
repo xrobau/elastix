@@ -3,7 +3,7 @@
   Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 1.4-1                                               |
-  | http://www.elastix.org                                               |
+  | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
@@ -51,6 +51,7 @@ class paloSantoPeersInformation {
     }
 
     /*HERE YOUR FUNCTIONS*/
+/*    
 	function addInformationPeer($dataPeer)
     {
         $arrTmp = array();
@@ -71,13 +72,14 @@ class paloSantoPeersInformation {
         }else 
            return "No Found";
     }
-
+*/
     function  addInfoRequest($mac, $ip, $company, $comment, $certificate,$key)
     {
 
         $data = array($mac,$ip,$certificate,$key,$comment,$company);
 
-        $query = "INSERT INTO peer(mac, model, host, inkey , outkey, status, his_status, key, comment, company)VALUES(?,'symmetric',?,?,'','Requesting connection','waiting response',?,?,?)";
+        $query = "INSERT INTO peer(mac, model, host, inkey , outkey, status, his_status, key, comment, company)".
+            "VALUES(?,'symmetric',?,?,'','Requesting connection','waiting response',?,?,?)";
 
         $result=$this->_DB->genQuery($query, $data);
         if($result==FALSE)
@@ -113,7 +115,7 @@ class paloSantoPeersInformation {
       }
       return $result;
    }
-
+/*
     function uploadInformationPeer($data, $where)
     {
 
@@ -125,7 +127,7 @@ class paloSantoPeersInformation {
         $result = $this->_DB->genQuery($queryInsert);
         return $result;
     }
-
+*/
     function addInformationParameter($dataParameter, $id)
     {
        $arrTmp = array();
@@ -156,7 +158,7 @@ class paloSantoPeersInformation {
      return $dataParameter;
    }
 
-    function obtainForeignKey($idPeer)
+    private function obtainForeignKey($idPeer)
     {
         $data = array($idPeer);
         $query = "SELECT inkey FROM peer WHERE id=?";
@@ -394,6 +396,7 @@ class paloSantoPeersInformation {
            echo "Unabled open file";
    }
 
+    // Se usa en módulo general_information
     function GenKeyPub($company)
     {
       $root = "/var/lib/asterisk/keys";
@@ -404,7 +407,7 @@ class paloSantoPeersInformation {
         return false;
     }
 
-    function keyIsValid($key)
+    private function keyIsValid($key)
     {
         // primero verificar si la primera linea contiene -----BEGIN PUBLIC KEY----- | -----BEGIN RSA PRIVATE KEY-----
         if(!preg_match("/^(.|\n)*-----BEGIN PUBLIC KEY-----(.|\n)*$/",$key)){
@@ -494,7 +497,7 @@ class paloSantoPeersInformation {
         $arrResult = $this->AsteriskManager_Command($dsn_agi_manager['host'], $dsn_agi_manager['user'], $dsn_agi_manager['password'], "reload");
     }
 
-    function AsteriskManager_Command($host, $user, $password, $command) {
+    private function AsteriskManager_Command($host, $user, $password, $command) {
         global $arrLang;
         $astman = new AGI_AsteriskManager( );
         if (!$astman->connect("$host", "$user" , "$password")) {

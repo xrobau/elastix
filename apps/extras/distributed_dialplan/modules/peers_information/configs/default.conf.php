@@ -28,8 +28,7 @@
   $Id: default.conf.php,v 1.1 2008-08-03 11:08:42 Andres Flores aflores@palosanto.com Exp $ */
     global $arrConfModule;
 
-    $arrConfModule['module_name']   = 'peers_information';
     $arrConfModule['templates_dir'] = 'themes';
     $arrConfModule['dsn_conn_database'] = "sqlite3:////var/www/db/elastixconnection.db";
-    
+
 ?>

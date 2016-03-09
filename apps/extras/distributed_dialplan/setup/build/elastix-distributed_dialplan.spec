@@ -91,6 +91,14 @@ fi
 %{_localstatedir}/www/html/elastixConnection/*
 
 %changelog
+* Wed Mar  9 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Peers Information: complete rewrite. This rewrite tries to encapsulate
+  the required operations into a single library file instead of having logic
+  spread across index.php. Error conditions are much better reported. Module
+  code has been reorganized. Asterisk is no longer reloaded every time the
+  peer report is shown, fixes Elastix bug #1654.
+  SVN Rev[7514]
+
 * Sun Apr 19 2015 Alex Villacis Lasso <a_villacis@palosanto.com>
 - REMOVED: Peers Information - remove private copy of jQuery - framework has a
   newer version.

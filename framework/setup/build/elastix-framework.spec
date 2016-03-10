@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Thu Mar 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: work around PHP 5.1.x bug in PDO that internally truncates
+  integer values to 32 bits even on x86_64. Further fix for Elastix bug #2477.
+  SVN Rev[7516]
+
 * Thu Mar 10 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-12
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

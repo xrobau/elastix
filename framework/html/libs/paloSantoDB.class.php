@@ -34,6 +34,7 @@ class paloDB {
     var $connStatus;    // Se asigna a VERDADERO si ocurrió error de DB
     var $errMsg;        // Texto del mensaje de error
     var $engine;        // Base de datos
+    private $_forceintcast = FALSE;
 
     /**
      * Constructor de la clase, recibe como parámetro el DSN de PEAR a usar
@@ -47,6 +48,8 @@ class paloDB {
      */
     function paloDB($dsn) // Creo que aqui debo pasar el dsn
     {
+        $this->_forceintcast = (explode(".", phpversion()) >= array(5, 3, 0));
+
         // Creo una conexion y hago login en la base de datos
         $this->conn = NULL;
         $this->errMsg = "";
@@ -119,8 +122,11 @@ class paloDB {
                         ((string)((int)$param[$i]) === $param[$i]))
                     ? PDO::PARAM_INT : PDO::PARAM_STR;
 
-                // Some versions of PHP try to bind numeric string as PARAM_STR even if PARAM_INT specified
-                if ($data_type == PDO::PARAM_INT) $param[$i] = (int)$param[$i];
+                /* Some versions of PHP try to bind numeric string as PARAM_STR
+                 * even if PARAM_INT specified. Affects PHP 5.4.x in CentOS 7.
+                 */
+                if ($this->_forceintcast && $data_type == PDO::PARAM_INT)
+                    $param[$i] = (int)$param[$i];
                 break;
             }
             $sth->bindValue($i + 1, $param[$i], $data_type);

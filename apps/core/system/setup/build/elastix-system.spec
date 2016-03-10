@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -180,6 +180,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Mar 10 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-4
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Tue Mar  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix various issues on restore under CentOS 7: cyrus
   user no longer has a shell and therefore "su" must specify one; work around

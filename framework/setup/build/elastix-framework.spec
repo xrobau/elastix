@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 2.5.0
-Release: 11
+Release: 12
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -389,6 +389,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Thu Mar 10 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-12
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon Mar  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: prevent string-to-int conversion on database write if
   resulting int would exceed INT_MAX on the current system. Fixes Elastix
@@ -410,6 +414,7 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-11
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[7489]
 
 * Fri Feb 12 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: use correct method set_error to report problems on user

@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 4.0.0
-Release: 9
+Release: 10
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -389,6 +389,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Mar 11 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-10
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Thu Mar 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: work around PHP 5.1.x bug in PDO that internally truncates
   integer values to 32 bits even on x86_64. Further fix for Elastix bug #2477.

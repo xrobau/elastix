@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Mar 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Do Not Call: switch to use of PDO for DNC number inserts. This is
+  3x as fast as the same operations using the paloDB class.
+  SVN Rev[7520]
+
 * Tue Mar  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Agent Console: instead of blanking the call information panel, it is
   now colored in a "disabled" color.

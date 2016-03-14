@@ -30,10 +30,12 @@
 class paloSantoDontCall
 {
     private $_db;
+    private $_stmt;
     var $errMsg;
-    
+
     function paloSantoDontCall($pDB)
     {
+        $this->_stmt = array();
         if (is_object($pDB)) {
             $this->_db =& $pDB;
             $this->errMsg = $this->_db->errMsg;
@@ -45,7 +47,7 @@ class paloSantoDontCall
             }
         }
     }
-    
+
     function contarDontCall()
     {
         $tupla = $this->_db->getFirstRowQuery('SELECT COUNT(*) AS N FROM dont_call', TRUE);
@@ -55,7 +57,7 @@ class paloSantoDontCall
         }
         return $tupla['N'];
     }
-    
+
     function listarDontCall($limit = NULL, $offset = 0)
     {
         $sql = 'SELECT id, caller_id, date_income, status FROM dont_call ORDER BY caller_id';
@@ -71,7 +73,7 @@ class paloSantoDontCall
         }
         return $recordset;
     }
-    
+
     function borrarDontCall($arrData)
     {
         $this->_db->beginTransaction();
@@ -93,46 +95,52 @@ class paloSantoDontCall
         $this->_db->commit();
         return TRUE;
     }
-    
+
     private function _insertarNumero($dnc, &$loadReport)
     {
-        $tupla = $this->_db->getFirstRowQuery(
-            'SELECT id, status FROM dont_call WHERE caller_id = ?',
-            TRUE, array($dnc));
-        if (!is_array($tupla)) {
-            $this->errMsg = $this->_db->errMsg;
+        if (count($this->_stmt) <= 0) {
+            $this->_stmt['SELECT'] = $this->_db->conn->prepare(
+                'SELECT id, status FROM dont_call WHERE caller_id = ?');
+            $this->_stmt['UPDATE'] = $this->_db->conn->prepare(
+                'UPDATE dont_call SET status = "A" WHERE id = ?');
+            $this->_stmt['INSERT'] = $this->_db->conn->prepare(
+                'INSERT INTO dont_call (caller_id, date_income, status) VALUES (?, NOW(), "A")');
+        }
+
+        $r = $this->_stmt['SELECT']->execute(array($dnc));
+        if (!$r) {
+            $this->errMsg = print_r($this->_stmt['SELECT']->errorInfo(), TRUE);
             return FALSE;
         }
-        if (count($tupla) > 0) {
+        $tupla = $this->_stmt['SELECT']->fetch(PDO::FETCH_ASSOC);
+        $this->_stmt['SELECT']->closeCursor();
+
+        if (is_array($tupla) && count($tupla) > 0) {
             // Número ya ha sido insertado
             if ($tupla['status'] != 'A') {
                 // Activar número, si estaba inactivo
-                if (!$this->_db->genQuery(
-                    'UPDATE dont_call SET status = "A" WHERE id = ?',
-                    array($tupla['id']))) {
-                    $this->errMsg = $this->_db->errMsg;
+                if (!$this->_stmt['UPDATE']->execute(array($tupla['id']))) {
+                    $this->errMsg = print_r($this->_stmt['UPDATE']->errorInfo(), TRUE);
                     return FALSE;
                 }
             }
         } else {
             // Número debe de insertarse
-            if (!$this->_db->genQuery(
-                'INSERT INTO dont_call (caller_id, date_income, status) VALUES (?, NOW(), "A")',
-                array($dnc))) {
-                $this->errMsg = $this->_db->errMsg;
+            if (!$this->_stmt['INSERT']->execute(array($dnc))) {
+                $this->errMsg = print_r($this->_stmt['INSERT']->errorInfo(), TRUE);
                 return FALSE;
             }
             $loadReport['inserted']++;
         }
         return TRUE;
     }
-    
+
     function insertarNumero($dnc)
     {
         $loadReport = array('inserted' => 0);
         return $this->_insertarNumero($dnc, $loadReport);
     }
-    
+
     function cargarArchivo($sArchivo, $callback = NULL)
     {
         $hArchivo = @fopen($sArchivo, 'r');
@@ -140,13 +148,13 @@ class paloSantoDontCall
             $this->errMsg = _tr('Failed to open file');
             return NULL;
         }
-        
+
         $loadReport = array(
             'total'     =>  0,  // Total de líneas procesadas
             'inserted'  =>  0,  // Total de registros nuevos (no existentes)
             'rejected'  =>  0,  // Total de registros rechazados
         );
-        
+
         while (!feof($hArchivo)) {
             $t = fgetcsv($hArchivo);
             if (count($t) > 0 && trim($t[0]) != '') {
@@ -157,9 +165,9 @@ class paloSantoDontCall
                     }
                 } else {
                     $loadReport['rejected']++;
-                }                
+                }
                 $loadReport['total']++;
-                
+
                 if (!is_null($callback) && $loadReport['total'] % 1000 == 0) {
                     call_user_func($callback, $loadReport);
                 }

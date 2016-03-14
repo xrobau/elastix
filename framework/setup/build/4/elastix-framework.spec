@@ -389,6 +389,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Mar 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: enable larger limits for post_max_size and
+  max_upload_filesize, since previous values are too small for common CallCenter
+  uploads.
+  SVN Rev[7519]
+
 * Fri Mar 11 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-10
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

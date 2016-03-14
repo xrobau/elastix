@@ -180,11 +180,19 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Mar 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: fixed incorrect color assignment of graph colors on
+  Performance Graphic rewrite that causes user confusion on which y-axis is
+  intended for each plot. Fixes Elastix bug #2469. Additionally, fix incorrect
+  timestamp values, which should now be expressed as javascript timestamps (in
+  milliseconds) instead of UNIX timestamps.
+  SVN Rev[7518]
+
 * Thu Mar 10 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-4
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.
 
-* Tue Mar  8 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Tue Mar  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Backup/Restore: fix various issues on restore under CentOS 7: cyrus
   user no longer has a shell and therefore "su" must specify one; work around
   mysqldump inserting IF NOT EXISTS twice on some system tables; the

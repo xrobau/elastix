@@ -51,18 +51,31 @@ $this->_sampler_CallsMemoryCPU().
 ", {
     xaxes: [ {
         mode: 'time',
+        timezone: 'browser',
         position: 'bottom'
     } ],
     yaxes: [ {
     // align if we are to the right
+          min: 0,
           font: {
              size: 11,
              lineHeight: 13,
              family: 'sans-serif',
              variant: 'small-caps',
-             color: '#cb4b4b'
+             color: '#33cc33' // green - simultaneous calls
           },
           position: 'right'
+       },
+       {
+          min: 0,
+          max: 110,
+          font: {
+             size: 11,
+             lineHeight: 13,
+             family: 'sans-serif',
+             variant: 'small-caps',
+             color: '#3da8fb' // blue - cpu usage
+          }
        },
        {
           min: 0,
@@ -71,16 +84,7 @@ $this->_sampler_CallsMemoryCPU().
              lineHeight: 13,
              family: 'sans-serif',
              variant: 'small-caps',
-             color: '#33cc33'
-          }
-       },
-       {
-          font: {
-             size: 11,
-             lineHeight: 13,
-             family: 'sans-serif',
-             variant: 'small-caps',
-             color: '#3da8fb'
+             color: '#cb4b4b' // red - memory usage
           }
        }
     ],
@@ -147,7 +151,7 @@ $this->_sampler_CallsMemoryCPU().
                 'color'         =>  $line['color'],
             );
             foreach ($arraySample as $time_value) {
-                $obj['data'][] = array((int)$time_value['timestamp'], (int)$time_value['value']);
+                $obj['data'][] = array((int)$time_value['timestamp'] * 1000, (int)$time_value['value']);
             }
             switch ($i) {
             case 1:

@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Wed Mar 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: retry call update operation on deadlock or timeout. This
+  reduces the chances of an exception interruting the Predictor enumeration
+  wait. Ported from CallCenterPRO.
+  SVN Rev[7524]
 - FIXED: Dialer: synchronize pause state when updating queue membership.
   Otherwise a static agent added to a new queue while paused will not inherit
   the paused state and will receive calls through the new membership. Ported

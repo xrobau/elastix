@@ -923,18 +923,48 @@ SQL_LLAMADA_COLOCADA;
             }
 
             if ($resultado['Response'] == 'Success') {
-                $this->_tuberia->msg_AMIEventProcess_avisoInicioOriginate(
-                    $tupla['actionid'], $iTimestampInicioOriginate);
-                $sth->execute(array('Placing', date('Y-m-d H:i:s', $iTimestampInicioOriginate),
-                    $infoCampania['id'], $tupla['id']));
+                $param_originateresult = array('Placing', date('Y-m-d H:i:s', $iTimestampInicioOriginate),
+                    $infoCampania['id'], $tupla['id']);
+                $ts = $iTimestampInicioOriginate;
             } else {
                 $this->_log->output(
                     "ERR: (campania {$infoCampania['id']} cola {$infoCampania['queue']}) ".
                     "no se puede llamar a número - ".print_r($resultado, TRUE));
-                $sth->execute(array('Failure', date('Y-m-d H:i:s', $iTimestampInicioOriginate),
-                    $infoCampania['id'], $tupla['id']));
-                $this->_tuberia->msg_AMIEventProcess_avisoInicioOriginate($tupla['actionid'], NULL);
+                $param_originateresult = array('Failure', date('Y-m-d H:i:s', $iTimestampInicioOriginate),
+                    $infoCampania['id'], $tupla['id']);
+                $ts = NULL;
             }
+
+
+            $retries = 10;
+            $deadlock_retry = FALSE;
+            do {
+                $deadlock_retry = FALSE;
+                try {
+                    $this->_db->beginTransaction();
+
+                    $sth->execute($param_originateresult);
+
+                    $this->_db->commit();
+                } catch (PDOException $e) {
+                    if (esReiniciable($e)) {
+                        // Códigos de error correspondientes a deadlock
+                        $this->_db->rollBack();
+                        $deadlock_retry = TRUE;
+                        $retries--;
+                        if ($retries <= 0) throw $e;
+                    } else {
+                        if (!is_null($this->_db)) {
+                            $this->_db->rollBack();
+                        }
+                        throw $e;
+                    }
+                }
+            } while ($deadlock_retry && $retries > 0);
+
+
+            $this->_tuberia->msg_AMIEventProcess_avisoInicioOriginate(
+                $tupla['actionid'], $ts);
 
             // Notificar el progreso de la llamada
             $prop = array(
@@ -1546,11 +1576,28 @@ PETICION_LLAMADAS_AGENTE;
             /* Se consulta el posible contacto en base al caller-id. Si hay
              * exactamente un contacto, su ID se usa para la inserción. */
             $recordset = $this->_db->prepare('SELECT id FROM contact WHERE telefono = ?');
-            $recordset->execute(array($paramInsertar['callerid']));
-            $listaIdContactos = $recordset->fetchAll(PDO::FETCH_COLUMN, 0);
-            if (count($listaIdContactos) == 1) {
-                $paramInsertar['id_contact'] = $listaIdContactos[0];
-            }
+
+            $retries = 10;
+            $deadlock_retry = FALSE;
+            do {
+                $deadlock_retry = FALSE;
+                try {
+                    $recordset->execute(array($paramInsertar['callerid']));
+                    $listaIdContactos = $recordset->fetchAll(PDO::FETCH_COLUMN, 0);
+                    if (count($listaIdContactos) == 1) {
+                        $paramInsertar['id_contact'] = $listaIdContactos[0];
+                    }
+                } catch (PDOException $e) {
+                    if (esReiniciable($e)) {
+                        // no hay transacción para rollback
+                        $deadlock_retry = TRUE;
+                        $retries--;
+                        if ($retries <= 0) throw $e;
+                    } else {
+                        throw $e;
+                    }
+                }
+            } while ($deadlock_retry && $retries > 0);
         }
 
         $sqlCampos = array();
@@ -1563,8 +1610,25 @@ PETICION_LLAMADAS_AGENTE;
             implode(', ', array_fill(0, count($params), '?')).')';
 
         $sth = $this->_db->prepare($sql);
-        $sth->execute($params);
-        $idCall = $this->_db->lastInsertId();
+
+        $retries = 10;
+        $deadlock_retry = FALSE;
+        do {
+            $deadlock_retry = FALSE;
+            try {
+                $sth->execute($params);
+                $idCall = $this->_db->lastInsertId();
+            } catch (PDOException $e) {
+                if (esReiniciable($e)) {
+                    // no hay transacción para rollback
+                    $deadlock_retry = TRUE;
+                    $retries--;
+                    if ($retries <= 0) throw $e;
+                } else {
+                    throw $e;
+                }
+            }
+        } while ($deadlock_retry && $retries > 0);
 
         // Para llamada entrante se debe de insertar el log de progreso
         if ($tipo_llamada == 'incoming') {
@@ -1606,6 +1670,8 @@ PETICION_LLAMADAS_AGENTE;
     // Procedimiento que actualiza una sola llamada de la tabla calls o call_entry
     private function _sqlupdatecalls($paramActualizar)
     {
+        $sql_list = array();
+
         // Porción que identifica la tabla a modificar
         $tipo_llamada = $paramActualizar['tipo_llamada'];
         unset($paramActualizar['tipo_llamada']);
@@ -1649,15 +1715,43 @@ PETICION_LLAMADAS_AGENTE;
             unset($paramActualizar['inc_retries']);
         }
         foreach ($paramActualizar as $k => $v) {
-        	$sqlCampos[] = "$k = ?";
+            $sqlCampos[] = "$k = ?";
             $paramCampos[] = $v;
         }
+        $sql_list[] = array(
+            $sqlTabla.implode(', ', $sqlCampos).' WHERE '.implode(' AND ', $sqlWhere),
+            array_merge($paramCampos, $paramWhere),
+        );
 
-        $sql = $sqlTabla.implode(', ', $sqlCampos).' WHERE '.implode(' AND ', $sqlWhere);
-        $params = array_merge($paramCampos, $paramWhere);
 
-        $sth = $this->_db->prepare($sql);
-        $sth->execute($params);
+        $retries = 10;
+        $deadlock_retry = FALSE;
+        do {
+            $deadlock_retry = FALSE;
+            try {
+                $this->_db->beginTransaction();
+
+                foreach ($sql_list as $sql_item) {
+                    $sth = $this->_db->prepare($sql_item[0]);
+                    $sth->execute($sql_item[1]);
+                }
+
+                $this->_db->commit();
+            } catch (PDOException $e) {
+                if (esReiniciable($e)) {
+                    // Códigos de error correspondientes a deadlock
+                    $this->_db->rollBack();
+                    $deadlock_retry = TRUE;
+                    $retries--;
+                    if ($retries <= 0) throw $e;
+                } else {
+                    if (!is_null($this->_db)) {
+                        $this->_db->rollBack();
+                    }
+                    throw $e;
+                }
+            }
+        } while ($deadlock_retry && $retries > 0);
     }
 
     // Procedimiento que inserta un solo registro en current_calls o current_call_entry

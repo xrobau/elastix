@@ -415,4 +415,21 @@ function construirEventoProgresoLlamada($db, $prop)
 
     return array($id_campaignlog, $evlist);
 }
+
+function esDeadlockTransaccion(PDOException $e)
+{
+    // 40001 - 1213 - Deadlock found when trying to get lock; try restarting transaction
+    return ($e->errorInfo[0] == '40001' && $e->errorInfo[1] == 1213);
+}
+
+function esLockTimeout(PDOException $e)
+{
+    // HY000 - 1205 - Lock wait timeout exceeded; try restarting transaction
+    return ($e->errorInfo[0] == 'HY000' && $e->errorInfo[1] == 1205);
+}
+
+function esReiniciable(PDOException $e)
+{
+    return (esDeadlockTransaccion($e) || esLockTimeout($e));
+}
 ?>

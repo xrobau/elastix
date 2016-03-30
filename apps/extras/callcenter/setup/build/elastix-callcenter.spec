@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Mar 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: re-throw exception after removing event handlers. Fixes failure
+  to install event handlers on next iteration. Ported from CallCenterPRO.
+  SVN Rev[7521]
+
 * Mon Mar 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Do Not Call: switch to use of PDO for DNC number inserts. This is
   3x as fast as the same operations using the paloDB class.

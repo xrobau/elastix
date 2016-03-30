@@ -59,18 +59,33 @@ class Predictor
         $evlist = array('CoreShowChannel', 'CoreShowChannelsComplete',
             'QueueParams', 'QueueMember', 'QueueEntry', 'QueueStatusComplete');
         foreach ($evlist as $k)
-            $this->_astConn->add_event_handler($k, array($this, "msg_$k"));
+            $this->_astConn->remove_event_handler($k);
+        foreach ($evlist as $k)
+            if (!$this->_astConn->add_event_handler($k, array($this, "msg_$k"))) {
+                // Quitar manejadores de eventos si alguno no se puede agregar
+                foreach ($evlist as $k)
+                    $this->_astConn->remove_event_handler($k);
+                return FALSE;
+            }
 
         // Anular resultados previos
         $this->_agentesAppQueue = array();
         $this->_infoColas = array();
 
-        $this->_astConn->CoreShowChannels($this->_tmp_actionid);
-        $this->_esperarEnumeracion();
-
-        foreach ($colas as $queue) {
-            $this->_astConn->QueueStatus($queue, $this->_tmp_actionid);
+        try {
+            $this->_astConn->CoreShowChannels($this->_tmp_actionid);
             $this->_esperarEnumeracion();
+
+            foreach ($colas as $queue) {
+                $this->_astConn->QueueStatus($queue, $this->_tmp_actionid);
+                $this->_esperarEnumeracion();
+            }
+        } catch (Exception $e) {
+            // Quitar manejadores de eventos antes de relanzar excepción
+            foreach ($evlist as $k)
+                $this->_astConn->remove_event_handler($k);
+
+            throw $e;
         }
 
         // Quitar manejadores de eventos
@@ -78,6 +93,8 @@ class Predictor
             $this->_astConn->remove_event_handler($k);
         $this->_tmp_actionid = NULL;
         $this->timestamp_examen = microtime(TRUE);
+
+        return TRUE;
     }
 
     private function _esperarEnumeracion()

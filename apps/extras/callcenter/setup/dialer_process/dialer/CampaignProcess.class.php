@@ -622,15 +622,24 @@ PETICION_CAMPANIAS_ENTRANTES;
         // Averiguar cuantas llamadas se pueden hacer (por predicción), y tomar
         // el menor valor de entre máx campaña y predictivo.
         if ($this->DEBUG) {
-        	$this->_log->output('DEBUG: '.__METHOD__.' verificando agentes libres...');
+            $this->_log->output('DEBUG: '.__METHOD__.' verificando agentes libres...');
         }
 
         // Parámetros requeridos para predicción de colocación de llamadas
         $infoCola = $this->_tuberia->AMIEventProcess_infoPrediccionCola($infoCampania['queue']);
         if (is_null($infoCola)) {
-            $oPredictor->examinarColas(array($infoCampania['queue']));
-            $infoCola = $oPredictor->infoPrediccionCola($infoCampania['queue']);
+            if ($oPredictor->examinarColas(array($infoCampania['queue']))) {
+                $infoCola = $oPredictor->infoPrediccionCola($infoCampania['queue']);
+            }
         }
+
+        if (is_null($infoCola)) {
+            $this->_log->output('ERR: '.__METHOD__." no se puede obtener información de ".
+                "estado de cola para (campania {$infoCampania['id']} ".
+                "cola {$infoCampania['queue']}).");
+            return FALSE;
+        }
+
         $resumenPrediccion = ($this->_configDB->dialer_predictivo && ($infoCampania['num_completadas'] >= MIN_MUESTRAS))
             ? $oPredictor->predecirNumeroLlamadas($infoCola,
                 $this->_configDB->dialer_qos,

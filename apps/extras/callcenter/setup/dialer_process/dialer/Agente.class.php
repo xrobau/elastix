@@ -360,10 +360,7 @@ class Agente
     {
         $this->_num_pausas++;
         if ($this->_num_pausas == 1 && count($this->colas_actuales) > 0) {
-            $ami->asyncQueuePause(
-                array($this, '_cb_QueuePause'),
-                array($this->channel, TRUE),
-                NULL, $this->channel, TRUE);
+            $this->asyncQueuePause($ami, TRUE);
         }
     }
 
@@ -372,12 +369,17 @@ class Agente
         if ($this->_num_pausas > 0) {
             $this->_num_pausas--;
             if ($this->_num_pausas == 0 && count($this->colas_actuales) > 0) {
-                $ami->asyncQueuePause(
-                    array($this, '_cb_QueuePause'),
-                    array($this->channel, FALSE),
-                    NULL, $this->channel, FALSE);
+                $this->asyncQueuePause($ami, FALSE);
             }
         }
+    }
+
+    public function asyncQueuePause($ami, $nstate, $queue = NULL)
+    {
+        $ami->asyncQueuePause(
+            array($this, '_cb_QueuePause'),
+            array($this->channel, $nstate),
+            $queue, $this->channel, $nstate);
     }
 
     public function iniciarLoginAgente($sExtension)

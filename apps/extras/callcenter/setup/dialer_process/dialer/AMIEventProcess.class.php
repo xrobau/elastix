@@ -2361,7 +2361,10 @@ Uniqueid: 1429642067.241008
         $this->_queueshadow->msg_QueueMember($params);
 
         /* Se debe usar Location porque Name puede ser el nombre amistoso */
-        $this->_tmp_estadoAgenteCola[$params['Location']][$params['Queue']] = $params['Status'];
+        $this->_tmp_estadoAgenteCola[$params['Location']][$params['Queue']] = array(
+            'Status'    =>  $params['Status'],
+            'Paused'    =>  ($params['Paused'] != 0),
+        );
     }
 
     public function msg_QueueEntry($sEvent, $params, $sServer, $iPort)
@@ -2435,12 +2438,32 @@ Uniqueid: 1429642067.241008
 
     private function _evaluarPertenenciaColas($a, $estadoCola)
     {
+        // Separar Status y Paused
+        $estadoCola_Status = array();
+        $estadoCola_Paused = array();
+        foreach ($estadoCola as $cola => $tupla) {
+            $estadoCola_Status[$cola] = $tupla['Status'];
+            $estadoCola_Paused[$cola] = $tupla['Paused'];
+        }
+
         // Para agentes estáticos, cambio de membresía debe reportarse
-        $bCambioColas = $a->asignarEstadoEnColas($estadoCola);
+        $bCambioColas = $a->asignarEstadoEnColas($estadoCola_Status);
         if ($bCambioColas && $a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
+        $bAgentePausado = ($a->num_pausas > 0);
 
         $sAgente = $a->channel;
         if ($a->estado_consola == 'logged-in') {
+            // Revisar y sincronizar estado de pausa en colas
+            foreach ($estadoCola_Paused as $cola => $p) {
+                if ($bAgentePausado && !$p) {
+                    $this->_log->output('INFO: agente '.$sAgente.' debe estar pausado pero no está en pausa en cola '.$cola);
+                    $a->asyncQueuePause($this->_ami, TRUE, $cola);
+                } elseif (!$bAgentePausado && $p) {
+                    $this->_log->output('INFO: agente '.$sAgente.' debe estar despausado pero está en pausa en cola '.$cola);
+                    $a->asyncQueuePause($this->_ami, FALSE, $cola);
+                }
+            }
+
             $diffcolas = $a->diferenciaColasDinamicas();
             if (is_array($diffcolas)) {
 
@@ -2452,7 +2475,7 @@ Uniqueid: 1429642067.241008
                         $this->_ami->asyncQueueAdd(
                             array($this, '_cb_QueueAdd'),
                             NULL,
-                            $q, $sAgente, $p, $a->name, ($a->num_pausas > 0));
+                            $q, $sAgente, $p, $a->name, $bAgentePausado);
                     }
                 }
 

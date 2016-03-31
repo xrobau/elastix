@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Thu Mar 31 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: factor out parse_database_data from AMI functions for a
+  future commit. Ported from CallCenterPRO.
+  SVN Rev[7527]
 - CHANGED: Dialer: use asynchronous AMI for GetVar to retrieve the channel
   variable MIXMONITOR_FILENAME instead of going through CampaignProcess, thus
   removing one use of AMI from CampaignProcess. Ported from CallCenterPRO.

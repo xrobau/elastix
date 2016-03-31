@@ -674,6 +674,18 @@ class AMIClientConn extends MultiplexConn
         return $ret;
     }
 
+    function parse_database_data($data)
+    {
+        $data = explode("\n", $data);
+        $db = array();
+
+        foreach ($data as $line) {
+            $temp = explode(":",$line);
+            if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);
+        }
+        return $db;
+    }
+
     /** Show all entries in the asterisk database
      * @return Array associative array of key=>value
      */
@@ -689,20 +701,12 @@ class AMIClientConn extends MultiplexConn
             return NULL;
         }
 
-        $data = explode("\n",$r["data"]);
-        $db = array();
-
-        foreach ($data as $line) {
-            $temp = explode(":",$line);
-            if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);
-        }
-        return $db;
+        return $this->parse_database_data($r['data']);
     }
 
     function database_showkey($key)
     {
         $r = $this->Command("database showkey $key");
-        $data = explode("\n",$r["data"]);
 
         $this->raw_response = NULL;
         if (!is_array($r) || !isset($r['data'])) {
@@ -710,12 +714,7 @@ class AMIClientConn extends MultiplexConn
             return NULL;
         }
 
-        $db = array();
-        foreach ($data as $line) {
-            $temp = explode(":",$line);
-            if (count($temp) >= 2) $db[ trim($temp[0]) ] = trim($temp[1]);
-        }
-        return $db;
+        return $this->parse_database_data($r['data']);
     }
 
     /** Add an entry to the asterisk database

@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Thu Mar 31 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: use asynchronous AMI for GetVar to retrieve the channel
+  variable MIXMONITOR_FILENAME instead of going through CampaignProcess, thus
+  removing one use of AMI from CampaignProcess. Ported from CallCenterPRO.
+  SVN Rev[7526]
 - CHANGED: Dialer: remove unused parameter in _verificarFinLlamadasAgendables
   since now schedule unpause is done by AMIEventProcess. Ported from
   CallCenterPRO.

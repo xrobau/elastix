@@ -308,7 +308,7 @@ class Llamada
                 if (count($this->_actualizacionesPendientes) > 0) {
                     if (isset($this->_actualizacionesPendientes['sqlupdatecalls'])) {
                         //$this->_log->output('INFO: '.__METHOD__.': ya se tiene ID de llamada, actualizando call_entry...');
-                    	$paramActualizar = $this->_actualizacionesPendientes['sqlupdatecalls'];
+                        $paramActualizar = $this->_actualizacionesPendientes['sqlupdatecalls'];
                         unset($this->_actualizacionesPendientes['sqlupdatecalls']);
 
                         $paramActualizar['id'] = $this->id_llamada;
@@ -332,8 +332,18 @@ class Llamada
                         $this->_tuberia->msg_CampaignProcess_sqlinsertcurrentcalls($paramInsertarCC);
                         $this->_waiting_id_current_call = TRUE;
                     }
+                    if (isset($this->_actualizacionesPendientes['recording'])) {
+                        $listaRecording = $this->_actualizacionesPendientes['recording'];
+                        unset($this->_actualizacionesPendientes['recording']);
+
+                        foreach ($listaRecording as $tupla) {
+                            $this->_tuberia->msg_CampaignProcess_agregarArchivoGrabacion(
+                                $this->tipo_llamada, $this->id_llamada, $tupla['uniqueid'],
+                                $tupla['channel'], $tupla['recordingfile']);
+                        }
+                    }
                     if (count($this->_actualizacionesPendientes) > 0) {
-                    	$this->_log->output('ERR: '.__METHOD__.': actualización pendiente no implementada');
+                        $this->_log->output('ERR: '.__METHOD__.': actualización pendiente no implementada');
                     }
                 }
             }
@@ -1027,9 +1037,20 @@ class Llamada
 
     public function agregarArchivoGrabacion($uniqueid, $channel, $recordingfile)
     {
-        $this->_tuberia->msg_CampaignProcess_agregarArchivoGrabacion(
-            $this->tipo_llamada, $this->id_llamada, $uniqueid, $channel,
-            $recordingfile);
+        if (!is_null($this->id_llamada)) {
+            // Se tiene id_llamada, se manda mensaje directamente
+            $this->_tuberia->msg_CampaignProcess_agregarArchivoGrabacion(
+                $this->tipo_llamada, $this->id_llamada, $uniqueid, $channel,
+                $recordingfile);
+        } else {
+            // No se tiene id_llamada, se guarda en reserva.
+            // Esto sólo puede ocurrir para incoming
+            $this->_actualizacionesPendientes['recording'][] = array(
+                'uniqueid'      =>  $uniqueid,
+                'channel'       =>  $channel,
+                'recordingfile' =>  $recordingfile
+            );
+        }
     }
 
     public function agregarCanalSilenciado($chan)

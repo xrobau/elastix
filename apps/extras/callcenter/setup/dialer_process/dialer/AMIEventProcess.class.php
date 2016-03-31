@@ -1886,7 +1886,7 @@ Uniqueid: 1429642067.241008
 
         $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid']);
         if (is_null($llamada) && isset($this->_colasEntrantes[$params['Queue']])) {
-        	// Llamada de campaña entrante
+            // Llamada de campaña entrante
             $llamada = $this->_listaLlamadas->nuevaLlamada('incoming');
             $llamada->uniqueid = $params['Uniqueid'];
             $llamada->id_queue_call_entry = $this->_colasEntrantes[$params['Queue']]['id_queue_call_entry'];
@@ -1902,9 +1902,33 @@ Uniqueid: 1429642067.241008
                 $params['local_timestamp_received'],
                 $params['Channel'],
                 $params['Queue']);
+            if ($llamada->tipo_llamada == 'incoming') {
+                // Esto asume que toda llamada entrante se crea más arriba
+                $this->_ami->asyncGetVar(
+                    array($this, '_cb_GetVar_MIXMONITOR_FILENAME'),
+                    array($params['Channel'], $llamada),
+                    $params['Channel'], 'MIXMONITOR_FILENAME');
+            }
         }
 
         return FALSE;
+    }
+
+    // Callback con resultado del GetVar(MIXMONITOR_FILENAME)
+    public function _cb_GetVar_MIXMONITOR_FILENAME($r, $channel, $llamada)
+    {
+        if ($r['Response'] != 'Success') {
+            if ($this->DEBUG) {
+                $this->_log->output('DEBUG: '.__METHOD__.
+                    ': fallo en obtener MIXMONITOR_FILENAME para canal '.$channel.
+                    ': '.$r['Response'].' - '.$r['Message']);
+            }
+        } else {
+            $r['Value'] = trim($r['Value']);
+            if (!empty($r['Value'])) {
+                $llamada->agregarArchivoGrabacion($llamada->uniqueid, $channel, $r['Value']);
+            }
+        }
     }
 
     public function msg_Link($sEvent, $params, $sServer, $iPort)

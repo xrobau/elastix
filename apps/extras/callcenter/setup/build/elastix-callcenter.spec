@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Thu Mar 31 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Campaign Monitoring: fix lingering errors in event refactoring. Ported
+  from CallCenterPRO.
+  SVN Rev[7530]
 - CHANGED: Dialer: use is_callable() instead of open-coding it. Ported from
   CallCenterPRO.
   SVN Rev[7529]

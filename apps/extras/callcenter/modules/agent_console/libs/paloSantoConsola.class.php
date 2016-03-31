@@ -466,7 +466,7 @@ class PaloSantoConsola
         if (is_null($estado['callinfo']) && isset($connStatus->callchannel)) {
             $estado['callinfo'] = array_merge($this->_traducirEstadoLlamada($connStatus), array(
                 'agent_number'  =>  $this->_agent,
-                'remote_channel'=>  $connStatus->callchannel,
+                'remote_channel'=>  (string)$connStatus->callchannel,
             ));
         }
         return $estado;
@@ -485,6 +485,7 @@ class PaloSantoConsola
             'dialend'       =>  isset($xml_callinfo->dialend) ? (string)$xml_callinfo->dialend : NULL,
             'queuestart'    =>  isset($xml_callinfo->queuestart) ? (string)$xml_callinfo->queuestart : NULL,
             'linkstart'     =>  isset($xml_callinfo->linkstart) ? (string)$xml_callinfo->linkstart : NULL,
+            'trunk'         =>  isset($xml_callinfo->trunk) ? (string)$xml_callinfo->trunk : NULL,
         );
     }
 

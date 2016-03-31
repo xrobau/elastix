@@ -83,14 +83,14 @@ class AMIEventProcess extends TuberiaProcess
         $this->_listaAgentes = new ListaAgentes();
 
         // Registro de manejadores de eventos desde CampaignProcess
-        foreach (array('nuevaListaAgentes', 'avisoInicioOriginate',
+        foreach (array('nuevaListaAgentes',
             'idnewcall', 'idcurrentcall', 'canalRemotoAgente', 'actualizarConfig',
             'quitarReservaAgente') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('informarCredencialesAsterisk', 'nuevasCampanias',
             'leerTiempoContestar', 'nuevasLlamadasMarcar',
             'contarLlamadasEsperandoRespuesta', 'agentesAgendables',
-            'infoPrediccionCola') as $k)
+            'infoPrediccionCola', 'ejecutarOriginate') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde ECCPWorkerProcess
@@ -705,41 +705,23 @@ class AMIEventProcess extends TuberiaProcess
         return $listaKeyRepetidos;
     }
 
-    private function _avisoInicioOriginate($sActionID, $iTimestampInicioOriginate)
+    private function _ejecutarOriginate($sFuente, $sActionID, $iTimeoutOriginate,
+        $iTimestampInicioOriginate, $sContext, $sCID, $sCadenaVar, $retry,
+        $trunk, $precall_events = array())
     {
-    	$llamada = $this->_listaLlamadas->buscar('actionid', $sActionID);
+        $llamada = $this->_listaLlamadas->buscar('actionid', $sActionID);
         if (is_null($llamada)) {
-        	$this->_log->output('ERR: '.__METHOD__." no se encuentra llamada con ".
-                "actionid=$sActionID para aviso de resultado de Originate");
-        } else {
-        	// Un timestamp NULL indica fallo de Originate y quitar la llamada
-            if (is_null($iTimestampInicioOriginate)) {
-            	$this->_listaLlamadas->remover($llamada);
-                if (!is_null($llamada->agente_agendado)) {
-                	$a = $llamada->agente_agendado;
-                    $llamada->agente_agendado = NULL;
-                    $a->llamada_agendada = NULL;
-
-                    /* Se debe quitar la reservación únicamente si no hay más
-                     * llamadas agendadas para este agente. Si se cumple esto,
-                     * CampaignProcess lanzará el evento quitarReservaAgente
-                     * el cual quita asíncronamente la pausa del agente. */
-                    $this->_tuberia->msg_CampaignProcess_verificarFinLlamadasAgendables(
-                        $a->channel, $llamada->campania->id);
-                }
-            } else {
-            	$llamada->timestamp_originatestart = $iTimestampInicioOriginate;
-
-                /* Una llamada recién creada empieza con status == NULL. Si antes
-                 * de eso se recibió OriginateResponse(Failure) entonces se seteó
-                 * a Failure el estado. No se debe sobreescribir este Failure
-                 * para que se pueda limpiar la llamada en caso de que no se
-                 * reciba nunca un Hangup. */
-                if (is_null($llamada->status)) {
-                    $llamada->status = 'Placing';
-                }
-            }
+            $this->_log->output('ERR: '.__METHOD__." no se encuentra llamada con ".
+                "actionid=$sActionID para iniciar Originate");
+            $this->_tuberia->enviarRespuesta($sFuente, FALSE);
+            return;
         }
+
+        // Luego de llamar a este método, el status debería haber cambiado a Placing
+        $r = $llamada->marcarLlamada($this->_ami, $sFuente, $iTimeoutOriginate,
+            $iTimestampInicioOriginate, $sContext, $sCID, $sCadenaVar, $retry,
+            $trunk, $precall_events);
+        if (!$r) $this->_tuberia->enviarRespuesta($sFuente, FALSE);
     }
 
     private function _idnewcall($tipo_llamada, $uniqueid, $id_call)
@@ -1125,6 +1107,20 @@ class AMIEventProcess extends TuberiaProcess
             array($this, '_nuevasLlamadasMarcar'), $datos));
     }
 
+    public function rpc_ejecutarOriginate($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+
+        /* Se omite aquí la llamada a enviarRespuesta a propósito. La función
+         * _ejecutarOriginate va a iniciar una llamada AMI asíncrona, y el
+         * callback de esa llamada va a invocar enviarRespuesta. */
+        array_unshift($datos, $sFuente);
+        call_user_func_array(array($this, '_ejecutarOriginate'), $datos);
+    }
+
     public function rpc_agregarIntentoLoginAgente($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
@@ -1398,15 +1394,6 @@ class AMIEventProcess extends TuberiaProcess
             $this->_tmp_estadoLoginAgente = array();
             $this->_ami->Agents($this->_tmp_actionid_agents);
         }
-    }
-
-    public function msg_avisoInicioOriginate($sFuente, $sDestino, $sNombreMensaje,
-        $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_avisoInicioOriginate'), $datos);
     }
 
     public function msg_idNuevaSesionAgente($sFuente, $sDestino,

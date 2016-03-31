@@ -438,7 +438,7 @@ class Llamada
         case 'timestamp_originatestart':
             $this->_timestamp_originatestart = $v;
             if ($this->_stillborn && !is_null($this->timestamp_originateend)) {
-                /* Esta asignación se hace al recibir el evento avisoInicioOriginate.
+                /* Esta asignación se hace al ejecutar el callback _cb_Originate.
                  * Por lo tanto, si la llamada ya recibió el Hangup, se la debe
                  * quitar de la lista de seguimiento. */
                 if (!($this->_status == 'Failure' && is_null($this->_failure_cause))) {
@@ -537,6 +537,102 @@ class Llamada
         }
     }
 
+    public function marcarLlamada($ami, $sFuente, $iTimeoutOriginate,
+        $timestamp, $sContext, $sCID, $sCadenaVar, $retry, $trunk, $precall_events)
+    {
+        if (!in_array($this->tipo_llamada, array('outgoing')))
+            return FALSE;
+
+        // Notificar el progreso de la llamada
+        $paramProgreso = array(
+            'datetime_entry'                    =>  date('Y-m-d H:i:s', $timestamp),
+            'new_status'                        =>  'Placing',
+            'retry'                             =>  $retry,
+            'trunk'                             =>  $trunk,
+            'id_campaign_'.$this->tipo_llamada  =>  $this->campania->id,
+            'id_call_'.$this->tipo_llamada      =>  $this->id_llamada,
+            'extra_events'                      =>  $precall_events,
+        );
+        if (!is_null($this->agente_agendado)) {
+            $paramProgreso['agente_agendado'] = $this->agente_agendado->channel; // para emitir ScheduledCallStart
+            $paramProgreso['id_agent'] = $this->agente_agendado->id_agent;
+        }
+        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+
+        $sExten = NULL; $sDialstring = NULL;
+        if ($this->tipo_llamada == 'outgoing') {
+            $sExten = is_null($this->agente_agendado)
+                ? $this->campania->queue
+                : $this->agente_agendado->number;
+            $sDialstring = $this->dialstring;
+        }
+
+        $callable = array($this, '_cb_Originate');
+        $callable_params = array($sFuente, $timestamp, $retry, $trunk);
+        $ami->asyncOriginate(
+            $callable, $callable_params,
+            $sDialstring,
+            $sExten, $sContext, 1,
+            NULL, NULL, $iTimeoutOriginate, $sCID, $sCadenaVar,
+            NULL, TRUE, $this->actionid);
+
+        return TRUE;
+    }
+
+    public function _cb_Originate($r, $sFuente, $timestamp, $retry, $trunk)
+    {
+        $bExito = ($r['Response'] == 'Success');
+
+        // Respuesta para ECCPConn o CampaignProcess que esperaba...
+        $this->_tuberia->enviarRespuesta($sFuente, $bExito);
+        if (!$bExito) {
+            $this->_log->output('ERR: '.__METHOD__.
+                "campania {$this->tipo_llamada} ID={$this->campania->id} ".
+                (($this->tipo_llamada == 'outgoing') ? " cola {$this->campania->queue} " : '').
+                "no se puede llamar a número: ".print_r($r, TRUE));
+            if ($this->status == 'Placing') $this->status = 'Failure';
+
+            // Notificar el progreso de la llamada
+            $paramProgreso = array(
+                'datetime_entry'                    =>  time() /*$this->timestamp_originatestart*/,
+                'new_status'                        =>  $this->status,
+                'retry'                             =>  $retry,
+                'trunk'                             =>  $trunk,
+                'id_campaign_'.$this->tipo_llamada  =>  $this->campania->id,
+                'id_call_'.$this->tipo_llamada      =>  $this->id_llamada,
+            );
+            if (!is_null($this->agente_agendado)) {
+                $paramProgreso['agente_agendado'] = $this->agente_agendado->channel; // para emitir ScheduledCallStart
+                $paramProgreso['id_agent'] = $this->agente_agendado->id_agent;
+            }
+            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+
+            $this->_listaLlamadas->remover($this);
+
+            if (!is_null($this->agente_agendado)) {
+                $a = $this->agente_agendado;
+                $this->agente_agendado = NULL;
+                $a->llamada_agendada = NULL;
+
+                /* Se debe quitar la reservación únicamente si no hay más
+                 * llamadas agendadas para este agente. Si se cumple esto,
+                 * CampaignProcess lanzará el evento quitarReservaAgente
+                 * el cual quita asíncronamente la pausa del agente. */
+                $this->_tuberia->msg_CampaignProcess_verificarFinLlamadasAgendables(
+                    $a->channel, $this->campania->id);
+            }
+        } else {
+            $this->timestamp_originatestart = $timestamp;
+
+            /* Una llamada recién creada empieza con status == NULL. Si antes
+             * de eso se recibió OriginateResponse(Failure) entonces se seteó
+             * a Failure el estado. No se debe sobreescribir este Failure
+             * para que se pueda limpiar la llamada en caso de que no se
+             * reciba nunca un Hangup. */
+            if (!is_null($this->status)) $this->status = 'Placing';
+        }
+    }
+
     public function llamadaIniciaDial($timestamp, $destination)
     {
         $this->actualchannel = $destination;
@@ -619,8 +715,8 @@ class Llamada
                 $sAgente_agendado = $a->channel;
             }
 
-            /* Remover llamada que no se pudo colocar si ya se recibió
-             * avisoInicioOriginate, y si se tiene una causa de fallo válida. */
+            /* Remover llamada que no se pudo colocar si ya se ejecutó callback
+             * _cb_Originate, y si se tiene una causa de fallo válida. */
             if (!($this->_stillborn && is_null($this->timestamp_originatestart))) {
                 if (!is_null($this->failure_cause)) {
                     $this->_listaLlamadas->remover($this);

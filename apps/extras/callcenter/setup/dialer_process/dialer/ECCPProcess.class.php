@@ -642,6 +642,13 @@ SQL_EXISTE_AUDIT;
         }
         list($prop) = $datos;
 
+        // Para asegurar orden estricto de eventos
+        if (isset($prop['extra_events'])) {
+            $extra_events = $prop['extra_events'];
+            unset($prop['extra_events']);
+            $this->_lanzarEventos($extra_events);
+        }
+
         try {
             $this->_notificarProgresoLlamada($prop);
         } catch (PDOException $e) {

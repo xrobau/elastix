@@ -833,16 +833,19 @@ PETICION_LLAMADAS;
             }
         }
 
-        // Generar realmente todas las llamadas leídas
+        // Peticiones preparadas
         $sPeticionLlamadaColocada = <<<SQL_LLAMADA_COLOCADA
-UPDATE calls SET status = ?, datetime_originate = ?, fecha_llamada = NULL,
+UPDATE calls SET status = 'Placing', datetime_originate = ?, fecha_llamada = NULL,
     datetime_entry_queue = NULL, start_time = NULL, end_time = NULL,
     duration_wait = NULL, duration = NULL, failure_cause = NULL,
     failure_cause_txt = NULL, uniqueid = NULL, id_agent = NULL,
     retries = retries + 1
 WHERE id_campaign = ? AND id = ?
 SQL_LLAMADA_COLOCADA;
-        $sth = $this->_db->prepare($sPeticionLlamadaColocada);
+        $sth_placing = $this->_db->prepare($sPeticionLlamadaColocada);
+
+        // Generar realmente todas las llamadas leídas
+        $queue_monitor_format = NULL;
         foreach ($listaLlamadas as $tupla) {
             $listaVars = array(
                 'ID_CAMPAIGN'   =>  $infoCampania['id'],
@@ -852,8 +855,10 @@ SQL_LLAMADA_COLOCADA;
                 'CONTEXT'       =>  $infoCampania['context'],
             );
             if (!is_null($tupla['agent'])) {
-            	$listaVars['AGENTCHANNEL'] = $tupla['agent'];
-                $listaVars['QUEUE_MONITOR_FORMAT'] = $this->_formatoGrabacionCola($infoCampania['queue']);
+                $listaVars['AGENTCHANNEL'] = $tupla['agent'];
+                if (is_null($queue_monitor_format))
+                    $queue_monitor_format = $this->_formatoGrabacionCola($infoCampania['queue']);
+                $listaVars['QUEUE_MONITOR_FORMAT'] = $queue_monitor_format;
             }
             $sCadenaVar = $this->_construirCadenaVariables($listaVars);
             if ($this->DEBUG) {
@@ -870,93 +875,47 @@ SQL_LLAMADA_COLOCADA;
                     "\tCadena de marcado... {$tupla['dialstring']}\n".
                     "\tTimeout marcado..... ".(is_null($iTimeoutOriginate) ? '(por omisión)' : $iTimeoutOriginate.' ms.'));
             }
-            if (is_null($tupla['agent'])) {
-                $resultado = $this->_ami->Originate(
-                    $tupla['dialstring'], $infoCampania['queue'], $infoCampania['context'], 1,
-                    NULL, NULL, $iTimeoutOriginate,
-                    (isset($datosTrunk['CID']) ? $datosTrunk['CID'] : $tupla['phone']),
-                    $sCadenaVar,
-                    NULL,
-                    TRUE, $tupla['actionid']);
-            } else {
-                // Este código asume Agent/9000
-                $sExten = $tupla['agent']; $regs = NULL;
-                if (preg_match('|^(\w+)/(\d+)|', $sExten, $regs))
-                    $sExten = $regs[2];
-                $resultado = $this->_ami->Originate(
-                    $tupla['dialstring'], $sExten, 'llamada_agendada', 1,
-                    NULL, NULL, $iTimeoutOriginate,
-                    (isset($datosTrunk['CID']) ? $datosTrunk['CID'] : $tupla['phone']),
-                    $sCadenaVar,
-                    NULL,
-                    TRUE, $tupla['actionid']);
-            }
-            $iTimestampInicioOriginate = time();
 
-            if (!is_array($resultado) || count($resultado) == 0) {
-                $this->_log->output("ERR: problema al enviar Originate a Asterisk");
-                $this->_iniciarConexionAMI();
-            }
+            /* La actualización de la llamada a estado Placing en la base de
+             * datos debe realizarse ANTES de ejecutar el Originate, y también
+             * debe de lanzarse el evento de progreso ANTES del originate. Se
+             * confía en que AMIEventProcess lanzará el evento de Failure si el
+             * Originate falla.
+             *
+             * La notificación de progreso de llamada se realiza a través de
+             * AMIEventProcess para garantizar el orden de eventos y de escrituras
+             * en la tabla call_progress_log.
+             *
+             * Si ocurre una excepción de base de datos aquí, se la deja
+             * propagar luego de rollback. */
+            try {
+                $this->_db->beginTransaction();
 
-            if ($this->DEBUG) {
-                $this->_log->output("DEBUG: ".__METHOD__." llamada generada: {$tupla['actionid']} {$tupla['dialstring']}");
-            }
+                $iTimestampInicioOriginate = time();
+                $sth_placing->execute(array(
+                    date('Y-m-d H:i:s', $iTimestampInicioOriginate),
+                    $infoCampania['id'],
+                    $tupla['id']
+                ));
 
-            if ($resultado['Response'] == 'Success') {
-                $param_originateresult = array('Placing', date('Y-m-d H:i:s', $iTimestampInicioOriginate),
-                    $infoCampania['id'], $tupla['id']);
-                $ts = $iTimestampInicioOriginate;
-            } else {
-                $this->_log->output(
-                    "ERR: (campania {$infoCampania['id']} cola {$infoCampania['queue']}) ".
-                    "no se puede llamar a número - ".print_r($resultado, TRUE));
-                $param_originateresult = array('Failure', date('Y-m-d H:i:s', $iTimestampInicioOriginate),
-                    $infoCampania['id'], $tupla['id']);
-                $ts = NULL;
-            }
-
-
-            $retries = 10;
-            $deadlock_retry = FALSE;
-            do {
-                $deadlock_retry = FALSE;
-                try {
-                    $this->_db->beginTransaction();
-
-                    $sth->execute($param_originateresult);
-
-                    $this->_db->commit();
-                } catch (PDOException $e) {
-                    if (esReiniciable($e)) {
-                        // Códigos de error correspondientes a deadlock
-                        $this->_db->rollBack();
-                        $deadlock_retry = TRUE;
-                        $retries--;
-                        if ($retries <= 0) throw $e;
-                    } else {
-                        if (!is_null($this->_db)) {
-                            $this->_db->rollBack();
-                        }
-                        throw $e;
-                    }
+                $this->_db->commit();
+            } catch (PDOException $e) {
+                if (!is_null($this->_db)) {
+                    $this->_db->rollBack();
                 }
-            } while ($deadlock_retry && $retries > 0);
 
+                // TODO: deshacer AMIEventProcess_nuevasLlamadasMarcar sin marcar
 
-            $this->_tuberia->msg_AMIEventProcess_avisoInicioOriginate(
-                $tupla['actionid'], $ts);
+                throw $e;
+            }
 
-            // Notificar el progreso de la llamada
-            $prop = array(
-                'datetime_entry'        =>  date('Y-m-d H:i:s', $iTimestampInicioOriginate),
-                'new_status'            =>  ($resultado['Response'] == 'Success') ? 'Placing' : 'Failure',
-                'id_campaign_outgoing'  =>  $infoCampania['id'],
-                'id_call_outgoing'      =>  $tupla['id'],
-                'retry'                 =>  (is_null($tupla['retries']) ? 0 : $tupla['retries']) + 1,
-                'trunk'                 =>  $infoCampania['trunk'],
-            );
-            if (!is_null($tupla['agent'])) $prop['agente_agendado'] = $tupla['agent'];
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($prop);
+            // Mandar a ejecutar la llamada a través de AMIEventProcess
+            $this->_tuberia->AMIEventProcess_ejecutarOriginate(
+                $tupla['actionid'], $iTimeoutOriginate, $iTimestampInicioOriginate,
+                (is_null($tupla['agent']) ? $infoCampania['context'] : 'llamada_agendada'),
+                (isset($datosTrunk['CID']) ? $datosTrunk['CID'] : $tupla['phone']),
+                $sCadenaVar, (is_null($tupla['retries']) ? 0 : $tupla['retries']) + 1,
+                $infoCampania['trunk']);
         }
 
         /* Si se llega a este punto, se presume que, con agentes disponibles, y

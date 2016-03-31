@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Thu Mar 31 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: use is_callable() instead of open-coding it. Ported from
+  CallCenterPRO.
+  SVN Rev[7529]
 - CHANGED: Dialer: move execution of "database show QPENALTY" to AMIEventProcess
   using asynchronous AMI. This removes the last AMI use from event handlers in
   CampaignProcess as preparation for SQLWorkerProcess. Ported from

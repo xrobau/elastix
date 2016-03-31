@@ -666,8 +666,7 @@ class AMIClientConn extends MultiplexConn
             $this->_send_next_request();
         }
 
-        if ((is_array($handler) && count($handler) >= 2 && is_object($handler[0]) &&
-            method_exists($handler[0], $handler[1])) || function_exists($handler)) {
+        if (is_callable($handler)) {
             $ret = call_user_func_array($handler, $handler_params);
             $ret = ($ret !== 'AMI_EVENT_DISCARD');
         }

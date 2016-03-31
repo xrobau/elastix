@@ -1854,9 +1854,8 @@ PETICION_LLAMADAS_AGENTE;
         $sth->execute(array($num_completadas, $promedio, $desviacion, $id_campaign));
     }
 
-    private function _verificarFinLlamadasAgendables($sAgente, $id_campania, $infoSeguimiento)
+    private function _verificarFinLlamadasAgendables($sAgente, $id_campania)
     {
-        if (is_null($this->_ami)) return;
         $l = $this->_contarLlamadasAgendablesReserva($id_campania, $sAgente);
         if ($l['AHORA'] == 0 && $l['RESERVA'] == 0) {
             /* Por ahora el agente ya no tiene llamadas agendables y se debe

@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Mar 31 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: remove unused parameter in _verificarFinLlamadasAgendables
+  since now schedule unpause is done by AMIEventProcess. Ported from
+  CallCenterPRO.
+  SVN Rev[7525]
+
 * Wed Mar 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: retry call update operation on deadlock or timeout. This
   reduces the chances of an exception interruting the Predictor enumeration

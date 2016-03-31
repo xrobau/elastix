@@ -723,9 +723,9 @@ class AMIEventProcess extends TuberiaProcess
                     /* Se debe quitar la reservación únicamente si no hay más
                      * llamadas agendadas para este agente. Si se cumple esto,
                      * CampaignProcess lanzará el evento quitarReservaAgente
-                     * luego de quitar la pausa del agente. */
+                     * el cual quita asíncronamente la pausa del agente. */
                     $this->_tuberia->msg_CampaignProcess_verificarFinLlamadasAgendables(
-                        $a->channel, $llamada->campania->id, $a->resumenSeguimiento());
+                        $a->channel, $llamada->campania->id);
                 }
             } else {
             	$llamada->timestamp_originatestart = $iTimestampInicioOriginate;

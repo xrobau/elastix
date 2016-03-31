@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Thu Mar 31 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: move execution of "database show QPENALTY" to AMIEventProcess
+  using asynchronous AMI. This removes the last AMI use from event handlers in
+  CampaignProcess as preparation for SQLWorkerProcess. Ported from
+  CallCenterPRO.
+  SVN Rev[7528]
 - CHANGED: Dialer: factor out parse_database_data from AMI functions for a
   future commit. Ported from CallCenterPRO.
   SVN Rev[7527]

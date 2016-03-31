@@ -386,10 +386,9 @@ class CampaignProcess extends TuberiaProcess
         $recordset = $this->_db->query(
             'SELECT id, number, name, estatus, type FROM agent ORDER BY number, estatus');
         $lista = array(); $listaNum = array();
-        $arrExt = array();
         foreach ($recordset as $tupla) {
             if (!in_array($tupla['number'], $listaNum)) {
-            	$lista[] = array(
+                $lista[] = array(
                     'id'        =>  $tupla['id'],
                     'number'    =>  $tupla['number'],
                     'name'      =>  $tupla['name'],
@@ -397,25 +396,6 @@ class CampaignProcess extends TuberiaProcess
                     'type'      =>  $tupla['type'],
                 );
                 $listaNum[] = $tupla['number'];
-            }
-
-            $extension = $tupla['type']{0} . $tupla['number'];
-            $arrExt[$extension] = $tupla['type'].'/'.$tupla['number'];
-        }
-
-        $dynmembers = array();
-        $db_output = $this->_ami->database_show('QPENALTY');
-        if (!is_array($db_output)) {
-            $this->_log->output('ERR: '.__METHOD__.': fallo al ejecutar database show QPENALTY : '.
-                print_r($this->_ami->raw_response, TRUE));
-            return;
-        }
-        foreach (array_keys($db_output) as $k) {
-            $regs = NULL;
-            if (preg_match('|^/QPENALTY/(\d+)/agents/(\S+)$|', $k, $regs)) {
-                if (isset($arrExt[$regs[2]])) {
-                    $dynmembers[$arrExt[$regs[2]]][$regs[1]] = (int)$db_output[$k];
-                }
             }
         }
 
@@ -446,7 +426,7 @@ class CampaignProcess extends TuberiaProcess
         }
 
         // Mandar el recordset a AMIEventProcess como un mensaje
-        $this->_tuberia->msg_AMIEventProcess_nuevaListaAgentes($lista, $dynmembers, $queueflags);
+        $this->_tuberia->msg_AMIEventProcess_nuevaListaAgentes($lista, $queueflags);
     }
 
     private function _actualizarCampanias()

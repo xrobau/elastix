@@ -1300,8 +1300,45 @@ class AMIEventProcess extends TuberiaProcess
             return;
         }
 
-        list($total_agents, $dyn_agents, $queueflags) = $datos;
+        list($total_agents, $queueflags) = $datos;
 
+        $this->_ami->asyncCommand(
+            array($this, '_cb_Command_DatabaseShow'),
+            array($total_agents, $queueflags),
+            'database show QPENALTY');
+    }
+
+    public function _cb_Command_DatabaseShow($r, $total_agents, $queueflags)
+    {
+        if (!isset($r['data'])) {
+            $this->_log->output('ERR: '.__METHOD__.': fallo al ejecutar database show QPENALTY : '.
+                print_r($r, TRUE));
+            return;
+        }
+
+        // Se arma mapa de miembros tal como aparecen en database --> channel
+        $arrExt = array();
+        foreach ($total_agents as $tupla) {
+            $extension = $tupla['type']{0} . $tupla['number'];
+            $arrExt[$extension] = $tupla['type'].'/'.$tupla['number'];
+        }
+
+        $db_output = $this->_ami->parse_database_data($r['data']);
+        $dynmembers = array();
+        foreach (array_keys($db_output) as $k) {
+            $regs = NULL;
+            if (preg_match('|^/QPENALTY/(\d+)/agents/(\S+)$|', $k, $regs)) {
+                if (isset($arrExt[$regs[2]])) {
+                    $dynmembers[$arrExt[$regs[2]]][$regs[1]] = (int)$db_output[$k];
+                }
+            }
+        }
+
+        $this->_nuevaListaAgentes($total_agents, $dynmembers, $queueflags);
+    }
+
+    private function _nuevaListaAgentes($total_agents, $dyn_agents, $queueflags)
+    {
         foreach ($total_agents as $tupla) {
             // id type number name estatus
             $sAgente = $tupla['type'].'/'.$tupla['number'];

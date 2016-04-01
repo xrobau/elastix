@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: remove debugging messages on code involving Hold. Ported
+  from CallCenterPRO.
+  SVN Rev[7546]
 - CHANGED: Dialer: update UniqueidAgente when entering and leaving Hold. This
   prevents the call from being mis-identified as a transferred call. Ported from
   CallCenterPRO.

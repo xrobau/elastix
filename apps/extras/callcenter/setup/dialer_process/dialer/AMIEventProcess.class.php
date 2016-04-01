@@ -271,7 +271,7 @@ class AMIEventProcess extends TuberiaProcess
                 'QueueMemberStatus', 'QueueParams', 'QueueMember', 'QueueEntry',
                 'QueueStatusComplete', 'Leave', 'Reload', 'Agents', 'AgentsComplete',
                 'AgentCalled', 'AgentDump', 'AgentConnect', 'AgentComplete',
-                'QueueMemberPaused', 'ParkedCall', 'ParkedCallTimeOut',
+                'QueueMemberPaused', 'ParkedCall', /*'ParkedCallTimeOut',*/
                 'ParkedCallGiveUp',
             ) as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
@@ -1961,7 +1961,7 @@ Uniqueid: 1429642067.241008
         /* Se ha detectado llamada que regresa de hold. En el evento ParkedCall
          * se asignó el uniqueid nuevo. */
         if (!is_null($llamada) && $llamada->status == 'OnHold') {
-            if (true/*$this->DEBUG*/) {
+            if ($this->DEBUG) {
                 $this->_log->output("DEBUG: ".__METHOD__.": identificada llamada ".
                     "que regresa de HOLD {$llamada->actualchannel}, ".
                     "agentchannel={$sAgentChannel} se quita estado OnHold...");
@@ -2117,7 +2117,7 @@ Uniqueid: 1429642067.241008
 
     public function msg_Hangup($sEvent, $params, $sServer, $iPort)
     {
-        if (true /*$this->DEBUG*/) {
+        if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
                 "\n$sEvent: => ".print_r($params, TRUE)
@@ -2185,7 +2185,7 @@ Uniqueid: 1429642067.241008
                 $this->_config['dialer']['llamada_corta']);
         } else {
             if ($llamada->status == 'OnHold') {
-                if (true /*$this->DEBUG*/) {
+                if ($this->DEBUG) {
                     $this->_log->output('DEBUG: '.__METHOD__.': se ignora Hangup para llamada que se envía a HOLD.');
                 }
             } else {
@@ -2732,7 +2732,7 @@ Uniqueid: 1429642067.241008
     [Uniqueid] => 1459123412.11
     [local_timestamp_received] => 1459123412.7244
  */
-        if (true /*$this->DEBUG*/) {
+        if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
                 "\n$sEvent: => ".print_r($params, TRUE)
@@ -2742,7 +2742,7 @@ Uniqueid: 1429642067.241008
         $llamada = $this->_listaLlamadas->buscar('actualchannel', $params['Channel']);
         if (is_null($llamada)) return;
 
-        if (true/*$this->DEBUG*/) {
+        if ($this->DEBUG) {
             $this->_log->output("DEBUG: ".__METHOD__.": identificada llamada ".
                 "enviada a HOLD {$llamada->actualchannel} en parkinglot ".
                 "{$params['Exten']}, cambiado Uniqueid a {$params['Uniqueid']} ");
@@ -2751,10 +2751,10 @@ Uniqueid: 1429642067.241008
 
         // TODO: Timeout podría usarse para mostrar un cronómetro
     }
-
+/*
     public function msg_ParkedCallTimeOut($sEvent, $params, $sServer, $iPort)
     {
-        if (true /*$this->DEBUG*/) {
+        if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
                 "\n$sEvent: => ".print_r($params, TRUE)
@@ -2763,7 +2763,7 @@ Uniqueid: 1429642067.241008
 
 
     }
-
+*/
     public function msg_ParkedCallGiveUp($sEvent, $params, $sServer, $iPort)
     {
 /*
@@ -2779,7 +2779,7 @@ Uniqueid: 1429642067.241008
     [UniqueID] => 1459187104.6
     [local_timestamp_received] => 1459187117.4845
  */
-        if (true /*$this->DEBUG*/) {
+        if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
                 "\n$sEvent: => ".print_r($params, TRUE)
@@ -2790,7 +2790,7 @@ Uniqueid: 1429642067.241008
         if (is_null($llamada)) return;
 
         if ($llamada->status == 'OnHold') {
-            if (true /*$this->DEBUG*/) {
+            if ($this->DEBUG) {
                 $this->_log->output('DEBUG: '.__METHOD__.': llamada colgada mientras estaba en HOLD.');
             }
             $llamada->llamadaRegresaHold($this->_ami, $params['local_timestamp_received']);

@@ -1197,7 +1197,7 @@ class Llamada
     {
         $callable = array($this, '_cb_Park');
         $call_params = array($sFuente, $ami, $timestamp);
-        $this->_log->output('DEBUG: '.__METHOD__.": asyncPark({$this->actualchannel}, {$this->agentchannel})");
+        //$this->_log->output('DEBUG: '.__METHOD__.": asyncPark({$this->actualchannel}, {$this->agentchannel})");
         $ami->asyncPark(
             $callable, $call_params,
             $this->actualchannel,
@@ -1206,7 +1206,7 @@ class Llamada
 
     public function _cb_Park($r, $sFuente, $ami, $timestamp)
     {
-        $this->_log->output('DEBUG: '.__METHOD__.': r='.print_r($r, TRUE));
+        //$this->_log->output('DEBUG: '.__METHOD__.': r='.print_r($r, TRUE));
         $this->_tuberia->enviarRespuesta($sFuente,
             ($r['Response'] == 'Success')
                 ? array(0, '')

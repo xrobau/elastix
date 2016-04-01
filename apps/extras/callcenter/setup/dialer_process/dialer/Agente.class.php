@@ -279,6 +279,15 @@ class Agente
                 $this->_listaAgentes->agregarIndice('agentchannel', $sCanalNuevo, $this);
             }
             break;
+        case 'UniqueidAgente':
+            if ($v != $this->_UniqueidAgente) {
+                if (!is_null($this->_UniqueidAgente))
+                    $this->_listaAgentes->removerIndice('uniqueidlink', $this->_UniqueidAgente);
+                $this->_UniqueidAgente = $v;
+                if (!is_null($v))
+                    $this->_listaAgentes->agregarIndice('uniqueidlink', $v, $this);
+            }
+            break;
         default:
             die(__METHOD__.' - propiedad no implementada: '.$s);
         }
@@ -505,12 +514,9 @@ class Agente
 
     public function asignarLlamadaAtendida($llamada, $uniqueid_agente)
     {
-    	$this->_llamada = $llamada;
+        $this->_llamada = $llamada;
         $this->llamada_agendada = NULL;
-        if (!is_null($this->_UniqueidAgente))
-            $this->_listaAgentes->removerIndice('uniqueidlink', $this->_UniqueidAgente);
-        $this->_UniqueidAgente = $uniqueid_agente;
-        $this->_listaAgentes->agregarIndice('uniqueidlink', $uniqueid_agente, $this);
+        $this->UniqueidAgente = $uniqueid_agente;
         $this->resetTimeout();
     }
 
@@ -518,9 +524,7 @@ class Agente
     {
         $this->_llamada = NULL;
         $this->llamada_agendada = NULL;
-        if (!is_null($this->_UniqueidAgente))
-            $this->_listaAgentes->removerIndice('uniqueidlink', $this->_UniqueidAgente);
-        $this->_UniqueidAgente = NULL;
+        $this->UniqueidAgente = NULL;
         $this->resetTimeout();
     }
 

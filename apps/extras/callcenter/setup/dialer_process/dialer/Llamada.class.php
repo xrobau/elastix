@@ -930,11 +930,14 @@ class Llamada
         $this->request_hold = FALSE;
         $this->_park_exten = $parkexten;
 
+        // Se quita Uniqueid de agente obsoleto
+        if (!is_null($this->agente)) $this->agente->UniqueidAgente = NULL;
+
         // Esta asignación manda a escribir a la base de datos
         $this->uniqueid = $uniqueid_nuevo;
     }
 
-    public function llamadaRegresaHold($ami, $iTimestamp, /*$uniqueid_nuevo = NULL,*/ $sAgentChannel = NULL)
+    public function llamadaRegresaHold($ami, $iTimestamp, $sAgentChannel = NULL, $uniqueid_agente = NULL)
     {
         /* Para agentes dinámicos, el Originate de recuperación de la llamada
          * ocasiona que se asigne un nuevo canal de agente SIP/xxxx-abcde que
@@ -943,6 +946,7 @@ class Llamada
 
         if (!is_null($this->agente)) {
             $a = $this->agente;
+            $a->UniqueidAgente = $uniqueid_agente;
             $this->_tuberia->msg_ECCPProcess_marcarFinalHold(
                 $iTimestamp, $a->channel,
                 $this->resumenLlamada(),

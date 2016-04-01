@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: update UniqueidAgente when entering and leaving Hold. This
+  prevents the call from being mis-identified as a transferred call. Ported from
+  CallCenterPRO.
+  SVN Rev[7545]
 - CHANGED: Dialer: use ParkedCallGiveUp event instead of a Hangup special case
   to detect a call hangup while on a parking lot. Ported from CallCenterPRO.
   SVN Rev[7544]

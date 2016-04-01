@@ -1967,7 +1967,8 @@ Uniqueid: 1429642067.241008
                     "agentchannel={$sAgentChannel} se quita estado OnHold...");
             }
             $llamada->llamadaRegresaHold($this->_ami,
-                $params['local_timestamp_received'], $sAgentChannel);
+                $params['local_timestamp_received'], $sAgentChannel,
+                ($llamada->uniqueid == $params['Uniqueid1']) ? $params['Uniqueid2'] : $params['Uniqueid1']);
             return FALSE;
         }
 
@@ -2137,7 +2138,7 @@ Uniqueid: 1429642067.241008
              * El hangup de aquí podría ser para la parte de la llamada del
              * agente. */
             $a = $this->_listaAgentes->buscar('uniqueidlink', $params['Uniqueid']);
-            if (!is_null($a) && !is_null($a->llamada) && $a->llamada->status != 'OnHold') {
+            if (!is_null($a) && !is_null($a->llamada)) {
                 $llamada = $a->llamada;
             }
         }

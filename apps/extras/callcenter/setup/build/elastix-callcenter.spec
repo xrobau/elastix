@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: move audit fixing to SQLWorkerProcess. Ported from
+  CallCenterPRO.
+  SVN Rev[7549]
 - CHANGED: Dialer (ECCP): move call update events to SQLWorkerProcess. Ported
   from CallCenterPRO.
   SVN Rev[7548]

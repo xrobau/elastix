@@ -170,13 +170,8 @@ class AMIEventProcess extends TuberiaProcess
             // Desconectar a todos los agentes
             foreach ($this->_listaAgentes as $a) {
                 if (!is_null($a->id_sesion)) {
-                    $this->_tuberia->msg_ECCPProcess_AgentLogoff(
-                        $a->channel,
-                        microtime(TRUE),
-                        $a->id_agent,
-                        $a->id_sesion,
-                        $a->auditpauses);
-                    $a->terminarLoginAgente($this->_ami);
+                    $a->terminarLoginAgente($this->_tuberia, $this->_ami,
+                        microtime(TRUE));
                 }
             }
 
@@ -2773,13 +2768,6 @@ Uniqueid: 1429642067.241008
 
     private function _ejecutarLogoffAgente($sAgente, $a, $timestamp, $evtname)
     {
-        $this->_tuberia->msg_ECCPProcess_AgentLogoff(
-            $sAgente,
-            $timestamp,
-            $a->id_agent,
-            $a->id_sesion,
-            $a->auditpauses);
-
         if (!is_null($a->llamada)) {
             $this->_log->output('WARN: agente '.$a->channel.' todavía tiene una '.
                 'llamada al procesar '.$evtname.', se cierra...');
@@ -2790,7 +2778,7 @@ Uniqueid: 1429642067.241008
             }
         }
 
-        $a->terminarLoginAgente($this->_ami);
+        $a->terminarLoginAgente($this->_tuberia, $this->_ami, $timestamp);
     }
 
     private function _dumpstatus()

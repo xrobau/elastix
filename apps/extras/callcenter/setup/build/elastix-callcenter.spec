@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: move msg_ECCPProcess_AgentLogoff to Agente class. This
+  message is always paired to the Agente::terminarLoginAgente method. Ported
+  from CallCenterPRO.
+  SVN Rev[7536]
 - CHANGED: Dialer: move QueuePause from ECCPProcess to AMIEventProcess. Step 1
   of removal of AMI connection from ECCPProcess. Ported from CallCenterPRO.
   SVN Rev[7535]

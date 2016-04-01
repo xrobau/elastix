@@ -440,8 +440,16 @@ class Agente
     }
 
     // Se llama en Agentlogoff
-    public function terminarLoginAgente($ami)
+    public function terminarLoginAgente($tuberia, $ami, $timestamp)
     {
+        // Emitir AgentLogoff ANTES de limpiar pausas e ID de sesión
+        $tuberia->msg_ECCPProcess_AgentLogoff(
+            $this->channel,
+            $timestamp,
+            $this->id_agent,
+            $this->id_sesion,
+            $this->auditpauses);
+
         $this->clearBreak($ami);
         $this->clearHold();
         $this->clearReserved($ami);

@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: minor optimization to save 1 RPC on idle queue. Ported from
+  CallCenterPRO.
+  SVN Rev[7553]
 - CHANGED: Dialer: assume queue events for Asterisk 12 and later. Ported from
   CallCenterPRO.
   SVN Rev[7552]

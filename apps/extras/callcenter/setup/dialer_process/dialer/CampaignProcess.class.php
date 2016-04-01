@@ -512,16 +512,18 @@ PETICION_CAMPANIAS_ENTRANTES;
 
         // TODO: colocar código de detección de conflicto de agentes
 
-        /* El valor de llamadas predichas no toma en cuenta las llamadas que han
-         * sido generadas pero todavía no se recibe su OriginateResponse. Para
-         * evitar sobrecolocar mientras las primeras llamadas esperan ser
-         * contestadas, se cuentan tales llamadas y se resta. */
-        $iNumEsperanRespuesta = count($listaLlamadasAgendadas) +
-            $this->_contarLlamadasEsperandoRespuesta($infoCampania['queue']);
+        if ($iNumLlamadasColocar > 0) {
+            /* El valor de llamadas predichas no toma en cuenta las llamadas que han
+             * sido generadas pero todavía no se recibe su OriginateResponse. Para
+             * evitar sobrecolocar mientras las primeras llamadas esperan ser
+             * contestadas, se cuentan tales llamadas y se resta. */
+            $iNumEsperanRespuesta = count($listaLlamadasAgendadas) +
+                $this->_contarLlamadasEsperandoRespuesta($infoCampania['queue']);
 
-        if ($iNumLlamadasColocar > $iNumEsperanRespuesta)
-            $iNumLlamadasColocar -= $iNumEsperanRespuesta;
-        else $iNumLlamadasColocar = 0;
+            if ($iNumLlamadasColocar > $iNumEsperanRespuesta)
+                $iNumLlamadasColocar -= $iNumEsperanRespuesta;
+            else $iNumLlamadasColocar = 0;
+        }
 
         if (count($listaLlamadasAgendadas) <= 0 && $iNumLlamadasColocar <= 0) {
             if ($this->DEBUG) {

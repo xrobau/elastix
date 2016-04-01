@@ -1240,15 +1240,6 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, $r);
     }
 
-    public function _cb_QueuePause($r, $sAgente, $nstate)
-    {
-        if ($r['Response'] != 'Success') {
-            $this->_log->output('ERR: '.__METHOD__.' (internal) no se puede '.
-                ($nstate ? 'pausar' : 'despausar').' al agente '.$sAgente.': '.
-                $sAgente.' - '.$r['Message']);
-        }
-    }
-
     public function rpc_infoPrediccionCola($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {

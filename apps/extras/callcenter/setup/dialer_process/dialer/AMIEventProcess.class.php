@@ -1359,6 +1359,21 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tmp_actionid_queuestatus = 'QueueStatus-'.posix_getpid().'-'.time();
         $this->_tmp_estadoAgenteCola = array();
 
+        $versionMinima = array(12, 0, 0);
+        while (count($versionMinima) < count($this->_asteriskVersion))
+            array_push($versionMinima, 0);
+        while (count($versionMinima) > count($this->_asteriskVersion))
+            array_push($this->_asteriskVersion, 0);
+        $bEventosCola = ($this->_asteriskVersion >= $versionMinima);
+
+        // Asumir para Asterisk 12 o superior que siempre se tiene eventos de cola
+        if ($bEventosCola) {
+            foreach (array_keys($queueflags) as $k) {
+                $queueflags[$k]['eventmemberstatus'] = TRUE;
+                $queueflags[$k]['eventwhencalled'] = TRUE;
+            }
+        }
+
         $this->_ami->QueueStatus(NULL, $this->_tmp_actionid_queuestatus);
         $this->_queueshadow->QueueStatus_start($queueflags);
 

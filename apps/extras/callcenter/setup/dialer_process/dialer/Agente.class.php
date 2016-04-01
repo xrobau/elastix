@@ -351,10 +351,8 @@ class Agente
 
             $this->_decrementarPausas($ami);
         }
-        if (!is_null($this->_llamada)) {
+        if (!is_null($this->_llamada))
             $this->_llamada->request_hold = FALSE;
-            $this->_llamada->status = 'Success';
-        }
         $this->resetTimeout();
     }
 

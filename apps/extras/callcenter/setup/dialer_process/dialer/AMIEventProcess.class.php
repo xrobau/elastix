@@ -266,7 +266,7 @@ class AMIEventProcess extends TuberiaProcess
 
             // Instalación de los manejadores de eventos
             foreach (array('Newchannel', 'Dial', 'OriginateResponse', 'Join',
-                'Link', 'Unlink', 'Hangup', 'Agentlogin', 'Agentlogoff',
+                'Link', 'Hangup', 'Agentlogin', 'Agentlogoff',
                 'PeerStatus', 'QueueMemberAdded','QueueMemberRemoved','VarSet',
                 'QueueMemberStatus', 'QueueParams', 'QueueMember', 'QueueEntry',
                 'QueueStatusComplete', 'Leave', 'Reload', 'Agents', 'AgentsComplete',
@@ -1918,7 +1918,7 @@ Uniqueid: 1429642067.241008
 
         // Asterisk 11 no emite evento Unlink sino Bridge con Bridgestate=Unlink
         if (isset($params['Bridgestate']) && $params['Bridgestate'] == 'Unlink')
-            return $this->msg_Unlink($sEvent, $params, $sServer, $iPort);
+            return FALSE;
 
         $llamada = NULL;
 
@@ -1958,6 +1958,19 @@ Uniqueid: 1429642067.241008
             return FALSE;
         }
 
+        /* Se ha detectado llamada que regresa de hold. En el evento ParkedCall
+         * se asignó el uniqueid nuevo. */
+        if (!is_null($llamada) && $llamada->status == 'OnHold') {
+            if (true/*$this->DEBUG*/) {
+                $this->_log->output("DEBUG: ".__METHOD__.": identificada llamada ".
+                    "que regresa de HOLD {$llamada->actualchannel}, ".
+                    "agentchannel={$sAgentChannel} se quita estado OnHold...");
+            }
+            $llamada->llamadaRegresaHold($this->_ami,
+                $params['local_timestamp_received'], $sAgentChannel);
+            return FALSE;
+        }
+
         /* Si no se tiene clave, todavía puede ser llamada agendada que debe
          * buscarse por nombre de canal. También podría ser una llamada que
          * regresa de Hold, y que ha sido asignado un Uniqueid distinto. Para
@@ -1974,15 +1987,7 @@ Uniqueid: 1429642067.241008
             if (!is_null($llamada)) $sNuevo_Uniqueid = $params["Uniqueid2"];
         }
         if (!is_null($sNuevo_Uniqueid) && $llamada->uniqueid != $sNuevo_Uniqueid) {
-            if ($llamada->status == 'OnHold') {
-                if (true/*$this->DEBUG*/) {
-                    $this->_log->output("DEBUG: ".__METHOD__.": identificada llamada que regresa de HOLD ".
-                        "{$llamada->channel}, cambiado Uniqueid a {$sNuevo_Uniqueid} ");
-                }
-                $llamada->llamadaRegresaHold($this->_ami, $params['local_timestamp_received'],
-                    $sNuevo_Uniqueid, $sAgentChannel);
-                return FALSE;
-            } elseif (!is_null($llamada->agente_agendado) && $llamada->agente_agendado->channel == $sChannel) {
+            if (!is_null($llamada->agente_agendado) && $llamada->agente_agendado->channel == $sChannel) {
                 if ($this->DEBUG) {
                     $this->_log->output("DEBUG: ".__METHOD__.": identificada llamada agendada".
                         "{$llamada->channel}, cambiado Uniqueid a {$sNuevo_Uniqueid} ");
@@ -2109,33 +2114,9 @@ Uniqueid: 1429642067.241008
         return array($r1[2], $r1[0], $r1[1], $params['Channel2']);
     }
 
-    public function msg_Unlink($sEvent, $params, $sServer, $iPort)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.
-                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
-                "\n$sEvent: => ".print_r($params, TRUE)
-                );
-        }
-
-        $llamada = NULL;
-        if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid1']);
-        if (is_null($llamada)) $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid2']);
-
-        // Marcar el estado de la llamada que se manda a hold
-        if (!is_null($llamada) && $llamada->request_hold) {
-        	$llamada->status = 'OnHold';
-            if (true /*$this->DEBUG*/) {
-                $this->_log->output("DEBUG: ".__METHOD__.": llamada ".
-                    ($llamada->uniqueid)." ha sido puesta en HOLD en vez de colgada.");
-            }
-        }
-        return FALSE;
-    }
-
     public function msg_Hangup($sEvent, $params, $sServer, $iPort)
     {
-        if ($this->DEBUG) {
+        if (true /*$this->DEBUG*/) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
                 "\n$sEvent: => ".print_r($params, TRUE)
@@ -2150,35 +2131,27 @@ Uniqueid: 1429642067.241008
         $a = NULL;
         $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid']);
         if (is_null($llamada)) {
-        	/* Si la llamada ha sido transferida, la porción que está siguiendo
+            /* Si la llamada ha sido transferida, la porción que está siguiendo
              * el marcador todavía está activa, pero transferida a otra extensión.
              * Sin embargo, el agente está ahora libre y recibirá otra llamada.
              * El hangup de aquí podría ser para la parte de la llamada del
              * agente. */
             $a = $this->_listaAgentes->buscar('uniqueidlink', $params['Uniqueid']);
-            if (!is_null($a)) {
-            	$llamada = $a->llamada;
+            if (!is_null($a) && !is_null($a->llamada) && $a->llamada->status != 'OnHold') {
+                $llamada = $a->llamada;
             }
         }
 
-        if (is_null($llamada)) {
-            /* Si no se encuentra la llamada, es posible que se haya recibido
-             * Hangup del canal de una llamada que se ha enviado a HOLD, y que
-             * ya ha expirado su espera y debe finalizarse. Entonces OnHold será
-             * verdadero, y Channel coincidirá con el ActualChannel de una de
-             * las llamadas. Además debe de localizarse el agente ECCP que mandó
-             * a HOLD la llamada y quitarle la pausa. */
-            $llamada = $this->_listaLlamadas->buscar('actualchannel', $params['Channel']);
-            if (!is_null($llamada) && $llamada->status != 'OnHold') $llamada = NULL;
-            if (!is_null($llamada)) {
+        if (!is_null($llamada)) {
+
+            // TODO: este procesamiento debe de ir en ParkedCallGiveUp
+            if ($llamada->status == 'OnHold') {
                 if (true /*$this->DEBUG*/) {
                     $this->_log->output('DEBUG: '.__METHOD__.': llamada colgada mientras estaba en HOLD.');
                 }
                 $llamada->llamadaRegresaHold($this->_ami, $params['local_timestamp_received']);
             }
-        }
 
-        if (!is_null($llamada)) {
             $this->_procesarLlamadaColgada($llamada, $params);
         } elseif (is_null($a)) {
             /* No se encuentra la llamada entre las monitoreadas. Puede ocurrir
@@ -2777,6 +2750,11 @@ Uniqueid: 1429642067.241008
         $llamada = $this->_listaLlamadas->buscar('actualchannel', $params['Channel']);
         if (is_null($llamada)) return;
 
+        if (true/*$this->DEBUG*/) {
+            $this->_log->output("DEBUG: ".__METHOD__.": identificada llamada ".
+                "enviada a HOLD {$llamada->actualchannel} en parkinglot ".
+                "{$params['Exten']}, cambiado Uniqueid a {$params['Uniqueid']} ");
+        }
         $llamada->llamadaEnviadaHold($params['Exten'], $params['Uniqueid']);
 
         // TODO: Timeout podría usarse para mostrar un cronómetro

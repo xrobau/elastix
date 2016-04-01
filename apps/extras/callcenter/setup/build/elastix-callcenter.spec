@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: store new Uniqueid when parking call. This allows removal of
+  the Unlink handler. This also allows identification of the call that returns
+  from Hold without having to lookup the call by channel. Ported from
+  CallCenterPRO.
+  SVN Rev[7543]
 - CHANGED: Dialer: store parkinglot extension from ParkedCall event. This allows
   removal of the "parkedcalls show" command invocation in ECCPConn. Ported from
   CallCenterPRO.

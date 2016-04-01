@@ -924,20 +924,21 @@ class Llamada
 
     public function llamadaEnviadaHold($parkexten, $uniqueid_nuevo)
     {
+        if (!$this->request_hold) return;
+
+        $this->status = 'OnHold';
+        $this->request_hold = FALSE;
         $this->_park_exten = $parkexten;
 
-        // TODO: todavía no se usa $uniqueid_nuevo
+        // Esta asignación manda a escribir a la base de datos
+        $this->uniqueid = $uniqueid_nuevo;
     }
 
-    public function llamadaRegresaHold($ami, $iTimestamp, $uniqueid_nuevo = NULL, $sAgentChannel = NULL)
+    public function llamadaRegresaHold($ami, $iTimestamp, /*$uniqueid_nuevo = NULL,*/ $sAgentChannel = NULL)
     {
-        if (is_null($uniqueid_nuevo)) $uniqueid_nuevo = $this->_uniqueid;
-        if (is_null($this->_uniqueid) || $uniqueid_nuevo != $this->_uniqueid) {
-            if (!is_null($this->_uniqueid))
-                $this->_listaLlamadas->removerIndice('uniqueid', $this->_uniqueid);
-            $this->_uniqueid = $uniqueid_nuevo;
-            $this->_listaLlamadas->agregarIndice('uniqueid', $this->_uniqueid, $this);
-        }
+        /* Para agentes dinámicos, el Originate de recuperación de la llamada
+         * ocasiona que se asigne un nuevo canal de agente SIP/xxxx-abcde que
+         * debe de ser recogido y asignado. */
         if (!is_null($sAgentChannel)) $this->_agentchannel = $sAgentChannel;
 
         if (!is_null($this->agente)) {
@@ -951,14 +952,16 @@ class Llamada
 
         $this->_park_exten = NULL;
 
-        // Actualizar el Uniqueid en la base de datos
+        /* Actualizar el estado de salida de hold en la base de datos. Por
+         * compatibilidad, también se pasa el uniqueid, aunque no se haya vuelto
+         * a cambiar. */
         $this->_status = 'Success';
         if (!is_null($this->_id_llamada)) {
             $paramActualizar = array(
                 'tipo_llamada'  =>  $this->tipo_llamada,
                 'id_campaign'   =>  is_null($this->campania) ? NULL : $this->campania->id,
-                'id'            =>  $this->_id_llamada,
-                'uniqueid'      =>  $this->_uniqueid,
+                'id'            =>  $this->id_llamada,
+                'uniqueid'      =>  $this->uniqueid,
                 'status'        =>  ($this->tipo_llamada == 'incoming') ? 'activa' : 'Success',
             );
             $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
@@ -966,7 +969,7 @@ class Llamada
             // Notificar el progreso de la llamada
             $paramProgreso = array(
                 'datetime_entry'    =>  date('Y-m-d H:i:s', $iTimestamp),
-                'uniqueid'          =>  $this->_uniqueid,
+                'uniqueid'          =>  $this->uniqueid,
                 'new_status'        =>  'OffHold',
             );
             $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
@@ -978,7 +981,7 @@ class Llamada
             $paramActualizar = array(
                 'tipo_llamada'  =>  $this->tipo_llamada,
                 'id'            =>  $this->id_current_call,
-                'uniqueid'      =>  $this->_uniqueid,
+                'uniqueid'      =>  $this->uniqueid,
                 'hold'          =>  'N',
             );
             $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecurrentcalls($paramActualizar);

@@ -500,9 +500,6 @@ SQL_EXISTE_AUDIT;
             }
             marcarFinalBreakAgente($this->_db, $id_sesion, $iTimestampLogout);
 
-            // Quitar posibles pausas sobre el agente
-            $this->_ami->QueuePause(NULL, $sAgente, 'false');
-
             // Notificar a todas las conexiones abiertas
             $eventos[] = array('AgentLogoff', array($sAgente));
             $this->_lanzarEventos($eventos);

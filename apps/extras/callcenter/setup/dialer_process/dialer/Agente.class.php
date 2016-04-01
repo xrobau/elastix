@@ -467,6 +467,10 @@ class Agente
         $this->_extension = NULL;
         $this->_id_sesion = NULL;
         $this->resetTimeout();
+
+        if (count($this->_estado_agente_colas) > 0) {
+            $this->asyncQueuePause($ami, FALSE);
+        }
     }
 
     public function resumenSeguimiento()

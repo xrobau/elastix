@@ -83,7 +83,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_listaAgentes = new ListaAgentes();
 
         // Registro de manejadores de eventos desde CampaignProcess
-        foreach (array('canalRemotoAgente', 'quitarReservaAgente') as $k)
+        foreach (array('quitarReservaAgente') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('nuevasCampanias',
             'leerTiempoContestar', 'nuevasLlamadasMarcar',
@@ -767,29 +767,6 @@ class AMIEventProcess extends TuberiaProcess
         }
     }
 
-    private function _canalRemotoAgente($sAgentNum, $tipo_llamada, $uniqueid, $sCanalRemoto)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.': CampaignProcess avisa un canal remoto '.$sCanalRemoto);
-        }
-        $llamada = NULL;
-        $llamada = $this->_listaLlamadas->buscar('uniqueid', $uniqueid);
-        if (is_null($llamada)) {
-            $this->_log->output('ERR: '.__METHOD__.": no se encuentra llamada con tipo=$tipo_llamada uniqueid=$uniqueid");
-        } elseif (!is_null($llamada->agente) && $llamada->agente->number == $sAgentNum) {
-            if (is_null($llamada->actualchannel)) {
-                $llamada->actualchannel = $sCanalRemoto;
-
-            } elseif ($llamada->actualchannel != $sCanalRemoto) {
-                $this->_log->output('WARN: '.__METHOD__.
-                    ": llamada con tipo=$tipo_llamada id=$id_call canal remoto ".
-                    "recogido en Link auxiliar fue {$llamada->actualchannel} pero realmente es {$sCanalRemoto}");
-                $llamada->actualchannel = $sCanalRemoto;
-            }
-            // TODO: actualizar current_calls con canal remoto
-        }
-    }
-
     private function _pingAgente($sAgente)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
@@ -1462,15 +1439,6 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
         }
         call_user_func_array(array($this, '_idcurrentcall'), $datos);
-    }
-
-    public function msg_canalRemotoAgente($sFuente, $sDestino,
-        $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_canalRemotoAgente'), $datos);
     }
 
     public function msg_actualizarConfig($sFuente, $sDestino,

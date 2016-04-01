@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: remove unused message canalRemotoAgente from AMIEventProcess.
+  Ported from CallCenterPRO.
+  SVN Rev[7534]
 - CHANGED: Dialer: move call state update to SQLWorkerProcess. With this change
   call updates will no longer block on heavy reads from calls table. Ported from
   CallCenterPRO.

@@ -315,7 +315,7 @@ class Llamada
                         $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
                         // Lanzar evento ECCP en ECCPProcess
-                        $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada,
+                        $this->_tuberia->msg_SQLWorkerProcess_AgentLinked($this->tipo_llamada,
                             is_null($this->campania) ? NULL : $this->campania->id,
                             $this->id_llamada, $this->agente->channel,
                             is_null($this->actualchannel) ? $this->channel : $this->actualchannel,
@@ -560,7 +560,7 @@ class Llamada
             $paramProgreso['agente_agendado'] = $this->agente_agendado->channel; // para emitir ScheduledCallStart
             $paramProgreso['id_agent'] = $this->agente_agendado->id_agent;
         }
-        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+        $this->_tuberia->msg_SQLWorkerProcess_notificarProgresoLlamada($paramProgreso);
 
         $sExten = NULL; $sDialstring = NULL;
         if ($this->tipo_llamada == 'outgoing') {
@@ -608,7 +608,7 @@ class Llamada
                 $paramProgreso['agente_agendado'] = $this->agente_agendado->channel; // para emitir ScheduledCallStart
                 $paramProgreso['id_agent'] = $this->agente_agendado->id_agent;
             }
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+            $this->_tuberia->msg_SQLWorkerProcess_notificarProgresoLlamada($paramProgreso);
 
             $this->_listaLlamadas->remover($this);
 
@@ -649,7 +649,7 @@ class Llamada
         $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
         if (!is_null($this->campania))
             $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
-        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+        $this->_tuberia->msg_SQLWorkerProcess_notificarProgresoLlamada($paramProgreso);
     }
 
     public function llamadaFueOriginada($timestamp, $uniqueid, $channel,
@@ -764,7 +764,7 @@ class Llamada
             $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
         if (!is_null($sAgente_agendado))
             $paramProgreso['agente_agendado'] = $sAgente_agendado;
-        $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+        $this->_tuberia->msg_SQLWorkerProcess_notificarProgresoLlamada($paramProgreso);
     }
 
     public function llamadaEntraEnCola($timestamp, $channel, $sQueueNumber)
@@ -791,7 +791,7 @@ class Llamada
             $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
             // Notificar el progreso de la llamada
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada(array(
+            $this->_tuberia->msg_SQLWorkerProcess_notificarProgresoLlamada(array(
                 'datetime_entry'        =>  $paramActualizar['datetime_entry_queue'],
                 'id_campaign_outgoing'  =>  $this->campania->id,
                 'id_call_outgoing'      =>  $this->id_llamada,
@@ -898,7 +898,7 @@ class Llamada
             $this->_waiting_id_current_call = TRUE;
 
             // Lanzar evento ECCP en ECCPProcess
-            $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada,
+            $this->_tuberia->msg_SQLWorkerProcess_AgentLinked($this->tipo_llamada,
                 is_null($this->campania) ? NULL : $this->campania->id,
                 $this->id_llamada, $this->agente->channel, $sRemChannel,
                 date('Y-m-d H:i:s', $this->timestamp_link), $paramActualizar['id_agent'],
@@ -947,7 +947,7 @@ class Llamada
         if (!is_null($this->agente)) {
             $a = $this->agente;
             $a->UniqueidAgente = $uniqueid_agente;
-            $this->_tuberia->msg_ECCPProcess_marcarFinalHold(
+            $this->_tuberia->msg_SQLWorkerProcess_marcarFinalHold(
                 $iTimestamp, $a->channel,
                 $this->resumenLlamada(),
                 $a->resumenSeguimiento());
@@ -979,7 +979,7 @@ class Llamada
             $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
             if (!is_null($this->campania))
                 $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+            $this->_tuberia->msg_SQLWorkerProcess_notificarProgresoLlamada($paramProgreso);
         }
         if (!is_null($this->id_current_call)) {
             $paramActualizar = array(
@@ -1080,7 +1080,7 @@ class Llamada
             $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
             if (!is_null($this->agente)) {
-                $this->_tuberia->msg_ECCPProcess_AgentUnlinked(
+                $this->_tuberia->msg_SQLWorkerProcess_AgentUnlinked(
                     $this->agente->channel, $this->tipo_llamada,
                     is_null($this->campania) ? NULL : $this->campania->id,
                     $this->id_llamada, $this->phone,
@@ -1135,7 +1135,7 @@ class Llamada
             // Emitir el evento directamente en caso necesario
             if (!is_null($sAgente_agendado))
                 $paramProgreso['agente_agendado'] = $sAgente_agendado;
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+            $this->_tuberia->msg_SQLWorkerProcess_notificarProgresoLlamada($paramProgreso);
         }
 
         /* Para las llamadas exitosas, ya se ha recibido OriginateResponse y
@@ -1232,7 +1232,7 @@ class Llamada
             if (!is_null($this->campania)) {
                 $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
             }
-            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+            $this->_tuberia->msg_SQLWorkerProcess_notificarProgresoLlamada($paramProgreso);
         } else {
             $this->agente->clearHold($ami);
         }

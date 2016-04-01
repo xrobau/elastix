@@ -414,7 +414,7 @@ class Agente
             $this->_login_channel = $channel;
         } else {
             if ($this->_estado_consola != 'logged-out') {
-                $this->_tuberia->msg_ECCPProcess_AgentLogin(
+                $this->_tuberia->msg_SQLWorkerProcess_AgentLogin(
                     $this->channel,
                     microtime(TRUE),
                     NULL);
@@ -439,7 +439,7 @@ class Agente
         $this->_estado_consola = 'logged-in';
         $this->resetTimeout();
         $this->_logging_inicio = NULL;
-        $this->_tuberia->msg_ECCPProcess_AgentLogin(
+        $this->_tuberia->msg_SQLWorkerProcess_AgentLogin(
             $this->channel,
             microtime(TRUE),
             $this->id_agent);
@@ -452,7 +452,7 @@ class Agente
     public function terminarLoginAgente($ami, $timestamp)
     {
         // Emitir AgentLogoff ANTES de limpiar pausas e ID de sesión
-        $this->_tuberia->msg_ECCPProcess_AgentLogoff(
+        $this->_tuberia->msg_SQLWorkerProcess_AgentLogoff(
             $this->channel,
             $timestamp,
             $this->id_agent,
@@ -598,7 +598,7 @@ class Agente
         $colasAtencion = ($this->type == 'Agent')
             ? $this->colas_actuales
             : $this->colas_dinamicas;
-        $this->_tuberia->msg_ECCPProcess_nuevaMembresiaCola(
+        $this->_tuberia->msg_SQLWorkerProcess_nuevaMembresiaCola(
             $this->channel,
             $this->resumenSeguimientoLlamada(),
             $colasAtencion);

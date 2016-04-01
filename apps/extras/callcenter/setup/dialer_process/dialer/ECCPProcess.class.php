@@ -46,15 +46,12 @@ class ECCPProcess extends TuberiaProcess
      * desconectadas. */
     private $_finalizandoPrograma = FALSE;
 
-    private $_iTimestampInicioProceso;
-
     public function inicioPostDemonio($infoConfig, &$oMainLog)
     {
     	$this->_log = $oMainLog;
         $this->_multiplex = new ECCPServer('tcp://0.0.0.0:20005', $this->_log, $this->_tuberia);
         $this->_tuberia->registrarMultiplexHijo($this->_multiplex);
         $this->_tuberia->setLog($this->_log);
-        $this->_iTimestampInicioProceso = time();
 
         // Interpretar la configuración del demonio
         $this->_dsn = $this->_interpretarConfiguracion($infoConfig);
@@ -73,9 +70,7 @@ class ECCPProcess extends TuberiaProcess
         // Registro de manejadores de eventos
         foreach (array('emitirEventos',) as $k)
             $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "msg_$k"));
-        foreach (array('AgentLogin', 'AgentLogoff', 'AgentLinked',
-            'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada',
-            'nuevaMembresiaCola', 'recordingMute', 'recordingUnmute') as $k)
+        foreach (array('recordingMute', 'recordingUnmute') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
         foreach (array('eccpresponse') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
@@ -355,54 +350,6 @@ LISTA_AUDITORIAS_AGENTE;
         }
     }
 
-    /**
-     * Método para marcar en las tablas de auditoría que el agente ha iniciado
-     * la sesión. Esta implementación verifica si el agente ya ha sido marcado
-     * previamente como que inició la sesión, y sólo marca el inicio si no está
-     * ya marcado antes.
-     *
-     * @param   string  $sAgente    Canal del agente que se verifica sesión
-     * @param   int     $id_agent   ID en base de datos del agente
-     * @param   float   $iTimestampLogin timestamp devuelto por microtime() de login
-     *
-     * @return  mixed   NULL en error, o el ID de la auditoría de inicio de sesión
-     */
-    private function _marcarInicioSesionAgente($idAgente, $iTimestampLogin)
-    {
-        try {
-            // Verificación de sesión activa
-            $sPeticionExiste = <<<SQL_EXISTE_AUDIT
-SELECT id FROM audit
-WHERE id_agent = ? AND datetime_init >= ? AND datetime_end IS NULL
-    AND duration IS NULL AND id_break IS NULL
-ORDER BY datetime_init DESC
-SQL_EXISTE_AUDIT;
-            $recordset = $this->_db->prepare($sPeticionExiste);
-            $recordset->execute(array($idAgente, date('Y-m-d H:i:s', $this->_iTimestampInicioProceso)));
-            $tupla = $recordset->fetch();
-            $recordset->closeCursor();
-
-            // Se indica éxito de inmediato si ya hay una sesión
-            $idAudit = NULL;
-            if ($tupla) {
-                $idAudit = $tupla['id'];
-                $this->_log->output('WARN: '.__METHOD__.": id_agente={$idAgente} ".
-                    'inició sesión en '.date('Y-m-d H:i:s', $iTimestampLogin).
-                    " pero hay sesión abierta ID={$idAudit}, se reusa.");
-            } else {
-                // Ingreso de sesión del agente
-                $sTimeStamp = date('Y-m-d H:i:s', $iTimestampLogin);
-                $sth = $this->_db->prepare('INSERT INTO audit (id_agent, datetime_init) VALUES (?, ?)');
-                $sth->execute(array($idAgente, $sTimeStamp));
-                $idAudit = $this->_db->lastInsertId();
-            }
-
-            return $idAudit;
-        } catch (PDOException $e) {
-            $this->_stdManejoExcepcionDB($e, 'no se puede registrar inicio de sesión de agente');
-        	return NULL;
-        }
-    }
 
     /**************************************************************************/
 
@@ -417,214 +364,12 @@ SQL_EXISTE_AUDIT;
         $this->_lanzarEventos($eventos);
     }
 
-    public function msg_AgentLogin($sFuente, $sDestino, $sNombreMensaje,
-        $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($sAgente, $iTimestampLogin, $id_agent) = $datos;
-
-        try {
-            if (is_null($id_agent)) {
-                // Ha fallado un intento de login
-                $this->_multiplex->notificarEvento_AgentLogin($sAgente, NULL, FALSE);
-            } else {
-                $id_sesion = $this->_marcarInicioSesionAgente($id_agent, $iTimestampLogin);
-                if (!is_null($id_sesion)) {
-                    $this->_tuberia->msg_AMIEventProcess_idNuevaSesionAgente($sAgente, $id_sesion);
-
-                    // Notificar a todas las conexiones abiertas
-                    $this->_multiplex->notificarEvento_AgentLogin($sAgente, TRUE);
-                }
-            }
-        } catch (PDOException $e) {
-            $this->_stdManejoExcepcionDB($e, 'no se puede registrar inicio de sesión de agente');
-        }
-    }
-
-    public function msg_AgentLogoff($sFuente, $sDestino, $sNombreMensaje,
-        $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($sAgente, $iTimestampLogout, $id_agent, $id_sesion, $pausas) = $datos;
-
-        try {
-            $eventos = array();
-
-            // Escribir la información de auditoría en la base de datos
-            $this->_db->beginTransaction();
-            foreach ($pausas as $tipo_pausa => $id_pausa) if (!is_null($id_pausa)) {
-                // TODO: ¿Qué ocurre con la posible llamada parqueada?
-                marcarFinalBreakAgente($this->_db, $id_pausa, $iTimestampLogout);
-                $eventos[] = construirEventoPauseEnd($this->_db, $sAgente, $id_pausa, $tipo_pausa);
-            }
-            marcarFinalBreakAgente($this->_db, $id_sesion, $iTimestampLogout);
-
-            // Notificar a todas las conexiones abiertas
-            $eventos[] = array('AgentLogoff', array($sAgente));
-            $this->_lanzarEventos($eventos);
-
-            $this->_db->commit();
-        } catch (PDOException $e) {
-            $this->_db->rollBack();
-            $this->_stdManejoExcepcionDB($e, 'no se puede registrar final de sesión de agente');
-        }
-    }
-
-    public function msg_AgentLinked($sFuente, $sDestino, $sNombreMensaje,
-        $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($sTipoLlamada, $idCampania, $idLlamada, $sChannel, $sRemChannel,
-            $sFechaLink, $id_agent, $trunk, $queue) = $datos;
-
-        try {
-        	$infoLlamada = leerInfoLlamada($this->_db, $sTipoLlamada, $idCampania, $idLlamada);
-            /* Ya que la escritura a la base de datos es asíncrona, puede
-             * ocurrir que se lea la llamada en el estado OnQueue y sin fecha
-             * de linkstart. */
-            $infoLlamada['status'] = ($infoLlamada['calltype'] == 'incoming') ? 'activa' : 'Success';
-            if (!isset($infoLlamada['queue']) && !is_null($queue))
-                $infoLlamada['queue'] = $queue;
-            $infoLlamada['datetime_linkstart'] = $sFechaLink;
-            if (!isset($infoLlamada['trunk']) || is_null($infoLlamada['trunk']))
-                $infoLlamada['trunk'] = $trunk;
-
-            // Notificar el progreso de la llamada
-            $paramProgreso = array(
-                'datetime_entry'    =>  $sFechaLink,
-                'new_status'        =>  'Success',
-                'id_agent'          =>  $id_agent,
-            );
-            $paramProgreso['id_call_'.$sTipoLlamada] = $idLlamada;
-            if (!is_null($idCampania)) $paramProgreso['id_campaign_'.$sTipoLlamada] = $idCampania;
-
-            $infoLlamada['campaignlog_id'] = $this->_notificarProgresoLlamada($paramProgreso);
-            $this->_multiplex->notificarEvento_AgentLinked($sChannel, $sRemChannel, $infoLlamada);
-        } catch (PDOException $e) {
-        	$this->_stdManejoExcepcionDB($e, 'no se puede leer información de llamada para AgentLinked');
-        }
-    }
-
-    public function msg_AgentUnlinked($sFuente, $sDestino, $sNombreMensaje,
-        $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($sAgente, $sTipoLlamada, $idCampaign, $idLlamada, $sPhone,
-            $sFechaFin, $iDuracion, $bShortFlag, $paramProgreso) = $datos;
-
-        try {
-            $campaignlog_id = $this->_notificarProgresoLlamada($paramProgreso);
-            $this->_multiplex->notificarEvento_AgentUnlinked($sAgente, array(
-                'calltype'      =>  $sTipoLlamada,
-                'campaign_id'   =>  $idCampaign,
-                'call_id'       =>  $idLlamada,
-                'phone'         =>  $sPhone,
-                'datetime_linkend'  =>  $sFechaFin,
-                'duration'      =>  $iDuracion,
-                'shortcall'     =>  $bShortFlag ? 1 : 0,
-                'campaignlog_id'=>  $campaignlog_id,
-                'queue'         =>  $paramProgreso['queue'],
-            ));
-        } catch (PDOException $e) {
-            $this->_stdManejoExcepcionDB($e, 'no se puede leer información de llamada para AgentUnlinked');
-        }
-    }
-
-    public function msg_marcarFinalHold($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($iTimestampFinalPausa, $sAgente, $infoLlamada, $infoSeguimiento) = $datos;
-
-        try {
-            // Actualizar las tablas de calls y current_calls
-            // TODO: esto es equivalente a SQLWorkerProcess->sqlupdatecurrentcalls
-            $this->_db->beginTransaction();
-            if ($infoLlamada['calltype'] == 'incoming') {
-                $sth = $this->_db->prepare(
-                    'UPDATE current_call_entry SET hold = ? WHERE id = ?');
-                $sth->execute(array('N', $infoLlamada['currentcallid']));
-                $sth = $this->_db->prepare('UPDATE call_entry set status = ? WHERE id = ?');
-                $sth->execute(array('activa', $infoLlamada['callid']));
-            } elseif ($infoLlamada['calltype'] == 'outgoing') {
-                $sth = $this->_db->prepare(
-                    'UPDATE current_calls SET hold = ? WHERE id = ?');
-                $sth->execute(array('N', $infoLlamada['currentcallid']));
-                $sth = $this->_db->prepare('UPDATE calls set status = ? WHERE id = ?');
-                $sth->execute(array('Success', $infoLlamada['callid']));
-            }
-
-            // Auditoría del fin del hold
-            marcarFinalBreakAgente($this->_db, $infoSeguimiento['id_audit_hold'], $iTimestampFinalPausa);
-            $eventos[] = construirEventoPauseEnd($this->_db, $sAgente, $infoSeguimiento['id_audit_hold'], 'hold');
-            $this->_lanzarEventos($eventos);
-
-            $this->_db->commit();
-        } catch (PDOException $e) {
-            $this->_db->rollBack();
-            $this->_stdManejoExcepcionDB($e, 'no se puede actualizar el final de HOLD');
-        }
-    }
-
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
         $this->_log->output('INFO: recibido mensaje de finalización, se desconectan conexiones...');
         $this->_finalizandoPrograma = TRUE;
         $this->_multiplex->finalizarConexionesECCP();
         $this->_tuberia->msg_HubProcess_finalizacionTerminada();
-    }
-
-    public function msg_notificarProgresoLlamada($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($prop) = $datos;
-
-        // Para asegurar orden estricto de eventos
-        if (isset($prop['extra_events'])) {
-            $extra_events = $prop['extra_events'];
-            unset($prop['extra_events']);
-            $this->_lanzarEventos($extra_events);
-        }
-
-        try {
-            $this->_notificarProgresoLlamada($prop);
-        } catch (PDOException $e) {
-            $this->_stdManejoExcepcionDB($e, 'no se puede escribir bitácora de estado de llamada');
-        }
-    }
-
-    private function _notificarProgresoLlamada($prop)
-    {
-        list($id_campaignlog, $eventos) = construirEventoProgresoLlamada($this->_db, $prop);
-        $this->_lanzarEventos($eventos);
-        return $id_campaignlog;
-    }
-
-    public function msg_nuevaMembresiaCola($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
-        }
-        list($sAgente, $infoSeguimiento, $listaColas) = $datos;
-
-        try {
-            $recordset_breakinfo = NULL;
-            cargarInfoPausa($this->_db, $infoSeguimiento, $recordset_breakinfo);
-            $this->_multiplex->notificarEvento_QueueMembership($sAgente, $infoSeguimiento, $listaColas);
-        } catch (PDOException $e) {
-            $this->_stdManejoExcepcionDB($e, 'no se puede cargar información de pausa');
-        }
     }
 
     public function msg_recordingMute($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)

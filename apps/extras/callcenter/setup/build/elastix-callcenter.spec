@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer (ECCP): move call update events to SQLWorkerProcess. Ported
+  from CallCenterPRO.
+  SVN Rev[7548]
 - CHANGED: Dialer (ECCP): move SQL code for call progress notification to
   SQLWorkerProcess. This introduces a message handler to forward events from
   SQLWorkerProcess, and uses it to forward call progress messages. Ported from

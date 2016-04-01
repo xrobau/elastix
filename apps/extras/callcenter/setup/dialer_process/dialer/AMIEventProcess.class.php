@@ -93,13 +93,13 @@ class AMIEventProcess extends TuberiaProcess
 
         // Registro de manejadores de eventos desde SQLWorkerProcess
         foreach (array('actualizarConfig', 'nuevaListaAgentes', 'idnewcall',
-            'idcurrentcall',) as $k)
+            'idcurrentcall', 'idNuevaSesionAgente', ) as $k)
             $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "msg_$k"));
         foreach (array('informarCredencialesAsterisk', ) as $k)
             $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde ECCPWorkerProcess
-        foreach (array('idNuevaSesionAgente', 'quitarBreakAgente',
+        foreach (array('quitarBreakAgente',
             'llamadaSilenciada', 'llamadaSinSilencio') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente',

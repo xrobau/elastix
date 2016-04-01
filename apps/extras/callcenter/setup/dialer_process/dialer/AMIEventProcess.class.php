@@ -272,7 +272,7 @@ class AMIEventProcess extends TuberiaProcess
                 'QueueStatusComplete', 'Leave', 'Reload', 'Agents', 'AgentsComplete',
                 'AgentCalled', 'AgentDump', 'AgentConnect', 'AgentComplete',
                 'QueueMemberPaused', 'ParkedCall', /*'ParkedCallTimeOut',*/
-                'ParkedCallGiveUp',
+                'ParkedCallGiveUp', 'QueueCallerAbandon',
             ) as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
             $astman->add_event_handler('Bridge', array($this, "msg_Link")); // Visto en Asterisk 1.6.2.x
@@ -2524,6 +2524,37 @@ Uniqueid: 1429642067.241008
                 $this->_log->output('WARN: agente '.$params['Location'].' no es un agente registrado en el callcenter, se ignora');
             }
         }
+    }
+
+    public function msg_QueueCallerAbandon($sEvent, $params, $sServer, $iPort)
+    {
+        /*
+            [Event] => QueueCallerAbandon
+            [Privilege] => agent,all
+            [Queue] => 8010
+            [Uniqueid] => 1459286416.10
+            [Position] => 1
+            [OriginalPosition] => 1
+            [HoldTime] => 60
+            [local_timestamp_received] => 1459286477.4821
+         */
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['Uniqueid']);
+        if (is_null($llamada)) return;
+
+        /* TODO: el comportamiento de finalizar seguimiento sólo es adecuado si
+         * no hay ninguna cola enlazada como destino en caso de fallo, o si la
+         * cola enlazada corresponde a una campaña entrante. La asignación a otra
+         * cola de campaña saliente NO ESTÁ SOPORTADA. */
+        $llamada->llamadaFinalizaSeguimiento(
+            $params['local_timestamp_received'],
+            $this->_config['dialer']['llamada_corta']);
     }
 
     public function msg_Leave($sEvent, $params, $sServer, $iPort)

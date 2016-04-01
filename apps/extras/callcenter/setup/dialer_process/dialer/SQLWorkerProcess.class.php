@@ -531,9 +531,9 @@ class SQLWorkerProcess extends TuberiaProcess
                 'trunk'                 =>  $paramInsertar['trunk'],
             );
 
-            // TODO: traer actualización SQL a este proceso
-            $eventos[] = array('ECCPProcess', 'notificarProgresoLlamada',
-                array($infoProgreso));
+            list($id_campaignlog, $eventos_forward) = construirEventoProgresoLlamada($this->_db, $infoProgreso);
+            $eventos[] = array('ECCPProcess', 'emitirEventos',
+                array($eventos_forward));
         }
 
         return $eventos;

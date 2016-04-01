@@ -71,7 +71,7 @@ class ECCPProcess extends TuberiaProcess
         $this->_repararAuditoriasIncompletas();
 
         // Registro de manejadores de eventos
-        foreach (array('notificarProgresoLlamada') as $k)
+        foreach (array('emitirEventos',) as $k)
             $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "msg_$k"));
         foreach (array('AgentLogin', 'AgentLogoff', 'AgentLinked',
             'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada',
@@ -405,6 +405,17 @@ SQL_EXISTE_AUDIT;
     }
 
     /**************************************************************************/
+
+    public function msg_emitirEventos($sFuente, $sDestino, $sNombreMensaje,
+        $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        list($eventos) = $datos;
+
+        $this->_lanzarEventos($eventos);
+    }
 
     public function msg_AgentLogin($sFuente, $sDestino, $sNombreMensaje,
         $iTimestamp, $datos)

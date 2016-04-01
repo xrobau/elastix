@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: use ParkedCallGiveUp event instead of a Hangup special case
+  to detect a call hangup while on a parking lot. Ported from CallCenterPRO.
+  SVN Rev[7544]
 - CHANGED: Dialer: store new Uniqueid when parking call. This allows removal of
   the Unlink handler. This also allows identification of the call that returns
   from Hold without having to lookup the call by channel. Ported from

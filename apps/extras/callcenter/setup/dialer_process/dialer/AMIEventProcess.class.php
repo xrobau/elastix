@@ -2143,15 +2143,6 @@ Uniqueid: 1429642067.241008
         }
 
         if (!is_null($llamada)) {
-
-            // TODO: este procesamiento debe de ir en ParkedCallGiveUp
-            if ($llamada->status == 'OnHold') {
-                if (true /*$this->DEBUG*/) {
-                    $this->_log->output('DEBUG: '.__METHOD__.': llamada colgada mientras estaba en HOLD.');
-                }
-                $llamada->llamadaRegresaHold($this->_ami, $params['local_timestamp_received']);
-            }
-
             $this->_procesarLlamadaColgada($llamada, $params);
         } elseif (is_null($a)) {
             /* No se encuentra la llamada entre las monitoreadas. Puede ocurrir
@@ -2774,6 +2765,19 @@ Uniqueid: 1429642067.241008
 
     public function msg_ParkedCallGiveUp($sEvent, $params, $sServer, $iPort)
     {
+/*
+    [Event] => ParkedCallGiveUp
+    [Privilege] => call,all
+    [Exten] => 71
+    [Channel] => SIP/1071-00000003
+    [Parkinglot] => default
+    [CallerIDNum] => 1071
+    [CallerIDName] => A Cuenta SIP
+    [ConnectedLineNum] => 1064
+    [ConnectedLineName] => Alex
+    [UniqueID] => 1459187104.6
+    [local_timestamp_received] => 1459187117.4845
+ */
         if (true /*$this->DEBUG*/) {
             $this->_log->output('DEBUG: '.__METHOD__.
                 "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
@@ -2781,7 +2785,15 @@ Uniqueid: 1429642067.241008
                 );
         }
 
+        $llamada = $this->_listaLlamadas->buscar('uniqueid', $params['UniqueID']);
+        if (is_null($llamada)) return;
 
+        if ($llamada->status == 'OnHold') {
+            if (true /*$this->DEBUG*/) {
+                $this->_log->output('DEBUG: '.__METHOD__.': llamada colgada mientras estaba en HOLD.');
+            }
+            $llamada->llamadaRegresaHold($this->_ami, $params['local_timestamp_received']);
+        }
     }
 
     private function _ejecutarLogoffAgente($sAgente, $a, $timestamp, $evtname)

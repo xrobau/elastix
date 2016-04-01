@@ -1242,7 +1242,6 @@ class AMIEventProcess extends TuberiaProcess
             return;
         }
 
-        $this->_log->output('DEBUG: '.__METHOD__.": Agent($sAgente)->setHold($idHold, $idAuditHold)");
         $a->setHold($this->_ami, $idHold, $idAuditHold);
         $a->llamada->mandarLlamadaHold($this->_ami, $sFuente, $timestamp);
 

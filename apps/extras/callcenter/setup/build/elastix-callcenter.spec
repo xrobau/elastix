@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add call parking commands to AMIClientConn. Ported from
+  CallCenterPRO.
+  SVN Rev[7539]
 - CHANGED: Dialer: move QueuePause from ECCPProcess to AMIEventProcess. Step 2
   of removal of AMI connection from ECCPProcess. Ported from CallCenterPRO.
   SVN Rev[7538]

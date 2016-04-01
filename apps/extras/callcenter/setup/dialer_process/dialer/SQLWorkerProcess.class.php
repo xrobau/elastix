@@ -201,22 +201,30 @@ class SQLWorkerProcess extends TuberiaProcess
             /* Por ahora se intenta ejecutar todas las operaciones, incluso
              * si se intenta finalizar el programa. */
             if (count($this->_accionesPendientes) > 0) {
-                $this->_db->beginTransaction();
-
                 if ($this->DEBUG) {
                     $this->_volcarAccion($this->_accionesPendientes[0]);
                 }
+
+                $t_1 = microtime(TRUE);
+                $this->_db->beginTransaction();
+
                 $eventos = call_user_func_array(
                     $this->_accionesPendientes[0][0],
                     $this->_accionesPendientes[0][1]);
-                if ($this->DEBUG) {
-                    $this->_log->output('DEBUG: acción ejecutada correctamente.');
-                }
 
                 /* El commit también puede arrojar excepción. Se debe pasar más
                  * allá del commit antes de quitar la acción pendiente y lanzar
                  * los eventos. */
                 $this->_db->commit();
+                $t_2 = microtime(TRUE);
+                if ($this->DEBUG) {
+                    $this->_log->output('DEBUG: '.__METHOD__.' acción ejecutada correctamente.');
+                }
+                if ($this->DEBUG || ($t_2 - $t_1 >= 1.0)) {
+                    $this->_log->output('DEBUG: '.__METHOD__.' acción '.
+                        $this->_accionesPendientes[0][0][1].' tomó '.
+                        sprintf('%.2f s.', $t_2 - $t_1));
+                }
 
                 array_shift($this->_accionesPendientes);
                 $this->_lanzarEventos($eventos);

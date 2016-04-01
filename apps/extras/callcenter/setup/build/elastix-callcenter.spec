@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: add timing for each SQL action in SQLWorkerProcess. Ported
+  from CallCenterPRO.
+  SVN Rev[7556]
 - CHANGED: Dialer: perform SQL commit before removing the action and delivering
   events, not after. Ported from CallCenterPRO.
   SVN Rev[7555]

@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: make construirEventoProgresoLlamada private to
+  SQLWorkerProcess. Ported from CallCenterPRO.
+  SVN Rev[7551]
 - CHANGED: Dialer: remove unused database connection code from ECCPProcess.
   Ported from CallCenterPRO.
   SVN Rev[7550]

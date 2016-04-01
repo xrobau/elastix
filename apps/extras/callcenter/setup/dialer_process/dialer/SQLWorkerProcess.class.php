@@ -600,7 +600,7 @@ class SQLWorkerProcess extends TuberiaProcess
                 'trunk'                 =>  $paramInsertar['trunk'],
             );
 
-            list($id_campaignlog, $eventos_forward) = construirEventoProgresoLlamada($this->_db, $infoProgreso);
+            list($id_campaignlog, $eventos_forward) = $this->_construirEventoProgresoLlamada($infoProgreso);
             $eventos[] = array('ECCPProcess', 'emitirEventos',
                 array($eventos_forward));
         }
@@ -946,7 +946,7 @@ SQL_EXISTE_AUDIT;
         $paramProgreso['id_call_'.$sTipoLlamada] = $idLlamada;
         if (!is_null($idCampania)) $paramProgreso['id_campaign_'.$sTipoLlamada] = $idCampania;
 
-        list($infoLlamada['campaignlog_id'], $eventos_forward) = construirEventoProgresoLlamada($this->_db, $paramProgreso);
+        list($infoLlamada['campaignlog_id'], $eventos_forward) = $this->_construirEventoProgresoLlamada($paramProgreso);
         $eventos_forward[] = array('AgentLinked', array($sChannel, $sRemChannel, $infoLlamada));
 
         $eventos[] = array('ECCPProcess', 'emitirEventos', array($eventos_forward));
@@ -971,7 +971,7 @@ SQL_EXISTE_AUDIT;
             'queue'         =>  $paramProgreso['queue'],
         );
 
-        list($infoLlamada['campaignlog_id'], $eventos_forward) = construirEventoProgresoLlamada($this->_db, $paramProgreso);
+        list($infoLlamada['campaignlog_id'], $eventos_forward) = $this->_construirEventoProgresoLlamada($paramProgreso);
         $eventos_forward[] = array('AgentUnlinked', array($sAgente, $infoLlamada));
 
         $eventos[] = array('ECCPProcess', 'emitirEventos', array($eventos_forward));
@@ -1031,11 +1031,125 @@ SQL_EXISTE_AUDIT;
             unset($prop['extra_events']);
         }
 
-        list($id_campaignlog, $eventos_progreso) = construirEventoProgresoLlamada($this->_db, $prop);
+        list($id_campaignlog, $eventos_progreso) = $this->_construirEventoProgresoLlamada($prop);
         $eventos_forward = array_merge($eventos_forward, $eventos_progreso);
 
         $eventos[] = array('ECCPProcess', 'emitirEventos', array($eventos_forward));
         return $eventos;
+    }
+
+    private function _construirEventoProgresoLlamada($prop)
+    {
+        $id_campaignlog = NULL;
+        $ev = NULL;
+        $evlist = array();
+
+        $campaign_type = NULL;
+        foreach (array('incoming', 'outgoing') as $ct) {
+            if (isset($prop['id_call_'.$ct])) {
+                $campaign_type = $ct;
+                break;
+            }
+        }
+
+        /* Se leen las propiedades del último log de la llamada, o NULL si no
+         * hay cambio de estado previo. */
+        $recordset = $this->_db->prepare(
+            "SELECT retry, uniqueid, trunk, id_agent, duration ".
+            "FROM call_progress_log WHERE id_call_{$campaign_type} = ? ".
+            "ORDER BY datetime_entry DESC, id DESC LIMIT 0,1");
+        $recordset->execute(array($prop['id_call_'.$campaign_type]));
+        $tuplaAnterior = $recordset->fetch(PDO::FETCH_ASSOC);
+        $recordset->closeCursor();
+        if (!is_array($tuplaAnterior) || count($tuplaAnterior) <= 0) {
+            $tuplaAnterior = array(
+                'retry'             =>  0,
+                'uniqueid'          =>  NULL,
+                'trunk'             =>  NULL,
+                'id_agent'          =>  NULL,
+                'duration'          =>  NULL,
+            );
+        }
+
+        // Obtener agente agendado avisado por CampaignProcess o AMIEventProcess
+        $agente_agendado = NULL;
+        if (isset($prop['agente_agendado'])) {
+            $agente_agendado = $prop['agente_agendado'];
+            unset($prop['agente_agendado']);
+        }
+
+        // Si el número de reintento es distinto, se anulan datos anteriores
+        if (isset($prop['retry']) && $tuplaAnterior['retry'] != $prop['retry']) {
+            $tuplaAnterior['uniqueid'] = NULL;
+            $tuplaAnterior['trunk'] = NULL;
+            $tuplaAnterior['id_agent'] = NULL;
+            $tuplaAnterior['duration'] = NULL;
+        }
+        $tuplaAnterior = array_merge($tuplaAnterior, $prop);
+
+        // Escribir los valores nuevos en un nuevo registro
+        unset($tuplaAnterior['queue']);
+        $columnas = array_keys($tuplaAnterior);
+        $paramSQL = array();
+        foreach ($columnas as $k) $paramSQL[] = $tuplaAnterior[$k];
+        $sPeticionSQL = 'INSERT INTO call_progress_log ('.
+                implode(', ', $columnas).') VALUES ('.
+                implode(', ', array_fill(0, count($columnas), '?')).')';
+        $sth = $this->_db->prepare($sPeticionSQL);
+        $sth->execute($paramSQL);
+
+        $id_campaignlog = $tuplaAnterior['id'] = $this->_db->lastInsertId();
+
+        // Avisar el inicio del marcado de la llamada saliente agendada
+        if ($campaign_type == 'outgoing' && !is_null($agente_agendado)) {
+            if ($tuplaAnterior['new_status'] == 'Placing') {
+                $ev = array('ScheduledCallStart', array($agente_agendado, $campaign_type,
+                    $tuplaAnterior['id_campaign_outgoing'], $tuplaAnterior['id_call_outgoing']));
+                $evlist[] = $ev;
+            }
+            if (in_array($tuplaAnterior['new_status'], array('NoAnswer', 'Failure'))) {
+                $ev = array('ScheduledCallFailed', array($agente_agendado, $campaign_type,
+                    $tuplaAnterior['id_campaign_outgoing'], $tuplaAnterior['id_call_outgoing']));
+                $evlist[] = $ev;
+            }
+        }
+
+        /* Emitir el evento a las conexiones ECCP. Para mantener la
+         * consistencia con el resto del API, se quitan los valores de
+        * id_call_* y id_campaign_*, y se sintetiza tipo_llamada. */
+        if (!in_array($tuplaAnterior['new_status'], array('Success', 'Hangup', 'ShortCall'))) {
+            // Todavía no se soporta emitir agente conectado para OnHold/OffHold
+            unset($tuplaAnterior['id_agent']);
+
+            $tuplaAnterior['campaign_type'] = $campaign_type;
+            if (isset($tuplaAnterior['id_campaign_'.$campaign_type]))
+                $tuplaAnterior['campaign_id'] = $tuplaAnterior['id_campaign_'.$campaign_type];
+            $tuplaAnterior['call_id'] = $tuplaAnterior['id_call_'.$campaign_type];
+            unset($tuplaAnterior['id_campaign_'.$campaign_type]);
+            unset($tuplaAnterior['id_call_'.$campaign_type]);
+
+            // Agregar el teléfono callerid o marcado
+            $sql = array(
+                'outgoing'  =>
+                    'SELECT calls.phone, campaign.queue '.
+                    'FROM calls, campaign '.
+                    'WHERE calls.id_campaign = campaign.id AND calls.id = ?',
+                'incoming'  =>
+                    'SELECT call_entry.callerid AS phone, queue_call_entry.queue '.
+                    'FROM call_entry, queue_call_entry '.
+                    'WHERE call_entry.id_queue_call_entry = queue_call_entry.id AND call_entry.id = ?',
+            );
+            $recordset = $this->_db->prepare($sql[$tuplaAnterior['campaign_type']]);
+            $recordset->execute(array($tuplaAnterior['call_id']));
+            $tuplaNumero = $recordset->fetch(PDO::FETCH_ASSOC);
+            $recordset->closeCursor();
+            $tuplaAnterior['phone'] = $tuplaNumero['phone'];
+            $tuplaAnterior['queue'] = $tuplaNumero['queue'];
+            $ev = array('CallProgress', array($tuplaAnterior));
+            $evlist[] = $ev;
+        }
+
+        return array($id_campaignlog, $evlist);
     }
 
     /**************************************************************************/

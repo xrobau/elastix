@@ -1796,7 +1796,7 @@ Uniqueid: 1429642067.241008
         if ($a->estado_consola != 'logged-in') {
             if (!is_null($a->extension)) {
                 if (in_array($params['Queue'], $a->colas_dinamicas)) {
-                    $a->completarLoginAgente($this->_tuberia);
+                    $a->completarLoginAgente($this->_tuberia, $this->_ami);
                 } else {
                     $this->_log->output('WARN: '.__METHOD__.': se ignora ingreso a '.
                         'cola '.$params['Queue'].' de '.$sAgente.
@@ -2272,7 +2272,7 @@ Uniqueid: 1429642067.241008
             }
             return FALSE;
         }
-        $a->completarLoginAgente($this->_tuberia);
+        $a->completarLoginAgente($this->_tuberia, $this->_ami);
     }
 
     public function msg_Agentlogoff($sEvent, $params, $sServer, $iPort)

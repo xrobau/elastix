@@ -425,7 +425,7 @@ class Agente
     }
 
     // Se llama en Agentlogin al confirmar que agente está logoneado
-    public function completarLoginAgente($tuberia)
+    public function completarLoginAgente($tuberia, $ami)
     {
         $this->_estado_consola = 'logged-in';
         $this->resetTimeout();
@@ -434,6 +434,9 @@ class Agente
             $this->channel,
             microtime(TRUE),
             $this->id_agent);
+        if (count($this->_estado_agente_colas) > 0) {
+            $this->asyncQueuePause($ami, FALSE);
+        }
     }
 
     // Se llama en Agentlogoff

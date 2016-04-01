@@ -467,9 +467,6 @@ SQL_EXISTE_AUDIT;
                 // Ha fallado un intento de login
                 $this->_multiplex->notificarEvento_AgentLogin($sAgente, NULL, FALSE);
             } else {
-                // Si el agente está en pausa, se la quita ahora
-                $this->_ami->QueuePause(NULL, $sAgente, 'false');
-
                 $id_sesion = $this->_marcarInicioSesionAgente($id_agent, $iTimestampLogin);
                 if (!is_null($id_sesion)) {
                     $this->_tuberia->msg_AMIEventProcess_idNuevaSesionAgente($sAgente, $id_sesion);

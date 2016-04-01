@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: move QueuePause from ECCPProcess to AMIEventProcess. Step 1
+  of removal of AMI connection from ECCPProcess. Ported from CallCenterPRO.
+  SVN Rev[7535]
 - CHANGED: Dialer: remove unused message canalRemotoAgente from AMIEventProcess.
   Ported from CallCenterPRO.
   SVN Rev[7534]

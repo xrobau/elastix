@@ -29,6 +29,9 @@
 
 class ListaAgentes implements IteratorAggregate
 {
+    private $_tuberia;
+    private $_log;
+
     private $_agentes = array();
     private $_indices = array(
         'agentchannel'  =>  array(),    // agent->channel canal de agente (Agent/9000)
@@ -37,11 +40,18 @@ class ListaAgentes implements IteratorAggregate
         'extension'     =>  array(),    // agent->extension extensión (SIP/1064) que inició la llamada de login
     );
 
+    function __construct($tuberia, $log)
+    {
+    	$this->_tuberia = $tuberia;
+        $this->_log = $log;
+    }
+
     function numLlamadas() { return count($this->_agentes); }
 
-    function nuevoAgente($idAgente, $iNumero, $sNombre, $bEstatus, $sType, $log)
+    function nuevoAgente($idAgente, $iNumero, $sNombre, $bEstatus, $sType)
     {
-        $o = new Agente($this, $idAgente, $iNumero, $sNombre, $bEstatus, $sType, $log);
+        $o = new Agente($this, $idAgente, $iNumero, $sNombre, $bEstatus, $sType,
+            $this->_tuberia, $this->_log);
         $this->_agentes[] = $o;
         return $o;
     }

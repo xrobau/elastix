@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: each Agente object has its own reference to message pipe.
+  Ported from CallCenterPRO.
+  SVN Rev[7537]
 - CHANGED: Dialer: move msg_ECCPProcess_AgentLogoff to Agente class. This
   message is always paired to the Agente::terminarLoginAgente method. Ported
   from CallCenterPRO.

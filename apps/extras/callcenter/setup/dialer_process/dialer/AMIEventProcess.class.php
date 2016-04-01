@@ -80,7 +80,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->registrarMultiplexHijo($this->_multiplex);
         $this->_tuberia->setLog($this->_log);
         $this->_listaLlamadas = new ListaLlamadas($this->_tuberia, $this->_log);
-        $this->_listaAgentes = new ListaAgentes();
+        $this->_listaAgentes = new ListaAgentes($this->_tuberia, $this->_log);
 
         // Registro de manejadores de eventos desde CampaignProcess
         foreach (array('quitarReservaAgente') as $k)
@@ -170,7 +170,7 @@ class AMIEventProcess extends TuberiaProcess
             // Desconectar a todos los agentes
             foreach ($this->_listaAgentes as $a) {
                 if (!is_null($a->id_sesion)) {
-                    $a->terminarLoginAgente($this->_tuberia, $this->_ami,
+                    $a->terminarLoginAgente($this->_ami,
                         microtime(TRUE));
                 }
             }
@@ -338,7 +338,7 @@ class AMIEventProcess extends TuberiaProcess
     private function _cancelarIntentoLoginAgente($sAgente)
     {
         $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (!is_null($a)) $a->respuestaLoginAgente($this->_tuberia, 'Failure', NULL, NULL);
+        if (!is_null($a)) $a->respuestaLoginAgente('Failure', NULL, NULL);
         return !is_null($a);
     }
 
@@ -510,7 +510,7 @@ class AMIEventProcess extends TuberiaProcess
                         "cargado información de agente {$listaECCP[4]}");
                     $this->_tuberia->msg_SQLWorkerProcess_requerir_nuevaListaAgentes();
                 } else {
-                    $a->respuestaLoginAgente($this->_tuberia,
+                    $a->respuestaLoginAgente(
                         $params['Response'], $params['Uniqueid'], $params['Channel']);
                     if ($params['Response'] == 'Success') {
                         if ($this->DEBUG) {
@@ -545,7 +545,7 @@ class AMIEventProcess extends TuberiaProcess
     {
         $a = $this->_listaAgentes->buscar('uniqueidlogin', $params['Uniqueid']);
         if (is_null($a)) return FALSE;
-        $a->respuestaLoginAgente($this->_tuberia, 'Failure', NULL, NULL);
+        $a->respuestaLoginAgente('Failure', NULL, NULL);
         if ($this->DEBUG) {
             $this->_log->output("DEBUG: AgentLogin({$a->channel}) cuelga antes de ".
                 "introducir contraseña");
@@ -896,7 +896,7 @@ class AMIEventProcess extends TuberiaProcess
             }
             if (!is_null($a->logging_inicio) && time() - $a->logging_inicio > 5 * 60) {
                 $this->_log->output('ERR: proceso de login trabado para '.$a->channel.', se indica fallo...');
-                $a->respuestaLoginAgente($this->_tuberia, 'Failure', NULL, NULL);
+                $a->respuestaLoginAgente('Failure', NULL, NULL);
             }
         }
     }
@@ -1320,7 +1320,7 @@ class AMIEventProcess extends TuberiaProcess
                 // Agente nuevo por registrar
                 $a = $this->_listaAgentes->nuevoAgente($tupla['id'],
                     $tupla['number'], $tupla['name'], ($tupla['estatus'] == 'A'),
-                    $tupla['type'], $this->_log);
+                    $tupla['type']);
             } elseif ($a->id_agent != $tupla['id']) {
                 // Agente ha cambiado de ID de base de datos, y está deslogoneado
                 if ($a->estado_consola == 'logged-out') {
@@ -1339,7 +1339,7 @@ class AMIEventProcess extends TuberiaProcess
             $dyn = array();
             if (isset($dyn_agents[$sAgente]))
                 $dyn = $dyn_agents[$sAgente];
-            if ($a->asignarColasDinamicas($dyn)) $a->nuevaMembresiaCola($this->_tuberia);
+            if ($a->asignarColasDinamicas($dyn)) $a->nuevaMembresiaCola();
         }
 
         if (!is_null($this->_ami)) {
@@ -1786,12 +1786,12 @@ Uniqueid: 1429642067.241008
         /* El cambio de membresía sólo se reporta para agentes estáticos, porque
          * el de agentes dinámicos se reporta al refrescar membresía de agentes
          * con el mensaje desde CampaignProcess. */
-        if ($a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
+        if ($a->type == 'Agent') $a->nuevaMembresiaCola();
 
         if ($a->estado_consola != 'logged-in') {
             if (!is_null($a->extension)) {
                 if (in_array($params['Queue'], $a->colas_dinamicas)) {
-                    $a->completarLoginAgente($this->_tuberia, $this->_ami);
+                    $a->completarLoginAgente($this->_ami);
                 } else {
                     $this->_log->output('WARN: '.__METHOD__.': se ignora ingreso a '.
                         'cola '.$params['Queue'].' de '.$sAgente.
@@ -1837,7 +1837,7 @@ Uniqueid: 1429642067.241008
         /* El cambio de membresía sólo se reporta para agentes estáticos, porque
          * el de agentes dinámicos se reporta al refrescar membresía de agentes
          * con el mensaje desde CampaignProcess. */
-        if ($a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
+        if ($a->type == 'Agent') $a->nuevaMembresiaCola();
 
         if ($a->estado_consola == 'logged-in') {
             if ($a->type == 'Agent') {
@@ -2267,7 +2267,7 @@ Uniqueid: 1429642067.241008
             }
             return FALSE;
         }
-        $a->completarLoginAgente($this->_tuberia, $this->_ami);
+        $a->completarLoginAgente($this->_ami);
     }
 
     public function msg_Agentlogoff($sEvent, $params, $sServer, $iPort)
@@ -2464,7 +2464,7 @@ Uniqueid: 1429642067.241008
 
         // Para agentes estáticos, cambio de membresía debe reportarse
         $bCambioColas = $a->asignarEstadoEnColas($estadoCola_Status);
-        if ($bCambioColas && $a->type == 'Agent') $a->nuevaMembresiaCola($this->_tuberia);
+        if ($bCambioColas && $a->type == 'Agent') $a->nuevaMembresiaCola();
         $bAgentePausado = ($a->num_pausas > 0);
 
         $sAgente = $a->channel;
@@ -2778,7 +2778,7 @@ Uniqueid: 1429642067.241008
             }
         }
 
-        $a->terminarLoginAgente($this->_tuberia, $this->_ami, $timestamp);
+        $a->terminarLoginAgente($this->_ami, $timestamp);
     }
 
     private function _dumpstatus()

@@ -40,7 +40,9 @@ define('AST_DEVICE_ONHOLD',     8);
 
 class Agente
 {
+    // Relaciones con otros objetos conocidos
     private $_log;
+    private $_tuberia;
 
     private $_listaAgentes;
 
@@ -124,13 +126,14 @@ class Agente
     private $_logging_inicio = NULL;
 
     function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
-        $bEstatus, $sType, $log)
+        $bEstatus, $sType, $tuberia, $log)
     {
         $this->_listaAgentes = $lista;
         $this->_id_agent = (int)$idAgente;
         $this->_name = (string)$sNombre;
         $this->_estatus = (bool)$bEstatus;
         $this->_type = (string)$sType;
+        $this->_tuberia = $tuberia;
         $this->_log = $log;
         $this->resetTimeout();
 
@@ -395,7 +398,7 @@ class Agente
     }
 
     // Se llama en OriginateResponse exitoso, o en Hangup antes de completar login
-    public function respuestaLoginAgente($tuberia, $response, $uniqueid, $channel)
+    public function respuestaLoginAgente($response, $uniqueid, $channel)
     {
         if ($response == 'Success') {
             // El sistema espera ahora la contraseña del agente
@@ -405,7 +408,7 @@ class Agente
             $this->_login_channel = $channel;
         } else {
             if ($this->_estado_consola != 'logged-out') {
-                $tuberia->msg_ECCPProcess_AgentLogin(
+                $this->_tuberia->msg_ECCPProcess_AgentLogin(
                     $this->channel,
                     microtime(TRUE),
                     NULL);
@@ -425,12 +428,12 @@ class Agente
     }
 
     // Se llama en Agentlogin al confirmar que agente está logoneado
-    public function completarLoginAgente($tuberia, $ami)
+    public function completarLoginAgente($ami)
     {
         $this->_estado_consola = 'logged-in';
         $this->resetTimeout();
         $this->_logging_inicio = NULL;
-        $tuberia->msg_ECCPProcess_AgentLogin(
+        $this->_tuberia->msg_ECCPProcess_AgentLogin(
             $this->channel,
             microtime(TRUE),
             $this->id_agent);
@@ -440,10 +443,10 @@ class Agente
     }
 
     // Se llama en Agentlogoff
-    public function terminarLoginAgente($tuberia, $ami, $timestamp)
+    public function terminarLoginAgente($ami, $timestamp)
     {
         // Emitir AgentLogoff ANTES de limpiar pausas e ID de sesión
-        $tuberia->msg_ECCPProcess_AgentLogoff(
+        $this->_tuberia->msg_ECCPProcess_AgentLogoff(
             $this->channel,
             $timestamp,
             $this->id_agent,
@@ -585,12 +588,12 @@ class Agente
         return (count(array_intersect($currcolas, $this->colas_dinamicas)) > 0);
     }
 
-    public function nuevaMembresiaCola($tuberia)
+    public function nuevaMembresiaCola()
     {
         $colasAtencion = ($this->type == 'Agent')
             ? $this->colas_actuales
             : $this->colas_dinamicas;
-        $tuberia->msg_ECCPProcess_nuevaMembresiaCola(
+        $this->_tuberia->msg_ECCPProcess_nuevaMembresiaCola(
             $this->channel,
             $this->resumenSeguimientoLlamada(),
             $colasAtencion);

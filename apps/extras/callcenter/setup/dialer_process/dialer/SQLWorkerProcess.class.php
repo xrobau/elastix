@@ -213,10 +213,13 @@ class SQLWorkerProcess extends TuberiaProcess
                     $this->_log->output('DEBUG: acción ejecutada correctamente.');
                 }
 
+                /* El commit también puede arrojar excepción. Se debe pasar más
+                 * allá del commit antes de quitar la acción pendiente y lanzar
+                 * los eventos. */
+                $this->_db->commit();
+
                 array_shift($this->_accionesPendientes);
                 $this->_lanzarEventos($eventos);
-
-                $this->_db->commit();
             }
         } catch (PDOException $e) {
             if ($this->DEBUG || !esReiniciable($e)) {

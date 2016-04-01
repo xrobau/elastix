@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: perform SQL commit before removing the action and delivering
+  events, not after. Ported from CallCenterPRO.
+  SVN Rev[7555]
 - CHANGED: Dialer: handle QueueCallerAbandon event. This is required to properly
   mark as abandoned when a call times out in a queue and is transferred to a
   second queue without immediately hanging up. Fixes Elastix bug #2500. Ported

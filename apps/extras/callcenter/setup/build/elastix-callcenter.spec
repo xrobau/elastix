@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: move call state update to SQLWorkerProcess. With this change
+  call updates will no longer block on heavy reads from calls table. Ported from
+  CallCenterPRO.
+  SVN Rev[7533]
 - CHANGED: Dialer: introduce SQLWorkerProcess. This class will handle all
   database writes required by state changes that were previously executed in
   CampaignProcess. This should allow updates to be processed even when

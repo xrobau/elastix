@@ -26,7 +26,6 @@
  | The Initial Developer of the Original Code is PaloSanto Solutions    |
  +----------------------------------------------------------------------+
  $Id: DialerProcess.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
-require_once "/var/www/html/libs/callCenterProUtils.class.php";
 require_once 'ECCPHelper.lib.php';
 
 class SQLWorkerProcess extends TuberiaProcess
@@ -66,7 +65,7 @@ class SQLWorkerProcess extends TuberiaProcess
         $this->_tuberia->setLog($this->_log);
 
         // Interpretar la configuración del demonio
-        $this->_dsn = $this->_interpretarConfiguracion();
+        $this->_dsn = $this->_interpretarConfiguracion($infoConfig);
         if (!$this->_iniciarConexionDB()) return FALSE;
 
         // Leer el resto de la configuración desde la base de datos
@@ -112,11 +111,23 @@ class SQLWorkerProcess extends TuberiaProcess
         return TRUE;
     }
 
-    private function _interpretarConfiguracion()
+    private function _interpretarConfiguracion($infoConfig)
     {
-        $dbConfig = getCallCenterDBString(TRUE);
-        $this->_log->output('Usando host de base de datos: '.$dbConfig["host"]);
-        return array("mysql:host={$dbConfig["host"]};dbname=call_center_pro", $dbConfig["user"], $dbConfig["password"]);
+        $dbHost = 'localhost';
+        $dbUser = 'asterisk';
+        $dbPass = 'asterisk';
+        if (isset($infoConfig['database']) && isset($infoConfig['database']['dbhost'])) {
+            $dbHost = $infoConfig['database']['dbhost'];
+            $this->_log->output('Usando host de base de datos: '.$dbHost);
+        } else {
+            $this->_log->output('Usando host (por omisión) de base de datos: '.$dbHost);
+        }
+        if (isset($infoConfig['database']) && isset($infoConfig['database']['dbuser']))
+            $dbUser = $infoConfig['database']['dbuser'];
+        if (isset($infoConfig['database']) && isset($infoConfig['database']['dbpass']))
+            $dbPass = $infoConfig['database']['dbpass'];
+
+        return array("mysql:host=$dbHost;dbname=call_center", $dbUser, $dbPass);
     }
 
     private function _iniciarConexionDB()
@@ -310,21 +321,90 @@ class SQLWorkerProcess extends TuberiaProcess
 
     /**************************************************************************/
 
+    private function _encolarAccionPendiente($method, $params)
+    {
+        array_push($this->_accionesPendientes, array(
+            array($this, $method),    // callable
+            $params,    // params
+        ));
+
+    }
+
     public function msg_requerir_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
         $this->_log->output("INFO: $sFuente requiere refresco de lista de agentes");
-        array_push($this->_accionesPendientes, array(
-            array($this, '_requerir_nuevaListaAgentes'),    // callable
-            array(),    // params
-        ));
+        $this->_encolarAccionPendiente('_requerir_nuevaListaAgentes', $datos);
+    }
+
+    public function msg_sqlinsertcalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        $this->_encolarAccionPendiente('_sqlinsertcalls', $datos);
+    }
+
+    public function msg_sqlupdatecalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        $this->_encolarAccionPendiente('_sqlupdatecalls', $datos);
+    }
+
+    public function msg_sqlupdatecurrentcalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        $this->_encolarAccionPendiente('_sqlupdatecurrentcalls', $datos);
+    }
+
+    public function msg_sqlinsertcurrentcalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        $this->_encolarAccionPendiente('_sqlinsertcurrentcalls', $datos);
+    }
+
+    public function msg_sqldeletecurrentcalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        $this->_encolarAccionPendiente('_sqldeletecurrentcalls', $datos);
+    }
+
+    public function msg_sqlupdatestatcampaign($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        $this->_encolarAccionPendiente('_sqlupdatestatcampaign', $datos);
+    }
+
+    public function msg_agregarArchivoGrabacion($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' - '.print_r($datos, 1));
+        }
+        $this->_encolarAccionPendiente('_agregarArchivoGrabacion', $datos);
     }
 
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
         $this->_log->output('INFO: recibido mensaje de finalización...');
         $this->_finalizandoPrograma = TRUE;
+    }
 
-        // TODO: mover a manejador de finalsql cuando se migre a esta clase
+    public function msg_finalsql($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if (!$this->_finalizandoPrograma) {
+            $this->_log->output('WARN: AMIEventProcess envió mensaje antes que HubProcess');
+        }
+        $this->_finalizandoPrograma = TRUE;
         $this->_tuberia->msg_HubProcess_finalizacionTerminada();
     }
 
@@ -381,5 +461,309 @@ class SQLWorkerProcess extends TuberiaProcess
             array('AMIEventProcess', 'nuevaListaAgentes', array($lista, $queueflags)),
         );
     }
+
+    private function _sqlinsertcalls($paramInsertar)
+    {
+        $eventos = array();
+
+        // Porción que identifica la tabla a modificar
+        $tipo_llamada = $paramInsertar['tipo_llamada'];
+        unset($paramInsertar['tipo_llamada']);
+        switch ($tipo_llamada) {
+        case 'outgoing':
+            $sqlTabla = 'INSERT INTO calls ';
+            break;
+        case 'incoming':
+            $sqlTabla = 'INSERT INTO call_entry ';
+            break;
+        default:
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramInsertar, TRUE));
+            return $eventos;
+        }
+
+        // Recoger el canal para llamada entrante
+        $channel = NULL;
+        if (isset($paramInsertar['channel'])) {
+            $channel = $paramInsertar['channel'];
+            unset($paramInsertar['channel']);
+        }
+
+        // Caso especial: llamada entrante requiere ID de contacto
+        if ($tipo_llamada == 'incoming') {
+            /* Se consulta el posible contacto en base al caller-id. Si hay
+             * exactamente un contacto, su ID se usa para la inserción. */
+            $recordset = $this->_db->prepare('SELECT id FROM contact WHERE telefono = ?');
+
+            $recordset->execute(array($paramInsertar['callerid']));
+            $listaIdContactos = $recordset->fetchAll(PDO::FETCH_COLUMN, 0);
+            if (count($listaIdContactos) == 1) {
+                $paramInsertar['id_contact'] = $listaIdContactos[0];
+            }
+        }
+
+        $sqlCampos = array();
+        $params = array();
+        foreach ($paramInsertar as $k => $v) {
+            $sqlCampos[] = $k;
+            $params[] = $v;
+        }
+        $sql = $sqlTabla.'('.implode(', ', $sqlCampos).') VALUES ('.
+            implode(', ', array_fill(0, count($params), '?')).')';
+
+        $sth = $this->_db->prepare($sql);
+        $sth->execute($params);
+        $idCall = $this->_db->lastInsertId();
+
+        // Mandar de vuelta el ID de inserción a AMIEventProcess
+        $eventos[] = array('AMIEventProcess', 'idnewcall',
+            array($tipo_llamada, $paramInsertar['uniqueid'], $idCall));
+
+        // Para llamada entrante se debe de insertar el log de progreso
+        if ($tipo_llamada == 'incoming') {
+            // Notificar el progreso de la llamada
+            $infoProgreso = array(
+                'datetime_entry'        =>  $paramInsertar['datetime_entry_queue'],
+                'new_status'            =>  'OnQueue',
+                'id_campaign_incoming'  =>  $paramInsertar['id_campaign'],
+                'id_call_incoming'      =>  $idCall,
+                'uniqueid'              =>  $paramInsertar['uniqueid'],
+                'trunk'                 =>  $paramInsertar['trunk'],
+            );
+
+            // TODO: traer actualización SQL a este proceso
+            $eventos[] = array('ECCPProcess', 'notificarProgresoLlamada',
+                array($infoProgreso));
+        }
+
+        return $eventos;
+    }
+
+    // Procedimiento que actualiza una sola llamada de la tabla calls o call_entry
+    private function _sqlupdatecalls($paramActualizar)
+    {
+        $eventos = array();
+
+        $sql_list = array();
+        $id_llamada = NULL;
+
+        // Porción que identifica la tabla a modificar
+        $tipo_llamada = $paramActualizar['tipo_llamada'];
+        unset($paramActualizar['tipo_llamada']);
+        switch ($tipo_llamada) {
+        case 'outgoing':
+            $sqlTabla = 'UPDATE calls SET ';
+            break;
+        case 'incoming':
+            $sqlTabla = 'UPDATE call_entry SET ';
+            break;
+        default:
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramActualizar, TRUE));
+            return $eventos;
+        }
+
+        // Porción que identifica la tupla a modificar
+        $sqlWhere = array();
+        $paramWhere = array();
+        if (isset($paramActualizar['id_campaign'])) {
+            if (!is_null($paramActualizar['id_campaign'])) {
+                $sqlWhere[] = 'id_campaign = ?';
+                $paramWhere[] = $paramActualizar['id_campaign'];
+            }
+            unset($paramActualizar['id_campaign']);
+        }
+        if (isset($paramActualizar['id'])) {
+            $sqlWhere[] = 'id = ?';
+            $paramWhere[] = $paramActualizar['id'];
+            $id_llamada = $paramActualizar['id'];
+            unset($paramActualizar['id']);
+        }
+
+        // Parámetros a modificar
+        $sqlCampos = array();
+        $paramCampos = array();
+
+        // TODO: revisar si es necesario inc_retries, porque campañas
+        // salientes incrementan directamente al cambiar a Placing
+        //
+        // Caso especial: retries se debe de incrementar
+        if (isset($paramActualizar['inc_retries'])) {
+            $sqlCampos[] = 'retries = retries + ?';
+            $paramCampos[] = $paramActualizar['inc_retries'];
+            unset($paramActualizar['inc_retries']);
+        }
+        foreach ($paramActualizar as $k => $v) {
+            $sqlCampos[] = "$k = ?";
+            $paramCampos[] = $v;
+        }
+        $sql_list[] = array(
+            $sqlTabla.implode(', ', $sqlCampos).' WHERE '.implode(' AND ', $sqlWhere),
+            array_merge($paramCampos, $paramWhere),
+        );
+
+        $id_contact = NULL;
+        $failstates = array('Failure', 'NoAnswer', 'ShortCall', 'Abandoned');
+
+        foreach ($sql_list as $sql_item) {
+            $sth = $this->_db->prepare($sql_item[0]);
+            $sth->execute($sql_item[1]);
+        }
+
+        return $eventos;
+    }
+
+    // Procedimiento que inserta un solo registro en current_calls o current_call_entry
+    private function _sqlinsertcurrentcalls($paramInsertar)
+    {
+        $eventos = array();
+
+        // Porción que identifica la tabla a modificar
+        $tipo_llamada = $paramInsertar['tipo_llamada'];
+        unset($paramInsertar['tipo_llamada']);
+        switch ($tipo_llamada) {
+        case 'outgoing':
+            $sqlTabla = 'INSERT INTO current_calls ';
+            break;
+        case 'incoming':
+            $sqlTabla = 'INSERT INTO current_call_entry ';
+            break;
+        default:
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramInsertar, TRUE));
+            return $eventos;
+        }
+
+        $sqlCampos = array();
+        $params = array();
+        foreach ($paramInsertar as $k => $v) {
+            $sqlCampos[] = $k;
+            $params[] = $v;
+        }
+        $sql = $sqlTabla.'('.implode(', ', $sqlCampos).') VALUES ('.
+            implode(', ', array_fill(0, count($params), '?')).')';
+
+        $sth = $this->_db->prepare($sql);
+        $sth->execute($params);
+
+        // Mandar de vuelta el ID de inserción a AMIEventProcess
+        $eventos[] = array('AMIEventProcess', 'idcurrentcall', array(
+            $tipo_llamada,
+            isset($paramInsertar['id_call_entry'])
+            ? $paramInsertar['id_call_entry']
+            : $paramInsertar['id_call'],
+            $this->_db->lastInsertId())
+        );
+
+        return $eventos;
+    }
+
+    // Procedimiento que actualiza un solo registro en current_calls o current_call_entry
+    private function _sqlupdatecurrentcalls($paramActualizar)
+    {
+        $eventos = array();
+
+        // Porción que identifica la tabla a modificar
+        switch ($paramActualizar['tipo_llamada']) {
+        case 'outgoing':
+            $sqlTabla = 'UPDATE current_calls SET ';
+            break;
+        case 'incoming':
+            $sqlTabla = 'UPDATE current_call_entry SET ';
+            break;
+        default:
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramActualizar, TRUE));
+            return $eventos;
+        }
+        unset($paramActualizar['tipo_llamada']);
+
+        // Porción que identifica la tupla a modificar
+        $sqlWhere = array();
+        $paramWhere = array();
+        if (isset($paramActualizar['id'])) {
+            $sqlWhere[] = 'id = ?';
+            $paramWhere[] = $paramActualizar['id'];
+            unset($paramActualizar['id']);
+        }
+
+        // Parámetros a modificar
+        $sqlCampos = array();
+        $paramCampos = array();
+
+        foreach ($paramActualizar as $k => $v) {
+            $sqlCampos[] = "$k = ?";
+            $paramCampos[] = $v;
+        }
+
+        $sql = $sqlTabla.implode(', ', $sqlCampos).' WHERE '.implode(' AND ', $sqlWhere);
+        $params = array_merge($paramCampos, $paramWhere);
+
+        $sth = $this->_db->prepare($sql);
+        $sth->execute($params);
+
+        return $eventos;
+    }
+
+    private function _sqldeletecurrentcalls($paramBorrar)
+    {
+        $eventos = array();
+
+        // Esto no debería pasar (manualdialing)
+        if (!in_array($paramBorrar['tipo_llamada'], array('incoming', 'outgoing'))) {
+            $this->_log->output('ERR: '.__METHOD__.' no debió haberse recibido para '.
+                print_r($paramBorrar, TRUE));
+            return $eventos;
+        }
+
+        // Porción que identifica la tabla a modificar
+        $sth = $this->_db->prepare(($paramBorrar['tipo_llamada'] == 'outgoing')
+            ? 'DELETE FROM current_calls WHERE id = ?'
+            : 'DELETE FROM current_call_entry WHERE id = ?');
+        $sth->execute(array($paramBorrar['id']));
+
+        return $eventos;
+    }
+
+    private function _sqlupdatestatcampaign($id_campaign, $num_completadas,
+            $promedio, $desviacion)
+    {
+        $eventos = array();
+
+        $sth = $this->_db->prepare(
+            'UPDATE campaign SET num_completadas = ?, promedio = ?, desviacion = ? WHERE id = ?');
+        $sth->execute(array($num_completadas, $promedio, $desviacion, $id_campaign));
+
+        return $eventos;
+    }
+
+    private function _agregarArchivoGrabacion($tipo_llamada, $id_llamada, $uniqueid, $channel, $recordingfile)
+    {
+        $eventos = array();
+
+        // TODO: configurar prefijo de monitoring
+        $sDirBaseMonitor = '/var/spool/asterisk/monitor/';
+
+        // Quitar el prefijo de monitoring de todos los archivos
+        if (strpos($recordingfile, $sDirBaseMonitor) === 0)
+            $recordingfile = substr($recordingfile, strlen($sDirBaseMonitor));
+
+        // Se asume que el archivo está completo con extensión
+        $field = 'id_call_'.$tipo_llamada;
+        $recordset = $this->_db->prepare("SELECT COUNT(*) AS N FROM call_recording WHERE {$field} = ? AND recordingfile = ?");
+        $recordset->execute(array($id_llamada, $recordingfile));
+        $iNumDuplicados = $recordset->fetch(PDO::FETCH_COLUMN, 0);
+        $recordset->closeCursor();
+        if ($iNumDuplicados <= 0) {
+            // El archivo no constaba antes - se inserta con los datos actuales
+            $sth = $this->_db->prepare(
+                "INSERT INTO call_recording (datetime_entry, {$field}, uniqueid, channel, recordingfile) ".
+                'VALUES (NOW(), ?, ?, ?, ?)');
+            $sth->execute(array($id_llamada, $uniqueid, $channel, $recordingfile));
+        }
+
+        return $eventos;
+    }
+
 
 }

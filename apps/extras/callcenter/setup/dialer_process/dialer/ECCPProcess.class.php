@@ -76,7 +76,7 @@ class ECCPProcess extends TuberiaProcess
 
         // Registro de manejadores de eventos
         foreach (array('notificarProgresoLlamada') as $k)
-            $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
+            $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "msg_$k"));
         foreach (array('AgentLogin', 'AgentLogoff', 'AgentLinked',
             'AgentUnlinked', 'marcarFinalHold', 'notificarProgresoLlamada',
             'nuevaMembresiaCola', 'recordingMute', 'recordingUnmute') as $k)

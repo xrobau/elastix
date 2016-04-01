@@ -83,8 +83,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_listaAgentes = new ListaAgentes();
 
         // Registro de manejadores de eventos desde CampaignProcess
-        foreach (array('idnewcall', 'idcurrentcall',
-            'canalRemotoAgente', 'quitarReservaAgente') as $k)
+        foreach (array('canalRemotoAgente', 'quitarReservaAgente') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('nuevasCampanias',
             'leerTiempoContestar', 'nuevasLlamadasMarcar',
@@ -93,7 +92,8 @@ class AMIEventProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde SQLWorkerProcess
-        foreach (array('actualizarConfig', 'nuevaListaAgentes', ) as $k)
+        foreach (array('actualizarConfig', 'nuevaListaAgentes', 'idnewcall',
+            'idcurrentcall',) as $k)
             $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "msg_$k"));
         foreach (array('informarCredencialesAsterisk', ) as $k)
             $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "rpc_$k"));
@@ -755,7 +755,7 @@ class AMIEventProcess extends TuberiaProcess
                 if ($this->DEBUG) {
                     $this->_log->output('DEBUG: '.__METHOD__." la llamada se cerró antes de conocer su id_current_call.");
                 }
-                $this->_tuberia->msg_CampaignProcess_sqldeletecurrentcalls(array(
+                $this->_tuberia->msg_SQLWorkerProcess_sqldeletecurrentcalls(array(
                     'tipo_llamada'  =>  $tipo_llamada,
                     'id'            =>  $id_current_call,
                 ));
@@ -938,7 +938,7 @@ class AMIEventProcess extends TuberiaProcess
                 }
                 if ($this->_listaLlamadas->numLlamadas() > 0) return;
             }
-            $this->_tuberia->msg_CampaignProcess_finalsql();
+            $this->_tuberia->msg_SQLWorkerProcess_finalsql();
             $this->_tuberia->msg_HubProcess_finalizacionTerminada();
             $this->_finalizacionConfirmada = TRUE;
         }

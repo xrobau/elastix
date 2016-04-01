@@ -312,7 +312,7 @@ class Llamada
                         unset($this->_actualizacionesPendientes['sqlupdatecalls']);
 
                         $paramActualizar['id'] = $this->id_llamada;
-                        $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
+                        $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
                         // Lanzar evento ECCP en ECCPProcess
                         $this->_tuberia->msg_ECCPProcess_AgentLinked($this->tipo_llamada,
@@ -329,7 +329,7 @@ class Llamada
 
                         $paramInsertarCC[($this->tipo_llamada == 'incoming') ? 'id_call_entry' : 'id_call'] =
                             $this->id_llamada;
-                        $this->_tuberia->msg_CampaignProcess_sqlinsertcurrentcalls($paramInsertarCC);
+                        $this->_tuberia->msg_SQLWorkerProcess_sqlinsertcurrentcalls($paramInsertarCC);
                         $this->_waiting_id_current_call = TRUE;
                     }
                     if (isset($this->_actualizacionesPendientes['recording'])) {
@@ -337,7 +337,7 @@ class Llamada
                         unset($this->_actualizacionesPendientes['recording']);
 
                         foreach ($listaRecording as $tupla) {
-                            $this->_tuberia->msg_CampaignProcess_agregarArchivoGrabacion(
+                            $this->_tuberia->msg_SQLWorkerProcess_agregarArchivoGrabacion(
                                 $this->tipo_llamada, $this->id_llamada, $tupla['uniqueid'],
                                 $tupla['channel'], $tupla['recordingfile']);
                         }
@@ -423,7 +423,7 @@ class Llamada
                         'id'            =>  $this->_id_llamada,
                         'uniqueid'      =>  $this->_uniqueid,
                     );
-                    $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
+                    $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
                 }
                 if (!is_null($this->id_current_call)) {
                     $paramActualizar = array(
@@ -431,7 +431,7 @@ class Llamada
                         'id'            =>  $this->id_current_call,
                         'uniqueid'      =>  $this->_uniqueid,
                     );
-                    $this->_tuberia->msg_CampaignProcess_sqlupdatecurrentcalls($paramActualizar);
+                    $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecurrentcalls($paramActualizar);
                 }
             }
             break;
@@ -528,7 +528,7 @@ class Llamada
             );
 
             // Actualizar asíncronamente las propiedades de la llamada
-            $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
+            $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
             if (!is_null($this->timestamp_hangup) &&
                 !($this->_stillborn && is_null($this->_timestamp_originatestart))) {
@@ -747,7 +747,7 @@ class Llamada
         }
 
         // Actualizar asíncronamente las propiedades de la llamada
-        $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
+        $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
         // Notificar el progreso de la llamada
         $paramProgreso = array(
@@ -785,7 +785,7 @@ class Llamada
 
                 // OJO: si se pasa en un futuro "channel", verificar en incoming
             );
-            $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
+            $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
             // Notificar el progreso de la llamada
             $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada(array(
@@ -812,7 +812,7 @@ class Llamada
                 // El siguiente código asume que la llamada entrante no tiene canales auxiliares
                 'channel'               =>  $channel,
             );
-            $this->_tuberia->msg_CampaignProcess_sqlinsertcalls($paramInsertar);
+            $this->_tuberia->msg_SQLWorkerProcess_sqlinsertcalls($paramInsertar);
 
             // La notificación de progreso se realiza en CampaignProcess ANTES
             // de devolver el ID de inserción.
@@ -890,8 +890,8 @@ class Llamada
             $paramActualizar['id'] = $this->id_llamada;
             $paramInsertarCC[($this->tipo_llamada == 'incoming') ? 'id_call_entry' : 'id_call'] =
                 $this->id_llamada;
-            $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
-            $this->_tuberia->msg_CampaignProcess_sqlinsertcurrentcalls($paramInsertarCC);
+            $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
+            $this->_tuberia->msg_SQLWorkerProcess_sqlinsertcurrentcalls($paramInsertarCC);
             $this->_waiting_id_current_call = TRUE;
 
             // Lanzar evento ECCP en ECCPProcess
@@ -949,7 +949,7 @@ class Llamada
                 'uniqueid'      =>  $this->_uniqueid,
                 'status'        =>  ($this->tipo_llamada == 'incoming') ? 'activa' : 'Success',
             );
-            $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
+            $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
             // Notificar el progreso de la llamada
             $paramProgreso = array(
@@ -969,7 +969,7 @@ class Llamada
                 'uniqueid'      =>  $this->_uniqueid,
                 'hold'          =>  'N',
             );
-            $this->_tuberia->msg_CampaignProcess_sqlupdatecurrentcalls($paramActualizar);
+            $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecurrentcalls($paramActualizar);
         }
     }
 
@@ -989,7 +989,7 @@ class Llamada
 
         // Mandar a borrar el registro de current_calls
         if (!is_null($this->id_current_call)) {
-            $this->_tuberia->msg_CampaignProcess_sqldeletecurrentcalls(array(
+            $this->_tuberia->msg_SQLWorkerProcess_sqldeletecurrentcalls(array(
                 'tipo_llamada'      =>  $this->tipo_llamada,
                 'id'                =>  $this->id_current_call,
             ));
@@ -1058,7 +1058,7 @@ class Llamada
             $paramActualizar['id'] = $this->id_llamada;
             $paramProgreso['id_call_'.$this->tipo_llamada] = $this->id_llamada;
             if (!is_null($this->campania)) $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
-            $this->_tuberia->msg_CampaignProcess_sqlupdatecalls($paramActualizar);
+            $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
             if (!is_null($this->agente)) {
                 $this->_tuberia->msg_ECCPProcess_AgentUnlinked(
@@ -1135,7 +1135,7 @@ class Llamada
     {
         if (!is_null($this->id_llamada)) {
             // Se tiene id_llamada, se manda mensaje directamente
-            $this->_tuberia->msg_CampaignProcess_agregarArchivoGrabacion(
+            $this->_tuberia->msg_SQLWorkerProcess_agregarArchivoGrabacion(
                 $this->tipo_llamada, $this->id_llamada, $uniqueid, $channel,
                 $recordingfile);
         } else {

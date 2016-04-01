@@ -163,7 +163,7 @@ class Campania
         $this->_variancia = $iNuevaVariancia;
         $this->_desviacion = sqrt($this->_variancia);
 
-        $this->_tuberia->msg_CampaignProcess_sqlupdatestatcampaign($this->id,
+        $this->_tuberia->msg_SQLWorkerProcess_sqlupdatestatcampaign($this->id,
             $this->_num_completadas, $this->_promedio, $this->_desviacion);
     }
 

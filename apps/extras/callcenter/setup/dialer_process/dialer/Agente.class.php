@@ -331,26 +331,25 @@ class Agente
         $this->resetTimeout();
     }
 
-    public function setHold($id_hold, $id_audit_hold)
+    public function setHold($ami, $id_hold, $id_audit_hold)
     {
         if (!is_null($id_hold) && !is_null($id_audit_hold)) {
             $this->_id_hold = (int)$id_hold;
             $this->_id_audit_hold = (int)$id_audit_hold;
-            $this->_num_pausas++;
+            $this->_incrementarPausas($ami);
             if (!is_null($this->_llamada))
                 $this->_llamada->request_hold = TRUE;
-        } else {
-            $this->clearHold();
         }
         $this->resetTimeout();
     }
 
-    public function clearHold()
+    public function clearHold($ami)
     {
         if (!is_null($this->_id_audit_hold)) {
             $this->_id_hold = NULL;
             $this->_id_audit_hold = NULL;
-            if ($this->_num_pausas > 0) $this->_num_pausas--;
+
+            $this->_decrementarPausas($ami);
         }
         if (!is_null($this->_llamada)) {
             $this->_llamada->request_hold = FALSE;
@@ -454,7 +453,7 @@ class Agente
             $this->auditpauses);
 
         $this->clearBreak($ami);
-        $this->clearHold();
+        $this->clearHold($ami);
         $this->clearReserved($ami);
         $this->_estado_consola = 'logged-out';
         $this->_num_pausas = 0;

@@ -36,7 +36,6 @@ class ECCPProcess extends TuberiaProcess
     private $_log;      // Log abierto por framework de demonio
     private $_dsn;      // Cadena que representa el DSN, estilo PDO
     private $_db;       // Conexión a la base de datos, PDO
-    private $_ami = NULL;       // Conexión AMI a Asterisk
     private $_configDB; // Objeto de configuración desde la base de datos
 
     // Contadores para actividades ejecutadas regularmente
@@ -70,9 +69,6 @@ class ECCPProcess extends TuberiaProcess
         }
 
         $this->_repararAuditoriasIncompletas();
-
-        // Iniciar la conexión Asterisk
-        if (!$this->_iniciarConexionAMI()) return FALSE;
 
         // Registro de manejadores de eventos
         foreach (array('notificarProgresoLlamada') as $k)
@@ -296,26 +292,7 @@ LISTA_AUDITORIAS_AGENTE;
             }
         }
 
-        // Verificar si la conexión AMI sigue siendo válida
-        if (!is_null($this->_ami) && is_null($this->_ami->sKey)) {
-            $this->_ami = NULL;
-        }
-        if (is_null($this->_ami) && !$this->_finalizandoPrograma) {
-            if (!$this->_iniciarConexionAMI()) {
-                $this->_log->output('ERR: no se puede restaurar conexión a Asterisk, se espera...');
-                if (!is_null($this->_db)) {
-                    if ($this->_multiplex->procesarPaquetes())
-                        $this->_multiplex->procesarActividad(0);
-                    else $this->_multiplex->procesarActividad(5);
-                } else {
-                    usleep(5000000);
-                }
-            } else {
-                $this->_log->output('INFO: conexión a Asterisk restaurada, se reinicia operación normal.');
-            }
-        }
-
-        if (!is_null($this->_db) && !is_null($this->_ami) && !$this->_finalizandoPrograma) {
+        if (!is_null($this->_db) && !$this->_finalizandoPrograma) {
             try {
                 $this->_verificarCambioConfiguracion();
             } catch (PDOException $e) {
@@ -349,31 +326,6 @@ LISTA_AUDITORIAS_AGENTE;
     }
 
     /**************************************************************************/
-
-    private function _iniciarConexionAMI()
-    {
-        if (!is_null($this->_ami)) {
-            $this->_log->output('INFO: Desconectando de sesión previa de Asterisk...');
-            $this->_ami->disconnect();
-            $this->_ami = NULL;
-        }
-        $astman = new AMIClientConn($this->_multiplex, $this->_log);
-
-        $this->_log->output('INFO: Iniciando sesión de control de Asterisk...');
-        if (!$astman->connect(
-                $this->_configDB->asterisk_asthost,
-                $this->_configDB->asterisk_astuser,
-                $this->_configDB->asterisk_astpass)) {
-            $this->_log->output("FATAL: no se puede conectar a Asterisk Manager");
-            return FALSE;
-        } else {
-            // ECCPProcess no tiene manejadores de eventos AMI
-            $astman->Events('off');
-
-            $this->_ami = $astman;
-            return TRUE;
-        }
-    }
 
     private function _verificarCambioConfiguracion()
     {
@@ -583,17 +535,8 @@ SQL_EXISTE_AUDIT;
         list($iTimestampFinalPausa, $sAgente, $infoLlamada, $infoSeguimiento) = $datos;
 
         try {
-            // Quitar la pausa del agente si es necesario
-            if ($infoSeguimiento['num_pausas'] == 1) {
-                // La única pausa que quedaba era la del hold
-                $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
-                if ($r['Response'] != 'Success') {
-                    $this->_log->output('ERR: '.__METHOD__.' (internal) no se puede sacar al agente de pausa: '.
-                        $sAgente.' - '.$r['Message']);
-                }
-            }
-
             // Actualizar las tablas de calls y current_calls
+            // TODO: esto es equivalente a SQLWorkerProcess->sqlupdatecurrentcalls
             $this->_db->beginTransaction();
             if ($infoLlamada['calltype'] == 'incoming') {
                 $sth = $this->_db->prepare(

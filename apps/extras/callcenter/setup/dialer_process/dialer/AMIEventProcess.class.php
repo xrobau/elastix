@@ -99,8 +99,7 @@ class AMIEventProcess extends TuberiaProcess
             $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde ECCPWorkerProcess
-        foreach (array('idNuevaSesionAgente',
-            'quitarBreakAgente', 'idNuevoHoldAgente', 'quitarHoldAgente',
+        foreach (array('idNuevaSesionAgente', 'quitarBreakAgente',
             'llamadaSilenciada', 'llamadaSinSilencio') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
         foreach (array('agregarIntentoLoginAgente', 'infoSeguimientoAgente',
@@ -108,7 +107,7 @@ class AMIEventProcess extends TuberiaProcess
             'cancelarIntentoLoginAgente', 'reportarInfoLlamadasColaEntrante',
             'pingAgente', 'dumpstatus', 'listarTotalColasTrabajoAgente',
             'infoSeguimientoAgentesCola', 'reportarInfoLlamadaAgendada',
-            'iniciarBreakAgente') as $k)
+            'iniciarBreakAgente', 'iniciarHoldAgente') as $k)
             $this->_tuberia->registrarManejador('*', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
@@ -272,7 +271,8 @@ class AMIEventProcess extends TuberiaProcess
                 'QueueMemberStatus', 'QueueParams', 'QueueMember', 'QueueEntry',
                 'QueueStatusComplete', 'Leave', 'Reload', 'Agents', 'AgentsComplete',
                 'AgentCalled', 'AgentDump', 'AgentConnect', 'AgentComplete',
-                'QueueMemberPaused',
+                'QueueMemberPaused', 'ParkedCall', 'ParkedCallTimeOut',
+                'ParkedCallGiveUp',
             ) as $k)
                 $astman->add_event_handler($k, array($this, "msg_$k"));
             $astman->add_event_handler('Bridge', array($this, "msg_Link")); // Visto en Asterisk 1.6.2.x
@@ -361,28 +361,6 @@ class AMIEventProcess extends TuberiaProcess
         if (!is_null($a)) {
             if (!is_null($a->id_break)) {
                 $a->clearBreak($this->_ami);
-            }
-        }
-    }
-
-    private function _idNuevoHoldAgente($sAgente, $idHold, $idAuditHold)
-    {
-        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (!is_null($a)) {
-            if (!is_null($a->id_hold)) {
-                $this->_log->output('ERR: '.__METHOD__." - posible carrera, ".
-                    "id_hold ya asignado para $sAgente, se pierde anterior.");
-            }
-            $a->setHold($idHold, $idAuditHold);
-        }
-    }
-
-    private function _quitarHoldAgente($sAgente)
-    {
-        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
-        if (!is_null($a)) {
-            if (!is_null($a->id_hold)) {
-                $a->clearHold();
             }
         }
     }
@@ -1240,6 +1218,39 @@ class AMIEventProcess extends TuberiaProcess
         $this->_tuberia->enviarRespuesta($sFuente, $r);
     }
 
+    public function rpc_iniciarHoldAgente($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+
+        list($sAgente, $idHold, $idAuditHold, $timestamp) = $datos;
+        $r = NULL;
+        $a = $this->_listaAgentes->buscar('agentchannel', $sAgente);
+        if (is_null($a)) {
+            $r = array(404, 'Agent not found or not logged in through ECCP');
+        } elseif ($a->estado_consola != 'logged-in') {
+            $r = array(417, 'Agent currently not logged in');
+        } elseif (!is_null($a->id_hold)) {
+            $r = array(417, 'Agent already in hold');
+        } elseif (is_null($a->llamada)) {
+            $r = array(417, 'Agent not in call');
+        }
+        if (!is_null($r)) {
+            $this->_tuberia->enviarRespuesta($sFuente, $r);
+            return;
+        }
+
+        $this->_log->output('DEBUG: '.__METHOD__.": Agent($sAgente)->setHold($idHold, $idAuditHold)");
+        $a->setHold($this->_ami, $idHold, $idAuditHold);
+        $a->llamada->mandarLlamadaHold($this->_ami, $sFuente, $timestamp);
+
+        /* En el caso de éxito dentro de mandarLlamadaHold, NO se envía la
+         * respuesta de vuelta a $sFuente, sino que se espera a que se reciba
+         * la respuesta de éxito de la llamada Park. */
+    }
+
     public function rpc_infoPrediccionCola($sFuente, $sDestino,
         $sNombreMensaje, $iTimestamp, $datos)
     {
@@ -1380,24 +1391,6 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
         }
         call_user_func_array(array($this, '_quitarBreakAgente'), $datos);
-    }
-
-    public function msg_idNuevoHoldAgente($sFuente, $sDestino,
-        $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_idNuevoHoldAgente'), $datos);
-    }
-
-    public function msg_quitarHoldAgente($sFuente, $sDestino,
-        $sNombreMensaje, $iTimestamp, $datos)
-    {
-        if ($this->DEBUG) {
-            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
-        }
-        call_user_func_array(array($this, '_quitarHoldAgente'), $datos);
     }
 
     public function msg_quitarReservaAgente($sFuente, $sDestino,
@@ -1982,11 +1975,11 @@ Uniqueid: 1429642067.241008
         }
         if (!is_null($sNuevo_Uniqueid) && $llamada->uniqueid != $sNuevo_Uniqueid) {
             if ($llamada->status == 'OnHold') {
-                if ($this->DEBUG) {
+                if (true/*$this->DEBUG*/) {
                     $this->_log->output("DEBUG: ".__METHOD__.": identificada llamada que regresa de HOLD ".
                         "{$llamada->channel}, cambiado Uniqueid a {$sNuevo_Uniqueid} ");
                 }
-                $llamada->llamadaRegresaHold($params['local_timestamp_received'],
+                $llamada->llamadaRegresaHold($this->_ami, $params['local_timestamp_received'],
                     $sNuevo_Uniqueid, $sAgentChannel);
                 return FALSE;
             } elseif (!is_null($llamada->agente_agendado) && $llamada->agente_agendado->channel == $sChannel) {
@@ -2132,7 +2125,7 @@ Uniqueid: 1429642067.241008
         // Marcar el estado de la llamada que se manda a hold
         if (!is_null($llamada) && $llamada->request_hold) {
         	$llamada->status = 'OnHold';
-            if ($this->DEBUG) {
+            if (true /*$this->DEBUG*/) {
                 $this->_log->output("DEBUG: ".__METHOD__.": llamada ".
                     ($llamada->uniqueid)." ha sido puesta en HOLD en vez de colgada.");
             }
@@ -2178,10 +2171,10 @@ Uniqueid: 1429642067.241008
             $llamada = $this->_listaLlamadas->buscar('actualchannel', $params['Channel']);
             if (!is_null($llamada) && $llamada->status != 'OnHold') $llamada = NULL;
             if (!is_null($llamada)) {
-                if ($this->DEBUG) {
-                	$this->_log->output('DEBUG: '.__METHOD__.': llamada colgada mientras estaba en HOLD.');
+                if (true /*$this->DEBUG*/) {
+                    $this->_log->output('DEBUG: '.__METHOD__.': llamada colgada mientras estaba en HOLD.');
                 }
-                $llamada->llamadaRegresaHold($params['local_timestamp_received']);
+                $llamada->llamadaRegresaHold($this->_ami, $params['local_timestamp_received']);
             }
         }
 
@@ -2227,7 +2220,7 @@ Uniqueid: 1429642067.241008
                 $this->_config['dialer']['llamada_corta']);
         } else {
             if ($llamada->status == 'OnHold') {
-                if ($this->DEBUG) {
+                if (true /*$this->DEBUG*/) {
                     $this->_log->output('DEBUG: '.__METHOD__.': se ignora Hangup para llamada que se envía a HOLD.');
                 }
             } else {
@@ -2755,6 +2748,59 @@ Uniqueid: 1429642067.241008
         }
 
         $this->_queueshadow->msg_AgentComplete($params);
+    }
+
+    public function msg_ParkedCall($sEvent, $params, $sServer, $iPort)
+    {
+/*
+    [Event] => ParkedCall
+    [Privilege] => call,all
+    [Exten] => 71
+    [Channel] => SIP/1065-00000007
+    [Parkinglot] => default
+    [From] => SIP/1064-00000008
+    [Timeout] => 180
+    [CallerIDNum] => 1065
+    [CallerIDName] => WinXP
+    [ConnectedLineNum] => 1064
+    [ConnectedLineName] => Alex Villacis Lasso
+    [Uniqueid] => 1459123412.11
+    [local_timestamp_received] => 1459123412.7244
+ */
+        if (true /*$this->DEBUG*/) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+        // TODO: Channel contiene canal de llamada parqueada pero Uniqueid es valor reasignado
+        // TODO: recoger Exten para usar como extensión de recoger en Unhold
+        // TODO: Timeout podría usarse para mostrar un cronómetro
+    }
+
+    public function msg_ParkedCallTimeOut($sEvent, $params, $sServer, $iPort)
+    {
+        if (true /*$this->DEBUG*/) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+
+    }
+
+    public function msg_ParkedCallGiveUp($sEvent, $params, $sServer, $iPort)
+    {
+        if (true /*$this->DEBUG*/) {
+            $this->_log->output('DEBUG: '.__METHOD__.
+                "\nretraso => ".(microtime(TRUE) - $params['local_timestamp_received']).
+                "\n$sEvent: => ".print_r($params, TRUE)
+                );
+        }
+
+
     }
 
     private function _ejecutarLogoffAgente($sAgente, $a, $timestamp, $evtname)

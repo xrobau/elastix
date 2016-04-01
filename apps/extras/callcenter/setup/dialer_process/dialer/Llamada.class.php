@@ -919,7 +919,7 @@ class Llamada
         }
     }
 
-    public function llamadaRegresaHold($iTimestamp, $uniqueid_nuevo = NULL, $sAgentChannel = NULL)
+    public function llamadaRegresaHold($ami, $iTimestamp, $uniqueid_nuevo = NULL, $sAgentChannel = NULL)
     {
         if (is_null($uniqueid_nuevo)) $uniqueid_nuevo = $this->_uniqueid;
         if (is_null($this->_uniqueid) || $uniqueid_nuevo != $this->_uniqueid) {
@@ -936,7 +936,7 @@ class Llamada
                 $iTimestamp, $a->channel,
                 $this->resumenLlamada(),
                 $a->resumenSeguimiento());
-            $a->clearHold();
+            $a->clearHold($ami);
         }
 
         // Actualizar el Uniqueid en la base de datos
@@ -1172,6 +1172,51 @@ class Llamada
                 $this->id_llamada);
         }
         $this->_mutedchannels = array();
+    }
+
+    public function mandarLlamadaHold($ami, $sFuente, $timestamp)
+    {
+        $callable = array($this, '_cb_Park');
+        $call_params = array($sFuente, $ami, $timestamp);
+        $this->_log->output('DEBUG: '.__METHOD__.": asyncPark({$this->actualchannel}, {$this->agentchannel})");
+        $ami->asyncPark(
+            $callable, $call_params,
+            $this->actualchannel,
+            $this->agentchannel);
+    }
+
+    public function _cb_Park($r, $sFuente, $ami, $timestamp)
+    {
+        $this->_log->output('DEBUG: '.__METHOD__.': r='.print_r($r, TRUE));
+        $this->_tuberia->enviarRespuesta($sFuente,
+            ($r['Response'] == 'Success')
+                ? array(0, '')
+                : array(500, 'Unable to start agent hold - '.$r['Message']));
+        if ($r['Response'] == 'Success') {
+            // Actualizar current_calls
+            if (!is_null($this->id_current_call)) {
+                $paramActualizar = array(
+                    'tipo_llamada'  =>  $this->tipo_llamada,
+                    'id'            =>  $this->id_current_call,
+                    'hold'          =>  'S',
+                );
+                $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecurrentcalls($paramActualizar);
+            }
+
+            // Emitir progreso de llamada
+            $paramProgreso = array(
+                'datetime_entry'                =>  date('Y-m-d H:i:s', $timestamp),
+                'new_status'                    =>  'OnHold',
+                'id_call_'.$this->tipo_llamada  =>  $this->id_llamada,
+                //'uniqueid'          =>  $paramActualizar['Uniqueid'],
+            );
+            if (!is_null($this->campania)) {
+                $paramProgreso['id_campaign_'.$this->tipo_llamada] = $this->campania->id;
+            }
+            $this->_tuberia->msg_ECCPProcess_notificarProgresoLlamada($paramProgreso);
+        } else {
+            $this->agente->clearHold($ami);
+        }
     }
 }
 ?>

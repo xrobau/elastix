@@ -2923,21 +2923,10 @@ SQL_INSERTAR_AGENDAMIENTO;
 
     private function Request_agentauth_hold($comando)
     {
-        if (is_null($this->_ami))
-            return $this->_generarRespuestaFallo(500, 'No AMI connection');
-
         $sAgente = (string)$comando->agent_number;
 
         $xml_response = new SimpleXMLElement('<response />');
         $xml_holdResponse = $xml_response->addChild('hold_response');
-
-        /* Verificar si existe una extensión de parqueo. Por omisión el FreePBX
-         * de Elastix NO HABILITA soporte de extensión de parqueo */
-        $sExtParqueo = $this->_leerConfigExtensionParqueo();
-        if (is_null($sExtParqueo)) {
-            $this->_agregarRespuestaFallo($xml_holdResponse, 500, 'Parked call extension is disabled');
-            return $xml_response;
-        }
 
         // Obtener el ID del break que corresponde al hold
         $recordset = $this->_db->prepare('SELECT id FROM break WHERE tipo = "H" AND status = "A"');
@@ -2948,7 +2937,7 @@ SQL_INSERTAR_AGENDAMIENTO;
         // Verificar si el agente está siendo monitoreado
         $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
         if (is_null($infoSeguimiento)) {
-            $this->_agregarRespuestaFallo($xml_holdResponse, 404, 'Specified agent not found');
+            $this->_agregarRespuestaFallo($xml_holdResponse, 404, 'Agent not found or not logged in through ECCP');
             return $xml_response;
         }
         if ($infoSeguimiento['estado_consola'] != 'logged-in') {
@@ -2968,137 +2957,49 @@ SQL_INSERTAR_AGENDAMIENTO;
             return $xml_response;
         }
 
-        // Si el agente ya estaba en hold, se debería validar si la llamada sigue activa
-        $bHoldQuitado = FALSE;
         if (!is_null($infoSeguimiento['id_audit_hold'])) {
-            $sExtLlamadaParqueada = $this->_buscarExtensionParqueo(
-                $infoSeguimiento['clientchannel']);
-            if (!is_null($sExtLlamadaParqueada)) {
-                // La llamada sigue en hold. No se requiere hacer nada
-                $xml_holdResponse->addChild('success');
-                return $xml_response;
-            } else {
-                // El abonado se cansó de esperar y ha colgado. Se termina el
-                // hold anterior y se marca en la base de datos.
-                $iTimestampFinalPausa = time();
-                $this->_tuberia->msg_AMIEventProcess_quitarHoldAgente($sAgente);
-                marcarFinalBreakAgente($this->_db,
-                    $infoSeguimiento['id_audit_hold'], $iTimestampFinalPausa);
-                $bHoldQuitado = TRUE;
-
-                // TODO: evento OnHangup debería revisar info_hold de todos los
-                // agentes para eliminar los holds y pausas de las llamadas que
-                // han colgado.
-            }
+            // Agente ya estaba en hold
+            $this->_agregarRespuestaFallo($xml_holdResponse, 417, 'Agent already in hold');
+            return $xml_response;
         }
 
-        // En este punto, $infoLlamada tiene la información para iniciar hold
-
-        // Ejecutar la pausa a través del AMI.
-        /* TODO: puede haber una carrera si dos o más conexiones intentan hacer
-         * que el mismo agente entre en break al mismo tiempo.
-         */
-        if ($infoSeguimiento['num_pausas'] == 0) {
-            $r = $this->_ami->QueuePause(NULL, $sAgente, 'true');
-            if ($r['Response'] != 'Success') {
-                $this->_log->output('ERR: '.__METHOD__.' (internal) no se puede poner al agente en pausa: '.
-                    $sAgente.' - '.$r['Message']);
-
-                $this->_agregarRespuestaFallo($xml_holdResponse, 500, 'Unable to start agent hold');
-                return $xml_response;
-            }
-        }
+        // Se escribe el inicio provisional de la pausa en la base de datos
         $iTimestampInicioPausa = time();
-
-        // Mandar a escribir el inicio de la pausa a la base de datos
         $idAuditHold = $this->_marcarInicioBreakAgente(
             $infoSeguimiento['id_agent'], $idHold, $iTimestampInicioPausa);
         if (is_null($idAuditHold)) {
-            if ($infoSeguimiento['num_pausas'] == 0) {
-                $r = $this->_ami->QueuePause(NULL, $sAgente, 'false');
-            }
             $this->_agregarRespuestaFallo($xml_holdResponse, 500, 'Unable to start agent hold');
             return $xml_response;
         }
 
-        // Notificar éxito en inicio de break
-        $this->_tuberia->msg_AMIEventProcess_idNuevoHoldAgente($sAgente, $idHold, $idAuditHold);
-
-        $eventos = array();
-
-        // Marcar en calls y current_calls el estado de hold
-        try {
-        	$this->_db->beginTransaction();
-            if ($infoLlamada['calltype'] == 'incoming') {
-                $sth = $this->_db->prepare(
-                    'UPDATE current_call_entry SET hold = ? WHERE id = ?');
-                $sth->execute(array('S', $infoLlamada['currentcallid']));
-                $sth = $this->_db->prepare('UPDATE call_entry set status = ? WHERE id = ?');
-                $sth->execute(array('hold', $infoLlamada['callid']));
-            } elseif ($infoLlamada['calltype'] == 'outgoing') {
-                $sth = $this->_db->prepare(
-                    'UPDATE current_calls SET hold = ? WHERE id = ?');
-                $sth->execute(array('S', $infoLlamada['currentcallid']));
-                $sth = $this->_db->prepare('UPDATE calls set status = ? WHERE id = ?');
-                $sth->execute(array('OnHold', $infoLlamada['callid']));
+        // Se comunica a AMIEventProcess la pausa elegida para que la inicie.
+        // Esto puede fallar si el estado del agente ha cambiado.
+        list($errcode, $errdesc) = $this->_tuberia->AMIEventProcess_iniciarHoldAgente(
+            $sAgente, $idHold, $idAuditHold, $iTimestampInicioPausa);
+        if ($errcode != 0) {
+            // Ha fallado el inicio de pausa, se deshace auditoría
+            try {
+                $sth = $this->_db->prepare('DELETE FROM audit WHERE id = ?');
+                $sth->execute(array($idAuditHold));
+                $sth = NULL;
+            } catch (PDOException $e) {
+                $this->_stdManejoExcepcionDB($e, 'no se puede quitar auditoría provisional!');
             }
-
-            // Notificar progreso de la llamada
-            $paramProgreso = array(
-                'datetime_entry'    =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
-                'new_status'        =>  'OnHold',
-            );
-            if ($infoLlamada['calltype'] == 'incoming') {
-                $paramProgreso['id_campaign_incoming'] = $infoLlamada['campaign_id'];
-                $paramProgreso['id_call_incoming'] = $infoLlamada['callid'];
-            } else {
-                $paramProgreso['id_campaign_outgoing'] = $infoLlamada['campaign_id'];
-                $paramProgreso['id_call_outgoing'] = $infoLlamada['callid'];
-            }
-            list($id_campaignlog, $evlist) = construirEventoProgresoLlamada($this->_db, $paramProgreso);
-            $eventos = array_merge($eventos, $evlist);
-
-            $this->_db->commit();
-        } catch (PDOException $e) {
-        	$this->_db->rollBack();
-            $this->_log->output('ERR: '.__METHOD__. ": no se puede actualizar estado de hold en DB: ".
-                implode(' - ', $e->errorInfo));
-        }
-
-        // Ejecutar realmente la redirección al hold
-        $r = $this->_ami->Redirect(
-            $infoSeguimiento['clientchannel'], // channel
-            '',                             // extrachannel
-            $sExtParqueo,                   // exten
-            'from-internal',                // context
-            1);                             // priority
-        if ($r['Response'] != 'Success') {
-            $this->_log->output(
-                "ERR: ".__METHOD__."al iniciar hold: no se puede ejecutar hold ".
-                "(Redirect {$infoSeguimiento['clientchannel']} --> {$sExtParqueo}) - {$r['Message']}");
-            $this->_tuberia->msg_AMIEventProcess_quitarHoldAgente($sAgente);
-            marcarFinalBreakAgente($this->_db,
-                $infoSeguimiento['id_audit_hold'], $iTimestampInicioPausa);
-            $this->_agregarRespuestaFallo($xml_holdResponse, 500, 'Unable to start agent hold');
+            $this->_agregarRespuestaFallo($xml_holdResponse, $errcode, $errdesc);
             return $xml_response;
         }
 
-        // Notificar a ECCP el inicio de la pausa de hold
-        $eventos[] = array(
-            'PauseStart',
-            array(
-                $sAgente,
-                array(
-                    'pause_class'   =>  'hold',
-                    'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
-                )
-            )
-        );
         $xml_holdResponse->addChild('success');
         return array(
             'response'  =>  $xml_response,
-            'eventos'   =>  $eventos,
+            'eventos'   =>  array(
+                array('PauseStart', array($sAgente, array(
+                    'pause_class'   =>  'hold',
+                    'pause_start'   =>  date('Y-m-d H:i:s', $iTimestampInicioPausa),
+                ))),
+            ),
         );
+
     }
 
     private function Request_agentauth_unhold($comando)
@@ -3148,6 +3049,7 @@ SQL_INSERTAR_AGENDAMIENTO;
             return $xml_response;
         }
 
+        // TODO: evento ParkedCall se emite con campo Exten que tiene extensión de parqueo
         $sExtLlamadaParqueada = $this->_buscarExtensionParqueo($infoSeguimiento['clientchannel']);
         if (!is_null($sExtLlamadaParqueada)) {
             $sActionID = 'ECCP:1.0:'.posix_getpid().':RedirectFromHold';

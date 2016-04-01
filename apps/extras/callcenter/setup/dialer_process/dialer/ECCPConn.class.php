@@ -3012,14 +3012,6 @@ SQL_INSERTAR_AGENDAMIENTO;
         $xml_response = new SimpleXMLElement('<response />');
         $xml_unholdResponse = $xml_response->addChild('unhold_response');
 
-        /* Verificar si existe una extensión de parqueo. Por omisión el FreePBX
-         * de Elastix NO HABILITA soporte de extensión de parqueo */
-        $sExtParqueo = $this->_leerConfigExtensionParqueo();
-        if (is_null($sExtParqueo)) {
-            $this->_agregarRespuestaFallo($xml_unholdResponse, 500, 'Parked call extension is disabled');
-            return $xml_response;
-        }
-
         // Verificar si el agente está siendo monitoreado
         $infoSeguimiento = $this->_tuberia->AMIEventProcess_infoSeguimientoAgente($sAgente);
         if (is_null($infoSeguimiento)) {
@@ -3049,14 +3041,12 @@ SQL_INSERTAR_AGENDAMIENTO;
             return $xml_response;
         }
 
-        // TODO: evento ParkedCall se emite con campo Exten que tiene extensión de parqueo
-        $sExtLlamadaParqueada = $this->_buscarExtensionParqueo($infoSeguimiento['clientchannel']);
-        if (!is_null($sExtLlamadaParqueada)) {
+        if (!is_null($infoLlamada['park_exten'])) {
             $sActionID = 'ECCP:1.0:'.posix_getpid().':RedirectFromHold';
             if ($this->DEBUG) {
                 $this->_log->output("DEBUG: intentando recuperar llamada:\n".
                     "\tChannel      =>  $sAgente\n".
-                    "\tExten        =>  $sExtLlamadaParqueada\n".
+                    "\tExten        =>  {$infoLlamada['park_exten']}\n".
                     "\tContext      =>  from-internal\n".
                     "\tActionID     =>  $sActionID");
             }
@@ -3064,7 +3054,7 @@ SQL_INSERTAR_AGENDAMIENTO;
             // Sacar la llamada del parqueo y redirigirla al agente pausado
             $r = $this->_ami->Originate(
                 $sAgente,               // channel
-                $sExtLlamadaParqueada,  // extension
+                $infoLlamada['park_exten'],  // extension
                 'from-internal',        // context
                 '1',                    // priority
                 NULL, NULL, NULL, NULL, NULL, NULL,
@@ -3083,66 +3073,6 @@ SQL_INSERTAR_AGENDAMIENTO;
 
         $xml_unholdResponse->addChild('success');
         return $xml_response;
-    }
-
-    /* Leer el estado de /etc/asterisk/features_general_additional.conf y
-     * obtener la extensión de parqueo configurada. Devuelve NULL en caso de
-     * error o si la  característica de extensión de parqueo no está
-     * configurada, o la extensión numérica en caso contrario. */
-    private function _leerConfigExtensionParqueo()
-    {
-        $sNombreArchivo = '/etc/asterisk/features_general_additional.conf';
-        if (!file_exists($sNombreArchivo)) {
-            $this->_log->output("WARN: $sNombreArchivo no se encuentra.");
-            return NULL;
-        }
-        if (!is_readable($sNombreArchivo)) {
-            $this->_log->output("WARN: $sNombreArchivo no puede leerse por usuario de marcador.");
-            return NULL;
-        }
-        $infoConfig = parse_ini_file($sNombreArchivo, TRUE);
-        if (is_array($infoConfig)) {
-            $sExtensionParqueo = isset($infoConfig['parkext']) ? $infoConfig['parkext'] : '';
-            return (preg_match('/^\d+$/', $sExtensionParqueo)) ? $sExtensionParqueo : NULL;
-        } else {
-            $this->_log->output("ERR: $sNombreArchivo no puede parsearse correctamente.");
-        }
-        return NULL;
-    }
-
-    /* Ejecutar el comando adecuado según la versión de Asterisk para listar las
-     * extensiones de llamadas parqueadas. Se devuelve el número de extensión
-     * que contiene el canal que se ha pasado como parámetro, o NULL si ha
-     * ocurrido un problema o si no se encuentra el canal. */
-    private function _buscarExtensionParqueo($sCanal)
-    {
-        $versionMinima = array(1, 6, 0);
-
-        while (count($versionMinima) < count($this->_astVersion))
-            array_push($versionMinima, 0);
-        while (count($versionMinima) > count($this->_astVersion))
-            array_push($this->_astVersion, 0);
-        $sComandoParqueo = ($this->_astVersion >= $versionMinima)
-            ? 'parkedcalls show'
-            : 'show parkedcalls';
-        $r = $this->_ami->Command($sComandoParqueo);
-        if (!isset($r['data'])) return NULL;
-
-/*
-Privilege: Command
- Num                   Channel (Context         Extension    Pri ) Timeout
-*** Parking lot: default
-71                 SIP/1065-00000014 (from-internal   s            1   )     38s
----
-1 parked call in total.
- */
-        $lineas = explode("\n", $r['data']); $regs = NULL;
-        foreach ($lineas as $sLinea) {
-            if (preg_match('/^\s*(\d{2,})\s*(\S+)/', $sLinea, $regs)) {
-                if ($regs[2] == $sCanal) return $regs[1];
-            }
-        }
-        return NULL;
     }
 
     private function Request_eccpauth_getagentqueues($comando)

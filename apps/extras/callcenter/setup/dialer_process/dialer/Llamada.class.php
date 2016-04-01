@@ -136,6 +136,7 @@ class Llamada
     private $_id_current_call;   // ID del registro correspondiente en current_call[_entry]
     private $_waiting_id_current_call = FALSE;  // Se pone a VERDADERO cuando se espera el id_current_call
     var $request_hold = FALSE;  // Se asigna a VERDADERO al invocar requerimiento hold, y se verifica en Unlink
+    private $_park_exten = NULL;// Extensión de lote de parqueo de llamada enviada a hold
 
     // Timestamps correspondientes a diversos eventos de la llamada
     private $_timestamp_originatestart = NULL;   // Inicio de Originate en CampaignProcess
@@ -264,12 +265,11 @@ class Llamada
                                         ? $this->timestamp_link - $this->timestamp_originatestart : NULL;
         case 'esperando_contestar':
                                 return (!is_null($this->timestamp_originatestart) && is_null($this->timestamp_originateend));
-        case 'id_current_call':
-                                return $this->_id_current_call;
+        case 'id_current_call': return $this->_id_current_call;
         case 'waiting_id_current_call':
                                 return $this->_waiting_id_current_call;
-        case 'mutedchannels':
-                                return $this->_mutedchannels;
+        case 'mutedchannels':   return $this->_mutedchannels;
+        case 'park_exten':      return $this->_park_exten;
         default:
             $this->_log->output('ERR: '.__METHOD__.' - propiedad no implementada: '.$s);
             die(__METHOD__.' - propiedad no implementada: '.$s."\n");
@@ -489,6 +489,9 @@ class Llamada
         }
         if (!is_null($this->trunk))
             $resumen['trunk'] = $this->trunk;
+
+        if (!is_null($this->_park_exten))
+            $resumen['park_exten'] = $this->park_exten;
 
         foreach (array(
             'timestamp_originatestart'  =>  'dialstart',
@@ -919,6 +922,13 @@ class Llamada
         }
     }
 
+    public function llamadaEnviadaHold($parkexten, $uniqueid_nuevo)
+    {
+        $this->_park_exten = $parkexten;
+
+        // TODO: todavía no se usa $uniqueid_nuevo
+    }
+
     public function llamadaRegresaHold($ami, $iTimestamp, $uniqueid_nuevo = NULL, $sAgentChannel = NULL)
     {
         if (is_null($uniqueid_nuevo)) $uniqueid_nuevo = $this->_uniqueid;
@@ -938,6 +948,8 @@ class Llamada
                 $a->resumenSeguimiento());
             $a->clearHold($ami);
         }
+
+        $this->_park_exten = NULL;
 
         // Actualizar el Uniqueid en la base de datos
         $this->_status = 'Success';

@@ -102,6 +102,15 @@ fi
 
 %changelog
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: store parkinglot extension from ParkedCall event. This allows
+  removal of the "parkedcalls show" command invocation in ECCPConn. Ported from
+  CallCenterPRO.
+  SVN Rev[7542]
+- CHANGED: Dialer: reimplement Hold using Park instead of Redirect. This moves
+  responsibility for agent pause/unpause to Agente class, just like the other
+  pauses. Last use of AMI by ECCPProcess class is now removed. Ported from
+  CallCenterPRO.
+  SVN Rev[7541]
 - CHANGED: Dialer: remove unused _cb_QueuePause callback from AMIEventProcess.
   Ported from CallCenterPRO.
   SVN Rev[7540]

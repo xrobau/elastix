@@ -2774,8 +2774,11 @@ Uniqueid: 1429642067.241008
                 );
         }
 
-        // TODO: Channel contiene canal de llamada parqueada pero Uniqueid es valor reasignado
-        // TODO: recoger Exten para usar como extensión de recoger en Unhold
+        $llamada = $this->_listaLlamadas->buscar('actualchannel', $params['Channel']);
+        if (is_null($llamada)) return;
+
+        $llamada->llamadaEnviadaHold($params['Exten'], $params['Uniqueid']);
+
         // TODO: Timeout podría usarse para mostrar un cronómetro
     }
 

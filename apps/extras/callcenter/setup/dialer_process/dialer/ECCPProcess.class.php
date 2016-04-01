@@ -27,19 +27,11 @@
   +----------------------------------------------------------------------+
   $Id: DialerProcess.class.php,v 1.48 2009/03/26 13:46:58 alex Exp $ */
 
-require_once 'ECCPHelper.lib.php';
-
 class ECCPProcess extends TuberiaProcess
 {
     private $DEBUG = FALSE; // VERDADERO si se activa la depuración
 
     private $_log;      // Log abierto por framework de demonio
-    private $_dsn;      // Cadena que representa el DSN, estilo PDO
-    private $_db;       // Conexión a la base de datos, PDO
-    private $_configDB; // Objeto de configuración desde la base de datos
-
-    // Contadores para actividades ejecutadas regularmente
-    private $_iTimestampUltimaRevisionConfig = 0;       // Última revisión de configuración
 
     /* Si se pone a VERDADERO, el programa intenta finalizar y no deben
      * aceptarse conexiones nuevas. Todas las conexiones existentes serán
@@ -53,20 +45,8 @@ class ECCPProcess extends TuberiaProcess
         $this->_tuberia->registrarMultiplexHijo($this->_multiplex);
         $this->_tuberia->setLog($this->_log);
 
-        // Interpretar la configuración del demonio
-        $this->_dsn = $this->_interpretarConfiguracion($infoConfig);
-        if (!$this->_iniciarConexionDB()) return FALSE;
-
-        // Leer el resto de la configuración desde la base de datos
-        try {
-            $this->_configDB = new ConfigDB($this->_db, $this->_log);
-        } catch (PDOException $e) {
-            $this->_log->output("FATAL: no se puede leer configuración DB - ".$e->getMessage());
-        	return FALSE;
-        }
-
         // Registro de manejadores de eventos
-        foreach (array('emitirEventos',) as $k)
+        foreach (array('actualizarConfig', 'emitirEventos',) as $k)
             $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "msg_$k"));
         foreach (array('recordingMute', 'recordingUnmute') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
@@ -76,122 +56,25 @@ class ECCPProcess extends TuberiaProcess
         // Registro de manejadores de eventos desde HubProcess
         $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
 
-        $this->DEBUG = $this->_configDB->dialer_debug;
-
         // Se ha tenido éxito si se están escuchando conexiones
         return $this->_multiplex->escuchaActiva();
     }
 
-    private function _interpretarConfiguracion($infoConfig)
-    {
-        $dbHost = 'localhost';
-        $dbUser = 'asterisk';
-        $dbPass = 'asterisk';
-        if (isset($infoConfig['database']) && isset($infoConfig['database']['dbhost'])) {
-            $dbHost = $infoConfig['database']['dbhost'];
-            $this->_log->output('Usando host de base de datos: '.$dbHost);
-        } else {
-            $this->_log->output('Usando host (por omisión) de base de datos: '.$dbHost);
-        }
-        if (isset($infoConfig['database']) && isset($infoConfig['database']['dbuser']))
-            $dbUser = $infoConfig['database']['dbuser'];
-        if (isset($infoConfig['database']) && isset($infoConfig['database']['dbpass']))
-            $dbPass = $infoConfig['database']['dbpass'];
-
-        return array("mysql:host=$dbHost;dbname=call_center", $dbUser, $dbPass);
-    }
-
-    private function _iniciarConexionDB()
-    {
-        try {
-            $this->_db = new PDO($this->_dsn[0], $this->_dsn[1], $this->_dsn[2]);
-            $this->_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->_db->setAttribute(PDO::ATTR_EMULATE_PREPARES, FALSE);
-            return TRUE;
-        } catch (PDOException $e) {
-            $this->_db = NULL;
-            $this->_log->output("FATAL: no se puede conectar a DB - ".$e->getMessage());
-            return FALSE;
-        }
-    }
-
     public function procedimientoDemonio()
     {
-        // Verificar posible desconexión de la base de datos
-        if (is_null($this->_db)) {
-            $this->_log->output('INFO: intentando volver a abrir conexión a DB...');
-            if (!$this->_iniciarConexionDB()) {
-            	$this->_log->output('ERR: no se puede restaurar conexión a DB, se espera...');
-                usleep(5000000);
-            } else {
-            	$this->_log->output('INFO: conexión a DB restaurada, se reinicia operación normal.');
-                $this->_configDB->setDBConn($this->_db);
-            }
-        }
-
-        if (!is_null($this->_db) && !$this->_finalizandoPrograma) {
-            try {
-                $this->_verificarCambioConfiguracion();
-            } catch (PDOException $e) {
-                $this->_stdManejoExcepcionDB($e, 'no se puede verificar cambio en configuración');
-            }
-        }
-
-        // Rutear los mensajes si hay DB
-        if (!is_null($this->_db)) {
-            // Rutear todos los mensajes pendientes entre tareas y agentes
-            if ($this->_multiplex->procesarPaquetes())
-                $this->_multiplex->procesarActividad(0);
-            else $this->_multiplex->procesarActividad(1);
-        }
+        // Rutear todos los mensajes pendientes entre tareas y agentes
+        if ($this->_multiplex->procesarPaquetes())
+            $this->_multiplex->procesarActividad(0);
+        else $this->_multiplex->procesarActividad(1);
 
     	return TRUE;
     }
 
     public function limpiezaDemonio($signum)
     {
-
         // Mandar a cerrar todas las conexiones activas
         $this->_multiplex->finalizarServidor();
-
-        // Desconectarse de la base de datos
-        $this->_configDB = NULL;
-        if (!is_null($this->_db)) {
-            $this->_log->output('INFO: desconectando de la base de datos...');
-            $this->_db = NULL;
-        }
     }
-
-    /**************************************************************************/
-
-    private function _verificarCambioConfiguracion()
-    {
-        $iTimestamp = time();
-        if ($iTimestamp - $this->_iTimestampUltimaRevisionConfig > 3) {
-            $this->_configDB->leerConfiguracionDesdeDB();
-            $listaVarCambiadas = $this->_configDB->listaVarCambiadas();
-            if (count($listaVarCambiadas) > 0) {
-                if (in_array('dialer_debug', $listaVarCambiadas)) {
-                    $this->DEBUG = $this->_configDB->dialer_debug;
-                }
-                $this->_configDB->limpiarCambios();
-            }
-            $this->_iTimestampUltimaRevisionConfig = $iTimestamp;
-        }
-    }
-
-    private function _stdManejoExcepcionDB($e, $s)
-    {
-        $this->_log->output('ERR: '.__METHOD__. ": $s: ".implode(' - ', $e->errorInfo));
-        $this->_log->output("ERR: traza de pila: \n".$e->getTraceAsString());
-        if ($e->errorInfo[0] == 'HY000' && $e->errorInfo[1] == 2006) {
-            // Códigos correspondientes a pérdida de conexión de base de datos
-            $this->_log->output('WARN: '.__METHOD__.
-                ': conexión a DB parece ser inválida, se cierra...');
-            $this->_db = NULL;
-        }
-    }
-
 
     /**************************************************************************/
 
@@ -204,6 +87,15 @@ class ECCPProcess extends TuberiaProcess
         list($eventos) = $datos;
 
         $this->_lanzarEventos($eventos);
+    }
+
+    public function msg_actualizarConfig($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_actualizarConfig'), $datos);
     }
 
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
@@ -260,6 +152,19 @@ class ECCPProcess extends TuberiaProcess
                     $this->_multiplex,
                     'notificarEvento_'.$ev[0]),
                 $ev[1]);
+        }
+    }
+
+    private function _actualizarConfig($k, $v)
+    {
+        switch ($k) {
+        case 'dialer_debug':
+            $this->_log->output('INFO: actualizando DEBUG...');
+            $this->DEBUG = $v;
+            break;
+        default:
+            $this->_log->output('WARN: '.__METHOD__.': se ignora clave de config no implementada: '.$k);
+            break;
         }
     }
 }

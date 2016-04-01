@@ -299,6 +299,11 @@ class SQLWorkerProcess extends TuberiaProcess
                         $this->_tuberia->msg_AMIEventProcess_actualizarConfig(
                             $k, $this->_configDB->$k);
                     }
+
+                    if (in_array($k, array('dialer_debug'))) {
+                        $this->_tuberia->msg_ECCPProcess_actualizarConfig(
+                            $k, $this->_configDB->$k);
+                    }
                 }
 
                 if (in_array('dialer_debug', $listaVarCambiadas))

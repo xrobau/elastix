@@ -3684,7 +3684,7 @@ LOG_CAMPANIA_SALIENTE;
     {
         $xml_response = new SimpleXMLElement('<response />');
         $xml_dumpstatusResponse = $xml_response->addChild('refreshagents_response');
-        $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+        $this->_tuberia->msg_SQLWorkerProcess_requerir_nuevaListaAgentes();
         $xml_dumpstatusResponse->addChild('success');
         return $xml_response;
     }

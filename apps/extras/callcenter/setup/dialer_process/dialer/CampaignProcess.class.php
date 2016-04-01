@@ -42,9 +42,7 @@ class CampaignProcess extends TuberiaProcess
     private $_configDB; // Objeto de configuración desde la base de datos
 
     // Contadores para actividades ejecutadas regularmente
-    private $_iTimestampActualizacion = 0;              // Última actualización remota
     private $_iTimestampUltimaRevisionCampanias = 0;    // Última revisión de campañas
-    private $_iTimestampUltimaRevisionConfig = 0;       // Última revisión de configuración
 
     // Lista de campañas y colas que ya fueron avisadas a AMIEventProcess
     private $_campaniasAvisadas = array(
@@ -117,31 +115,11 @@ class CampaignProcess extends TuberiaProcess
             'agregarArchivoGrabacion') as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
-        // Registro de manejadores de eventos desde ECCPProcess
-        foreach (array('requerir_nuevaListaAgentes') as $k)
-            $this->_tuberia->registrarManejador('*', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde HubProcess
         $this->_tuberia->registrarManejador('HubProcess', 'finalizando', array($this, "msg_finalizando"));
 
         $this->DEBUG = $this->_configDB->dialer_debug;
-
-        // Informar a AMIEventProcess la configuración de Asterisk
-        $this->_tuberia->AMIEventProcess_informarCredencialesAsterisk(array(
-            'asterisk'  =>  array(
-                'asthost'           =>  $this->_configDB->asterisk_asthost,
-                'astuser'           =>  $this->_configDB->asterisk_astuser,
-                'astpass'           =>  $this->_configDB->asterisk_astpass,
-                'duracion_sesion'   =>  $this->_configDB->asterisk_duracion_sesion,
-            ),
-            'dialer'    =>  array(
-                'llamada_corta'     =>  $this->_configDB->dialer_llamada_corta,
-                'tiempo_contestar'  =>  $this->_configDB->dialer_tiempo_contestar,
-                'debug'             =>  $this->_configDB->dialer_debug,
-                'allevents'         =>  $this->_configDB->dialer_allevents,
-            ),
-        ));
-
         return TRUE;
     }
 
@@ -251,14 +229,8 @@ class CampaignProcess extends TuberiaProcess
         if (!is_null($this->_db)) {
             try {
                 if (!$this->_finalizandoPrograma) {
-                    // Verificar si se ha cambiado la configuración
-                    $this->_verificarCambioConfiguracion();
-
                     if ($this->_ociosoSinEventos) {
                         if (!is_null($this->_ami)) $this->_actualizarCampanias();
-
-                        // Actualizar la información remota en AMIClientConn
-                        $this->_actualizarInformacionRemota();
                     }
                 }
 
@@ -284,7 +256,6 @@ class CampaignProcess extends TuberiaProcess
 
     public function limpiezaDemonio($signum)
     {
-
         // Mandar a cerrar todas las conexiones activas
         $this->_multiplex->finalizarServidor();
 
@@ -304,7 +275,6 @@ class CampaignProcess extends TuberiaProcess
             $this->_ami = NULL;
         }
         $astman = new AMIClientConn($this->_multiplex, $this->_log);
-        //$this->_momentoUltimaConnAsterisk = time();
 
         $this->_log->output('INFO: Iniciando sesión de control de Asterisk...');
         if (!$astman->connect(
@@ -333,100 +303,6 @@ class CampaignProcess extends TuberiaProcess
             $this->_ami = $astman;
             return TRUE;
         }
-    }
-
-    private function _verificarCambioConfiguracion()
-    {
-        $iTimestamp = time();
-        if ($iTimestamp - $this->_iTimestampUltimaRevisionConfig > 3) {
-            $this->_configDB->leerConfiguracionDesdeDB();
-            $listaVarCambiadas = $this->_configDB->listaVarCambiadas();
-            if (count($listaVarCambiadas) > 0) {
-                foreach ($listaVarCambiadas as $k) {
-                	if (in_array($k, array('asterisk_asthost', 'asterisk_astuser', 'asterisk_astpass'))) {
-                		$this->_tuberia->msg_AMIEventProcess_actualizarConfig(
-                            'asterisk_cred', array(
-                                $this->_configDB->asterisk_asthost,
-                                $this->_configDB->asterisk_astuser,
-                                $this->_configDB->asterisk_astpass,
-                            ));
-                	} elseif (in_array($k, array('asterisk_duracion_sesion',
-                        'dialer_llamada_corta', 'dialer_tiempo_contestar',
-                        'dialer_debug', 'dialer_allevents'))) {
-                        $this->_tuberia->msg_AMIEventProcess_actualizarConfig($k, $this->_configDB->$k);
-                    }
-                }
-
-                if (in_array('dialer_debug', $listaVarCambiadas))
-                    $this->DEBUG = $this->_configDB->dialer_debug;
-                $this->_configDB->limpiarCambios();
-            }
-            $this->_iTimestampUltimaRevisionConfig = $iTimestamp;
-        }
-    }
-
-    /* Mandar a los otros procedimientos la información que no pueden leer
-     * directamente porque no tienen conexión de base de datos. */
-    private function _actualizarInformacionRemota()
-    {
-    	$iTimestamp = time();
-        if ($iTimestamp - $this->_iTimestampActualizacion >= 5 * 60) {
-            //$this->_log->output('INFO: actualizando información remota...');
-
-            $this->_actualizarInformacionRemota_agentes();
-
-            $this->_iTimestampActualizacion = $iTimestamp;
-        }
-    }
-
-    // Mandar a AMIEventProcess una lista actualizada de los agentes activos
-    private function _actualizarInformacionRemota_agentes()
-    {
-    	// El ORDER BY del query garantiza que estatus A aparece antes que I
-        $recordset = $this->_db->query(
-            'SELECT id, number, name, estatus, type FROM agent ORDER BY number, estatus');
-        $lista = array(); $listaNum = array();
-        foreach ($recordset as $tupla) {
-            if (!in_array($tupla['number'], $listaNum)) {
-                $lista[] = array(
-                    'id'        =>  $tupla['id'],
-                    'number'    =>  $tupla['number'],
-                    'name'      =>  $tupla['name'],
-                    'estatus'   =>  $tupla['estatus'],
-                    'type'      =>  $tupla['type'],
-                );
-                $listaNum[] = $tupla['number'];
-            }
-        }
-
-        /* Leer el estado de las banderas de activación de eventos de las colas
-         * a partir del archivo de configuración. El código a continuación
-         * depende de la existencia de queues_additional.conf de una instalación
-         * FreePBX, y además asume Asterisk 11 o inferior. Se debe modificar
-         * esto cuando se migre a una versión superior de Asterisk que siempre
-         * emite los eventos. */
-        $queueflags = array();
-        if (file_exists('/etc/asterisk/queues_additional.conf')) {
-            $queue = NULL;
-            foreach (file('/etc/asterisk/queues_additional.conf') as $s) {
-                $regs = NULL;
-                if (preg_match('/^\[(\S+)\]/', $s, $regs)) {
-                    $queue = $regs[1];
-                    $queueflags[$queue]['eventmemberstatus'] = FALSE;
-                    $queueflags[$queue]['eventwhencalled'] = FALSE;
-                } elseif (preg_match('/^(\w+)\s*=\s*(.*)/', trim($s), $regs)) {
-                    if (in_array($regs[1], array('eventmemberstatus', 'eventwhencalled'))) {
-                        $queueflags[$queue][$regs[1]] = in_array($regs[2], array('yes', 'true', 'y', 't', 'on', '1'));
-                    } elseif ($regs[1] == 'member' && (stripos($regs[2], 'SIP/') === 0 || stripos($regs[2], 'IAX2/') === 0)) {
-                        $this->_log->output('WARN: '.__METHOD__.': agente estático '.
-                            $regs[2].' encontrado en cola '.$queue.' - puede causar problemas.');
-                    }
-                }
-            }
-        }
-
-        // Mandar el recordset a AMIEventProcess como un mensaje
-        $this->_tuberia->msg_AMIEventProcess_nuevaListaAgentes($lista, $queueflags);
     }
 
     private function _actualizarCampanias()
@@ -1395,12 +1271,6 @@ PETICION_LLAMADAS_AGENTE;
     }
 
     /**************************************************************************/
-
-    public function msg_requerir_nuevaListaAgentes($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
-    {
-    	$this->_log->output("INFO: $sFuente requiere refresco de lista de agentes");
-        $this->_actualizarInformacionRemota_agentes();
-    }
 
     public function msg_sqlinsertcalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {

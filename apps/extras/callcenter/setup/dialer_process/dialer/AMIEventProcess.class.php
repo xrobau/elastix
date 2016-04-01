@@ -83,15 +83,20 @@ class AMIEventProcess extends TuberiaProcess
         $this->_listaAgentes = new ListaAgentes();
 
         // Registro de manejadores de eventos desde CampaignProcess
-        foreach (array('nuevaListaAgentes',
-            'idnewcall', 'idcurrentcall', 'canalRemotoAgente', 'actualizarConfig',
-            'quitarReservaAgente') as $k)
+        foreach (array('idnewcall', 'idcurrentcall',
+            'canalRemotoAgente', 'quitarReservaAgente') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
-        foreach (array('informarCredencialesAsterisk', 'nuevasCampanias',
+        foreach (array('nuevasCampanias',
             'leerTiempoContestar', 'nuevasLlamadasMarcar',
             'contarLlamadasEsperandoRespuesta', 'agentesAgendables',
             'infoPrediccionCola', 'ejecutarOriginate') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "rpc_$k"));
+
+        // Registro de manejadores de eventos desde SQLWorkerProcess
+        foreach (array('actualizarConfig', 'nuevaListaAgentes', ) as $k)
+            $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "msg_$k"));
+        foreach (array('informarCredencialesAsterisk', ) as $k)
+            $this->_tuberia->registrarManejador('SQLWorkerProcess', $k, array($this, "rpc_$k"));
 
         // Registro de manejadores de eventos desde ECCPWorkerProcess
         foreach (array('idNuevaSesionAgente',
@@ -175,7 +180,7 @@ class AMIEventProcess extends TuberiaProcess
                 }
             }
 
-            $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+            $this->_tuberia->msg_SQLWorkerProcess_requerir_nuevaListaAgentes();
         }
 
         // Rutear todos los mensajes pendientes entre tareas
@@ -508,7 +513,7 @@ class AMIEventProcess extends TuberiaProcess
                 if (is_null($a)) {
                     $this->_log->output("ERR: ".__METHOD__.": no se ha ".
                         "cargado información de agente {$listaECCP[4]}");
-                    $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+                    $this->_tuberia->msg_SQLWorkerProcess_requerir_nuevaListaAgentes();
                 } else {
                     $a->respuestaLoginAgente($this->_tuberia,
                         $params['Response'], $params['Uniqueid'], $params['Channel']);
@@ -1992,7 +1997,7 @@ Uniqueid: 1429642067.241008
             } elseif (!is_null($sAgentNum)) {
                 $this->_log->output("ERR: ".__METHOD__.": no se ha ".
                     "cargado información de agente $sAgentNum");
-                $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+                $this->_tuberia->msg_SQLWorkerProcess_requerir_nuevaListaAgentes();
             } else {
                 if ($this->DEBUG) {
                 	$this->_log->output('DEBUG: '.__METHOD__.': llamada '.
@@ -2606,7 +2611,7 @@ Uniqueid: 1429642067.241008
 
         if (!$this->_queueshadow->msg_Leave($params)) {
             $this->_log->output('ERR: número de llamadas en espera fuera de sincronía, se intenta refrescar...');
-            $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+            $this->_tuberia->msg_SQLWorkerProcess_requerir_nuevaListaAgentes();
         }
     }
 
@@ -2620,7 +2625,7 @@ Uniqueid: 1429642067.241008
         }
 
         $this->_log->output('INFO: se ha recargado configuración de Asterisk, se refresca agentes...');
-        $this->_tuberia->msg_CampaignProcess_requerir_nuevaListaAgentes();
+        $this->_tuberia->msg_SQLWorkerProcess_requerir_nuevaListaAgentes();
     }
 
     public function msg_Agents($sEvent, $params, $sServer, $iPort)

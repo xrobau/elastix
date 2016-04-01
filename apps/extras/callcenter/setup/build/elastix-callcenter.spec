@@ -101,6 +101,15 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: introduce SQLWorkerProcess. This class will handle all
+  database writes required by state changes that were previously executed in
+  CampaignProcess. This should allow updates to be processed even when
+  CampaignProcess is busy reading calls for outgoing campaigns. All operations
+  are wrapped in transactions and will be restarted on errors without retry
+  limits. This commit migrates the query of active agents.
+  SVN Rev[7532]
+
 * Thu Mar 31 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: move Originate call into AMIEventProcess. This puts all
   responsibility of database state changes on AMIEventProcess, preventing races

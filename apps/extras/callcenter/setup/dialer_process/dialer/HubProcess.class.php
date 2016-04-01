@@ -37,7 +37,8 @@ class HubProcess extends AbstractProcess implements iRoutedMessageHook
     private $_tareas;   // Lista de tareas, nombreClase => PID
 
     // Estas tareas deben estar siempre en ejecución
-    private $_tareasFijas = array('AMIEventProcess', 'CampaignProcess', 'ECCPProcess');
+    private $_tareasFijas = array('AMIEventProcess', 'CampaignProcess',
+        'ECCPProcess', 'SQLWorkerProcess');
 
     // Contador para garantizar unicidad de nombre de tarea dinámica
     private $_dynProcessCounter = 0;

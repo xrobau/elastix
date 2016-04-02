@@ -43,6 +43,7 @@ class CampaignProcess extends TuberiaProcess
 
     // Contadores para actividades ejecutadas regularmente
     private $_iTimestampUltimaRevisionCampanias = 0;    // Última revisión de campañas
+    private $_iTimestampUltimaRevisionConfig = 0;       // Última revisión de configuración
 
     // Lista de campañas y colas que ya fueron avisadas a AMIEventProcess
     private $_campaniasAvisadas = array(
@@ -224,6 +225,9 @@ class CampaignProcess extends TuberiaProcess
         if (!is_null($this->_db)) {
             try {
                 if (!$this->_finalizandoPrograma) {
+                    // Verificar si se ha cambiado la configuración
+                    $this->_verificarCambioConfiguracion();
+
                     if ($this->_ociosoSinEventos) {
                         if (!is_null($this->_ami)) $this->_actualizarCampanias();
                     }
@@ -297,6 +301,21 @@ class CampaignProcess extends TuberiaProcess
 
             $this->_ami = $astman;
             return TRUE;
+        }
+    }
+
+    private function _verificarCambioConfiguracion()
+    {
+        $iTimestamp = time();
+        if ($iTimestamp - $this->_iTimestampUltimaRevisionConfig > 3) {
+            $this->_configDB->leerConfiguracionDesdeDB();
+            $listaVarCambiadas = $this->_configDB->listaVarCambiadas();
+            if (count($listaVarCambiadas) > 0) {
+                if (in_array('dialer_debug', $listaVarCambiadas))
+                    $this->DEBUG = $this->_configDB->dialer_debug;
+                $this->_configDB->limpiarCambios();
+            }
+            $this->_iTimestampUltimaRevisionConfig = $iTimestamp;
         }
     }
 

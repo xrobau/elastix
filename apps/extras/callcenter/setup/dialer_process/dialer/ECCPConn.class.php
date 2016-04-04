@@ -976,13 +976,11 @@ LEER_CAMPANIA;
     {
         switch ($sTipoCampania) {
         case 'incoming':
-            $sDescCampania = 'entrante';
             $sPeticionSQL =
                 'SELECT CONCAT(agent.type,"/",agent.number) AS agentchannel FROM call_entry, agent '.
                 'WHERE call_entry.id_agent = agent.id AND call_entry.id = ?';
             break;
         case 'outgoing':
-            $sDescCampania = 'saliente';
             $sPeticionSQL =
                 'SELECT CONCAT(agent.type,"/",agent.number) AS agentchannel FROM calls, agent '.
                 'WHERE calls.id_agent = agent.id AND calls.id = ?';

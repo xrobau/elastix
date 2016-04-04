@@ -562,10 +562,10 @@ function loadCampaignContacts($pDB, $smarty, $module_name, $local_templates_dir)
 
     // Carga de todas las funciones auxiliares de los diálogos
     foreach ($listuploaders as $uploader) {
-        if (file_exists("$uploadersdir/$uploader/index.php")) {
-            if (file_exists("$uploadersdir/$uploader/lang/en.lang"))
-                load_language_module("$uploadersdir/$uploader");
-            require_once "$uploadersdir/$uploader/index.php";
+        if (file_exists("modules/$module_name/uploaders/$uploader/index.php")) {
+            if (file_exists("modules/$module_name/uploaders/$uploader/lang/en.lang"))
+                load_language_module("$module_name/uploaders/$uploader");
+            require_once "modules/$module_name/uploaders/$uploader/index.php";
         }
     }
 

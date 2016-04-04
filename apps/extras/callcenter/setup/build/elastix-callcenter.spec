@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Mon Apr  4 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: move translations used only by CSV upload to CSV
+  plugin. Fix incorrect uploader translation path.
+  SVN Rev[7562]
 - CHANGED: Campaign Out: prune all translations that are actually the same value
   as the English one.
   SVN Rev[7561]

@@ -38,6 +38,7 @@ class paloContactInsert
 
     function __construct($db, $idCampaign)
     {
+        if (get_class($db) == 'paloDB') $db = $db->conn;
         if (get_class($db) != 'PDO') die ('Expected PDO, got '.get_class($db));
         $this->_db = $db;
         $this->_id_campaign = $idCampaign;
@@ -49,6 +50,8 @@ class paloContactInsert
         $this->_sth_attribute = $this->_db->prepare(
             'INSERT INTO call_attribute (id_call, columna, value, column_number) VALUES (?, ?, ?, ?)');
     }
+
+    function beforeBatchInsert() { return TRUE; }
 
     /**
      * Procedimiento para insertar un contacto a la campaña. El formato de los
@@ -84,7 +87,7 @@ class paloContactInsert
         // Inserción del número en sí
         $r = $this->_sth_contact_number->execute(array($this->_id_campaign, $number, $iDNC));
         if (!$r) {
-            $this->errMsg = 'On number insert: '.print_r($this->_sth_contact_number->errorInfo(), TRUE);
+            $this->errMsg = _tr('On number insert').': '.print_r($this->_sth_contact_number->errorInfo(), TRUE);
             return NULL;
         }
 
@@ -96,10 +99,21 @@ class paloContactInsert
             if (is_null($attr[1])) $attr[1] = '';
             $r = $this->_sth_attribute->execute(array($idCall, $attr[0], $attr[1], $iNumColumna));
             if (!$r) {
-                $this->errMsg = 'On attribute insert: '.print_r($this->_sth_attribute->errorInfo(), TRUE);
+                $this->errMsg = _tr('On attribute insert').': '.print_r($this->_sth_attribute->errorInfo(), TRUE);
                 return NULL;
             }
         }
         return $idCall;
+    }
+
+    function afterBatchInsert()
+    {
+        $sth = $this->_db->prepare('UPDATE campaign SET estatus = ? WHERE id = ? AND estatus = ?');
+        $r = $sth->execute(array('A', $this->_id_campaign, 'T'));
+        if (!$r) {
+            $this->errMsg = _tr('On campaign reactivation').': '.print_r($this->_sth_attribute->errorInfo(), TRUE);
+            return FALSE;
+        }
+        return TRUE;
     }
 }

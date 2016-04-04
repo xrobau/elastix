@@ -9,38 +9,22 @@
   <td>
     <table width="100%" valign="top" cellpadding="4" cellspacing="0" border="0">
       <tr>
-          {if $mode eq 'input'}
         <td align="left">
           <input class="button" type="submit" name="save" value="{$SAVE}" onclick="return enviar_datos();" />
           <input class="button" type="submit" name="cancel" value="{$CANCEL}" />
         </td>
         <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
-          {elseif $mode eq 'edit'}
-        <td align="left">
-          <input class="button" type="submit" name="apply_changes" value="{$APPLY_CHANGES}" onclick="return enviar_datos();" />
-          <input class="button" type="submit" name="cancel" value="{$CANCEL}" />
-        </td>
-          {else}
-{* Removido para eliminar xajax *}
-          {/if}
      </tr>
    </table>
   </td>
 </tr>
 <tr>
   <td>
-    <table width="900" valign="top" border="0" cellspacing="0" cellpadding="0" class="tabForm">
-
-      <tr>
-        <td align='right'>{$encoding.LABEL}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
-        <td  colspan='4'>{$encoding.INPUT}</td>
-      </tr>
-      <tr>
-        <td align='right'>{$phonefile.LABEL}: {if $mode eq 'input'}<span  class="required">*</span>{/if}</td>
-        <td  colspan='4'>{$phonefile.INPUT}</td>
-      </tr>
-
-    </table>
+    {$uploader.LABEL}: {$uploader.INPUT}<br/>
+    <fieldset>
+        <legend>{$LBL_OPTIONS_UPLOADER}</legend>
+        {$CONTENT_UPLOADER}
+    </fieldset>
   </td>
 </tr>
 </table>

@@ -170,5 +170,7 @@ $arrLangModule=array(
 '(No external URL)'=>'(No external URL)',
 'Load Contacts'=>'Load Contacts',
 'Load Contacts for Campaign'=>'Load Contacts for Campaign',
+'Available uploaders' => 'Available uploaders',
+'Options for' => 'Options for',
 );
 ?>

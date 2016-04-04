@@ -1,5 +1,4 @@
 <?php
-//bin/bash: indent: command not found
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
@@ -541,68 +540,59 @@ function loadCampaignContacts($pDB, $smarty, $module_name, $local_templates_dir)
         $smarty->assign("mb_message", 'Cannot read campaign - '.$oCamp->errMsg);
         return '';
     }
-
-    $smarty->assign('id_campaign', $id_campaign);
-    $smarty->assign('FRAMEWORK_TIENE_TITULO_MODULO', existeSoporteTituloFramework());
-    $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-    $smarty->assign("CANCEL", _tr("Cancel"));
-    $smarty->assign("SAVE", _tr("Save"));
-    $smarty->assign("APPLY_CHANGES", _tr("Apply changes"));
-
-    $oForm = new paloForm($smarty, array(
-        'encoding'          =>  array(
-            'LABEL'                     =>  _tr('Call File Encoding'),
-            'REQUIRED'                  =>  'yes',
-            'INPUT_TYPE'                =>  'SELECT',
-            'INPUT_EXTRA_PARAM'         =>  listarCodificaciones(),
-            'VALIDATION_TYPE'           =>  'text',
-            'VALIDATION_EXTRA_PARAM'    =>  '',
-        ),
-        'phonefile'          =>  array(
-            'LABEL'                     =>  _tr('Call File'),
-            'REQUIRED'                  =>  'yes',
-            'INPUT_TYPE'                =>  'FILE',
-            'INPUT_EXTRA_PARAM'         =>  '',
-            'VALIDATION_TYPE'           =>  'text',
-            'VALIDATION_EXTRA_PARAM'    =>  '',
-        ),
+    $smarty->assign(array(
+        'id_campaign'                   =>  $id_campaign,
+        'FRAMEWORK_TIENE_TITULO_MODULO' =>  existeSoporteTituloFramework(),
+        'REQUIRED_FIELD'                =>  _tr("Required field"),
+        'CANCEL'                        =>  _tr("Cancel"),
+        'SAVE'                          =>  _tr("Save"),
+        'LBL_OPTIONS_UPLOADER'          =>  _tr('Options for').': ',
+        'LBL_UPLOADERS'                 =>  _tr('Available uploaders'),
+        'icon'                          =>  'images/kfaxview.png',
     ));
 
-    if (isset($_POST['save'])) {
-        if (!in_array($_POST['encoding'], mb_list_encodings())) {
-            $smarty->assign("mb_title", _tr('Validation Error'));
-            $smarty->assign("mb_message", _tr('Invalid character encoding'));
-        } elseif (empty($_FILES['phonefile']['tmp_name'])) {
-            $smarty->assign("mb_title", _tr('Validation Error'));
-            $smarty->assign("mb_message", _tr('Call file not specified or failed to be uploaded'));
-        } else {
-            $pDB->beginTransaction();
-
-            // Se puede tardar mucho tiempo en la inserción
-            set_time_limit(0);
-            $bExito = $oCamp->addCampaignNumbersFromFile(
-                $id_campaign,
-                $_FILES['phonefile']['tmp_name'],
-                $_POST['encoding']);
-            if ($bExito && $arrCampaign[0]['estatus'] == 'T') {
-                // Agregar números a una campaña terminada debe volverla a activar
-                $oCamp->activar_campaign($id_campaign, 'A');
-            }
-
-            // Confirmar o deshacer la transacción según sea apropiado
-            if ($bExito) {
-                $pDB->commit();
-                header("Location: ?menu=$module_name");
-                return '';
-            } else {
-                $pDB->rollBack();
-                $smarty->assign("mb_title", _tr("Validation Error"));
-                $smarty->assign("mb_message", $oCamp->errMsg);
-            }
+    // Construir lista de todos los cargadores conocidos
+    $listuploaders = array();
+    $uploadersdir = "modules/$module_name/uploaders";
+    foreach (scandir("$uploadersdir/") as $uploader) {
+        if ($uploader != '.' && $uploader != '..' && is_dir("$uploadersdir/$uploader")) {
+            $listuploaders[$uploader] = $uploader;
         }
     }
 
-    $smarty->assign('icon', 'images/kfaxview.png');
+    // Carga de todas las funciones auxiliares de los diálogos
+    foreach ($listuploaders as $uploader) {
+        if (file_exists("$uploadersdir/$uploader/index.php")) {
+            if (file_exists("$uploadersdir/$uploader/lang/en.lang"))
+                load_language_module("$uploadersdir/$uploader");
+            require_once "$uploadersdir/$uploader/index.php";
+        }
+    }
+
+    $oForm = new paloForm($smarty, array(
+        'uploader'          =>  array(
+            'LABEL'                     =>  _tr('Available uploaders'),
+            'REQUIRED'                  =>  'yes',
+            'INPUT_TYPE'                =>  'SELECT',
+            'INPUT_EXTRA_PARAM'         =>  $listuploaders,
+            'VALIDATION_TYPE'           =>  'text',
+            'VALIDATION_EXTRA_PARAM'    =>  '',
+            'ONCHANGE'                  =>  'submit();',
+        ),
+    ));
+
+    $selected_uploader = isset($_REQUEST['uploader']) ? $_REQUEST['uploader'] : 'CSV';
+    if (!in_array($selected_uploader, $listuploaders)) $selected_uploader = 'CSV';
+
+    $classname = 'Uploader_'.$selected_uploader;
+    $method = (isset($_REQUEST['uploader_action']) && method_exists($classname, 'handleJSON_'.$_REQUEST['uploader_action']))
+        ? 'handleJSON_'.$_REQUEST['uploader_action'] : 'main';
+    $h = array($classname, $method);
+    $r = call_user_func($h, $module_name, $smarty, realpath($local_templates_dir.'/../../uploaders/'.$selected_uploader.'/tpl'), $pDB);
+    if ($method != 'main') return $r;
+
+    $smarty->assign('CONTENT_UPLOADER', $r);
+    $smarty->assign('LBL_OPTIONS_UPLOADER', _tr('Options for').': '.htmlentities($selected_uploader, ENT_COMPAT, 'UTF-8'));
     return $oForm->fetchForm(
         "$local_templates_dir/load_contacts.tpl",
         _tr("Load Contacts for Campaign").': '.$arrCampaign[0]['name'],
@@ -784,25 +774,6 @@ function getFormCampaign($arrDataTrunks, $arrDataQueues, $arrSelectForm,
     );
 
     return $formCampos;
-}
-
-function listarCodificaciones()
-{
-	$listaEncodings = array(
-        'UTF-8' =>  _tr('UTF-8'),
-    );
-    $listaPosterior = array();
-    foreach (mb_list_encodings() as $sEnc) {
-		if (!isset($listaEncodings[$sEnc]) && !isset($listaPosterior[$sEnc]) &&
-            !in_array($sEnc, array('pass', 'wchar', 'BASE64', 'UUENCODE',
-                'HTML-ENTITIES', 'Quoted-Printable', 'UTF7-IMAP'))) {
-			if ($sEnc != _tr($sEnc))
-                $listaEncodings[$sEnc] = _tr($sEnc);
-            else $listaPosterior[$sEnc] = _tr($sEnc);
-		}
-	}
-    $listaEncodings = array_merge($listaEncodings, $listaPosterior);
-    return $listaEncodings;
 }
 
 // TODO: validar esta funcion para verificar para qué es necesario escapar.

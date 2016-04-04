@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Sun Apr  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: factor out contact loading via CSV as a plugin and a
+  reference implementation of contact loader plugins.
+  SVN Rev[7558]
+
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: restore periodic read of configuration in CampaignProcess.
   SVN Rev[7557]

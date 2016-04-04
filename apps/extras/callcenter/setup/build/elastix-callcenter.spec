@@ -101,37 +101,42 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Apr  4 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: prune all translations that are actually the same value
+  as the English one.
+  SVN Rev[7561]
+
 * Sun Apr  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: factor out contact loading via CSV as a plugin and a
   reference implementation of contact loader plugins.
-  SVN Rev[7558]
+  SVN Rev[7559]
 
 * Fri Apr  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: restore periodic read of configuration in CampaignProcess.
-  SVN Rev[7557]
+  SVN Rev[7558]
 - CHANGED: Dialer: add timing for each SQL action in SQLWorkerProcess. Ported
   from CallCenterPRO.
-  SVN Rev[7556]
+  SVN Rev[7557]
 - CHANGED: Dialer: perform SQL commit before removing the action and delivering
   events, not after. Ported from CallCenterPRO.
-  SVN Rev[7555]
+  SVN Rev[7556]
 - CHANGED: Dialer: handle QueueCallerAbandon event. This is required to properly
   mark as abandoned when a call times out in a queue and is transferred to a
   second queue without immediately hanging up. Fixes Elastix bug #2500. Ported
   from CallCenterPRO.
-  SVN Rev[7554]
+  SVN Rev[7555]
 - CHANGED: Dialer: minor optimization to save 1 RPC on idle queue. Ported from
   CallCenterPRO.
-  SVN Rev[7553]
+  SVN Rev[7554]
 - CHANGED: Dialer: assume queue events for Asterisk 12 and later. Ported from
   CallCenterPRO.
-  SVN Rev[7552]
+  SVN Rev[7553]
 - CHANGED: Dialer: make construirEventoProgresoLlamada private to
   SQLWorkerProcess. Ported from CallCenterPRO.
-  SVN Rev[7551]
+  SVN Rev[7552]
 - CHANGED: Dialer: remove unused database connection code from ECCPProcess.
   Ported from CallCenterPRO.
-  SVN Rev[7550]
+  SVN Rev[7551]
 - CHANGED: Dialer: move audit fixing to SQLWorkerProcess. Ported from
   CallCenterPRO.
   SVN Rev[7549]

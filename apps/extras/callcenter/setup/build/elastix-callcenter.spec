@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Apr  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Campaign Out: add documentation on the API for custom uploaders.
+  SVN Rev[7564]
+
 * Mon Apr  4 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: move translations used only by CSV upload to CSV
   plugin. Fix incorrect uploader translation path.

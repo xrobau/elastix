@@ -174,7 +174,7 @@ function listPackages($smarty, $module_name, $local_templates_dir, $arrConf)
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("Name")." = $nombre_paquete",
         $arrFilter, array("nombre_paquete" => ""));
     $oGrid->addButtonAction('update_repositorios', _tr('Repositories Update'),
-        'refresh', 'mostrarReloj()');
+        'refresh', 'refreshPackageList()');
     $oGrid->showFilter($oFilterForm->fetchForm("$local_templates_dir/new.tpl",
         '', $arrFilter));
     return $oGrid->fetchGrid($arrGrid, $arrData);

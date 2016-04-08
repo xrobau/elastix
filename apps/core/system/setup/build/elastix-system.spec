@@ -180,6 +180,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Apr  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Packages: force Elastix registration before allowing any package
+  action to continue.
+  SVN Rev[7566]
+
 * Mon Mar 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: fixed incorrect color assignment of graph colors on
   Performance Graphic rewrite that causes user confusion on which y-axis is

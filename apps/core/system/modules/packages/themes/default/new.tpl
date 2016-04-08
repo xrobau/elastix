@@ -13,99 +13,15 @@
     <input type='hidden' id='estaus_reloj' value='apagado' />
 {literal}
 <script type='text/javascript'>
-    function mostrarReloj()
-    {
-       var estatus = $("#estaus_reloj").val();
-       if(estatus=='apagado'){
-            $("#estaus_reloj").val('prendido');
-            $("#relojArena").html("<img src='modules/packages/images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$UpdatingRepositories}{literal}...</font>");
-            $("#neo-table-header-filterrow").data("neo-table-header-filterrow-status", "hidden");
-            $("#neo-tabla-header-row-filter-1").click();
-		var arrAction                = new Array();
-		arrAction["action"]          = "updateRepositories";
-		arrAction["menu"]	     = "packages";
-		arrAction["rawmode"]         = "yes";
-		request("index.php",arrAction,false,
-		    function(arrData,statusResponse,error){
-				alert(statusResponse);
-				$("#relojArena").html("");
-				$("#estaus_reloj").val('apagado');
-				$("#submit_nombre").click();
-		});
-        }
-        else alert("{/literal}{$accionEnProceso}{literal}");
-    }
-    function installaPackage(paquete,val)
-    {   
-        var estatus = $("#estaus_reloj").val();
-        if(estatus=='apagado'){
-	      
-            $("#estaus_reloj").val('prendido');
-            $("#relojArena").html("");
-	    if(val==0)
-	      $("#relojArena").html("<img src='images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$InstallPackage}{literal}: "+ paquete +"...</font>");
-            else
-	      $("#relojArena").html("<img src='images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$UpdatePackage}{literal}: "+ paquete +"...</font>");
-            
-	    $("#neo-table-header-filterrow").data("neo-table-header-filterrow-status", "hidden");
-            $("#neo-tabla-header-row-filter-1").click();
-		var arrAction                    = new Array();
-		arrAction["action"]      = "install";
-		arrAction["menu"]        = "packages";
-		arrAction["paquete"]	 = paquete;
-		arrAction["val"]	 = val;
-		arrAction["rawmode"]     = "yes";
-		request("index.php",arrAction,false,
-         	    function(arrData,statusResponse,error){
-                                alert(statusResponse);
-                                $("#relojArena").html("");
-                                $("#estaus_reloj").val('apagado');
-                                $("#submit_nombre").click();
-
-		});
-        }
-        else alert("{/literal}{$accionEnProceso}{literal}");
-    }
-
-    function uninstallPackage(paquete)
-    {
-        var estatus = $("#estaus_reloj").val();
-        if(estatus=='apagado'){
-            $("#estaus_reloj").val('prendido');
-            $("#relojArena").html("<img src='images/loading.gif' align='absmiddle' /> <br /> <font style='font-size:12px; color:red'>{/literal}{$UninstallPackage}{literal}: "+ paquete +"...</font>");
-            $("#neo-table-header-filterrow").data("neo-table-header-filterrow-status", "hidden");
-            $("#neo-tabla-header-row-filter-1").click();
-                var arrAction                    = new Array();
-                arrAction["action"]      = "uninstall";
-                arrAction["menu"]        = "packages";
-                arrAction["paquete"]     = paquete;
-                arrAction["rawmode"]     = "yes";
-                request("index.php",arrAction,false,
-                    function(arrData,statusResponse,error){
-                                alert(statusResponse);
-                                $("#relojArena").html("");
-                                $("#estaus_reloj").val('apagado');
-                                $("#submit_nombre").click();
-
-                });
-        }
-        else alert("{/literal}{$accionEnProceso}{literal}");
-    }
-
-
-</script>
-
-<script>
-function confirmDelete(paquete) {
-  if (confirm("{/literal}{$msgConfirmDelete}{literal}")) {
-             uninstallPackage(paquete);
-  }
-}
-function confirmUpdate(paquete) {
-  if (confirm("{/literal}{$msgConfirmUpdate}{literal}")) {
-             installaPackage(paquete,1);
-  }
-}
+arrLang = {
+    action_in_progress: "{/literal}{$accionEnProceso}{literal}",
+    updating_repositories: "{/literal}{$UpdatingRepositories}{literal}",
+    install_package: "{/literal}{$InstallPackage}{literal}",
+    update_package: "{/literal}{$UpdatePackage}{literal}",
+    uninstall_package: "{/literal}{$UninstallPackage}{literal}",
+    msg_confirm_delete: "{/literal}{$msgConfirmDelete}{literal}",
+    msg_confirm_update: "{/literal}{$msgConfirmUpdate}{literal}"
+};
 </script>
 
 {/literal}

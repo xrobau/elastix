@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Apr  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: force registration popup to appear on first logged-in
+  display if system is not registered.
+  SVN Rev[7565]
+
 * Mon Mar 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: enable larger limits for post_max_size and
   max_upload_filesize, since previous values are too small for common CallCenter

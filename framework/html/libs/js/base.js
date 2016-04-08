@@ -290,6 +290,9 @@ $(document).ready(function(){
 
         $('.register_link').css('color',arrData['color']);
         $('.register_link').text(arrData['label']);
+
+        // Mostrar el popup si no está registrado
+        if (arrData.auto_popup) $('a.register_link').click();
     });
     $('a.register_link').click(function() { showPopupCloudLogin('',540,335); });
 });

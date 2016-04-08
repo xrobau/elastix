@@ -78,6 +78,9 @@ function _moduleContent(&$smarty, $module_name) {
 }
 
 function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf, &$pDBACL) {
+
+    $_SESSION['registration_popup_displayed'] = TRUE;
+
     $pACL = new paloACL($pDBACL);
     $arrFormRegister = createFieldForm($arrConf);
     $oForm = new paloForm($smarty, $arrFormRegister);
@@ -145,6 +148,8 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
 function isRegisteredServer(&$pDB, $arrConf) {
     $pRegister = new paloSantoRegistration($pDB,$arrConf["url_webservice"]);
     $iRegister = $pRegister->isRegisteredInfo();
+
+    $iRegister['auto_popup'] = (($iRegister['registered'] != 'yes-all') && !isset($_SESSION['registration_popup_displayed']));
 
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status("TRUE");

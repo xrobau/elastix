@@ -867,7 +867,7 @@ class SQLWorkerProcess extends TuberiaProcess
         return $eventos;
     }
 
-    private function _AgentLogoff($sAgente, $iTimestampLogout, $id_agent, $id_sesion, $pausas, $razon)
+    private function _AgentLogoff($sAgente, $iTimestampLogout, $id_agent, $id_sesion, $pausas)
     {
         $eventos = array();
         $eventos_forward = array();
@@ -878,7 +878,7 @@ class SQLWorkerProcess extends TuberiaProcess
             marcarFinalBreakAgente($this->_db, $id_pausa, $iTimestampLogout);
             $eventos_forward[] = construirEventoPauseEnd($this->_db, $sAgente, $id_pausa, $tipo_pausa);
         }
-        marcarFinalBreakAgente($this->_db, $id_sesion, $iTimestampLogout, $razon);
+        marcarFinalBreakAgente($this->_db, $id_sesion, $iTimestampLogout);
 
         // Notificar a todas las conexiones abiertas
         $eventos_forward[] = array('AgentLogoff', array($sAgente));

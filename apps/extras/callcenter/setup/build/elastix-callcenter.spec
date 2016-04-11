@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Apr 11 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: remove event parameter no appearing in CallCenter Community.
+  SVN Rev[7567]
+
 * Thu Apr  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Campaign Out: add documentation on the API for custom uploaders.
   SVN Rev[7564]

@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -181,6 +181,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed Apr 13 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-6
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Fri Apr  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Packages: force Elastix registration before allowing any package
   action to continue.

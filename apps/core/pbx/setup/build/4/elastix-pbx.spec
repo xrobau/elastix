@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -300,6 +300,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Apr 13 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Sat Feb 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: (WIP) tweak macro-hangupcall to check if CDR(recordingfile) is set,
   and if so, test if file exists, either under ${ASTSPOOLDIR}/monitor/ or under

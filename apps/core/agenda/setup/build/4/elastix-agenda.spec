@@ -3,7 +3,7 @@
 Summary: Elastix Module Agenda
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -101,6 +101,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Apr 13 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
+- CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
+  SVN history. Bump version and release in specfile.
+
 * Thu Dec 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Address Book: extend registration status report for list of all
   internal contacts. Tweak so that only one external command is required per

@@ -1,8 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  CodificaciÃ³n: UTF-8
+  Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,35 +24,29 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"client" => "client",
-"fileCRM" => "fichier CRM",
-"Select file upload" => "Sélectionner le fichier à charger",
-"Result" => "Résultat",
-"Load File" => "Charger un fichier",
-"Format File" => "Format du fichier",
-"Upload" => "Charger",
-"File" => "Fichier",
-"Error" => "Erreur",
-"Error while loading file" => "Erreur en chargeant le fichier",
-"Invalid CSV File" => "Fichier CSV invalide",
-"Invalid phone number" => "Numéro de téléphone incorrect",
-"Line" => "Ligne",
-"Unsupported attribute" => "Attribut non supporté",
-"Invalid Cedula/RUC" => "Fiche invalide",
-"Missing or empty name" => "Nom manquant ou vide",
-"Missing or empty surname" => "Nom de famille manquant ou vide",
-"Download contacts" => "Téléchargement des contacts",
-"Inserted records" => "Insérer un enregistrement",
-"Updated records" => "Actualiser un enregistrement",
-"Detected charset" => "Jeu de caractères détecté",
-
+$arrLangModule = array(
+    "fileCRM" => "fichier CRM",
+    "Select file upload" => "Sélectionner le fichier à charger",
+    "Result" => "Résultat",
+    "Load File" => "Charger un fichier",
+    "Format File" => "Format du fichier",
+    "Upload" => "Charger",
+    "File" => "Fichier",
+    "Error" => "Erreur",
+    "Error while loading file" => "Erreur en chargeant le fichier",
+    "Invalid CSV File" => "Fichier CSV invalide",
+    "Invalid phone number" => "Numéro de téléphone incorrect",
+    "Line" => "Ligne",
+    "Unsupported attribute" => "Attribut non supporté",
+    "Invalid Cedula/RUC" => "Fiche invalide",
+    "Missing or empty name" => "Nom manquant ou vide",
+    "Missing or empty surname" => "Nom de famille manquant ou vide",
+    "Download contacts" => "Téléchargement des contacts",
+    "Inserted records" => "Insérer un enregistrement",
+    "Updated records" => "Actualiser un enregistrement",
+    "Detected charset" => "Jeu de caractères détecté",
 );
 ?>
-

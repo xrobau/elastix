@@ -3,7 +3,7 @@
   Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 0.5                                                  |
-  | http://www.elastix.com                                               |
+  | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
@@ -25,31 +25,29 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.2 2007/08/09 00:31:28 jmartinez Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-"Name Break" => "Nombre",
-"Description Break" => "Descripción",
-"New Break" => "Nuevo Receso",
-"View Break" => "Ver Receso",
-"Edit Break" => "Editar Receso",
-"Active" => "Activo",
-"Inactive" => "Inactivo",
-"Breaks List" => "Lista de Recesos",
-"Name Break" => "Nombre",
-"Description Break" => "Descripción",
-"Create New Break" => "Crear Nuevo Receso",
-"Error when Activating the Break" => "Error al activar el Receso",
-"Activate Error" => "Error al Activar", //Bruno agrego
-"Break ID is not valid" => "Id Receso no es válido",
-"Name Break can't be empty" => "Nombre de Receso no puede ser vacío",
-"Name Break already exists" => "Nombre de Receso ya existe",
-"Id Break is empty" => "Id Receso esta Vacío",
-"Desactivate Error" => "Error al Desactivar", //Bruno agrego
-"Error when desactivating the Break" => "Error al desactivar el receso",
-"Desactivate" => "Desactivar", //Bruno agrego
-"Activate"=>"Activar",
-"Status"=>"Estado",
-"Apply Changes"=>"Aplicar Cambios",
+    "Name Break" => "Nombre",
+    "Description Break" => "Descripción",
+    "New Break" => "Nuevo Receso",
+    "View Break" => "Ver Receso",
+    "Edit Break" => "Editar Receso",
+    "Active" => "Activo",
+    "Inactive" => "Inactivo",
+    "Breaks List" => "Lista de Recesos",
+    "Create New Break" => "Crear Nuevo Receso",
+    "Error when Activating the Break" => "Error al activar el Receso",
+    "Activate Error" => "Error al Activar",
+    "Break ID is not valid" => "Id Receso no es válido",
+    "Name Break can't be empty" => "Nombre de Receso no puede ser vacío",
+    "Name Break already exists" => "Nombre de Receso ya existe",
+    "Id Break is empty" => "Id Receso esta Vacío",
+    "Desactivate Error" => "Error al Desactivar",
+    "Error when desactivating the Break" => "Error al desactivar el receso",
+    "Desactivate" => "Desactivar",
+    "Activate" => "Activar",
+    "Status" => "Estado",
+    "Apply Changes" => "Aplicar Cambios",
 );
 ?>

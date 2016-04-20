@@ -1,9 +1,9 @@
-	<?php
+<?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
-  | http://www.elastix.com                                               |
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.org                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
@@ -24,34 +24,26 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Name Break" => "Nom",
-"Description Break" => "Description",
-"New Break" => "Nouvelle pause",
-"View Break" => "Voir",
-"Edit Break" => "Editer une Pause",
-"Active" => "Active",
-"Inactive" => "Inactive",
-"Breaks List" => "Liste des pauses",
-"Create New Break" => "Créer une nouvelle Pause",
-"Error when Activating the Break" => "Erreur en activant la pause",
-"Activate Error" => "Erreur d'activation",
-"Break ID is not valid" => "Id pause non valide",
-"Name Break can't be empty" => "Le nom de la pause ne peut pas être vide",
-"Name Break already exists" => "Le nom de la pause existe déjà",
-"Id Break is empty" => "Id pause vide",
-"Desactivate Error" => "Erreur de désactivation",
-"Error when desactivating the Break" => "Erreur en désactivant la Pause",
-"Desactivate" => "Désactiver",
-"Activate" => "Activer",
-"Status" => "Statut",
-
+$arrLangModule = array(
+    "Name Break" => "Nom",
+    "New Break" => "Nouvelle pause",
+    "View Break" => "Voir",
+    "Edit Break" => "Editer une Pause",
+    "Breaks List" => "Liste des pauses",
+    "Create New Break" => "Créer une nouvelle Pause",
+    "Error when Activating the Break" => "Erreur en activant la pause",
+    "Activate Error" => "Erreur d'activation",
+    "Break ID is not valid" => "Id pause non valide",
+    "Name Break can't be empty" => "Le nom de la pause ne peut pas être vide",
+    "Name Break already exists" => "Le nom de la pause existe déjà",
+    "Id Break is empty" => "Id pause vide",
+    "Desactivate Error" => "Erreur de désactivation",
+    "Error when desactivating the Break" => "Erreur en désactivant la Pause",
+    "Desactivate" => "Désactiver",
+    "Activate" => "Activer",
+    "Status" => "Statut",
 );
 ?>
-

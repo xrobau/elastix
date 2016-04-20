@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,36 +24,28 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Hold Time" => "Temps de pause",
-"Cola" => "File",
-"date" => "Date",
-"query" => "Chercher",
-"Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
-"Debe ingresar una fecha inicio/fin" => "Vous devez entrer une date",
-"Error" => "Erreur",
-"Find" => "Rechercher",
-"Date Init" => "Du",
-"Date End" => "Au",
-"Tipo" => "Type",
-"Estado" => "Etat",
-"Ingoing" => "Entrant",
-"Outgoing" => "Sortant",
-"Todas" => "Tous",
-"Exitosas" => "Réussis",
-"Abandonadas" => "Perdus",
-"No Realizadas" => "Non réalisés",
-"Total Calls" => "Total des appels",
-"Total" => "Total",
-"Tiempo Promedio Espera(Seg)" => "Temps d'attente myen (sec)",
-"Espera Mayor(seg)" => "Meilleure attente (sec)",
-
+$arrLangModule = array(
+    "Hold Time" => "Temps de pause",
+    "Cola" => "File",
+    "query" => "Chercher",
+    "Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
+    "Debe ingresar una fecha inicio/fin" => "Vous devez entrer une date",
+    "Error" => "Erreur",
+    "Find" => "Rechercher",
+    "Date Init" => "Du",
+    "Date End" => "Au",
+    "Estado" => "Etat",
+    "Ingoing" => "Entrant",
+    "Outgoing" => "Sortant",
+    "Todas" => "Tous",
+    "Exitosas" => "Réussis",
+    "Abandonadas" => "Perdus",
+    "No Realizadas" => "Non réalisés",
+    "Total Calls" => "Total des appels",
+    "Tiempo Promedio Espera(Seg)" => "Temps d'attente myen (sec)",
+    "Espera Mayor(seg)" => "Meilleure attente (sec)",
 );
 ?>
-

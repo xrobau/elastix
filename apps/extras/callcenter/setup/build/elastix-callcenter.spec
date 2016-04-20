@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Hold Time: prune all translations that are actually the same value as
+  the English one.
+  SVN Rev[7580]
 - CHANGED: Graphic Calls: prune all translations that are actually the same
   value as the English one.
   SVN Rev[7579]

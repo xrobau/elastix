@@ -25,34 +25,32 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.2 2007/08/09 00:31:28 jmartinez Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Phone List"=>"Lista de Teléfonos",
-"Number Phone's"=>"Números telefónicos",
-"Date Income"=>"Fecha de Ingreso",
-"Add"=>"Agregar",
-"Apply"=>"Aplicar",
-"Status"=>"Estado",
-"Upload File"=>"Subir Archivo",
-"Add new Number"=>"Agregar Nuevo Número",
-"SAVE"=>"GUARDAR",
-"CANCEL"=>"CANCELAR",
-"Remove"=>"Remover",
-"Result"=>"Resultado",
-"Load File"=>"Cargar Archivo",
-"Please select any file"=>"Por favor, elija un archivo",
-"Please enter a number phone"=>"Por favor, ingrese un numero telefónico",
-"Number phone is not numeric value"=>"El número de teléfono no es un valor numérico válido",
-"Add Number"=>"Agregar Número",
-"the number already exists"=>"El número de teléfono ya existe",
-"Active" => "Activo",
-"Inactive" => "Inactivo",
-"Desactivate"=>"Desactivar",
-"Activate"=>"Activar",
-'Maximum upload size: %d Mb' => 'Longitud máxima de archivo: %d Mb',
-'Are you sure to remove selected DNC?' => '¿Está seguro de remover los DNC seleccionados?',
+$arrLangModule = array(
+    "Phone List" => "Lista de Teléfonos",
+    "Number Phone's" => "Números telefónicos",
+    "Date Income" => "Fecha de Ingreso",
+    "Add" => "Agregar",
+    "Apply" => "Aplicar",
+    "Status" => "Estado",
+    "Upload File" => "Subir Archivo",
+    "Add new Number" => "Agregar Nuevo Número",
+    "SAVE" => "GUARDAR",
+    "CANCEL" => "CANCELAR",
+    "Remove" => "Remover",
+    "Result" => "Resultado",
+    "Load File" => "Cargar Archivo",
+    "Please select any file" => "Por favor, elija un archivo",
+    "Please enter a number phone" => "Por favor, ingrese un numero telefónico",
+    "Number phone is not numeric value" => "El número de teléfono no es un valor numérico válido",
+    "Add Number" => "Agregar Número",
+    "the number already exists" => "El número de teléfono ya existe",
+    "Active" => "Activo",
+    "Inactive" => "Inactivo",
+    "Desactivate" => "Desactivar",
+    "Activate" => "Activar",
+    "Maximum upload size: %d Mb" => "Longitud máxima de archivo: %d Mb",
+    "Are you sure to remove selected DNC?" => "¿Está seguro de remover los DNC seleccionados?",
 );
-
-
 ?>

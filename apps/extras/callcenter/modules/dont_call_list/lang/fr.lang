@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,35 +24,31 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Phone List" => "Liste des n° de téléphone",
-"Number Phone's" => "N° de téléphone",
-"Date Income" => "Date effective",
-"Add" => "Ajouter",
-"Apply" => "Appliquer",
-"Status" => "Etat",
-"Upload File" => "Envoi de fichier",
-"Add new Number" => "Ajouter un nouveau n°",
-"SAVE" => "Sauvegarder",
-"CANCEL" => "Annuler",
-"Remove" => "Supprimer",
-"Result" => "Resultat",
-"Load File" => "Charger un fichier",
-"Please select any file" => "Sélectionnez un fichier S.V.P.",
-"Please enter a number phone" => "Entrez un n° de téléphone S.V.P.",
-"Number phone is not numeric value" => "Le n° de téléphone n'est pas une valeur numérique!",
-"Add Number" => "Ajouter un N°",
-"the number already exists" => "Le n° existe déja!",
-"Active" => "Actif",
-"Inactive" => "Inactif",
-"Desactivate" => "Désactivé",
-"Activate" => "Activé",
-
+$arrLangModule = array(
+    "Phone List" => "Liste des n° de téléphone",
+    "Number Phone's" => "N° de téléphone",
+    "Date Income" => "Date effective",
+    "Add" => "Ajouter",
+    "Apply" => "Appliquer",
+    "Status" => "Etat",
+    "Upload File" => "Envoi de fichier",
+    "Add new Number" => "Ajouter un nouveau n°",
+    "SAVE" => "Sauvegarder",
+    "CANCEL" => "Annuler",
+    "Remove" => "Supprimer",
+    "Result" => "Resultat",
+    "Load File" => "Charger un fichier",
+    "Please select any file" => "Sélectionnez un fichier S.V.P.",
+    "Please enter a number phone" => "Entrez un n° de téléphone S.V.P.",
+    "Number phone is not numeric value" => "Le n° de téléphone n'est pas une valeur numérique!",
+    "Add Number" => "Ajouter un N°",
+    "the number already exists" => "Le n° existe déja!",
+    "Active" => "Actif",
+    "Inactive" => "Inactif",
+    "Desactivate" => "Désactivé",
+    "Activate" => "Activé",
 );
 ?>

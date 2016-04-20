@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Callback Extensions: prune all translations that are actually the
+  same value as the English one.
+  SVN Rev[7574]
 - CHANGED: Calls Per Hour: prune all translations that are actually the same
   value as the English one.
   SVN Rev[7573]

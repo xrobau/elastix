@@ -25,44 +25,31 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 2.5 2015/12/19 02:04:28 Andrey Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Outgoing Campaigns"    => "Outgoing Campaigns",
-"Campaigns"             => "Campaigns",
-"New Campaign"          => "New Campaign",
-"Graphic Calls per hour"	    => "График Вызовов за час",
-"Cola"                  => "Очередь",
-"date"                  => "Дата",
-"query"                 => "Запрос",
-"Debe ingresar una fecha valida"    => "Вы должны ввести правильную дату",
-"Debe ingresar una fecha inicio/fin"           => "Вы должны ввести дату",
-"Error"                             => "Ошибка",
-"Find"                              => "Поиск",
-"Date Init"                         => "Начальная дата",
-"Date End"                          => "Конечная дата",
-"Tipo"                              => "Тип",
-"Estado"                            => "Статус",
-"Ingoing"                           => "Входящие",
-"Outgoing"                          => "Исходящие",
-"Successful"                        => "Успешно",
-"Not Realiced"                      => "Not Realiced",
-"Left"                              => "Потерянных",
-"Hour"                              => "Час",
-"Show Filter"                       => "Показать Фильтр",
-"Hide Filter"                       => "Скрыть Фильтр",
-"Download"                          => "Скачать",
-"Page"                              => "Страница",
-"records"                           => "записей",
-"Total Calls"                       => "Всего Вызовов",
-
-/*
-"Calls"                             => "Вызовы",
-"Completed"                         => "Завершённые",
-"Abandoned"                         => "Пропущенные",
-"No answer/Short call"              => "Нет ответа/Короткий вызов",
-"All"                               => "Все",
-*/
-
+$arrLangModule = array(
+    "Graphic Calls per hour" => "График Вызовов за час",
+    "Cola" => "Очередь",
+    "date" => "Дата",
+    "query" => "Запрос",
+    "Debe ingresar una fecha valida" => "Вы должны ввести правильную дату",
+    "Debe ingresar una fecha inicio/fin" => "Вы должны ввести дату",
+    "Error" => "Ошибка",
+    "Find" => "Поиск",
+    "Date Init" => "Начальная дата",
+    "Date End" => "Конечная дата",
+    "Tipo" => "Тип",
+    "Estado" => "Статус",
+    "Ingoing" => "Входящие",
+    "Outgoing" => "Исходящие",
+    "Successful" => "Успешно",
+    "Left" => "Потерянных",
+    "Hour" => "Час",
+    "Show Filter" => "Показать Фильтр",
+    "Hide Filter" => "Скрыть Фильтр",
+    "Download" => "Скачать",
+    "Page" => "Страница",
+    "records" => "записей",
+    "Total Calls" => "Всего Вызовов",
 );
 ?>

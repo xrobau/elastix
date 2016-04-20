@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.5.2-3.1                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,20 +25,20 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: fa.lang,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Reporte de Troncales usadas por Hora en el dia" => "گزارش ترانک استفاده شده بر اساس زمان در طول روز",
-"Time Period " => "زمان دوره ",
-"Entered" => "وارد شده",
-"Answered" => "پاسخ داده شده",
-"Abandoned" => "از دست رفته",
-"In queue" => "در صف",
-"Without monitoring " => "بدون نظارت ",
-"Queue" => "صف",
-"Start date" => "تاريخ شروع",
-"End date" => "تاريخ پايان",
-"Total" => "کل",
-"Trunk"=>"ترانک",
+$arrLangModule = array(
+    "Reporte de Troncales usadas por Hora en el dia" => "گزارش ترانک استفاده شده بر اساس زمان در طول روز",
+    "Time Period " => "زمان دوره ",
+    "Entered" => "وارد شده",
+    "Answered" => "پاسخ داده شده",
+    "Abandoned" => "از دست رفته",
+    "In queue" => "در صف",
+    "Without monitoring " => "بدون نظارت ",
+    "Queue" => "صف",
+    "Start date" => "تاريخ شروع",
+    "End date" => "تاريخ پايان",
+    "Total" => "کل",
+    "Trunk" => "ترانک",
 );
 ?>

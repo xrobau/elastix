@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Calls Per Agent: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7572]
 - CHANGED: Calls Detail: prune all translations that are actually the same value
   as the English one.
   SVN Rev[7571]

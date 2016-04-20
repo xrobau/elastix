@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,34 +24,26 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Calls per Agent" => "Appels par agent",
-"Start Date" => "Date de début",
-"End Date" => "Date de fin",
-"Query" => "Filtrer",
-"No.Agent" => "N° d'agent",
-"Agent" => "Agent",
-"Queue" => "File",
-"Type" => "Type",
-"Column" => "Colonne",
-"Text" => "Texte",
-"Error" => "Erreur",
-"Transfer" => "Transfert",
-"Duration" => "Durée",
-"Average" => "Moyenne",
-"Call longest" => "Appel le plus long",
-"Calls answered" => "Appels répondus",
-"Error when connecting to database" => "Erreur de connexion à la base de données",
-"Debe ingresar una fecha" => "Vous devez entrer une date",
-"Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
-"Total" => "Total",
-
+$arrLangModule = array(
+    "Calls per Agent" => "Appels par agent",
+    "Start Date" => "Date de début",
+    "End Date" => "Date de fin",
+    "Query" => "Filtrer",
+    "No.Agent" => "N° d'agent",
+    "Queue" => "File",
+    "Column" => "Colonne",
+    "Text" => "Texte",
+    "Error" => "Erreur",
+    "Transfer" => "Transfert",
+    "Duration" => "Durée",
+    "Average" => "Moyenne",
+    "Call longest" => "Appel le plus long",
+    "Calls answered" => "Appels répondus",
+    "Error when connecting to database" => "Erreur de connexion à la base de données",
+    "Debe ingresar una fecha" => "Vous devez entrer une date",
+    "Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
 );
 ?>
-

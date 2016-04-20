@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,35 +24,28 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Form List" => "Liste des Formulaires",
-"Form Name" => "Nom",
-"Form Description" => "Description",
-"Status" => "Etat",
-"Options" => "Options",
-"List Item" => "Liste des objets",
-"Type" => "Type",
-"Preview" => "Pr&eacute;visualiser",
-"All" => "Tous",
-"Active" => "Actifs",
-"Inactive" => "Inactifs",
-"Type Label" => "Label",
-"Type Text" => "Texte",
-"Type List" => "Liste",
-"Type Date" => "Date",
-"Type Text Area" => "Zone de texte",
-"View Form" => "Voir",
-"Cancel" => "Annuler",
-"Form" => "Formulaire",
-"Forms" => "Formulaires",
-"Formularios" => "Formulaires",
-"Estado" => "Etat",
-
+$arrLangModule = array(
+    "Form List" => "Liste des Formulaires",
+    "Form Name" => "Nom",
+    "Status" => "Etat",
+    "List Item" => "Liste des objets",
+    "Preview" => "Pr&eacute;visualiser",
+    "All" => "Tous",
+    "Active" => "Actifs",
+    "Inactive" => "Inactifs",
+    "Type Label" => "Label",
+    "Type Text" => "Texte",
+    "Type List" => "Liste",
+    "Type Date" => "Date",
+    "Type Text Area" => "Zone de texte",
+    "View Form" => "Voir",
+    "Cancel" => "Annuler",
+    "Form" => "Formulaire",
+    "Forms" => "Formulaires",
+    "Formularios" => "Formulaires",
+    "Estado" => "Etat",
 );
 ?>

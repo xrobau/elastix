@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Form List: prune all translations that are actually the same value as
+  the English one.
+  SVN Rev[7578]
 - CHANGED: Form Designer: prune all translations that are actually the same
   value as the English one.
   SVN Rev[7577]

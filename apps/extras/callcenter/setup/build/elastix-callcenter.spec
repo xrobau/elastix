@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Queues: prune all translations that are actually the same value as
+  the English one.
+  SVN Rev[7583]
 - CHANGED: Login Logout: prune all translations that are actually the same value
   as the English one.
   SVN Rev[7582]

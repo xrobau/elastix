@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,49 +24,43 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
-global $arrLangModule; 
- $arrLangModule = array(  
-"Ingoing Calls" => "Appels entrants",
-"guardar" => "Sauver",
-"cancelar" => "Annuler",
-"label_choice" => "Sélectionner une file",
-"Form" => "Formulaire",
-"nameLabel" => "Nom",
-"nameForm" => "Sélectionner une file",
-"nameFormChoice" => "File sélectionnée",
-"Result" => "Résultat",
-"msgResultado" => "Réussis",
-"Select Queue" => "Sélectionner une file",
-"Queue List" => "Liste des files",
-"Name Queue" => "Nom des files d'attente",
-"Status" => "Etat",
-"Options" => "Options",
-"View" => "Visualiser",
-"Activate" => "Activer",
-"Desactivate" => "Désactiver",
-"Active" => "Actif",
-"View Queue" => "Visualisation d'une file",
-"edit" => "Editer",
-"dasactivate" => "Désactiver",
-"confirm continue" => "Confirmer continuer",
-"Script" => "Script",
-"Queue" => "File d'attente : ",
-"Error when connecting to database" => "Erreur de connexion à la base de données",
-"Desactivate Error" => "Erreur désactivation",
-"Error when desactivating the Queue" => "Erreur en désactivant la file",
-"Inactive" => "Inactif",
-"Activate Error" => "Erreur d'activation",
-"Error when Activating the Queue" => "Erreur lors de l'activation de la file",
-"apply_changes" => "Appliquer",
-"Edit Queue" => "Edition d'une file",
-"all" => "Toutes",
-"active" => "Actives",
-"inactive" => "Inactives",
-
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Ingoing Calls" => "Appels entrants",
+    "guardar" => "Sauver",
+    "cancelar" => "Annuler",
+    "label_choice" => "Sélectionner une file",
+    "Form" => "Formulaire",
+    "nameLabel" => "Nom",
+    "nameForm" => "Sélectionner une file",
+    "nameFormChoice" => "File sélectionnée",
+    "Result" => "Résultat",
+    "msgResultado" => "Réussis",
+    "Select Queue" => "Sélectionner une file",
+    "Queue List" => "Liste des files",
+    "Name Queue" => "Nom des files d'attente",
+    "Status" => "Etat",
+    "View" => "Visualiser",
+    "Activate" => "Activer",
+    "Desactivate" => "Désactiver",
+    "Active" => "Actif",
+    "View Queue" => "Visualisation d'une file",
+    "edit" => "Editer",
+    "dasactivate" => "Désactiver",
+    "confirm continue" => "Confirmer continuer",
+    "Queue" => "File d'attente : ",
+    "Error when connecting to database" => "Erreur de connexion à la base de données",
+    "Desactivate Error" => "Erreur désactivation",
+    "Error when desactivating the Queue" => "Erreur en désactivant la file",
+    "Inactive" => "Inactif",
+    "Activate Error" => "Erreur d'activation",
+    "Error when Activating the Queue" => "Erreur lors de l'activation de la file",
+    "apply_changes" => "Appliquer",
+    "Edit Queue" => "Edition d'une file",
+    "all" => "Toutes",
+    "active" => "Actives",
+    "inactive" => "Inactives",
 );
 ?>

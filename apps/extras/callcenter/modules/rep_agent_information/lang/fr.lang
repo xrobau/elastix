@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,59 +24,50 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Time conecction of agents" => "Temps de connexion agents.",
-"Start Date" => "Du",
-"End Date" => "Au",
-"Query" => "Requête",
-"No.Agent" => "N° d'agent",
-"Agent" => "Agent",
-"Queue" => "File",
-"Type" => "Type",
-"Column" => "Colonne",
-"Text" => "Text",
-"Error" => "Erreur",
-"Transfer" => "Transfert",
-"Duration" => "Durée",
-"Average" => "Moyenne",
-"Total" => "Total",
-"Call longest" => "Appel trop long",
-"Calls answered" => "Appels répondus",
-"Error when connecting to database" => "Erreur lors de la connexion à la base de données !",
-"Debe ingresar una fecha" => "Vour devez entrer une date",
-"Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
-"Conecction Data" => "Connexion de données",
-"First Conecction" => "1ère Connexion",
-"Last Conecction" => "Dernière déconnexion",
-"Time Conecction" => "Temps de connexion",
-"Count Conecction" => "Compteur de connexion",
-"Calls Entry" => "Appels saisis",
-"Reason No Ready" => "Raison: Pas prêt.",
-"Break" => "Pause",
-"Bathroom" => "Salle de bains",
-"Call" => "Appel",
-"Count Calls Entry" => "Compteur d'appels saisis",
-"Calls/h" => "Appels/h",
-"Time Call Entry" => "Durée appels saisis",
-"Average Calls Entry" => "Moyenne d'appels saisis",
-"Porcent compare whit time not ready" => "% comparé avec le temps: non prêt.",
-"Count" => "Compteur",
-"Hour" => "Heur",
-"Monitored" => "Contrôlé",
-"Unmonitored" => "Non Contrôlé",
-"Monitored only" => "Contrôlé seulement",
-"There aren't records to show" => "Il n'y a pas d'enregistrement à afficher !",
-"Agent name" => "Nom de l'agent",
-"Show" => "Afficher",
-"Database Error" => "Erreur de base de données : ",
-"Invalid agent number" => "N° d'agent invalide",
-
+$arrLangModule = array(
+    "Time conecction of agents" => "Temps de connexion agents.",
+    "Start Date" => "Du",
+    "End Date" => "Au",
+    "Query" => "Requête",
+    "No.Agent" => "N° d'agent",
+    "Queue" => "File",
+    "Column" => "Colonne",
+    "Error" => "Erreur",
+    "Transfer" => "Transfert",
+    "Duration" => "Durée",
+    "Average" => "Moyenne",
+    "Call longest" => "Appel trop long",
+    "Calls answered" => "Appels répondus",
+    "Error when connecting to database" => "Erreur lors de la connexion à la base de données !",
+    "Debe ingresar una fecha" => "Vour devez entrer une date",
+    "Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
+    "Conecction Data" => "Connexion de données",
+    "First Conecction" => "1ère Connexion",
+    "Last Conecction" => "Dernière déconnexion",
+    "Time Conecction" => "Temps de connexion",
+    "Count Conecction" => "Compteur de connexion",
+    "Calls Entry" => "Appels saisis",
+    "Reason No Ready" => "Raison: Pas prêt.",
+    "Break" => "Pause",
+    "Bathroom" => "Salle de bains",
+    "Call" => "Appel",
+    "Count Calls Entry" => "Compteur d'appels saisis",
+    "Calls/h" => "Appels/h",
+    "Time Call Entry" => "Durée appels saisis",
+    "Average Calls Entry" => "Moyenne d'appels saisis",
+    "Porcent compare whit time not ready" => "% comparé avec le temps: non prêt.",
+    "Count" => "Compteur",
+    "Hour" => "Heur",
+    "Monitored" => "Contrôlé",
+    "Unmonitored" => "Non Contrôlé",
+    "Monitored only" => "Contrôlé seulement",
+    "There aren't records to show" => "Il n'y a pas d'enregistrement à afficher !",
+    "Agent name" => "Nom de l'agent",
+    "Show" => "Afficher",
+    "Database Error" => "Erreur de base de données : ",
+    "Invalid agent number" => "N° d'agent invalide",
 );
 ?>
-

@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,50 +24,42 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Calls Detail" => "Détail des appels",
-"Start Date" => "Du",
-"End Date" => "Au",
-"Start Time" => "à",
-"End Time" => "à",
-"Query" => "Filtrer",
-"No.Agent" => "N° d'agent",
-"Agent" => "Agent",
-"Queue" => "File",
-"Type" => "Type",
-"Phone" => "Téléphone",
-"Column" => "Colonne",
-"Text" => "Texte",
-"Error" => "Erreur",
-"Transfer" => "Transfert",
-"Duration" => "Durée",
-"Error when connecting to database" => "Erreur de connexion à la base de données",
-"Debe ingresar una fecha" => "Vous devez entrer une date",
-"Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
-"Total" => "Total",
-"Status" => "Statut",
-"Success" => "Succès",
-"Abandoned" => "Abandonné",
-"End Monitor" => "Terminer la surveillance",
-"Failure" => "Echec",
-"NoAnswer" => "Sans réponse",
-"OnQueue" => "Dans la file",
-"Placing" => "Placé",
-"Ringing" => "En sonnerie",
-"ShortCall" => "Appel court",
-"Duration Wait" => "Durée d'attente",
-"Filter" => "Filter",
-"Any Type" => "Tout",
-"All Agents" => "Tous",
-"All Queues" => "Toutes",
-"Inbound" => "Entrant",
-"Outbound" => "Sortant",
+$arrLangModule = array(
+    "Calls Detail" => "Détail des appels",
+    "Start Date" => "Du",
+    "End Date" => "Au",
+    "Start Time" => "à",
+    "End Time" => "à",
+    "Query" => "Filtrer",
+    "No.Agent" => "N° d'agent",
+    "Queue" => "File",
+    "Phone" => "Téléphone",
+    "Column" => "Colonne",
+    "Text" => "Texte",
+    "Error" => "Erreur",
+    "Transfer" => "Transfert",
+    "Duration" => "Durée",
+    "Error when connecting to database" => "Erreur de connexion à la base de données",
+    "Debe ingresar una fecha" => "Vous devez entrer une date",
+    "Debe ingresar una fecha valida" => "Vous devez entrer une date valide",
+    "Status" => "Statut",
+    "Success" => "Succès",
+    "Abandoned" => "Abandonné",
+    "End Monitor" => "Terminer la surveillance",
+    "Failure" => "Echec",
+    "NoAnswer" => "Sans réponse",
+    "OnQueue" => "Dans la file",
+    "Placing" => "Placé",
+    "Ringing" => "En sonnerie",
+    "ShortCall" => "Appel court",
+    "Duration Wait" => "Durée d'attente",
+    "Any Type" => "Tout",
+    "All Agents" => "Tous",
+    "All Queues" => "Toutes",
+    "Inbound" => "Entrant",
+    "Outbound" => "Sortant",
 );
 ?>
-

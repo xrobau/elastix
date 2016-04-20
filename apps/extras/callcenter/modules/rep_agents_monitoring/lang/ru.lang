@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.5.2-3.1                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,25 +25,23 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 2.5 2015/12/19 14:48:19 Andrey Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Agents Monitoring" => "Мониторинг Агентов",
-"Queue" => "Очередь",
-"Agent" => "Агент",
-"Current status" => "Текущий статус",
-"Total calls" => "Всего вызовов",
-"Total login time" => "Общее время в системе",
-"Total talk time" => "Общее время разговоров",
-"No registered" => "Не зарегистрирован",
-"LOGOUT" => "ВЫШЕЛ",
-"Agent" => "Агент",
-"Agents" => "Агенты",
-"Total" => "Всего",
-"Number" => "Номер",
-"Page" => "Страница",
-"records" => "записей",
-"TOTAL" => "ВСЕГО",
-
-
-);?>
+$arrLangModule = array(
+    "Agents Monitoring" => "Мониторинг Агентов",
+    "Queue" => "Очередь",
+    "Agent" => "Агент",
+    "Current status" => "Текущий статус",
+    "Total calls" => "Всего вызовов",
+    "Total login time" => "Общее время в системе",
+    "Total talk time" => "Общее время разговоров",
+    "No registered" => "Не зарегистрирован",
+    "LOGOUT" => "ВЫШЕЛ",
+    "Agents" => "Агенты",
+    "Total" => "Всего",
+    "Number" => "Номер",
+    "Page" => "Страница",
+    "records" => "записей",
+    "TOTAL" => "ВСЕГО",
+);
+?>

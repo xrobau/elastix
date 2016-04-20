@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agent Monitoring: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7585]
 - CHANGED: Agent Information: prune all translations that are actually the same
   value as the English one.
   SVN Rev[7584]

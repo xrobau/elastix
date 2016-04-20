@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,26 +24,18 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Agents Monitoring" => "Contrôle des Agents",
-"Queue" => "File",
-"Agent" => "Agent",
-"Current status" => "Etat actuel",
-"Total calls" => "Appels totaux",
-"Total login time" => "Durée totale de connexion",
-"Total talk time" => "Temps total de parole",
-"No registered" => "Non enregistré",
-"LOGOUT" => "Déconnexion",
-"Agents" => "Agents",
-"Total" => "Total",
-"Number" => "N°",
-
+$arrLangModule = array(
+    "Agents Monitoring" => "Contrôle des Agents",
+    "Queue" => "File",
+    "Current status" => "Etat actuel",
+    "Total calls" => "Appels totaux",
+    "Total login time" => "Durée totale de connexion",
+    "Total talk time" => "Temps total de parole",
+    "No registered" => "Non enregistré",
+    "LOGOUT" => "Déconnexion",
+    "Number" => "N°",
 );
 ?>
-

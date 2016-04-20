@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.5.2-3.1                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,22 +25,18 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Agents Monitoring" => "Monitoreo de Agentes",
-"Queue" => "Cola",
-"Agent" => "Agente",
-"Current status" => "Estado actual",
-"Total calls" => "Total de llamadas",
-"Total login time" => "Tiempo total de sesión",
-"Total talk time" => "Tiempo total de llamadas",
-"No registered" => "No registrada",
-"LOGOUT" => "LOGOUT",
-"Agent" => "Agente",
-"Agents" => "Agentes",
-"Total" => "Total",
-"Number" => "Número",
-
-
-);?>
+$arrLangModule = array(
+    "Agents Monitoring" => "Monitoreo de Agentes",
+    "Queue" => "Cola",
+    "Agent" => "Agente",
+    "Current status" => "Estado actual",
+    "Total calls" => "Total de llamadas",
+    "Total login time" => "Tiempo total de sesión",
+    "Total talk time" => "Tiempo total de llamadas",
+    "No registered" => "No registrada",
+    "Agents" => "Agentes",
+    "Number" => "Número",
+);
+?>

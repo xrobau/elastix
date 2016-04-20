@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Incoming Call Monitoring: prune all translations that are actually
+  the same value as the English one.
+  SVN Rev[7586]
 - CHANGED: Agent Monitoring: prune all translations that are actually the same
   value as the English one.
   SVN Rev[7585]

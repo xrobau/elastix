@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.5.2-3.1                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,17 +25,16 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: fa.lang,v 1.1.1.1 2009/07/27 09:10:19 dlopez Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Incoming calls monitoring" => "نظارت تماس هاي ورودي",
-"Queue" => "صف",
-"Entered" => "وارد شده",
-"Answered" => "پاسخ داده شده",
-"Abandoned" => "از دست رفته",
-"Waiting calls" => "تماس هاي در انتظار",
-"Without monitoring" => "بدون نظارت",
-"Total" => "کل",
-
+$arrLangModule = array(
+    "Incoming calls monitoring" => "نظارت تماس هاي ورودي",
+    "Queue" => "صف",
+    "Entered" => "وارد شده",
+    "Answered" => "پاسخ داده شده",
+    "Abandoned" => "از دست رفته",
+    "Waiting calls" => "تماس هاي در انتظار",
+    "Without monitoring" => "بدون نظارت",
+    "Total" => "کل",
 );
 ?>

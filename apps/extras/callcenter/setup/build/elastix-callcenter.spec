@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Agents: prune all translations that are actually the same value
+  as the English one.
+  SVN Rev[7569]
+
 * Mon Apr 11 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: remove event parameter no appearing in CallCenter Community.
   SVN Rev[7567]

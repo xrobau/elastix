@@ -25,26 +25,26 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-   */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Error when connecting to database" => "连接数据库时出现错误",
-"Error" => "错误",
-"Debe ingresar una fecha valida" => "输入有效日期",
-"Debe ingresar una fecha inicio/fin" => "必须输入一个日期来开始/结束",
-"Login Logout" => "登入登出时间",
-"Agente" => "代理",
-"Nombre" => "名称",
-"Login" => "登入 ",
-"Logout" => "登出",
-"Total Login" => "登入总数",
-"Tiempo en Llamadas" => "呼叫时间",
-"Service(%)" => "服务（％）",
-"Date Init" => "开始日期",
-"Date End" => "结束日期",
-"Tipo" => "类型",
-"Find" => "查找",
-"Estado" => "状态",
-"Total" => "总数",
+$arrLangModule = array(
+    "Error when connecting to database" => "连接数据库时出现错误",
+    "Error" => "错误",
+    "Debe ingresar una fecha valida" => "输入有效日期",
+    "Debe ingresar una fecha inicio/fin" => "必须输入一个日期来开始/结束",
+    "Login Logout" => "登入登出时间",
+    "Agente" => "代理",
+    "Nombre" => "名称",
+    "Login" => "登入 ",
+    "Logout" => "登出",
+    "Total Login" => "登入总数",
+    "Tiempo en Llamadas" => "呼叫时间",
+    "Service(%)" => "服务（％）",
+    "Date Init" => "开始日期",
+    "Date End" => "结束日期",
+    "Tipo" => "类型",
+    "Find" => "查找",
+    "Estado" => "状态",
+    "Total" => "总数",
 );
 ?>

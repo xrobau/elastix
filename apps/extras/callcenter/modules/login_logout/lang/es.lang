@@ -25,31 +25,18 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-"Error when connecting to database" => "Error cuando se conectaba a  la base de datos",
-"Error"                             => "Error",
-"Debe ingresar una fecha valida"    => "Debe ingresar una fecha válida",
-"Debe ingresar una fecha inicio/fin"=> "Debe ingresar una fecha inicio/fin",
-"Login Logout"                      => "Tiempo de Sesión",
-"Agente"                            => "Agente",
-"Nombre"                            => "Nombre",
-"Login"                             => "Login",
-"Logout"                            => "Logout",
-"Total Login"                       => "Total Sesión",
-"Tiempo en Llamadas"                => "Tiempo en Llamadas",
-"Service(%)"                        => "Servicio(%)",
-"Date Init"                         => "Fecha Inicial",
-"Date End"                          => "Fecha Final",
-"Tipo"                              => "Tipo",
-"Find"                              => "Consultar",
-"Estado"                            => "Estado",
-"Detallado"                         => "Detallado",
-"General"                           => "General",
-'Incoming Queue'                    => 'Cola Entrante',
-'All'                               => 'Todas',
-'Llamadas entrantes'                =>  'Llamadas entrantes',
-'Llamadas salientes'                =>  'Llamadas salientes',
+    "Error when connecting to database" => "Error cuando se conectaba a  la base de datos",
+    "Debe ingresar una fecha valida" => "Debe ingresar una fecha válida",
+    "Login Logout" => "Tiempo de Sesión",
+    "Total Login" => "Total Sesión",
+    "Service(%)" => "Servicio(%)",
+    "Date Init" => "Fecha Inicial",
+    "Date End" => "Fecha Final",
+    "Find" => "Consultar",
+    "Incoming Queue" => "Cola Entrante",
+    "All" => "Todas",
 );
 ?>

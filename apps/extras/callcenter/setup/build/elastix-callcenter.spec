@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu Apr 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Russian translations by user Russian.
+  SVN Rev[7589]
+
 * Wed Apr 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Break Report: prune all translations that are actually the same value
   as the English one.

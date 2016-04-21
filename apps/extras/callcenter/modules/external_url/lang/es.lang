@@ -25,35 +25,23 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.2 2007/08/09 00:31:28 jmartinez Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-'New URL'   =>  'Nuevo URL',
-'Opens in'  =>  'Se abre en',
-'Active'   =>  'Activo',
-'URL Template'   =>  'Plantilla de URL',
-'URL Description'   =>  'Descripción de URL',
-'Description'   =>  'Descripción',
-'New window'   =>  'Nueva ventana',
-'Embedded'   =>  'Embebido',
-'Embedded frame'   =>  'Marco embebido',
-'Apply changes' =>  'Aplicar cambios',
-'Enable use of this template' => 'Habilitar uso de esta plantilla',
-'Open URL in' => 'Abrir URL en',
-'Edit URL' => 'Editar URL',
-'Apply Changes' => 'Aplicar Cambios',
-'TEMPLATE_DESC' => "La plantilla de URL puede contener identificadores con ".
-    "nombres entre llaves, como por ejemplo {HomeAddress}, los cuales serán ".
-    "reemplazados con los verdaderos valores escapados para cada llamada ".
-    "conectada. Los identificadores disponibles son los nombres de los ".
-    "atributos de la llamada (con distinción de mayúsculas y minúsculas), ".
-    "además de los siguientes atributos por omisión de la llamada:\n\n".
-    "{__AGENT_NUMBER__} Identificador del canal de agente, por ejemplo Agent/9000\n".
-    "{__CALL_TYPE__} uno de los valores 'incoming', 'outgoing'\n".
-    "{__CAMPAIGN_ID__} ID interno de la campaña en curso\n".
-    "{__CALL_ID__} ID interno de la llamada actualmente conectada\n".
-    "{__PHONE__} Número marcado o Caller-ID de la llamada conectada\n".
-    "{__REMOTE_CHANNEL__} Identificador de canal de la llamada conectada\n".
-    "",
+    "New URL" => "Nuevo URL",
+    "Opens in" => "Se abre en",
+    "Active" => "Activo",
+    "URL Template" => "Plantilla de URL",
+    "URL Description" => "Descripción de URL",
+    "Description" => "Descripción",
+    "New window" => "Nueva ventana",
+    "Embedded" => "Embebido",
+    "Embedded frame" => "Marco embebido",
+    "Apply changes" => "Aplicar cambios",
+    "Enable use of this template" => "Habilitar uso de esta plantilla",
+    "Open URL in" => "Abrir URL en",
+    "Edit URL" => "Editar URL",
+    "Apply Changes" => "Aplicar Cambios",
+    "TEMPLATE_DESC" => "La plantilla de URL puede contener identificadores con nombres entre llaves, como por ejemplo {HomeAddress}, los cuales serán reemplazados con los verdaderos valores escapados para cada llamada conectada. Los identificadores disponibles son los nombres de los atributos de la llamada (con distinción de mayúsculas y minúsculas), además de los siguientes atributos por omisión de la llamada:\n\n{__AGENT_NUMBER__} Identificador del canal de agente, por ejemplo Agent/9000\n{__CALL_TYPE__} uno de los valores 'incoming', 'outgoing'\n{__CAMPAIGN_ID__} ID interno de la campaña en curso\n{__CALL_ID__} ID interno de la llamada actualmente conectada\n{__PHONE__} Número marcado o Caller-ID de la llamada conectada\n{__REMOTE_CHANNEL__} Identificador de canal de la llamada conectada\n",
 );
 ?>

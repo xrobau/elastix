@@ -28,24 +28,10 @@
   $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Name Break" => "نام",
-    "Description Break" => "توصيفات",
-    "New Break" => "تنفس جديد",
-    "View Break" => "نمايش تنفس",
-    "Edit Break" => "ويرايش تنفس",
-    "Active" => "فعال",
-    "Inactive" => "غيرفعال",
-    "Breaks List" => "ليست تنفس ها",
-    "Create New Break" => "ايجاد تنفس جديد",
-    "Error when Activating the Break" => "خطا در هنگام فعال نمودن تنفس",
-    "Activate Error" => "خطاي فعال سازي",
-    "Break ID is not valid" => "شناسه تنفس معتبر نيست",
-    "Name Break can't be empty" => " نام تنفس بايد درج شود",
-    "Name Break already exists" => "نام تنفس از پيش وجود دارد ",
-    "Id Break is empty" => "شناسه تنفس نوشته نشده",
-    "Desactivate Error" => "خطاي غيرفعال سازي",
-    "Error when desactivating the Break" => "خطا در هنگام غيرفعال نمودن تنفس",
-    "Desactivate" => "غيرفعال نمودن",
-    "Activate" => "فعال نمودن",
+    "Call File Encoding" => "Кодировка Файла",
+    "Call File" => "Файл Вызовов",
+    "Invalid CSV File" => "Недействительный CSV Файл",
+    "Invalid CSV File Line" => "Недействительная строка в CSV Файле ",
+    "Invalid number" => "Неправильный номер",
 );
 ?>

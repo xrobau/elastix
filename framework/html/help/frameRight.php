@@ -51,22 +51,6 @@ if(!empty($_GET['id_nodo'])){
 
     // Si no existe el archivo de ayuda y se trata de un menu "padre",
     // muestro el menu hijo que encuentre primero
-/*
-    $resArchivoExiste = existeArchivoAyuda($idMenuMostrar);
-    if($resArchivoExiste == 3 || $resArchivoExiste == 4) {
-		$idMenuMostrar = menuHijoPorOmision($idMenuMostrar);
-        $resArchivoExiste = existeArchivoAyuda($idMenuMostrar);
-    }
-
-    if($resArchivoExiste == 1) {
-       $smarty->assign("node_id", $idMenuMostrar);
-       $smarty->display($_SERVER["DOCUMENT_ROOT"]."/modules/$idMenuMostrar/help/$idMenuMostrar.hlp");
-    }else if($resArchivoExiste == 2) {
-       $smarty->assign("node_id", $idMenuMostrar);
-       $smarty->display($_SERVER["DOCUMENT_ROOT"]."/help/content/$idMenuMostrar.hlp");
-    } else
-       echo "The help file for the selected menu does not exists";
-*/
     $sRuta = rutaArchivoAyuda($idMenuMostrar);
     if (is_null($sRuta)) {
     	$idMenuMostrar = menuHijoPorOmision($idMenuMostrar);
@@ -105,35 +89,23 @@ function obtenerMenuPadre($idMenu)
     $arrMenu = $_SESSION['elastix_user_permission'];
     return $arrMenu[$idMenu]['IdParent'];
 }
-/*
-function existeArchivoAyuda($idMenu)
-{
-    if(file_exists($_SERVER["DOCUMENT_ROOT"]."/modules/$idMenu/help/$idMenu.hlp")) {
-        return 1;
-    } else if(file_exists($_SERVER["DOCUMENT_ROOT"]."/help/content/$idMenu.hlp")) {
-        return 2;
-    } else if(!file_exists($_SERVER["DOCUMENT_ROOT"]."/help/content/$idMenu.hlp")){
-        return 3;
-    }else
-        return 4;
-}
-*/
 
 function rutaArchivoAyuda($idMenu)
 {
     $serverDir = dirname($_SERVER['SCRIPT_FILENAME']).'/..';
 
     $lang = get_language("$serverDir/");
-    $lang = ($lang == "es" || $lang == "en")?$lang:"en";
+    $listaRutas = array();
 
-    $listaRutas = array(
-        "$serverDir/modules/$idMenu/help/$lang.hlp",
-        "$serverDir/modules/$idMenu/help/$idMenu.hlp",
-        "$serverDir/help/content/{$lang}_{$idMenu}.hlp",
-        "$serverDir/help/content/$idMenu.hlp",
-    );
+    $listaRutas[] = "$serverDir/modules/$idMenu/help/$lang.hlp";
+    if ($lang != 'en') $listaRutas[] = "$serverDir/modules/$idMenu/help/en.hlp";
+    $listaRutas[] = "$serverDir/modules/$idMenu/help/$idMenu.hlp";
+    $listaRutas[] = "$serverDir/help/content/{$lang}_{$idMenu}.hlp";
+    if ($lang != 'en') $listaRutas[] = "$serverDir/help/content/en_{$idMenu}.hlp";
+    $listaRutas[] = "$serverDir/help/content/$idMenu.hlp";
+
     foreach ($listaRutas as $sRuta) {
-    	if (file_exists($sRuta)) return $sRuta;
+        if (file_exists($sRuta)) return $sRuta;
     }
     return NULL;
 }

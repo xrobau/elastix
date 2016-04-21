@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Thu Apr 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: Help screen should now load suitably translated help file,
+  not only the ones in English and Spanish.
+  SVN Rev[7590]
+
 * Wed Apr 13 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-11
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

@@ -139,7 +139,7 @@ $arrLang=array(
 /*Module Email*/
 "Email" => "Email",
 "Domains" => "Домены",
-"Accounts" => "Учётные записи",
+"Accounts" => "Учётные Записи",
 "Relay" => "Relay",
 "Webmail" =>"Webmail",
 "Antispam" => "Antispam",
@@ -160,7 +160,7 @@ $arrLang=array(
 "Calls Recordings" => "Записи Разговоров",
 "Batch Configurations" => "Групповая Настройка",
 "Endpoint Configurator" => "Настройка Телефонов",
-"Batch of Extensions" => "Группа Extensions",
+"Batch of Extensions" => "Группа Внутренних номеров",
 "Conference" => "Конференция",
 "Tools" => "Инструменты",
 "Asterisk-Cli" => "Командная строка Asterisk",
@@ -180,7 +180,8 @@ $arrLang=array(
 
 "Extras" => "Extras",
 "Addons" => "Дополнения",
-"My Extension" => "Мой Extension",
+"My Extension" => "Мой Номер",
+"Settings" => "Настройки",
 
 /*Module Security*/
 "Security" => "Безопасность",
@@ -282,12 +283,19 @@ implementations of Voice over IP around the globe.",
 "Agent Options" => "Настройки Агента",
 "Ingoing Calls" => "Входящие Вызовы",
 "Outgoing Calls" => "Исходящие Вызовы",
+"Campaigns"  => "Кампании",
+"Do not Call List"  => "Список 'Не Звонить'",
+"External URLs"  => "Внешние URL",
+"Queues"  => "Очереди",
+"Clients"  => "Клиенты",
+"Ingoing Campaigns" => "Входящие Кампании",
 "Agent Console" => "Консоль Агента",
 "Reports Break" => "Отчет о Перерывах",
 "Calls Detail"  => "Детализация Вызовов",
 "Calls per hour" => "Вызовов за час",
 "Calls per Agent" => "Вызовов Агенту",
 "Hold Time" => "Время Удержания",
+"Login Logout" => "Время Входа-Выхода",
 "Ingoing Calls Success" => "Входящие Вызовы Успешно",
 "Graphic Calls per hour" => "График Вызовов за час",
 "Agent Information" => "Информация об Агенте",
@@ -295,6 +303,11 @@ implementations of Voice over IP around the globe.",
 "Trunks used per hour" => "Занятость транков за час",
 "Incoming calls monitoring" => "Мониторинг входящих вызовов",
 "Campaign monitoring" => "Мониторинг кампании",
+"Agents" => "Агенты",
+"ECCP Users" => "ECCP Пользователи",
+"Callback Extensions" => "Внутренние номера для Обратного вызова",
+"Form Designer" => "Дизайнер Форм",
+"Form Preview" => "Преварительный просмотр Форм",
 
 /*New*/
 "Hide left panel" => "Скрыть левую панель",
@@ -312,6 +325,6 @@ implementations of Voice over IP around the globe.",
 "Asterisk Logs" => "Журнал Asterisk",
 "Graphic Report"  => "Графический Отчёт",
 "Summary"  => "Сводка",
-"Missed Calls"  => "Пропущенные Звонки"
+"Missed Calls"  => "Пропущенные Вызовы"
 );
 ?>

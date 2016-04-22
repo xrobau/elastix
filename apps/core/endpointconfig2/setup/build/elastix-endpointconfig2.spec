@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: added partial Russian translations by user
+  Russian.
+  SVN Rev[7592]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7236]

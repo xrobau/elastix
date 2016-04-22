@@ -1,0 +1,62 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Configure" => "Настроить",
+    "Endpoint Configurator" => "Настройка Телефонов",
+    "Showing" => "Показ",
+    "Scan network for endpoints" => "Сканирование сети для поиска телефонов",
+    "Step" => "Шаг",
+    "Apply configuration to all selected endpoints" => "Применить настройки ко всем выбранным телефонам",
+    "Remove configuration for selected endpoints" => "Удалить настройки для выбранных телефонов",
+    "Download list of configurable endpoints" => "Скачать список настраиваемых телефонов",
+    "CSV (Legacy)" => "CSV (Устаревший)",
+    "CSV (nested)" => "CSV (встроенный)",
+    "Upload list of endpoint configuration" => "Загрузить список настроек телефонов",
+    "View log of last configuration" => "Посмотреть журнал последней настройки",
+    "Status" => "Статус",
+    "MAC Address" => "MAC-адрес",
+    "Current IP" => "Текущий IP",
+    "Manufacturer" => "Производитель",
+    "Model" => "Модель",
+    "No endpoints have been discovered or loaded." => "Нет обнаруженных или загруженных телефонов.",
+    "Cannot scan while scanning/configuration is in progress." => "Нельзя сканировать во время выполнения сканирования/конфигурации.",
+    "Cannot configure while scanning/configuration is in progress." => "Нельзя запустить конфигурирование во время выполнения сканирования/конфигурации.",
+    "Invalid endpoint ID" => "Недействительный ID телефона",
+    "Line" => "Линия",
+    "Warning" => "Предупреждение",
+    "Error" => "Ошибка",
+    "Fatal error" => "Фатальная Ошибка",
+    "Log of last configuration" => "Журнал последней конфигурации",
+    "Apply" => "Применить",
+    "Dismiss" => "Отклонить",
+    "All endpoints were successfully configured" => "Все телефоны были удачно сконфигурированы",
+    "of" => "из",
+);
+?>

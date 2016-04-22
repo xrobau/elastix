@@ -114,9 +114,9 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     $inicioRango = $iOffsetVerdadero - 5 * $iEstimadoBytesPagina;
     if ($inicioRango < 0) $inicioRango = 0;
     if($isExport)
-        $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern, NULL, $isExport);
+        $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern);
     else
-        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern, NULL, $isExport);
+        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern);
 
     /* Localizar la línea del offset verdadero, así como los offsets de las páginas previa y siguiente */
     for ($iPos = 0; $iPos < count($arrResult); $iPos++) {
@@ -143,10 +143,9 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
         $inicioRango = $totalBytes - 5 * $iEstimadoBytesPagina;
         if ($inicioRango < 0) $inicioRango = 0;
         if($isExport)
-            $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern,
-            (($busqueda != '') ? $busqueda : NULL), $isExport);
+            $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern);
         else
-            $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern, NULL, $isExport);
+            $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern);
         if (count($arrResult) <= $iNumLineasPorPagina)
             $offset = $arrResult[0]['offset'];
         else $offset = $arrResult[count($arrResult) - $iNumLineasPorPagina]['offset'];
@@ -174,18 +173,8 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
             break;
         }
 
-        /*$inicioRango = $page * $iEstimadoBytesPagina;
-
-        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioRango, $field_pattern, NULL, $isExport);
-        $offset = $arrResult[0]['offset'];
-
-        $oGrid->setOffsetValue($offset);
-
-        $oGrid->setEnd(((int)($offset / 128) + $iNumLineasPorPagina) <= $oGrid->getTotal() ? (int)($offset / 128) + $iNumLineasPorPagina : $oGrid->getTotal());
-
-        $oGrid->setStart(($oGrid->getTotal()==0) ? 0 : (1 + (int)($offset / 128)));*/
         $inicioBusqueda = ($page * $iEstimadoBytesPagina) - ($iEstimadoBytesPagina);
-        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioBusqueda, $field_pattern, NULL, $isExport);
+        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $inicioBusqueda, $field_pattern);
                 $offset = $arrResult[0]['offset'];
 
         $oGrid->setOffsetValue($offset);
@@ -232,11 +221,9 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     //Fin Paginacion
 
     if($isExport)
-        $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern,
-        (($busqueda != '') ? $busqueda : NULL), $isExport);
+        $arrResult =$pAccessLogs->ObtainAccessLogs($totalBytes, 0, $field_pattern);
     else
-        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $offset, $field_pattern,
-        (($busqueda != '') ? $busqueda : NULL), $isExport);
+        $arrResult =$pAccessLogs->ObtainAccessLogs(10 * $iEstimadoBytesPagina, $offset, $field_pattern);
     if(!$isExport)
         $arrResult = array_slice($arrResult, 0, $iNumLineasPorPagina);
 
@@ -246,7 +233,7 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
             $arrTmp[0] = $value['fecha'];
             $arrTmp[1] = $value['tipo'];
             $arrTmp[2] = $value['origen'];
-            $arrTmp[3] = $value['linea'];
+            $arrTmp[3] = $isExport ? $value['linea'] : formatLogEntry($value['linea'], (($busqueda != '') ? $busqueda : NULL));
             $arrData[] = $arrTmp;
         }
     }
@@ -273,6 +260,15 @@ function report_AccessAudit($smarty, $module_name, $local_templates_dir)
     $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
     $oGrid->showFilter(trim($htmlFilter));
     return $oGrid->fetchGrid();
+}
+
+function formatLogEntry($s, $sCadenaHighlight)
+{
+    $s = htmlentities($s, ENT_COMPAT, 'UTF-8');
+    if (!is_null($sCadenaHighlight) && trim($sCadenaHighlight) != '')
+        $s = str_replace($sCadenaHighlight, "<span style=\"background:#ffff00;\">$sCadenaHighlight</span>", $s);
+    $s = '<pre>'.$s.'</pre>';
+    return $s;
 }
 
 function createFieldFilter($listaFechas)

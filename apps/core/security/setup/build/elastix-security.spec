@@ -133,6 +133,12 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Audit: HTML formatting does not belong in the internal library. Move it
+  to the controller, and fix use of htmlentities() while at it. Fixes mojibake
+  on display of internationalized module names.
+  SVN Rev[7595]
+
 * Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

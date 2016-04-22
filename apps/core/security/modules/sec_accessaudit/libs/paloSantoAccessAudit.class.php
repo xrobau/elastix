@@ -45,7 +45,7 @@ class paloSantoAccessaudit{
         return array($total);
     }
 
-    function ObtainAccessLogs($limit, $offset, $sFecha, $sCadenaHighlight = NULL, $isExport=false)
+    function ObtainAccessLogs($limit, $offset, $sFecha)
     {
         $iBytesLeidos = 0;
         $lineas = array();
@@ -53,7 +53,7 @@ class paloSantoAccessaudit{
         $bContinuar = TRUE;
         while ($bContinuar) {
             $pos = $this->astLog->obtenerPosicionMensaje();
-            $s = $this->astLog->siguienteMensaje();            
+            $s = $this->astLog->siguienteMensaje();
             // Se desactiva la condición porque ya no todas las líneas empiezan con corchete
             if (!(count($lineas) == 0 && !is_null($s) && $s{0} != '[')) {
                 $regs = NULL;
@@ -74,18 +74,7 @@ class paloSantoAccessaudit{
                         'linea' =>  $s,
                     );
                 }
-                if($isExport){
-                    $lineas[] = $l;
-                }
-                else{
-                    $l['linea'] = htmlentities($l['linea']);
-
-                    if (!is_null($sCadenaHighlight) && trim($sCadenaHighlight) != '') {
-                        $l['linea'] = str_replace($sCadenaHighlight, "<span style=\"background:#ffff00;\">$sCadenaHighlight</span>", $l['linea']);
-                    }
-                    $l['linea'] = '<pre>'.$l['linea'].'</pre>';
-                    $lineas[] = $l;
-                }
+                $lineas[] = $l;
             }
             $pos = $this->astLog->obtenerPosicionMensaje();
             $iBytesLeidos = $pos[1] - $offset;

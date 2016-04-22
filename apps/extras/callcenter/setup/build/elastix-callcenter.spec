@@ -101,6 +101,10 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: do not call stream_select() with only empty socket arrays.
+  SVN Rev[7597]
+
 * Thu Apr 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Added Russian translations by user Russian.
   SVN Rev[7589]
@@ -168,7 +172,7 @@ fi
   SVN Rev[7569]
 
 * Mon Apr 11 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
-- FIXED: Dialer: remove event parameter no appearing in CallCenter Community.
+- FIXED: Dialer: remove event parameter not appearing in CallCenter Community.
   SVN Rev[7567]
 
 * Thu Apr  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>

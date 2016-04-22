@@ -126,8 +126,9 @@ class MultiplexServer
                 $listoEscribir[] = $conexion['socket'];
             }
         }
-        $iNumCambio = @stream_select($listoLeer, $listoEscribir, $listoErr,
-                $tv_sec, $tv_usec);
+        $iNumCambio = (count($listoLeer) + count($listoEscribir) > 0)
+            ? @stream_select($listoLeer, $listoEscribir, $listoErr, $tv_sec, $tv_usec)
+            : 0;
         if ($iNumCambio === false) {
             // Interrupción, tal vez una señal
             $this->_oLog->output("INFO: select() finaliza con fallo - señal pendiente?");

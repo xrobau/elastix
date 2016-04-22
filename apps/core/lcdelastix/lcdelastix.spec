@@ -55,6 +55,11 @@ fi
 /opt/lcdelastix/*
 
 %changelog
+* Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: lcdelastix: check whether /etc/localtime is a symlink and use it as
+  an additional way to find out the current timezone.
+  SVN Rev[7603]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: lcdelastix: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7240]

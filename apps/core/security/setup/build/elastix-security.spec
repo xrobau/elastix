@@ -134,6 +134,7 @@ fi
 
 %changelog
 * Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: added Russian translations by user Russian.
 - FIXED: Audit: HTML formatting does not belong in the internal library. Move it
   to the controller, and fix use of htmlentities() while at it. Fixes mojibake
   on display of internationalized module names.

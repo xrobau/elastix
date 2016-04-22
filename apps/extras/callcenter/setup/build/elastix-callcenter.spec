@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: check whether /etc/localtime is a symlink and use it as an
+  additional way to find out the current timezone. Fixes part 2 of Elastix
+  bug #2507.
+  SVN Rev[7598]
 - CHANGED: Dialer: do not call stream_select() with only empty socket arrays.
   SVN Rev[7597]
 

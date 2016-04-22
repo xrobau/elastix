@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.4-1                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,39 +25,37 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2008-11-11 09:11:49 jvega jvega@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Pager Email Address" => "Localizador de direcciones de Correo Electrónico",
-"Confirm Password"=>"Confirmar Contraseña",
-"Email Attachment"=>"Correos Adjuntos",
-"Play CID"=>"Reproducir CID",
-"Play Envelope"=>"Reproducir Encabezado",
-"Delete Vmail"=>"Eliminar Vmail",
-"Required Field"=>"Campo Requerido",
-"Filter"=>"Filtro",
-"Configuration" => "Configuración",
-"Start Date"=>"Fecha Inicio",
-"End Date"=>"Fecha Fin",
-"Voicemail List" => "Lista de Grabaciones",
-"Are you sure you wish to delete voicemails?" => "Está seguro que desea eliminar la grabación de voz?",
-"Date"=>"Fecha",
-"Time"=>"Tiempo",
-"Message"=>"Mensaje",
-"CallerID" => "CallerID",
-"Extension" => "Extensión",
-"Duration"=>"Duración",
-"Email"=>"Correo Electrónico",
-"Status"=>"Estado",
-"Enable" => "Habilitar",
-"Disable" => "Deshabilitar",
-"Yes" => "Sí",
-"No" => "No",
-"no_file" => "Archivo no ha sido encontrado!",
-"no_extension" => "Este archivo no está permitido para descargar",
-"Download" => "Descargar",
-"Listen" => "Escuchar",
-"no_extension_assigned" => "El usuario actual no tiene un número de extensión asociado a él. Puede asociar un número de extensión a su usuario haciendo click <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">aquí</a>",
-"contact_admin" => "No hay número de extensión asociado con el usuario actual. Por favor contáctese con el administrador para que le asigne una extensión"
+$arrLangModule = array(
+    "Pager Email Address" => "Localizador de direcciones de Correo Electrónico",
+    "Confirm Password" => "Confirmar Contraseña",
+    "Email Attachment" => "Correos Adjuntos",
+    "Play CID" => "Reproducir CID",
+    "Play Envelope" => "Reproducir Encabezado",
+    "Delete Vmail" => "Eliminar Vmail",
+    "Required Field" => "Campo Requerido",
+    "Filter" => "Filtro",
+    "Configuration" => "Configuración",
+    "Start Date" => "Fecha Inicio",
+    "End Date" => "Fecha Fin",
+    "Voicemail List" => "Lista de Grabaciones",
+    "Are you sure you wish to delete voicemails?" => "Está seguro que desea eliminar la grabación de voz?",
+    "Date" => "Fecha",
+    "Time" => "Tiempo",
+    "Message" => "Mensaje",
+    "Extension" => "Extensión",
+    "Duration" => "Duración",
+    "Email" => "Correo Electrónico",
+    "Status" => "Estado",
+    "Enable" => "Habilitar",
+    "Disable" => "Deshabilitar",
+    "Yes" => "Sí",
+    "no_file" => "Archivo no ha sido encontrado!",
+    "no_extension" => "Este archivo no está permitido para descargar",
+    "Download" => "Descargar",
+    "Listen" => "Escuchar",
+    "no_extension_assigned" => "El usuario actual no tiene un número de extensión asociado a él. Puede asociar un número de extensión a su usuario haciendo click <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">aquí</a>",
+    "contact_admin" => "No hay número de extensión asociado con el usuario actual. Por favor contáctese con el administrador para que le asigne una extensión",
 );
 ?>

@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,16 +24,11 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by: Lakatos Tamás                                          |
-  | Email: lakatost@gmail.com                                            |
-  |                                                                      |
   +----------------------------------------------------------------------+
-  : hu.lang,v 1.6 2008/01/21 09:51:55 bmacias@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Asterisk-Cli" => "Asterisk-Cli",
-"Command" => "Parancs",
-"Execute" => "Érvényesít",
+$arrLangModule = array(
+    "Command" => "Parancs",
+    "Execute" => "Érvényesít",
 );
 ?>

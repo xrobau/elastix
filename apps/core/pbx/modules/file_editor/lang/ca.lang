@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye:  Jaume Ponsa - Sistemes i Xarxes Informatiques Calidae|
-  |        (Caldes de Montbui, Barcelona)                                |
-  |                                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,28 +25,19 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ca.lang,v 1.5 2008/02/17 11:45:00 bmacias Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Command" => "Comanda",
-"Execute" => "Executar",
-"Result" => "Resultat",
-"File Editor" => "Asterisk File Editor",
-"File List" => "File Name",
-"File Size" => "File Size",
-"Back" => "Enrere",
-"This file doesn't have permisses to read" => "Aquest arxiu no té permisos de lectura",
-"This file doesn't have permisses to write" => "Aquest arxiu no té permisos d'escritura",
-"The changes was saved in the file" => "Els canvis s'han guardat a l'arxiu.",
-"Doesn't have permisses to read" => "No té permisos de lectura",
-"This is not a valid directory" => "No es un directori vàlid",
-"Please write the file name" => "Please write the file name",
-"New File" => "New File",
-"File already exist" => "File already exist",
-"File" => "Arxiu",
-"Filter" => "Filtrar",
-"Reload Asterisk" => "Reload Asterisk",
-"Asterisk has been reloaded" => "Asterisk has been reloaded",
-"Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager"
+$arrLangModule = array(
+    "Command" => "Comanda",
+    "Execute" => "Executar",
+    "Result" => "Resultat",
+    "Back" => "Enrere",
+    "This file doesn't have permisses to read" => "Aquest arxiu no té permisos de lectura",
+    "This file doesn't have permisses to write" => "Aquest arxiu no té permisos d'escritura",
+    "The changes was saved in the file" => "Els canvis s'han guardat a l'arxiu.",
+    "Doesn't have permisses to read" => "No té permisos de lectura",
+    "This is not a valid directory" => "No es un directori vàlid",
+    "File" => "Arxiu",
+    "Filter" => "Filtrar",
 );
 ?>

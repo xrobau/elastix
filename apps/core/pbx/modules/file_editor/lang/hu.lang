@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,33 +24,19 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by: Lakatos Tamás                                          |
-  | Email: lakatost@gmail.com                                            |
-  |                                                                      |
   +----------------------------------------------------------------------+
-  : hu.lang,v 1.6 2008/01/21 09:51:55 bmacias@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Command" => "Parancs",
-"Execute" => "Érvényesít",
-"Result" => "Eredmény",
-"File Editor" => "Asterisk File Editor",
-"File List" => "File Name",
-"File Size" => "File Size",
-"Back" => "Vissza",
-"This file doesn't have permisses to read" => "A file olvasása nem engedélyezett",
-"This file doesn't have permisses to write" => "A file írása nem engedélyezett",
-"The changes was saved in the file" => "A változások elmentve a file-ba",
-"Doesn't have permisses to read" => "Nincs engedély az olvasásra",
-"This is not a valid directory" => "Ez nem érvényes katalógus",
-"Please write the file name" => "Please write the file name",
-"New File" => "New File",
-"File already exist" => "File already exist",
-"File" => "File",
-"Filter" => "Szűrő",
-"Reload Asterisk" => "Reload Asterisk",
-"Asterisk has been reloaded" => "Asterisk has been reloaded",
-"Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager"
+$arrLangModule = array(
+    "Command" => "Parancs",
+    "Execute" => "Érvényesít",
+    "Result" => "Eredmény",
+    "Back" => "Vissza",
+    "This file doesn't have permisses to read" => "A file olvasása nem engedélyezett",
+    "This file doesn't have permisses to write" => "A file írása nem engedélyezett",
+    "The changes was saved in the file" => "A változások elmentve a file-ba",
+    "Doesn't have permisses to read" => "Nincs engedély az olvasásra",
+    "This is not a valid directory" => "Ez nem érvényes katalógus",
+    "Filter" => "Szűrő",
 );
 ?>

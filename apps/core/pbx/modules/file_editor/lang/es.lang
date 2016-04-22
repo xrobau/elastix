@@ -25,28 +25,28 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Command" => "Comando",
-"Execute" => "Ejecutar",
-"Result" => "Resultado",
-"File Editor" => "Editor de archivos de Asterisk",
-"File List" => "Nombre de archivo",
-"File Size" => "Tamaño de archivo",
-"Back" => "Regresar",
-"This file doesn't have permisses to read" => "Este archivo no tiene permisos de lectura",
-"This file doesn't have permisses to write" => "Este archivo no tiene permisos de escritura",
-"The changes was saved in the file" => "Los cambios han sido guardados en el archivo.",
-"Doesn't have permisses to read" => "no tiene permisos de lectura",
-"This is not a valid directory" => "No es un directorio válido",
-"Please write the file name" => "Por favor escriba el nombre del archivo",
-"New File" => "Nuevo Archivo",
-"File already exist" => "El archivo ya existe",
-"File" => "Archivo",
-"Filter" => "Filtrar",
-"Reload Asterisk" => "Recargar Asterisk",
-"Asterisk has been reloaded" => "Asterisk ha sido recargado",
-"Error when connecting to Asterisk Manager" => "Ocurrió un error al intentar conectarse con Asterisk",
+$arrLangModule = array(
+    "Command" => "Comando",
+    "Execute" => "Ejecutar",
+    "Result" => "Resultado",
+    "File Editor" => "Editor de archivos de Asterisk",
+    "File List" => "Nombre de archivo",
+    "File Size" => "Tamaño de archivo",
+    "Back" => "Regresar",
+    "This file doesn't have permisses to read" => "Este archivo no tiene permisos de lectura",
+    "This file doesn't have permisses to write" => "Este archivo no tiene permisos de escritura",
+    "The changes was saved in the file" => "Los cambios han sido guardados en el archivo.",
+    "Doesn't have permisses to read" => "no tiene permisos de lectura",
+    "This is not a valid directory" => "No es un directorio válido",
+    "Please write the file name" => "Por favor escriba el nombre del archivo",
+    "New File" => "Nuevo Archivo",
+    "File already exist" => "El archivo ya existe",
+    "File" => "Archivo",
+    "Filter" => "Filtrar",
+    "Reload Asterisk" => "Recargar Asterisk",
+    "Asterisk has been reloaded" => "Asterisk ha sido recargado",
+    "Error when connecting to Asterisk Manager" => "Ocurrió un error al intentar conectarse con Asterisk",
 );
 ?>

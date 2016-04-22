@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 2.0.4-5                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,22 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.1 2011-04-14 11:04:34 Alberto Santos asantos@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Festival" => "Festival",
-"Status" => "Estado",
-"File could not be found in the following path" => "Archivo no pudo ser encontrado en la siguiente ruta",
-"Could not write the configuration on file" => "No se pudo escribir el archivo de configuración",
-"Error determining status of festival" => "Error al determinar el estado de festival",
-"Festival is already activated" => "Festival ya está activado",
-"Message" => "Mensaje",
-"Festival has been successfully activated" => "Festival ha sido activado exitosamente",
-"Festival could not be activated" => "Festival no pudo ser activado",
-"Festival is already deactivated" => "Festival ya se encuentra desactivado",
-"The file /usr/share/festival/festival.scm was modified" => "El archivo /usr/share/festival/festival.scm fue modificado",
-"Festival has been successfully deactivated" => "Festival ha sido desactivado exitosamente",
-"Festival could not be deactivated" => "Festival no pudo ser desactivado",
-"Dismiss" => "Descartar"
+$arrLangModule = array(
+    "Status" => "Estado",
+    "File could not be found in the following path" => "Archivo no pudo ser encontrado en la siguiente ruta",
+    "Could not write the configuration on file" => "No se pudo escribir el archivo de configuración",
+    "Error determining status of festival" => "Error al determinar el estado de festival",
+    "Festival is already activated" => "Festival ya está activado",
+    "Message" => "Mensaje",
+    "Festival has been successfully activated" => "Festival ha sido activado exitosamente",
+    "Festival could not be activated" => "Festival no pudo ser activado",
+    "Festival is already deactivated" => "Festival ya se encuentra desactivado",
+    "The file /usr/share/festival/festival.scm was modified" => "El archivo /usr/share/festival/festival.scm fue modificado",
+    "Festival has been successfully deactivated" => "Festival ha sido desactivado exitosamente",
+    "Festival could not be deactivated" => "Festival no pudo ser desactivado",
+    "Dismiss" => "Descartar",
 );
 ?>

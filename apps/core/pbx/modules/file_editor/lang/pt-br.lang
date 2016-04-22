@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Erwan DESVERGNES - SDCI                               |
-  | erwan.desvergnes@SDCI.fr                                             |
-  |                                                                      |                                               |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,28 +25,19 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: br.lang,v 1.6 2007/09/05 00:36:42 afigueroa Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Command" => "Comando",
-"Execute" => "Executar",
-"Result" => "Resultado",
-"File Editor" => "Asterisk File Editor",
-"File List" => "File Name",
-"File Size" => "File Size",
-"Back" => "Voltar",
-"This file doesn't have permisses to read" => "Sem permissão de leitura",
-"This file doesn't have permisses to write" => "Sem permissão de escrita",
-"The changes was saved in the file" => "As mudanças foram salvas no arquivo",
-"Doesn't have permisses to read" => "Sem permissão de leitura",
-"This is not a valid directory" => "Este não é um diretório válido",
-"Please write the file name" => "Please write the file name",
-"New File" => "New File",
-"File already exist" => "File already exist",
-"File" => "Arquivo",
-"Filter" => "Filtro",
-"Reload Asterisk" => "Reload Asterisk",
-"Asterisk has been reloaded" => "Asterisk has been reloaded",
-"Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager"
+$arrLangModule = array(
+    "Command" => "Comando",
+    "Execute" => "Executar",
+    "Result" => "Resultado",
+    "Back" => "Voltar",
+    "This file doesn't have permisses to read" => "Sem permissão de leitura",
+    "This file doesn't have permisses to write" => "Sem permissão de escrita",
+    "The changes was saved in the file" => "As mudanças foram salvas no arquivo",
+    "Doesn't have permisses to read" => "Sem permissão de leitura",
+    "This is not a valid directory" => "Este não é um diretório válido",
+    "File" => "Arquivo",
+    "Filter" => "Filtro",
 );
 ?>

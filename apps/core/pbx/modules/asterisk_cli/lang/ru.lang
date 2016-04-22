@@ -25,11 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Asterisk-Cli" => "Командная строка Asterisk",
-"Command" => "Команда",
-"Execute" => "Исполнить",
+$arrLangModule = array(
+    "Asterisk-Cli" => "Командная строка Asterisk",
+    "Command" => "Команда",
+    "Execute" => "Исполнить",
 );
 ?>

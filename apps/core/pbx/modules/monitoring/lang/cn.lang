@@ -25,33 +25,9 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: cn.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Monitoring" => "Monitoring List",
-"Date" => "Date",
-"Time" => "Time",
-"Source" => "Source",
-"Destination" => "Destination",
-"Duration" => "Duration",
-"Download" => "Download",
-"Listen" => "Listen",
-"Type" => "Type",
-"Message" => "Message",
-"Start_Date" => "Start Date",
-"End_Date" => "End Date",
-"message_alert" => "Are you sure you wish to delete recordings?",
-"no_extension" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
-"no_file" => "File not found!",
-"Outgoing" => "Outgoing",
-"Incoming" => "Incoming",
-"Queue" => "Queue",
-"Group" => "Group",
-"unknown" => "Unknown",
-"delete_file_error" => "At least one of files selected cannot be deleted because it no exists",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
-"You are not authorized to download this file" => "You are not authorized to download this file",
-"You are not authorized to listen this file" => "You are not authorized to listen this file",
-"You are not authorized to delete any records" => "You are not authorized to delete any records"
+$arrLangModule = array(
+    "delete_file_error" => "At least one of files selected cannot be deleted because it no exists",
 );
 ?>

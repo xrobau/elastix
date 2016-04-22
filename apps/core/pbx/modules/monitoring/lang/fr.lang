@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,39 +24,31 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Monitoring" => "Contrôle des conversations",
-"Date" => "Date",
-"Time" => "Heure",
-"Source" => "Source",
-"Destination" => "Destination",
-"Duration" => "Durée",
-"Download" => "Télécharger",
-"Listen" => "Ecouter",
-"Type" => "Type",
-"Message" => "Message",
-"Start_Date" => "Du",
-"End_Date" => "Au",
-"message_alert" => "Etes-vous sûr de vouloir supprimer ces enregistrements ?",
-"no_extension" => "Votre compte utilisateur n'est associé à aucune extension. Vous pouvez lui en associer une en cliquant <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">ici</a>",
-"no_file" => "Fichier non trouvé !",
-"Outgoing" => "Sortant",
-"Incoming" => "Entrant",
-"Queue" => "File",
-"Group" => "Groupe",
-"unknown" => "Inconnu",
-"Search" => "Recherche sur",
-"Show" => "Afficher",
-"delete_file_error" => "Au moins un des fichiers sélectionnés ne peut pas être supprimé car il n'existe pas",
-"contact_admin" => "Votre compte utilisateur n'est associé à aucune extension. Veuillez demander à l'administrateur de vous en assigner une",
-"You are not authorized to download this file" => "Vous n'êtes pas autorisé à télécharger ce fichier",
-"You are not authorized to listen this file" => "Vous n'êtes pas autorisé à écouter ce fichier",
-"You are not authorized to delete any records" => "Vous n'êtes pas autorisé à supprimer les enregistrements"
+$arrLangModule = array(
+    "Monitoring" => "Contrôle des conversations",
+    "Time" => "Heure",
+    "Duration" => "Durée",
+    "Download" => "Télécharger",
+    "Listen" => "Ecouter",
+    "Start_Date" => "Du",
+    "End_Date" => "Au",
+    "message_alert" => "Etes-vous sûr de vouloir supprimer ces enregistrements ?",
+    "no_extension" => "Votre compte utilisateur n'est associé à aucune extension. Vous pouvez lui en associer une en cliquant <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">ici</a>",
+    "no_file" => "Fichier non trouvé !",
+    "Outgoing" => "Sortant",
+    "Incoming" => "Entrant",
+    "Queue" => "File",
+    "Group" => "Groupe",
+    "unknown" => "Inconnu",
+    "Search" => "Recherche sur",
+    "Show" => "Afficher",
+    "delete_file_error" => "Au moins un des fichiers sélectionnés ne peut pas être supprimé car il n'existe pas",
+    "contact_admin" => "Votre compte utilisateur n'est associé à aucune extension. Veuillez demander à l'administrateur de vous en assigner une",
+    "You are not authorized to download this file" => "Vous n'êtes pas autorisé à télécharger ce fichier",
+    "You are not authorized to listen this file" => "Vous n'êtes pas autorisé à écouter ce fichier",
+    "You are not authorized to delete any records" => "Vous n'êtes pas autorisé à supprimer les enregistrements",
 );
 ?>

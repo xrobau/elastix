@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye:  Jaume Ponsa - Sistemes i Xarxes Informatiques Calidae|
-  |        (Caldes de Montbui, Barcelona)                                |
-  |                                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,33 +25,9 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ca.lang,v 1.5 2008/02/17 11:45:00 bmacias Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Monitoring" => "Monitoring List",
-"Date" => "Date",
-"Time" => "Time",
-"Source" => "Source",
-"Destination" => "Destination",
-"Duration" => "Duration",
-"Download" => "Download",
-"Listen" => "Listen",
-"Type" => "Type",
-"Message" => "Message",
-"Start_Date" => "Start Date",
-"End_Date" => "End Date",
-"message_alert" => "Are you sure you wish to delete recordings?",
-"no_extension" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
-"no_file" => "File not found!",
-"Outgoing" => "Outgoing",
-"Incoming" => "Incoming",
-"Queue" => "Queue",
-"Group" => "Group",
-"unknown" => "Unknown",
-"delete_file_error" => "At least one of files selected cannot be deleted because it no exists",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
-"You are not authorized to download this file" => "You are not authorized to download this file",
-"You are not authorized to listen this file" => "You are not authorized to listen this file",
-"You are not authorized to delete any records" => "You are not authorized to delete any records"
+$arrLangModule = array(
+    "delete_file_error" => "At least one of files selected cannot be deleted because it no exists",
 );
 ?>

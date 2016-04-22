@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,39 +24,22 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by: Jason Papanayotou                                      |
-  | Email: jasonpap@gmail.com                                            |
-  |                                                                      |
   +----------------------------------------------------------------------+
-  $Id: el.lang,v 1.6 2008/02/11 11:07:22 bmacias@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Monitoring" => "Λίστα παρακολουθήσεων",
-"Date" => "Ημερομηνία",
-"Time" => "Ώρα",
-"Source" => "Πηγή",
-"Destination" => "Προορισμός",
-"Duration" => "Διάρκεια",
-"Download" => "Download",
-"Listen" => "Listen",
-"Type" => "Τύπος",
-"Message" => "Μήνυμα",
-"Start_Date" => "Ημερομηνία Εκκίνησης",
-"End_Date" => "Ημερομηνία Τερματισμού",
-"message_alert" => "Είστε σίγουροι οτι θέλετε να σβήσετε τις εγγραφές;",
-"no_extension" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
-"no_file" => "File not found!",
-"Outgoing" => "Outgoing",
-"Incoming" => "Incoming",
-"Queue" => "Queue",
-"Group" => "Group",
-"unknown" => "Unknown",
-"Filter" => "Φίλτρο",
-"delete_file_error" => "At least one of files selected cannot be deleted because it no exists",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
-"You are not authorized to download this file" => "You are not authorized to download this file",
-"You are not authorized to listen this file" => "You are not authorized to listen this file",
-"You are not authorized to delete any records" => "You are not authorized to delete any records"
+$arrLangModule = array(
+    "Monitoring" => "Λίστα παρακολουθήσεων",
+    "Date" => "Ημερομηνία",
+    "Time" => "Ώρα",
+    "Source" => "Πηγή",
+    "Destination" => "Προορισμός",
+    "Duration" => "Διάρκεια",
+    "Type" => "Τύπος",
+    "Message" => "Μήνυμα",
+    "Start_Date" => "Ημερομηνία Εκκίνησης",
+    "End_Date" => "Ημερομηνία Τερματισμού",
+    "message_alert" => "Είστε σίγουροι οτι θέλετε να σβήσετε τις εγγραφές;",
+    "Filter" => "Φίλτρο",
+    "delete_file_error" => "At least one of files selected cannot be deleted because it no exists",
 );
 ?>

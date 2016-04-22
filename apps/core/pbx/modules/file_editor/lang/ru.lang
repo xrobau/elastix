@@ -25,28 +25,35 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Command" => "Команда",
-"Execute" => "Исполнить",
-"Result" => "Результат",
-"File Editor" => "Asterisk File Editor",
-"File List" => "File Name",
-"File Size" => "File Size",
-"Back" => "Назад",
-"This file doesn't have permisses to read" => "Файл не может быть прочитан",
-"This file doesn't have permisses to write" => "Файл не может быть записан",
-"The changes was saved in the file" => "Изменения сохранены в файле",
-"Doesn't have permisses to read" => "Нет прав на чтение",
-"This is not a valid directory" => "Некорректная директория",
-"Please write the file name" => "Please write the file name",
-"New File" => "New File",
-"File already exist" => "File already exist",
-"File" => "File",
-"Filter" => "Фильтр",
-"Reload Asterisk" => "Reload Asterisk",
-"Asterisk has been reloaded" => "Asterisk has been reloaded",
-"Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager"
+$arrLangModule = array(
+    "Command" => "Команда",
+    "Execute" => "Исполнить",
+    "Result" => "Результат",
+    "File Editor" => "Редактор файлов Asterisk",
+    "File List" => "Имя Файла",
+    "File Size" => "Размер Файла",
+    "Back" => "Назад",
+    "This file doesn't have permisses to read" => "Файл не может быть прочитан",
+    "This file doesn't have permisses to write" => "Файл не может быть записан",
+    "The changes was saved in the file" => "Изменения сохранены в файле",
+    "Doesn't have permisses to read" => "Нет прав на чтение",
+    "This is not a valid directory" => "Некорректная директория",
+    "Please write the file name" => "Пожалуйста, напишите имя файла",
+    "New File" => "Новый Файл",
+    "File already exist" => "Файл уже существует",
+    "File" => "Файл",
+    "Filter" => "Фильтр",
+    "Reload Asterisk" => "Перезагрузить Asterisk",
+    "Asterisk has been reloaded" => "Asterisk был перезагружен",
+    "Error when connecting to Asterisk Manager" => "Ошибка соединения с Asterisk Manager",
+    "Show Filter" => "Показать Фильтр",
+    "Hide Filter" => "Скрыть Фильтр",
+    "Filter applied " => "Текущий фильтр: ",
+    "Page" => "Страница",
+    "records" => "записей",
+    "of" => "из",
+    "No records match the filter criteria" => "Нет записей, соответствующих критериям фильтра",
 );
 ?>

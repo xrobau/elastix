@@ -1,8 +1,8 @@
-﻿<?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.4-1                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,35 +25,33 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2008-11-11 09:11:49 jvega jvega@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Pager Email Address" => "آدرس ايميل پيجر",
-"Confirm Password"=>"تاييد رمز عبور",
-"Email Attachment"=>"پيوست ايميل",
-"Play CID"=>"پخش شماره تماس",
-"Play Envelope"=>"پخش پيام",
-"Delete Vmail"=>"حذف پيام صوتي",
-"Required Field"=>"فيلدهاي مورد نياز",
-"Filter"=>"فيلتر",
-"Configuration" => "پيكر بندي",
-"Start Date"=>"تاريخ شروع",
-"End Date"=>"تاريخ پايان",
-"Voicemail List" => "ليست صندوق صوتي",
-"Are you sure you wish to delete voicemails?" => "آيا مطمئن به حذف صندوق صوتي هستيد؟",
-"Date"=>"تاريخ",
-"Time"=>"زمان",
-"Message"=>"پيام",
-"CallerID" => "شماره تماس گيرنده",
-"Extension" => "داخلي",
-"Duration"=>"مدت زمان",
-"Email"=>"ايميل",
-"Status"=>"وضعيت",
-"Enable" => "فعال",
-"Disable" => "غير فعال",
-"Yes" => "بله",
-"No" => "خير",
-"no_extension_assigned" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension"
+$arrLangModule = array(
+    "Pager Email Address" => "آدرس ايميل پيجر",
+    "Confirm Password" => "تاييد رمز عبور",
+    "Email Attachment" => "پيوست ايميل",
+    "Play CID" => "پخش شماره تماس",
+    "Play Envelope" => "پخش پيام",
+    "Delete Vmail" => "حذف پيام صوتي",
+    "Required Field" => "فيلدهاي مورد نياز",
+    "Filter" => "فيلتر",
+    "Configuration" => "پيكر بندي",
+    "Start Date" => "تاريخ شروع",
+    "End Date" => "تاريخ پايان",
+    "Voicemail List" => "ليست صندوق صوتي",
+    "Are you sure you wish to delete voicemails?" => "آيا مطمئن به حذف صندوق صوتي هستيد؟",
+    "Date" => "تاريخ",
+    "Time" => "زمان",
+    "Message" => "پيام",
+    "CallerID" => "شماره تماس گيرنده",
+    "Extension" => "داخلي",
+    "Duration" => "مدت زمان",
+    "Email" => "ايميل",
+    "Status" => "وضعيت",
+    "Enable" => "فعال",
+    "Disable" => "غير فعال",
+    "Yes" => "بله",
+    "No" => "خير",
 );
 ?>

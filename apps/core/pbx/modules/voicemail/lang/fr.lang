@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   CodificaciÃ³n: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,43 +24,35 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Dannarz                                             |
-  | Email: sesshomarurin7@palosanto.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: fr.lang, October 25, 2010, 5:39 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Pager Email Address" => "Adresse email du Pager",
-"Confirm Password" => "Confirmer le mot de passe",
-"Email Attachment" => "Pièce jointe",
-"Play CID" => "Lire CID",
-"Play Envelope" => "Lire l'enveloppe",
-"Delete Vmail" => "Effacer le message vocal",
-"Required Field" => "Champ Requis",
-"Filter" => "Filtre",
-"Configuration" => "Configuration",
-"Start Date" => "Du",
-"End Date" => "Au",
-"Voicemail List" => "Liste des messages vocaux",
-"Are you sure you wish to delete voicemails?" => "Etes-vous sûr de vouloir effacer les messages vocaux ?",
-"Date" => "Date",
-"Time" => "Heure",
-"Message" => "Message",
-"CallerID" => "N° de l'appelant",
-"Extension" => "Extension",
-"Duration" => "Durée",
-"Email" => "Email",
-"Status" => "Etat",
-"Enable" => "Valider",
-"Disable" => "Dévalider",
-"Yes" => "Oui",
-"No" => "Non",
-"no_file" => "Le fichier n'a pas été trouvé !",
-"no_extension" => "Vous ne pouvez pas télécharger ce fichier",
-"Download" => "Télécharger",
-"Listen" => "Ecouter",
-"no_extension_assigned" => "Votre compte utilisateur n'est associé à aucune extension. Vous pouvez lui en associer une en cliquant <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">ici</a>",
-"contact_admin" => "Votre compte utilisateur n'est associé à aucune extension. Veuillez demander à l'administrateur de vous en assigner une"
+$arrLangModule = array(
+    "Pager Email Address" => "Adresse email du Pager",
+    "Confirm Password" => "Confirmer le mot de passe",
+    "Email Attachment" => "Pièce jointe",
+    "Play CID" => "Lire CID",
+    "Play Envelope" => "Lire l'enveloppe",
+    "Delete Vmail" => "Effacer le message vocal",
+    "Required Field" => "Champ Requis",
+    "Filter" => "Filtre",
+    "Start Date" => "Du",
+    "End Date" => "Au",
+    "Voicemail List" => "Liste des messages vocaux",
+    "Are you sure you wish to delete voicemails?" => "Etes-vous sûr de vouloir effacer les messages vocaux ?",
+    "Time" => "Heure",
+    "CallerID" => "N° de l'appelant",
+    "Duration" => "Durée",
+    "Status" => "Etat",
+    "Enable" => "Valider",
+    "Disable" => "Dévalider",
+    "Yes" => "Oui",
+    "No" => "Non",
+    "no_file" => "Le fichier n'a pas été trouvé !",
+    "no_extension" => "Vous ne pouvez pas télécharger ce fichier",
+    "Download" => "Télécharger",
+    "Listen" => "Ecouter",
+    "no_extension_assigned" => "Votre compte utilisateur n'est associé à aucune extension. Vous pouvez lui en associer une en cliquant <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">ici</a>",
+    "contact_admin" => "Votre compte utilisateur n'est associé à aucune extension. Veuillez demander à l'administrateur de vous en assigner une",
 );
 ?>

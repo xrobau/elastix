@@ -10,11 +10,7 @@
   | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com 											 |
-  |                                                                      |
-  | Translate bye: Erwan DESVERGNES - SDCI                               |
-  | erwan.desvergnes@SDCI.fr                                             |
-  |                                                                      |
+  | http://www.palosanto.com                                             |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,28 +25,18 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-*/
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Command" => "Naredba",
-"Execute" => "Izvrši",
-"Result" => "Rezultat",
-"File Editor" => "Asterisk File Editor",
-"File List" => "File Name",
-"File Size" => "File Size",
-"Back" => "Nazad",
-"This file doesn't have permisses to read" => "Ova datoteka nema dozvole za čitanje",
-"This file doesn't have permisses to write" => "Ova datoteka nema dozvole za pisanje",
-"The changes was saved in the file" => "Promjene su spremljene u datoteku",
-"Doesn't have permisses to read" => "Nema dozvola za čitanje",
-"This is not a valid directory" => "Ovo nije ispravna mapa",
-"Please write the file name" => "Please write the file name",
-"New File" => "New File",
-"File already exist" => "File already exist",
-"File" => "Datoteka",
-"Filter" => "Filter",
-"Reload Asterisk" => "Reload Asterisk",
-"Asterisk has been reloaded" => "Asterisk has been reloaded",
-"Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager"
+$arrLangModule = array(
+    "Command" => "Naredba",
+    "Execute" => "Izvrši",
+    "Result" => "Rezultat",
+    "Back" => "Nazad",
+    "This file doesn't have permisses to read" => "Ova datoteka nema dozvole za čitanje",
+    "This file doesn't have permisses to write" => "Ova datoteka nema dozvole za pisanje",
+    "The changes was saved in the file" => "Promjene su spremljene u datoteku",
+    "Doesn't have permisses to read" => "Nema dozvola za čitanje",
+    "This is not a valid directory" => "Ovo nije ispravna mapa",
+    "File" => "Datoteka",
 );
 ?>

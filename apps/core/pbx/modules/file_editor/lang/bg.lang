@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,32 +24,23 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Chavdar Iliev                                             |
-  | Email: chavdar_75@yahoo.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: bg.lang, October 25, 2010, 6:07 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"File Editor" => "Редактиране на Астериск Файлове",
-"File List" => "Име на Файла",
-"File Size" => "Големина на Файла",
-"Back" => "Назад",
-"This file doesn't have permisses to read" => "Този файл не е позволен за четене",
-"This file doesn't have permisses to write" => "Този файл не е позволен за запис",
-"The changes was saved in the file" => "Промените са записани във Файла",
-"Doesn't have permisses to read" => "Нямате права за четене",
-"This is not a valid directory" => "Неправилна директория",
-"Please write the file name" => "Моля въведете име на файла",
-"New File" => "Нов Файл",
-"File already exist" => "Файлът вече съществува",
-"File" => "Файл",
-"Filter" => "Филтър",
-"Command" => "Command",
-"Execute" => "Execute",
-"Result" => "Result",
-"Reload Asterisk" => "Reload Asterisk",
-"Asterisk has been reloaded" => "Asterisk has been reloaded",
-"Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager"
+$arrLangModule = array(
+    "File Editor" => "Редактиране на Астериск Файлове",
+    "File List" => "Име на Файла",
+    "File Size" => "Големина на Файла",
+    "Back" => "Назад",
+    "This file doesn't have permisses to read" => "Този файл не е позволен за четене",
+    "This file doesn't have permisses to write" => "Този файл не е позволен за запис",
+    "The changes was saved in the file" => "Промените са записани във Файла",
+    "Doesn't have permisses to read" => "Нямате права за четене",
+    "This is not a valid directory" => "Неправилна директория",
+    "Please write the file name" => "Моля въведете име на файла",
+    "New File" => "Нов Файл",
+    "File already exist" => "Файлът вече съществува",
+    "File" => "Файл",
+    "Filter" => "Филтър",
 );
 ?>

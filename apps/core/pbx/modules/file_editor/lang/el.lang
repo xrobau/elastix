@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,33 +24,23 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by: Jason Papanayotou                                      |
-  | Email: jasonpap@gmail.com                                            |
-  |                                                                      |
   +----------------------------------------------------------------------+
-  $Id: el.lang,v 1.6 2008/02/11 11:07:22 bmacias@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Command" => "Εντολές",
-"Execute" => "Εκτέλεση",
-"Result" => "Αποτέλεσμα",
-"File Editor" => "Asterisk File Editor",
-"File List" => "File Name",
-"File Size" => "File Size",
-"Back" => "Πίσω",
-"This file doesn't have permisses to read" => "Αυτό το αρχείο δεν έχει δικαιώματα ανάγνωσης",
-"This file doesn't have permisses to write" => "Αυτό το αρχείο δεν έχει δικαιώματα εγγραφής",
-"The changes was saved in the file" => "Οι αλλαγές αποθηκεύτηκαν στο αρχείο",
-"Doesn't have permisses to read" => "δεν έχει δικαίωμα ανάγνωσης",
-"This is not a valid directory" => "Αυτός ο φάκελος δεν είναι έγκυρος",
-"Please write the file name" => "Παρακαλώ εισάγετε το όνομα του αρχείου",
-"New File" => "Νέο αρχείο",
-"File already exist" => "Το αρχείο υπάρχει ήδη",
-"File" => "Αρχείο",
-"Filter" => "Φίλτρο",
-"Reload Asterisk" => "Reload Asterisk",
-"Asterisk has been reloaded" => "Asterisk has been reloaded",
-"Error when connecting to Asterisk Manager" => "Error when connecting to Asterisk Manager"
+$arrLangModule = array(
+    "Command" => "Εντολές",
+    "Execute" => "Εκτέλεση",
+    "Result" => "Αποτέλεσμα",
+    "Back" => "Πίσω",
+    "This file doesn't have permisses to read" => "Αυτό το αρχείο δεν έχει δικαιώματα ανάγνωσης",
+    "This file doesn't have permisses to write" => "Αυτό το αρχείο δεν έχει δικαιώματα εγγραφής",
+    "The changes was saved in the file" => "Οι αλλαγές αποθηκεύτηκαν στο αρχείο",
+    "Doesn't have permisses to read" => "δεν έχει δικαίωμα ανάγνωσης",
+    "This is not a valid directory" => "Αυτός ο φάκελος δεν είναι έγκυρος",
+    "Please write the file name" => "Παρακαλώ εισάγετε το όνομα του αρχείου",
+    "New File" => "Νέο αρχείο",
+    "File already exist" => "Το αρχείο υπάρχει ήδη",
+    "File" => "Αρχείο",
+    "Filter" => "Φίλτρο",
 );
 ?>

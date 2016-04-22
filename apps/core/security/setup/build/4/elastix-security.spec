@@ -134,6 +134,9 @@ fi
 
 %changelog
 * Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: security: check whether /etc/localtime is a symlink and use it as
+  an additional way to find out the current timezone.
+  SVN Rev[7604]
 - CHANGED: added Russian translations by user Russian.
 - FIXED: Audit: HTML formatting does not belong in the internal library. Move it
   to the controller, and fix use of htmlentities() while at it. Fixes mojibake

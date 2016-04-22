@@ -31,24 +31,24 @@
 
 /*
  * Este programa recibe los siguientes parámetros, en el orden indicado:
- * 
+ *
  *  Interfaz de red por la que ingresó la petición de portknock (ethX)
  *  IPv4 fuente de la petición de portknock
  *  Nombre de usuario bajo el cual se hace la petición
  *  Payload del paquete encriptado de la petición, en base64
- * 
- * Se consulta la base de datos acl.db para verificar si el usuario existe y 
+ *
+ * Se consulta la base de datos acl.db para verificar si el usuario existe y
  * para obtener el hash MD5 de la contraseña. Luego de deshacer la codificación
  * base64, se decripta el payload usando el hash MD5 como contraseña. Se espera
  * que el payload en plaintext sea un texto con el siguiente formato
- * 
+ *
  *  tttttttttttt:aa.bb.cc.dd:XXX,YYY,ZZZ
- * 
- * El primer campo es el timestamp UNIX del envío del paquete, y debe ser 
+ *
+ * El primer campo es el timestamp UNIX del envío del paquete, y debe ser
  * enteramente numérico. El segundo campo es una IP, que debe coincidir con la
  * IP desde la cual se envió el paquete portknock. El tercer campo es una lista
  * separada por comas de las ETIQUETAS de los servicios de red que el usuario
- * desea que sean permitidos para la IP fuente. La lista debe de ser un 
+ * desea que sean permitidos para la IP fuente. La lista debe de ser un
  * subconjunto de la lista de puertos autorizados para el usuario indicado en la
  * base de datos iptables.db. Si alguna etiqueta no se reconoce o no está entre
  * las autorizaciones, se rechaza toda la petición. Luego de validar esto, se
@@ -87,7 +87,7 @@ try {
 if (is_null($md5_password)) exit(5);
 
 // Desencriptación y validación de payload
-$sPlaintext = trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $md5_password, $sPayload, 
+$sPlaintext = trim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $md5_password, $sPayload,
     MCRYPT_MODE_CBC, md5($md5_password)), "\0");
 $params = explode(':', $sPlaintext);
 if (count($params) != 3 || !ctype_digit($params[0]) || $ipFuente != $params[1]) exit(6);
@@ -100,7 +100,10 @@ function load_default_timezone()
     $sDefaultTimezone = @date_default_timezone_get();
     if ($sDefaultTimezone == 'UTC') {
         $sDefaultTimezone = 'America/New_York';
-        if (file_exists('/etc/sysconfig/clock')) {
+        $regs = NULL;
+        if (is_link("/etc/localtime") && preg_match("|/usr/share/zoneinfo/(.+)|", readlink("/etc/localtime"), $regs)) {
+            $sDefaultTimezone = $regs[1];
+        } elseif (file_exists('/etc/sysconfig/clock')) {
             foreach (file('/etc/sysconfig/clock') as $s) {
                 $regs = NULL;
                 if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
@@ -119,7 +122,7 @@ function validar_acceso_puertos($id_user, $eth_in, $sourceip, $portlist)
 	try {
         // Lectura de los puertos autorizados y las reglas actuales
         $sqlPuertos = <<<SQL_PUERTOS
-SELECT portknock_user_auth.id AS auth_id, portknock_user_current_rule.id AS rule_id, 
+SELECT portknock_user_auth.id AS auth_id, portknock_user_current_rule.id AS rule_id,
     port.name
 FROM portknock_user_auth, port
 LEFT JOIN portknock_user_current_rule
@@ -145,7 +148,7 @@ SQL_PUERTOS;
                 $ruleGroups[$row['auth_id']]['current'][] = $row['rule_id'];
             }
         }
-        
+
         // Filtrar los puertos autorizados.
         $allowedPorts = array();
         foreach ($ruleGroups as $rule) {
@@ -153,7 +156,7 @@ SQL_PUERTOS;
         }
         $excessPorts = array_diff($portlist, $allowedPorts);
         if (count($excessPorts) > 0) return FALSE;
-        
+
         // Extraer las reglas que referencian puertos deseados
         $sthInsert = $db->prepare(
             'INSERT INTO portknock_user_current_rule '.
@@ -176,7 +179,7 @@ SQL_PUERTOS;
                 }
         	}
         }
-        
+
         // Mandar a actualizar las reglas de firewall. Se asume usuario root
         $retval = NULL;
         system('/usr/share/elastix/privileged/fwconfig --load', $retval);

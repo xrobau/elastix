@@ -25,14 +25,14 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Billing Capable" => "Возможность выписок по счёту",
-"Default Rate Configuration" => "Настройки Тарифов по Умолчанию",
-"Default Rate" => "Тариф по Умолчанию",
-"Default Rate Offset" => "Надбавка Тарифа по Умолчанию",
-"Trunk Bill Configuration" => "Биллинговые настройки по транкам",
-"Trunk" => "Транк",
+$arrLangModule = array(
+    "Billing Capable" => "Возможность выписок по счёту",
+    "Default Rate Configuration" => "Настройки Тарифов по Умолчанию",
+    "Default Rate" => "Тариф по Умолчанию",
+    "Default Rate Offset" => "Надбавка Тарифа по Умолчанию",
+    "Trunk Bill Configuration" => "Биллинговые настройки по транкам",
+    "Trunk" => "Транк",
 );
 ?>

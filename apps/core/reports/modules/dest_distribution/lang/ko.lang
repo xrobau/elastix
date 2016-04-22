@@ -25,26 +25,25 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ko.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Filter" => "필터",
-"Start Date" => "시작 날자",
-"End Date" => "종료 날자",
-"Destination Distribution" => "목적지 분배",
-"Criteria" => "기준",
-"Distribution by Time" => "시간기준에 따른 정렬",
-"Distribution by Number of Calls" => "사용호수에 따른 정렬",
-"Distribution by Cost" => "요금에 따른 정렬",
-"Date Range spans maximum number of days" => "데이터의 범위는 최대 사용일수을 나타낸다.",
-"ERROR" => "에러",
-"Minutes" => "분",
-"Number of Calls" => "사용콜수",
-"others" => "기타",
-"Rate Name" => "요율 이름",
-"default" => "초기값",
-"Duration in seconds" => "사용시간(초)",
-"Cost" => "요금",
-"No records found" => "No records found"
+$arrLangModule = array(
+    "Filter" => "필터",
+    "Start Date" => "시작 날자",
+    "End Date" => "종료 날자",
+    "Destination Distribution" => "목적지 분배",
+    "Criteria" => "기준",
+    "Distribution by Time" => "시간기준에 따른 정렬",
+    "Distribution by Number of Calls" => "사용호수에 따른 정렬",
+    "Distribution by Cost" => "요금에 따른 정렬",
+    "Date Range spans maximum number of days" => "데이터의 범위는 최대 사용일수을 나타낸다.",
+    "ERROR" => "에러",
+    "Minutes" => "분",
+    "Number of Calls" => "사용콜수",
+    "others" => "기타",
+    "Rate Name" => "요율 이름",
+    "default" => "초기값",
+    "Duration in seconds" => "사용시간(초)",
+    "Cost" => "요금",
 );
 ?>

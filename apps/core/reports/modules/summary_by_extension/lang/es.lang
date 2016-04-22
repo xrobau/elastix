@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificaci贸n: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.4-1                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,31 +25,31 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2009-01-06 09:01:38 jvega jvega@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Summary by Extension" => "Resumen",
-"Start date" => "Fecha Inicio",
-"End date" => "Fecha Fin",
-"Extension"=>"Extensi贸n",
-"User name"=>"Nombre Usuario",
-"Sec. Outgoing Calls"=>"Tiempo total (Llamadas Salientes)",
-"Sec. Incoming Calls"=>"Tiempo total (Llamadas Entrantes)",
-"Num. Outgoing Calls"=>"# Llamadas Salientes",
-"Num. Incoming Calls"=>"# Llamadas Entrantes",
-"Call Details" => "Ver",
-"Top 10 (Outgoing) ext" => utf8_decode("Top 10 (salientes) extensi贸n"),
-"Top 10 (Incoming) ext" => utf8_decode("Top 10 (entrantes) extensi贸n"),
-"Filter by" => "Filtrar por",
-"User" => "Usuario",
-"seconds" => "segundos",
-"Other calls" => "Otras llamadas", 
-"External #" => "# Externos",
-"calls" => "llamadas",
-"call" => "llamada",
-"No data to display" => "No hay datos para mostrar",
-"Details" => "Detalles",
-"End Date" => "Fecha Fin",
-"Start Date" => "Fecha Inicio",
+$arrLangModule = array(
+    "Summary by Extension" => "Resumen",
+    "Start date" => "Fecha Inicio",
+    "End date" => "Fecha Fin",
+    "Extension" => "Extensi贸n",
+    "User name" => "Nombre Usuario",
+    "Sec. Outgoing Calls" => "Tiempo total (Llamadas Salientes)",
+    "Sec. Incoming Calls" => "Tiempo total (Llamadas Entrantes)",
+    "Num. Outgoing Calls" => "# Llamadas Salientes",
+    "Num. Incoming Calls" => "# Llamadas Entrantes",
+    "Call Details" => "Ver",
+    "Top 10 (Outgoing) ext" => "Top 10 (salientes) extensi髇",
+    "Top 10 (Incoming) ext" => "Top 10 (entrantes) extensi髇",
+    "Filter by" => "Filtrar por",
+    "User" => "Usuario",
+    "seconds" => "segundos",
+    "Other calls" => "Otras llamadas",
+    "External #" => "# Externos",
+    "calls" => "llamadas",
+    "call" => "llamada",
+    "No data to display" => "No hay datos para mostrar",
+    "Details" => "Detalles",
+    "End Date" => "Fecha Fin",
+    "Start Date" => "Fecha Inicio",
 );
 ?>

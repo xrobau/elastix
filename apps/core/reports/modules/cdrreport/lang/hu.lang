@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,42 +24,23 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by: Lakatos Tamás                                          |
-  | Email: lakatost@gmail.com                                            |
-  |                                                                      |
   +----------------------------------------------------------------------+
-  : hu.lang,v 1.6 2008/01/21 09:51:55 bmacias@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Start Date" => "Kezdő Dátum",
-"End Date" => "Vég Dátum",
-"Field Name" => "Mező név",
-"Field" => "Mező  ",
-"CDR Report List" => "CDR Report",
-"Account Code" => "Account Code",
-"Date" => "Dátum",
-"Source" => "Forrás",
-"Destination" => "Cél",
-"Src. Channel" => "Forrás csatorna",
-"Dst. Channel" => "Cél csatorna",
-"Duration" => "Időtartam",
-"Filter" => "Szűrő",
-"Are you sure you wish to delete CDR(s) Report(s)?" => "Are you sure you wish to delete the displayed CDR(s)?",
-"Status" => "Állapot",
-"ALL" => "ALL",
-"ANSWERED" => "ANSWERED",
-"BUSY" => "BUSY",
-"FAILED" => "FAILED",
-"NO ANSWER" => "NO ANSWER",
-"Delete" => "Delete the displayed CDR(s)",
-"CDR Report" => "CDR Report",
-"Please End Date must be greater than Start Date" => "Please End Date must be greater than Start Date",
-"Ring Group"=>"Ring Group",
-"(Any ringgroup)"=>"(Any ringgroup)",
-"Your username does not have any extension assigned." => "Your username does not have any extension assigned.",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
-"no_extension" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
-"Only administrators can delete CDRs" => "Only administrators can delete CDRs"
+$arrLangModule = array(
+    "Start Date" => "Kezdő Dátum",
+    "End Date" => "Vég Dátum",
+    "Field Name" => "Mező név",
+    "Field" => "Mező  ",
+    "Date" => "Dátum",
+    "Source" => "Forrás",
+    "Destination" => "Cél",
+    "Src. Channel" => "Forrás csatorna",
+    "Dst. Channel" => "Cél csatorna",
+    "Duration" => "Időtartam",
+    "Filter" => "Szűrő",
+    "Are you sure you wish to delete CDR(s) Report(s)?" => "Are you sure you wish to delete the displayed CDR(s)?",
+    "Status" => "Állapot",
+    "Delete" => "Delete the displayed CDR(s)",
 );
 ?>

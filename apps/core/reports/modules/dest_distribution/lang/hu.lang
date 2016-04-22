@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,31 +24,26 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by: Lakatos Tamás                                          |
-  | Email: lakatost@gmail.com                                            |
-  |                                                                      |
   +----------------------------------------------------------------------+
-  : hu.lang,v 1.6 2008/01/21 09:51:55 bmacias@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Filter" => "Szűrő",
-"Start Date" => "Kezdő Dátum",
-"End Date" => "Vég Dátum",
-"Destination Distribution" => "Cél Szétosztás",
-"Criteria" => "Kritérium",
-"Distribution by Time" => "Csoportosítás Idő alapján",
-"Distribution by Number of Calls" => "Csoportosítás Hívószám alapján",
-"Distribution by Cost" => "Csoportosítás költség alapján",
-"Date Range spans maximum number of days" => "Dátum tartomány átnyúlik a napok max. számán",
-"ERROR" => "Hiba",
-"Minutes" => "Perc",
-"Number of Calls" => "Hívoszám",
-"others" => "egyéb",
-"Rate Name" => "Tarifa név",
-"default" => "alapértelmezett  ",
-"Duration in seconds" => "Időtartam másodpercben",
-"Cost" => "Költség",
-"No records found" => "No records found"
+$arrLangModule = array(
+    "Filter" => "Szűrő",
+    "Start Date" => "Kezdő Dátum",
+    "End Date" => "Vég Dátum",
+    "Destination Distribution" => "Cél Szétosztás",
+    "Criteria" => "Kritérium",
+    "Distribution by Time" => "Csoportosítás Idő alapján",
+    "Distribution by Number of Calls" => "Csoportosítás Hívószám alapján",
+    "Distribution by Cost" => "Csoportosítás költség alapján",
+    "Date Range spans maximum number of days" => "Dátum tartomány átnyúlik a napok max. számán",
+    "ERROR" => "Hiba",
+    "Minutes" => "Perc",
+    "Number of Calls" => "Hívoszám",
+    "others" => "egyéb",
+    "Rate Name" => "Tarifa név",
+    "default" => "alapértelmezett  ",
+    "Duration in seconds" => "Időtartam másodpercben",
+    "Cost" => "Költség",
 );
 ?>

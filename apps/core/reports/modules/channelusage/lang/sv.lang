@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,22 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: sv.lang,v 0.1 2008/03/25 00:36:42 IFIT DATA - http://www.ifit.se Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Channels Usage Report" => "Kanal användnings Rapport",
-"Simultaneous Channels (Total)" => "Parallella Kanaler (Totalt)",
-"Simultaneous Zap Channels" => "Parallella Zap Kanaler",
-"Simultaneous SIP Channels" => "Parallella SIP Kanaler",
-"Simultaneous IAX Channels" => "Parallella IAX Kanaler",
-"Simultaneous H323 Channels" => "Parallella H323 Kanaler",
-"Simultaneous Local Channels" => "Parallella Lokala Kanaler",
-"Total Channels" => "Totala Kanaler",
-"Zap Channels" => "Zap Kanaler",
-"SIP Channels" => "SIP Kanaler",
-"IAX Channels" => "IAX Kanaler",
-"H323 Channels" => "H323 Kanaler",
-"Local Channels" => "Lokala Kanaler",
-"Nothing to show yet" => "Nothing to show yet"
+$arrLangModule = array(
+    "Channels Usage Report" => "Kanal användnings Rapport",
+    "Simultaneous Channels (Total)" => "Parallella Kanaler (Totalt)",
+    "Simultaneous Zap Channels" => "Parallella Zap Kanaler",
+    "Simultaneous SIP Channels" => "Parallella SIP Kanaler",
+    "Simultaneous IAX Channels" => "Parallella IAX Kanaler",
+    "Simultaneous H323 Channels" => "Parallella H323 Kanaler",
+    "Simultaneous Local Channels" => "Parallella Lokala Kanaler",
+    "Total Channels" => "Totala Kanaler",
+    "Zap Channels" => "Zap Kanaler",
+    "SIP Channels" => "SIP Kanaler",
+    "IAX Channels" => "IAX Kanaler",
+    "H323 Channels" => "H323 Kanaler",
+    "Local Channels" => "Lokala Kanaler",
 );
 ?>

@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Erwan DESVERGNES - SDCI                               |
-  | erwan.desvergnes@SDCI.fr                                             |
-  |                                                                      |                                               |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,37 +25,22 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: br.lang,v 1.6 2007/09/05 00:36:42 afigueroa Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Start Date" => "Data Início",
-"End Date" => "Data Final",
-"Field Name" => "Nome do Campo",
-"Field" => "Campo",
-"CDR Report List" => "CDR Report",
-"Account Code" => "Código de Cuenta",
-"Date" => "Data",
-"Source" => "Origem",
-"Destination" => "Destino",
-"Src. Channel" => "Canal Origem",
-"Dst. Channel" => "Canal Destino",
-"Duration" => "Duração",
-"Filter" => "Filtro",
-"Are you sure you wish to delete CDR(s) Report(s)?" => "Are you sure you wish to delete the displayed CDR(s)?",
-"Status" => "Status",
-"ALL" => "ALL",
-"ANSWERED" => "ANSWERED",
-"BUSY" => "BUSY",
-"FAILED" => "FAILED",
-"NO ANSWER" => "NO ANSWER",
-"Delete" => "Delete the displayed CDR(s)",
-"CDR Report" => "CDR Report",
-"Please End Date must be greater than Start Date" => "Please End Date must be greater than Start Date",
-"Ring Group"=>"Ring Group",
-"(Any ringgroup)"=>"(Any ringgroup)",
-"Your username does not have any extension assigned." => "Your username does not have any extension assigned.",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
-"no_extension" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
-"Only administrators can delete CDRs" => "Only administrators can delete CDRs"
+$arrLangModule = array(
+    "Start Date" => "Data Início",
+    "End Date" => "Data Final",
+    "Field Name" => "Nome do Campo",
+    "Field" => "Campo",
+    "Account Code" => "Código de Cuenta",
+    "Date" => "Data",
+    "Source" => "Origem",
+    "Destination" => "Destino",
+    "Src. Channel" => "Canal Origem",
+    "Dst. Channel" => "Canal Destino",
+    "Duration" => "Duração",
+    "Filter" => "Filtro",
+    "Are you sure you wish to delete CDR(s) Report(s)?" => "Are you sure you wish to delete the displayed CDR(s)?",
+    "Delete" => "Delete the displayed CDR(s)",
 );
 ?>

@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Michael Thomsen                                       |
-  | mt@xhal.dk                                                           |
-  |                                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,14 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: da.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Billing Capable" => "Kan takseres",
-"Default Rate Configuration" => "Default Rate Configuration",
-"Default Rate" => "Default Rate",
-"Default Rate Offset" => "Default Rate Offset",
-"Trunk Bill Configuration" => "Konfiguration af takstberegning på linier",
-"Trunk" => "Linie",
+$arrLangModule = array(
+    "Billing Capable" => "Kan takseres",
+    "Trunk Bill Configuration" => "Konfiguration af takstberegning på linier",
+    "Trunk" => "Linie",
 );
 ?>

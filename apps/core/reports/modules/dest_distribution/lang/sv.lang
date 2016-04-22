@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,26 +25,24 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: sv.lang,v 0.1 2008/03/25 00:36:42 IFIT DATA - http://www.ifit.se Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Filter" => "Filter",
-"Start Date" => "Start Datum",
-"End Date" => "Slut Datum",
-"Destination Distribution" => "Mål Distribution",
-"Criteria" => "Kriteria",
-"Distribution by Time" => "Distribution i Tid",
-"Distribution by Number of Calls" => "Distribution i Antal Samtal",
-"Distribution by Cost" => "Distribution i Kostnad",
-"Date Range spans maximum number of days" => "Datum period visar maximalt antal dagar",
-"ERROR" => "Fel",
-"Minutes" => "Minuter",
-"Number of Calls" => "Antal samtal",
-"others" => "Andra",
-"Rate Name" => "Taxa Namn",
-"default" => "Standard",
-"Duration in seconds" => "Längd i sekunder",
-"Cost" => "Kostnad",
-"No records found" => "No records found"
+$arrLangModule = array(
+    "Start Date" => "Start Datum",
+    "End Date" => "Slut Datum",
+    "Destination Distribution" => "Mål Distribution",
+    "Criteria" => "Kriteria",
+    "Distribution by Time" => "Distribution i Tid",
+    "Distribution by Number of Calls" => "Distribution i Antal Samtal",
+    "Distribution by Cost" => "Distribution i Kostnad",
+    "Date Range spans maximum number of days" => "Datum period visar maximalt antal dagar",
+    "ERROR" => "Fel",
+    "Minutes" => "Minuter",
+    "Number of Calls" => "Antal samtal",
+    "others" => "Andra",
+    "Rate Name" => "Taxa Namn",
+    "default" => "Standard",
+    "Duration in seconds" => "Längd i sekunder",
+    "Cost" => "Kostnad",
 );
 ?>

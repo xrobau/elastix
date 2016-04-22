@@ -25,26 +25,25 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Filter" => "Filtrar",
-"Start Date" => "Fecha Inicio",
-"End Date" => "Fecha Fin",
-"Destination Distribution" => "Distribución de Destinos",
-"Criteria" => "Criterio",
-"Distribution by Time" => "Distribución por Duración",
-"Distribution by Number of Calls" => "Distribución por Número de Llamadas",
-"Distribution by Cost" => "Distribución por Costo",
-"Date Range spans maximum number of days" => "Rango de fechas excede el número máximo de días",
-"ERROR" => "ERROR",
-"Minutes" => "Minutos",
-"Number of Calls" => "Número de Llamadas",
-"others" => "otros",
-"Rate Name" => "Nombre de Tarifa",
-"default" => "Predeterminada",
-"Duration in seconds" => "Duración en segundos",
-"Cost" => "Costo",
-"No records found" => "No se encontraron registros"
+$arrLangModule = array(
+    "Filter" => "Filtrar",
+    "Start Date" => "Fecha Inicio",
+    "End Date" => "Fecha Fin",
+    "Destination Distribution" => "Distribución de Destinos",
+    "Criteria" => "Criterio",
+    "Distribution by Time" => "Distribución por Duración",
+    "Distribution by Number of Calls" => "Distribución por Número de Llamadas",
+    "Distribution by Cost" => "Distribución por Costo",
+    "Date Range spans maximum number of days" => "Rango de fechas excede el número máximo de días",
+    "Minutes" => "Minutos",
+    "Number of Calls" => "Número de Llamadas",
+    "others" => "otros",
+    "Rate Name" => "Nombre de Tarifa",
+    "default" => "Predeterminada",
+    "Duration in seconds" => "Duración en segundos",
+    "Cost" => "Costo",
+    "No records found" => "No se encontraron registros",
 );
 ?>

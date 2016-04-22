@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Erwan DESVERGNES - SDCI                               |
-  | erwan.desvergnes@SDCI.fr                                             |
-  |                                                                      |                                               |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,22 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: br.lang,v 1.6 2007/09/05 00:36:42 afigueroa Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Channels Usage Report" => "Relatório de uso dos Canais",
-"Simultaneous Channels (Total)" => "Canais Simultâneos (Total)",
-"Simultaneous Zap Channels" => "Canais Zap Simultâneos",
-"Simultaneous SIP Channels" => "Canais SIP Simultâneos",
-"Simultaneous IAX Channels" => "Canais IAX Simultâneos",
-"Simultaneous H323 Channels" => "Canais H323 Simultâneos",
-"Simultaneous Local Channels" => "Canais Local Simultâneos",
-"Total Channels" => "Total de Canais",
-"Zap Channels" => "Canais Zap",
-"SIP Channels" => "Canais SIP",
-"IAX Channels" => "Canais IAX",
-"H323 Channels" => "Canais H323",
-"Local Channels" => "Canais Locais",
-"Nothing to show yet" => "Nothing to show yet"
+$arrLangModule = array(
+    "Channels Usage Report" => "Relatório de uso dos Canais",
+    "Simultaneous Channels (Total)" => "Canais Simultâneos (Total)",
+    "Simultaneous Zap Channels" => "Canais Zap Simultâneos",
+    "Simultaneous SIP Channels" => "Canais SIP Simultâneos",
+    "Simultaneous IAX Channels" => "Canais IAX Simultâneos",
+    "Simultaneous H323 Channels" => "Canais H323 Simultâneos",
+    "Simultaneous Local Channels" => "Canais Local Simultâneos",
+    "Total Channels" => "Total de Canais",
+    "Zap Channels" => "Canais Zap",
+    "SIP Channels" => "Canais SIP",
+    "IAX Channels" => "Canais IAX",
+    "H323 Channels" => "Canais H323",
+    "Local Channels" => "Canais Locais",
 );
 ?>

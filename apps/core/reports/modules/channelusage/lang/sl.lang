@@ -25,22 +25,20 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: sl.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Channels Usage Report" => "Channels Usage Report",
-"Simultaneous Channels (Total)" => "Vzporedni kanali (vsi)",
-"Simultaneous Zap Channels" => "Vzporedni Zap kanali",
-"Simultaneous SIP Channels" => "Vzporedni SIP kanali",
-"Simultaneous IAX Channels" => "Vzporedni IAX kanali",
-"Simultaneous H323 Channels" => "Vzporedni H323 kanali",
-"Simultaneous Local Channels" => "Vzporedni lokalni kanali",
-"Total Channels" => "Vseh kanalov",
-"Zap Channels" => "Zap kanali",
-"SIP Channels" => "Sip kanali",
-"IAX Channels" => "IAX kanali",
-"H323 Channels" => "H323 kanali",
-"Local Channels" => "lokalni kanali",
-"Nothing to show yet" => "Nothing to show yet"
+$arrLangModule = array(
+    "Simultaneous Channels (Total)" => "Vzporedni kanali (vsi)",
+    "Simultaneous Zap Channels" => "Vzporedni Zap kanali",
+    "Simultaneous SIP Channels" => "Vzporedni SIP kanali",
+    "Simultaneous IAX Channels" => "Vzporedni IAX kanali",
+    "Simultaneous H323 Channels" => "Vzporedni H323 kanali",
+    "Simultaneous Local Channels" => "Vzporedni lokalni kanali",
+    "Total Channels" => "Vseh kanalov",
+    "Zap Channels" => "Zap kanali",
+    "SIP Channels" => "Sip kanali",
+    "IAX Channels" => "IAX kanali",
+    "H323 Channels" => "H323 kanali",
+    "Local Channels" => "lokalni kanali",
 );
 ?>

@@ -25,26 +25,25 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Filter" => "Фильтр",
-"Start Date" => "Начальная дата",
-"End Date" => "Конечная дата",
-"Destination Distribution" => "Распределение по Направлениям",
-"Criteria" => "Критерий",
-"Distribution by Time" => "Распределение по времени",
-"Distribution by Number of Calls" => "Распределение по количеству звонков",
-"Distribution by Cost" => "Распределение по стоимости",
-"Date Range spans maximum number of days" => "Диапазон дат перекрывает максимальное количество дней",
-"ERROR" => "ОШИБКА",
-"Minutes" => "Минут",
-"Number of Calls" => "Количество звонков",
-"others" => "другие",
-"Rate Name" => "Название тарифа",
-"default" => "по умолчанию",
-"Duration in seconds" => "Длительность в секундах",
-"Cost" => "Стоимость",
-"No records found" => "No records found"
+$arrLangModule = array(
+    "Filter" => "Фильтр",
+    "Start Date" => "Начальная дата",
+    "End Date" => "Конечная дата",
+    "Destination Distribution" => "Распределение по Направлениям",
+    "Criteria" => "Критерий",
+    "Distribution by Time" => "Распределение по времени",
+    "Distribution by Number of Calls" => "Распределение по количеству звонков",
+    "Distribution by Cost" => "Распределение по стоимости",
+    "Date Range spans maximum number of days" => "Диапазон дат перекрывает максимальное количество дней",
+    "ERROR" => "ОШИБКА",
+    "Minutes" => "Минут",
+    "Number of Calls" => "Количество звонков",
+    "others" => "другие",
+    "Rate Name" => "Название тарифа",
+    "default" => "по умолчанию",
+    "Duration in seconds" => "Длительность в секундах",
+    "Cost" => "Стоимость",
 );
 ?>

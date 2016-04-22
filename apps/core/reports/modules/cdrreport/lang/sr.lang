@@ -25,37 +25,20 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: sr.lang,v 1.6 2007/10/23 00:36:42 bmacias Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Start Date" => "Pocetni datum",
-"End Date" => "Zavrsni datum",
-"Field Name" => "Ime polja",
-"Field" => "Polje",
-"CDR Report List" => "CDR Report",
-"Account Code" => "Account Code",
-"Date" => "Datum",
-"Source" => "Izvor",
-"Destination" => "Odrediste",
-"Src. Channel" => "izvorni kanl.",
-"Dst. Channel" => "odred. kanl.",
-"Duration" => "Trajanje",
-"Filter" => "Filter",
-"Are you sure you wish to delete CDR(s) Report(s)?" => "Are you sure you wish to delete the displayed CDR(s)?",
-"Status" => "Status",
-"ALL" => "ALL",
-"ANSWERED" => "ANSWERED",
-"BUSY" => "BUSY",
-"FAILED" => "FAILED",
-"NO ANSWER" => "NO ANSWER",
-"Delete" => "Delete the displayed CDR(s)",
-"CDR Report" => "CDR Report",
-"Please End Date must be greater than Start Date" => "Please End Date must be greater than Start Date",
-"Ring Group"=>"Ring Group",
-"(Any ringgroup)"=>"(Any ringgroup)",
-"Your username does not have any extension assigned." => "Your username does not have any extension assigned.",
-"contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
-"no_extension" => "There is no extension number associated with the current user. You can associate an extension number to your user by clicking <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">here</a>",
-"Only administrators can delete CDRs" => "Only administrators can delete CDRs"
+$arrLangModule = array(
+    "Start Date" => "Pocetni datum",
+    "End Date" => "Zavrsni datum",
+    "Field Name" => "Ime polja",
+    "Field" => "Polje",
+    "Date" => "Datum",
+    "Source" => "Izvor",
+    "Destination" => "Odrediste",
+    "Src. Channel" => "izvorni kanl.",
+    "Dst. Channel" => "odred. kanl.",
+    "Duration" => "Trajanje",
+    "Are you sure you wish to delete CDR(s) Report(s)?" => "Are you sure you wish to delete the displayed CDR(s)?",
+    "Delete" => "Delete the displayed CDR(s)",
 );
 ?>

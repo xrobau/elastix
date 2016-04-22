@@ -25,22 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: cn.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Channels Usage Report" => "频道使用量报表",
-"Simultaneous Channels (Total)" => "同步频道 (总数)",
-"Simultaneous Zap Channels" => "同步Zap频道",
-"Simultaneous SIP Channels" => "同步SIP频道",
-"Simultaneous IAX Channels" => "同步IAX频道",
-"Simultaneous H323 Channels" => "同步H323频道",
-"Simultaneous Local Channels" => "同步本地频道",
-"Total Channels" => "全部频道",
-"Zap Channels" => "Zap频道",
-"SIP Channels" => "SIP频道",
-"IAX Channels" => "IAX频道",
-"H323 Channels" => "H323频道",
-"Local Channels" => "本地频道",
-"Nothing to show yet" => "Nothing to show yet"
+$arrLangModule = array(
+    "Channels Usage Report" => "频道使用量报表",
+    "Simultaneous Channels (Total)" => "同步频道 (总数)",
+    "Simultaneous Zap Channels" => "同步Zap频道",
+    "Simultaneous SIP Channels" => "同步SIP频道",
+    "Simultaneous IAX Channels" => "同步IAX频道",
+    "Simultaneous H323 Channels" => "同步H323频道",
+    "Simultaneous Local Channels" => "同步本地频道",
+    "Total Channels" => "全部频道",
+    "Zap Channels" => "Zap频道",
+    "SIP Channels" => "SIP频道",
+    "IAX Channels" => "IAX频道",
+    "H323 Channels" => "H323频道",
+    "Local Channels" => "本地频道",
 );
 ?>

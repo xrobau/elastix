@@ -10,11 +10,7 @@
   | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com 											 |
-  |                                                                      |
-  | Translate bye: Erwan DESVERGNES - SDCI                               |
-  | erwan.desvergnes@SDCI.fr                                             |
-  |                                                                      |
+  | http://www.palosanto.com                                             |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,33 +25,22 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-*/
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"billing_report" => "billing_report",
-"Start Date" => "Početni datum",
-"End Date" => "Krajnji datum",
-"Field Name" => "Naziv polja",
-"Channel" => "Kanal",
-"Billing Report" => "Izvještaj naplate",
-"Duration in seconds" => "Trajanje u sekundama",
-"Cost" => "Cijena",
-"Summary Cost" => "Summary Cost",
-"Rate Applied" => "Primjenjeni cjenik",
-"Date" => "Datum",
-"Source" => "Izvorište",
-"Destination" => "Odredište",
-"Dst. Channel" => "Odredišni kanal",
-"Duration" => "Trajanje",
-"Filter" => "Filter",
-"Field" => "Polje",
-"Rate Value" => "Rate Value",
-"Trunk" => "Trunk",
-"default" => "default",
-"Unknown" => "Unknown",
-"horas" => "horas",
-"minutos" => "minutos",
-"segundos" => "segundos",
-"Account Code" => "Account Code",
+$arrLangModule = array(
+    "Start Date" => "Početni datum",
+    "End Date" => "Krajnji datum",
+    "Field Name" => "Naziv polja",
+    "Channel" => "Kanal",
+    "Billing Report" => "Izvještaj naplate",
+    "Duration in seconds" => "Trajanje u sekundama",
+    "Cost" => "Cijena",
+    "Rate Applied" => "Primjenjeni cjenik",
+    "Date" => "Datum",
+    "Source" => "Izvorište",
+    "Destination" => "Odredište",
+    "Dst. Channel" => "Odredišni kanal",
+    "Duration" => "Trajanje",
+    "Field" => "Polje",
 );
 ?>

@@ -25,26 +25,24 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: de.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Filter" => "Filter",
-"Start Date" => "Startdatum",
-"End Date" => "Enddatum",
-"Destination Distribution" => "Verteilung am Bestimmungsort",
-"Criteria" => "Kriterium",
-"Distribution by Time" => "Verteilung durch Zeit",
-"Distribution by Number of Calls" => "Verteilung durch Anrufnummern",
-"Distribution by Cost" => "Verteilung durch Kosten",
-"Date Range spans maximum number of days" => "Datumstrecke überspannt die Höchstzahl von Tagen",
-"ERROR" => "FEHLER",
-"Minutes" => "Minuten",
-"Number of Calls" => "Anzahl Anrufe",
-"others" => "andere",
-"Rate Name" => "Tarifname",
-"default" => "defaut",
-"Duration in seconds" => "Dauer in Sekunden",
-"Cost" => "Kosten",
-"No records found" => "No records found"
+$arrLangModule = array(
+    "Start Date" => "Startdatum",
+    "End Date" => "Enddatum",
+    "Destination Distribution" => "Verteilung am Bestimmungsort",
+    "Criteria" => "Kriterium",
+    "Distribution by Time" => "Verteilung durch Zeit",
+    "Distribution by Number of Calls" => "Verteilung durch Anrufnummern",
+    "Distribution by Cost" => "Verteilung durch Kosten",
+    "Date Range spans maximum number of days" => "Datumstrecke überspannt die Höchstzahl von Tagen",
+    "ERROR" => "FEHLER",
+    "Minutes" => "Minuten",
+    "Number of Calls" => "Anzahl Anrufe",
+    "others" => "andere",
+    "Rate Name" => "Tarifname",
+    "default" => "defaut",
+    "Duration in seconds" => "Dauer in Sekunden",
+    "Cost" => "Kosten",
 );
 ?>

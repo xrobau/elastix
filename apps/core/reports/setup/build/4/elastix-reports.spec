@@ -93,6 +93,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: added Russian translations by user Russian.
+  SVN Rev[7594]
+
 * Wed Apr 13 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-3
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump version and release in specfile.

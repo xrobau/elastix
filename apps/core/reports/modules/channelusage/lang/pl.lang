@@ -11,9 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Aneta and Tomasz Stachowicz by TIMI                   |
-  | timi_pl@tlen.pl                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -28,22 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: pl.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Channels Usage Report" => "Raport wykorzystania kanałów",
-"Simultaneous Channels (Total)" => "Jednoczesne kanaly (Razem)",
-"Simultaneous Zap Channels" => "Jednoczesne kanaly Zap",
-"Simultaneous SIP Channels" => "Jednoczesne kanaly SIP",
-"Simultaneous IAX Channels" => "Jednoczesne kanaly IAX",
-"Simultaneous H323 Channels" => "Jednoczesne kanaly H323",
-"Simultaneous Local Channels" => "Jednoczesne kanaly lokalne",
-"Total Channels" => "Suma kanalow",
-"Zap Channels" => "Kanaly Zap",
-"SIP Channels" => "Kanaly SIP",
-"IAX Channels" => "Kanaly IAX",
-"H323 Channels" => "Kanaly H323",
-"Local Channels" => "Kanaly lokalne",
-"Nothing to show yet" => "Nothing to show yet"
+$arrLangModule = array(
+    "Channels Usage Report" => "Raport wykorzystania kanałów",
+    "Simultaneous Channels (Total)" => "Jednoczesne kanaly (Razem)",
+    "Simultaneous Zap Channels" => "Jednoczesne kanaly Zap",
+    "Simultaneous SIP Channels" => "Jednoczesne kanaly SIP",
+    "Simultaneous IAX Channels" => "Jednoczesne kanaly IAX",
+    "Simultaneous H323 Channels" => "Jednoczesne kanaly H323",
+    "Simultaneous Local Channels" => "Jednoczesne kanaly lokalne",
+    "Total Channels" => "Suma kanalow",
+    "Zap Channels" => "Kanaly Zap",
+    "SIP Channels" => "Kanaly SIP",
+    "IAX Channels" => "Kanaly IAX",
+    "H323 Channels" => "Kanaly H323",
+    "Local Channels" => "Kanaly lokalne",
 );
 ?>

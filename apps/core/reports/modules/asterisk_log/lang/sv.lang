@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,18 +25,14 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: sv.lang,v 0.1 2008/03/25 00:36:42 IFIT DATA - http://www.ifit.se Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Search string" => "Search string",
-"Search" => "Sök",
-"Search next" => "Search next",
-"offset" => "offset",
-"Asterisk Logs" => "Asterisk Logs",
-"Date" => "Datum",
-"Show" => "Visa",
-"Message" => "Meddelande",
-"Type" => "Typ",
-"Source" => "Källa",
+$arrLangModule = array(
+    "Search" => "Sök",
+    "Date" => "Datum",
+    "Show" => "Visa",
+    "Message" => "Meddelande",
+    "Type" => "Typ",
+    "Source" => "Källa",
 );
 ?>

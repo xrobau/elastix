@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Michael Thomsen                                       |
-  | mt@xhal.dk                                                           |
-  |                                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,22 +25,20 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: da.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Channels Usage Report" => "Channels Usage Report",
-"Simultaneous Channels (Total)" => "Samtidige kanaler (i alt)",
-"Simultaneous Zap Channels" => "Samtidige ZAP kanaler",
-"Simultaneous SIP Channels" => "Samtidige SIP kanaler",
-"Simultaneous IAX Channels" => "Samtidige IAX kanaler",
-"Simultaneous H323 Channels" => "Samtidige H323 kanaler",
-"Simultaneous Local Channels" => "Samtidige lokale kanaler",
-"Total Channels" => "Kanaler i alt",
-"Zap Channels" => "Zap kanaler",
-"SIP Channels" => "SIP kanaler",
-"IAX Channels" => "IAX kanaler",
-"H323 Channels" => "H323 kanaler",
-"Local Channels" => "Lokale kanaler",
-"Nothing to show yet" => "Nothing to show yet"
+$arrLangModule = array(
+    "Simultaneous Channels (Total)" => "Samtidige kanaler (i alt)",
+    "Simultaneous Zap Channels" => "Samtidige ZAP kanaler",
+    "Simultaneous SIP Channels" => "Samtidige SIP kanaler",
+    "Simultaneous IAX Channels" => "Samtidige IAX kanaler",
+    "Simultaneous H323 Channels" => "Samtidige H323 kanaler",
+    "Simultaneous Local Channels" => "Samtidige lokale kanaler",
+    "Total Channels" => "Kanaler i alt",
+    "Zap Channels" => "Zap kanaler",
+    "SIP Channels" => "SIP kanaler",
+    "IAX Channels" => "IAX kanaler",
+    "H323 Channels" => "H323 kanaler",
+    "Local Channels" => "Lokale kanaler",
 );
 ?>

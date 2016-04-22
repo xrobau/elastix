@@ -25,33 +25,27 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.7 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"billing_report" => "billing_report",
-"Start Date" => "Fecha Inicio",
-"End Date" => "Fecha Fin",
-"Field Name" => "Nombre del Campo",
-"Channel" => "Canal",
-"Billing Report" => "Reporte de Facturación",
-"Duration in seconds" => "Duración en segundos",
-"Cost" => "Costo",
-"Summary Cost" => "Resumen de gastos",
-"Rate Applied" => "Tarifa Aplicada",
-"Date" => "Fecha",
-"Source" => "Fuente",
-"Destination" => "Destino",
-"Dst. Channel" => "Canal destino",
-"Duration" => "Duración",
-"Filter" => "Filtrar",
-"Field" => "Campo",
-"Rate Value" => "Valor de Tarifa",
-"Trunk" => "Trunk",
-"default" => "default",
-"Unknown" => "Desconocido",
-"horas" => "horas",
-"minutos" => "minutos",
-"segundos" => "segundos",
-"Account Code" => "Código de cuenta",
+$arrLangModule = array(
+    "Start Date" => "Fecha Inicio",
+    "End Date" => "Fecha Fin",
+    "Field Name" => "Nombre del Campo",
+    "Channel" => "Canal",
+    "Billing Report" => "Reporte de Facturación",
+    "Duration in seconds" => "Duración en segundos",
+    "Cost" => "Costo",
+    "Summary Cost" => "Resumen de gastos",
+    "Rate Applied" => "Tarifa Aplicada",
+    "Date" => "Fecha",
+    "Source" => "Fuente",
+    "Destination" => "Destino",
+    "Dst. Channel" => "Canal destino",
+    "Duration" => "Duración",
+    "Filter" => "Filtrar",
+    "Field" => "Campo",
+    "Rate Value" => "Valor de Tarifa",
+    "Unknown" => "Desconocido",
+    "Account Code" => "Código de cuenta",
 );
 ?>

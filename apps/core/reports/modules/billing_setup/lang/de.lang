@@ -25,14 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: de.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Billing Capable" => "mögliche Berechnung",
-"Default Rate Configuration" => "Default Rate Configuration",
-"Default Rate" => "Default Rate",
-"Default Rate Offset" => "Default Rate Offset",
-"Trunk Bill Configuration" => "Konfiguration des Bündelsystems",
-"Trunk" => "Bündel",
+$arrLangModule = array(
+    "Billing Capable" => "mögliche Berechnung",
+    "Trunk Bill Configuration" => "Konfiguration des Bündelsystems",
+    "Trunk" => "Bündel",
 );
 ?>

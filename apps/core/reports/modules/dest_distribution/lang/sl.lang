@@ -25,26 +25,23 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: sl.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Filter" => "Filter",
-"Start Date" => "Začetni datum",
-"End Date" => "Končni datum",
-"Destination Distribution" => "Destination Distribution",
-"Criteria" => "kriterij",
-"Distribution by Time" => "distribucija po času",
-"Distribution by Number of Calls" => "distribucija po številu klicev",
-"Distribution by Cost" => "distribucija po ceni",
-"Date Range spans maximum number of days" => "časovni razpon traja maksimalno število dni",
-"ERROR" => "napaka",
-"Minutes" => "minut",
-"Number of Calls" => "število klicev",
-"others" => "ostalo",
-"Rate Name" => "ime tarife",
-"default" => "osnovna",
-"Duration in seconds" => "trajanje v sekundah",
-"Cost" => "cena",
-"No records found" => "No records found"
+$arrLangModule = array(
+    "Start Date" => "Začetni datum",
+    "End Date" => "Končni datum",
+    "Criteria" => "kriterij",
+    "Distribution by Time" => "distribucija po času",
+    "Distribution by Number of Calls" => "distribucija po številu klicev",
+    "Distribution by Cost" => "distribucija po ceni",
+    "Date Range spans maximum number of days" => "časovni razpon traja maksimalno število dni",
+    "ERROR" => "napaka",
+    "Minutes" => "minut",
+    "Number of Calls" => "število klicev",
+    "others" => "ostalo",
+    "Rate Name" => "ime tarife",
+    "default" => "osnovna",
+    "Duration in seconds" => "trajanje v sekundah",
+    "Cost" => "cena",
 );
 ?>

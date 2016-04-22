@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.0                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,38 +24,24 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by: Jason Papanayotou                                      |
-  | Email: jasonpap@gmail.com                                            |
-  |                                                                      |
   +----------------------------------------------------------------------+
-  $Id: el.lang,v 1.6 2008/02/11 11:07:22 bmacias@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"billing_report" => "billing_report",
-"Start Date" => "Ημερομηνία Εκκίνησης",
-"End Date" => "Ημερομηνία Τερματισμού",
-"Field Name" => "Όνομα Πεδίου",
-"Channel" => "Κανάλι",
-"Billing Report" => "Αναφορά Χρέωσης",
-"Duration in seconds" => "Διάρκεια Σε Δευτερόλεπτα",
-"Cost" => "Κόστος",
-"Summary Cost" => "Summary Cost",
-"Rate Applied" => "Εφαρμοσμένο Ποσοστό",
-"Date" => "Ημερομηνία",
-"Source" => "Πηγή",
-"Destination" => "Προορισμός",
-"Dst. Channel" => "Κανάλι Προορισμού",
-"Duration" => "Διάρκεια",
-"Filter" => "Φίλτρο",
-"Field" => "Πεδίο",
-"Rate Value" => "Rate Value",
-"Trunk" => "Trunk",
-"default" => "default",
-"Unknown" => "Unknown",
-"horas" => "horas",
-"minutos" => "minutos",
-"segundos" => "segundos",
-"Account Code" => "Account Code",
+$arrLangModule = array(
+    "Start Date" => "Ημερομηνία Εκκίνησης",
+    "End Date" => "Ημερομηνία Τερματισμού",
+    "Field Name" => "Όνομα Πεδίου",
+    "Channel" => "Κανάλι",
+    "Billing Report" => "Αναφορά Χρέωσης",
+    "Duration in seconds" => "Διάρκεια Σε Δευτερόλεπτα",
+    "Cost" => "Κόστος",
+    "Rate Applied" => "Εφαρμοσμένο Ποσοστό",
+    "Date" => "Ημερομηνία",
+    "Source" => "Πηγή",
+    "Destination" => "Προορισμός",
+    "Dst. Channel" => "Κανάλι Προορισμού",
+    "Duration" => "Διάρκεια",
+    "Filter" => "Φίλτρο",
+    "Field" => "Πεδίο",
 );
 ?>

@@ -11,9 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Aneta and Tomasz Stachowicz by TIMI                   |
-  | timi_pl@tlen.pl                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -28,14 +25,14 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: pl.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Billing Capable" => "Włącz billing",
-"Default Rate Configuration" => "Konfiguracja domyślnej stawki",
-"Default Rate" => "Domyślna stawka za minutę",
-"Default Rate Offset" => "Domyślna opłata za rozpoczęcie rozmowy",
-"Trunk Bill Configuration" => "Konfiguracja billingu traktu",
-"Trunk" => "Trakt",
+$arrLangModule = array(
+    "Billing Capable" => "Włącz billing",
+    "Default Rate Configuration" => "Konfiguracja domyślnej stawki",
+    "Default Rate" => "Domyślna stawka za minutę",
+    "Default Rate Offset" => "Domyślna opłata za rozpoczęcie rozmowy",
+    "Trunk Bill Configuration" => "Konfiguracja billingu traktu",
+    "Trunk" => "Trakt",
 );
 ?>

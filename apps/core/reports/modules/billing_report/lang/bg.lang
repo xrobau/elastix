@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,37 +24,25 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Chavdar Iliev                                             |
-  | Email: chavdar_75@yahoo.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: bg.lang, October 25, 2010, 6:07 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"billing_report" => "billing_report",
-"Start Date" => "Начална Дата",
-"End Date" => "Крайна Дата",
-"Field Name" => "Име на Полето",
-"Channel" => "Линия",
-"Billing Report" => "Сведение за Сметка",
-"Duration in seconds" => "Продължителност в Секунди",
-"Cost" => "Стойност",
-"Summary Cost" => "Общо Стойност",
-"Rate Applied" => "Тарифа",
-"Date" => "Дата",
-"Source" => "Източник",
-"Destination" => "Направление",
-"Dst. Channel" => "Към Линия",
-"Duration" => "Продължителност",
-"Filter" => "Филтър",
-"Field" => "По",
-"Rate Value" => "Rate Value",
-"Trunk" => "Trunk",
-"default" => "default",
-"Unknown" => "Unknown",
-"horas" => "horas",
-"minutos" => "minutos",
-"segundos" => "segundos",
-"Account Code" => "Account Code",
+$arrLangModule = array(
+    "Start Date" => "Начална Дата",
+    "End Date" => "Крайна Дата",
+    "Field Name" => "Име на Полето",
+    "Channel" => "Линия",
+    "Billing Report" => "Сведение за Сметка",
+    "Duration in seconds" => "Продължителност в Секунди",
+    "Cost" => "Стойност",
+    "Summary Cost" => "Общо Стойност",
+    "Rate Applied" => "Тарифа",
+    "Date" => "Дата",
+    "Source" => "Източник",
+    "Destination" => "Направление",
+    "Dst. Channel" => "Към Линия",
+    "Duration" => "Продължителност",
+    "Filter" => "Филтър",
+    "Field" => "По",
 );
 ?>

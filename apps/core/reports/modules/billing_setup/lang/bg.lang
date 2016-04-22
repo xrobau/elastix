@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,19 +24,15 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Chavdar Iliev                                             |
-  | Email: chavdar_75@yahoo.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: bg.lang, October 25, 2010, 6:07 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Billing Capable" => "Използвай",
-"Default Rate Configuration" => "Настройки Тарифа по Подразбиране",
-"Default Rate" => "Стойност",
-"Default Rate Offset" => "Такса Свързване",
-"Trunk Bill Configuration" => "Използване за Градска Линия",
-"Trunk" => "Градска Линия",
-
+$arrLangModule = array(
+    "Billing Capable" => "Използвай",
+    "Default Rate Configuration" => "Настройки Тарифа по Подразбиране",
+    "Default Rate" => "Стойност",
+    "Default Rate Offset" => "Такса Свързване",
+    "Trunk Bill Configuration" => "Използване за Градска Линия",
+    "Trunk" => "Градска Линия",
 );
 ?>

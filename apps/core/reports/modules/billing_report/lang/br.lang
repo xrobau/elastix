@@ -10,11 +10,7 @@
   | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com 											 |
-  |                                                                      |
-  | Translate bye: Erwan DESVERGNES - SDCI                               |
-  | erwan.desvergnes@SDCI.fr                                             |
-  |                                                                      |                                               |
+  | http://www.palosanto.com                                             |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,33 +25,23 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: br.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"billing_report" => "billing_report",
-"Start Date" => "Data Início",
-"End Date" => "Data Final",
-"Field Name" => "Nome do Campo",
-"Channel" => "Canal",
-"Billing Report" => "Relatório de Faturamento",
-"Duration in seconds" => "Duração em Segundos",
-"Cost" => "Custo",
-"Summary Cost" => "Summary Cost",
-"Rate Applied" => "Taxa Aplicada",
-"Date" => "Data",
-"Source" => "Origem",
-"Destination" => "Destino",
-"Dst. Channel" => "Canal Destino",
-"Duration" => "Duração",
-"Filter" => "Filtro",
-"Field" => "Campo",
-"Rate Value" => "Rate Value",
-"Trunk" => "Trunk",
-"default" => "default",
-"Unknown" => "Unknown",
-"horas" => "horas",
-"minutos" => "minutos",
-"segundos" => "segundos",
-"Account Code" => "Account Code",
+$arrLangModule = array(
+    "Start Date" => "Data Início",
+    "End Date" => "Data Final",
+    "Field Name" => "Nome do Campo",
+    "Channel" => "Canal",
+    "Billing Report" => "Relatório de Faturamento",
+    "Duration in seconds" => "Duração em Segundos",
+    "Cost" => "Custo",
+    "Rate Applied" => "Taxa Aplicada",
+    "Date" => "Data",
+    "Source" => "Origem",
+    "Destination" => "Destino",
+    "Dst. Channel" => "Canal Destino",
+    "Duration" => "Duração",
+    "Filter" => "Filtro",
+    "Field" => "Campo",
 );
 ?>

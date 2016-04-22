@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Michael Thomsen                                       |
-  | mt@xhal.dk                                                           |
-  |                                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,26 +25,23 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: da.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Filter" => "Filter",
-"Start Date" => "Start dato",
-"End Date" => "Slut dato",
-"Destination Distribution" => "Destination Distribution",
-"Criteria" => "Kriterier",
-"Distribution by Time" => "Sortering på tid",
-"Distribution by Number of Calls" => "Sortering på antal opkald",
-"Distribution by Cost" => "Sortering på pris",
-"Date Range spans maximum number of days" => "Datointervallet er for stort",
-"ERROR" => "FEJL",
-"Minutes" => "Minutter",
-"Number of Calls" => "Antal opkald",
-"others" => "Andre",
-"Rate Name" => "Navn på takst",
-"default" => "Standardværdi",
-"Duration in seconds" => "Tid i sekunder",
-"Cost" => "Pris",
-"No records found" => "No records found"
+$arrLangModule = array(
+    "Start Date" => "Start dato",
+    "End Date" => "Slut dato",
+    "Criteria" => "Kriterier",
+    "Distribution by Time" => "Sortering på tid",
+    "Distribution by Number of Calls" => "Sortering på antal opkald",
+    "Distribution by Cost" => "Sortering på pris",
+    "Date Range spans maximum number of days" => "Datointervallet er for stort",
+    "ERROR" => "FEJL",
+    "Minutes" => "Minutter",
+    "Number of Calls" => "Antal opkald",
+    "others" => "Andre",
+    "Rate Name" => "Navn på takst",
+    "default" => "Standardværdi",
+    "Duration in seconds" => "Tid i sekunder",
+    "Cost" => "Pris",
 );
 ?>

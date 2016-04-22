@@ -2,7 +2,7 @@
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version: 2.0                                           |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,30 +24,23 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
-  |                                                                      |
-  | Translate by:Chavdar Iliev                                             |
-  | Email: chavdar_75@yahoo.com                                                       |
   +----------------------------------------------------------------------+
-  $Id: bg.lang, October 25, 2010, 6:07 pm kleber andres loayza Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(  
-"Filter" => "Филтър",
-"Start Date" => "Начална Дата",
-"End Date" => "Крайна Дата",
-"Destination Distribution" => "Направление",
-"Criteria" => "Критерий",
-"Distribution by Time" => "Distribution by Time",
-"Distribution by Number of Calls" => "Distribution by Number of Calls",
-"Distribution by Cost" => "Distribution by Cost",
-"Date Range spans maximum number of days" => "Периодът обхваща максимален брой дни",
-"ERROR" => "ГРЕШКА",
-"Minutes" => "Минути",
-"Number of Calls" => "Брой Разговори",
-"others" => "други",
-"Rate Name" => "Име на Тарифа",
-"default" => "по подразбиране",
-"Duration in seconds" => "Продължителност в Секунди",
-"Cost" => "Стойност",
-"No records found" => "No records found"
+$arrLangModule = array(
+    "Filter" => "Филтър",
+    "Start Date" => "Начална Дата",
+    "End Date" => "Крайна Дата",
+    "Destination Distribution" => "Направление",
+    "Criteria" => "Критерий",
+    "Date Range spans maximum number of days" => "Периодът обхваща максимален брой дни",
+    "ERROR" => "ГРЕШКА",
+    "Minutes" => "Минути",
+    "Number of Calls" => "Брой Разговори",
+    "others" => "други",
+    "Rate Name" => "Име на Тарифа",
+    "default" => "по подразбиране",
+    "Duration in seconds" => "Продължителност в Секунди",
+    "Cost" => "Стойност",
 );
 ?>

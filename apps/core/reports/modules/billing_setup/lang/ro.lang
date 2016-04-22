@@ -1,20 +1,16 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificacion: UTF-8
+  Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.1                                                  |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
   | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
-  | Telfs. 2283-268, 2294-440, 22OC84-356                                |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Romanian Translation by: Narcis Magardician   LAST UPDATE 04/06/2008 |
-  | narcis@artelcom.ro                                                   |
-  |                                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,14 +25,14 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ro.lang,v 1.6 2007/09/05 00:36:42 afigueroa Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Billing Capable" => "Capabil de Facturare",
-"Default Rate Configuration" => "Configurarea Ratelor Implicite",
-"Default Rate" => "Rata Implicita",
-"Default Rate Offset" => "Offsetul Ratei Implicite",
-"Trunk Bill Configuration" => "Configurare Facturare Trunchiuri",
-"Trunk" => "Trunchi",
+$arrLangModule = array(
+    "Billing Capable" => "Capabil de Facturare",
+    "Default Rate Configuration" => "Configurarea Ratelor Implicite",
+    "Default Rate" => "Rata Implicita",
+    "Default Rate Offset" => "Offsetul Ratei Implicite",
+    "Trunk Bill Configuration" => "Configurare Facturare Trunchiuri",
+    "Trunk" => "Trunchi",
 );
 ?>

@@ -11,10 +11,6 @@
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
   | http://www.palosanto.com                                             |
-  |                                                                      |
-  | Translate bye: Michael Thomsen                                       |
-  | mt@xhal.dk                                                           |
-  |                                                                      |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,33 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: da.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"billing_report" => "billing_report",
-"Start Date" => "Start dato",
-"End Date" => "Slut dato",
-"Field Name" => "Feltnavn",
-"Channel" => "Kanal",
-"Billing Report" => "Regningsudtræk",
-"Duration in seconds" => "Tid i sekunder",
-"Cost" => "Pris",
-"Summary Cost" => "Summary Cost",
-"Rate Applied" => "Takst tilføjet",
-"Date" => "Dato",
-"Source" => "Kilde",
-"Destination" => "Destination",
-"Dst. Channel" => "Destinationskanal",
-"Duration" => "Tid",
-"Filter" => "Filter",
-"Field" => "Felt",
-"Rate Value" => "Rate Value",
-"Trunk" => "Trunk",
-"default" => "default",
-"Unknown" => "Unknown",
-"horas" => "horas",
-"minutos" => "minutos",
-"segundos" => "segundos",
-"Account Code" => "Account Code",
+$arrLangModule = array(
+    "Start Date" => "Start dato",
+    "End Date" => "Slut dato",
+    "Field Name" => "Feltnavn",
+    "Channel" => "Kanal",
+    "Billing Report" => "Regningsudtræk",
+    "Duration in seconds" => "Tid i sekunder",
+    "Cost" => "Pris",
+    "Rate Applied" => "Takst tilføjet",
+    "Date" => "Dato",
+    "Source" => "Kilde",
+    "Dst. Channel" => "Destinationskanal",
+    "Duration" => "Tid",
+    "Field" => "Felt",
 );
 ?>

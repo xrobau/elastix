@@ -10,11 +10,7 @@
   | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
   | Telfs. 2283-268, 2294-440, 2284-356                                  |
   | Guayaquil - Ecuador                                                  |
-  | http://www.palosanto.com 											 |
-  |                                                                      |
-  | Translate bye: Erwan DESVERGNES - SDCI                               |
-  | erwan.desvergnes@SDCI.fr                                             |
-  |                                                                      |
+  | http://www.palosanto.com                                             |
   +----------------------------------------------------------------------+
   | The contents of this file are subject to the General Public License  |
   | (GPL) Version 2 (the "License"); you may not use this file except in |
@@ -29,22 +25,21 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-*/
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Channels Usage Report" => "Izvještaj o korištenju kanala",
-"Simultaneous Channels (Total)" => "Istovremeni kanali (Total)",
-"Simultaneous Zap Channels" => "Istovremeni Zap kanali",
-"Simultaneous SIP Channels" => "Istovremeni SIP kanali",
-"Simultaneous IAX Channels" => "Istovremeni IAX kanali",
-"Simultaneous H323 Channels" => "Istovremeni H323 kanali",
-"Simultaneous Local Channels" => "Istovremeni lokalni kanali",
-"Total Channels" => "Ukupno kanala",
-"Zap Channels" => "Zap kanali",
-"SIP Channels" => "SIP kanali",
-"IAX Channels" => "IAX kanali",
-"H323 Channels" => "H323 kanali",
-"Local Channels" => "Lokalni kanali",
-"Nothing to show yet" => "Nothing to show yet"
+$arrLangModule = array(
+    "Channels Usage Report" => "Izvještaj o korištenju kanala",
+    "Simultaneous Channels (Total)" => "Istovremeni kanali (Total)",
+    "Simultaneous Zap Channels" => "Istovremeni Zap kanali",
+    "Simultaneous SIP Channels" => "Istovremeni SIP kanali",
+    "Simultaneous IAX Channels" => "Istovremeni IAX kanali",
+    "Simultaneous H323 Channels" => "Istovremeni H323 kanali",
+    "Simultaneous Local Channels" => "Istovremeni lokalni kanali",
+    "Total Channels" => "Ukupno kanala",
+    "Zap Channels" => "Zap kanali",
+    "SIP Channels" => "SIP kanali",
+    "IAX Channels" => "IAX kanali",
+    "H323 Channels" => "H323 kanali",
+    "Local Channels" => "Lokalni kanali",
 );
 ?>

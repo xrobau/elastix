@@ -25,22 +25,20 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Channels Usage Report" => "Channels Usage Report",
-"Simultaneous Channels (Total)" => "Занятость каналов (Всего)",
-"Simultaneous Zap Channels" => "Занятость каналов Zap",
-"Simultaneous SIP Channels" => "Занятость каналов SIP",
-"Simultaneous IAX Channels" => "Занятость каналов IAX",
-"Simultaneous H323 Channels" => "Занятость каналов H323",
-"Simultaneous Local Channels" => "Занятость каналов локальных",
-"Total Channels" => "Всего каналов",
-"Zap Channels" => "Каналов Zap",
-"SIP Channels" => "Каналов SIP",
-"IAX Channels" => "Каналов IAX",
-"H323 Channels" => "Каналов H323",
-"Local Channels" => "Каналов локальных",
-"Nothing to show yet" => "Nothing to show yet"
+$arrLangModule = array(
+    "Simultaneous Channels (Total)" => "Занятость каналов (Всего)",
+    "Simultaneous Zap Channels" => "Занятость каналов Zap",
+    "Simultaneous SIP Channels" => "Занятость каналов SIP",
+    "Simultaneous IAX Channels" => "Занятость каналов IAX",
+    "Simultaneous H323 Channels" => "Занятость каналов H323",
+    "Simultaneous Local Channels" => "Занятость каналов локальных",
+    "Total Channels" => "Всего каналов",
+    "Zap Channels" => "Каналов Zap",
+    "SIP Channels" => "Каналов SIP",
+    "IAX Channels" => "Каналов IAX",
+    "H323 Channels" => "Каналов H323",
+    "Local Channels" => "Каналов локальных",
 );
 ?>

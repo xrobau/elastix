@@ -25,14 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: sr.lang,v 1.6 2007/10/23 00:36:42 bmacias Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Billing Capable" => "Obracun moguc",
-"Default Rate Configuration" => "Default Rate Configuration",
-"Default Rate" => "Default Rate",
-"Default Rate Offset" => "Default Rate Offset",
-"Trunk Bill Configuration" => "Konfiguracija obracunske linije",
-"Trunk" => "Linija",
+$arrLangModule = array(
+    "Billing Capable" => "Obracun moguc",
+    "Trunk Bill Configuration" => "Konfiguracija obracunske linije",
+    "Trunk" => "Linija",
 );
 ?>

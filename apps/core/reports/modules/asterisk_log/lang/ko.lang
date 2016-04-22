@@ -25,18 +25,12 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ko.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Search string" => "Search string",
-"Search" => "Search",
-"Search next" => "Search next",
-"offset" => "offset",
-"Asterisk Logs" => "Asterisk Logs",
-"Date" => "날자",
-"Show" => "보기",
-"Message" => "Message",
-"Type" => "타입",
-"Source" => "자원",
+$arrLangModule = array(
+    "Date" => "날자",
+    "Show" => "보기",
+    "Type" => "타입",
+    "Source" => "자원",
 );
 ?>

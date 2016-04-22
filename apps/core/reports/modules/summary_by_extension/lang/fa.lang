@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.4-1                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,29 +25,23 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: en.lang,v 1.1 2009-01-06 09:01:38 jvega jvega@palosanto.com Exp $ */
+  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Summary by Extension" => "گزارش هر داخلي",
-"Start date" => "تاريخ شروع",
-"End date" => "تاريخ پايان",
-"Extension"=>"داخلي",
-"User name"=>"كاربر",
-"Sec. Outgoing Calls"=>"Total time (Outgoing Calls)",
-"Sec. Incoming Calls"=>"Total time (Incoming Calls)",
-"Num. Outgoing Calls"=>"# تماس خروجي",
-"Num. Incoming Calls"=>"# تماس ورودي",
-"Call Details" => "View",
-"Top 10 (Outgoing) ext" => "Top 10 (Outgoing) ext",
-"Top 10 (Incoming) ext" => "Top 10 (Incoming) ext",
-"Filter by" => "فيلتر",
-"User" => "کاربر",
-"seconds" => "ثانيه ها",
-"Other calls" => "تماس هاي ديگر",
-"External #" => "خارجي #",
-"calls" => "تماس ها",
-"call" => "تماس",
-"No data to display" => "ديتايي براي نمايش نيست",
-"Details" => "Details"
+$arrLangModule = array(
+    "Summary by Extension" => "گزارش هر داخلي",
+    "Start date" => "تاريخ شروع",
+    "End date" => "تاريخ پايان",
+    "Extension" => "داخلي",
+    "User name" => "كاربر",
+    "Num. Outgoing Calls" => "# تماس خروجي",
+    "Num. Incoming Calls" => "# تماس ورودي",
+    "Filter by" => "فيلتر",
+    "User" => "کاربر",
+    "seconds" => "ثانيه ها",
+    "Other calls" => "تماس هاي ديگر",
+    "External #" => "خارجي #",
+    "calls" => "تماس ها",
+    "call" => "تماس",
+    "No data to display" => "ديتايي براي نمايش نيست",
 );
 ?>

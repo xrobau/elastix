@@ -44,7 +44,10 @@ function load_default_timezone()
     $sDefaultTimezone = @date_default_timezone_get();
     if ($sDefaultTimezone == 'UTC') {
         $sDefaultTimezone = 'America/New_York';
-        if (file_exists('/etc/sysconfig/clock')) {
+        $regs = NULL;
+        if (is_link("/etc/localtime") && preg_match("|/usr/share/zoneinfo/(.+)|", readlink("/etc/localtime"), $regs)) {
+            $sDefaultTimezone = $regs[1];
+        } elseif (file_exists('/etc/sysconfig/clock')) {
             foreach (file('/etc/sysconfig/clock') as $s) {
                 $regs = NULL;
                 if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {

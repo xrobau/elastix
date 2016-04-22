@@ -180,6 +180,11 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: check whether /etc/localtime is a symlink and use it as an additional
+  way to find out the current timezone.
+  SVN Rev[7605]
+
 * Fri Apr  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Packages: force Elastix registration before allowing any package
   action to continue.

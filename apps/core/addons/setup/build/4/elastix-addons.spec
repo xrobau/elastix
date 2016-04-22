@@ -136,6 +136,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: check whether /etc/localtime is a symlink and use it as an
+  additional way to find out the current timezone.
+  SVN Rev[7600]
+
 * Tue Mar 08 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

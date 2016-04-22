@@ -4,7 +4,7 @@
   Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 1.0                                                  |
-  | http://www.elastix.org                                               |
+  | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
@@ -75,7 +75,10 @@ function load_default_timezone()
     $sDefaultTimezone = @date_default_timezone_get();
     if ($sDefaultTimezone == 'UTC') {
         $sDefaultTimezone = 'America/New_York';
-        if (file_exists('/etc/sysconfig/clock')) {
+        $regs = NULL;
+        if (is_link("/etc/localtime") && preg_match("|/usr/share/zoneinfo/(.+)|", readlink("/etc/localtime"), $regs)) {
+            $sDefaultTimezone = $regs[1];
+        } elseif (file_exists('/etc/sysconfig/clock')) {
             foreach (file('/etc/sysconfig/clock') as $s) {
                 $regs = NULL;
                 if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
@@ -90,7 +93,7 @@ function load_default_timezone()
 function action_deleteModule($opt)
 {
     $sModuleDir = NULL;
-    
+
     // Name of module directory
     foreach ($opt[0] as $option) switch ($option[0]) {
     case '--deletemodule':
@@ -108,7 +111,7 @@ function action_deleteModule($opt)
 function action_createModule($opt)
 {
     $sModuleSpec = NULL;
-    
+
     // Name of XML specification of module
     foreach ($opt[0] as $option) switch ($option[0]) {
     case '--createmodule':
@@ -199,7 +202,7 @@ function buildModule_index($xml_modulespec)
         $widgetCache = array();
         foreach ($xml_modulespec->form->field as $xml_field) {
             $sFieldType = (string)$xml_field['type'];
-            if (!preg_match('/^\w+$/', $sFieldType)) 
+            if (!preg_match('/^\w+$/', $sFieldType))
                 error_exit("ERR: invalid field type ".$xml_field['type']."\n");
             if (!isset($widgetCache[$sFieldType]))
                 $widgetCache[$sFieldType] = loadTemplate('fields_form/'.$sFieldType.'.s');
@@ -212,8 +215,8 @@ function buildModule_index($xml_modulespec)
                     phpidentifier(strtolower(trim($xml_field)))),
                 $widgetCache[$sFieldType]);
         }
-        
-        $sContent .= str_replace('{ARR_FIELDS_FORM}', $sContentForm, 
+
+        $sContent .= str_replace('{ARR_FIELDS_FORM}', $sContentForm,
             loadTemplate('index_form.s'));
     } elseif (isset($xml_modulespec->grid)) {
         $blockRows    ="";
@@ -222,7 +225,7 @@ function buildModule_index($xml_modulespec)
         foreach ($xml_modulespec->grid->column as $xml_column) {
             $key = (string)$xml_column['key'];
             $column = (string)$xml_column;
-            
+
             $sColumnKey = phpidentifier(strtolower($column));
             $sColumnString = phpstring($column);
 
@@ -245,7 +248,7 @@ function buildModule_index($xml_modulespec)
     } else {
         error_exit("ERR: unknown or missing module type\n");
     }
-    
+
     return str_replace(
         array(
             '{NAME_CLASS}',
@@ -354,7 +357,7 @@ function loadTemplate($s)
 function action_createLanguage($opt)
 {
     $sLanguage = NULL;
-    
+
     // Name of new language string, without .lang
     foreach ($opt[0] as $option) switch ($option[0]) {
     case '--createlanguage':
@@ -400,7 +403,7 @@ function action_addTranslation($opt)
         if (trim($option[1]) != '') $sTranslatedString = $option[1];
         break;
     }
-    
+
     if (is_null($sModule)) error_exit("ERR: module name not specified!\n");
     if (!preg_match('/^\w+$/', $sModule))
         error_exit("ERR: invalid module specification!\n");
@@ -483,8 +486,8 @@ function loadLanguageFile($filename)
      * all of the syntax issues that might be present in a legal language file.
      * Instead, this program will use the internal PHP parser using include()
      * on the language file. However, this introduces the risk that an attacker
-     * can overwrite the requested filename with a malicious version, which 
-     * therefore will run as root inside the privileged script. In order to 
+     * can overwrite the requested filename with a malicious version, which
+     * therefore will run as root inside the privileged script. In order to
      * mitigate this, the program will fork and drop privileges, include() the
      * file, and transmit a serialized version through a pipe. The parent side
      * will check that the serialized variable is an array composed of only
@@ -519,13 +522,13 @@ function loadLanguageFile($filename)
         if (!posix_setgid($newuser['gid'])) error_exit("ERR: failed to switch gid\n");
         if (!posix_setuid($newuser['uid'])) error_exit("ERR: failed to switch uid\n");
         if (!posix_setsid() == -1) error_exit("ERR: failed to become session leader\n");
-        
+
         // The insecure operation...
         include ($filename);
-        
+
         global $arrLang;
         global $arrLangModule;
-        
+
         $s = NULL;
         if (isset($arrLangModule) && is_array($arrLangModule)) {
             $s = serialize($arrLangModule);
@@ -558,7 +561,7 @@ function writeLanguageFile($filename, $arrLang, $bAsFramework)
    Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 2.3                                                  |
-  | http://www.elastix.org                                               |
+  | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+

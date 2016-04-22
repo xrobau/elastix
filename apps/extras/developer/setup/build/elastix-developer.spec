@@ -70,6 +70,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: check whether /etc/localtime is a symlink and use it as an additional
+  way to find out the current timezone.
+  SVN Rev[7599]
+
 * Thu Apr 09 2015 Bruno Macias Velasco <bmacias@elastix.com> 2.5.0-1
 - CHANGED: Build Module was changed, index_form.s and index_grid.s reduce
   lines language handler.
@@ -77,13 +82,13 @@ fi
   module was changed to use jquery action.
 
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
-- CHANGED: Build Module, Delete Module, Language Admin: For each module 
-  listed here the english help file was renamed to en.hlp and a spanish 
+- CHANGED: Build Module, Delete Module, Language Admin: For each module
+  listed here the english help file was renamed to en.hlp and a spanish
   help file called es.hlp was ADDED.
   SVN Rev[6358]
 
 * Wed Aug  8 2013 Alex Villacis Lasso <a_villacis@palosanto.com>
-- FIXED: Language Admin: (jbriones) relax strict validation on language 
+- FIXED: Language Admin: (jbriones) relax strict validation on language
   translation in order to allow an empty arrLangModule.
   SVN Rev[5590]
 
@@ -102,7 +107,7 @@ fi
 - DELETED: Removed Load Module functionality, as now modules should be installed
   via RPM packages.
   SVN Rev[4468]
-- CHANGED: Language Admin: extend develbuilder to save a list of translations 
+- CHANGED: Language Admin: extend develbuilder to save a list of translations
   from a XML specification. Use this to reimplement the Save All functionality.
   SVN Rev[4461]
 
@@ -112,8 +117,8 @@ fi
   SVN Rev[4459]
 
 * Tue Nov 27 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- CHANGED: Language Admin: extend develbuilder to create files for new 
-  languages. Use this to reimplement the creation of a new language. Also, 
+- CHANGED: Language Admin: extend develbuilder to create files for new
+  languages. Use this to reimplement the creation of a new language. Also,
   remove some dead code.
   SVN Rev[4458]
 
@@ -132,9 +137,9 @@ fi
   SVN Rev[4440]
 - FIXED: Developer: check that form element exists before traversing its fields.
   SVN Rev[4439]
-- CHANGED: Build Module: create new privileged script develbuilder and 
-  reimplement module creation using this script. Required to cope with recent 
-  security changes that switch ownership of Elastix GUI to root. As a side 
+- CHANGED: Build Module: create new privileged script develbuilder and
+  reimplement module creation using this script. Required to cope with recent
+  security changes that switch ownership of Elastix GUI to root. As a side
   effect, we get a net reduction of code size and some improvement in
   readability.
 - CHANGED: Developer: switched module ownership to root.root.
@@ -146,7 +151,7 @@ fi
   not able to change the value. To fix this problem, a new hidden input
   was added to the form which contains the key of the word
   SVN Rev[4061]
-- FIXED: module language_admin, fixed mantis bug #1317, number of 
+- FIXED: module language_admin, fixed mantis bug #1317, number of
   pages was not displayed and also keys with the character '_' were
   not able to change
   SVN Rev[4053]

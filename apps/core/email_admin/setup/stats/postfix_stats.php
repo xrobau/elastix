@@ -7,7 +7,10 @@ function load_default_timezone()
     $sDefaultTimezone = @date_default_timezone_get();
     if ($sDefaultTimezone == 'UTC') {
         $sDefaultTimezone = 'America/New_York';
-        if (file_exists('/etc/sysconfig/clock')) {
+        $regs = NULL;
+        if (is_link("/etc/localtime") && preg_match("|/usr/share/zoneinfo/(.+)|", readlink("/etc/localtime"), $regs)) {
+            $sDefaultTimezone = $regs[1];
+        } elseif (file_exists('/etc/sysconfig/clock')) {
             foreach (file('/etc/sysconfig/clock') as $s) {
                 $regs = NULL;
                 if (preg_match('/^ZONE\s*=\s*"(.+)"/', $s, $regs)) {
@@ -78,13 +81,13 @@ foreach($arrLogs as $idFile=>$logFilename) {
     // foreach to go to the previous maillog file. If the date is older i break because i don't need to analyze more files.
     if(!$oFile->dateFound and $oFile->wantedDateStatus=="older") {
         wlog("The wanted date was not found on this file. It seems to be an older date. Looking in the previous log file.\n");
-        // I do nothing 
+        // I do nothing
     } else {
         break;
     }
 }
 
-// Up to here i have an array  
+// Up to here i have an array
 wlog("====================================\nPreparing the output\n====================================\n");
 
 $arrFinal = array(); $date="";
@@ -218,7 +221,7 @@ class searchLog {
     var $cursor;
     var $salto;
     var $dateFound=false;
-    var $wantedDateStatus="unknown"; 
+    var $wantedDateStatus="unknown";
     var $filesize;
     var $fileMDateYear;
     var $fileMDateMonth;
@@ -233,7 +236,7 @@ class searchLog {
     {
         // Reset the dateFound and wantedDateStatus variables
         $this->dateFound=false;
-        $this->wantedDateStatus = "unknown"; 
+        $this->wantedDateStatus = "unknown";
 
         $arrSalida=array();
         $this->filesize = filesize($archivoLog);
@@ -258,7 +261,7 @@ class searchLog {
                      "the nearest date possible\n");
             }
 
-            if ($this->dateFound==false and $this->cursor<=0) {    
+            if ($this->dateFound==false and $this->cursor<=0) {
                 $this->wantedDateStatus="older";
                 if($this->debug) wlog("Date not found. The wanted date is OLDER than the ones included in the file $archivoLog\n");
                 if($this->debug) wlog("Anyway, we will return the array with the dates found on this file.\n");
@@ -280,16 +283,16 @@ class searchLog {
                     } elseif($arrMatches[1].$arrMatches[2].$arrMatches[3]!=$lastDateTXT and !empty($lastDateTXT)) {
                         $this->printProgress();
                         // If the next datetime in the log is newer than the last one, then it is ok
-                        $currentRecordTS = $this->convert2ts($this->calculateYear($this->month2digits($arrMatches[1]), 
-                                                             $this->fileMDateYear, $this->fileMDateMonth), 
+                        $currentRecordTS = $this->convert2ts($this->calculateYear($this->month2digits($arrMatches[1]),
+                                                             $this->fileMDateYear, $this->fileMDateMonth),
                                                              $arrMatches[1], $arrMatches[2], $arrMatches[3], 0);
-                        $lastRecordTS    = $this->convert2ts($this->calculateYear($this->month2digits($lastMonth), 
-                                                             $this->fileMDateYear, $this->fileMDateMonth), 
+                        $lastRecordTS    = $this->convert2ts($this->calculateYear($this->month2digits($lastMonth),
+                                                             $this->fileMDateYear, $this->fileMDateMonth),
                                                              $lastMonth, $lastDay, $lastHour, 0);
                         if($currentRecordTS>$lastRecordTS) {
                             $arrSalida[$lastDateTXT.$year]["NumConnections"] = $contCon;
                             $arrSalida[$lastDateTXT.$year]["Status"] = "Completed";
-                            // We store the date of the current line as the 'last' one in order to compare with 
+                            // We store the date of the current line as the 'last' one in order to compare with
                             // the next line's date in the next iteraction
                             $lastDateTXT = $arrMatches[1].$arrMatches[2].$arrMatches[3];
                             $lastMonth = $arrMatches[1]; $lastDay = $arrMatches[2]; $lastHour = $arrMatches[3];
@@ -303,7 +306,7 @@ class searchLog {
                             $contCon++;
                         }
                     }
-                } 
+                }
             }
             if(!@is_array($arrSalida[$lastDateTXT.$year])) {
                 $arrSalida[$lastDateTXT.$year]["NumConnections"]=$contCon;
@@ -332,7 +335,7 @@ class searchLog {
             $this->seekStartOfLine();
             if($this->debug) wlog("Cursor position=" . $this->cursor . ". Step=" . $this->salto. "\n");
             // The next line checks if the method converge
-            if($viejoCursor==$this->cursor) { 
+            if($viejoCursor==$this->cursor) {
                 if($this->debug) wlog("The method converges\n");
                 $this->methodConverges=true;
                 break;
@@ -344,16 +347,16 @@ class searchLog {
                 $currentYear = $this->calculateYear($this->month2digits($arrMatches[1]), $this->fileMDateYear, $this->fileMDateMonth);
                 $currentTS=$this->convert2ts($currentYear,$arrMatches[1], $arrMatches[2], $arrMatches[3]);
 
-                if($currentTS>$lastStoredTS) { 
+                if($currentTS>$lastStoredTS) {
                     $nuevoCursor=$this->retrocederMarca($this->cursor);
-                } else if($currentTS<$lastStoredTS) { 
+                } else if($currentTS<$lastStoredTS) {
                     $nuevoCursor=$this->adelantarMarca($this->cursor);
-                // I found the last stored date. So i will break here. 
-                // It does not matter if the cursor is not on the right date. 
-                } else if(($currentTS==$lastStoredTS)) { 
-                    $this->dateFound = true; 
+                // I found the last stored date. So i will break here.
+                // It does not matter if the cursor is not on the right date.
+                } else if(($currentTS==$lastStoredTS)) {
+                    $this->dateFound = true;
 
-                    break; 
+                    break;
                 }
             } else {
                 // A non well formated line... skiping?
@@ -370,7 +373,7 @@ class searchLog {
                     $currentTS=$this->convert2ts($currentYear,$arrMatches[1], $arrMatches[2], $arrMatches[3]);
                     if($currentTS!=$lastStoredTS) break;
                 }
-            }    
+            }
             // Rewind the cursor to the last line
             $this->cursor = ftell($this->f);
             $this->cursor = $this->cursor - 2;
@@ -380,7 +383,7 @@ class searchLog {
         wlog("Position set at byte $this->cursor\n");
     }
 
-    function retrocederMarca($cursor) 
+    function retrocederMarca($cursor)
     {
         $this->salto = $this->salto/2;
         if($this->salto<=1) $this->salto=1;
@@ -390,7 +393,7 @@ class searchLog {
         else return $resultado;
     }
 
-    function adelantarMarca($cursor) 
+    function adelantarMarca($cursor)
     {
         $this->salto = $this->salto/2;
         if($this->salto<=1) $this->salto=1;
@@ -425,10 +428,10 @@ class searchLog {
         return mktime($hour,$minute,0,$month,$day,$year); // Assuming minute 30 or whatever
     }
 
-    function month2digits($month3Chars) 
-    { 
+    function month2digits($month3Chars)
+    {
         $arrMonth = array("Jan"=>1,"Feb"=>2,"Mar"=>3,"Apr"=>4,"May"=>5,"Jun"=>6,"Jul"=>7,"Aug"=>8,"Sep"=>9,"Oct"=>10,"Nov"=>11,"Dec"=>12);
-        return $arrMonth[$month3Chars]; 
+        return $arrMonth[$month3Chars];
     }
 
     // The $month and $lastRecord_month arguments must be digits
@@ -440,7 +443,7 @@ class searchLog {
             return $lastRecord_year-1;
         } else {
             return $lastRecord_year;
-        } 
+        }
     }
 
     function printProgress()

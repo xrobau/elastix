@@ -206,6 +206,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Postfix Stats: check whether /etc/localtime is a symlink and use it as
+  an additional way to find out the current timezone.
+  SVN Rev[7601]
+
 * Mon Jan 18 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

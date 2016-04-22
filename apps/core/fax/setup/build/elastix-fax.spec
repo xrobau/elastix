@@ -193,6 +193,11 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Fax Events: check whether /etc/localtime is a symlink and use it as
+  an additional way to find out the current timezone.
+  SVN Rev[7602]
+
 * Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: Fax - Build/elastix-fax.spec: Update specfile with latest SVN
   history. Changed Version and Release in specfile.

@@ -1,3 +1,230 @@
+2.2.0-16 (SVN Revision 7606)
+* Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+* FIXED: Dialer: check whether /etc/localtime is a symlink and use it as an
+  additional way to find out the current timezone. Fixes part 2 of Elastix
+  bug #2507.
+  SVN Rev[7598]
+* CHANGED: Dialer: do not call stream_select() with only empty socket arrays.
+  SVN Rev[7597]
+* CHANGED: Added Russian translations by user Russian.
+  SVN Rev[7589]
+* CHANGED: Break Report: prune all translations that are actually the same value
+  as the English one.
+  SVN Rev[7588]
+* CHANGED: Trunks per Hour: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7587]
+* CHANGED: Incoming Call Monitoring: prune all translations that are actually
+  the same value as the English one.
+  SVN Rev[7586]
+* CHANGED: Agent Monitoring: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7585]
+* CHANGED: Agent Information: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7584]
+* CHANGED: Queues: prune all translations that are actually the same value as
+  the English one.
+  SVN Rev[7583]
+* CHANGED: Login Logout: prune all translations that are actually the same value
+  as the English one.
+  SVN Rev[7582]
+* CHANGED: Ingoing Calls Success: prune all translations that are actually the
+  same value as the English one.
+  SVN Rev[7581]
+* CHANGED: Hold Time: prune all translations that are actually the same value as
+  the English one.
+  SVN Rev[7580]
+* CHANGED: Graphic Calls: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7579]
+* CHANGED: Form List: prune all translations that are actually the same value as
+  the English one.
+  SVN Rev[7578]
+* CHANGED: Form Designer: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7577]
+* CHANGED: Dont Call List: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7576]
+* CHANGED: Clients: prune all translations that are actually the same value as
+  the English one.
+  SVN Rev[7575]
+* CHANGED: Callback Extensions: prune all translations that are actually the
+  same value as the English one.
+  SVN Rev[7574]
+* CHANGED: Calls Per Hour: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7573]
+* CHANGED: Calls Per Agent: prune all translations that are actually the same
+  value as the English one.
+  SVN Rev[7572]
+* CHANGED: Calls Detail: prune all translations that are actually the same value
+  as the English one.
+  SVN Rev[7571]
+* CHANGED: Break Administrator: prune all translations that are actually the
+  same value as the English one.
+  SVN Rev[7570]
+* CHANGED: Agents: prune all translations that are actually the same value
+  as the English one.
+  SVN Rev[7569]
+* FIXED: Dialer: remove event parameter not appearing in CallCenter Community.
+  SVN Rev[7567]
+* CHANGED: Campaign Out: add documentation on the API for custom uploaders.
+  SVN Rev[7564]
+* CHANGED: Campaign Out: move translations used only by CSV upload to CSV
+  plugin. Fix incorrect uploader translation path.
+  SVN Rev[7562]
+* CHANGED: Campaign Out: prune all translations that are actually the same value
+  as the English one.
+  SVN Rev[7561]
+* CHANGED: Campaign Out: factor out contact loading via CSV as a plugin and a
+  reference implementation of contact loader plugins.
+  SVN Rev[7559]
+* FIXED: Dialer: restore periodic read of configuration in CampaignProcess.
+  SVN Rev[7558]
+* CHANGED: Dialer: add timing for each SQL action in SQLWorkerProcess. Ported
+  from CallCenterPRO.
+  SVN Rev[7557]
+* CHANGED: Dialer: perform SQL commit before removing the action and delivering
+  events, not after. Ported from CallCenterPRO.
+  SVN Rev[7556]
+* CHANGED: Dialer: handle QueueCallerAbandon event. This is required to properly
+  mark as abandoned when a call times out in a queue and is transferred to a
+  second queue without immediately hanging up. Fixes Elastix bug #2500. Ported
+  from CallCenterPRO.
+  SVN Rev[7555]
+* CHANGED: Dialer: minor optimization to save 1 RPC on idle queue. Ported from
+  CallCenterPRO.
+  SVN Rev[7554]
+* CHANGED: Dialer: assume queue events for Asterisk 12 and later. Ported from
+  CallCenterPRO.
+  SVN Rev[7553]
+* CHANGED: Dialer: make construirEventoProgresoLlamada private to
+  SQLWorkerProcess. Ported from CallCenterPRO.
+  SVN Rev[7552]
+* CHANGED: Dialer: remove unused database connection code from ECCPProcess.
+  Ported from CallCenterPRO.
+  SVN Rev[7551]
+* CHANGED: Dialer: move audit fixing to SQLWorkerProcess. Ported from
+  CallCenterPRO.
+  SVN Rev[7549]
+* CHANGED: Dialer (ECCP): move call update events to SQLWorkerProcess. Ported
+  from CallCenterPRO.
+  SVN Rev[7548]
+* CHANGED: Dialer (ECCP): move SQL code for call progress notification to
+  SQLWorkerProcess. This introduces a message handler to forward events from
+  SQLWorkerProcess, and uses it to forward call progress messages. Ported from
+  CallCenterPRO.
+  SVN Rev[7547]
+* CHANGED: Dialer: remove debugging messages on code involving Hold. Ported
+  from CallCenterPRO.
+  SVN Rev[7546]
+* CHANGED: Dialer: update UniqueidAgente when entering and leaving Hold. This
+  prevents the call from being mis-identified as a transferred call. Ported from
+  CallCenterPRO.
+  SVN Rev[7545]
+* CHANGED: Dialer: use ParkedCallGiveUp event instead of a Hangup special case
+  to detect a call hangup while on a parking lot. Ported from CallCenterPRO.
+  SVN Rev[7544]
+* CHANGED: Dialer: store new Uniqueid when parking call. This allows removal of
+  the Unlink handler. This also allows identification of the call that returns
+  from Hold without having to lookup the call by channel. Ported from
+  CallCenterPRO.
+  SVN Rev[7543]
+* CHANGED: Dialer: store parkinglot extension from ParkedCall event. This allows
+  removal of the "parkedcalls show" command invocation in ECCPConn. Ported from
+  CallCenterPRO.
+  SVN Rev[7542]
+* CHANGED: Dialer: reimplement Hold using Park instead of Redirect. This moves
+  responsibility for agent pause/unpause to Agente class, just like the other
+  pauses. Last use of AMI by ECCPProcess class is now removed. Ported from
+  CallCenterPRO.
+  SVN Rev[7541]
+* CHANGED: Dialer: remove unused _cb_QueuePause callback from AMIEventProcess.
+  Ported from CallCenterPRO.
+  SVN Rev[7540]
+* CHANGED: Dialer: add call parking commands to AMIClientConn. Ported from
+  CallCenterPRO.
+  SVN Rev[7539]
+* CHANGED: Dialer: move QueuePause from ECCPProcess to AMIEventProcess. Step 2
+  of removal of AMI connection from ECCPProcess. Ported from CallCenterPRO.
+  SVN Rev[7538]
+* CHANGED: Dialer: each Agente object has its own reference to message pipe.
+  Ported from CallCenterPRO.
+  SVN Rev[7537]
+* CHANGED: Dialer: move msg_ECCPProcess_AgentLogoff to Agente class. This
+  message is always paired to the Agente::terminarLoginAgente method. Ported
+  from CallCenterPRO.
+  SVN Rev[7536]
+* CHANGED: Dialer: move QueuePause from ECCPProcess to AMIEventProcess. Step 1
+  of removal of AMI connection from ECCPProcess. Ported from CallCenterPRO.
+  SVN Rev[7535]
+* CHANGED: Dialer: remove unused message canalRemotoAgente from AMIEventProcess.
+  Ported from CallCenterPRO.
+  SVN Rev[7534]
+* CHANGED: Dialer: move call state update to SQLWorkerProcess. With this change
+  call updates will no longer block on heavy reads from calls table. Ported from
+  CallCenterPRO.
+  SVN Rev[7533]
+* CHANGED: Dialer: introduce SQLWorkerProcess. This class will handle all
+  database writes required by state changes that were previously executed in
+  CampaignProcess. This should allow updates to be processed even when
+  CampaignProcess is busy reading calls for outgoing campaigns. All operations
+  are wrapped in transactions and will be restarted on errors without retry
+  limits. This commit migrates the query of active agents.
+  SVN Rev[7532]
+* CHANGED: Dialer: move Originate call into AMIEventProcess. This puts all
+  responsibility of database state changes on AMIEventProcess, preventing races
+  when implementing SQLWorkerProcess.
+  SVN Rev[7531]
+* FIXED: Campaign Monitoring: fix lingering errors in event refactoring. Ported
+  from CallCenterPRO.
+  SVN Rev[7530]
+* CHANGED: Dialer: use is_callable() instead of open-coding it. Ported from
+  CallCenterPRO.
+  SVN Rev[7529]
+* CHANGED: Dialer: move execution of "database show QPENALTY" to AMIEventProcess
+  using asynchronous AMI. This removes the last AMI use from event handlers in
+  CampaignProcess as preparation for SQLWorkerProcess. Ported from
+  CallCenterPRO.
+  SVN Rev[7528]
+* CHANGED: Dialer: factor out parse_database_data from AMI functions for a
+  future commit. Ported from CallCenterPRO.
+  SVN Rev[7527]
+* CHANGED: Dialer: use asynchronous AMI for GetVar to retrieve the channel
+  variable MIXMONITOR_FILENAME instead of going through CampaignProcess, thus
+  removing one use of AMI from CampaignProcess. Ported from CallCenterPRO.
+  SVN Rev[7526]
+* CHANGED: Dialer: remove unused parameter in _verificarFinLlamadasAgendables
+  since now schedule unpause is done by AMIEventProcess. Ported from
+  CallCenterPRO.
+  SVN Rev[7525]
+* CHANGED: Dialer: retry call update operation on deadlock or timeout. This
+  reduces the chances of an exception interruting the Predictor enumeration
+  wait. Ported from CallCenterPRO.
+  SVN Rev[7524]
+* FIXED: Dialer: synchronize pause state when updating queue membership.
+  Otherwise a static agent added to a new queue while paused will not inherit
+  the paused state and will receive calls through the new membership. Ported
+  from CallCenterPRO.
+  SVN Rev[7523]
+* CHANGED: Dialer: encapsulate check for restartable exception. Ported from
+  CallCenterPRO.
+  SVN Rev[7522]
+* FIXED: Dialer: re-throw exception after removing event handlers. Fixes failure
+  to install event handlers on next iteration. Ported from CallCenterPRO.
+  SVN Rev[7521]
+* CHANGED: Do Not Call: switch to use of PDO for DNC number inserts. This is
+  3x as fast as the same operations using the paloDB class.
+  SVN Rev[7520]
+* CHANGED: Agent Console: instead of blanking the call information panel, it is
+  now colored in a "disabled" color.
+  SVN Rev[7513]
+* CHANGED: Campaign Out: isolate database inserts for outgoing campaign from
+  CSV import code. Phase 2 of pluggable contact import support.
+  SVN Rev[7506]
+
 2.2.0-15 (SVN Revision 7502)
 * FIXED: Dialer: fix incomplete parameter replacement on call prediction after
   QueueShadow patch that caused newly created outgoing campaigns to remain

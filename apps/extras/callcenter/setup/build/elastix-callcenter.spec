@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 15
+Release: 16
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Apr 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- Bump version for release
+- Update CHANGELOG
+  SVN Rev[7606]
+
 * Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: check whether /etc/localtime is a symlink and use it as an
   additional way to find out the current timezone. Fixes part 2 of Elastix

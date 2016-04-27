@@ -4,8 +4,16 @@ engine = sqlite3
 path   = /var/www/db
 deletable = yes
 
-[address_book]
+;Disabled in order to migrate data into elastix_address_book
+;[address_book]
+;ignore_backup = no
+;engine = sqlite3
+;path   = /var/www/db
+;deletable = yes
+
+[elastix_address_book]
 ignore_backup = no
-engine = sqlite3
-path   = /var/www/db
-deletable = yes
+engine = mysql
+path = /var/lib/mysql
+deletable = no
+

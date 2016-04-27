@@ -101,6 +101,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Apr 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book: DISABLE address_book DATABASE: the elastix_address_book
+  database in MySQL will be used instead.
+  SVN Rev[7607]
+
 * Wed Apr 13 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump version and release in specfile.

@@ -101,6 +101,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Apr 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book: add contact_directory table to schema, fixes mixup
+  between visibility and directory.
+  SVN Rev[7608]
+
 * Wed Apr 27 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Address Book: DISABLE address_book DATABASE: the elastix_address_book
   database in MySQL will be used instead.

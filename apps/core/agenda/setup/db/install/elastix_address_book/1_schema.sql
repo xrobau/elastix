@@ -4,16 +4,33 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON `elastix_address_book`.* TO 'asteriskuse
 
 USE elastix_address_book;
 
+CREATE TABLE IF NOT EXISTS contact_directory
+(
+    id              INT UNSIGNED NOT NULL AUTO_INCREMENT,   /* clave primaria */
+    directory_name  VARCHAR(64) NOT NULL,
+    directory_desc  TEXT    NOT NULL,
+
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO contact_directory VALUES
+    (NULL, 'internal', 'Contacts matching PBX extensions'),
+    (NULL, 'external', 'External contacts by users' );
+
 CREATE TABLE IF NOT EXISTS contact (
-    id      INT UNSIGNED NOT NULL AUTO_INCREMENT,   /* clave primaria */
+    id              INT UNSIGNED NOT NULL AUTO_INCREMENT,   /* clave primaria */
+
+    /* ID del directorio al cual pertenece este contacto */
+    id_directory    INT UNSIGNED NOT NULL,
 
     /* ID en acl.db del usuario ACL de Elastix que es responsable de este contacto */
     iduser  INT UNSIGNED NOT NULL,
 
-    /* Bandera que indica si el contacto es público (1) o privado (0) - reemplaza a interno/externo */
+    /* Bandera que indica si el contacto es público (1) o privado (0) - reemplaza a status=isPublic/isPrivate */
     visibility  BOOLEAN NOT NULL DEFAULT 0,
 
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    FOREIGN KEY (id_directory) REFERENCES contact_directory (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /* Números telefónicos asociados al contacto */

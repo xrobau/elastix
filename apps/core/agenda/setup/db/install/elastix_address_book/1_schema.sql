@@ -83,9 +83,6 @@ CREATE TABLE IF NOT EXISTS contact_attribute (
     attribute_key   VARCHAR(32) NOT NULL,
     attribute_value TEXT NOT NULL,
 
-    /* rol asociado para el correo */
-    email_role      ENUM('work', 'personal') NOT NULL DEFAULT 'personal',
-
     PRIMARY KEY (id),
     FOREIGN KEY (id_contact) REFERENCES contact(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

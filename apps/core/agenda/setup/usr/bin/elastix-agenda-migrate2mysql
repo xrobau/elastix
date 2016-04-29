@@ -1,0 +1,191 @@
+#!/usr/bin/php
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+*/
+
+/* This script should be run exactly once, to migrate all contact data contained
+   in the file /var/www/db/address_book.db and put it into the MySQL database
+   elastix_address_book. */
+
+if (!file_exists('/var/www/db/address_book.db')) {
+    print "INFO: /var/www/db/address_book.db not found, assuming database already migrated.\n";
+    exit(0);
+}
+   
+if (!($documentRoot = getenv('ELASTIX_ROOT'))) $documentRoot="/var/www/html";
+require_once("$documentRoot/libs/misc.lib.php");
+require_once("$documentRoot/configs/default.conf.php");
+
+global $arrConf;
+require_once("$arrConf[basePath]/libs/paloSantoDB.class.php");
+
+
+$pDB = new paloDB('sqlite3:////var/www/db/address_book.db');
+if ($pDB->errMsg != '') {
+    fprintf(STDERR, "FATAL: could not open sqlite3 database: {$pDB->errMsg}\n");
+    exit(1);
+}
+$rs_old = $pDB->fetchTable('SELECT * FROM contact', TRUE);
+if (!is_array($rs_old)) {
+    fprintf(STDERR, "FATAL: could not read contacts from sqlite3 database: {$pDB->errMsg}\n");
+    exit(1);
+}
+$pDB = NULL;
+
+$dsn = generarDSNSistema('asteriskuser', 'elastix_address_book', $arrConf['basePath'].'/');
+$pDB = new paloDB($dsn);
+if ($pDB->errMsg != '') {
+    fprintf(STDERR, "FATAL: could not open new database: {$pDB->errMsg}\n");
+    exit(1);
+}
+
+// Load IDs for internal and external contacts
+$rs_dir = $pDB->fetchTable('SELECT id, directory_name FROM contact_directory', TRUE);
+if (!is_array($rs_dir)) {
+    fprintf(STDERR, "FATAL: could not load contact directory IDs: {$pDB->errMsg}\n");
+    exit(1);
+}
+$dirs = array();
+foreach ($rs_dir as $tupla_dir) {
+    $dirs[$tupla_dir['directory_name']] = $tupla_dir['id'];
+}
+unset($rs_dir);
+
+$bError = FALSE;
+$pDB->beginTransaction();
+foreach ($rs_old as $tupla_old) {
+    // Fields added since 2.0.0-22
+    foreach (array('picture', 'address', 'company', 'notes') as $k)
+        if (!isset($tupla_old[$k])) $tupla_old[$k] = NULL;
+    if (!isset($tupla_old['status'])) $tupla_old['status'] = 'isPrivate';
+    
+    // Fields added since 2.4.0-4
+    foreach (array('cell_phone', 'home_phone', 'fax1', 'fax2', 'province', 'city', 'company_contact', 'contact_rol' /* sp */) as $k)
+        if (!isset($tupla_old[$k])) $tupla_old[$k] = NULL;
+    if (!isset($tupla_old['directory'])) $tupla_old['directory'] = 'external';
+
+    // Fields added since 2.4.0-5
+    foreach (array('department', 'im') as $k)
+        if (!isset($tupla_old[$k])) $tupla_old[$k] = NULL;
+
+    // Check for supported directory
+    if (!isset($dirs[$tupla_old['directory']])) {
+        fprintf(STDERR, "ERR: dropping contact {$tupla_old[id]} with unsupported directory {$tupla_old[directory]}...\n");
+        continue;
+    }
+
+    // Insert base contact
+    $r = $pDB->genQuery('INSERT INTO contact (id_directory, iduser, visibility) VALUES (?, ?, ?)',
+        array($dirs[$tupla_old['directory']], $tupla_old['iduser'], ($tupla_old['status'] == 'isPublic') ? 1 : 0));
+    if (!$r) {
+        $bError = TRUE;
+        fprintf(STDERR, "FATAL: could not insert contact: {$pDB->errMsg}\n");
+        break;
+    }
+    $id_contact = $pDB->getLastInsertId();
+    
+    // Insert attributes
+    $attr = array();
+    foreach (array('name', 'last_name', 'picture', 'notes', 'address', 'city',
+        'province', 'company', 'province', 'company', 'department', 'company_contact') as $k)
+        if (!empty($tupla_old[$k])) $attr[$k] = trim($tupla_old[$k]);
+    // contact_rol --> contact_role
+    if (!empty($tupla_old['contact_rol'])) $attr['contact_role'] = trim($tupla_old['contact_rol']);
+    foreach ($attr as $k => $v) {
+        $r = $pDB->genQuery('INSERT INTO contact_attribute (id_contact, attribute_key, attribute_value) VALUES (?, ?, ?)',
+            array($id_contact, $k, $v));
+        if (!$r) {
+            $bError = TRUE;
+            fprintf(STDERR, "FATAL: could not insert contact attribute: {$pDB->errMsg}\n");
+            break 2;
+        }
+    }
+    
+    /* All contacts have at least one phone. For public contacts, this is the extension
+       in freepbx, with role 'work'. */
+    $phones = array();
+    $phones[] = array($tupla_old['telefono'], $tupla_old['extension'], 'work');
+    if (!empty($tupla_old['cell_phone']))
+        $phones[] = array($tupla_old['cell_phone'], NULL, 'mobile');
+    if (!empty($tupla_old['home_phone']))
+        $phones[] = array($tupla_old['home_phone'], NULL, 'home');
+    if (!empty($tupla_old['fax1']))
+        $phones[] = array($tupla_old['fax1'], NULL, 'fax');
+    if (!empty($tupla_old['fax2']))
+        $phones[] = array($tupla_old['fax2'], NULL, 'fax');
+    foreach ($phones as $phone) {
+        array_unshift($phone, $id_contact);
+        $r = $pDB->genQuery('INSERT INTO contact_phone_number (id_contact, phone_number, extension, phone_role) VALUES (?, ?, ?, ?)',
+            $phone);
+        if (!$r) {
+            $bError = TRUE;
+            fprintf(STDERR, "FATAL: could not insert contact phone: {$pDB->errMsg}\n");
+            break 2;
+        }
+    }
+
+    // Insert email if one exists
+    $emails = array();
+    if (!empty($tupla_old['email']))
+        $emails[] = array($tupla_old['email'], 'work');
+    foreach ($emails as $email) {
+        array_unshift($email, $id_contact);
+        $r = $pDB->genQuery('INSERT INTO contact_email (id_contact, email, email_role) VALUES (?, ?, ?)',
+            $email);
+        if (!$r) {
+            $bError = TRUE;
+            fprintf(STDERR, "FATAL: could not insert contact email: {$pDB->errMsg}\n");
+            break 2;
+        }
+    }
+    
+    // Insert IM if one exists
+    $ims = array();
+    if (!empty($tupla_old['im']))
+        $ims[] = array($tupla_old['im'], 'work');
+    foreach ($ims as $im) {
+        array_unshift($im, $id_contact);
+        $r = $pDB->genQuery('INSERT INTO contact_im_address (id_contact, im_address, im_role) VALUES (?, ?, ?)',
+            $im);
+        if (!$r) {
+            $bError = TRUE;
+            fprintf(STDERR, "FATAL: could not insert contact IM: {$pDB->errMsg}\n");
+            break 2;
+        }
+    }
+}
+if (!$bError) {
+    $pDB->commit();
+    rename('/var/www/db/address_book.db', '/var/www/db/address_book.db.migrated');
+    exit(0);
+} else {
+    $pDB->rollBack();
+    exit(1);
+}
+
+

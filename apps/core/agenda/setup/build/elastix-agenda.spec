@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Fri Apr 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Address Book: added migration script to MySQL schema.
+  SVN Rev[7610]
 - CHANGED: Address Book: add contact_directory table to schema, fixes mixup
   between visibility and directory.
   SVN Rev[7608]

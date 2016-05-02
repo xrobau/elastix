@@ -101,6 +101,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon May  2 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: use SET NAMES utf8 in address book migration script.
+  SVN Rev[7611]
+
 * Fri Apr 29 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Address Book: added migration script to MySQL schema.
   SVN Rev[7610]

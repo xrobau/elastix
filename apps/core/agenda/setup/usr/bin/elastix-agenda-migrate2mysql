@@ -63,6 +63,7 @@ if ($pDB->errMsg != '') {
     fprintf(STDERR, "FATAL: could not open new database: {$pDB->errMsg}\n");
     exit(1);
 }
+$pDB->genQuery('SET NAMES "utf8"');
 
 // Load IDs for internal and external contacts
 $rs_dir = $pDB->fetchTable('SELECT id, directory_name FROM contact_directory', TRUE);

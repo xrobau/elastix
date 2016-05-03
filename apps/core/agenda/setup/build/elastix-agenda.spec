@@ -101,22 +101,6 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
-* Mon May  2 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
-- FIXED: use SET NAMES utf8 in address book migration script.
-  SVN Rev[7611]
-
-* Fri Apr 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
-- ADDED: Address Book: added migration script to MySQL schema.
-  SVN Rev[7610]
-- CHANGED: Address Book: add contact_directory table to schema, fixes mixup
-  between visibility and directory.
-  SVN Rev[7608]
-
-* Wed Apr 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGED: Address Book: DISABLE address_book DATABASE: the elastix_address_book
-  database in MySQL will be used instead.
-  SVN Rev[7607]
-
 * Thu Dec 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Address Book: extend registration status report for list of all
   internal contacts. Tweak so that only one external command is required per

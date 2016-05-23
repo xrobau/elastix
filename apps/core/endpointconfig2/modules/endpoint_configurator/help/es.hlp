@@ -18,7 +18,7 @@ pre {
     </header>
     <body>
         <h1>{$node_name}</h1>
-<p>El módulo "Nuevo Configurador de Endpoint"  permite la configuración automática de manera remota de los endpoints soportados. Este módulo combina la funcionalidad de los módulos antiguos "Configurador de Endpoints" y "Lote de Endpoints" en una sola interfaz completamente reescrita. Con este módulo el administrador puede apuntar los endpoints soportados hacia ELastix como su servidor de telefonía.</p>
+<p>El módulo "Nuevo Configurador de Endpoint"  permite la configuración automática de manera remota de los endpoints soportados. Este módulo combina la funcionalidad de los módulos antiguos "Configurador de Endpoints" y "Lote de Endpoints" en una sola interfaz completamente reescrita. Con este módulo el administrador puede apuntar los endpoints soportados hacia Elastix como su servidor de telefonía.</p>
 
 <h3>Tabla de contenido</h3>
 <ol>
@@ -365,6 +365,7 @@ Soporta reinicio remoto. </li>
 <li>Fanvil: C56,C58,C60,C62. Parte de la familia Atcom. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: bridge, timezone.</li>
 <li>Grandstream: BT200,HT386,GXP280,GXP1400,GXP1405,GXP1450,GXP2000,GXP2020,GXP2100,GXP2120,GXP2200,GXV3140,GXV3175.
  Soporta reinicio remoto. Provisionamiento estático soportado por BT200, GXP140x (y Elastix), GXP1450, y GXV series, no soportado para los demás. Puede ser enlazado con la agenda interna y externa de Elastix. Soporta las siguientes propiedades adicionales: timezone, language.</li>
+<li>INCOM: ICW-1000. Soporta reinicio remoto y provisionamiento estático.</li>
 <li>LG-ERICSSON: IP8802. Soporta reinicio remoto y provisionamiento estático. Soporta las siguientes propiedades adicionales: timezone.</li>
 <li>CiscoSPA : SPA501G,SPA502G,SPA504G,SPA508G,SPA509G,SPA512G,SPA514G,SPA525G2,SPA301G,SPA303G.
 Soporta reinicio remoto. Soporta las siguientes propiedades adicionales: timezone, daylightrule, daylightenable.

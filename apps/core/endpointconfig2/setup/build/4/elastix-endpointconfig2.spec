@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon May 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: introduce new manufacturer INCOM with new
+  phone model ICW-1000.
+  SVN Rev[7613]
+
 * Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: added partial Russian translations by user
   Russian.

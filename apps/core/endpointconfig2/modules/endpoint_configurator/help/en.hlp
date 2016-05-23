@@ -568,6 +568,7 @@ provisioning supported. Supports the following extra endpoint properties: bridge
  Remote reboot supported. Static provisioning supported for BT200, GXP140x (and Elastix),
  GXP1450, and GXV series, unsupported in all others. Can be linked to the Elastix internal and
  external agendas. Supports the following extra endpoint properties: timezone, language.</li>
+<li>INCOM: ICW-1000. Remote reboot and static provisioning supported.</li>
 <li>LG-ERICSSON: IP8802. Remote reboot and static provisioning supported. Supports the
 following extra endpoint properties: timezone.</li>
 <li>CiscoSPA : SPA501G,SPA502G,SPA504G,SPA508G,SPA509G,SPA512G,SPA514G,SPA525G2,SPA301G,SPA303G.

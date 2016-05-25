@@ -29,11 +29,9 @@
 
 function _moduleContent(&$smarty, $module_name)
 {
-	//include module files
-    include_once "libs/paloSantoDB.class.php";
-    include_once "libs/paloSantoForm.class.php";
-    include      "configs/languages.conf.php";
-    include_once "modules/$module_name/configs/default.conf.php";
+    require_once "libs/paloSantoDB.class.php";
+    require_once "libs/paloSantoForm.class.php";
+    require_once "modules/$module_name/configs/default.conf.php";
 
     load_language_module($module_name);
 
@@ -43,95 +41,69 @@ function _moduleContent(&$smarty, $module_name)
     $arrConf = array_merge($arrConf,$arrConfModule);
 
     //folder path for custom templates
-    $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
-    $templates_dir=(isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
-    $local_templates_dir="$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
-    
-    $error_msg='';
-    $msgError='';
-    $contenido='';
-    $archivos=array();
-    $langElastix=array();
-    $arrDefaultRate=array();
-    $conexionDB=FALSE;
-    //leer los archivos disponibles
-  /*  $languages=array(
-                    "en"=>"English",
-                    "es"=>"Español",
-                    "fr"=>"Français",
-                    );*/
-    leer_directorio("lang",$error_msg,$archivos);
-    if (count($archivos)>0)
-    {
-        foreach ($languages as $lang=>$lang_name)
-        {
-            if (in_array("$lang.lang",$archivos))
-               $langElastix[$lang]=$lang_name;
-        }
-    }
+    $base_dir = dirname($_SERVER['SCRIPT_FILENAME']);
+    $templates_dir = (isset($arrConf['templates_dir']))?$arrConf['templates_dir']:'themes';
+    $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-    if (count($langElastix)>0){
+    $languages = load_available_languages();
 
-        //si no me puedo conectar a la base de datos
+    //si no me puedo conectar a la base de datos
 //       debo presentar un mensaje en vez del boton cambiar
 //       un
-        $arrForm  = array("language"  => array("LABEL"                  => _tr("Select language"),
-                                               "REQUIRED"               => "yes",
-                                               "INPUT_TYPE"             => "SELECT",
-                                               "INPUT_EXTRA_PARAM"      => $langElastix,
-                                               "VALIDATION_TYPE"        => "text",
-                                               "VALIDATION_EXTRA_PARAM" => ""),);
-        $oForm = new paloForm($smarty, $arrForm);
-        $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
-        if(empty($pDB->errMsg)) {
-            $conexionDB=TRUE;
-
-        if(isset($_POST['save_language'])) {
-        //guardar el nuevo valor
-            $lang = $_POST['language'];
-            
-            $bExito=set_key_settings($pDB,'language',$lang);
-        //redirigir a la pagina nuevamente
-            if ($bExito)
-            header("Location: index.php?menu=language");
-            else
-               $smarty->assign("mb_message", "Error");
-        }
-    //obtener el valor de la tarifa por defecto
-            $defLang=get_key_settings($pDB,'language');
-            if (empty($defLang)) $defLang="en";
-            $arrDefaultRate['language']=$defLang;
-        }
-        else
-             $msgError=_tr("You can't change language").'.-'._tr("ERROR").":".$pDB->errMsg;
-       // $arrDefaultRate['language']="es";
-        $smarty->assign("CAMBIAR", _tr("Save"));
-        $smarty->assign("MSG_ERROR",$msgError);
-        $smarty->assign("conectiondb",$conexionDB);
-	$smarty->assign("icon","modules/$module_name/images/system_preferencies_language.png");
-        $contenido = $oForm->fetchForm("$local_templates_dir/language.tpl", _tr("Language"), $arrDefaultRate);
+    $arrForm  = array(
+        "language"  => array(
+            "LABEL"                  => _tr("Select language"),
+            "REQUIRED"               => "yes",
+            "INPUT_TYPE"             => "SELECT",
+            "INPUT_EXTRA_PARAM"      => $languages,
+            "VALIDATION_TYPE"        => "text",
+            "VALIDATION_EXTRA_PARAM" => ""
+        ),
+    );
+    $oForm = new paloForm($smarty, $arrForm);
+    $pDB = new paloDB($arrConf['elastix_dsn']['settings']);
+    if (!empty($pDB->errMsg)) {
+        $smarty->assign(array(
+            'mb_title'      =>  _tr('Error'),
+            'mb_message'    =>  _tr("You can't change language").': '.$pDB->errMsg,
+        ));
+        return '';
     }
-    return $contenido;
-}
 
-function leer_directorio($directorio,$error_msg,&$archivos)
-{
-    $bExito=FALSE;
-    $archivos=array();
-    if (file_exists($directorio)) {
-        if ($handle = opendir($directorio)) {
-            $bExito=true;
-            while (false !== ($file = readdir($handle))) {
-               //no tomar en cuenta . y ..
-                if ($file!="." && $file!=".." )
-                    $archivos[]=$file;
+    if (isset($_POST['save_language'])) {
+        if (!isset($languages[$_POST['language']])) {
+            $smarty->assign(array(
+                'mb_title'      =>  _tr('Error'),
+                'mb_message'    =>  _tr('Unsupported language'),
+            ));
+        } else {
+            // guardar el nuevo valor
+            $bExito = set_key_settings($pDB, 'language', $_POST['language']);
+            if (!$bExito) {
+                $smarty->assign(array(
+                    'mb_title'      =>  _tr('Error'),
+                    'mb_message'    =>  $pDB->errMsg,
+                ));
+            } else {
+                // Refrescar para que tome efecto el nuevo idioma
+                Header('Location: ?menu='.$module_name);
+                return '';
             }
-            closedir($handle);
         }
+    }
 
-     }else
-        $error_msg ="No existe directorio";
+    $_POST['language'] = get_key_settings($pDB, 'language');
+    if (empty($_POST['language'])) $_POST['language'] = "en";
 
-     return $bExito;
+    $smarty->assign("CAMBIAR", _tr("Save"));
+    $smarty->assign("icon","modules/$module_name/images/system_preferencies_language.png");
+    return $oForm->fetchForm("$local_templates_dir/language.tpl", _tr("Language"), $_POST);
 }
-?>
+
+function load_available_languages()
+{
+    require "configs/languages.conf.php";
+
+    ksort($languages);
+    return $languages;
+}

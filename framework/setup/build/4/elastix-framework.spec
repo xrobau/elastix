@@ -389,6 +389,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Wed May 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Language: code cleanup. Use master language list instead of local
+  available module translations to populate dropdown list. Fixes Elastix
+  bug #2532.
+  SVN Rev[7617]
+
 * Thu Apr 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: Help screen should now load suitably translated help file,
   not only the ones in English and Spanish.

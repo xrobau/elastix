@@ -155,7 +155,7 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
-* Wed May 25 2015 Luis Abarca <labarca@palosanto.com> 2.5.0-5
+* Wed May 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-5
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
 

@@ -93,6 +93,8 @@ class PaloSantoConsola
                     $dbConnCC->genQuery(
                         'INSERT INTO eccp_authorized_clients (username, md5_password) VALUES(?, md5(?))',
                         array($sUsernameECCP, $sPasswordECCP));
+                } else {
+                    $sPasswordECCP = $md5_passwd['md5_password'];
                 }
             }
 

@@ -101,7 +101,13 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
-* Wed Apr 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+* Wed May 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: pick up and use agentconsole ECCP password if different from the
+  default. This prevents the console from breaking if eccp_users module changes
+  the password for the "agentconsole" user. Ported from CallCenterPRO.
+  SVN Rev[7620]
+
+* Wed Apr 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 2.2.0-16
 - Bump version for release
 - Update CHANGELOG
   SVN Rev[7606]

@@ -261,7 +261,7 @@ class ECCP
         $xml_request = new SimpleXMLElement("<request />");
         $xml_cmdRequest = $xml_request->addChild('login');
         $xml_cmdRequest->addChild('username', str_replace('&', '&amp;', $username));
-        $xml_cmdRequest->addChild('password', md5($password));
+        $xml_cmdRequest->addChild('password', preg_match('/^[[:xdigit:]]{32}$/', $password) ? $password : md5($password));
         $xml_response = $this->send_request($xml_request);
         if (isset($xml_response->login_response->app_cookie))
             $this->_sAppCookie = $xml_response->login_response->app_cookie;

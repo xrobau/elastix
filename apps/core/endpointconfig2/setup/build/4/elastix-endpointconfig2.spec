@@ -3,7 +3,7 @@
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 2
+Release: 3
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -155,6 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed May 25 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-3
+- CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Mon May 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: introduce new manufacturer INCOM with new
   phone model ICW-1000.

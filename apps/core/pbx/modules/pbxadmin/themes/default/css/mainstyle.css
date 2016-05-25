@@ -585,8 +585,11 @@ div.modulebuttons {
 input[type="submit"]{ height: 25px;}
 
 /*rnav*/
-.rnav .ui-widget-content {background: none;}
+.rnav .ui-widget-content {background: none; padding: 2px;}
 .rnav .ui-widget-content a {color: #072966;}
+.rnav .ui-widget-content li.ui-state-focus {
+    font-weight: normal;
+}
 
 /* menubar logo */
 #MENU_BRAND_IMAGE_TANGO_LEFT {

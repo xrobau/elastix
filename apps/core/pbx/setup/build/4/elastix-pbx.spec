@@ -300,6 +300,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed May 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Embedded FreePBX: prevent item resizing on right-hand menu list on
+  mouse hover. Fixes Elastix bug #2536.
+  SVN Rev[7619]
+
 * Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: added Russian translations by user Russian.
   SVN Rev[7593]

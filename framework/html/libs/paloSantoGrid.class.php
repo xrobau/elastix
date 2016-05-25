@@ -258,11 +258,48 @@ class paloSantoGrid {
         $this->arrFiltersControl = array();
     }
 
+    /**
+     * Procedimiento para agregar un control de desactivación de filtro a la
+     * grilla. Un control de desactivación de filtro es un hipervínculo (con
+     * GET) que tiene seteada la variable reservada "name_delete_filters", la
+     * cual tiene el valor de nombres de variables de petición separadas por
+     * coma. La función getParameter() IGNORA los valores de las variables
+     * mencionadas en la lista de "name_delete_filters" y devuelve NULL en
+     * caso de pedirlas, incluso si estuviesen seteadas.
+     *
+     * Adicionalmente, esta función verifica por su cuenta las variables a
+     * quitar mencionadas en "name_delete_filters", y si esas variables son las
+     * claves del arreglo asociativo $arrFilter, se asume que los valores de
+     * $arrFilter son los valores a reemplazar para resetear el filtro a su
+     * estado por omisión. En este caso, se asume que $arrData es la lista de
+     * variables de la petición, y los valores SE AGREGAN Y/O SOBREESCRIBEN con
+     * los valores indicados en $arrFilter.
+     *
+     * La presentación exacta del control de desactivación de filtro puede variar
+     * con el tema de Elastix, pero los temas estándar muestran el control como
+     * un rectángulo rosado con bordes redondeados, un mensaje indicado por el
+     * parámetro $msg, y una equis correspondiente al hipervínculo en sí.
+     *
+     * La secuencia de operaciones esperada por los módulos de grilla es:
+     * - creación de nuevo paloSantoGrid
+     * - se recogen las variables de petición en $arrData, usando getParameter()
+     * - se llama sucesivamente a addFilterControl para cada control a quitar
+     * - se llama showFilter() con el formulario y las variables de $arrData
+     *   posiblemente modificadas por las llamadas a addFilterControl
+     * - se construye el arreglo de url con $arrData como variables a asignar
+     *   con setURL()
+     * - conversión de $arrData a parámetros de filtración del query SQL
+     *
+     * @param string    $msg                Mensaje descriptivo del control
+     * @param array     $arrData            Variables de petición recogidas con getParameter()
+     * @param array     $arrFilter          Arreglo asociativo de variables anulables con valores de anulación
+     * @param bool      $always_activated   VERDADERO si el control debe ser visible incluso si las variables están ausentes
+     */
     public function addFilterControl($msg, &$arrData, $arrFilter = array(), $always_activated=false)
     {
         if (!empty($msg)) $msg = htmlentities($msg, ENT_COMPAT, 'UTF-8');
 
-		$defaultFiler = "yes";
+        $defaultFiler = "yes";
         if((is_array($arrFilter) && count($arrFilter)>0)){
             $name_delete_filters = getParameter('name_delete_filters');
             $keys = array_keys($arrFilter);
@@ -274,10 +311,13 @@ class paloSantoGrid {
                     $arrData[$name] = $value;
                 }
                 if($always_activated){ // a pesar de que fue eliminado el filtro, se desea que el control siga visible.
-                    $this->arrFiltersControl[] = array("msg" => $msg, "filters" => implode(",",$keys), "defaultFilter" => "yes");
-				}
-            }
-            else{
+                    $this->arrFiltersControl[] = array(
+                        "msg" => $msg,
+                        "filters" => implode(",",$keys),
+                        "defaultFilter" => "yes"
+                    );
+                }
+            } else {
                 $filter_apply = true;
                 foreach($arrFilter as $name => $value){
                     $val = (isset($arrData[$name]) && !empty($arrData[$name]))?$arrData[$name]:null;
@@ -285,20 +325,22 @@ class paloSantoGrid {
                         $filter_apply = false;
                         break;
                     }
-					//esto se hace para poder saber si el fitro aplicado corresponde al valor por default del filtro
-					if($always_activated){
-						if($val!=$arrFilter[$name]){
-							$defaultFiler = "no";
-						}
-					}else
-						$defaultFiler = "no";
+                    //esto se hace para poder saber si el fitro aplicado corresponde al valor por default del filtro
+                    if($always_activated){
+                        if($val!=$arrFilter[$name]){
+                            $defaultFiler = "no";
+                        }
+                    }else
+                        $defaultFiler = "no";
                 }
                 if($filter_apply){ //solo si todos estan seteados o tiene un value asociado (!=null)
-                    $this->arrFiltersControl[] = array("msg" => $msg, "filters" => implode(",",$keys), "defaultFilter" => $defaultFiler);
-				}
+                    $this->arrFiltersControl[] = array(
+                        "msg" => $msg,
+                        "filters" => implode(",",$keys),
+                        "defaultFilter" => $defaultFiler);
+                }
             }
-        }
-        else{
+        } else {
             echo "Invalid format for variable \$arrFilter.";
         }
     }

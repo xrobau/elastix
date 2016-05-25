@@ -390,6 +390,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed May 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add some documentation to addFilterControl method in class
+  paloSantoGrid().
+  SVN Rev[7618]
 - FIXED: Language: code cleanup. Use master language list instead of local
   available module translations to populate dropdown list. Fixes Elastix
   bug #2532.

@@ -102,9 +102,16 @@ fi
 
 %changelog
 * Wed May 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
-- FIXED: pick up and use agentconsole ECCP password if different from the
-  default. This prevents the console from breaking if eccp_users module changes
-  the password for the "agentconsole" user. Ported from CallCenterPRO.
+- FIXED: Dialer: implement abort of pending but undialed calls in case of
+  database deadlock. This prevents undialed calls from accumulating in
+  AMIEventProcess and preventing future retries due to dialstring duplication.
+  Additionally update the campaign revision timestamp more often to prevent a
+  busy CPU loop in case of a persistent database error that prevents updates.
+  Ported from CallCenterPRO.
+  SVN Rev[7621]
+- FIXED: Agent Console: pick up and use agentconsole ECCP password if different
+  from the default. This prevents the console from breaking if eccp_users module
+  changes the password for the "agentconsole" user. Ported from CallCenterPRO.
   SVN Rev[7620]
 
 * Wed Apr 27 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 2.2.0-16

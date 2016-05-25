@@ -83,7 +83,7 @@ class AMIEventProcess extends TuberiaProcess
         $this->_listaAgentes = new ListaAgentes($this->_tuberia, $this->_log);
 
         // Registro de manejadores de eventos desde CampaignProcess
-        foreach (array('quitarReservaAgente') as $k)
+        foreach (array('quitarReservaAgente', 'abortarNuevasLlamadasMarcar') as $k)
             $this->_tuberia->registrarManejador('CampaignProcess', $k, array($this, "msg_$k"));
         foreach (array('nuevasCampanias',
             'leerTiempoContestar', 'nuevasLlamadasMarcar',
@@ -681,6 +681,37 @@ class AMIEventProcess extends TuberiaProcess
             }
     	}
         return $listaKeyRepetidos;
+    }
+
+    private function _abortarNuevasLlamadasMarcar($llamadasAbortar)
+    {
+        foreach ($llamadasAbortar as $sActionID) {
+            $llamada = $this->_listaLlamadas->buscar('actionid', $sActionID);
+            if (is_null($llamada)) {
+                $this->_log->output('ERR: '.__METHOD__." no se encuentra llamada con ".
+                    "actionid=$sActionID para abortar intento de marcado");
+                continue;
+            }
+
+            // No se espera que el status sea no-NULL para llamada abortable
+            if (!is_null($llamada->status)) {
+                $this->_log->output('ERR: '.__METHOD__." llamada con ".
+                    "actionid=$sActionID ya inició marcado, no es abortable");
+                continue;
+            }
+
+            // Desconectar posible agente agendado de llamada
+            if (!is_null($llamada->agente_agendado)) {
+                $a = $llamada->agente_agendado;
+                $llamada->agente_agendado = NULL;
+                $a->llamada_agendada = NULL;
+
+                /* La llamada abortada todavía está pendiente, así que no se
+                 * debe de quitar la reservación del agente. */
+            }
+
+            $this->_listaLlamadas->remover($llamada);
+        }
     }
 
     private function _ejecutarOriginate($sFuente, $sActionID, $iTimeoutOriginate,
@@ -1459,6 +1490,15 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
         }
         call_user_func_array(array($this, '_llamadaSinSilencio'), $datos);
+    }
+
+    public function msg_abortarNuevasLlamadasMarcar($sFuente, $sDestino,
+        $sNombreMensaje, $iTimestamp, $datos)
+    {
+        if ($this->DEBUG) {
+            $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
+        }
+        call_user_func_array(array($this, '_abortarNuevasLlamadasMarcar'), $datos);
     }
 
     public function msg_finalizando($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)

@@ -324,6 +324,11 @@ class CampaignProcess extends TuberiaProcess
         // Revisar las campañas cada 3 segundos
         $iTimestamp = time();
         if ($iTimestamp - $this->_iTimestampUltimaRevisionCampanias >= INTERVALO_REVISION_CAMPANIAS) {
+
+            /* Se actualiza timestamp de revisión aquí por si no se puede
+             * actualizar más tarde debido a una excepción de DB. */
+            $this->_iTimestampUltimaRevisionCampanias = $iTimestamp;
+
             $sFecha = date('Y-m-d', $iTimestamp);
             $sHora = date('H:i:s', $iTimestamp);
             $listaCampanias = array(
@@ -444,6 +449,10 @@ PETICION_CAMPANIAS_ENTRANTES;
                 count($listaCampaniasAvisar['incoming_queue_old']) == 0))
                 $this->_tuberia->AMIEventProcess_nuevasCampanias($listaCampaniasAvisar);
 
+            /* Se actualiza timestamp de revisión aquí por si no se puede
+             * actualizar más tarde debido a una excepción de DB. */
+            $this->_iTimestampUltimaRevisionCampanias = time();
+
             // Generar las llamadas para todas las campañas salientes activas
             foreach ($listaCampanias['outgoing'] as $tuplaCampania) {
                 /* Se debe crear el predictor para cada campaña porque la
@@ -459,9 +468,11 @@ PETICION_CAMPANIAS_ENTRANTES;
                  * eventos aquí para paliar la acumulación. */
                 $this->_ociosoSinEventos = !$this->_multiplex->procesarPaquetes();
                 $this->_multiplex->procesarActividad(0);
-            }
 
-            $this->_iTimestampUltimaRevisionCampanias = $iTimestamp;
+                /* Se actualiza timestamp de revisión aquí por si no se puede
+                 * actualizar más tarde debido a una excepción de DB. */
+                $this->_iTimestampUltimaRevisionCampanias = time();
+            }
         }
     }
 
@@ -738,7 +749,9 @@ SQL_LLAMADA_COLOCADA;
 
         // Generar realmente todas las llamadas leídas
         $queue_monitor_format = NULL;
-        foreach ($listaLlamadas as $tupla) {
+        while (count($listaLlamadas) > 0) {
+            $tupla = array_shift($listaLlamadas);
+
             $listaVars = array(
                 'ID_CAMPAIGN'   =>  $infoCampania['id'],
                 'ID_CALL'       =>  $tupla['id'],
@@ -796,7 +809,12 @@ SQL_LLAMADA_COLOCADA;
                     $this->_db->rollBack();
                 }
 
-                // TODO: deshacer AMIEventProcess_nuevasLlamadasMarcar sin marcar
+                // Se deshace AMIEventProcess_nuevasLlamadasMarcar sin marcar
+                $this->_log->output('WARN: '.__METHOD__.' abortando '.
+                    count($listaLlamadas).' llamadas sin marcar debido a excepción de DB...');
+                $llamadasAbortar = array($tupla['actionid']);
+                foreach ($listaLlamadas as $t) $llamadasAbortar[] = $t['actionid'];
+                $this->_tuberia->msg_AMIEventProcess_abortarNuevasLlamadasMarcar($llamadasAbortar);
 
                 throw $e;
             }

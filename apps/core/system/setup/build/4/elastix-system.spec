@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -181,6 +181,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Wed May 25 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-7
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: check whether /etc/localtime is a symlink and use it as an additional
   way to find out the current timezone.

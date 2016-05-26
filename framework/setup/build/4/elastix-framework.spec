@@ -389,6 +389,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Thu May 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: add Turkish translation for main menus and Language module.
+  SVN Rev[7622]
+
 * Wed May 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: add some documentation to addFilterControl method in class
   paloSantoGrid().

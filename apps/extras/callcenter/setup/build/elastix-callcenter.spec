@@ -101,6 +101,11 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Thu May 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Turkish translations for Agent Console, Callcenter Config,
+  Ingoing Calls Success, Campaign Out, Campaign Monitoring.
+  SVN Rev[7624]
+
 * Wed May 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: implement abort of pending but undialed calls in case of
   database deadlock. This prevents undialed calls from accumulating in

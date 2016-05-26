@@ -180,6 +180,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu May 26 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: add Turkish translations for Currency and Shutdown modules.
+  SVN Rev[7623]
+
 * Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: check whether /etc/localtime is a symlink and use it as an additional
   way to find out the current timezone.

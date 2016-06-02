@@ -389,6 +389,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Wed Jun  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: implement method to preserve initial column widths on
+  standard tables after applying colResizable() on them.
+  SVN Rev[7625]
+
 * Thu May 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Framework: add Turkish translation for main menus and Language module.
   SVN Rev[7622]

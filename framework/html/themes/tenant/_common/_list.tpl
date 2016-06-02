@@ -247,9 +247,17 @@ $(document).ready(function() {
         }
     });
 
-    $('form.elastix-standard-formgrid>table.elastix-standard-table').colResizable({
-        liveDrag:true,
-        marginLeft:"1px"
+    $('form.elastix-standard-formgrid>table.elastix-standard-table').each(function() {
+        var wt = $(this).find('thead>tr').width();
+        $(this).find('thead>tr>th').each(function () {
+            var wc = $(this).width();
+            var pc = 100.0 * wc / wt;
+            $(this).width(pc + "%");
+        });
+        $(this).colResizable({
+            liveDrag:   true,
+            marginLeft: "0px"
+        });
     });
 });
 </script>

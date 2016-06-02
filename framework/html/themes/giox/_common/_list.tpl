@@ -216,10 +216,7 @@ $(document).ready(function() {
         }
     });
 
-    $('form.elastix-standard-formgrid>table.elastix-standard-table').colResizable({
-        liveDrag:   true,
-        marginLeft: "0px"
-    });
+    elxneo_apply_jresizer_table();
 });
 </script>
 {/literal}

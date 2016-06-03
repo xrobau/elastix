@@ -25,6 +25,7 @@ Conflicts: elastix-fax <= 2.2.0-5
 Conflicts: elastix-email_admin <= 2.3.0-8
 Conflicts: elastix-developer <= 2.3.0-4
 Conflicts: elastix-addons <= 2.5.0-3
+Conflicts: elastix-monitoring_services <= 5.4.1-8
 Conflicts: kernel-module-dahdi
 Conflicts: kernel-module-rhino
 Conflicts: kernel-module-wanpipe
@@ -389,6 +390,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Jun  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: the elastix-monitoring_services addon up to 5.4.1-8 uses
+  the obsolete /register.php route removed in SVN commit #7912. The required
+  Conflicts: header is included now.
+  SVN Rev[7626]
+
 * Wed Jun  1 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: implement method to preserve initial column widths on
   standard tables after applying colResizable() on them.

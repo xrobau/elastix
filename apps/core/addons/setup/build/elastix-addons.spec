@@ -139,6 +139,11 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Mon Jun 20 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Addons: work around change in location of primary_db in CentOS 7
+  yum update.
+  SVN Rev[7627]
+
 * Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Addons: check whether /etc/localtime is a symlink and use it as an
   additional way to find out the current timezone.

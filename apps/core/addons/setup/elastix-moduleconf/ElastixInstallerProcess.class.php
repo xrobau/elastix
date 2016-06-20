@@ -743,6 +743,7 @@ Installing for dependencies:
                 }
             }
             if (preg_match('/No package (\S+) available/', $sLinea, $regs)) {
+                $this->oMainLog->output('ERR: requested package not found: '.$regs[1]);
                 $this->_estadoPaquete['status'] = 'error';
                 $this->_estadoPaquete['errores'][] = "The following package is not available: ".$regs[1];
             }
@@ -775,9 +776,13 @@ Installing for dependencies:
                     );
 
                     if (!is_dir($sRutaRepo)) {
+                        $this->oMainLog->output('ERR: repo cache directory not found for repo: '.
+                            $sNombreRepo.' expected directory path: '.$sRutaRepo);
                         $this->_estadoPaquete['status'] = 'error';
                         $this->_estadoPaquete['errores'][] = "Unable to figure out cache directory for repo: $sNombreRepo";
                     } elseif (!is_readable($sRutaRepo.'repomd.xml')) {
+                        $this->oMainLog->output('ERR: repomd.xml not readable for repo: '.
+                            $sNombreRepo.' expected path: '.$sRutaRepo.'repomd.xml');
                         $this->_estadoPaquete['status'] = 'error';
                         $this->_estadoPaquete['errores'][] = "Unable to read file repomd.xml from repo: $sNombreRepo";
                     } else {
@@ -786,13 +791,24 @@ Installing for dependencies:
                         foreach ($repomd->data as $dataObj) {
                             if ($dataObj['type'] == 'primary_db') {
                                 $sRutaPrimary = $dataObj->location['href'];
+                                $this->oMainLog->output('INFO: repo '.$sNombreRepo.' declares primary_db at '.$sRutaPrimary);
                                 $regs = NULL;
+                                /*
                                 if (preg_match('|^(.*)/(\S+)(\.bz2)|', $sRutaPrimary, $regs)) {
                                     $sRutaPrimary = $regs[2];
                                 }
-                                $infoRepo[$sNombreRepo]['primary_db'] = $sRutaPrimary;
+                                */
+                                $sRutaPrimary = basename($sRutaPrimary, '.bz2');
+                                if (file_exists($sRutaRepo.'gen/primary_db.sqlite')) {
+                                    $infoRepo[$sNombreRepo]['primary_db'] = 'gen/primary_db.sqlite';
+                                } elseif (file_exists($sRutaRepo.'gen/'.$sRutaPrimary)) {
+                                    $infoRepo[$sNombreRepo]['primary_db'] = 'gen/'.$sRutaPrimary;
+                                } else {
+                                    $infoRepo[$sNombreRepo]['primary_db'] = $sRutaPrimary;
+                                }
                             } elseif (!isset($infoRepo[$sNombreRepo]['primary_db']) && $dataObj['type'] == 'primary') {
                                 $sRutaPrimary = $dataObj->location['href'];
+                                $this->oMainLog->output('INFO: repo '.$sNombreRepo.' declares primary at '.$sRutaPrimary);
                                 $regs = NULL;
                                 if (preg_match('|^(.*)/(\S+)|', $sRutaPrimary, $regs)) {
                                     $sRutaPrimary = $regs[2];
@@ -808,9 +824,13 @@ Installing for dependencies:
                             }
                         }
                         if (!isset($infoRepo[$sNombreRepo]['primary_db'])) {
+                            $this->oMainLog->output('ERR: primary_db not identified for repo: '.
+                                $sNombreRepo);
                             $this->_estadoPaquete['status'] = 'error';
                             $this->_estadoPaquete['errores'][] = "Unable to locate primary_db from repo: $sNombreRepo";
                         } elseif (!is_readable($sRutaRepo.$infoRepo[$sNombreRepo]['primary_db'])) {
+                            $this->oMainLog->output('ERR: primary_db not found/readable for repo: '.
+                                $sNombreRepo.' expected path: '.$sRutaRepo.$infoRepo[$sNombreRepo]['primary_db']);
                             $this->_estadoPaquete['status'] = 'error';
                             $this->_estadoPaquete['errores'][] = "Unable to read primary_db from repo: $sNombreRepo";
                             unset($infoRepo[$sNombreRepo]['primary_db']);
@@ -829,6 +849,8 @@ Installing for dependencies:
                 $repo =& $infoRepo[$infoPaquete['repo']];
                 $regs = NULL;
                 if (!preg_match('/^((\S+):)?(\S+)-(\S+)$/', $infoPaquete['version'], $regs)) {
+                    $this->oMainLog->output('ERR: package name '.$infoPaquete['nombre'].
+                        ' has unparsable version string: '.$infoPaquete['version']);
                     $this->_estadoPaquete['status'] = 'error';
                     $this->_estadoPaquete['errores'][] = "Unable to parse version string for package: ".$infoPaquete['nombre'];
                 } else {
@@ -840,6 +862,7 @@ Installing for dependencies:
                     $dsn = "sqlite3:///".$repo['ruta'].$repo['primary_db'];
                     $oDB = new paloDB($dsn);
                     if ($oDB->connStatus) {
+                        $this->oMainLog->output('ERR: failed to open primary_db as sqlite database: '.$dsn);
                         $this->_estadoPaquete['status'] = 'error';
                         $this->_estadoPaquete['errores'][] = "Unable to open primary_db for package: ".$infoPaquete['nombre'];
                     } else {
@@ -857,6 +880,7 @@ Installing for dependencies:
                             $sRelease,
                         ));
                         if (!is_array($recordset)) {
+                            $this->oMainLog->output('ERR: failed to query from sqlite database: '.$dsn);
                             $this->_estadoPaquete['status'] = 'error';
                             $this->_estadoPaquete['errores'][] = "Unable to query primary_db for package: ".$infoPaquete['nombre'];
                         } elseif (count($recordset) <= 0) {

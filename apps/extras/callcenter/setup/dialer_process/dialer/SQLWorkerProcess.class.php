@@ -88,7 +88,8 @@ class SQLWorkerProcess extends TuberiaProcess
             'sqlupdatecurrentcalls', 'sqlupdatestatcampaign', 'finalsql',
             'verificarFinLlamadasAgendables', 'agregarArchivoGrabacion',
             'AgentLogin', 'AgentLogoff', 'AgentLinked', 'AgentUnlinked',
-            'marcarFinalHold', 'nuevaMembresiaCola', 'notificarProgresoLlamada',) as $k)
+            'marcarFinalHold', 'nuevaMembresiaCola', 'notificarProgresoLlamada',
+            'requerir_credencialesAsterisk',) as $k)
             $this->_tuberia->registrarManejador('AMIEventProcess', $k, array($this, "msg_$k"));
 
         // Registro de manejadores de eventos desde ECCPWorkerProcess
@@ -101,6 +102,13 @@ class SQLWorkerProcess extends TuberiaProcess
         $this->DEBUG = $this->_configDB->dialer_debug;
 
         // Informar a AMIEventProcess la configuración de Asterisk
+        $this->_informarCredencialesAsterisk();
+
+        return TRUE;
+    }
+
+    private function _informarCredencialesAsterisk()
+    {
         $this->_tuberia->AMIEventProcess_informarCredencialesAsterisk(array(
             'asterisk'  =>  array(
                 'asthost'           =>  $this->_configDB->asterisk_asthost,
@@ -115,8 +123,6 @@ class SQLWorkerProcess extends TuberiaProcess
                 'allevents'         =>  $this->_configDB->dialer_allevents,
             ),
         ));
-
-        return TRUE;
     }
 
     private function _interpretarConfiguracion($infoConfig)
@@ -358,6 +364,12 @@ class SQLWorkerProcess extends TuberiaProcess
     {
         $this->_log->output("INFO: $sFuente requiere refresco de lista de agentes");
         $this->_encolarAccionPendiente('_requerir_nuevaListaAgentes', $datos);
+    }
+
+    public function msg_requerir_credencialesAsterisk($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
+    {
+        $this->_log->output("INFO: $sFuente requiere envío de credenciales Asterisk");
+        $this->_informarCredencialesAsterisk(); // <-- no requiere acceso inmediato a base de datos
     }
 
     public function msg_sqlinsertcalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)

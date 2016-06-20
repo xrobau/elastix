@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Mon Jun 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: fix AMIEventProcess inability to reconnect to AMI after a
+  process crash, since SQLWorkerProcess had no way to be notified that the
+  instance needed to be sent the AMI credentials. Ported from CallCenterPRO.
+  SVN Rev[7628]
+
 * Thu May 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Added Turkish translations for Agent Console, Callcenter Config,
   Ingoing Calls Success, Campaign Out, Campaign Monitoring.

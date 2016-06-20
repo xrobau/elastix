@@ -1320,6 +1320,10 @@ class AMIEventProcess extends TuberiaProcess
                 'colas en progreso: '.$this->_tmp_actionid_queuestatus);
             return;
         }
+        if (is_null($this->_ami)) {
+            $this->_log->output('WARN: '.__METHOD__.': no se dispone de conexión Asterisk, se ignora petición...');
+            return;
+        }
 
         list($total_agents, $queueflags) = $datos;
 

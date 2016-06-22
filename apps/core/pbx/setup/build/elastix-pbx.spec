@@ -300,6 +300,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Wed Jun 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: factorize recording row formatting into a single method and
+  factorize common code between normal display and report download. This
+  addresses incomplete fix for Elastix bug #2147 from SVN commit #6833.
+  SVN Rev[7631]
+
 * Wed May 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Embedded FreePBX: prevent item resizing on right-hand menu list on
   mouse hover. Fixes Elastix bug #2536.

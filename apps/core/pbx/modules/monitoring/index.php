@@ -62,9 +62,12 @@ function _moduleContent(&$smarty, $module_name)
     $pACL = new paloACL($pDBACL);
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $extension = $pACL->getUserExtension($user);
+    if ($extension == '') $extension = NULL;
     $esAdministrador = $pACL->isUserAdministratorGroup($user);
-    if($extension=="" || is_null($extension)){
-        if($esAdministrador)
+
+    // Sólo el administrador puede consultar con $extension == NULL
+    if (is_null($extension)) {
+        if ($esAdministrador)
             $smarty->assign("mb_message", "<b>"._tr("no_extension")."</b>");
         else{
             $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
@@ -171,12 +174,9 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     $oGrid->enableExport();   // enable export.
     $oGrid->setNameFile_Export(_tr("Monitoring"));
 
-    if($esAdministrador)
-        $totalMonitoring = $pMonitoring->getNumMonitoring($filter_field, $filter_value, null, $date_initial, $date_final);
-    elseif(!($extension=="" || is_null($extension)))
-        $totalMonitoring = $pMonitoring->getNumMonitoring($filter_field, $filter_value, $extension, $date_initial, $date_final);
-    else
-        $totalMonitoring = 0;
+    // Se asume que sólo el administrador puede consultar con extension NULL
+    $totalMonitoring = $pMonitoring->getNumMonitoring($filter_field, $filter_value,
+        $esAdministrador ? NULL : $extension, $date_initial, $date_final);
     $url = array('menu' => $module_name);
 
     $paramFilter = array(
@@ -190,138 +190,65 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     $oGrid->setURL($url);
 
     $arrData = null;
-    if($oGrid->isExportAction()){
+    $oGrid->setTotal($totalMonitoring);
+    if ($oGrid->isExportAction()) {
         $limit = $totalMonitoring;
         $offset = 0;
 
-        $arrColumns = array(_tr("Date"), _tr("Time"), _tr("Source"), _tr("Destination"),_tr("Duration"),_tr("Type"),_tr("File"));
-        $oGrid->setColumns($arrColumns);
-
-        if($esAdministrador)
-            $arrResult =$pMonitoring->getMonitoring($limit, $offset, $filter_field, $filter_value, null, $date_initial, $date_final);
-        elseif(!($extension=="" || is_null($extension)))
-            $arrResult =$pMonitoring->getMonitoring($limit, $offset, $filter_field, $filter_value, $extension, $date_initial, $date_final);
-        else
-            $arrResult = array();
-
-        if(is_array($arrResult) && $totalMonitoring>0){
-            foreach($arrResult as $key => $value){
-                $arrTmp[0] = date('d M Y',strtotime($value['calldate']));
-                $arrTmp[1] = date('H:i:s',strtotime($value['calldate']));
-                $arrTmp[2] = $value['src'];
-                $arrTmp[3] = $value['dst'];
-                $arrTmp[4] = SecToHHMMSS($value['duration']);
-                $file = $value['uniqueid'];
-                $namefile = basename($value['recordingfile']);
-                if ($namefile == 'deleted') {
-                    $arrTmp[5] = _tr('Deleted');
-                } else switch($namefile[0]){
-                     case 'O':  // FreePBX 2.8.1
-                     case 'o':  // FreePBX 2.11+
-                        $arrTmp[5] = _tr("Outgoing");
-                        break;
-                     case 'g':  // FreePBX 2.8.1
-                     case 'r':  // FreePBX 2.11+
-                        $arrTmp[5] = _tr("Group");
-                        break;
-                     case "q":
-                        $arrTmp[5] = _tr("Queue");
-                        break;
-                     default :
-                        $arrTmp[5] = _tr("Incoming");
-                        break;
-                }
-                $arrTmp[6] = $namefile;
-                $arrData[] = $arrTmp;
-            }
-        }
-    }
-    else{
+        $arrColumns = array(_tr("Date"), _tr("Time"), _tr("Source"),
+            _tr("Destination"), _tr("Duration"),_tr("Type"),_tr("File"));
+    } else {
         $limit  = 20;
-        $total  = $totalMonitoring;
         $oGrid->setLimit($limit);
-        $oGrid->setTotal($total);
         $offset = $oGrid->calculateOffset();
 
-        if($esAdministrador){
-        $oGrid->deleteList(_tr("message_alert"),'submit_eliminar',_tr("Delete"));
-            $buttonDelete = "";
-        }
-        else
-            $buttonDelete = "";
+        $arrColumns = array('', _tr("Date"), _tr("Time"), _tr("Source"),
+            _tr("Destination"),_tr("Duration"),_tr("Type"),_tr("Message"));
+    }
 
-        $arrColumns = array($buttonDelete, _tr("Date"), _tr("Time"), _tr("Source"), _tr("Destination"),_tr("Duration"),_tr("Type"),_tr("Message"));
-        $oGrid->setColumns($arrColumns);
+    $oGrid->setColumns($arrColumns);
 
-        if($esAdministrador)
-            $arrResult =$pMonitoring->getMonitoring($limit, $offset, $filter_field, $filter_value, null, $date_initial, $date_final);
-        elseif(!($extension=="" || is_null($extension)))
-            $arrResult =$pMonitoring->getMonitoring($limit, $offset, $filter_field, $filter_value, $extension, $date_initial, $date_final);
-        else
-            $arrResult = array();
+    // Se asume que sólo el administrador puede consultar con extension NULL
+    $arrResult = $pMonitoring->getMonitoring($limit, $offset, $filter_field, $filter_value,
+        $esAdministrador ? NULL : $extension, $date_initial, $date_final);
 
-        if(is_array($arrResult) && $total>0){
-            $src = "";
-            $dst = "";
-            foreach($arrResult as $key => $value){
-                if($esAdministrador)
-                    $arrTmp[0] = "<input type='checkbox' name='id_".$value['uniqueid']."' />";
-                else
-                    $arrTmp[0] = "";
-                $arrTmp[1] = date('d M Y',strtotime($value['calldate']));
-                $arrTmp[2] = date('H:i:s',strtotime($value['calldate']));
-                if(!isset($value['src']) || $value['src']=="")
-                    $src = "<font color='gray'>"._tr("unknown")."</font>";
-                else
-                    $src = $value['src'];
-                if(!isset($value['dst']) || $value['dst']=="")
-                    $dst = "<font color='gray'>"._tr("unknown")."</font>";
-                else
-                    $dst = $value['dst'];
-                $arrTmp[3] = $src;
-                $arrTmp[4] = $dst;
-                $arrTmp[5] = "<label title='".$value['duration']." seconds' style='color:green'>".SecToHHMMSS( $value['duration'] )."</label>";
+    if (is_array($arrResult)) {
+        if ($oGrid->isExportAction()) {
+            $arrData = array_map('formatCallRecordingTuple', $arrResult);
+        } else foreach ($arrResult as $value) {
+            $arrTmp = formatCallRecordingTuple($value);
+            array_unshift($arrTmp, $esAdministrador ? "<input type='checkbox' name='id_".$value['uniqueid']."' />" : '');
 
-                //$file = base64_encode($value['recordingfile']);
-                $file = $value['uniqueid'];
-                $namefile = basename($value['recordingfile']);
-                if ($namefile == 'deleted') {
-                    $arrTmp[6] = _tr('Deleted');
-                } else switch($namefile[0]){
-                      case "O":
-                          $arrTmp[6] = _tr("Outgoing");
-                      break;
-                      case "g":
-                          $arrTmp[6] = _tr("Group");
-                      break;
-                      case "q":
-                          $arrTmp[6] = _tr("Queue");
-                      break;
-                      default :
-                          $arrTmp[6] = _tr("Incoming");
-                      break;
-                }
-                if ($namefile != 'deleted') {
-                    $urlparams = array(
-                        'menu'      =>  $module_name,
-                        'action'    =>  'display_record',
-                        'id'        =>  $file,
-                        'namefile'  =>  $namefile,
-                        'rawmode'   =>  'yes',
-                    );
-                    $recordingLink = "<a href=\"javascript:popUp('index.php?".urlencode(http_build_query($urlparams)."',350,100);")."\">"._tr("Listen")."</a>&nbsp;";
+            // checkbox(id_uniqueid) date time src dst hh:mm:ss rectype namefile
+            if ($arrTmp[3] == '') $arrTmp[3] = "<font color='gray'>"._tr("unknown")."</font>";
+            if ($arrTmp[4] == '') $arrTmp[4] = "<font color='gray'>"._tr("unknown")."</font>";
+            $arrTmp[5] = "<label title='".$value['duration']." "._tr('seconds')."' style='color:green'>".$arrTmp[5]."</label>";
 
-                    $urlparams['action'] = 'download';
-                    $recordingLink .= "<a href='?".http_build_query($urlparams)."' >"._tr("Download")."</a>";
-                } else {
-                    $recordingLink = '';
-                }
-                $arrTmp[7] = $recordingLink;
-                $arrData[] = $arrTmp;
+            if ($arrTmp[7] != 'deleted') {
+                $urlparams = array(
+                    'menu'      =>  $module_name,
+                    'action'    =>  'display_record',
+                    'id'        =>  $value['uniqueid'],
+                    'namefile'  =>  $arrTmp[7],
+                    'rawmode'   =>  'yes',
+                );
+                $recordingLink = "<a href=\"javascript:popUp('index.php?".urlencode(http_build_query($urlparams)."',350,100);")."\">"._tr("Listen")."</a>&nbsp;";
+
+                $urlparams['action'] = 'download';
+                $recordingLink .= "<a href='?".http_build_query($urlparams)."' >"._tr("Download")."</a>";
+            } else {
+                $recordingLink = '';
             }
+            $arrTmp[7] = $recordingLink;
+
+            $arrData[] = $arrTmp;
         }
     }
     $oGrid->setData($arrData);
+
+    if ($esAdministrador) {
+        $oGrid->deleteList(_tr("message_alert"), 'submit_eliminar', _tr("Delete"));
+    }
 
     //begin section filter
     $arrFormFilterMonitoring = createFieldFilter();
@@ -353,6 +280,38 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     //end grid parameters
 
     return $content;
+}
+
+function formatCallRecordingTuple($value)
+{
+    $namefile = basename($value['recordingfile']);
+    if ($namefile == 'deleted') {
+        $rectype = _tr('Deleted');
+    } else switch($namefile[0]){
+        case 'O':  // FreePBX 2.8.1
+        case 'o':  // FreePBX 2.11+
+            $rectype = _tr("Outgoing");
+            break;
+        case 'g':  // FreePBX 2.8.1
+        case 'r':  // FreePBX 2.11+
+            $rectype = _tr("Group");
+            break;
+        case "q":
+            $rectype = _tr("Queue");
+            break;
+        default :
+            $rectype = _tr("Incoming");
+            break;
+    }
+    return array(
+        date('d M Y',strtotime($value['calldate'])),
+        date('H:i:s',strtotime($value['calldate'])),
+        isset($value['src']) ? $value['src'] : '',
+        isset($value['dst']) ? $value['dst'] : '',
+        SecToHHMMSS($value['duration']),
+        $rectype,
+        $namefile,
+    );
 }
 
 function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,

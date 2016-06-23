@@ -1,7 +1,7 @@
 Summary: LCDproc client for Elastix status display
 Name: lcdelastix
 Version: 1.4.1
-Release: 0
+Release: 1
 License: GPL
 Group: Applications/System
 Source0: lcdelastix-%{version}.tar.bz2
@@ -10,6 +10,8 @@ BuildArch: noarch
 Requires: php >= 5.0.0
 Requires: elastix-framework
 Requires: lcdproc >= 1:0.5.6-1
+# for lsusb dependency
+Requires: usbutils
 
 %description
 
@@ -58,7 +60,10 @@ fi
 /opt/lcdelastix/*
 
 %changelog
-* Thu Jun 23 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+* Thu Jun 23 2016 Alex Villacis Lasso <a_villacis@palosanto.com> 1.4.1-1
+- Bump version for release
+- FIXED: lcdelastix: add Requires: usbutils for lsusb.
+  SVN Rev[7635]
 - FIXED: lcdelastix: do not disable lcdelastix service on every update.
   SVN Rev[7634]
 - FIXED: lcdelastix: do not install two copies of elastix-configure-lcd.

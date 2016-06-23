@@ -55,6 +55,12 @@ fi
 /opt/lcdelastix/*
 
 %changelog
+* Thu Jun 23 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: lcdelastix: in Elastix 4, lsusb is at /usr/bin, not /sbin. The script
+  elastix-configure-lcd now tries several paths until one is found. Also the
+  return value of lsusb is actually examined.
+  SVN Rev[7632]
+
 * Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: lcdelastix: check whether /etc/localtime is a symlink and use it as
   an additional way to find out the current timezone.

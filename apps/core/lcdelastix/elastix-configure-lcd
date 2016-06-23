@@ -55,9 +55,26 @@ if (($st["mode"] & 0170000) != 0020000) { // Check for character device
 
 // Detect the device. This assumes there is at most one LCD device
 if ($sDriver == 'auto') {
+	$lsusb_paths = array('/usr/bin/lsusb', '/usr/sbin/lsusb', '/sbin/lsusb');
+	$lsusb_cmd = NULL;
+	foreach ($lsusb_paths as $c) {
+		if (file_exists($c)) {
+			$lsusb_cmd = $c;
+			break;
+		}
+	}
+	if (is_null($lsusb_cmd)) {
+		fputs(STDERR, "FATAL: failed to find lsusb, tried ".implode(' ', $lsusb_paths)."\n");
+		exit(1);
+	}
+
 	$sDriver = 'none';
 	$output = $retval = NULL;
-	exec('/sbin/lsusb', $output, $retval);
+	exec($lsusb_cmd, $output, $retval);
+	if ($retval != 0) {
+		fputs(STDERR, "FATAL: failed to run lsusb, exited with error code $retval !\n");
+		exit(1);
+	}
 	foreach ($output as $s) {
 		if (stripos($s, '10c4:ea60') !== FALSE) {
 			$sDriver = 'jbc1602';
@@ -67,6 +84,9 @@ if ($sDriver == 'auto') {
 			$sDriver = 'CFontzPacket';
 			break;
 		}
+	}
+	if ($sDriver == 'none') {
+		print "WARN: no LCD detected. LCD services will be disabled.\n";
 	}
 }
 

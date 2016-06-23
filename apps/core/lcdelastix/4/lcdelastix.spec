@@ -24,11 +24,12 @@ running on a device without a LCD display, unless you know what you are doing.
 rm -rf %{buildroot}
 mkdir -p  %{buildroot}/opt/lcdelastix/
 rm -f *.spec
+install -m 0755 elastix-configure-lcd  %{buildroot}%{_bindir}
+rm -f elastix-configure-lcd
 cp -r * %{buildroot}/opt/lcdelastix/
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m 0755 %{buildroot}/opt/lcdelastix/lcdelastix  %{buildroot}%{_sysconfdir}/rc.d/init.d/lcdelastix
 mkdir -p %{buildroot}%{_bindir}
-install -m 0755 elastix-configure-lcd  %{buildroot}%{_bindir}
 
 %clean
 rm -rf %{buildroot}
@@ -56,6 +57,8 @@ fi
 
 %changelog
 * Thu Jun 23 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: lcdelastix: do not install two copies of elastix-configure-lcd.
+  SVN Rev[7633]
 - FIXED: lcdelastix: in Elastix 4, lsusb is at /usr/bin, not /sbin. The script
   elastix-configure-lcd now tries several paths until one is found. Also the
   return value of lsusb is actually examined.

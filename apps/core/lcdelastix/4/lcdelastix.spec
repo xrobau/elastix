@@ -40,7 +40,9 @@ rm -rf %{buildroot}
 # Add LCDd service, but do not enable it. Prevents program from unnecessarily
 # running on a system without a LCD display
 /sbin/chkconfig --add lcdelastix
-/sbin/chkconfig lcdelastix off
+if [ $1 -eq 1 ] ; then # install
+    /sbin/chkconfig lcdelastix off
+fi
 
 %preun
 if [ $1 -eq 0 ] ; then # Check to tell apart update and uninstall
@@ -57,6 +59,8 @@ fi
 
 %changelog
 * Thu Jun 23 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: lcdelastix: do not disable lcdelastix service on every update.
+  SVN Rev[7634]
 - FIXED: lcdelastix: do not install two copies of elastix-configure-lcd.
   SVN Rev[7633]
 - FIXED: lcdelastix: in Elastix 4, lsusb is at /usr/bin, not /sbin. The script

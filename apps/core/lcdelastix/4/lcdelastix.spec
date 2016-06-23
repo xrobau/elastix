@@ -26,12 +26,12 @@ running on a device without a LCD display, unless you know what you are doing.
 rm -rf %{buildroot}
 mkdir -p  %{buildroot}/opt/lcdelastix/
 rm -f *.spec
+mkdir -p %{buildroot}%{_bindir}
 install -m 0755 elastix-configure-lcd  %{buildroot}%{_bindir}
 rm -f elastix-configure-lcd
 cp -r * %{buildroot}/opt/lcdelastix/
 mkdir -p %{buildroot}%{_sysconfdir}/rc.d/init.d
 install -m 0755 %{buildroot}/opt/lcdelastix/lcdelastix  %{buildroot}%{_sysconfdir}/rc.d/init.d/lcdelastix
-mkdir -p %{buildroot}%{_bindir}
 
 %clean
 rm -rf %{buildroot}

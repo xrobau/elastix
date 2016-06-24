@@ -574,13 +574,6 @@ class SQLWorkerProcess extends TuberiaProcess
             return $eventos;
         }
 
-        // Recoger el canal para llamada entrante
-        $channel = NULL;
-        if (isset($paramInsertar['channel'])) {
-            $channel = $paramInsertar['channel'];
-            unset($paramInsertar['channel']);
-        }
-
         // Caso especial: llamada entrante requiere ID de contacto
         if ($tipo_llamada == 'incoming') {
             /* Se consulta el posible contacto en base al caller-id. Si hay

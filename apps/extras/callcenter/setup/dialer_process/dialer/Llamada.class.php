@@ -785,8 +785,6 @@ class Llamada
                 'status'                =>  $this->status,
                 'datetime_entry_queue'  =>  date('Y-m-d H:i:s', $this->timestamp_enterqueue),
                 'trunk'                 =>  $this->trunk,
-
-                // OJO: si se pasa en un futuro "channel", verificar en incoming
             );
             $this->_tuberia->msg_SQLWorkerProcess_sqlupdatecalls($paramActualizar);
 
@@ -811,9 +809,6 @@ class Llamada
 
                 // Un trunk NULL ocurre en caso de Channel Local/XXX@yyyy-zzzz
                 'trunk'                 =>  is_null($this->trunk) ? '' : $this->trunk,
-
-                // El siguiente código asume que la llamada entrante no tiene canales auxiliares
-                'channel'               =>  $channel,
             );
             $this->_tuberia->msg_SQLWorkerProcess_sqlinsertcalls($paramInsertar);
 

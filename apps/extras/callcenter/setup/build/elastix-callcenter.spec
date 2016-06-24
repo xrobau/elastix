@@ -102,6 +102,9 @@ fi
 
 %changelog
 * Fri Jun 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: remove unused attribute "channel" from sqlinsertcalls message
+  sent to SQLWorkerProcess. Ported from CallCenterPRO.
+  SVN Rev[7639]
 - CHANGED: Dialer: implement explicit request flag for AMI credentials message.
   This flag is used to discard credentials that were explicitly requested if the
   initial credentials arrived in the meantime, to prevent unnecessary AMI

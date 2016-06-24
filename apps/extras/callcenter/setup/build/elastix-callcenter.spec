@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Jun 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Dialer: discard queue/agent enumeration if AMI connection is lost. This
+  prevents a stale enumeration from blocking valid future enumerations until
+  dialer restart. Ported from CallCenterPRO.
+  SVN Rev[7637]
+
 * Mon Jun 20 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Dialer: prevent AMIEventProcess crash due to NULL object if a request
   to refresh agents comes while in the middle of AMI disconnection. Ported from

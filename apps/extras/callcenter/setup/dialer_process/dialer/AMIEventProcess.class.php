@@ -61,7 +61,7 @@ class AMIEventProcess extends TuberiaProcess
 
     /* Se setea a TRUE si se recibe nuevaListaAgentes de CampaignProcess cuando
      * la conexión AMI no está disponible, lo cual puede ocurrir si
-     * CampaignProcess termina de iniciarse antes que AMIEventProcess, o si
+     * SQLWorkerProcess termina de iniciarse antes que AMIEventProcess, o si
      * se pierde la conexión a Asterisk. */
     private $_pendiente_QueueStatus = NULL;
 
@@ -222,6 +222,13 @@ class AMIEventProcess extends TuberiaProcess
             $this->_log->output('INFO: Desconectando de sesión previa de Asterisk...');
             $this->_ami->disconnect();
             $this->_ami = NULL;
+        }
+        if (!is_null($this->_tmp_actionid_queuestatus)) {
+            $this->_log->output('WARN: se desecha enumeración de colas/agentes en progreso por cierre de conexión AMI...');
+            $this->_tmp_actionid_queuestatus = NULL;
+            $this->_tmp_estadoAgenteCola = NULL;
+            $this->_tmp_actionid_agents = NULL;
+            $this->_tmp_estadoLoginAgente = NULL;
         }
         $astman = new AMIClientConn($this->_multiplex, $this->_log);
         //$this->_momentoUltimaConnAsterisk = time();

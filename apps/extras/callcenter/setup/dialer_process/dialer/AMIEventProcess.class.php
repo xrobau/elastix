@@ -211,9 +211,11 @@ class AMIEventProcess extends TuberiaProcess
 
     private function _cb_faltaConfig()
     {
-        $this->_log->output('WARN: no se dispone de credenciales para conexión a Asterisk, se piden a SQLWorkerProcess y espera...');
-        $this->_tuberia->msg_SQLWorkerProcess_requerir_credencialesAsterisk();
-        $this->_alarma_faltaconfig = $this->_agregarAlarma(3, array($this, '_cb_faltaConfig'), array());
+        if (is_null($this->_config)) {
+            $this->_log->output('WARN: no se dispone de credenciales para conexión a Asterisk, se piden a SQLWorkerProcess y espera...');
+            $this->_tuberia->msg_SQLWorkerProcess_requerir_credencialesAsterisk();
+            $this->_alarma_faltaconfig = $this->_agregarAlarma(3, array($this, '_cb_faltaConfig'), array());
+        }
     }
 
     private function _iniciarConexionAMI()
@@ -1052,8 +1054,27 @@ class AMIEventProcess extends TuberiaProcess
         if ($this->DEBUG) {
             $this->_log->output('DEBUG: '.__METHOD__.' recibido: '.print_r($datos, 1));
         }
-        $this->_config = $datos[0];
-        $bExito = $this->_iniciarConexionAMI();
+
+        if (!is_null($this->_alarma_faltaconfig)) {
+            $this->_cancelarAlarma($this->_alarma_faltaconfig);
+            $this->_alarma_faltaconfig = NULL;
+        }
+
+        $por_pedido = $datos[1];
+        if ($por_pedido) {
+            if (is_null($this->_config)) {
+                $this->_config = $datos[0];
+                $this->_log->output('INFO: recibidas credenciales AMI pedidas expresamente...');
+                $bExito = $this->_iniciarConexionAMI();
+            } else {
+                $this->_log->output('INFO: IGNORANDO credenciales AMI pedidas expresamente, ya se tiene AMI.');
+                $bExito = TRUE;
+            }
+        } else {
+            $this->_config = $datos[0];
+            $this->_log->output('INFO: recibidas credenciales iniciales AMI...');
+            $bExito = $this->_iniciarConexionAMI();
+        }
 
         $this->DEBUG = $this->_config['dialer']['debug'];
         $this->_queueshadow->DEBUG = $this->DEBUG;

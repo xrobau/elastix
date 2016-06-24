@@ -102,12 +102,12 @@ class SQLWorkerProcess extends TuberiaProcess
         $this->DEBUG = $this->_configDB->dialer_debug;
 
         // Informar a AMIEventProcess la configuración de Asterisk
-        $this->_informarCredencialesAsterisk();
+        $this->_informarCredencialesAsterisk(FALSE);
 
         return TRUE;
     }
 
-    private function _informarCredencialesAsterisk()
+    private function _informarCredencialesAsterisk($por_pedido)
     {
         $this->_tuberia->AMIEventProcess_informarCredencialesAsterisk(array(
             'asterisk'  =>  array(
@@ -122,7 +122,7 @@ class SQLWorkerProcess extends TuberiaProcess
                 'debug'             =>  $this->_configDB->dialer_debug,
                 'allevents'         =>  $this->_configDB->dialer_allevents,
             ),
-        ));
+        ), $por_pedido);
     }
 
     private function _interpretarConfiguracion($infoConfig)
@@ -369,7 +369,7 @@ class SQLWorkerProcess extends TuberiaProcess
     public function msg_requerir_credencialesAsterisk($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)
     {
         $this->_log->output("INFO: $sFuente requiere envío de credenciales Asterisk");
-        $this->_informarCredencialesAsterisk(); // <-- no requiere acceso inmediato a base de datos
+        $this->_informarCredencialesAsterisk(TRUE); // <-- no requiere acceso inmediato a base de datos
     }
 
     public function msg_sqlinsertcalls($sFuente, $sDestino, $sNombreMensaje, $iTimestamp, $datos)

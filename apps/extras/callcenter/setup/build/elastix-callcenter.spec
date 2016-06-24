@@ -102,6 +102,11 @@ fi
 
 %changelog
 * Fri Jun 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: implement explicit request flag for AMI credentials message.
+  This flag is used to discard credentials that were explicitly requested if the
+  initial credentials arrived in the meantime, to prevent unnecessary AMI
+  reconnections. Ported from CallCenterPRO.
+  SVN Rev[7638]
 - FIXED: Dialer: discard queue/agent enumeration if AMI connection is lost. This
   prevents a stale enumeration from blocking valid future enumerations until
   dialer restart. Ported from CallCenterPRO.

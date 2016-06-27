@@ -3,7 +3,7 @@
   Codificación: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 1.0                                                  |
-  | http://www.elastix.org                                               |
+  | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
   +----------------------------------------------------------------------+
@@ -85,14 +85,14 @@ $arrLangModule=array(
 "URL is empty" => "URL is empty",
 "Field Name" => "Field Name",
 "Type Field" => "Type Field",
-"Url" => "Url (Example: http://www.elastix.org or http://{IP_SERVER}/mail)",
+"Url" => "Url (Example: http://www.elastix.com or http://{IP_SERVER}/mail)",
 "Module Id is empty" => "Module Id is empty you must enter at least one alphanumeric character as module name",
 "Level 1 Parent Id is empty" => "Level 1 Parent Id is empty you must enter at least one alphanumeric character as level 1 parent name",
 "Level 2 Parent Id is empty" => "Level 2 Parent Id is empty you must enter at least one alphanumeric character as level 2 parent name",
 "Message" => "Message",
 "here" => "here",
 "If you are not redirected to your new module in a few seconds, you can click" => "If you are not redirected to your new module in a few seconds, you can click",
-"Example: http://www.elastix.org" => "Example: http://www.elastix.org",
+"Example: http://www.elastix.com" => "Example: http://www.elastix.com",
 
 );
 ?>

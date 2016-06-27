@@ -70,6 +70,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Jun 27 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Developer: massive s/www.elastix.org/www.elastix.com/g
+  SVN Rev[7640]
+
 * Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: check whether /etc/localtime is a symlink and use it as an additional
   way to find out the current timezone.

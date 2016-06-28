@@ -1,0 +1,171 @@
+#!/usr/bin/php
+<?php
+
+$command = NULL;
+if ($argc >= 2 && in_array($argv[1], array('list', 'add', 'remove')))
+    $command = $argv[1];
+if (is_null($command)) {
+?>
+Uso: elastix-menuhack COMANDO [args...]
+
+Donde COMANDO puede ser: list add
+
+Para comando list:
+    elastix-menuhack list
+
+Para comando add:
+    elastix-menuhack add MENU/SUBMENU/SUBMENU3 [descripcion-de-modulo [link-target]]
+
+    Los niveles MENU, SUBMENU, SUBMENU3 deben separarse por barra inclinada (/)
+    y se crearán con dueño admin si no existen. El último nivel se considera el
+    identificador del módulo. Si la rama indicada existe con distinto número de
+    niveles que lo indicado en la orden, se considera un error. Si la rama
+    indicada existe con el mismo número de niveles, se actualiza su descripción
+    si se la proporciona. Si la rama no existe, se la crea. Si se proporciona
+    un link-target, el módulo es de tipo link. De otro modo es módulo normal.
+<?php
+    exit(1);
+}
+
+$documentRoot="/var/www/html";
+require_once("$documentRoot/libs/misc.lib.php");
+require_once("$documentRoot/configs/default.conf.php");
+
+//global variables framework
+global $arrConf;
+global $arrLang;
+require_once("$arrConf[basePath]/libs/paloSantoDB.class.php");
+require_once("$arrConf[basePath]/libs/paloSantoMenu.class.php");
+require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
+require_once("$arrConf[basePath]/libs/paloSantoInstaller.class.php");
+require_once("$arrConf[basePath]/libs/paloSantoNavigation.class.php");
+
+$pDB = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/menu.db");
+$pDBACL = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/acl.db");
+
+if(!empty($pDB->errMsg)) die("ERROR DE DB: {$pDB->errMsg}\n");
+if(!empty($pDBACL->errMsg)) die("ERROR DE DB: {$pDBACL->errMsg}\n");
+
+$oMenu = new paloMenu($pDB);
+$oACL = new paloACL($pDBACL);
+$oInstaller = new Installer();
+
+if ($command == 'list') {
+
+    class paloSantoNavPrint extends paloSantoNavigationBase
+    {
+        function prettyprint()
+        {
+            $menuhdrs = array('Tipo', 'Rama', 'Descripcion', 'Enlace');
+            $maxdepth = $this->_maxtaglength($this->_menubase);
+            $maxdesc = strlen($menuhdrs[2]);
+            $maxlink = strlen($menuhdrs[3]);
+            foreach ($this->_menunodes as &$node) {
+                if (strlen($node['Name']) > $maxdesc)
+                    $maxdesc = strlen($node['Name']);
+                if (strlen($node['Link']) > $maxlink)
+                    $maxlink = strlen($node['Link']);
+            }
+
+            print str_pad($menuhdrs[0], 6 + 1, ' ');
+            print str_pad($menuhdrs[1], $maxdepth + 1, ' ');
+            print str_pad($menuhdrs[2], $maxdesc + 1, ' ');
+            print $menuhdrs[3]."\n";
+            print str_repeat('-', (6 + 1)+($maxdepth + 1)+($maxdesc + 1)+($maxlink))."\n";
+            $this->_printchildren($this->_menubase, '', 6, $maxdepth, $maxdesc);
+        }
+
+        private function _maxtaglength(&$children)
+        {
+            $maxlength = 0;
+            foreach (array_keys($children) as $key) {
+                $baselength = strlen($key);
+                if (count($children[$key]['children']) > 0)
+                    $baselength += 1 + $this->_maxtaglength($children[$key]['children']);
+                if ($maxlength < $baselength) $maxlength = $baselength;
+            }
+            return $maxlength;
+        }
+
+        private function _printchildren(&$children, $prefix, $wtype, $wbranch, $wdesc)
+        {
+            if ($prefix != '') $prefix .= '/';
+            foreach ($children as $key => &$node) {
+                if (count($node['children']) > 0)
+                    print str_repeat(' ', $wtype);
+                else print str_pad($node['Type'], $wtype, ' ');
+
+                print ' ';
+
+                print str_pad($prefix.$key, $wbranch, ' ');
+
+                print ' ';
+
+                print str_pad($node['Name'], $wdesc, ' ');
+
+                print ' ';
+
+                print $node['Link']."\n";
+
+                $this->_printchildren($node['children'], $prefix.$key, $wtype, $wbranch, $wdesc);
+            }
+        }
+    }
+
+    $oPN = new paloSantoNavPrint($oMenu->cargar_menu());
+    $oPN->prettyprint();
+    exit(0);
+
+} elseif ($command == 'add') {
+    if ($argc < 3) die("FATAL: no se ha especificado rama a crear!\n");
+    $branch = $argv[2];
+    $desc = ''; $link = '';
+    if ($argc > 3) $desc = $argv[3];
+    if ($argc > 4) $desc = $argv[4];
+
+    $branchlist = explode('/', $branch);
+    $desclist = explode('/', $desc);
+    while (count($branchlist) > count($desclist)) {
+        array_unshift($desclist, $branchlist[count($branchlist) - count($desclist) - 1]);
+    }
+    $menulist = $oMenu->cargar_menu();
+
+    /* La especificación de la rama debe consistir de 0 o más elementos que 
+     * existen, seguido enteramente de 0 o más elementos que no existen.
+     * Cualquier otro escenario es un error. Además, si un elemento en la
+     * rama existe, y no es el primero, su antecesor debe ser igual al IdParent
+     * del menú existente. Si es el primero, su IdParent debe ser también
+     * vacío. */
+    $n_noexiste = 0;
+    foreach ($branchlist as $i => $branchelem) {
+        if (isset($menulist[$branchelem])) {
+            if ($n_noexiste > 0)
+                die("FATAL: elemento $branchelem existe pero antecesor indicado no existe!\n");
+            $expectedparent = ($i > 0) ? $branchlist[$i - 1] : '';
+            if ($menulist[$branchelem]['IdParent'] != $expectedparent)
+                die("FATAL: elemento $branchelem no coincide en antecesor existente!\n");
+        } else {
+            $n_noexiste++;
+        }
+    }
+
+    for ($i = count($branchlist) - $n_noexiste; $i < count($branchlist); $i++) {
+        print "INFO: creando elemento ".(implode('/', array_slice($branchlist, 0, $i + 1)))." ({$desclist[$i]})...\n";
+        $newMenu = array(
+            'menuid'    => $branchlist[$i],
+            'tag'       => $desclist[$i],
+            'parent'    => ($i > 0) ? $branchlist[$i - 1] : '',
+            'link'      => ($link != '' && $i == count($branchlist) - 1) ? $link : '',
+        );
+        $bExito = $oInstaller->addMenu($oMenu, $newMenu);
+        if ($bExito && $i > 0) $oInstaller->addResourceMembership($oACL, $newMenu, array(
+            'id'    => '1',
+            'name'  => 'administrator',
+            'desc'  => 'total access',
+        ));
+        if (!$bExito) die("FATAL: no se puede actualizar - {$oInstaller->errMsg}");
+    }
+    exit(0);
+}
+
+?>

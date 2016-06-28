@@ -71,6 +71,8 @@ fi
 
 %changelog
 * Mon Jun 27 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: Developer: add elastix-menuhack utility.
+  SVN Rev[7641]
 - CHANGED: Developer: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7640]
 

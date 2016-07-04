@@ -390,6 +390,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Jul  4 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: only auto-popup on non-registration for admin users.
+  Non-admin users do not have authorization to initiate registration and
+  therefore should not see a popup with "no authorization" error message.
+  SVN Rev[7642]
+
 * Fri Jun  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: the elastix-monitoring_services addon up to 5.4.1-8 uses
   the obsolete /register.php route removed in SVN commit #7912. The required

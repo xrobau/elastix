@@ -62,7 +62,7 @@ function _moduleContent(&$smarty, $module_name) {
             $content = saveRegister($pDB, $arrConf);
             break;
         case "isRegistered":
-            $content = isRegisteredServer($pDB, $arrConf);
+            $content = isRegisteredServer($pDB, $arrConf, $pDBACL);
             break;
         case "saveByAccount":
             $content = saveRegisterByAccount($pDB, $arrConf);
@@ -145,11 +145,17 @@ function viewFormRegister($smarty, $module_name, $local_templates_dir, &$pDB, $a
     return $jsonObject->createJSON();
 }
 
-function isRegisteredServer(&$pDB, $arrConf) {
+function isRegisteredServer(&$pDB, $arrConf, $pDBACL) {
     $pRegister = new paloSantoRegistration($pDB,$arrConf["url_webservice"]);
     $iRegister = $pRegister->isRegisteredInfo();
 
-    $iRegister['auto_popup'] = (($iRegister['registered'] != 'yes-all') && !isset($_SESSION['registration_popup_displayed']));
+    $pACL = new paloACL($pDBACL);
+    $user = isset($_SESSION['elastix_user']) ? $_SESSION['elastix_user'] : "";
+
+    $iRegister['auto_popup'] = (
+        ($iRegister['registered'] != 'yes-all') &&
+        !isset($_SESSION['registration_popup_displayed']) &&
+        $pACL->isUserAdministratorGroup($user));
 
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status("TRUE");

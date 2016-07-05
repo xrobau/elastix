@@ -79,7 +79,7 @@ function validateOptions($opt)
         break;
     case '--device':
         // Only support ethernet for now
-        if (!preg_match('/^[[:alnum:]]+$/', $option[1]))
+        if (!preg_match('/^[[:alnum:]_-]+$/', $option[1]))
             error_exit('Option '.$option[0].": Invalid network device\n");
         break;
     case '--bootproto':
@@ -227,7 +227,7 @@ function listEthernetInterfaces()
     $interfaces = array();
     foreach (file('/proc/net/dev') as $s) {
         $regs = NULL;
-        if (preg_match('/^\s*([[:alnum:]]+):/', $s, $regs)) $interfaces[] = $regs[1];
+        if (preg_match('/^\s*([[:alnum:]_-]+):/', $s, $regs)) $interfaces[] = $regs[1];
     }
     return $interfaces;
 }
@@ -273,24 +273,26 @@ function setHostname($sHostname)
     // Set the hostname for the current session
 	exec("/bin/hostname $sHostname");
 
-    // In /etc/postfix/main.cf, replace myhostname and mydomain or add if absent
-    $bClavePresente = array();
-    $bClavePresente['myhostname'] = $bClavePresente['mydomain'] = FALSE;
-    $contenidoNuevo = array();
-    foreach (file('/etc/postfix/main.cf') as $sLinea) {
-        if (preg_match('/^myhostname\s*=/', $sLinea)) {
-            $bClavePresente['myhostname'] = TRUE;
-            $contenidoNuevo[] = "myhostname = $sHostname\n";
-        } elseif (preg_match('/^mydomain\s*=/', $sLinea)) {
-            $bClavePresente['mydomain'] = TRUE;
-            $contenidoNuevo[] = "mydomain = $sDomain\n";
-        } else {
-            $contenidoNuevo[] = $sLinea;
+    if (file_exists('/etc/postfix/main.cf')) {
+        // In /etc/postfix/main.cf, replace myhostname and mydomain or add if absent
+        $bClavePresente = array();
+        $bClavePresente['myhostname'] = $bClavePresente['mydomain'] = FALSE;
+        $contenidoNuevo = array();
+        foreach (file('/etc/postfix/main.cf') as $sLinea) {
+            if (preg_match('/^myhostname\s*=/', $sLinea)) {
+                $bClavePresente['myhostname'] = TRUE;
+                $contenidoNuevo[] = "myhostname = $sHostname\n";
+            } elseif (preg_match('/^mydomain\s*=/', $sLinea)) {
+                $bClavePresente['mydomain'] = TRUE;
+                $contenidoNuevo[] = "mydomain = $sDomain\n";
+            } else {
+                $contenidoNuevo[] = $sLinea;
+            }
         }
+        if (!$bClavePresente['myhostname']) $contenidoNuevo[] = "myhostname = $sHostname\n";
+        if (!$bClavePresente['mydomain']) $contenidoNuevo[] = "mydomain = $sDomain\n";
+        file_put_contents('/etc/postfix/main.cf', $contenidoNuevo);
     }
-    if (!$bClavePresente['myhostname']) $contenidoNuevo[] = "myhostname = $sHostname\n";
-    if (!$bClavePresente['mydomain']) $contenidoNuevo[] = "mydomain = $sDomain\n";
-    file_put_contents('/etc/postfix/main.cf', $contenidoNuevo);
 }
 
 // Set DNS servers in /etc/resolv.conf. DNS 1 is mandatory. DNS 2 is optional
@@ -368,9 +370,16 @@ function action_interfaceConfiguration($opt)
         $contenidoNuevo = array();
         foreach ($contenido as $sLinea) {
         	$regs = NULL;
-            if (preg_match('/^(\w+)\s*=/', $sLinea, $regs)) {
+            if (preg_match('/^(\w+)\s*=\s*"?(.+?)"?$/', trim($sLinea), $regs)) {
             	if (isset($settings[$regs[1]])) {
-            		$contenidoNuevo[] = $regs[1]."=".$settings[$regs[1]]."\n";
+                    /* Special case: if the configuration contained TYPE=macvlan
+                     * then it must NOT be overwritten with TYPE=Ethernet in 
+                     * order to avoid breaking the container configuration. */
+                    if ($regs[1] == 'TYPE' && in_array($regs[2], array('macvlan'))) {
+                        $contenidoNuevo[] = $sLinea;
+                    } else {
+            		    $contenidoNuevo[] = $regs[1]."=".$settings[$regs[1]]."\n";
+            		}
                     unset($settings[$regs[1]]);
             	} else {
             		// Unknown setting - pass thru

@@ -182,6 +182,11 @@ fi
 
 %changelog
 * Tue Jul  5 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Network Parameters: container compatibility - privileged script must
+  allow interface names with hypens. Test whether /etc/postfix/main.cf exists
+  before updating contents. Add a special case to avoid overwriting a macvlan
+  interface as an Ethernet interface, which breaks container networking.
+  SVN Rev[7644]
 - FIXED: Network Parameters: container compatibility - network interfaces may
   have hypens in their names. Do not assume that ifcfg-* matches a interface
   name. Stop assuming ethN as a "standard" ethernet interface name. The output

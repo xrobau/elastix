@@ -37,30 +37,42 @@ class paloNetwork
         $this->errMsg = "";
     }
 
-    private static function obtener_tipo_interfase($if)
+    /* A partir de CentOS 7 no se puede asumir una correspondencia entre los
+     * nombres de una CONEXIÓN de red y una INTERFAZ de red. Las conexiones
+     * están definidas en /etc/sysconfig/network-scripts/ifcfg-* y hacen
+     * referencia a interfases en su propiedad DEVICE. Este método lista todas
+     * las INTERFASES para las cuales se define la manera de obtener una IP,
+     * como BOOTPROTO=dhcp para dinámica, o cualquier otra cosa (incluyendo la
+     * ausencia de BOOTPROTO) para estática. Si hay múltiples conexiones que
+     * referencian la misma interfaz, con maneras distintas, se reporta dinámica
+     * si una cualquiera de ellas define BOOTPROTO=dhcp.
+     *
+     * TODO: se requiere reescritura que distinga entre CONEXIÓN e INTERFAZ.
+     */
+    private static function listar_bootproto_interfases()
     {
-        $filePattern = "/etc/sysconfig/network-scripts/ifcfg-";
-        $fileIf      = $filePattern . $if;
-        $lineaIfcfg  = "";
-        $type        = "static";
+        $iflist = array();
 
-        if(file_exists($fileIf))
-        {
-            if($fh = fopen($fileIf, "r")) {
-                while(!feof($fh)) {
-                    $lineaIfcfg = fgets($fh, 4048);
-                    if(preg_match("/^BOOTPROTO[[:space:]]*=[[:space:]]*\"?dhcp/", $lineaIfcfg)) {
-                        $type = "dhcp";
-                    }
-                }
-                fclose($fh);
-            } else {
-                // error
-                $type = "";
+        $dir = '/etc/sysconfig/network-scripts';
+        foreach (scandir($dir) as $fileIf) {
+            if (strpos($fileIf, 'ifcfg-') !== 0) continue;
+
+            $if = NULL;
+            $type = 'none';
+            foreach (file($dir.'/'.$fileIf) as $lineaIfcfg) {
+                $regs = NULL;
+                if (preg_match('/^DEVICE\s*=\s*"?(\S+?)"?$/', trim($lineaIfcfg), $regs))
+                    $if = $regs[1];
+                $regs = NULL;
+                if (preg_match('/^BOOTPROTO\s*=\s*"?(\S+?)"?$/', trim($lineaIfcfg), $regs))
+                    $type = $regs[1];
             }
-        }else $type = ""; //error
-
-        return $type;
+            if (!is_null($if)) {
+                if (!isset($iflist[$if])) $iflist[$if] = FALSE;
+                if (!$iflist[$if]) $iflist[$if] = ($type == 'dhcp');
+            }
+        }
+        return $iflist;
     }
 
     /**
@@ -87,7 +99,7 @@ class paloNetwork
      */
     static function obtener_interfases_red()
     {
-    	$interfases = array();
+        $interfases = array();
 
         // Se listan todas las interfases físicas, y se toman loopback y ether
         /*
@@ -104,12 +116,12 @@ class paloNetwork
         $if_actual = NULL;  // La interfaz que se examina
         $if_flags = NULL;
         foreach ($output as $s) {
-        	$regs = NULL;
-            if (preg_match('/^\d+:\s+(\w+):\s*<(.*)>/', $s, $regs)) {
-            	$if_actual = $regs[1];
-                $if_flags = explode(',', $regs[2]);
-            } elseif (preg_match('!\s*link/(loopback|ether) ([[:xdigit:]]{2}(:[[:xdigit:]]{2}){5})!', $s, $regs)) {
-            	$interfases[$if_actual] = array(
+            $regs = NULL;
+            if (preg_match('/^\d+:\s+([[:alnum:]_-]+)(@\S+)?:\s*<(.*)>/', $s, $regs)) {
+                $if_actual = $regs[1];
+                $if_flags = explode(',', $regs[3]);
+            } elseif (!is_null($if_actual) && preg_match('!\s*link/(loopback|ether) ([[:xdigit:]]{2}(:[[:xdigit:]]{2}){5})!', $s, $regs)) {
+                $interfases[$if_actual] = array(
                     'Name'          =>  (($regs[1] == 'ether') ? 'Ethernet' : 'Loopback'),
                     'Link'          =>  $regs[1],
                     'Type'          =>  NULL,
@@ -124,12 +136,10 @@ class paloNetwork
                     'TX bytes'      =>  0,
                 );
                 if ($regs[1] == 'ether') {
-                    if (preg_match('/^eth(\d+)$/', $if_actual, $regs)) {
-                    	$interfases[$if_actual]['Name'] = 'Ethernet '.$regs[1];
-                    } else {
-                    	$interfases[$if_actual]['Name'] .= $if_actual;
-                    }
+                    $interfases[$if_actual]['Name'] = $if_actual;
                 }
+            } else {
+                $if_actual = NULL;
             }
         }
 
@@ -137,14 +147,14 @@ class paloNetwork
          * paquetes transmitidos y recibidos, así como el controlador del
          * dispositivo de red. */
         foreach (array_keys($interfases) as $if_actual) {
-        	$fuentes = array(
+            $fuentes = array(
                 'RX packets'    =>  "/sys/class/net/$if_actual/statistics/rx_packets",
                 'RX bytes'      =>  "/sys/class/net/$if_actual/statistics/rx_bytes",
                 'TX packets'    =>  "/sys/class/net/$if_actual/statistics/tx_packets",
                 'TX bytes'      =>  "/sys/class/net/$if_actual/statistics/tx_bytes",
             );
             foreach ($fuentes as $k => $p) {
-            	if (file_exists($p))
+                if (file_exists($p))
                     $interfases[$if_actual][$k] = trim(file_get_contents($p));
             }
 
@@ -171,13 +181,20 @@ class paloNetwork
             inet 127.0.0.1/8 scope host lo
             inet6 ::1/128 scope host
                valid_lft forever preferred_lft forever
+        -bash-4.2# ip addr show dev mv-enp1s0
+        3: mv-enp1s0@if2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP qlen 1000
+            link/ether e6:d5:e6:7e:a7:aa brd ff:ff:ff:ff:ff:ff link-netnsid 0
+            inet 192.168.5.195/20 brd 192.168.15.255 scope global dynamic mv-enp1s0
+               valid_lft 83014sec preferred_lft 83014sec
+            inet6 fe80::e4d5:e6ff:fe7e:a7aa/64 scope link
+               valid_lft forever preferred_lft forever
          */
         foreach (array_keys($interfases) as $if_actual) {
-        	$output = NULL;
+            $output = NULL;
             exec('/sbin/ip addr show dev '.$if_actual, $output);
             foreach ($output as $s) {
-            	if (preg_match('|\s*inet (\d+\.\d+\.\d+.\d+)/(\d+).+\s((\w+)(:(\d+))?)\s*$|', trim($s), $regs)) {
-            		// Calcular IP de máscara a partir de número de bits
+                if (preg_match('|\s*inet (\d+\.\d+\.\d+.\d+)/(\d+).+\s(([[:alnum:]_-]+)(:(\d+))?)\s*$|', trim($s), $regs)) {
+                    // Calcular IP de máscara a partir de número de bits
                     $iMaskBits = $regs[2];
                     $iMask = (0xFFFFFFFF << (32 - $iMaskBits)) & 0xFFFFFFFF;
                     $sMaskIP = implode('.', array(
@@ -189,10 +206,10 @@ class paloNetwork
 
                     // Verificar si es IP de interfaz o de alias
                     if ($regs[3] == $if_actual) {
-                    	$interfases[$if_actual]['Inet Addr'] = $regs[1];
+                        $interfases[$if_actual]['Inet Addr'] = $regs[1];
                         $interfases[$if_actual]['Mask'] = $sMaskIP;
                     } else {
-                    	$if_alias = $regs[3];
+                        $if_alias = $regs[3];
                         $if_orig = $regs[4];
                         $if_aliasnum = $regs[6];
                         $interfases[$if_alias] = array(
@@ -204,13 +221,14 @@ class paloNetwork
                             'Running'       =>  $interfases[$if_orig]['Running'],
                         );
                     }
-            	}
+                }
             }
         }
 
         // Tipo de interfaz de red configurada en /etc/sysconfig/network-scripts/
+        $if_tipo = self::listar_bootproto_interfases();
         foreach (array_keys($interfases) as $if_actual) {
-        	$interfases[$if_actual]['Type'] = self::obtener_tipo_interfase($if_actual);
+            $interfases[$if_actual]['Type'] = (isset($if_tipo[$if_actual]) && $if_tipo[$if_actual]) ? 'dhcp' : 'static';
         }
 
         return $interfases;

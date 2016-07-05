@@ -181,6 +181,14 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Jul  5 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Network Parameters: container compatibility - network interfaces may
+  have hypens in their names. Do not assume that ifcfg-* matches a interface
+  name. Stop assuming ethN as a "standard" ethernet interface name. The output
+  of "ip addr show" may list the interface name with an extra '@xxx' that should
+  be discarded.
+  SVN Rev[7643]
+
 * Thu May 26 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: add Turkish translations for Currency and Shutdown modules.
   SVN Rev[7623]

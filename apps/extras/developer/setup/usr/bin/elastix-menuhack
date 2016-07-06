@@ -159,9 +159,11 @@ if ($command == 'list') {
         );
         $bExito = $oInstaller->addMenu($oMenu, $newMenu);
         if ($bExito && $i > 0) $oInstaller->addResourceMembership($oACL, $newMenu, array(
-            'id'    => '1',
-            'name'  => 'administrator',
-            'desc'  => 'total access',
+            array(
+                'id'    => '1',
+                'name'  => 'administrator',
+                'desc'  => 'total access',
+            )
         ));
         if (!$bExito) die("FATAL: no se puede actualizar - {$oInstaller->errMsg}");
     }

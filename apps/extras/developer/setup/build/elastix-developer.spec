@@ -70,6 +70,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Jul  6 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: elastix-menuhack: fix incorrect group definition passed to method
+  Installer::addResourceMembership().
+  SVN Rev[7645]
+
 * Mon Jun 27 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: Developer: add elastix-menuhack utility.
   SVN Rev[7641]

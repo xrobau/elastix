@@ -40,14 +40,10 @@ require_once("$arrConf[basePath]/libs/paloSantoACL.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoInstaller.class.php");
 require_once("$arrConf[basePath]/libs/paloSantoNavigation.class.php");
 
-$pDB = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/menu.db");
-$pDBACL = new paloDB("sqlite3:///{$arrConf['elastix_dbdir']}/acl.db");
-
+$pDB = new paloDB($arrConf['elastix_dsn']['menu']);
 if(!empty($pDB->errMsg)) die("ERROR DE DB: {$pDB->errMsg}\n");
-if(!empty($pDBACL->errMsg)) die("ERROR DE DB: {$pDBACL->errMsg}\n");
 
 $oMenu = new paloMenu($pDB);
-$oACL = new paloACL($pDBACL);
 $oInstaller = new Installer();
 
 if ($command == 'list') {
@@ -149,6 +145,10 @@ if ($command == 'list') {
         }
     }
 
+    $pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
+    if(!empty($pDBACL->errMsg)) die("ERROR DE DB: {$pDBACL->errMsg}\n");
+    $oACL = new paloACL($pDBACL);
+
     for ($i = count($branchlist) - $n_noexiste; $i < count($branchlist); $i++) {
         print "INFO: creando elemento ".(implode('/', array_slice($branchlist, 0, $i + 1)))." ({$desclist[$i]})...\n";
         $newMenu = array(
@@ -169,5 +169,3 @@ if ($command == 'list') {
     }
     exit(0);
 }
-
-?>

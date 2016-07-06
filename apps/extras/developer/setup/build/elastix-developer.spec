@@ -71,6 +71,9 @@ fi
 
 %changelog
 * Wed Jul  6 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-menuhack: use standard Elastix framework definitions for
+  databases instead of hardcoding the paths.
+  SVN Rev[7646]
 - FIXED: elastix-menuhack: fix incorrect group definition passed to method
   Installer::addResourceMembership().
   SVN Rev[7645]

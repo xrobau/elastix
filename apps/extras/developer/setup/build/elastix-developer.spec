@@ -71,6 +71,9 @@ fi
 
 %changelog
 * Wed Jul  6 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-menuhack: allow ELASTIX_ROOT to specify location of base
+  Elastix for command-line tools.
+  SVN Rev[7647]
 - CHANGED: elastix-menuhack: use standard Elastix framework definitions for
   databases instead of hardcoding the paths.
   SVN Rev[7646]

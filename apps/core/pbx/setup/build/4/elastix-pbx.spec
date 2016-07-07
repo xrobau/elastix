@@ -300,6 +300,14 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Jul  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring: add and use compatibility function hasModulePrivilege()
+  that allows authorization on particular actions to be assigned piecemeal. This
+  method delegates to paloACL::hasModulePrivilege if available, and falls back
+  to granting all known privileges to the administrator group. Part of fix for
+  Elastix bug #1100.
+  SVN Rev[7468]
+
 * Wed Jun 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: factorize recording row formatting into a single method and
   factorize common code between normal display and report download. This

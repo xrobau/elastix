@@ -63,11 +63,10 @@ function _moduleContent(&$smarty, $module_name)
     $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
     $extension = $pACL->getUserExtension($user);
     if ($extension == '') $extension = NULL;
-    $esAdministrador = $pACL->isUserAdministratorGroup($user);
 
     // Sólo el administrador puede consultar con $extension == NULL
     if (is_null($extension)) {
-        if ($esAdministrador)
+        if (hasModulePrivilege($user, $module_name, 'reportany'))
             $smarty->assign("mb_message", "<b>"._tr("no_extension")."</b>");
         else{
             $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
@@ -81,23 +80,26 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         case 'delete':
-            $content = deleteRecord($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension, $esAdministrador);
+            $content = deleteRecord($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
             break;
         case 'download':
-            $content = downloadFile($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension, $esAdministrador);
+            $content = downloadFile($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
             break;
         case "display_record":
-            $content = display_record($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension, $esAdministrador);
+            $content = display_record($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
             break;
         default:
-            $content = reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension, $esAdministrador);
+            $content = reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
             break;
     }
     return $content;
 }
 
-function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension, $esAdministrador)
+function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension)
 {
+    $bPuedeVerTodos = hasModulePrivilege($user, $module_name, 'reportany');
+    $bPuedeBorrar = hasModulePrivilege($user, $module_name, 'deleteany');
+
     $pMonitoring = new paloSantoMonitoring($pDB);
     $filter_field = getParameter("filter_field");
 
@@ -174,9 +176,11 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     $oGrid->enableExport();   // enable export.
     $oGrid->setNameFile_Export(_tr("Monitoring"));
 
+    // TODO: agregar filtro por extensión de usuario de Elastix sólo para reportany
+
     // Se asume que sólo el administrador puede consultar con extension NULL
     $totalMonitoring = $pMonitoring->getNumMonitoring($filter_field, $filter_value,
-        $esAdministrador ? NULL : $extension, $date_initial, $date_final);
+        $bPuedeVerTodos ? NULL : $extension, $date_initial, $date_final);
     $url = array('menu' => $module_name);
 
     $paramFilter = array(
@@ -210,14 +214,14 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
 
     // Se asume que sólo el administrador puede consultar con extension NULL
     $arrResult = $pMonitoring->getMonitoring($limit, $offset, $filter_field, $filter_value,
-        $esAdministrador ? NULL : $extension, $date_initial, $date_final);
+        $bPuedeVerTodos ? NULL : $extension, $date_initial, $date_final);
 
     if (is_array($arrResult)) {
         if ($oGrid->isExportAction()) {
             $arrData = array_map('formatCallRecordingTuple', $arrResult);
         } else foreach ($arrResult as $value) {
             $arrTmp = formatCallRecordingTuple($value);
-            array_unshift($arrTmp, $esAdministrador ? "<input type='checkbox' name='id_".$value['uniqueid']."' />" : '');
+            array_unshift($arrTmp, $bPuedeBorrar ? "<input type='checkbox' name='id_".$value['uniqueid']."' />" : '');
 
             // checkbox(id_uniqueid) date time src dst hh:mm:ss rectype namefile
             if ($arrTmp[3] == '') $arrTmp[3] = "<font color='gray'>"._tr("unknown")."</font>";
@@ -246,7 +250,7 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     }
     $oGrid->setData($arrData);
 
-    if ($esAdministrador) {
+    if ($bPuedeBorrar) {
         $oGrid->deleteList(_tr("message_alert"), 'submit_eliminar', _tr("Delete"));
     }
 
@@ -315,16 +319,16 @@ function formatCallRecordingTuple($value)
 }
 
 function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
-    $arrConf, $user, $extension, $esAdministrador)
+    $arrConf, $user, $extension)
 {
     $record = getParameter("id");
     $namefile = getParameter('namefile');
     $pMonitoring = new paloSantoMonitoring($pDB);
-    if(!$esAdministrador){
+    if (!hasModulePrivilege($user, $module_name, 'downloadany')) {
         if(!$pMonitoring->recordBelongsToUser($record, $extension)){
             $smarty->assign("mb_title", _tr("ERROR"));
             $smarty->assign("mb_message", _tr("You are not authorized to download this file"));
-            return reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension, $esAdministrador);
+            return reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
         }
     }
     $path_record = $arrConf['records_dir'];
@@ -454,13 +458,13 @@ function record_format(&$pDB, $arrConf){
     return $ctype;
 }
 
-function display_record($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension, $esAdministrador){
+function display_record($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension){
     $file = getParameter("id");
     $namefile = getParameter('namefile');
     $pMonitoring = new paloSantoMonitoring($pDB);
     $path_record = $arrConf['records_dir'];
     $sContenido="";
-    if(!$esAdministrador){
+    if (!hasModulePrivilege($user, $module_name, 'downloadany')) {
         if(!$pMonitoring->recordBelongsToUser($file, $extension)){
             return _tr("You are not authorized to listen this file");
         }
@@ -490,12 +494,12 @@ contenido;
     return $sContenido;
 }
 
-function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension, $esAdministrador)
+function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension)
 {
-    if(!$esAdministrador){
+    if (!hasModulePrivilege($module_name, $user, 'deleteany')) {
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message", _tr("You are not authorized to delete any records"));
-        return reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension, $esAdministrador);
+        return reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
     }
     $pMonitoring = new paloSantoMonitoring($pDB);
     $path_record = $arrConf['records_dir'];
@@ -526,7 +530,7 @@ function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
         }
     }
 
-    $content = reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension, $esAdministrador);
+    $content = reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
     return $content;
 }
 
@@ -588,7 +592,6 @@ function createFieldFilter(){
     return $arrFormElements;
 }
 
-
 function getAction()
 {
     if(getParameter("save_new")) //Get parameter by POST (submit)
@@ -605,5 +608,25 @@ function getAction()
         return "view_form";
     else
         return "report"; //cancel
+}
+
+// Abstracción de privilegio por módulo hasta implementar (Elastix bug #1100).
+// Parámetro $module se usará en un futuro al implementar paloACL::hasModulePrivilege().
+function hasModulePrivilege($user, $module, $privilege)
+{
+    global $arrConf;
+
+    $pDB = new paloDB($arrConf['elastix_dsn']['acl']);
+    $pACL = new paloACL($pDB);
+
+    if (method_exists($pACL, 'hasModulePrivilege'))
+        return $pACL->hasModulePrivilege($user, $module, $privilege);
+
+    $isAdmin = ($pACL->isUserAdministratorGroup($user) !== FALSE);
+    return ($isAdmin && in_array($privilege, array(
+        'reportany',    // ¿Está autorizado el usuario a ver la información de todos los demás?
+        'downloadany',  // ¿Está autorizado el usuario a descargar grabaciones de otros usuarios?
+        'deleteany',    // ¿Está autorizado el usuario a borrar grabaciones (propias o de otros)?
+    )));
 }
 ?>

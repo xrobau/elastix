@@ -301,6 +301,10 @@ fi
 
 %changelog
 * Thu Jul  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Voicemail: re-do the paloSantoVoiceMail API to actually return and
+  use a more structured format instead of a regexp dump. Preserve fields not
+  set in writeFileVoiceMail so the client does not have to.
+  SVN Rev[7650]
 - CHANGED: Voicemail: the paloSantoVoiceMail class never actually uses a
   database. Remove database opening module-wide.
   SVN Rev[7649]

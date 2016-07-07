@@ -455,26 +455,22 @@ function form_config($smarty, $module_name, $local_templates_dir, $ext)
     $arrDat = $paloVoice->loadConfiguration($ext);
 
     if( !isset($_POST['save']) ){
-        if( $arrDat == null ){
+        if (is_null($arrDat)) {
             $_POST['status'] = "Disable";
             $_POST['email_attach']  = "No";
             $_POST['play_cid']      = "No";
             $_POST['play_envelope'] = "No";
             $_POST['delete_vmail']  = "No";
-        }
-        else{
+        } else {
             $_POST['status'] = "Enable";
-
-            $_POST['password']        = $arrDat[1];
-            $_POST['password_confir'] = $arrDat[1];
-            //$Name = $arrDat[2];
-            $_POST['email']           = $arrDat[3];
-            $_POST['pager_email']     = $arrDat[4];
-            //$VM_Options = $arrDat[5];
-            $_POST['email_attach']    = ($arrDat[6] == 'yes')?"Yes":"No";
-            $_POST['play_cid']        = ($arrDat[7] == 'yes')?"Yes":"No";
-            $_POST['play_envelope']   = ($arrDat[8] == 'yes')?"Yes":"No";
-            $_POST['delete_vmail']    = ($arrDat[9] == 'yes')?"Yes":"No";
+            $_POST['password']        = $arrDat['voicemail_password'];
+            $_POST['password_confir'] = $arrDat['voicemail_password'];
+            $_POST['email']           = $arrDat['user_email_address'];
+            $_POST['pager_email']     = $arrDat['pager_email_address'];
+            $_POST['email_attach']    = (isset($arrDat['user_options']['attach']) && $arrDat['user_options']['attach'] == 'yes')?"Yes":"No";
+            $_POST['play_cid']        = (isset($arrDat['user_options']['saycid']) && $arrDat['user_options']['saycid'] == 'yes')?"Yes":"No";
+            $_POST['play_envelope']   = (isset($arrDat['user_options']['envelope']) && $arrDat['user_options']['envelope'] == 'yes')?"Yes":"No";
+            $_POST['delete_vmail']    = (isset($arrDat['user_options']['delete']) && $arrDat['user_options']['delete'] == 'yes')?"Yes":"No";
         }
     }
 
@@ -508,23 +504,21 @@ function save_config($smarty, $module_name, $local_templates_dir, $ext)
         return false;
     }
 
-    $option = ($_POST['status'] == "Enable")?1:0;
-
-    $Ext                 = $ext;
-    $VoiceMail_PW        = $_POST['password'];
-    $password_2          = $_POST['password_confir'];
-    $Name                = $arrDat[2];
-    $VM_Email_Address    = $_POST['email'];
-    $VM_Pager_Email_Addr = $_POST['pager_email'];
-    $VM_Options          = $arrDat[5];
-    $VM_EmailAttachment  = ($_POST['email_attach'] == 'Yes') ?'yes':'no';
-    $VM_Play_CID         = ($_POST['play_cid'] == 'Yes')     ?'yes':'no';
-    $VM_Play_Envelope    = ($_POST['play_envelope'] == 'Yes')?'yes':'no';
-    $VM_Delete_Vmail     = ($_POST['delete_vmail'] == 'Yes') ?'yes':'no';
-
-    $bandera = $paloVoice->writeFileVoiceMail($Ext,$Name,$VoiceMail_PW,$VM_Email_Address, $VM_Pager_Email_Addr,
-                                              $VM_Options, $VM_EmailAttachment, $VM_Play_CID, $VM_Play_Envelope,
-                                              $VM_Delete_Vmail, $option);
+    $bandera = $paloVoice->writeFileVoiceMail($ext, ($_POST['status'] == "Enable")
+        ? array(
+            'voicemail_password'    =>  $_POST['password'],
+            // user_name se conserva
+            'user_email_address'    =>  $_POST['email'],
+            'pager_email_address'   =>  $_POST['pager_email'],
+            'user_options'          =>  array(
+                // toda bandera distinta de las indicadas abajo se conserva
+                'attach'    =>  ($_POST['email_attach'] == 'Yes') ? 'yes' : 'no',
+                'saycid'    =>  ($_POST['play_cid'] == 'Yes')     ? 'yes' : 'no',
+                'envelope'  =>  ($_POST['play_envelope'] == 'Yes')? 'yes' : 'no',
+                'delete'    =>  ($_POST['delete_vmail'] == 'Yes') ? 'yes' : 'no',
+            ),
+        )
+        : NULL);
 
     if( $bandera == true )
         return true;

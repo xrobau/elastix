@@ -451,28 +451,21 @@ class core_Voicemail
         }
 
         $paloVoice = new paloSantoVoiceMail();
-        $arrDat = $paloVoice->loadConfiguration($ext);
-        if($emailAttachment)
-            $VM_EmailAttachment = 'yes';
-        else
-            $VM_EmailAttachment = 'no';
-        if($playCID)
-            $VM_Play_CID = 'yes';
-        else
-            $VM_Play_CID = 'no';
-        if($playEnvelope)
-            $VM_Play_Envelope = 'yes';
-        else
-            $VM_Play_Envelope = 'no';
-        if($deleteVmail)
-            $VM_Delete_Vmail = 'yes';
-        else
-            $VM_Delete_Vmail = 'no';
-        if($enable)
-            $option = 1;
-        else
-            $option = 0;
-        $bandera = $paloVoice->writeFileVoiceMail($extension,$arrDat[2],$password,$email,$pagerEmail,$arrDat[5],$VM_EmailAttachment, $VM_Play_CID,$VM_Play_Envelope,$VM_Delete_Vmail, $option);
+        $bandera = $paloVoice->writeFileVoiceMail($extension, $enable
+            ? array(
+                'voicemail_password'    =>  $password,
+                // user_name se conserva
+                'user_email_address'    =>  $email,
+                'pager_email_address'   =>  $pagerEmail,
+                'user_options'          =>  array(
+                    // toda bandera distinta de las indicadas abajo se conserva
+                    'attach'    =>  $emailAttachment ? 'yes' : 'no',
+                    'saycid'    =>  $playCID     ? 'yes' : 'no',
+                    'envelope'  =>  $playEnvelope? 'yes' : 'no',
+                    'delete'    =>  $deleteVmail ? 'yes' : 'no',
+                ),
+            )
+            : NULL);
 
         if(!$bandera){
             $this->errMsg["fc"] = 'ERROR';

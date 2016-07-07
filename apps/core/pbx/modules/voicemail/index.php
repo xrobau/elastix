@@ -55,15 +55,6 @@ function _moduleContent(&$smarty, $module_name)
     //segun el usuario que esta logoneado consulto si tiene asignada extension para buscar los voicemails
     $pDB = new paloDB($arrConf['elastix_dsn']['acl']);
 
-    $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
-    $arrAMP  = $pConfig->leer_configuracion(false);
-
-    $dsnAsterisk = $arrAMP['AMPDBENGINE']['valor']."://".
-                   $arrAMP['AMPDBUSER']['valor']. ":".
-                   $arrAMP['AMPDBPASS']['valor']. "@".
-                   $arrAMP['AMPDBHOST']['valor']. "/asterisk";
-    $pDB_ast = new paloDB($dsnAsterisk);
-
 
     if (!empty($pDB->errMsg)) {
         echo "ERROR DE DB: $pDB->errMsg <br>";
@@ -79,12 +70,12 @@ function _moduleContent(&$smarty, $module_name)
     $extension = $pACL->getUserExtension($_SESSION['elastix_user']); $ext = $extension;
     $esAdministrador = $pACL->isUserAdministratorGroup($_SESSION['elastix_user']);
     $bandCustom = true;
-    if(is_null($ext) || $ext==""){
-	$bandCustom = false;
-	if(!$esAdministrador){
-	    $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
-	    return "";
-	}
+    if (is_null($ext) || $ext=="") {
+        $bandCustom = false;
+        if (!$esAdministrador) {
+            $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
+            return "";
+        }
     }
     if($esAdministrador)
         $extension = "[[:digit:]]+";
@@ -146,7 +137,7 @@ function _moduleContent(&$smarty, $module_name)
     }
 
     $oGrid  = new paloSantoGrid($smarty);
-    if($report){
+    if ($report){
         $oGrid->addFilterControl(_tr("Filter applied ")._tr("Start Date")." = ".$arrDate['date_start'].", "._tr("End Date")." = ".$arrDate['date_end'], $arrDate, array('date_start' => date("d M Y"),'date_end' => date("d M Y")),true);
     }
 
@@ -162,13 +153,13 @@ function _moduleContent(&$smarty, $module_name)
     }
 
     if( getParameter('config') ){
-	if(!(is_null($ext) || $ext==""))
-	    return form_config($smarty, $module_name, $local_templates_dir, $ext, $pDB_ast);
+        if(!(is_null($ext) || $ext==""))
+            return form_config($smarty, $module_name, $local_templates_dir, $ext);
     }
 
     if( getParameter('save') ){
-        if( !save_config($smarty, $module_name, $local_templates_dir, $ext, $pDB_ast) )
-            return form_config($smarty, $module_name, $local_templates_dir, $ext, $pDB_ast);
+        if( !save_config($smarty, $module_name, $local_templates_dir, $ext) )
+            return form_config($smarty, $module_name, $local_templates_dir, $ext);
     }
 
     if( getParameter('action') == "display_record"){
@@ -196,11 +187,11 @@ function _moduleContent(&$smarty, $module_name)
             if (!is_file($voicemailPath)) {
                 die("<b>404 "._tr("no_file")."</b>");
             }
-           $sContenido="";
+            $sContenido="";
 
-			$name = basename($voicemailPath);
-			$format=substr(strtolower($name), -3);
-			 // This will set the Content-Type to the appropriate setting for the file
+            $name = basename($voicemailPath);
+            $format=substr(strtolower($name), -3);
+            // This will set the Content-Type to the appropriate setting for the file
             $ctype ='';
             switch( $format ) {
 
@@ -211,17 +202,17 @@ function _moduleContent(&$smarty, $module_name)
                 default: die("<b>404 "._tr("no_file")."</b>"); break ;
             }
 
-			if($sContenido == "")
+            if($sContenido == "")
                 $session_id = session_id();
 
-			$audiourl = construirURL(array(
-			    'menu'           =>  $module_name,
-			    'action'         =>  'download',
-			    'ext'            =>  $ext,
-			    'name'           =>  $file,
-			    'rawmode'        =>  'yes',
-			    'elastixSession' =>  $session_id,
-			));
+            $audiourl = construirURL(array(
+                'menu'           =>  $module_name,
+                'action'         =>  'download',
+                'ext'            =>  $ext,
+                'name'           =>  $file,
+                'rawmode'        =>  'yes',
+                'elastixSession' =>  $session_id,
+            ));
             $sContenido=<<<contenido
 <!DOCTYPE html>
 <html>
@@ -318,14 +309,13 @@ contenido;
 
     //si tiene extension consulto sino, muestro un mensaje de que no tiene asociada extension
     $archivos=array();
-    if (!(is_null($ext) || $ext=="") || $esAdministrador){
-	if(is_null($ext) || $ext=="")
-	    $smarty->assign("mb_message", "<b>"._tr("no_extension_assigned")."</b>");
+    if (!(is_null($ext) || $ext=="") || $esAdministrador) {
+        if(is_null($ext) || $ext=="")
+            $smarty->assign("mb_message", "<b>"._tr("no_extension_assigned")."</b>");
         $path = "/var/spool/asterisk/voicemail/default";
         $folder = "INBOX";
 
-        if($esAdministrador)
-        {
+        if($esAdministrador) {
             if ($handle = opendir($path)) {
                 while (false !== ($dir = readdir($handle))) {
                     if ($dir != "." && $dir != ".." && preg_match("/$extension/", $dir, $regs) && is_dir($path."/".$dir)) {
@@ -333,7 +323,7 @@ contenido;
                     }
                 }
             }
-        }else $directorios[] = $extension;
+        } else $directorios[] = $extension;
 //if($esAdministrador)
         $arrData = array();
         foreach($directorios as $directorio)
@@ -412,8 +402,8 @@ contenido;
         //Fin Paginacion
 
         $arrVoiceData=array_slice($arrData, $offset, $limit);
-    } //fin if (!is_null(extension))
-    else {
+        //fin if (!is_null(extension))
+    } else {
         $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
     }
 
@@ -442,7 +432,7 @@ contenido;
                     );
 
     if($bandCustom == true)
-	$oGrid->customAction("config",_tr("Configuration"));
+        $oGrid->customAction("config",_tr("Configuration"));
     $oGrid->deleteList(_tr("Are you sure you wish to delete voicemails?"),"submit_eliminar",_tr("Delete"));
     $oGrid->showFilter($htmlFilter);
     $contenidoModulo  = $oGrid->fetchGrid($arrGrid, $arrVoiceData);
@@ -451,7 +441,7 @@ contenido;
     return $contenidoModulo;
 }
 
-function form_config($smarty, $module_name, $local_templates_dir, $ext, $pDB)
+function form_config($smarty, $module_name, $local_templates_dir, $ext)
 {
     $arrForm = createFieldFormConfig();
     $oForm = new paloForm($smarty, $arrForm);
@@ -461,7 +451,7 @@ function form_config($smarty, $module_name, $local_templates_dir, $ext, $pDB)
     $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("icon","images/list.png");
 
-    $paloVoice = new paloSantoVoiceMail($pDB);
+    $paloVoice = new paloSantoVoiceMail();
     $arrDat = $paloVoice->loadConfiguration($ext);
 
     if( !isset($_POST['save']) ){
@@ -495,9 +485,9 @@ function form_config($smarty, $module_name, $local_templates_dir, $ext, $pDB)
     return $contenidoModulo;
 }
 
-function save_config($smarty, $module_name, $local_templates_dir, $ext, $pDB_ast)
+function save_config($smarty, $module_name, $local_templates_dir, $ext)
 {
-    $paloVoice = new paloSantoVoiceMail($pDB_ast);
+    $paloVoice = new paloSantoVoiceMail();
     $arrDat = $paloVoice->loadConfiguration($ext);
 
     $arrForm = createFieldFormConfig();

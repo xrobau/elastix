@@ -84,7 +84,7 @@ class core_Voicemail
         $this->_pACL    = NULL;
         $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
         $ampConf = $pConfig->leer_configuracion(false);
-        $this->_astDSN = 
+        $this->_astDSN =
             $ampConf['AMPDBENGINE']['valor']."://".
             $ampConf['AMPDBUSER']['valor']. ":".
             $ampConf['AMPDBPASS']['valor']. "@".
@@ -343,7 +343,7 @@ class core_Voicemail
             }
         }
         return array(
-            "totalVoicemail" => count($arrData), 
+            "totalVoicemail" => count($arrData),
             "voicemail"      => $arrData);
     }
 
@@ -403,7 +403,7 @@ class core_Voicemail
      *
      * @param   boolean     $enable               true if the configuration will be enabled or false if it will be disabled
      * @param   string      $email                email for the voicemail
-     * @param   string      $pagerEmail           (optional) pager email for the voicemail 
+     * @param   string      $pagerEmail           (optional) pager email for the voicemail
      * @param   string      $password             password for the voicemail
      * @param   string      $confirmPassword      must be equal to $password
      * @param   boolean     $emailAttachment      true if the email Attachment is on or false if it is off
@@ -450,7 +450,7 @@ class core_Voicemail
             return false;
         }
 
-        $paloVoice = new paloSantoVoiceMail($this->_getDB($this->_astDSN));
+        $paloVoice = new paloSantoVoiceMail();
         $arrDat = $paloVoice->loadConfiguration($ext);
         if($emailAttachment)
             $VM_EmailAttachment = 'yes';
@@ -521,7 +521,7 @@ class core_Voicemail
         $size = filesize($voicemailPath);
         $name = basename($voicemailPath);
         $ctype ='';
-        $ext=substr(strtolower($name), -3); 
+        $ext=substr(strtolower($name), -3);
         switch( $ext ) {
             case "mp3": $ctype="audio/mpeg"; break;
             case "wav": $ctype="audio/x-wav"; break;
@@ -550,7 +550,7 @@ class core_Voicemail
     }
 
     /**
-     * 
+     *
      * Function that returns the error message
      *
      * @return  string   Message error if had an error.

@@ -27,40 +27,16 @@
   +----------------------------------------------------------------------+
   $Id: paloSantoCDR.class.php,v 1.1.1.1 2008/10/09 12:48:09 jjvega Exp $ */
 
-//ini_set("display_errors", true);
-if (file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php")) { 
-require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
-}
-// require_once('/var/www/html/admin/common/php-asmanager.php');
-class paloSantoVoiceMail {
-    var $_DB;
+class paloSantoVoiceMail
+{
     var $errMsg;
-
-    function paloSantoVoiceMail(&$pDB)
-    {
-        // Se recibe como parámetro una referencia a una conexión paloDB
-        if (is_object($pDB)) {
-            $this->_DB =& $pDB;
-            $this->errMsg = $this->_DB->errMsg;
-        } else {
-            $dsn = (string)$pDB;
-            $this->_DB = new paloDB($dsn);
-
-            if (!$this->_DB->connStatus) {
-                $this->errMsg = $this->_DB->errMsg;
-                // debo llenar alguna variable de error
-            } else {
-                // debo llenar alguna variable de error
-            }
-        }
-    }
 
     function writeFileVoiceMail($Ext,$Name,$VoiceMail_PW,$VM_Email_Address, $VM_Pager_Email_Addr, $VM_Options,
                                 $VM_EmailAttachment, $VM_Play_CID, $VM_Play_Envelope, $VM_Delete_Vmail, $option)
     {
         $path = "/etc/asterisk/voicemail.conf";
-        if(file_exists($path))
-             exec("sed -ie '/^$Ext =>/d' $path");
+        if (file_exists($path))
+            exec("sed -ie '/^$Ext =>/d' $path");
         else{
            $this->errMsg = "File $path does not exist";
            return false;

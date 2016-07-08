@@ -74,29 +74,26 @@ function _moduleContent(&$smarty, $module_name)
         }
     }
 
-    //actions
-    $action = getAction();
-    $content = "";
-
-    switch($action){
-        case 'delete':
-            $content = deleteRecord($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
-            break;
-        case 'download':
-            $content = downloadFile($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
-            break;
-        case "display_record":
-            $content = display_record($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
-            break;
-        default:
-            $content = reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
-            break;
+    switch (getParameter('action')) {
+    case 'download':
+        $h = 'downloadFile';
+        break;
+    case 'display_record':
+        $h = 'display_record';
+        break;
+    default:
+        $h = 'reportMonitoring';
+        break;
     }
-    return $content;
+    return $h($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
 }
 
 function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension)
 {
+    if (isset($_POST['submit_eliminar'])) {
+        deleteRecord($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
+    }
+
     $bPuedeVerTodos = hasModulePrivilege($user, $module_name, 'reportany');
     $bPuedeBorrar = hasModulePrivilege($user, $module_name, 'deleteany');
 
@@ -495,16 +492,15 @@ contenido;
 
 function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension)
 {
-    if (!hasModulePrivilege($module_name, $user, 'deleteany')) {
+    if (!hasModulePrivilege($user, $module_name, 'deleteany')) {
         $smarty->assign("mb_title", _tr("ERROR"));
         $smarty->assign("mb_message", _tr("You are not authorized to delete any records"));
-        return reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
+        return FALSE;
     }
     $pMonitoring = new paloSantoMonitoring($pDB);
     $path_record = $arrConf['records_dir'];
-    foreach($_POST as $key => $values){
-        if(substr($key,0,3) == "id_")
-        {
+    foreach ($_POST as $key => $values) {
+        if (substr($key,0,3) == "id_") {
             $ID = substr($key, 3);
             $ID = str_replace("_",".",$ID);
             $recordName = $pMonitoring->getRecordName($ID);
@@ -512,25 +508,17 @@ function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
             $record = basename($record);
             $path   = $path_record.$record;
             $path2  = $path_record.getPathFile($record);
-            if(is_file($path)){
-                // Archivo existe. Se borra si se puede actualizar CDR
-                if($pMonitoring->deleteRecordFile($ID))
+
+            if ($pMonitoring->deleteRecordFile($ID)) {
+                if (is_file($path))
                     unlink($path);
-            }
-            else if(is_file($path2)){
-                // Archivo existe. Se borra si se puede actualizar CDR
-                if($pMonitoring->deleteRecordFile($ID))
+                elseif (is_file($path2))
                     unlink($path2);
-            }
-            else {
-                // Archivo no existe. Se actualiza CDR para mantener consistencia
-                $pMonitoring->deleteRecordFile($ID);
             }
         }
     }
 
-    $content = reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
-    return $content;
+    return TRUE;
 }
 
 function SecToHHMMSS($sec)
@@ -591,24 +579,6 @@ function createFieldFilter(){
     return $arrFormElements;
 }
 
-function getAction()
-{
-    if(getParameter("save_new")) //Get parameter by POST (submit)
-        return "save_new";
-    else if(getParameter("action")=="display_record")
-        return "display_record";
-    else if(getParameter("submit_eliminar"))
-        return "delete";
-    else if(getParameter("action")=="download")
-        return "download";
-    else if(getParameter("action")=="view")   //Get parameter by GET (command pattern, links)
-        return "view_form";
-    else if(getParameter("action")=="view_edit")
-        return "view_form";
-    else
-        return "report"; //cancel
-}
-
 // Abstracción de privilegio por módulo hasta implementar (Elastix bug #1100).
 // Parámetro $module se usará en un futuro al implementar paloACL::hasModulePrivilege().
 function hasModulePrivilege($user, $module, $privilege)
@@ -628,4 +598,3 @@ function hasModulePrivilege($user, $module, $privilege)
         'deleteany',    // ¿Está autorizado el usuario a borrar grabaciones (propias o de otros)?
     )));
 }
-?>

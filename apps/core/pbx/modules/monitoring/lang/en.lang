@@ -52,6 +52,7 @@ $arrLangModule=array(
 "contact_admin" => "There is no extension number associated with the current user. Please contact the administrator to assign it an extension",
 "You are not authorized to download this file" => "You are not authorized to download this file",
 "You are not authorized to listen this file" => "You are not authorized to listen this file",
-"You are not authorized to delete any records" => "You are not authorized to delete any record"
+"You are not authorized to delete any records" => "You are not authorized to delete any record",
+'Recording missing' => 'Recording missing',
 );
 ?>

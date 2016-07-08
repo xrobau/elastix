@@ -55,5 +55,6 @@ $arrLangModule = array(
     "You are not authorized to delete any records" => "Usted no está autorizado para eliminar ningún registro",
     "Start Date" => "Fecha inicial",
     "End Date" => "Fecha final",
+    'Recording missing' => 'No se encuentra la grabación',
 );
 ?>

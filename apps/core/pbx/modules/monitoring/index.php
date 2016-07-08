@@ -232,17 +232,24 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
             $arrTmp[5] = "<label title='".$value['duration']." "._tr('seconds')."' style='color:green'>".$arrTmp[5]."</label>";
 
             if ($arrTmp[7] != 'deleted') {
-                $urlparams = array(
-                    'menu'      =>  $module_name,
-                    'action'    =>  'display_record',
-                    'id'        =>  $value['uniqueid'],
-                    'namefile'  =>  $arrTmp[7],
-                    'rawmode'   =>  'yes',
-                );
-                $recordingLink = "<a href=\"javascript:popUp('index.php?".urlencode(http_build_query($urlparams)."',350,100);")."\">"._tr("Listen")."</a>&nbsp;";
+                $esc_recfile = htmlentities($value['recordingfile'], ENT_COMPAT, 'UTF-8');
+                $recinfo = $pMonitoring->resolveRecordingPath($value['recordingfile']);
+                if (is_null($recinfo['fullpath'])) {
+                    $recordingLink = '<span title="'.$esc_recfile.'" style="color: red"><b>'.
+                        htmlentities(_tr('Recording missing', ENT_COMPAT, 'UTF-8')).'</b></span>';
+                } else {
+                    $urlparams = array(
+                        'menu'      =>  $module_name,
+                        'action'    =>  'display_record',
+                        'id'        =>  $value['uniqueid'],
+                        'namefile'  =>  $arrTmp[7],
+                        'rawmode'   =>  'yes',
+                    );
+                    $recordingLink = "<a title=\"$esc_recfile\" href=\"javascript:popUp('index.php?".urlencode(http_build_query($urlparams)."',350,100);")."\">"._tr("Listen")."</a>&nbsp;";
 
-                $urlparams['action'] = 'download';
-                $recordingLink .= "<a href='?".http_build_query($urlparams)."' >"._tr("Download")."</a>";
+                    $urlparams['action'] = 'download';
+                    $recordingLink .= "<a title=\"$esc_recfile\" href='?".http_build_query($urlparams)."' >"._tr("Download")."</a>";
+                }
             } else {
                 $recordingLink = '';
             }
@@ -326,19 +333,18 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
 {
     $record = getParameter("id");
     $namefile = getParameter('namefile');
+    if (is_null($record) || !preg_match('/^[[:digit:]]+\.[[:digit:]]+$/', $record)) {
+        // Missing or invalid uniqueid
+        Header('HTTP/1.1 404 Not Found');
+        die("<b>404 "._tr("no_file")." </b>");
+    }
+
     $pMonitoring = new paloSantoMonitoring($pDB);
     if (!hasModulePrivilege($user, $module_name, 'downloadany')) {
         if (!$pMonitoring->recordBelongsToUser($record, $extension)) {
             Header('HTTP/1.1 403 Forbidden');
             die("<b>403 "._tr("You are not authorized to download this file")." </b>");
         }
-    }
-    $path_record = $arrConf['records_dir'];
-
-    if (is_null($record) || !preg_match('/^[[:digit:]]+\.[[:digit:]]+$/', $record)) {
-        // Missing or invalid uniqueid
-        Header('HTTP/1.1 404 Not Found');
-        die("<b>404 "._tr("no_file")." </b>");
     }
 
     // Check record is valid and points to an actual file
@@ -348,50 +354,18 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
         Header('HTTP/1.1 404 Not Found');
         die("<b>404 "._tr("no_file")." </b>");
     }
-    $file = basename($filebyUid['recordingfile']);
-    $path = $path_record.$file;
-    if ($file == 'deleted') {
+    if ($filebyUid['deleted']) {
         // Specified file has been deleted
         Header('HTTP/1.1 410 Gone');
         die("<b>410 "._tr("no_file")." </b>");
     }
-    if (!file_exists($path)) {
-        // Queue recordings might lack an extension
-        $arrData = glob("$path*");
-        if (count($arrData) > 0) {
-            $path = $arrData[0];
-            $file = basename($path);
-        }
-    }
-
-    if (file_exists($path) && is_file($path)) {
-    	$ok_path = $path;
-    } else {
-        $path2 = $path_record.getPathFile($file);
-        if (file_exists($path2) && is_file($path2)) {
-            $ok_path = $path2;
-        } else {
-            // Failed to find specified file
-            Header('HTTP/1.1 404 Not Found');
-            die("<b>404 "._tr("no_file")." </b>");
-        }
-    }
-
-    // Set Content-Type according to file extension
-    $contentTypes = array(
-        'wav'   =>  'audio/wav',
-        'gsm'   =>  'audio/gsm',
-        'mp3'   =>  'audio/mpeg',
-    );
-    $extension = substr(strtolower($file), -3);
-    if (!isset($contentTypes[$extension])) {
-        // Unrecognized file extension
+    if (is_null($filebyUid['fullpath']) || is_null($filebyUid['mimetype'])) {
         Header('HTTP/1.1 404 Not Found');
         die("<b>404 "._tr("no_file")." </b>");
     }
 
     // Actually open and transmit the file
-    $fp = fopen($ok_path, 'rb');
+    $fp = fopen($filebyUid['fullpath'], 'rb');
     if (!$fp) {
         Header('HTTP/1.1 404 Not Found');
         die("<b>404 "._tr("no_file")." </b>");
@@ -401,86 +375,38 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
     header("Cache-Control: public");
     header("Content-Description: wav file");
-    header("Content-Type: " . $contentTypes[$extension]);
-    header("Content-Disposition: attachment; filename=" . $file);
+    header("Content-Type: " . $filebyUid['mimetype']);
+    header("Content-Disposition: attachment; filename=" . basename($filebyUid['fullpath']));
     header("Content-Transfer-Encoding: binary");
-    header("Content-length: " . filesize($ok_path));
+    header("Content-length: " . filesize($filebyUid['fullpath']));
     fpassthru($fp);
     fclose($fp);
-}
-
-function record_format(&$pDB, $arrConf){
-    $record = getParameter("id");
-    $pMonitoring = new paloSantoMonitoring($pDB);
-
-    $path_record = $arrConf['records_dir'];
-    if (isset($record) && preg_match("/^[[:digit:]]+\.[[:digit:]]+$/",$record)) {
-
-        $filebyUid   = $pMonitoring->getAudioByUniqueId($record);
-        $file   = basename($filebyUid['recordingfile']);
-        $path   = $path_record.$file;
-
-        if($file[0] == "q"){// caso de archivos de colas no se tiene el tipo de archivo gsm, wav,etc
-            $arrData  = glob("$path*");
-            $path = isset($arrData[0])?$arrData[0]:$path;
-        }
-
-    // See if the file exists
-        if ($file == 'deleted' || !is_file($path)) {
-            return "";
-        }
-
-        if (file_exists($path) && is_file($path)) {
-        	$ok_path = $path;
-        } else {
-        	$path2  = $path_record.getPathFile($file);
-            if (file_exists($path2) && is_file($path2)) {
-            	$ok_path = $path2;
-            } else {
-            	return '';
-            }
-        }
-
-        $name = basename($ok_path);
-
-    //$extension = strtolower(substr(strrchr($name,"."),1));
-        $extension=substr(strtolower($name), -3);
-
-    // This will set the Content-Type to the appropriate setting for the file
-        $ctype ='';
-        switch( $extension ) {
-
-            case "mp3": $ctype="audio/mpeg"; break;
-            case "wav": $ctype="audio/wav"; break;
-            case "gsm": $ctype="audio/gsm"; break;
-            // not downloadable
-            default: $ctype=""; break ;
-        }
-    }
-    return $ctype;
 }
 
 function display_record($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension){
     $file = getParameter("id");
     $namefile = getParameter('namefile');
     $pMonitoring = new paloSantoMonitoring($pDB);
-    $path_record = $arrConf['records_dir'];
-    $sContenido="";
+
     if (!hasModulePrivilege($user, $module_name, 'downloadany')) {
         if(!$pMonitoring->recordBelongsToUser($file, $extension)){
             return _tr("You are not authorized to listen this file");
         }
     }
-    $session_id = session_id();
-    $ctype=record_format($pDB, $arrConf);
-	$audiourl = construirURL(array(
-	    'menu'             =>  $module_name,
-	    'action'           =>  'download',
-	    'id'               =>  $file,
-	    'namefile'         =>  $namefile,
-	    'rawmode'          =>  'yes',
-	    'elastixSession'   =>  $session_id,
-	));
+
+    $recinfo = $pMonitoring->getAudioByUniqueId($file, $namefile);
+    if (!is_array($recinfo)) {
+        return $pMonitoring->errMsg;
+    }
+    $ctype = is_null($recinfo['mimetype']) ? '' : $recinfo['mimetype'];
+    $audiourl = construirURL(array(
+        'menu'             =>  $module_name,
+        'action'           =>  'download',
+        'id'               =>  $file,
+        'namefile'         =>  $namefile,
+        'rawmode'          =>  'yes',
+        'elastixSession'   =>  session_id(),
+    ));
     $sContenido=<<<contenido
 <!DOCTYPE html>
 <html>

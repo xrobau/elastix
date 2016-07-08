@@ -34,6 +34,13 @@ class paloSantoMonitoring
     var $_DB;
     var $errMsg;
 
+    private static $_listaExtensiones = array(
+        'wav'   =>  'audio/wav',
+        'gsm'   =>  'audio/gsm',
+        'mp3'   =>  'audio/mpeg',
+        'WAV'   =>  'audio/wav',    // audio gsm en envoltura RIFF
+    );
+
     function paloSantoMonitoring(&$pDB)
     {
         // Se recibe como parámetro una referencia a una conexión paloDB
@@ -220,13 +227,107 @@ SQL_COND_EXTENSION;
             $query .= ' AND recordingfile LIKE ?';
             $parame[] = '%'.$namefile.'%';
         }
-        $result=$this->_DB->getFirstRowQuery($query, true, $parame);
-        if($result==FALSE){
+        $result = $this->_DB->getFirstRowQuery($query, TRUE, $parame);
+        if (!is_array($result)) {
             $this->errMsg = $this->_DB->errMsg;
-            return null;
+            return NULL;
+        }
+        if (count($result) <= 0) {
+            $this->errMsg = '(internal) CDR not found by specified id/namefile';
+            return NULL;
         }
 
+        $result = array_merge($result, $this->resolveRecordingPath($result['recordingfile']));
         return $result;
+    }
+
+    function resolveRecordingPath($recordingfile)
+    {
+        $result['fullpath'] = NULL;
+        $result['mimetype'] = NULL;
+        $result['deleted'] = ($recordingfile == 'deleted');
+        if (!$result['deleted']) {
+            $result['fullpath'] = $this->_rutaAbsolutaGrabacion($recordingfile);
+        }
+        if (!is_null($result['fullpath'])) {
+            $regs = NULL;
+            if (preg_match('/\.(\S{3})$/', $result['fullpath'], $regs)) {
+                if (in_array($regs[1], array_keys(self::$_listaExtensiones))) {
+                    $result['mimetype'] = self::$_listaExtensiones[$regs[1]];
+                }
+            }
+        }
+        return $result;
+    }
+
+    private function _rutaAbsolutaGrabacion($file)
+    {
+        $basedir = DEFAULT_ASTERISK_RECORDING_BASEDIR.'/';
+
+        /* Si la ruta almacenada en recordingfile es absoluta, sólo se acepta
+         * si luego de canonicalizar inicia en /var/spool/asterisk/monitor */
+        if ($file{0} == '/') {
+            $dir = realpath(dirname($file)); // FALSE si el directorio no existe
+            if ($dir === FALSE || strpos($dir.'/', $basedir) !== 0)
+                return NULL;
+            $file = substr($dir.'/'.basename($file), strlen($basedir));
+        }
+
+        if (file_exists($basedir.$file)) return $basedir.$file;
+
+        /* ¿Por qué no existe la ruta indicada? */
+
+        /* Algunas rutas a través del dialplan almacenan el archivo en
+         * el directorio clasificado por año/mes/día, pero no almacenan
+         * esta ruta en recordingfile. Se analiza el nombre de archivo
+         * para detectar si tiene posible información de fecha, y se
+         * adjunta esta fecha como camino si no está ya adjuntada. Este
+         * análisis sólo se hace si el recordingfile no tiene componentes
+         * de directorio. */
+        $datedir = '';
+        if (strpos($file, '/') === FALSE) {
+            /* FreePBX acostumbra construir el nombre de archivo con
+             * componentes separados por guiones. Si uno de los
+             * componentes representa una fecha, se compondrá de
+             * exactamente 8 dígitos y empezará con 2. */
+            foreach (explode('-', $file) as $test_token) {
+                if (strlen($test_token) == 8 && ctype_digit($test_token) &&
+                    $test_token{0} == '2') {
+                    // /var/spool/asterisk/monitor/2010/12/31/
+                    $testdir = substr($test_token, 0, 4).'/'.
+                        substr($test_token, 4, 2).'/'.
+                        substr($test_token, 6, 2).'/';
+                    if (is_dir($basedir.$testdir)) {
+                        $datedir = $testdir;
+                        break;
+                    }
+                }
+            }
+
+            if (file_exists($basedir.$datedir.$file)) return $basedir.$datedir.$file;
+        }
+
+        /* Algunas rutas a través del dialplan guardan un nombre de archivo SIN
+         * EXTENSIÓN. Se verifica si un glob con la ruta parcial lista algún
+         * conjunto de archivos. ESTO TOMA TIEMPO. */
+        $bFaltaExtension = TRUE;
+        $regs = NULL;
+        if (preg_match('/\.(\S{3})$/', $file, $regs)) {
+            /* Si la extensión es conocida, ni me molesto en hacer el glob. */
+            $bFaltaExtension = !(in_array($regs[1], array_keys(self::$_listaExtensiones)));
+        }
+        if ($bFaltaExtension) {
+            // $datedir puede ser "" si no se resolvió una fecha
+            if ($datedir != '') {
+                $r = glob($basedir.$datedir.$file.'*');
+                if (count($r) > 0) return $r[0];
+            }
+            $r = glob($basedir.$file.'*');
+            if (count($r) > 0) return $r[0];
+        }
+
+        // ...me doy
+        return NULL;
     }
 
     function recordBelongsToUser($uniqueid, $extension)

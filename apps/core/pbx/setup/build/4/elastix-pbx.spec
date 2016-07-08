@@ -301,6 +301,10 @@ fi
 
 %changelog
 * Fri Jul  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring: unify code for finding out the absolute path for the
+  recording into a single place at paloSantoMonitoring. Add a check to see
+  whether the recording referenced by the CDR actually exists.
+  SVN Rev[7658]
 - CHANGED: Monitoring: update recordBelongsToUser() test to use the same
   expanded condition as the main report.
   SVN Rev[7657]

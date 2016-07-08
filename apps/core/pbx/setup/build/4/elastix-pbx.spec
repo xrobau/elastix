@@ -301,10 +301,13 @@ fi
 
 %changelog
 * Fri Jul  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring: use array form variable to encode list of uniqueid
+  instead of encoding the uniqueid into the form name.
+  SVN Rev[7654]
 - FIXED: Monitoring: fix incorrect parameter order of hasModulePrivilege() on
   check before recording deletion. Simplify the dispatcher code to depend only
   on the "action" parameter.
-  SVN Rev[7652]
+  SVN Rev[7653]
 - CHANGED: Monitoring: emit a 403 Forbidden for an unauthorized recording
   download instead of rendering the report grid again. Emit a 410 Gone for an
   attempt to download a deleted file instead of a 404 Not Found.

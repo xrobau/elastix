@@ -90,7 +90,8 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension)
 {
-    if (isset($_POST['submit_eliminar'])) {
+    if (isset($_POST['submit_eliminar']) && isset($_POST['uniqueid']) &&
+        is_array($_POST['uniqueid']) && count($_POST['uniqueid']) > 0) {
         deleteRecord($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
     }
 
@@ -218,7 +219,8 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
             $arrData = array_map('formatCallRecordingTuple', $arrResult);
         } else foreach ($arrResult as $value) {
             $arrTmp = formatCallRecordingTuple($value);
-            array_unshift($arrTmp, $bPuedeBorrar ? "<input type='checkbox' name='id_".$value['uniqueid']."' />" : '');
+            array_unshift($arrTmp, ($bPuedeBorrar && ($value['recordingfile'] != 'deleted'))
+                ? '<input type="checkbox" name="uniqueid[]" value="'.htmlentities($value['uniqueid'], ENT_COMPAT, 'UTF-8').'"/>' : '');
 
             // checkbox(id_uniqueid) date time src dst hh:mm:ss rectype namefile
             if ($arrTmp[3] == '') $arrTmp[3] = "<font color='gray'>"._tr("unknown")."</font>";
@@ -499,22 +501,18 @@ function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     }
     $pMonitoring = new paloSantoMonitoring($pDB);
     $path_record = $arrConf['records_dir'];
-    foreach ($_POST as $key => $values) {
-        if (substr($key,0,3) == "id_") {
-            $ID = substr($key, 3);
-            $ID = str_replace("_",".",$ID);
-            $recordName = $pMonitoring->getRecordName($ID);
-            $record = substr($recordName,6);
-            $record = basename($record);
-            $path   = $path_record.$record;
-            $path2  = $path_record.getPathFile($record);
+    foreach ($_POST['uniqueid'] as $ID) {
+        $recordName = $pMonitoring->getRecordName($ID);
+        $record = substr($recordName,6);
+        $record = basename($record);
+        $path   = $path_record.$record;
+        $path2  = $path_record.getPathFile($record);
 
-            if ($pMonitoring->deleteRecordFile($ID)) {
-                if (is_file($path))
-                    unlink($path);
-                elseif (is_file($path2))
-                    unlink($path2);
-            }
+        if ($pMonitoring->deleteRecordFile($ID)) {
+            if (is_file($path))
+                unlink($path);
+            elseif (is_file($path2))
+                unlink($path2);
         }
     }
 

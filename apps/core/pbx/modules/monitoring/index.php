@@ -325,10 +325,9 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     $namefile = getParameter('namefile');
     $pMonitoring = new paloSantoMonitoring($pDB);
     if (!hasModulePrivilege($user, $module_name, 'downloadany')) {
-        if(!$pMonitoring->recordBelongsToUser($record, $extension)){
-            $smarty->assign("mb_title", _tr("ERROR"));
-            $smarty->assign("mb_message", _tr("You are not authorized to download this file"));
-            return reportMonitoring($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);
+        if (!$pMonitoring->recordBelongsToUser($record, $extension)) {
+            Header('HTTP/1.1 403 Forbidden');
+            die("<b>404 "._tr("You are not authorized to download this file")." </b>");
         }
     }
     $path_record = $arrConf['records_dir'];
@@ -350,14 +349,14 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     $path = $path_record.$file;
     if ($file == 'deleted') {
         // Specified file has been deleted
-        Header('HTTP/1.1 404 Not Found');
-        die("<b>404 "._tr("no_file")." </b>");
+        Header('HTTP/1.1 410 Gone');
+        die("<b>410 "._tr("no_file")." </b>");
     }
     if (!file_exists($path)) {
-    	// Queue recordings might lack an extension
+        // Queue recordings might lack an extension
         $arrData = glob("$path*");
         if (count($arrData) > 0) {
-        	$path = $arrData[0];
+            $path = $arrData[0];
             $file = basename($path);
         }
     }
@@ -384,7 +383,7 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     $extension = substr(strtolower($file), -3);
     if (!isset($contentTypes[$extension])) {
         // Unrecognized file extension
-    	Header('HTTP/1.1 404 Not Found');
+        Header('HTTP/1.1 404 Not Found');
         die("<b>404 "._tr("no_file")." </b>");
     }
 

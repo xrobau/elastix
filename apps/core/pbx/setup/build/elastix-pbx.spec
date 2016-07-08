@@ -301,6 +301,9 @@ fi
 
 %changelog
 * Fri Jul  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring: update recordBelongsToUser() test to use the same
+  expanded condition as the main report.
+  SVN Rev[7657]
 - CHANGED: Monitoring: factorize SQL condition construction into a single
   function, partly borrowed from cdrreport.
   SVN Rev[7656]

@@ -330,7 +330,7 @@ function downloadFile($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     if (!hasModulePrivilege($user, $module_name, 'downloadany')) {
         if (!$pMonitoring->recordBelongsToUser($record, $extension)) {
             Header('HTTP/1.1 403 Forbidden');
-            die("<b>404 "._tr("You are not authorized to download this file")." </b>");
+            die("<b>403 "._tr("You are not authorized to download this file")." </b>");
         }
     }
     $path_record = $arrConf['records_dir'];

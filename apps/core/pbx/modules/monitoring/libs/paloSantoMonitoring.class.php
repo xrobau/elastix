@@ -231,9 +231,17 @@ SQL_COND_EXTENSION;
 
     function recordBelongsToUser($uniqueid, $extension)
     {
-        $result=$this->_DB->getFirstRowQuery(
-            'SELECT COUNT(*) FROM cdr WHERE uniqueid = ? AND (src = ? OR dst = ?)',
-            FALSE, array($uniqueid, $extension, $extension));
+        $sql = <<<RECORD_BELONGS_TO_EXTENSION
+SELECT COUNT(*) FROM cdr
+WHERE uniqueid = ? AND (
+       src = ?
+    OR dst = ?
+    OR SUBSTRING_INDEX(SUBSTRING_INDEX(channel,'-',1),'/',-1) = ?
+    OR SUBSTRING_INDEX(SUBSTRING_INDEX(dstchannel,'-',1),'/',-1) = ?
+)
+RECORD_BELONGS_TO_EXTENSION;
+        $result = $this->_DB->getFirstRowQuery($sql, FALSE,
+            array($uniqueid, $extension, $extension, $extension, $extension));
         if (!is_array($result)) {
             $this->errMsg = $this->_DB->errMsg;
             return FALSE;

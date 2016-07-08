@@ -56,7 +56,7 @@ class paloSantoMonitoring {
     {
         // TODO: manejar subdirectorios de monitor
         $monitor_dir = '/var/spool/asterisk/monitor';
-        
+
         $in_val = strtolower($filter_value);
         switch($in_val){
             case "outgoing":
@@ -72,7 +72,7 @@ class paloSantoMonitoring {
                 return "recordingfile REGEXP '[[:<:]][0-9]' ";
         }
     }
-    
+
     function getNumMonitoring($filter_field, $filter_value, $extension, $date_initial, $date_final)
     {
         $where = "";
@@ -161,40 +161,8 @@ class paloSantoMonitoring {
         return $result;
     }
 
-    function getMonitoringById($id)
+    function deleteRecordFile($id)
     {
-        $query = "SELECT * FROM cdr WHERE uniqueid=?";
-     
-        $result=$this->_DB->getFirstRowQuery($query,true,array($id));
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
-
-    function Obtain_UID_From_User($user)
-    {
-        global $pACL;
-        $uid = $pACL->getIdUser($user);
-        if($uid!=FALSE)
-            return $uid;
-        else return -1;
-    }
-
-    function obtainExtension($db,$id){
-        $query = "SELECT extension FROM acl_user WHERE id=?";
-
-        $result = $db->getFirstRowQuery($query,true, array($id));
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result['extension'];
-    }
-
-    function deleteRecordFile($id){
         $result = $this->_DB->genQuery(
             'UPDATE cdr SET recordingfile = ? WHERE uniqueid = ?',
             array('deleted', $id));
@@ -205,7 +173,8 @@ class paloSantoMonitoring {
         return true;
     }
 
-    function getRecordName($id){
+    function getRecordName($id)
+    {
         $query = "SELECT recordingfile FROM cdr WHERE uniqueid=?";
         $result = $this->_DB->getFirstRowQuery($query,true,array($id));
         if($result==FALSE){
@@ -217,7 +186,6 @@ class paloSantoMonitoring {
 
     function getAudioByUniqueId($id, $namefile = NULL)
     {
-        
         $query = 'SELECT recordingfile FROM cdr WHERE uniqueid = ?';
         $parame = array($id);
         if (!is_null($namefile)) {
@@ -229,22 +197,19 @@ class paloSantoMonitoring {
             $this->errMsg = $this->_DB->errMsg;
             return null;
         }
-        
+
         return $result;
     }
 
-    function recordBelongsToUser($record, $extension)
+    function recordBelongsToUser($uniqueid, $extension)
     {
-	$query = "select count(*) from cdr where uniqueid=? and (src=? or dst=?)";
-	$result=$this->_DB->getFirstRowQuery($query, false, array($record,$extension,$extension));
-	if($result===FALSE){
+        $result=$this->_DB->getFirstRowQuery(
+            'SELECT COUNT(*) FROM cdr WHERE uniqueid = ? AND (src = ? OR dst = ?)',
+            FALSE, array($uniqueid, $extension, $extension));
+        if (!is_array($result)) {
             $this->errMsg = $this->_DB->errMsg;
-            return false;
+            return FALSE;
         }
-	if($result[0] > 0)
-	    return true;
-	else
-	    return false;
+        return ($result[0] > 0);
     }
 }
-?>

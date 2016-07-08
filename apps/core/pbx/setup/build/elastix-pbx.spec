@@ -300,6 +300,12 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jul  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring: emit a 403 Forbidden for an unauthorized recording
+  download instead of rendering the report grid again. Emit a 410 Gone for an
+  attempt to download a deleted file instead of a 404 Not Found.
+  SVN Rev[7651]
+
 * Thu Jul  7 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Voicemail: re-do the paloSantoVoiceMail API to actually return and
   use a more structured format instead of a regexp dump. Preserve fields not

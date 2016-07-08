@@ -26,7 +26,11 @@
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
   $Id: paloSantoMonitoring.class.php,v 1.1 2010-03-22 05:03:48 Eduardo Cueva ecueva@palosanto.com Exp $ */
-class paloSantoMonitoring {
+
+define ('DEFAULT_ASTERISK_RECORDING_BASEDIR', '/var/spool/asterisk/monitor');
+
+class paloSantoMonitoring
+{
     var $_DB;
     var $errMsg;
 
@@ -49,116 +53,140 @@ class paloSantoMonitoring {
         }
     }
 
-    /*HERE YOUR FUNCTIONS*/
-
-    // Construir condición SQL en base a valor de filter_value para recordingfile
-    private function _getWhereCondRecordingFile($filter_value)
+    private function _construirWhereMonitoring($param)
     {
-        // TODO: manejar subdirectorios de monitor
-        $monitor_dir = '/var/spool/asterisk/monitor';
+        $condSQL = array();
+        $paramSQL = array();
 
-        $in_val = strtolower($filter_value);
-        switch($in_val){
-            case "outgoing":
-                return "(recordingfile like 'O%' OR recordingfile like '{$monitor_dir}/O%'".
-                    " OR recordingfile like 'o%' OR recordingfile like '{$monitor_dir}/o%')";
-            case "group":
-                return "(recordingfile like 'g%' OR recordingfile like '{$monitor_dir}/g%'".
-                    " OR recordingfile like 'r%' OR recordingfile like '{$monitor_dir}/r%')";
-            case "queue":
-                return "(recordingfile like 'q%' OR recordingfile like '{$monitor_dir}/q%')";
-            default :
-                // TODO: esto no filtra realmente, deja pasar cualquier número
-                return "recordingfile REGEXP '[[:<:]][0-9]' ";
+        if (!is_array($param)) {
+            $this->errMsg = '(internal) invalid parameter array';
+            return NULL;
         }
-    }
+        if (!function_exists('_construirWhereMonitoring_notempty')) {
+            function _construirWhereMonitoring_notempty($x) { return ($x != ''); }
+        }
+        $param = array_filter($param, '_construirWhereMonitoring_notempty');
 
-    function getNumMonitoring($filter_field, $filter_value, $extension, $date_initial, $date_final)
-    {
-        $where = "";
-        $arrParam = array();
-        if (!in_array($filter_field, array('dst', 'src', 'recordingfile'))) $filter_field = '';
-        if(isset($filter_field) && $filter_field !="" && isset($filter_value) && $filter_value !=""){
-            if ($filter_field == "recordingfile") {
-                $where = ' AND '.$this->_getWhereCondRecordingFile($filter_value).' ';
+        // La columna recordingfile debe estar no-vacía
+        $condSQL[] = 'recordingfile <> ""';
+
+        // Fecha y hora de inicio y final del rango
+        $sRegFecha = '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/';
+        if (isset($param['date_start'])) {
+            if (preg_match($sRegFecha, $param['date_start'])) {
+                $condSQL[] = 'calldate >= ?';
+                $paramSQL[] = $param['date_start'];
             } else {
-                $arrParam[] = "$filter_value%";
-                $where = " AND $filter_field like ? AND recordingfile LIKE '%' ";
+                $this->errMsg = '(internal) Invalid start date, must be yyyy-mm-dd hh:mm:ss';
+                return NULL;
             }
-         }
-
-        if((isset($date_initial) & $date_initial !="") && (isset($date_final) & $date_final !="")){
-	    $arrParam[] = $date_initial;
-	    $arrParam[] = $date_final;
-            $where .= " AND (calldate >= ? AND calldate <= ?) ";
-
-        }else{
-            $date_initial = date('Y-m-d')." 00:00:00";
-            $date_final   = date('Y-m-d')." 23:59:59";
-	    $arrParam[] = $date_initial;
-	    $arrParam[] = $date_final;
-            $where .= " AND (calldate >= ? AND calldate <= ?) ";
+        }
+        if (isset($param['date_end'])) {
+            if (preg_match($sRegFecha, $param['date_end'])) {
+                $condSQL[] = 'calldate <= ?';
+                $paramSQL[] = $param['date_end'];
+            } else {
+                $this->errMsg = '(internal) Invalid end date, must be yyyy-mm-dd hh:mm:ss';
+                return NULL;
+            }
         }
 
-        if(isset($extension) & $extension !=""){
-	    $arrParam[] = $extension;
-	    $arrParam[] = $extension;
-            $where .= " AND (src=? OR dst=?)";
-	}
-
-        $query   = "SELECT COUNT(*) FROM cdr WHERE recordingfile <> '' $where";
-
-        $result=$this->_DB->getFirstRowQuery($query,false,$arrParam);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
+        // Extensión de fuente o destino, copiada de paloSantoCDR.class.php
+        if (isset($param['extension'])) {
+            $condSQL[] = <<<SQL_COND_EXTENSION
+(
+       src = ?
+    OR dst = ?
+    OR SUBSTRING_INDEX(SUBSTRING_INDEX(channel,'-',1),'/',-1) = ?
+    OR SUBSTRING_INDEX(SUBSTRING_INDEX(dstchannel,'-',1),'/',-1) = ?
+)
+SQL_COND_EXTENSION;
+            array_push($paramSQL, $param['extension'], $param['extension'],
+                $param['extension'], $param['extension']);
         }
-        return $result[0];
+
+        foreach (array('src', 'dst') as $sCampo) if (isset($param[$sCampo])) {
+            $listaPat = array_filter(
+                array_map('trim',
+                    is_array($param[$sCampo])
+                        ? $param[$sCampo]
+                        : explode(',', trim($param[$sCampo]))),
+                '_construirWhereMonitoring_notempty');
+
+            if (!function_exists('_construirWhereMonitoring_troncal2like2')) {
+                function _construirWhereMonitoring_troncal2like2($s) { return '%'.$s.'%'; }
+            }
+            $paramSQL = array_merge($paramSQL, array_map('_construirWhereMonitoring_troncal2like2', $listaPat));
+            $fieldSQL = array_fill(0, count($listaPat), "$sCampo LIKE ?");
+
+            /* Caso especial: si se especifica field_pattern=src|dst, también
+             * debe buscarse si el canal fuente o destino contiene el patrón
+             * dentro de su especificación de canal. */
+            if ($sCampo == 'src' || $sCampo == 'dst') {
+                if ($sCampo == 'src') $chanexpr = "SUBSTRING_INDEX(SUBSTRING_INDEX(channel,'-',1),'/',-1)";
+                if ($sCampo == 'dst') $chanexpr = "SUBSTRING_INDEX(SUBSTRING_INDEX(dstchannel,'-',1),'/',-1)";
+                $paramSQL = array_merge($paramSQL, array_map('_construirWhereMonitoring_troncal2like2', $listaPat));
+                $fieldSQL = array_merge($fieldSQL, array_fill(0, count($listaPat), "$chanexpr LIKE ?"));
+            }
+
+            $condSQL[] = '('.implode(' OR ', $fieldSQL).')';
+        }
+
+        // Tipo de grabación según nombre de archivo
+        $prefixByType = array(
+            'outgoing'  =>  array('O', 'o'),
+            'group'     =>  array('g', 'r'),
+            'queue'     =>  array('q'),
+        );
+        if (isset($param['recordingfile']) && isset($prefixByType[$param['recordingfile']])) {
+            $fieldSQL = array();
+            foreach ($prefixByType[$param['recordingfile']] as $p) {
+                $fieldSQL[] = 'recordingfile LIKE ?';
+                $paramSQL[] = $p.'%';
+                $fieldSQL[] = 'recordingfile LIKE ?';
+                $paramSQL[] = DEFAULT_ASTERISK_RECORDING_BASEDIR.'%/'.$p.'%';
+            }
+
+            $condSQL[] = '('.implode(' OR ', $fieldSQL).')';
+        }
+
+        // Construir fragmento completo de sentencia SQL
+        $where = array(implode(' AND ', $condSQL), $paramSQL);
+        if ($where[0] != '') $where[0] = 'WHERE '.$where[0];
+        return $where;
     }
 
-    function getMonitoring($limit, $offset, $filter_field, $filter_value, $extension, $date_initial, $date_final)
+    function getNumMonitoring($param)
     {
-        $where = "";
-        $arrParam = array();
-        if (!in_array($filter_field, array('dst', 'src', 'recordingfile'))) $filter_field = '';
-        if(isset($filter_field) & $filter_field !=""){
-            if($filter_field == "recordingfile"){
-                $where = ' AND '.$this->_getWhereCondRecordingFile($filter_value).' ';
-            }else{
-                $arrParam[] = "$filter_value%";
-                $where = " AND $filter_field like ? AND recordingfile LIKE '%' ";
-            }
-         }
+        list($sWhere, $paramSQL) = $this->_construirWhereMonitoring($param);
+        if (is_null($sWhere)) return NULL;
 
-        if((isset($date_initial) & $date_initial !="") && (isset($date_final) & $date_final !="")){
-	    $arrParam[] = $date_initial;
-	    $arrParam[] = $date_final;
-            $where .= " AND (calldate >= ? AND calldate <= ?) ";
-        }else{
-            $date_initial = date('Y-m-d')." 00:00:00";
-            $date_final   = date('Y-m-d')." 23:59:59";
-	    $arrParam[] = $date_initial;
-	    $arrParam[] = $date_final;
-            $where .= " AND (calldate >= ? AND calldate <= ?) ";
-        }
-
-        if(isset($extension) & $extension !=""){
-	    $arrParam[] = $extension;
-	    $arrParam[] = $extension;
-            $where .= " AND (src=? OR dst=?)";
-	}
-
-	$arrParam[] = $limit;
-	$arrParam[] = $offset;
-        $query   = "SELECT * FROM cdr WHERE recordingfile <> '' $where ORDER BY uniqueid DESC LIMIT ? OFFSET ?";
-        $result=$this->_DB->fetchTable($query, true, $arrParam);
-        if($result==FALSE){
+        $query = 'SELECT COUNT(*) FROM cdr '.$sWhere;
+        $r = $this->_DB->getFirstRowQuery($query, FALSE, $paramSQL);
+        if (!is_array($r)){
             $this->errMsg = $this->_DB->errMsg;
-            return array();
+            return NULL;
         }
+        return $r[0];
+    }
 
-        return $result;
+    function getMonitoring($param, $limit = NULL, $offset = 0)
+    {
+        list($sWhere, $paramSQL) = $this->_construirWhereMonitoring($param);
+        if (is_null($sWhere)) return NULL;
+
+        // TODO: paloSantoCDR ordena por calldate DESC. ¿Debería ser concordante?
+        $query = 'SELECT * FROM cdr '.$sWhere.' ORDER BY uniqueid DESC';
+        if (!empty($limit)) {
+            $query .= " LIMIT ? OFFSET ?";
+            array_push($paramSQL, $limit, $offset);
+        }
+        $r = $this->_DB->fetchTable($query, TRUE, $paramSQL);
+        if (!is_array($r)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
+        }
+        return $r;
     }
 
     function deleteRecordFile($id)

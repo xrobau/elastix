@@ -301,6 +301,9 @@ fi
 
 %changelog
 * Fri Jul  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring: factorize SQL condition construction into a single
+  function, partly borrowed from cdrreport.
+  SVN Rev[7656]
 - CHANGED: Monitoring: remove dead code.
   SVN Rev[7655]
 - CHANGED: Monitoring: use array form variable to encode list of uniqueid

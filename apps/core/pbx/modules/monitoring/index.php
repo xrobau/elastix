@@ -177,8 +177,13 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     // TODO: agregar filtro por extensión de usuario de Elastix sólo para reportany
 
     // Se asume que sólo el administrador puede consultar con extension NULL
-    $totalMonitoring = $pMonitoring->getNumMonitoring($filter_field, $filter_value,
-        $bPuedeVerTodos ? NULL : $extension, $date_initial, $date_final);
+    $param = array(
+        'date_start'    =>  $date_initial,
+        'date_end'      =>  $date_final,
+    );
+    if (!$bPuedeVerTodos) $param['extension'] = $extension;
+    if ($filter_field != '' && $filter_value != '') $param[$filter_field] = $filter_value;
+    $totalMonitoring = $pMonitoring->getNumMonitoring($param);
     $url = array('menu' => $module_name);
 
     $paramFilter = array(
@@ -211,8 +216,7 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
     $oGrid->setColumns($arrColumns);
 
     // Se asume que sólo el administrador puede consultar con extension NULL
-    $arrResult = $pMonitoring->getMonitoring($limit, $offset, $filter_field, $filter_value,
-        $bPuedeVerTodos ? NULL : $extension, $date_initial, $date_final);
+    $arrResult = $pMonitoring->getMonitoring($param, $limit, $offset);
 
     if (is_array($arrResult)) {
         if ($oGrid->isExportAction()) {

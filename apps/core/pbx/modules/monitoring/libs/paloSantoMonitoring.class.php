@@ -196,27 +196,21 @@ SQL_COND_EXTENSION;
         return $r;
     }
 
-    function deleteRecordFile($id)
+    function deleteRecordFile($id, $namefile)
     {
-        $result = $this->_DB->genQuery(
-            'UPDATE cdr SET recordingfile = ? WHERE uniqueid = ?',
-            array('deleted', $id));
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return true;
-    }
+        $recinfo = $this->getAudioByUniqueId($id, $namefile);
+        if (is_null($recinfo)) return FALSE;
 
-    function getRecordName($id)
-    {
-        $query = "SELECT recordingfile FROM cdr WHERE uniqueid=?";
-        $result = $this->_DB->getFirstRowQuery($query,true,array($id));
-        if($result==FALSE){
+        $r = $this->_DB->genQuery(
+            'UPDATE cdr SET recordingfile = ? WHERE uniqueid = ? AND recordingfile = ?',
+            array('deleted', $id, $recinfo['recordingfile']));
+        if (!$r) {
             $this->errMsg = $this->_DB->errMsg;
-            return null;
+            return FALSE;
         }
-        return $result['recordingfile'];
+        if (!is_null($recinfo['fullpath']))
+            return unlink($recinfo['fullpath']);
+        return TRUE;
     }
 
     function getAudioByUniqueId($id, $namefile = NULL)

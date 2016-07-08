@@ -224,7 +224,9 @@ function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $p
         } else foreach ($arrResult as $value) {
             $arrTmp = formatCallRecordingTuple($value);
             array_unshift($arrTmp, ($bPuedeBorrar && ($value['recordingfile'] != 'deleted'))
-                ? '<input type="checkbox" name="uniqueid[]" value="'.htmlentities($value['uniqueid'], ENT_COMPAT, 'UTF-8').'"/>' : '');
+                ? '<input type="checkbox" name="uniqueid[]" value="'.
+                    htmlentities($value['uniqueid'].'|'.$value['recordingfile'], ENT_COMPAT, 'UTF-8').'"/>'
+                : '');
 
             // checkbox(id_uniqueid) date time src dst hh:mm:ss rectype namefile
             if ($arrTmp[3] == '') $arrTmp[3] = "<font color='gray'>"._tr("unknown")."</font>";
@@ -432,18 +434,8 @@ function deleteRecord($smarty, $module_name, $local_templates_dir, &$pDB, $pACL,
     $pMonitoring = new paloSantoMonitoring($pDB);
     $path_record = $arrConf['records_dir'];
     foreach ($_POST['uniqueid'] as $ID) {
-        $recordName = $pMonitoring->getRecordName($ID);
-        $record = substr($recordName,6);
-        $record = basename($record);
-        $path   = $path_record.$record;
-        $path2  = $path_record.getPathFile($record);
-
-        if ($pMonitoring->deleteRecordFile($ID)) {
-            if (is_file($path))
-                unlink($path);
-            elseif (is_file($path2))
-                unlink($path2);
-        }
+        $l = explode('|', $ID);
+        if (count($l) >= 2) $pMonitoring->deleteRecordFile($l[0], $l[1]);
     }
 
     return TRUE;
@@ -459,16 +451,6 @@ function SecToHHMMSS($sec)
     $SS = $segundos; if($SS < 10) $SS = "0$SS";
 
     return "$HH:$MM:$SS";
-}
-
-function getPathFile($file)
-{
-    $arrTokens = explode('-',$file);
-    if (count($arrTokens) < 4) return '/'.$file;
-    $fyear     = substr($arrTokens[3],0,4);
-    $fmonth    = substr($arrTokens[3],4,2);
-    $fday      = substr($arrTokens[3],6,2);
-    return  "/$fyear/$fmonth/$fday/$file";
 }
 
 function createFieldFilter(){

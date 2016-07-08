@@ -301,6 +301,13 @@ fi
 
 %changelog
 * Fri Jul  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Monitoring: remove redundant getRecordName() method used only on
+  recording removal. Use instead getAudioByUniqueId(), which also allows the
+  removal of yet another handcoded attempt to produce an absolute path for the
+  recording. Fixes a (potential?) bug in which the code could fail to produce a
+  correct path to unlink() resulting in a recording disconnected from its CDR
+  but still lying around on the volume.
+  SVN Rev[7659]
 - CHANGED: Monitoring: unify code for finding out the absolute path for the
   recording into a single place at paloSantoMonitoring. Add a check to see
   whether the recording referenced by the CDR actually exists.

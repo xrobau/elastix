@@ -28,10 +28,75 @@
 */
 
 define('ASTERISK_VOICEMAIL_CONF', '/etc/asterisk/voicemail.conf');
+define('DEFAULT_ASTERISK_VOICEMAIL_BASEDIR', '/var/spool/asterisk/voicemail/default');
 
 class paloSantoVoiceMail
 {
     var $errMsg;
+
+    private static $_listaExtensiones = array(
+        'wav'   =>  'audio/wav',
+        'gsm'   =>  'audio/gsm',
+        //'mp3'   =>  'audio/mpeg',
+        'WAV'   =>  'audio/wav',    // audio gsm en envoltura RIFF
+    );
+
+    function listVoicemail($param)
+    {
+        if (isset($param['extension'])) {
+            if (ctype_digit($param['extension']))
+                $directorios[] = $param['extension'];
+        } else {
+            $directorios = array_filter(scandir(DEFAULT_ASTERISK_VOICEMAIL_BASEDIR), 'ctype_digit');
+        }
+        $ts_inicio = isset($param['date_start']) ? strtotime($param['date_start']) : NULL;
+        $ts_final = isset($param['date_end']) ? strtotime($param['date_end']) : NULL;
+
+        $arrData = array();
+        $ts = array();
+        foreach ($directorios as $directorio) {
+            $voicemailPath = DEFAULT_ASTERISK_VOICEMAIL_BASEDIR."/$directorio/INBOX";
+            if (!is_dir($voicemailPath)) continue;
+            foreach (scandir($voicemailPath) as $file) {
+                if (strtolower(substr($file, -4)) == '.txt') {
+                    $pConfig = new paloConfig($voicemailPath, $file, "=", "[[:space:]]*=[[:space:]]*");
+                    $arrVoiceMailDes = $pConfig->leer_configuracion(FALSE);
+
+                    if (is_array($arrVoiceMailDes) && count($arrVoiceMailDes) > 0 &&
+                        isset($arrVoiceMailDes['origtime']['valor'])) {
+
+                        if (!is_null($ts_inicio) && $arrVoiceMailDes['origtime']['valor'] < $ts_inicio)
+                            continue;
+                        if (!is_null($ts_final) && $arrVoiceMailDes['origtime']['valor'] > $ts_final)
+                            continue;
+
+                        $tupla = array(
+                            'origtime'      =>  $arrVoiceMailDes['origtime']['valor'],
+                            'callerid'      =>  $arrVoiceMailDes['callerid']['valor'],
+                            'extension'     =>  $arrVoiceMailDes['origmailbox']['valor'],
+                            'duration'      =>  $arrVoiceMailDes['duration']['valor'],
+                            'file'          =>  $file,
+                            'mailbox'       =>  $directorio,
+                            'recordingfile' =>  NULL,
+                        );
+                        foreach (array_keys(self::$_listaExtensiones) as $ext) {
+                            $testfile = substr($file, 0, -4).".$ext";
+                            if (file_exists("$voicemailPath/$testfile")) {
+                                $tupla['recordingfile'] = $testfile;
+                                break;
+                            }
+                        }
+                        $arrData[] = $tupla;
+                        $ts[] = $arrVoiceMailDes['origtime']['valor'];
+                    }
+                }
+            }
+        }
+
+        // Ordenar por origtime DESC
+        array_multisort($ts, SORT_DESC, $arrData);
+        return $arrData;
+    }
 
     function writeFileVoiceMail($new_vmext, $new_vmparam = NULL)
     {

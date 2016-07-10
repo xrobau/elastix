@@ -312,130 +312,59 @@ contenido;
     if (!(is_null($ext) || $ext=="") || $esAdministrador) {
         if(is_null($ext) || $ext=="")
             $smarty->assign("mb_message", "<b>"._tr("no_extension_assigned")."</b>");
-        $path = "/var/spool/asterisk/voicemail/default";
-        $folder = "INBOX";
 
-        if($esAdministrador) {
-            if ($handle = opendir($path)) {
-                while (false !== ($dir = readdir($handle))) {
-                    if ($dir != "." && $dir != ".." && preg_match("/$extension/", $dir, $regs) && is_dir($path."/".$dir)) {
-                        $directorios[] = $dir;
-                    }
-                }
-            }
-        } else $directorios[] = $extension;
-//if($esAdministrador)
-        $arrData = array();
-        foreach($directorios as $directorio)
-        {
-            $voicemailPath = "$path/$directorio/$folder";
-            if (file_exists($voicemailPath)) {
-                if ($handle = opendir($voicemailPath)) {
-                    $bExito=true;
-                    while (false !== ($file = readdir($handle))) {
-                        //no tomar en cuenta . y ..
-                        //buscar los archivos de texto (txt) que son los que contienen los datos de las llamadas
-                        if ($file!="." && $file!=".." && preg_match("/^(.+)\.(txt|TXT)$/", $file, $regs)) {
-                            //leer la info del archivo
-                            $pConfig = new paloConfig($voicemailPath, $file, "=", "[[:space:]]*=[[:space:]]*");
-                            $arrVoiceMailDes=array();
-                            $arrVoiceMailDes = $pConfig->leer_configuracion(false);
+        $param = array(
+            'date_start'    => $date_start,
+            'date_end'      => $date_end,
+        );
+        if (!$esAdministrador) $param['extension'] = $extension;
 
-                            //verifico que tenga datos
-                            if (is_array($arrVoiceMailDes) && count($arrVoiceMailDes)>0 && isset($arrVoiceMailDes['origtime']['valor'])){
-                                //uso las fechas del filtro
-                                //si la fecha de llamada esta dentro del rango, la muestro
-                                $fecha = date("Y-m-d",$arrVoiceMailDes['origtime']['valor']);
-                                $hora = date("H:i:s",$arrVoiceMailDes['origtime']['valor']);
+        $paloVoice = new paloSantoVoiceMail();
+        $rs = $paloVoice->listVoicemail($param);
 
-                                if (strtotime("$fecha $hora")<=strtotime($date_end) && strtotime("$fecha $hora")>=strtotime($date_start)){
-                                    $arrTmp[0] = "<input type='checkbox' name='".utf8_encode("voc-".$file).",$directorio' />";
-                                    $arrTmp[1] = $fecha;
-                                    $arrTmp[2] = $hora;
-                                    $arrTmp[3] = $arrVoiceMailDes['callerid']['valor'];
-                                    $arrTmp[4] = $arrVoiceMailDes['origmailbox']['valor'];
-                                    $arrTmp[5] = $arrVoiceMailDes['duration']['valor'].' sec.';
-                                    $pathRecordFile=base64_encode($regs[1].'.wav');
-                                    $recordingLink = "<a href='#' onClick=\"javascript:popUp('index.php?menu=$module_name&action=display_record&ext=$directorio&name=$pathRecordFile&rawmode=yes',350,100); return false;\">"._tr('Listen')."</a>&nbsp;";
-                                    $recordingLink .= "<a href='?menu=$module_name&action=download&ext=$directorio&name=$pathRecordFile&rawmode=yes'>"._tr('Download')."</a>";
-                                    $arrTmp[6] = $recordingLink;
-                                    $arrData[] = $arrTmp;
-                                }
-                            }
-                        }
-                    }
-                    closedir($handle);
-                }
-            } else {
-                // No vale la ruta
-            }
-        }
-        /*
-        function sort_voicemails_hora_desc($a, $b) { return ($a[2] == $b[2]) ? 0 : (($a[2] < $b[2]) ? 1 : -1); }
-        function sort_voicemails_fecha_desc($a, $b) { return ($a[1] == $b[1]) ? 0 : (($a[1] < $b[1]) ? 1 : -1); }
-        usort($arrData, 'sort_voicemails_hora_desc');
-        usort($arrData, 'sort_voicemails_fecha_desc');
-        */
-        $fechas = array();
-        $horas  = array();
-        foreach ($arrData as $llave => $fila) {
-            $fechas[$llave]  = $fila[1];
-            $horas[$llave]   = $fila[2];
-        }
-        array_multisort($fechas,SORT_DESC,$horas,SORT_DESC,$arrData);
-
-        //Paginacion
-        $limit  = 15;
-        $total  = count($arrData);
-
+        $limit = 15;
         $oGrid->setLimit($limit);
-        $oGrid->setTotal($total);
-
+        $oGrid->setTotal(count($rs));
         $offset = $oGrid->calculateOffset();
+        $arrData = array_slice($rs, $offset, $limit);
 
-        $end    = ($offset+$limit)<=$total ? $offset+$limit : $total;
+        $arrVoiceData = array();
+        foreach ($arrData as $t) {
+            $pathRecordFile = base64_encode($t['recordingfile']);
+            $arrVoiceData[] = array(
+                '<input type="checkbox" name="'.htmlentities('voc-'.$t['file'].','.$t['mailbox'], ENT_COMPAT, 'UTF-8').'" />',// TODO: convertir a name=x[]
+                date('Y-m-d', $t['origtime']),
+                date('H:i:s', $t['origtime']),
+                htmlentities($t['callerid'], ENT_COMPAT, 'UTF-8'),
+                $t['extension'],
+                $t['duration'].' sec.',
+                "<a href='#' onClick=\"javascript:popUp('index.php?menu=$module_name&action=display_record&ext={$t['mailbox']}&name=$pathRecordFile&rawmode=yes',350,100); return false;\">"._tr('Listen')."</a>&nbsp;".
+                    "<a href='?menu=$module_name&action=download&ext={$t['mailbox']}&name=$pathRecordFile&rawmode=yes'>"._tr('Download')."</a>",
+            );
+        }
+        $oGrid->setData($arrVoiceData);
 
         // Construyo el URL base
         if(isset($arrFilterExtraVars) && is_array($arrFilterExtraVars) and count($arrFilterExtraVars)>0) {
             $url = array_merge($url, $arrFilterExtraVars);
         }
-        //Fin Paginacion
 
-        $arrVoiceData=array_slice($arrData, $offset, $limit);
         //fin if (!is_null(extension))
     } else {
         $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
     }
 
-    $arrGrid = array("title"   => _tr("Voicemail List"),
-                     "url"     => $url,
-                     "icon"    => "/modules/$module_name/images/pbx_voicemail.png",
-                     "width"   => "99%",
-                     "start"   => ($total==0) ? 0 : $offset + 1,
-                     "end"     => $end,
-                     "total"   => $total,
-                     "columns" => array(0 => array("name"      => "",
-                                                   "property1" => ""),
-                                        1 => array("name"      => _tr("Date"),
-                                                   "property1" => ""),
-                                        2 => array("name"      => _tr("Time"),
-                                                   "property1" => ""),
-                                        3 => array("name"      => _tr("CallerID"),
-                                                   "property1" => ""),
-                                        4 => array("name"      => _tr("Extension"),
-                                                   "property1" => ""),
-                                        5 => array("name"      => _tr("Duration"),
-                                                   "property1" => ""),
-                                        6 => array("name"      => _tr("Message"),
-                                                   "property1" => ""),
-                                        )
-                    );
+    $oGrid->setTitle(_tr("Voicemail List"));
+    $oGrid->setURL($url);
+    $oGrid->setIcon("/modules/$module_name/images/pbx_voicemail.png");
+    $oGrid->setColumns(array('', _tr('Date'), _tr('Time'), _tr('CallerID'),
+        _tr('Extension'), _tr('Duration'), _tr('Message')));
 
     if($bandCustom == true)
         $oGrid->customAction("config",_tr("Configuration"));
     $oGrid->deleteList(_tr("Are you sure you wish to delete voicemails?"),"submit_eliminar",_tr("Delete"));
     $oGrid->showFilter($htmlFilter);
-    $contenidoModulo  = $oGrid->fetchGrid($arrGrid, $arrVoiceData);
+    $contenidoModulo  = $oGrid->fetchGrid();
     if (strpos($contenidoModulo, '<form') === FALSE)
     $contenidoModulo  = "<form style='margin-bottom:0;' method='POST' action='?menu=$module_name'>$contenidoModulo</form>";
     return $contenidoModulo;

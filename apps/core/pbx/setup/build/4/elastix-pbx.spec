@@ -300,6 +300,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sat Jul  9 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Voicemail: move implementation of voicemail listing out of index.php
+  into paloSantoVoiceMail class in preparation of unification with core.class.php.
+  SVN Rev[7660]
+
 * Fri Jul  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Monitoring: remove redundant getRecordName() method used only on
   recording removal. Use instead getAudioByUniqueId(), which also allows the

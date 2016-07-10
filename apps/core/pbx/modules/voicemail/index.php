@@ -332,7 +332,7 @@ contenido;
         foreach ($arrData as $t) {
             $pathRecordFile = base64_encode($t['recordingfile']);
             $arrVoiceData[] = array(
-                '<input type="checkbox" name="'.htmlentities('voc-'.$t['file'].','.$t['mailbox'], ENT_COMPAT, 'UTF-8').'" />',// TODO: convertir a name=x[]
+                '<input type="checkbox" name="voicemails[]" value="'.htmlentities($t['mailbox'].','.basename($t['file'], '.txt'), ENT_COMPAT, 'UTF-8').'" />',
                 date('Y-m-d', $t['origtime']),
                 date('H:i:s', $t['origtime']),
                 htmlentities($t['callerid'], ENT_COMPAT, 'UTF-8'),
@@ -465,19 +465,19 @@ function borrarVoicemails($pACL)
     $esAdministrador = $pACL->isUserAdministratorGroup($user);
 
     $listaArchivos = array();
-    if (is_array($_POST)) foreach (array_keys($_POST) as $name) {
-    	// El formato esperado de clave es voc-msg0001_txt,1064
+    if (is_array($_POST)) foreach ($_POST['voicemails'] as $name) {
+        // El formato esperado de clave es 1064,msg0001
         $regs = NULL;
-        if (preg_match('/^voc-(\w+)_(\w+),(\d+)$/', $name, $regs)) {
-        	if ($esAdministrador || $extension == $regs[3]) {
-        		$voicemailPath = "/var/spool/asterisk/voicemail/default/{$regs[3]}/INBOX";
-                $listaArchivos[] = "$voicemailPath/{$regs[1]}.txt";
-                $listaArchivos[] = "$voicemailPath/{$regs[1]}.wav";
-                $listaArchivos[] = "$voicemailPath/{$regs[1]}.WAV";
-        	} else {
+        if (preg_match('/^(\d+),(\w+)$/', $name, $regs)) {
+            if ($esAdministrador || $extension == $regs[1]) {
+                $voicemailPath = "/var/spool/asterisk/voicemail/default/{$regs[1]}/INBOX";
+                $listaArchivos[] = "$voicemailPath/{$regs[2]}.txt";
+                $listaArchivos[] = "$voicemailPath/{$regs[2]}.wav";
+                $listaArchivos[] = "$voicemailPath/{$regs[2]}.WAV";
+            } else {
                 // Intento de borrar el voicemail de otro usuario
-        		return;
-        	}
+                return;
+            }
         }
     }
     array_map('unlink', $listaArchivos);

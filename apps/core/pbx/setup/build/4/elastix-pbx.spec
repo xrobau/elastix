@@ -301,7 +301,10 @@ fi
 
 %changelog
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGE: Voicemail: remove custom enumeration of voicemails in core.class.php
+- CHANGED: Voicemail: use array form variable to encode list of voicemails
+  instead of encoding the voicemail identification into the form name.
+  SVN Rev[7662]
+- CHANGED: Voicemail: remove custom enumeration of voicemails in core.class.php
   and use unified version in paloSantoVoiceMail instead.
   SVN Rev[7661]
 

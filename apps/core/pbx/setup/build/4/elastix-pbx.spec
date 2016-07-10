@@ -300,6 +300,11 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGE: Voicemail: remove custom enumeration of voicemails in core.class.php
+  and use unified version in paloSantoVoiceMail instead.
+  SVN Rev[7661]
+
 * Sat Jul  9 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Voicemail: move implementation of voicemail listing out of index.php
   into paloSantoVoiceMail class in preparation of unification with core.class.php.

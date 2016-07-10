@@ -295,53 +295,23 @@ class core_Voicemail
             $t = $sFechaFinal; $sFechaFinal = $sFechaInicio; $sFechaInicio = $t;
         }
 
-        $path = "/var/spool/asterisk/voicemail/default";
-        $folder = "INBOX";
-        $directorios[] = $extension;
+        $paloVoice = new paloSantoVoiceMail();
+        $rs = $paloVoice->listVoicemail(array(
+            'date_start'    => $sFechaInicio,
+            'date_end'      => $sFechaFinal,
+            'extension'     => $extension,
+        ));
         $arrData = array();
-        foreach($directorios as $directorio)
-        {
-            $voicemailPath = "$path/$directorio/$folder";
-            if (file_exists($voicemailPath)) {
-                if ($handle = opendir($voicemailPath)) {
-                    $bExito=true;
-                    while (false !== ($file = readdir($handle))) {
-                        //no tomar en cuenta . y ..
-                        //buscar los archivos de texto (txt) que son los que contienen los datos de las llamadas
-                        if ($file!="." && $file!=".." && preg_match("/(.+)\.[txt|TXT]/",$file,$regs)) {
-                            //leer la info del archivo
-                            $pConfig = new paloConfig($voicemailPath, $file, "=", "[[:space:]]*=[[:space:]]*");
-                            $arrVoiceMailDes=array();
-                            $arrVoiceMailDes = $pConfig->leer_configuracion(false);
-
-                            //verifico que tenga datos
-                            if (is_array($arrVoiceMailDes) && count($arrVoiceMailDes)>0 && isset($arrVoiceMailDes['origtime']['valor'])){
-                                //uso las fechas del filtro
-                                //si la fecha de llamada esta dentro del rango, la muestro
-                                $fecha = date("Y-m-d",$arrVoiceMailDes['origtime']['valor']);
-                                $hora = date("H:i:s",$arrVoiceMailDes['origtime']['valor']);
-
-                                if (strtotime("$fecha $hora")<=strtotime($sFechaFinal) && strtotime("$fecha $hora")>=strtotime($sFechaInicio)){
-                                    $arrTmp["date"] = $fecha;
-                                    $arrTmp["time"] = $hora;
-                                    $arrTmp["callerid"] = $arrVoiceMailDes['callerid']['valor'];
-                                    $arrTmp["extension"] = $arrVoiceMailDes['origmailbox']['valor'];
-                                    $arrTmp["duration"] = $arrVoiceMailDes['duration']['valor'].' sec.';
-                                    $arrData[] = $arrTmp;
-                                }
-                            }
-                        }
-                    }
-                    closedir($handle);
-                }
-            } else {
-                $this->errMsg["fc"] = 'ERROR';
-                $this->errMsg["fm"] = 'File does not exist';
-                $this->errMsg["fd"] = "The file $voicemailPath does not exist";
-                $this->errMsg["cn"] = get_class($this);
-                return false;
-            }
+        foreach ($rs as $t) {
+            $arrData[] = array(
+                'date'      =>  date('Y-m-d', $t['origtime']),
+                'time'      =>  date('H:i:s', $t['origtime']),
+                'callerid'  =>  $t['callerid'],
+                'extension' =>  $t['extension'],
+                'duration'  =>  $t['duration'],
+            );
         }
+
         return array(
             "totalVoicemail" => count($arrData),
             "voicemail"      => $arrData);

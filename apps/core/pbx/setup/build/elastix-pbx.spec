@@ -301,6 +301,9 @@ fi
 
 %changelog
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring: push down required libraries into the functions that
+  absolutely require them.
+  SVN Rev[7664]
 - CHANGED: Voicemail: unify code for finding out the absolute path for the
   recording (as well as the mimetype) into a single place at paloSantoVoiceMail.
   SVN Rev[7663]

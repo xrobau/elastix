@@ -32,15 +32,12 @@
 //include elastix framework
 
 // exten => s,n,Set(CDR(userfield)=audio:${CALLFILENAME}.${MIXMON_FORMAT})   extensions_additional
-include_once "libs/paloSantoGrid.class.php";
-include_once "libs/paloSantoForm.class.php";
+require_once "libs/paloSantoACL.class.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
-    include_once "modules/$module_name/libs/paloSantoMonitoring.class.php";
-    include_once "libs/paloSantoACL.class.php";
+    require_once "modules/$module_name/configs/default.conf.php";
+    require_once "modules/$module_name/libs/paloSantoMonitoring.class.php";
 
     $base_dir=dirname($_SERVER['SCRIPT_FILENAME']);
 
@@ -90,6 +87,9 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportMonitoring($smarty, $module_name, $local_templates_dir, &$pDB, $pACL, $arrConf, $user, $extension)
 {
+    require_once "libs/paloSantoGrid.class.php";
+    require_once "libs/paloSantoForm.class.php";
+
     if (isset($_POST['submit_eliminar']) && isset($_POST['uniqueid']) &&
         is_array($_POST['uniqueid']) && count($_POST['uniqueid']) > 0) {
         deleteRecord($smarty, $module_name, $local_templates_dir, $pDB, $pACL, $arrConf, $user, $extension);

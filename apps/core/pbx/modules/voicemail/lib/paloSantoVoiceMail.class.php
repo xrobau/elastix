@@ -37,7 +37,7 @@ class paloSantoVoiceMail
     private static $_listaExtensiones = array(
         'wav'   =>  'audio/wav',
         'gsm'   =>  'audio/gsm',
-        //'mp3'   =>  'audio/mpeg',
+        'mp3'   =>  'audio/mpeg',
         'WAV'   =>  'audio/wav',    // audio gsm en envoltura RIFF
     );
 
@@ -96,6 +96,51 @@ class paloSantoVoiceMail
         // Ordenar por origtime DESC
         array_multisort($ts, SORT_DESC, $arrData);
         return $arrData;
+    }
+
+    /**
+     * Procedimiento para resolver las rutas absolutas de los archivos asociados
+     * al mensaje indicado en $msgbase dentro del mailbox de la extensión
+     * $extension. Las rutas están canonicalizadas y se garantizan que existen.
+     *
+     * @param string $extension Extensión del correo de voz
+     * @param string $msgbase   Nombre base del mensaje: "msg0001"
+     *
+     * @return mixed NULL en error, o estructura en éxito
+     */
+    function resolveVoiceMailFiles($extension, $msgbase)
+    {
+        if (!ctype_digit($extension)) {
+            $this->errMsg = '(internal) Invalid extension';
+            return NULL;
+        }
+        if (!preg_match('/^[[:alpha:]]+[[:digit:]]+$/', $msgbase)) {
+            $this->errMsg = '(internal) Invalid message name';
+            return NULL;
+        }
+        $voicemailPath = DEFAULT_ASTERISK_VOICEMAIL_BASEDIR."/$extension/INBOX";
+        if (!is_dir($voicemailPath)) {
+            $this->errMsg = 'No mailbox for extension';
+            return NULL;
+        }
+        $pathbase = $voicemailPath.'/'.$msgbase;
+        if (!file_exists("{$pathbase}.txt")) {
+            $this->errMsg = 'Voicemail message not found';
+            return NULL;
+        }
+        $result = array(
+            'txt'           =>  $pathbase,
+            'recordings'    =>  array(),
+        );
+        foreach (array_keys(self::$_listaExtensiones) as $ext) {
+            if (file_exists("{$pathbase}.{$ext}")) {
+                $result['recordings'][] = array(
+                    'fullpath'  =>  "{$pathbase}.{$ext}",
+                    'mimetype'  =>  self::$_listaExtensiones[$ext],
+                );
+            }
+        }
+        return $result;
     }
 
     function writeFileVoiceMail($new_vmext, $new_vmparam = NULL)

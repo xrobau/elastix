@@ -301,6 +301,9 @@ fi
 
 %changelog
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Voicemail: unify code for finding out the absolute path for the
+  recording (as well as the mimetype) into a single place at paloSantoVoiceMail.
+  SVN Rev[7663]
 - CHANGED: Voicemail: use array form variable to encode list of voicemails
   instead of encoding the voicemail identification into the form name.
   SVN Rev[7662]

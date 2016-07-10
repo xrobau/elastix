@@ -163,57 +163,33 @@ function _moduleContent(&$smarty, $module_name)
     }
 
     if( getParameter('action') == "display_record"){
-
-        $file = getParameter("name");
-        $ext  = getParameter("ext");
         $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
         $extension = $pACL->getUserExtension($user);
         $esAdministrador = $pACL->isUserAdministratorGroup($user);
-        $path = "/var/spool/asterisk/voicemail/default";
-        $voicemailPath = "$path/$ext/INBOX/".base64_decode($file);
-        $tmpfile = basename($voicemailPath);
-        $filetmp = "$path/$ext/INBOX/$tmpfile";
-        if(!is_file($filetmp)){
+        $file = getParameter("name");
+        $ext  = getParameter("ext");
+
+        if (!$esAdministrador && $extension != $ext) {
+            Header('HTTP/1.1 403 Forbidden');
+            die("<b>403 "._tr("no_extension")." </b>");
+        }
+
+        $paloVoice = new paloSantoVoiceMail();
+        $recinfo = $paloVoice->resolveVoiceMailFiles($ext, $file);
+        if (is_null($recinfo) || count($recinfo['recordings']) <= 0) {
+            Header("HTTP/1.1 404 Not Found");
             die("<b>404 "._tr("no_file")."</b>");
         }
-        if(!$esAdministrador){
-            if($extension != $ext){
-                 die("<b>404 "._tr("no_file")."</b>");
-            }
-            $voicemailPath = "$path/$extension/INBOX/".base64_decode($file);
-        }
-
-        if (isset($file) && preg_match("/^[[:alpha:]]+[[:digit:]]+\.(wav|WAV|Wav|mp3|gsm)$/",base64_decode($file))) {
-            if (!is_file($voicemailPath)) {
-                die("<b>404 "._tr("no_file")."</b>");
-            }
-            $sContenido="";
-
-            $name = basename($voicemailPath);
-            $format=substr(strtolower($name), -3);
-            // This will set the Content-Type to the appropriate setting for the file
-            $ctype ='';
-            switch( $format ) {
-
-                case "mp3": $ctype="audio/mpeg"; break;
-                case "wav": $ctype='audio/wav'; break;
-                case "gsm": $ctype="audio/x-gsm"; break;
-                // not downloadable
-                default: die("<b>404 "._tr("no_file")."</b>"); break ;
-            }
-
-            if($sContenido == "")
-                $session_id = session_id();
-
-            $audiourl = construirURL(array(
-                'menu'           =>  $module_name,
-                'action'         =>  'download',
-                'ext'            =>  $ext,
-                'name'           =>  $file,
-                'rawmode'        =>  'yes',
-                'elastixSession' =>  $session_id,
-            ));
-            $sContenido=<<<contenido
+        $ctype = $recinfo['recordings'][0]['mimetype'];
+        $audiourl = construirURL(array(
+            'menu'           =>  $module_name,
+            'action'         =>  'download',
+            'ext'            =>  $ext,
+            'name'           =>  $file,
+            'rawmode'        =>  'yes',
+            'elastixSession' =>  session_id(),
+        ));
+        $sContenido=<<<contenido
 <!DOCTYPE html>
 <html>
 <head><title>Elastix</title></head>
@@ -225,11 +201,7 @@ function _moduleContent(&$smarty, $module_name)
 </body>
 </html>
 contenido;
-            echo $sContenido;
-        }else{
-            die("<b>404 "._tr("no_file")."</b>");
-        }
-        return;
+        return $sContenido;
     }
 
     if( getParameter('action') == "download"){
@@ -238,68 +210,38 @@ contenido;
         $esAdministrador = $pACL->isUserAdministratorGroup($user);
         $record = getParameter("name");
         $ext  = getParameter("ext");
-        if (!preg_match("/^[[:digit:]]+$/", $ext)) {
+
+        if (!$esAdministrador && $extension != $ext) {
+            Header('HTTP/1.1 403 Forbidden');
+            die("<b>403 "._tr("no_extension")." </b>");
+        }
+
+        $paloVoice = new paloSantoVoiceMail();
+        $recinfo = $paloVoice->resolveVoiceMailFiles($ext, $record);
+        if (is_null($recinfo) || count($recinfo['recordings']) <= 0) {
             Header("HTTP/1.1 404 Not Found");
             die("<b>404 "._tr("no_file")."</b>");
         }
-        $record = base64_decode($record);
-        $path = "/var/spool/asterisk/voicemail/default";
-        $voicemailPath = "$path/$ext/INBOX/".$record;//"$path/$record";
-        $tmpfile = basename($voicemailPath);
-        $filetmp = "$path/$ext/INBOX/$tmpfile";
-        if(!is_file($filetmp)){
-            die("<b>404 "._tr("no_file")."</b>");
+        $size = filesize($recinfo['recordings'][0]['fullpath']);
+        $name = basename($recinfo['recordings'][0]['fullpath']);
+        $ctype = $recinfo['recordings'][0]['mimetype'];
+
+        $fp = fopen($recinfo['recordings'][0]['fullpath'], "rb");
+        if (!$fp) {
+            Header('HTTP/1.1 404 Not Found');
+            die("<b>404 "._tr("no_file")." </b>");
         }
-        if(!$esAdministrador){
-            if($extension != $ext){
-                Header("HTTP/1.1 404 Not Found");
-                 die("<b>404 "._tr("no_extension")."</b>");
-            }
-            $voicemailPath = "$path/$extension/INBOX/".$record;
-        }
-        if (isset($record) && preg_match("/^[[:alpha:]]+[[:digit:]]+\.(wav|WAV|Wav|mp3|gsm)$/",$record)) {
-        // See if the file exists
-
-            if (!is_file($voicemailPath)) {
-                Header("HTTP/1.1 404 Not Found");
-                die("<b>404 "._tr("no_file")."</b>");
-            }
-        // Gather relevent info about file
-            $size = filesize($voicemailPath);
-            $name = basename($voicemailPath);
-
-        //$extension = strtolower(substr(strrchr($name,"."),1));
-            $extension=substr(strtolower($name), -3);
-
-        // This will set the Content-Type to the appropriate setting for the file
-            $ctype ='';
-            switch( $extension ) {
-
-                case "mp3": $ctype="audio/mpeg"; break;
-                case "wav": $ctype='audio/wav'; break;
-                case "gsm": $ctype="audio/x-gsm"; break;
-                // not downloadable
-                default: die("<b>404 "._tr("no_file")."</b>"); break ;
-            }
-
-        // need to check if file is mislabeled or a liar.
-            $fp=fopen($voicemailPath, "rb");
-            if ($size && $ctype && $fp) {
-                header("Pragma: public");
-                header("Expires: 0");
-                header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-                header("Cache-Control: public");
-                header("Content-Description: wav file");
-                header("Content-Type: " . $ctype);
-                header("Content-Disposition: attachment; filename=" . $name);
-                header("Content-Transfer-Encoding: binary");
-                header("Content-length: " . $size);
-                fpassthru($fp);
-            }
-        }else{
-            Header("HTTP/1.1 404 Not Found");
-            die("<b>404 "._tr("no_file")."</b>");
-        }
+        header("Pragma: public");
+        header("Expires: 0");
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Cache-Control: public");
+        header("Content-Description: wav file");
+        header("Content-Type: " . $ctype);
+        header("Content-Disposition: attachment; filename=" . $name);
+        header("Content-Transfer-Encoding: binary");
+        header("Content-length: " . $size);
+        fpassthru($fp);
+        fclose($fp);
         return;
     }
 
@@ -330,7 +272,16 @@ contenido;
 
         $arrVoiceData = array();
         foreach ($arrData as $t) {
-            $pathRecordFile = base64_encode($t['recordingfile']);
+            $urlparam = array(
+                'menu'           =>  $module_name,
+                'action'         =>  'display_record',
+                'ext'            =>  $t['mailbox'],
+                'name'           =>  basename($t['file'], '.txt'),
+                'rawmode'        =>  'yes'
+            );
+            $displayurl = construirURL($urlparam);
+            $urlparam['action'] = 'download';
+            $downloadurl = construirURL($urlparam);
             $arrVoiceData[] = array(
                 '<input type="checkbox" name="voicemails[]" value="'.htmlentities($t['mailbox'].','.basename($t['file'], '.txt'), ENT_COMPAT, 'UTF-8').'" />',
                 date('Y-m-d', $t['origtime']),
@@ -338,8 +289,8 @@ contenido;
                 htmlentities($t['callerid'], ENT_COMPAT, 'UTF-8'),
                 $t['extension'],
                 $t['duration'].' sec.',
-                "<a href='#' onClick=\"javascript:popUp('index.php?menu=$module_name&action=display_record&ext={$t['mailbox']}&name=$pathRecordFile&rawmode=yes',350,100); return false;\">"._tr('Listen')."</a>&nbsp;".
-                    "<a href='?menu=$module_name&action=download&ext={$t['mailbox']}&name=$pathRecordFile&rawmode=yes'>"._tr('Download')."</a>",
+                "<a href='#' onClick=\"javascript:popUp('$displayurl',350,100); return false;\">"._tr('Listen')."</a>&nbsp;".
+                    "<a href='$downloadurl'>"._tr('Download')."</a>",
             );
         }
         $oGrid->setData($arrVoiceData);

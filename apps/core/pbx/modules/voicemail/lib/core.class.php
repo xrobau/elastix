@@ -465,32 +465,36 @@ class core_Voicemail
         }
         $extension = $this->_leerExtension();
         if (is_null($extension)) return false;
-        $path = "/var/spool/asterisk/voicemail/default";
-        $voicemailPath = "$path/$extension/INBOX/".$file;
-        if(!is_file($voicemailPath)){
-            $this->errMsg["fc"] = 'ERROR';
-            $this->errMsg["fm"] = 'File does not exist';
-            $this->errMsg["fd"] = "The file $voicemailPath does not exist";
-            $this->errMsg["cn"] = get_class($this);
-            return false;
+
+        $paloVoice = new paloSantoVoiceMail();
+        $msgbase = substr($file, 0, -4);
+        $recinfo = $paloVoice->resolveVoiceMailFiles($extension, $msgbase);
+        if (is_null($recinfo)) {
+            $this->errMsg = array(
+                'fc'    =>  'ERROR',
+                'fm'    =>  'File does not exist',
+                'fd'    =>  $paloVoice->errMsg,
+                'cn'    =>  get_class($this),
+            );
+            return FALSE;
         }
-        if(!preg_match("/^[[:alpha:]]+[[:digit:]]+\.(wav|WAV|Wav|mp3|gsm)$/",$file)){
-            $this->errMsg["fc"] = 'FILERROR';
-            $this->errMsg["fm"] = 'Wrong Audio format file';
-            $this->errMsg["fd"] = "The file $file does not have a correct audio format";
-            $this->errMsg["cn"] = get_class($this);
-            return false;
+        $voicemailPath = NULL;
+        foreach ($recinfo['recordings'] as $rec) {
+            if (basename($rec['fullpath']) == $file) {
+                $voicemailPath = $rec['fullpath'];
+                $ctype = $rec['mimetype'];
+                $size = filesize($voicemailPath);
+                break;
+            }
         }
-        $size = filesize($voicemailPath);
-        $name = basename($voicemailPath);
-        $ctype ='';
-        $ext=substr(strtolower($name), -3);
-        switch( $ext ) {
-            case "mp3": $ctype="audio/mpeg"; break;
-            case "wav": $ctype="audio/x-wav"; break;
-            case "Wav": $ctype="audio/x-wav"; break;
-            case "WAV": $ctype="audio/x-wav"; break;
-            case "gsm": $ctype="audio/x-gsm"; break;
+        if (is_null($voicemailPath)) {
+            $this->errMsg = array(
+                'fc'    =>  'FILERROR',
+                'fm'    =>  'Wrong Audio format file',
+                'fd'    =>  'The file $file does not have a correct audio format',
+                'cn'    =>  get_class($this),
+            );
+            return FALSE;
         }
 
         $audio = file_get_contents($voicemailPath);

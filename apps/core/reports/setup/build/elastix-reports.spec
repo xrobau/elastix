@@ -93,6 +93,14 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: CDR Report: add and use compatibility function hasModulePrivilege()
+  that allows authorization on particular actions to be assigned piecemeal. This
+  method delegates to paloACL::hasModulePrivilege if available, and falls back
+  to granting all known privileges to the administrator group. Part of fix for
+  Elastix bug #1100.
+  SVN Rev[7668]
+
 * Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: added Russian translations by user Russian.
   SVN Rev[7594]

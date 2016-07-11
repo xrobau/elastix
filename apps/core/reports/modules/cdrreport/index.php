@@ -65,21 +65,23 @@ function _moduleContent(&$smarty, $module_name)
     if (!empty($pACL->errMsg)) {
         return "ERROR DE ACL: $pACL->errMsg";
     }
+    $user = $_SESSION['elastix_user'];
+    $extension = $pACL->getUserExtension($user);
+    if ($extension == '') $extension = NULL;
 
-    $exten = $pACL->getUserExtension($_SESSION['elastix_user']);
-    $isAdministrator = $pACL->isUserAdministratorGroup($_SESSION['elastix_user']);
-    if(is_null($exten) || $exten == ""){
-	if(!$isAdministrator){
-	    $smarty->assign('mb_message', "<b>"._tr("contact_admin")."</b>");
-	    return "";
-	}
-	else
-	    $smarty->assign('mb_message', _tr("no_extension"));
+    $bPuedeVerTodos = hasModulePrivilege($user, $module_name, 'reportany');
+
+    // Sólo el administrador puede consultar con $extension == NULL
+    if (is_null($extension)) {
+        if ($bPuedeVerTodos)
+            $smarty->assign("mb_message", "<b>"._tr("no_extension")."</b>");
+        else{
+            $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
+            return "";
+        }
     }
 
-    // Para usuarios que no son administradores, se restringe a los CDR de la
-    // propia extensión
-    $sExtension = ($isAdministrator)? '' : $pACL->getUserExtension($_SESSION['elastix_user']);
+    $bPuedeBorrar = hasModulePrivilege($user, $module_name, 'deleteany');
 
     // DSN para consulta de ringgroups
     $dsn_asterisk = generarDSNSistema('asteriskuser', 'asterisk');
@@ -203,30 +205,29 @@ function _moduleContent(&$smarty, $module_name)
     $paramFiltro['date_end'] = translateDate($paramFiltro['date_end']).' 23:59:59';
 
     // Valores de filtrado que no se seleccionan mediante filtro
-    if ($sExtension != '') $paramFiltro['extension'] = $sExtension;
+    if (!$bPuedeVerTodos) $paramFiltro['extension'] = $extension;
 
     // Ejecutar el borrado, si se ha validado.
     if (isset($_POST['delete'])) {
-	if($isAdministrator){
-	    if($paramFiltro['date_start'] <= $paramFiltro['date_end']){
-		$r = $oCDR->borrarCDRs($paramFiltro);
-		if (!$r) $smarty->assign(array(
-		    'mb_title'      =>  _tr('ERROR'),
-		    'mb_message'    =>  $oCDR->errMsg,
-		));
-	    }else{
-		$smarty->assign(array(
-		    'mb_title'      =>  _tr('ERROR'),
-		    'mb_message'    =>  _tr("Please End Date must be greater than Start Date"),
-		));
-	    }
-	}
-	else{
-	    $smarty->assign(array(
-		    'mb_title'      =>  _tr('ERROR'),
-		    'mb_message'    =>  _tr("Only administrators can delete CDRs"),
-		));
-	}
+        if ($bPuedeBorrar) {
+            if ($paramFiltro['date_start'] <= $paramFiltro['date_end']) {
+                $r = $oCDR->borrarCDRs($paramFiltro);
+                if (!$r) $smarty->assign(array(
+                    'mb_title'      =>  _tr('ERROR'),
+                    'mb_message'    =>  $oCDR->errMsg,
+                ));
+            } else {
+                $smarty->assign(array(
+                    'mb_title'      =>  _tr('ERROR'),
+                    'mb_message'    =>  _tr("Please End Date must be greater than Start Date"),
+                ));
+            }
+        } else {
+            $smarty->assign(array(
+                'mb_title'      =>  _tr('ERROR'),
+                'mb_message'    =>  _tr("Only administrators can delete CDRs"),
+            ));
+        }
     }
 
     $oGrid->setTitle(_tr("CDR Report"));
@@ -235,14 +236,11 @@ function _moduleContent(&$smarty, $module_name)
     $oGrid->enableExport();   // enable export.
     $oGrid->setNameFile_Export(_tr("CDRReport"));
     $oGrid->setURL($url);
-    if($isAdministrator)
-	$oGrid->deleteList("Are you sure you wish to delete CDR(s) Report(s)?","delete",_tr("Delete"));
+    if ($bPuedeBorrar)
+        $oGrid->deleteList("Are you sure you wish to delete CDR(s) Report(s)?","delete",_tr("Delete"));
 
     $arrData = null;
-    if(!isset($sExtension) || $sExtension == ""  && !$isAdministrator)
-	$total = 0;
-    else
-	$total = $oCDR->contarCDRs($paramFiltro);
+    $total = $oCDR->contarCDRs($paramFiltro);
 
     if($oGrid->isExportAction()){
         $limit = $total;
@@ -251,7 +249,7 @@ function _moduleContent(&$smarty, $module_name)
         $arrColumns = array(_tr("Date"), _tr("Source"), _tr("Ring Group"), _tr("Destination"), _tr("Src. Channel"),_tr("Account Code"),_tr("Dst. Channel"),_tr("Status"),_tr("Duration"));
         $oGrid->setColumns($arrColumns);
 
-	$arrResult = $oCDR->listarCDRs($paramFiltro, $limit, $offset);
+        $arrResult = $oCDR->listarCDRs($paramFiltro, $limit, $offset);
 
         if(is_array($arrResult['cdrs']) && $total>0){
             foreach($arrResult['cdrs'] as $key => $value){
@@ -287,7 +285,7 @@ function _moduleContent(&$smarty, $module_name)
         $oGrid->setTotal($total);
 
         $offset = $oGrid->calculateOffset();
-	$arrResult = $oCDR->listarCDRs($paramFiltro, $limit, $offset);
+        $arrResult = $oCDR->listarCDRs($paramFiltro, $limit, $offset);
 
         $arrColumns = array(_tr("Date"), _tr("Source"), _tr("Ring Group"), _tr("Destination"), _tr("Src. Channel"),_tr("Account Code"),_tr("Dst. Channel"),_tr("Status"),_tr("Duration"));
         $oGrid->setColumns($arrColumns);
@@ -327,4 +325,22 @@ function _moduleContent(&$smarty, $module_name)
     $content = $oGrid->fetchGrid();
     return $content;
 }
-?>
+
+// Abstracción de privilegio por módulo hasta implementar (Elastix bug #1100).
+// Parámetro $module se usará en un futuro al implementar paloACL::hasModulePrivilege().
+function hasModulePrivilege($user, $module, $privilege)
+{
+    global $arrConf;
+
+    $pDB = new paloDB($arrConf['elastix_dsn']['acl']);
+    $pACL = new paloACL($pDB);
+
+    if (method_exists($pACL, 'hasModulePrivilege'))
+        return $pACL->hasModulePrivilege($user, $module, $privilege);
+
+    $isAdmin = ($pACL->isUserAdministratorGroup($user) !== FALSE);
+    return ($isAdmin && in_array($privilege, array(
+        'reportany',    // ¿Está autorizado el usuario a ver la información de todos los demás?
+        'deleteany',    // ¿Está autorizado el usuario a borrar CDRs?
+    )));
+}

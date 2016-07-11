@@ -401,15 +401,17 @@ function borrarVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $u
     $esAdministrador = $pACL->isUserAdministratorGroup($user);
 
     $listaArchivos = array();
+    $paloVoice = new paloSantoVoiceMail();
     if (is_array($_POST)) foreach ($_POST['voicemails'] as $name) {
         // El formato esperado de clave es 1064,msg0001
         $regs = NULL;
         if (preg_match('/^(\d+),(\w+)$/', $name, $regs)) {
             if ($esAdministrador || $extension == $regs[1]) {
-                $voicemailPath = "/var/spool/asterisk/voicemail/default/{$regs[1]}/INBOX";
-                $listaArchivos[] = "$voicemailPath/{$regs[2]}.txt";
-                $listaArchivos[] = "$voicemailPath/{$regs[2]}.wav";
-                $listaArchivos[] = "$voicemailPath/{$regs[2]}.WAV";
+                if (!$paloVoice->deleteVoiceMail($regs[1], $regs[2])) {
+                    $smarty->assign("mb_title", _tr("ERROR"));
+                    $smarty->assign("mb_message", $paloVoice->errMsg);
+                    return FALSE;
+                }
             } else {
                 // Intento de borrar el voicemail de otro usuario
                 $smarty->assign("mb_title", _tr("ERROR"));
@@ -418,7 +420,6 @@ function borrarVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $u
             }
         }
     }
-    array_map('unlink', $listaArchivos);
     return TRUE;
 }
 

@@ -334,36 +334,15 @@ class core_Voicemail
         }
         $extension = $this->_leerExtension();
         if (is_null($extension)) return false;
-        $path = "/var/spool/asterisk/voicemail/default";
-        $folder = "INBOX";
-        $voicemailPath = "$path/$extension/$folder";
-        if(file_exists($voicemailPath)){
-            $flag = 0;
-            if(file_exists("$voicemailPath/$file.txt")){
-                unlink("$voicemailPath/$file.txt");
-                $flag++;
-            }
-            if(file_exists("$voicemailPath/$file.wav")){
-                unlink("$voicemailPath/$file.wav");
-                $flag++;
-            }
-            if(file_exists("$voicemailPath/$file.WAV")){
-                unlink("$voicemailPath/$file.WAV");
-                $flag++;
-            }
-        }else{
-            $this->errMsg["fc"] = 'ERROR';
-            $this->errMsg["fm"] = 'File does not exist';
-            $this->errMsg["fd"] = "The file $voicemailPath does not exist";
-            $this->errMsg["cn"] = get_class($this);
-            return false;
-        }
-        if($flag==0){
-            $this->errMsg["fc"] = 'ERROR';
-            $this->errMsg["fm"] = 'File does not exist';
-            $this->errMsg["fd"] = "The file $file does not exist in the path $voicemailPath";
-            $this->errMsg["cn"] = get_class($this);
-            return false;
+        $paloVoice = new paloSantoVoiceMail();
+        if (!$paloVoice->deleteVoiceMail($extension, $file)) {
+            $this->errMsg = array(
+                'fc'    =>  'ERROR',
+                'fm'    =>  'File does not exist',
+                'fd'    =>  $paloVoice->errMsg,
+                'cn'    =>  get_class($this),
+            );
+            return FALSE;
         }
         return true;
     }

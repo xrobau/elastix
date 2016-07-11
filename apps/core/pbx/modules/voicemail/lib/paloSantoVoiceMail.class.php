@@ -129,7 +129,7 @@ class paloSantoVoiceMail
             return NULL;
         }
         $result = array(
-            'txt'           =>  $pathbase,
+            'txt'           =>  "{$pathbase}.txt",
             'recordings'    =>  array(),
         );
         foreach (array_keys(self::$_listaExtensiones) as $ext) {
@@ -141,6 +141,16 @@ class paloSantoVoiceMail
             }
         }
         return $result;
+    }
+
+    function deleteVoiceMail($extension, $msgbase)
+    {
+        $recinfo = $this->resolveVoiceMailFiles($extension, $msgbase);
+        if (!is_array($recinfo)) return FALSE;
+        $listaArchivos = array($recinfo['txt']);
+        foreach ($recinfo['recordings'] as $rec) $listaArchivos[] = $rec['fullpath'];
+        array_map('unlink', $listaArchivos);
+        return TRUE;
     }
 
     function writeFileVoiceMail($new_vmext, $new_vmparam = NULL)

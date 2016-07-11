@@ -301,6 +301,9 @@ fi
 
 %changelog
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Voicemail: unify code for removing one voicemail message into a
+  single place at paloSantoVoiceMail.
+  SVN Rev[7666]
 - CHANGED: Voicemail: transform code into a more modular form, analogous to the
   Monitoring report.
   SVN Rev[7665]

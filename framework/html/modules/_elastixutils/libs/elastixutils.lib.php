@@ -213,7 +213,7 @@ function changeMenuColorByUser()
          * menuColor se ha estado almacenando bajo el id_resource=19. Ahora se
          * implementa correctamente que el recurso que posee el color de menú
          * es themes_system. */
-        $arrResult['status'] = $pACL->saveUserProfileProperty($uid, 'themes_system', 'default', 'menuColor', $color);
+        $arrResult['status'] = $pACL->saveUserProfileProperty($uid, 'themes_system', 'menuColor', $color);
         $arrResult['msg'] = $arrResult['status'] ? _tr("OK") : _tr("ERROR DE DB: ").$pDB->errMsg;
     }
     return $arrResult;

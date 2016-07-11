@@ -1290,6 +1290,37 @@ class paloACL {
     }
 
     /**
+     * Procedimiento para leer todas las propiedades en el perfil indicado para
+     * el recurso y usuario especificados.
+     *
+     * @param integer   $id_user        ID del usuario
+     * @param mixed     $resource_name  Nombre o ID del recurso
+     * @param string    $profile_name   Nombre del perfil
+     *
+     * @return mixed    NULL en caso de error, o lista asociativa de propiedades.
+     */
+    function getUserProfile($id_user, $resource_name, $profile_name = 'default')
+    {
+        $this->errMsg = '';
+        $sql = <<<SQL_PROFILE
+SELECT pp.property, pp.value
+FROM acl_profile_properties pp, acl_user_profile up, acl_resource r
+WHERE up.id_user = ? AND up.profile = ? AND up.id_profile = pp.id_profile
+    AND up.id_resource = r.id AND r.name = ?
+SQL_PROFILE;
+        $rs = $this->_DB->fetchTable($sql, FALSE, array($id_user, $profile_name, $resource_name));
+        if (!is_array($rs)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
+        }
+        $listaPropiedades = array();
+        foreach ($rs as $tupla) {
+            $listaPropiedades[$tupla[0]] = $tupla[1];
+        }
+        return $listaPropiedades;
+    }
+
+    /**
      * Procedimiento para leer una sola propiedad de un perfil asociado a un
      * recurso para un usuario específico.
      *
@@ -1334,13 +1365,29 @@ SQL_PROFILE;
      *
      * @param integer   $id_user        ID del usuario
      * @param mixed     $resource_name  Nombre o ID del recurso
-     * @param string    $profile_name   Nombre del perfil
      * @param string    $property       Nombre de la propiedad
      * @param string    $value          Valor de propiedad a almacenar
+     * @param string    $profile_name   Nombre del perfil
      *
      * @return bool     VERDADERO si se almacenó la propiedad, FALSO en error.
      */
-    function saveUserProfileProperty($id_user, $resource_name, $profile_name, $property, $value)
+    function saveUserProfileProperty($id_user, $resource_name, $property, $value, $profile_name = 'default')
+    {
+        return $this->saveUserProfile($id_user, $resource_name, array($property => $value), $profile_name);
+    }
+
+    /**
+     * Procedimiento para almacenar una sola propiedad de un perfil asociado a
+     * un recurso para un usuario específico.
+     *
+     * @param integer   $id_user        ID del usuario
+     * @param mixed     $resource_name  Nombre o ID del recurso
+     * @param string    $properties     Lista asociativa de propiedades y valores
+     * @param string    $profile_name   Nombre del perfil
+     *
+     * @return bool     VERDADERO si se almacenaron las propiedades, FALSO en error.
+     */
+    function saveUserProfile($id_user, $resource_name, $properties, $profile_name = 'default')
     {
         $this->errMsg = '';
         if (ctype_digit("$resource_name")) {
@@ -1376,26 +1423,27 @@ SQL_LEER_ID_PROFILE;
         }
 
         // Se almacena el valor de la propiedad
-        $params = array($id_profile, $property);
-        if (is_null($value)) {
-            $sql = 'DELETE FROM acl_profile_properties WHERE id_profile = ? AND property = ?';
-        } else {
-            $sql = 'SELECT value FROM acl_profile_properties WHERE id_profile = ? AND property = ?';
-            $tupla = $this->_DB->getFirstRowQuery($sql, FALSE, $params);
-            if (!is_array($tupla)) {
+        foreach ($properties as $property => $value) {
+            $params = array($id_profile, $property);
+            if (is_null($value)) {
+                $sql = 'DELETE FROM acl_profile_properties WHERE id_profile = ? AND property = ?';
+            } else {
+                $sql = 'SELECT value FROM acl_profile_properties WHERE id_profile = ? AND property = ?';
+                $tupla = $this->_DB->getFirstRowQuery($sql, FALSE, $params);
+                if (!is_array($tupla)) {
+                    $this->errMsg = $this->_DB->errMsg;
+                    return FALSE;
+                }
+                array_unshift($params, $value);
+                $sql = (count($tupla) > 0)
+                    ? 'UPDATE acl_profile_properties SET value = ? WHERE id_profile = ? AND property = ?'
+                    : 'INSERT INTO acl_profile_properties (value, id_profile, property) VALUES (?, ?, ?)';
+            }
+            if (!$this->_DB->genQuery($sql, $params)) {
                 $this->errMsg = $this->_DB->errMsg;
                 return FALSE;
             }
-            array_unshift($params, $value);
-            $sql = (count($tupla) > 0)
-                ? 'UPDATE acl_profile_properties SET value = ? WHERE id_profile = ? AND property = ?'
-                : 'INSERT INTO acl_profile_properties (value, id_profile, property) VALUES (?, ?, ?)';
-        }
-        if (!$this->_DB->genQuery($sql, $params)) {
-            $this->errMsg = $this->_DB->errMsg;
-            return FALSE;
         }
         return TRUE;
     }
 }
-?>

@@ -390,6 +390,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Jul 11 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: create new paloACL methods getUserProfile and
+  saveUserProfile intended for use with the userlist module.
+  SVN Rev[7669]
+
 * Mon Jul  4 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Framework: only auto-popup on non-registration for admin users.
   Non-admin users do not have authorization to initiate registration and

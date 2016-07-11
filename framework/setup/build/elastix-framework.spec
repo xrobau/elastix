@@ -391,6 +391,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Jul 11 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: Parameter $extension of updateUser is now optional, and
+  will preserve the previous extension if not specified. To clear the extension,
+  an empty string is required, as used in userlist module.
+  SVN Rev[7672]
 - CHANGED: Framework: create new paloACL method setUserExtension to update the
   extension of a single user. The $extension parameter of createUser is now
   optional.

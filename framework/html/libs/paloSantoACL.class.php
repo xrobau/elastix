@@ -261,7 +261,7 @@ class paloACL {
      *
      * @return bool VERDADERO si se ha modificar correctamente el usuario, FALSO si ocurre un error.
      */
-    function updateUser($id_user, $username, $description, $extension)
+    function updateUser($id_user, $username, $description, $extension = NULL)
     {
         $bExito = FALSE;
         if ($username == "") {
@@ -294,12 +294,14 @@ class paloACL {
 
                 if ($bContinuar) {
                     // Proseguir con la modificación del usuario
-                    $sPeticionSQL = "UPDATE acl_user SET name = ?, description = ?, extension  = ? WHERE id = ?";
-                    $arrParam = array($username,$description,$extension,$id_user);
-                    if ($this->_DB->genQuery($sPeticionSQL,$arrParam)) {
-                        $bExito = TRUE;
-                    } else {
+                    $sPeticionSQL = "UPDATE acl_user SET name = ?, description = ? WHERE id = ?";
+                    $arrParam = array($username,$description,$id_user);
+                    if (!$this->_DB->genQuery($sPeticionSQL,$arrParam)) {
                         $this->errMsg = $this->_DB->errMsg;
+                    } else {
+                        $bExito = is_null($extension)
+                            ? TRUE
+                            : $this->setUserExtension($username, (trim($extension) == '') ? NULL : trim($extension));
                     }
                 }
             }

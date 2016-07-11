@@ -701,22 +701,11 @@ function reportUserList($pACL, $idUserAccount, $smarty, $userLevel1, $userAccoun
 function leerPropiedadesWebmail(&$pDB, &$smarty, $idUser)
 {
     // Obtener la información del usuario con respecto al perfil "default" del módulo "webmail"
-    $sPeticionPropiedades =
-        'SELECT pp.property, pp.value '.
-        'FROM acl_profile_properties pp, acl_user_profile up, acl_resource r '.
-    	'WHERE up.id_user = ? '.
-            'AND up.profile = "default" '.
-            'AND up.id_profile = pp.id_profile '.
-            'AND up.id_resource = r.id '.
-            'AND r.name = "webmail"';
-    $listaPropiedades = array();
-    $tabla = $pDB->fetchTable($sPeticionPropiedades, FALSE, array($idUser));
-    if ($tabla === FALSE) {
-      print "ERROR DE DB: ".$pDB->errMsg;
-    } else {
-      foreach ($tabla as $tupla) {
-        $listaPropiedades[$tupla[0]] = $tupla[1];
-      }
+    $pACL = new paloACL($pDB);
+    $listaPropiedades = $pACL->getUserProfile($idUser, 'webmail');
+    if (!is_array($listaPropiedades)) {
+        print "ERROR DE DB: ".$pACL->errMsg;
+        $listaPropiedades = array();
     }
 
     return $listaPropiedades;
@@ -724,97 +713,11 @@ function leerPropiedadesWebmail(&$pDB, &$smarty, $idUser)
 
 function actualizarPropiedades(&$pDB, &$smarty, $idUser, $sModulo, $sPerfil, $propiedades)
 {
-//    $oDBConn =& $pDB->conn;
-    // Verificar que existe realmente un perfil $sPerfil para el usuario $idUser y el módulo $sModulo,
-    // y crearlo si es necesario
-
-    $sPeticionID =
-        'SELECT up.id_profile '.
-        'FROM acl_user_profile up, acl_resource r '.
-        'WHERE up.id_user = ? AND up.id_resource = r.id AND r.name = ? AND up.profile = ?';
-    $tupla = $pDB->getFirstRowQuery($sPeticionID, FALSE, array($idUser, $sModulo, $sPerfil));
-    if ($tupla === FALSE) {
-        $smarty->assign("mb_message", "ERROR DE DB: ".$pDB->errMsg);
+    $pACL = new paloACL($pDB);
+    $r = $pACL->saveUserProfile($idUser, $sModulo, $propiedades, $sPerfil);
+    if (!$r) {
+        $smarty->assign("mb_message", "ERROR DE DB: ".$pACL->errMsg);
         return FALSE;
-    } elseif (count($tupla) == 0) {
-        $idPerfil = NULL;
-    } else {
-        $idPerfil = $tupla[0];
-    }
-    if (is_null($idPerfil)) {
-        // La combinación de usuario/módulo/perfil no existe y hay que crearla
-        $pACL = new paloACL($pDB);
-
-        // TODO: agregar función a paloACL para obtener ID de recurso, dado el nombre
-        $listaRecursos = $pACL->getResources();
-        $idRecurso = NULL;
-        foreach ($listaRecursos as $tuplaRecurso)
-        {
-            if ($tuplaRecurso[1] == $sModulo) {
-                $idRecurso = $tuplaRecurso[0];
-                break;
-            }
-        }
-        if (is_null($idRecurso)) {
-            $smarty->assign("mb_message", '(internal) No resource found for: '.$sModulo);
-            return FALSE;
-        }
-
-        // Crear el nuevo perfil para el usuario indicado...
-        $sPeticionNuevoPerfil = 'INSERT INTO acl_user_profile (id_user, id_resource, profile) VALUES (?, ?, ?)';
-        $r = $pDB->genQuery($sPeticionNuevoPerfil, array($idUser, $idRecurso, $sPerfil));
-        if (!$r) {
-            $smarty->assign("mb_message", "ERROR DE DB: ".$pDB->errMsg);
-            return FALSE;
-        }
-
-        // Una vez creado el perfil, el query de ID de perfil debe de funcionar
-        $tupla = $pDB->getFirstRowQuery($sPeticionID, FALSE, array($idUser, $sModulo, $sPerfil));
-        if ($tupla === FALSE) {
-            $smarty->assign("mb_message", "ERROR DE DB: ".$pDB->errMsg);
-            return FALSE;
-        } elseif (count($tupla) == 0) {
-            $smarty->assign("mb_message", '(internal) Unable to find just-inserted profile ID');
-            return FALSE;
-        } else {
-            $idPerfil = $tupla[0];
-        }
-    }
-
-    // Aquí ya se tiene el ID del perfil a actualizar. Las propiedades deben de reemplazarse, o
-    // crearse si no existen. Por ahora no deben borrarse en ausencia de la lista
-    $sPeticionPropiedades =
-        'SELECT property, value '.
-        'FROM acl_profile_properties '.
-    	'WHERE id_profile = ?';
-    $listaPropiedades = array();
-    $tabla = $pDB->fetchTable($sPeticionPropiedades, FALSE, array($idPerfil));
-    if ($tabla === FALSE) {
-      $smarty->assign("mb_message", "ERROR DE DB (1): ".$pDB->errMsg);
-    } else {
-      foreach ($tabla as $tupla) {
-        $listaPropiedades[$tupla[0]] = $tupla[1];
-      }
-    }
-
-    foreach ($propiedades as $k => $v) {
-        $sPeticionSQL = NULL;
-        $params = NULL;
-        if (array_key_exists($k,$listaPropiedades)) {
-            $sPeticionSQL = 'UPDATE acl_profile_properties SET value = ? WHERE id_profile = ? AND property = ?';
-            $params = array($v, $idPerfil, $k);
-        } else {
-            $sPeticionSQL = 'INSERT INTO acl_profile_properties (id_profile, property, value) VALUES (?, ?, ?)';
-            $params = array($idPerfil, $k, $v);
-        }
-        $r = $pDB->genQuery($sPeticionSQL, $params);
-        if (!$r) {
-
-            $smarty->assign("mb_message", "ERROR DE DB (2): ".$pDB->errMsg);
-            return FALSE;
-        }
     }
     return TRUE;
 }
-
-?>

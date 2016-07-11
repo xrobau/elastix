@@ -9,7 +9,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.5.0-11
+Prereq: elastix-framework >= 2.5.0-14
 Prereq: elastix-fax >= 2.2.0-4
 Prereq: php-soap
 Prereq: dahdi
@@ -180,6 +180,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Mon Jul 11 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Userlist: make use of new methods getUserProfile and saveUserProfile
+  in paloACL from elastix-framework. Change minimum required version of
+  elastix-framework to match.
+  SVN Rev[7670]
+
 * Tue Jul  5 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Network Parameters: container compatibility - privileged script must
   allow interface names with hypens. Test whether /etc/postfix/main.cf exists

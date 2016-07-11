@@ -63,9 +63,9 @@ function _moduleContent(&$smarty, $module_name)
     $extension = $pACL->getUserExtension($user);
     if ($extension == '') $extension = NULL;
 
-    $esAdministrador = $pACL->isUserAdministratorGroup($user);
+    // Sólo el administrador puede consultar con $extension == NULL
     if (is_null($extension)) {
-        if (!$esAdministrador) {
+        if (!hasModulePrivilege($user, $module_name, 'reportany')) {
             $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
             return "";
         }
@@ -90,14 +90,20 @@ function _moduleContent(&$smarty, $module_name)
         $h = 'reportVoicemails';
         break;
     }
-    return $h($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension);
+    return $h($smarty, $module_name, $local_templates_dir, $user, $extension);
 }
 
-function reportVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension)
+function reportVoicemails($smarty, $module_name, $local_templates_dir, $user, $extension)
 {
-    $esAdministrador = $pACL->isUserAdministratorGroup($user);
+    if (isset($_POST['submit_eliminar']) && isset($_POST['voicemails']) &&
+        is_array($_POST['voicemails']) && count($_POST['voicemails']) > 0) {
+        borrarVoicemails($smarty, $module_name, $local_templates_dir, $user, $extension);
+    }
 
-    //$smarty->assign("menu","voicemail");
+    $bPuedeVerTodos = hasModulePrivilege($user, $module_name, 'reportany');
+    $bPuedeBorrar = hasModulePrivilege($user, $module_name, 'deleteany');
+    $bPuedeDescargar = hasModulePrivilege($user, $module_name, 'downloadany');
+
     $smarty->assign("Filter",_tr('Show'));
     //formulario para el filtro
     $arrFormElements = createFieldFormVoiceList();
@@ -158,10 +164,6 @@ function reportVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $u
         $oGrid->addFilterControl(_tr("Filter applied ")._tr("Start Date")." = ".$arrDate['date_start'].", "._tr("End Date")." = ".$arrDate['date_end'], $arrDate, array('date_start' => date("d M Y"),'date_end' => date("d M Y")),true);
     }
 
-    if( getParameter('submit_eliminar') ) {
-        borrarVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension);
-    }
-
     $url = array('menu' => $module_name);
 
     //si tiene extension consulto sino, muestro un mensaje de que no tiene asociada extension
@@ -172,7 +174,7 @@ function reportVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $u
         'date_start'    => $date_start,
         'date_end'      => $date_end,
     );
-    if (!$esAdministrador) $param['extension'] = $extension;
+    if (!$bPuedeVerTodos) $param['extension'] = $extension;
 
     $paloVoice = new paloSantoVoiceMail();
     $rs = $paloVoice->listVoicemail($param);
@@ -196,14 +198,18 @@ function reportVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $u
         $urlparam['action'] = 'download';
         $downloadurl = construirURL($urlparam);
         $arrVoiceData[] = array(
-            '<input type="checkbox" name="voicemails[]" value="'.htmlentities($t['mailbox'].','.basename($t['file'], '.txt'), ENT_COMPAT, 'UTF-8').'" />',
+            ($bPuedeBorrar || ($extension == $t['mailbox']))
+                ? '<input type="checkbox" name="voicemails[]" value="'.htmlentities($t['mailbox'].','.basename($t['file'], '.txt'), ENT_COMPAT, 'UTF-8').'" />'
+                : '',
             date('Y-m-d', $t['origtime']),
             date('H:i:s', $t['origtime']),
             htmlentities($t['callerid'], ENT_COMPAT, 'UTF-8'),
             $t['extension'],
             $t['duration'].' sec.',
-            "<a href='#' onClick=\"javascript:popUp('$displayurl',350,100); return false;\">"._tr('Listen')."</a>&nbsp;".
-                "<a href='$downloadurl'>"._tr('Download')."</a>",
+            ($bPuedeDescargar || ($extension == $t['mailbox']))
+                ? "<a href='#' onClick=\"javascript:popUp('$displayurl',350,100); return false;\">"._tr('Listen')."</a>&nbsp;".
+                    "<a href='$downloadurl'>"._tr('Download')."</a>"
+                : '',
         );
     }
     $oGrid->setData($arrVoiceData);
@@ -316,15 +322,16 @@ function save_config($smarty, $module_name, $local_templates_dir, $ext)
     }
 }
 
-function downloadFile($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension)
+function downloadFile($smarty, $module_name, $local_templates_dir, $user, $extension)
 {
-    $esAdministrador = $pACL->isUserAdministratorGroup($user);
     $record = getParameter("name");
     $ext  = getParameter("ext");
 
-    if (!$esAdministrador && $extension != $ext) {
-        Header('HTTP/1.1 403 Forbidden');
-        die("<b>403 "._tr("no_extension")." </b>");
+    if (!hasModulePrivilege($user, $module_name, 'downloadany')) {
+        if ($extension != $ext) {
+            Header('HTTP/1.1 403 Forbidden');
+            die("<b>403 "._tr("no_extension")." </b>");
+        }
     }
 
     $paloVoice = new paloSantoVoiceMail();
@@ -355,15 +362,16 @@ function downloadFile($smarty, $module_name, $local_templates_dir, $pACL, $user,
     fclose($fp);
 }
 
-function display_record($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension)
+function display_record($smarty, $module_name, $local_templates_dir, $user, $extension)
 {
-    $esAdministrador = $pACL->isUserAdministratorGroup($user);
     $file = getParameter("name");
     $ext  = getParameter("ext");
 
-    if (!$esAdministrador && $extension != $ext) {
-        Header('HTTP/1.1 403 Forbidden');
-        die("<b>403 "._tr("no_extension")." </b>");
+    if (!hasModulePrivilege($user, $module_name, 'downloadany')) {
+        if ($extension != $ext) {
+            Header('HTTP/1.1 403 Forbidden');
+            die("<b>403 "._tr("no_extension")." </b>");
+        }
     }
 
     $paloVoice = new paloSantoVoiceMail();
@@ -396,9 +404,9 @@ contenido;
     return $sContenido;
 }
 
-function borrarVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension)
+function borrarVoicemails($smarty, $module_name, $local_templates_dir, $user, $extension)
 {
-    $esAdministrador = $pACL->isUserAdministratorGroup($user);
+    $bPuedeBorrar = hasModulePrivilege($user, $module_name, 'deleteany');
 
     $listaArchivos = array();
     $paloVoice = new paloSantoVoiceMail();
@@ -406,7 +414,7 @@ function borrarVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $u
         // El formato esperado de clave es 1064,msg0001
         $regs = NULL;
         if (preg_match('/^(\d+),(\w+)$/', $name, $regs)) {
-            if ($esAdministrador || $extension == $regs[1]) {
+            if ($bPuedeBorrar || $extension == $regs[1]) {
                 if (!$paloVoice->deleteVoiceMail($regs[1], $regs[2])) {
                     $smarty->assign("mb_title", _tr("ERROR"));
                     $smarty->assign("mb_message", $paloVoice->errMsg);
@@ -503,4 +511,23 @@ function createFieldFormConfig()
 
     return $arrFields;
 }
-?>
+
+// Abstracción de privilegio por módulo hasta implementar (Elastix bug #1100).
+// Parámetro $module se usará en un futuro al implementar paloACL::hasModulePrivilege().
+function hasModulePrivilege($user, $module, $privilege)
+{
+    global $arrConf;
+
+    $pDB = new paloDB($arrConf['elastix_dsn']['acl']);
+    $pACL = new paloACL($pDB);
+
+    if (method_exists($pACL, 'hasModulePrivilege'))
+        return $pACL->hasModulePrivilege($user, $module, $privilege);
+
+    $isAdmin = ($pACL->isUserAdministratorGroup($user) !== FALSE);
+    return ($isAdmin && in_array($privilege, array(
+        'reportany',    // ¿Está autorizado el usuario a ver la información de todos los demás?
+        'downloadany',  // ¿Está autorizado el usuario a descargar voicemail de otros usuarios?
+        'deleteany',    // ¿Está autorizado el usuario a borrar voicemail de otros usuarios?
+    )));
+}

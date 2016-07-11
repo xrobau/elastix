@@ -301,6 +301,12 @@ fi
 
 %changelog
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: VoiceMail: add and use compatibility function hasModulePrivilege()
+  that allows authorization on particular actions to be assigned piecemeal. This
+  method delegates to paloACL::hasModulePrivilege if available, and falls back
+  to granting all known privileges to the administrator group. Part of fix for
+  Elastix bug #1100.
+  SVN Rev[7667]
 - CHANGED: Voicemail: unify code for removing one voicemail message into a
   single place at paloSantoVoiceMail.
   SVN Rev[7666]

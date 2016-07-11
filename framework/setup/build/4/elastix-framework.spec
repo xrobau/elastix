@@ -391,6 +391,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Mon Jul 11 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: create new paloACL method setUserExtension to update the
+  extension of a single user. The $extension parameter of createUser is now
+  optional.
+  SVN Rev[7671]
 - CHANGED: Framework: create new paloACL methods getUserProfile and
   saveUserProfile intended for use with the userlist module.
   SVN Rev[7669]

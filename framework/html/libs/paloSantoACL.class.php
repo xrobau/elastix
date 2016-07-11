@@ -223,7 +223,7 @@ class paloACL {
      *
      * @return bool     VERDADERO si el usuario se crea correctamente, FALSO en error
      */
-    function createUser($username, $description, $md5_password, $extension)
+    function createUser($username, $description, $md5_password, $extension = NULL)
     {
         $bExito = FALSE;
         if ($username == "") {
@@ -865,6 +865,25 @@ class paloACL {
             }else $this->errMsg = $this->_DB->errMsg;
         }
         return $extension;
+    }
+
+    /**
+     * Procedimiento para asignar únicamente la extensión de un usuario existente.
+     *
+     * @param string   $username  Username del usuario
+     * @param string   $extension numero de extension
+     *
+     * @return boolean  VERDADERO en éxito, FALSO en error
+     */
+    function setUserExtension($username, $extension)
+    {
+        $sql = 'UPDATE acl_user SET extension = ? WHERE name = ?';
+        $r = $this->_DB->genQuery($sql, array($extension, $username));
+        if (!$r) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
     }
 
     /**

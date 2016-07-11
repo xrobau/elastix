@@ -27,18 +27,16 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ */
 
+require_once "libs/paloSantoConfig.class.php";
+require_once "libs/paloSantoACL.class.php";
+require_once "libs/paloSantoForm.class.php";
+
 function _moduleContent(&$smarty, $module_name)
 {
-    include_once "libs/paloSantoGrid.class.php";
-    include_once "libs/paloSantoConfig.class.php";
-    include_once "libs/paloSantoACL.class.php";
-    include_once "libs/paloSantoForm.class.php";
-    require_once "libs/misc.lib.php";
+    require_once "modules/$module_name/configs/default.conf.php";
+    require_once "modules/$module_name/lib/paloSantoVoiceMail.class.php";
 
-    include_once "lib/paloSantoVoiceMail.class.php";
-
-    //include module files
-    include_once "modules/$module_name/configs/default.conf.php";
+    require_once "libs/paloSantoGrid.class.php";
 
     load_language_module($module_name);
 
@@ -54,33 +52,52 @@ function _moduleContent(&$smarty, $module_name)
 
     //segun el usuario que esta logoneado consulto si tiene asignada extension para buscar los voicemails
     $pDB = new paloDB($arrConf['elastix_dsn']['acl']);
-
-
     if (!empty($pDB->errMsg)) {
-        echo "ERROR DE DB: $pDB->errMsg <br>";
+        return "ERROR DE DB: $pDB->errMsg <br>";
     }
-
-    $arrData = array();
     $pACL = new paloACL($pDB);
     if (!empty($pACL->errMsg)) {
-        echo "ERROR DE ACL: $pACL->errMsg <br>";
+        return "ERROR DE ACL: $pACL->errMsg <br>";
     }
-    $arrVoiceData = array();
-    $inicio= $fin = $total = 0;
-    $extension = $pACL->getUserExtension($_SESSION['elastix_user']); $ext = $extension;
-    $esAdministrador = $pACL->isUserAdministratorGroup($_SESSION['elastix_user']);
-    $bandCustom = true;
-    if (is_null($ext) || $ext=="") {
-        $bandCustom = false;
+    $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
+    $extension = $pACL->getUserExtension($user);
+    if ($extension == '') $extension = NULL;
+
+    $esAdministrador = $pACL->isUserAdministratorGroup($user);
+    if (is_null($extension)) {
         if (!$esAdministrador) {
             $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
             return "";
         }
     }
-    if($esAdministrador)
-        $extension = "[[:digit:]]+";
 
-    $smarty->assign("menu","voicemail");
+    if (getParameter('config') && !is_null($extension)) {
+        return form_config($smarty, $module_name, $local_templates_dir, $extension);
+    }
+    if (getParameter('save')) {
+        if( !save_config($smarty, $module_name, $local_templates_dir, $extension) )
+            return form_config($smarty, $module_name, $local_templates_dir, $extension);
+    }
+
+    switch (getParameter('action')) {
+    case 'download':
+        $h = 'downloadFile';
+        break;
+    case 'display_record':
+        $h = 'display_record';
+        break;
+    default:
+        $h = 'reportVoicemails';
+        break;
+    }
+    return $h($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension);
+}
+
+function reportVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension)
+{
+    $esAdministrador = $pACL->isUserAdministratorGroup($user);
+
+    //$smarty->assign("menu","voicemail");
     $smarty->assign("Filter",_tr('Show'));
     //formulario para el filtro
     $arrFormElements = createFieldFormVoiceList();
@@ -142,167 +159,58 @@ function _moduleContent(&$smarty, $module_name)
     }
 
     if( getParameter('submit_eliminar') ) {
-        borrarVoicemails($pACL);
-        if($oFilterForm->validateForm($_POST)) {
-            // Exito, puedo procesar los datos ahora.
-            $date_start = translateDate($_POST['date_start']) . " 00:00:00";
-            $date_end   = translateDate($_POST['date_end']) . " 23:59:59";
-            $arrFilterExtraVars = array("date_start" => $_POST['date_start'], "date_end" => $_POST['date_end']);
-        }
-        $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filter.tpl", "", $_POST);
+        borrarVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension);
     }
-
-    if( getParameter('config') ){
-        if(!(is_null($ext) || $ext==""))
-            return form_config($smarty, $module_name, $local_templates_dir, $ext);
-    }
-
-    if( getParameter('save') ){
-        if( !save_config($smarty, $module_name, $local_templates_dir, $ext) )
-            return form_config($smarty, $module_name, $local_templates_dir, $ext);
-    }
-
-    if( getParameter('action') == "display_record"){
-        $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        $extension = $pACL->getUserExtension($user);
-        $esAdministrador = $pACL->isUserAdministratorGroup($user);
-        $file = getParameter("name");
-        $ext  = getParameter("ext");
-
-        if (!$esAdministrador && $extension != $ext) {
-            Header('HTTP/1.1 403 Forbidden');
-            die("<b>403 "._tr("no_extension")." </b>");
-        }
-
-        $paloVoice = new paloSantoVoiceMail();
-        $recinfo = $paloVoice->resolveVoiceMailFiles($ext, $file);
-        if (is_null($recinfo) || count($recinfo['recordings']) <= 0) {
-            Header("HTTP/1.1 404 Not Found");
-            die("<b>404 "._tr("no_file")."</b>");
-        }
-        $ctype = $recinfo['recordings'][0]['mimetype'];
-        $audiourl = construirURL(array(
-            'menu'           =>  $module_name,
-            'action'         =>  'download',
-            'ext'            =>  $ext,
-            'name'           =>  $file,
-            'rawmode'        =>  'yes',
-            'elastixSession' =>  session_id(),
-        ));
-        $sContenido=<<<contenido
-<!DOCTYPE html>
-<html>
-<head><title>Elastix</title></head>
-<body>
-    <audio src="$audiourl" controls autoplay>
-        <embed src="$audiourl" type="$ctype" width="300" height="20" autoplay="true" loop="false" />
-    </audio>
-    <br/>
-</body>
-</html>
-contenido;
-        return $sContenido;
-    }
-
-    if( getParameter('action') == "download"){
-        $user = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-        $extension = $pACL->getUserExtension($user);
-        $esAdministrador = $pACL->isUserAdministratorGroup($user);
-        $record = getParameter("name");
-        $ext  = getParameter("ext");
-
-        if (!$esAdministrador && $extension != $ext) {
-            Header('HTTP/1.1 403 Forbidden');
-            die("<b>403 "._tr("no_extension")." </b>");
-        }
-
-        $paloVoice = new paloSantoVoiceMail();
-        $recinfo = $paloVoice->resolveVoiceMailFiles($ext, $record);
-        if (is_null($recinfo) || count($recinfo['recordings']) <= 0) {
-            Header("HTTP/1.1 404 Not Found");
-            die("<b>404 "._tr("no_file")."</b>");
-        }
-        $size = filesize($recinfo['recordings'][0]['fullpath']);
-        $name = basename($recinfo['recordings'][0]['fullpath']);
-        $ctype = $recinfo['recordings'][0]['mimetype'];
-
-        $fp = fopen($recinfo['recordings'][0]['fullpath'], "rb");
-        if (!$fp) {
-            Header('HTTP/1.1 404 Not Found');
-            die("<b>404 "._tr("no_file")." </b>");
-        }
-        header("Pragma: public");
-        header("Expires: 0");
-        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-        header("Cache-Control: public");
-        header("Content-Description: wav file");
-        header("Content-Type: " . $ctype);
-        header("Content-Disposition: attachment; filename=" . $name);
-        header("Content-Transfer-Encoding: binary");
-        header("Content-length: " . $size);
-        fpassthru($fp);
-        fclose($fp);
-        return;
-    }
-
-    $end = 0;
 
     $url = array('menu' => $module_name);
 
     //si tiene extension consulto sino, muestro un mensaje de que no tiene asociada extension
-    $archivos=array();
-    if (!(is_null($ext) || $ext=="") || $esAdministrador) {
-        if(is_null($ext) || $ext=="")
-            $smarty->assign("mb_message", "<b>"._tr("no_extension_assigned")."</b>");
+    if(is_null($extension) || $extension=="")
+        $smarty->assign("mb_message", "<b>"._tr("no_extension_assigned")."</b>");
 
-        $param = array(
-            'date_start'    => $date_start,
-            'date_end'      => $date_end,
+    $param = array(
+        'date_start'    => $date_start,
+        'date_end'      => $date_end,
+    );
+    if (!$esAdministrador) $param['extension'] = $extension;
+
+    $paloVoice = new paloSantoVoiceMail();
+    $rs = $paloVoice->listVoicemail($param);
+
+    $limit = 15;
+    $oGrid->setLimit($limit);
+    $oGrid->setTotal(count($rs));
+    $offset = $oGrid->calculateOffset();
+    $arrData = array_slice($rs, $offset, $limit);
+
+    $arrVoiceData = array();
+    foreach ($arrData as $t) {
+        $urlparam = array(
+            'menu'           =>  $module_name,
+            'action'         =>  'display_record',
+            'ext'            =>  $t['mailbox'],
+            'name'           =>  basename($t['file'], '.txt'),
+            'rawmode'        =>  'yes'
         );
-        if (!$esAdministrador) $param['extension'] = $extension;
+        $displayurl = construirURL($urlparam);
+        $urlparam['action'] = 'download';
+        $downloadurl = construirURL($urlparam);
+        $arrVoiceData[] = array(
+            '<input type="checkbox" name="voicemails[]" value="'.htmlentities($t['mailbox'].','.basename($t['file'], '.txt'), ENT_COMPAT, 'UTF-8').'" />',
+            date('Y-m-d', $t['origtime']),
+            date('H:i:s', $t['origtime']),
+            htmlentities($t['callerid'], ENT_COMPAT, 'UTF-8'),
+            $t['extension'],
+            $t['duration'].' sec.',
+            "<a href='#' onClick=\"javascript:popUp('$displayurl',350,100); return false;\">"._tr('Listen')."</a>&nbsp;".
+                "<a href='$downloadurl'>"._tr('Download')."</a>",
+        );
+    }
+    $oGrid->setData($arrVoiceData);
 
-        $paloVoice = new paloSantoVoiceMail();
-        $rs = $paloVoice->listVoicemail($param);
-
-        $limit = 15;
-        $oGrid->setLimit($limit);
-        $oGrid->setTotal(count($rs));
-        $offset = $oGrid->calculateOffset();
-        $arrData = array_slice($rs, $offset, $limit);
-
-        $arrVoiceData = array();
-        foreach ($arrData as $t) {
-            $urlparam = array(
-                'menu'           =>  $module_name,
-                'action'         =>  'display_record',
-                'ext'            =>  $t['mailbox'],
-                'name'           =>  basename($t['file'], '.txt'),
-                'rawmode'        =>  'yes'
-            );
-            $displayurl = construirURL($urlparam);
-            $urlparam['action'] = 'download';
-            $downloadurl = construirURL($urlparam);
-            $arrVoiceData[] = array(
-                '<input type="checkbox" name="voicemails[]" value="'.htmlentities($t['mailbox'].','.basename($t['file'], '.txt'), ENT_COMPAT, 'UTF-8').'" />',
-                date('Y-m-d', $t['origtime']),
-                date('H:i:s', $t['origtime']),
-                htmlentities($t['callerid'], ENT_COMPAT, 'UTF-8'),
-                $t['extension'],
-                $t['duration'].' sec.',
-                "<a href='#' onClick=\"javascript:popUp('$displayurl',350,100); return false;\">"._tr('Listen')."</a>&nbsp;".
-                    "<a href='$downloadurl'>"._tr('Download')."</a>",
-            );
-        }
-        $oGrid->setData($arrVoiceData);
-
-        // Construyo el URL base
-        if(isset($arrFilterExtraVars) && is_array($arrFilterExtraVars) and count($arrFilterExtraVars)>0) {
-            $url = array_merge($url, $arrFilterExtraVars);
-        }
-
-        //fin if (!is_null(extension))
-    } else {
-        $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
+    // Construyo el URL base
+    if(isset($arrFilterExtraVars) && is_array($arrFilterExtraVars) and count($arrFilterExtraVars)>0) {
+        $url = array_merge($url, $arrFilterExtraVars);
     }
 
     $oGrid->setTitle(_tr("Voicemail List"));
@@ -311,8 +219,7 @@ contenido;
     $oGrid->setColumns(array('', _tr('Date'), _tr('Time'), _tr('CallerID'),
         _tr('Extension'), _tr('Duration'), _tr('Message')));
 
-    if($bandCustom == true)
-        $oGrid->customAction("config",_tr("Configuration"));
+    if (!is_null($extension)) $oGrid->customAction("config",_tr("Configuration"));
     $oGrid->deleteList(_tr("Are you sure you wish to delete voicemails?"),"submit_eliminar",_tr("Delete"));
     $oGrid->showFilter($htmlFilter);
     $contenidoModulo  = $oGrid->fetchGrid();
@@ -409,10 +316,88 @@ function save_config($smarty, $module_name, $local_templates_dir, $ext)
     }
 }
 
-function borrarVoicemails($pACL)
+function downloadFile($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension)
 {
-    $user = isset($_SESSION['elastix_user']) ? $_SESSION['elastix_user'] : "";
-    $extension = $pACL->getUserExtension($user);
+    $esAdministrador = $pACL->isUserAdministratorGroup($user);
+    $record = getParameter("name");
+    $ext  = getParameter("ext");
+
+    if (!$esAdministrador && $extension != $ext) {
+        Header('HTTP/1.1 403 Forbidden');
+        die("<b>403 "._tr("no_extension")." </b>");
+    }
+
+    $paloVoice = new paloSantoVoiceMail();
+    $recinfo = $paloVoice->resolveVoiceMailFiles($ext, $record);
+    if (is_null($recinfo) || count($recinfo['recordings']) <= 0) {
+        Header("HTTP/1.1 404 Not Found");
+        die("<b>404 "._tr("no_file")."</b>");
+    }
+    $size = filesize($recinfo['recordings'][0]['fullpath']);
+    $name = basename($recinfo['recordings'][0]['fullpath']);
+    $ctype = $recinfo['recordings'][0]['mimetype'];
+
+    $fp = fopen($recinfo['recordings'][0]['fullpath'], "rb");
+    if (!$fp) {
+        Header('HTTP/1.1 404 Not Found');
+        die("<b>404 "._tr("no_file")." </b>");
+    }
+    header("Pragma: public");
+    header("Expires: 0");
+    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+    header("Cache-Control: public");
+    header("Content-Description: wav file");
+    header("Content-Type: " . $ctype);
+    header("Content-Disposition: attachment; filename=" . $name);
+    header("Content-Transfer-Encoding: binary");
+    header("Content-length: " . $size);
+    fpassthru($fp);
+    fclose($fp);
+}
+
+function display_record($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension)
+{
+    $esAdministrador = $pACL->isUserAdministratorGroup($user);
+    $file = getParameter("name");
+    $ext  = getParameter("ext");
+
+    if (!$esAdministrador && $extension != $ext) {
+        Header('HTTP/1.1 403 Forbidden');
+        die("<b>403 "._tr("no_extension")." </b>");
+    }
+
+    $paloVoice = new paloSantoVoiceMail();
+    $recinfo = $paloVoice->resolveVoiceMailFiles($ext, $file);
+    if (is_null($recinfo) || count($recinfo['recordings']) <= 0) {
+        Header("HTTP/1.1 404 Not Found");
+        die("<b>404 "._tr("no_file")."</b>");
+    }
+    $ctype = $recinfo['recordings'][0]['mimetype'];
+    $audiourl = construirURL(array(
+        'menu'           =>  $module_name,
+        'action'         =>  'download',
+        'ext'            =>  $ext,
+        'name'           =>  $file,
+        'rawmode'        =>  'yes',
+        'elastixSession' =>  session_id(),
+    ));
+    $sContenido=<<<contenido
+<!DOCTYPE html>
+<html>
+<head><title>Elastix</title></head>
+<body>
+    <audio src="$audiourl" controls autoplay>
+        <embed src="$audiourl" type="$ctype" width="300" height="20" autoplay="true" loop="false" />
+    </audio>
+    <br/>
+</body>
+</html>
+contenido;
+    return $sContenido;
+}
+
+function borrarVoicemails($smarty, $module_name, $local_templates_dir, $pACL, $user, $extension)
+{
     $esAdministrador = $pACL->isUserAdministratorGroup($user);
 
     $listaArchivos = array();
@@ -427,11 +412,14 @@ function borrarVoicemails($pACL)
                 $listaArchivos[] = "$voicemailPath/{$regs[2]}.WAV";
             } else {
                 // Intento de borrar el voicemail de otro usuario
-                return;
+                $smarty->assign("mb_title", _tr("ERROR"));
+                $smarty->assign("mb_message", _tr("Voicemail to delete not from current user"));
+                return FALSE;
             }
         }
     }
     array_map('unlink', $listaArchivos);
+    return TRUE;
 }
 
 function createFieldFormVoiceList()

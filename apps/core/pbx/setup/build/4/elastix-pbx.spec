@@ -301,6 +301,9 @@ fi
 
 %changelog
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Voicemail: transform code into a more modular form, analogous to the
+  Monitoring report.
+  SVN Rev[7665]
 - CHANGED: Monitoring: push down required libraries into the functions that
   absolutely require them.
   SVN Rev[7664]

@@ -1,6 +1,6 @@
 %define modname redfone
 
-Summary: Elastix Module Redfone 
+Summary: Elastix Module Redfone
 Name:    elastix-%{modname}
 Version: 2.0.0
 Release: 2
@@ -64,6 +64,9 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Jul 12 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Redfone: massive s/www.elastix.org/www.elastix.com/g
+
 * Mon Sep 27 2010 Alex Villacis Lasso <a_villacis@palosanto.com> 2.0.0-2
 - FIXED: Added missing Requires: fonulator for module.
 

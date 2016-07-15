@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -300,6 +300,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Fri Jul 15 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-7
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: VoiceMail: add and use compatibility function hasModulePrivilege()
   that allows authorization on particular actions to be assigned piecemeal. This

@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -181,6 +181,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Jul 15 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-8
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Mon Jul 11 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Userlist: make use of new methods getUserProfile and saveUserProfile
   in paloACL from elastix-framework. Change minimum required version of

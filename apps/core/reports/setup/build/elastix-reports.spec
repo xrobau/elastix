@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports
 Name:    elastix-reports
 Version: 2.5.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -93,6 +93,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Jul 15 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-6
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: CDR Report: add and use compatibility function hasModulePrivilege()
   that allows authorization on particular actions to be assigned piecemeal. This

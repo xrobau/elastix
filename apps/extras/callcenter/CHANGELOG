@@ -1,5 +1,32 @@
+2.2.0-17 (SVN Revision 7678)
+* CHANGED: Dialer: remove unused attribute "channel" from sqlinsertcalls message
+  sent to SQLWorkerProcess. Ported from CallCenterPRO.
+* CHANGED: Dialer: implement explicit request flag for AMI credentials message.
+  This flag is used to discard credentials that were explicitly requested if the
+  initial credentials arrived in the meantime, to prevent unnecessary AMI
+  reconnections. Ported from CallCenterPRO.
+* FIXED: Dialer: discard queue/agent enumeration if AMI connection is lost. This
+  prevents a stale enumeration from blocking valid future enumerations until
+  dialer restart. Ported from CallCenterPRO.
+* FIXED: Dialer: prevent AMIEventProcess crash due to NULL object if a request
+  to refresh agents comes while in the middle of AMI disconnection. Ported from
+  CallCenterPRO.
+* FIXED: Dialer: fix AMIEventProcess inability to reconnect to AMI after a
+  process crash, since SQLWorkerProcess had no way to be notified that the
+  instance needed to be sent the AMI credentials. Ported from CallCenterPRO.
+* CHANGED: Added Turkish translations for Agent Console, Callcenter Config,
+  Ingoing Calls Success, Campaign Out, Campaign Monitoring.
+* FIXED: Dialer: implement abort of pending but undialed calls in case of
+  database deadlock. This prevents undialed calls from accumulating in
+  AMIEventProcess and preventing future retries due to dialstring duplication.
+  Additionally update the campaign revision timestamp more often to prevent a
+  busy CPU loop in case of a persistent database error that prevents updates.
+  Ported from CallCenterPRO.
+* FIXED: Agent Console: pick up and use agentconsole ECCP password if different
+  from the default. This prevents the console from breaking if eccp_users module
+  changes the password for the "agentconsole" user. Ported from CallCenterPRO.
+
 2.2.0-16 (SVN Revision 7606)
-* Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 * FIXED: Dialer: check whether /etc/localtime is a symlink and use it as an
   additional way to find out the current timezone. Fixes part 2 of Elastix
   bug #2507.

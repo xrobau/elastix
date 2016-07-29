@@ -3,7 +3,7 @@
 Summary: Elastix Call Center
 Name:    elastix-callcenter
 Version: 2.2.0
-Release: 16
+Release: 17
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -101,6 +101,9 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Fri Jul 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 2.2.0-17
+- Bump version for release
+
 * Fri Jun 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Dialer: remove unused attribute "channel" from sqlinsertcalls message
   sent to SQLWorkerProcess. Ported from CallCenterPRO.

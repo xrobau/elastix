@@ -47,3 +47,13 @@ div#chat .chat-inner > .panel-group .panel-heading + .panel-collapse .panel-body
 {
     border-top: 0;
 }
+
+div#chat .chat-inner > .panel-group > .panel > .panel-heading i
+{
+  position: relative;
+  font-size: 15px;
+  margin-right: 5px;
+
+  top: 1px;
+  display: inline-block;
+}

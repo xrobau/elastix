@@ -107,7 +107,16 @@ $(document).ready(function(e) {
                         <div class="panel-heading">
                             <h4 class="panel-title">
                                 <a data-toggle="collapse" data-parent="#elastix-panels" href="#elastix-panel-{$panelname}">
-                                    {$paneldata.title|escape:html}
+                                    {if $paneldata.iconclass}
+                                    <i class="{$paneldata.iconclass}"></i>
+                                    {elseif $paneldata.icon}
+                                    <div style="display: inline-block; min-width: 15px; min-height: 15px; padding-right: 5px;">
+                                    <img alt="" src="{$paneldata.icon}" width="15" />
+                                    </div>
+                                    {else}
+                                    <i class="fa fa-file-o"></i>
+                                    {/if}
+                                    <span>{$paneldata.title|escape:html}</span>
                                 </a>
                             </h4>
                         </div>

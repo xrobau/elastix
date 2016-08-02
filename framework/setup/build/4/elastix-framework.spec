@@ -391,6 +391,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Aug  2 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: implement panel icon support on Tenant theme.
+  SVN Rev[7682]
 - CHANGED: Framework: implement i18n for panel sidebar title.
   SVN Rev[7681]
 - CHANGED: Framework: implement initial support for Elastix Panels. These panels

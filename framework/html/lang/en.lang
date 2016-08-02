@@ -126,7 +126,7 @@ $arrLang=array(
 "File install.php doesn't exist in module file" => "File install.php doesn't exist in module file",
 /*end load module*/
 
-// Elastix 0.9 
+// Elastix 0.9
 /*Start SubModule Themes*/
 "Themes" => "Themes",
 "Change Theme" => "Change Theme",
@@ -238,6 +238,7 @@ $arrLang=array(
 "Filter applied: " => "Filter applied: ",
 "Filter applied " => "Filter applied: ",
 "Voicemail" => "Voicemails",
-"Calls Recordings" => "Calls Recordings"
+"Calls Recordings" => "Calls Recordings",
+'Panels' => 'Panels',
 );
 ?>

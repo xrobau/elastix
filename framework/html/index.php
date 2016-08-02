@@ -209,7 +209,10 @@ if (isset($_SESSION['elastix_user']) &&
                 }
             }
         }
-        $smarty->assign('ELASTIX_PANELS', $panels);
+        $smarty->assign(array(
+            'LBL_ELASTIX_PANELS_SIDEBAR'    =>  _tr('Panels'),
+            'ELASTIX_PANELS'                =>  $panels,
+        ));
 
         if (file_exists('themes/'.$arrConf['mainTheme'].'/themesetup.php')) {
             require_once('themes/'.$arrConf['mainTheme'].'/themesetup.php');

@@ -128,7 +128,7 @@ $arrLang=array(
 /*end load module*/
 
 
-// Elastix 0.9 
+// Elastix 0.9
 
 /*Start SubModule Themes*/
 "Themes" => "Temas",
@@ -366,6 +366,7 @@ $arrLang=array(
 "My Extension"  => "Mi extensión",
 "Security"  => "Seguridad",
 "Asterisk Logs"  => "Logs de Asterisk",
-"Dashboard Applet Admin"  => "Administrador de Applets"
+"Dashboard Applet Admin"  => "Administrador de Applets",
+'Panels' => 'Paneles',
 );
 ?>

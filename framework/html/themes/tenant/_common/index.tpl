@@ -99,7 +99,7 @@ $(document).ready(function(e) {
                     <a href="#" class="chat-close"><i class="entypo-cancel"></i></a>
                     <i class="entypo-users"></i>
                     {* TODO: i18n *}
-                    <span id="panel-header-text">Panels</span>
+                    <span id="panel-header-text">{$LBL_ELASTIX_PANELS_SIDEBAR|escape:html}</span>
                 </h2>
                 <div id="elastix-panels" class="panel-group joined">
                     {foreach from=$ELASTIX_PANELS key=panelname item=paneldata name=elastixpanel}

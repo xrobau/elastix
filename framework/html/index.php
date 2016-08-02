@@ -189,8 +189,30 @@ if (isset($_SESSION['elastix_user']) &&
     } else {
         $oPn->renderMenuTemplates();
 
+        // Generar contenido principal de todos los paneles
+        $panels = array();
+        foreach (scandir("panels/") as $panelname) {
+            if ($panelname != '.' && $panelname != '..' &&
+                is_dir("panels/$panelname") &&
+                file_exists("panels/$panelname/index.php")) {
+
+                if (file_exists("panels/$panelname/lang/en.lang"))
+                    load_language_module("../panels/$panelname");
+                require_once "panels/$panelname/index.php";
+
+                // No hay soporte de namespace en PHP 5.1, se simula con una clase
+                $classname = 'Panel_'.ucfirst($panelname);
+                if (class_exists($classname) && method_exists($classname, 'templateContent')) {
+                    $tc = call_user_func(array($classname, 'templateContent'),
+                        $smarty, $panelname);
+                    $panels[$panelname] = $tc;
+                }
+            }
+        }
+        $smarty->assign('ELASTIX_PANELS', $panels);
+
         if (file_exists('themes/'.$arrConf['mainTheme'].'/themesetup.php')) {
-        	require_once('themes/'.$arrConf['mainTheme'].'/themesetup.php');
+            require_once('themes/'.$arrConf['mainTheme'].'/themesetup.php');
             themeSetup($smarty, $selectedMenu, $pdbACL, $pACL, $idUser);
         }
 

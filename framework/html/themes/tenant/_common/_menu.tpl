@@ -61,6 +61,13 @@ $(document).ready(function(){
         $("#export_button").attr("aria-expanded","false");
       }
     );
+
+   $('#header_open_sidebar, a.chat-close').click(function (e) {
+      $('div.page-container').toggleClass('chat-visible');
+      toggle_sidebar_menu(true);
+      e.stopPropagation();
+   });
+
 });
 
 function removeNeoDisplayOnMouseOut(ref){
@@ -180,6 +187,7 @@ function removeNeoDisplayOnMouseOver(ref){
 <!-- fin del menú tipo acordeon-->
 
 <!-- inicio del head principal-->
+<div class="main-content">
 <div style="height:72px;background-color:#efefef;padding:15px;">
     <!-- Profile Info and Notifications -->
     <span style='float:right; text-align:right; padding:0px 5px 0px 0px; width:175px;' class="col-md-6 col-sm-8 clearfix">
@@ -286,6 +294,12 @@ function removeNeoDisplayOnMouseOver(ref){
                 </li>
             </ul>
         </li>
+{if $ELASTIX_PANELS}
+        <!-- SIDEBAR LIST -->
+        <li id="header_open_sidebar">
+            <a href="#" data-toggle="chat" data-collapse-sidebar="1"><i class="fa fa-th-list"></i></a>
+        </li>
+{/if}
         </ul>
     </span>
 

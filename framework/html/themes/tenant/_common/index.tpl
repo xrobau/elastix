@@ -20,6 +20,7 @@
     <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/applet.css" />
     <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}libs/js/sticky_note/sticky_note.css" />
     <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/table.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/rightbar.css" />
 
     {$HEADER_LIBS_JQUERY}
         <!--<script type='text/javascript' src="{$WEBCOMMON}js/base.js"></script>-->
@@ -36,44 +37,44 @@
     <div class="page-container">
 
         {$MENU} <!-- Viene del tpl menu.tlp-->
-        {if !empty($mb_message)}
-        <div class="div_msg_errors" id="message_error">
-           {if !empty($mb_title)}
-           <div class="div_msg_errors_title" style="padding-left:5px">
-              <b style="color:red;">&nbsp;{$mb_title}</b>
-           </div>
-           {/if}
-           <div class="div_msg_errors_dismiss">
-               <i class="fa fa-remove" javascript="onclick='hide_message_error();'"></i>
-           </div>
-            <div style="padding:6px 30px 6px 15px">
-            {$mb_message}
+                    {if !empty($mb_message)}
+                    <div class="div_msg_errors" id="message_error">
+                       {if !empty($mb_title)}
+                       <div class="div_msg_errors_title" style="padding-left:5px">
+                          <b style="color:red;">&nbsp;{$mb_title}</b>
+                       </div>
+                       {/if}
+                       <div class="div_msg_errors_dismiss">
+                           <i class="fa fa-remove" javascript="onclick='hide_message_error();'"></i>
+                       </div>
+                        <div style="padding:6px 30px 6px 15px">
+                        {$mb_message}
+                        </div>
+                    </div>
+                    {/if}
+                    {$CONTENT}
+                </div>
             </div>
-        </div>
-        {/if}
-                {$CONTENT}
-            </div>
-            </div>
-
-        </div>
+        </div><!-- neo-contentbox -->
 
         <!-- Footer -->
         <footer class="main" style="margin-left:16px;">
             <a href="http://www.elastix.com" style="color: #444; text-decoration: none;" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank' style="color: #444; text-decoration: none;" >GPL</a> by <a href="http://www.palosanto.com" target='_blank' style="color: #444; text-decoration: none;">PaloSanto Solutions</a>. 2006 - {$currentyear}.
         </footer>
 
-        <br />
+        {*<br />*}
+        </div><!-- main-content -->
 
-         <div id="neo-sticky-note">
-                  <div id="neo-sticky-note-text"></div>
-                  <div id="neo-sticky-note-text-edit">
-                        <textarea id="neo-sticky-note-textarea"></textarea>
-                        <div id="neo-sticky-note-text-char-count"></div>
-                        <input type="button" value="{$SAVE_NOTE}" id="neo-submit-button" />
-                        <div id="auto-popup">AutoPopUp <input type="checkbox" id="neo-sticky-note-auto-popup" value="1"></div>
-                  </div>
-                  <div id="neo-sticky-note-text-edit-delete"></div>
-                </div>
+        <div id="neo-sticky-note">
+            <div id="neo-sticky-note-text"></div>
+            <div id="neo-sticky-note-text-edit">
+                <textarea id="neo-sticky-note-textarea"></textarea>
+                <div id="neo-sticky-note-text-char-count"></div>
+                <input type="button" value="{$SAVE_NOTE}" id="neo-submit-button" />
+                <div id="auto-popup">AutoPopUp <input type="checkbox" id="neo-sticky-note-auto-popup" value="1" /></div>
+            </div>
+            <div id="neo-sticky-note-text-edit-delete"></div>
+        </div>
 {* SE GENERA EL AUTO POPUP SI ESTA ACTIVADO *}
 {if $AUTO_POPUP eq '1'}{literal}
 <script type='text/javascript'>
@@ -91,17 +92,44 @@ $(document).ready(function(e) {
             <div class="neo-modal-elastix-popup-content"></div>
         </div>
         <div class="neo-modal-elastix-popup-blockmask"></div>
-
-    <!-- Bottom Scripts -->
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/gsap/main-gsap.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/bootstrap.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/joinable.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/resizeable.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-api.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/jquery.validate.min.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-login.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-custom.js"></script>
-    <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-demo.js"></script>
+{if $ELASTIX_PANELS}
+        <div id="chat" class="fixed">
+            <div class="chat-inner">
+                <h2 class="chat-header">
+                    <a href="#" class="chat-close"><i class="entypo-cancel"></i></a>
+                    <i class="entypo-users"></i>
+                    {* TODO: i18n *}
+                    <span id="panel-header-text">Panels</span>
+                </h2>
+                <div id="elastix-panels" class="panel-group joined">
+                    {foreach from=$ELASTIX_PANELS key=panelname item=paneldata name=elastixpanel}
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#elastix-panels" href="#elastix-panel-{$panelname}">
+                                    {$paneldata.title|escape:html}
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="elastix-panel-{$panelname}" class="panel-collapse collapse{if $smarty.foreach.elastixpanel.first} in{/if}">
+                            <div class="panel-body">{$paneldata.content}</div>
+                        </div>
+                    </div>
+                    {/foreach}
+                </div>
+            </div>
+        </div>
+{/if}
+        <!-- Bottom Scripts -->
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/gsap/main-gsap.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/bootstrap.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/joinable.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/resizeable.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-api.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/jquery.validate.min.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-login.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-custom.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-demo.js"></script>
     </div>
-    </body>
+</body>
 </html>

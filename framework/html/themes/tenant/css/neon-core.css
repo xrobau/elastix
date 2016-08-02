@@ -3206,8 +3206,15 @@ input[type="button"].btn-block {
   position: relative;
   float: left;
   width: 100%;
+  /*
+  Por Alex: se quita espacio alrededor de contenido principal.
   padding: 20px;
+  */
+  /*
+  Por Alex: se quita z-index porque hace que el overlay de jQueryUI se coloque
+  encima del diálogo en lugar de debajo.
   z-index: 2;
+  */
   background: #ffffff;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -6209,7 +6216,11 @@ textareatable .replace-inputs input {
 /* Table Tools */
 @media (min-width: 767px) {
   .chat-visible .main-content {
+  /*
+    Por Alex: se reduce en 20px el padding-right
     padding-right: 300px;
+    */
+    padding-right: 280px;
   }
 }
 .chat-visible #chat {

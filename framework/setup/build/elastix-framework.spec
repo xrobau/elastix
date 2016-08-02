@@ -390,6 +390,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Tue Aug  2 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: implement initial support for Elastix Panels. These panels
+  will appear on a sidebar to the right of the GUI, and will always be available
+  regardless of the logged-in user. For now available only on Tenant theme.
+  SVN Rev[7680]
+
 * Fri Jul 15 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-14
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

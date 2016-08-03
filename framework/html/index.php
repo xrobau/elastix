@@ -205,7 +205,9 @@ if (isset($_SESSION['elastix_user']) &&
                 if (class_exists($classname) && method_exists($classname, 'templateContent')) {
                     $tc = call_user_func(array($classname, 'templateContent'),
                         $smarty, $panelname);
-                    $panels[$panelname] = $tc;
+                    if (is_array($tc) && isset($tc['content'])) {
+                        $panels[$panelname] = $tc;
+                    }
                 }
             }
         }

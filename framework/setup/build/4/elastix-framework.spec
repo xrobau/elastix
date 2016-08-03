@@ -390,6 +390,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Wed Aug  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: allow individual panels to remove themselves from rendering
+  by returning a non-array from templateContent() method. Also doubles as a
+  validation check.
+  SVN Rev[7683]
+
 * Tue Aug  2 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: implement panel icon support on Tenant theme.
   SVN Rev[7682]

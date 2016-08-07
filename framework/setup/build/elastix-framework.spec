@@ -390,6 +390,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sat Aug  6 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: implement support for Elastix Panels on blackmin theme.
+  SVN Rev[7684]
+
 * Wed Aug  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: allow individual panels to remove themselves from rendering
   by returning a non-array from templateContent() method. Also doubles as a

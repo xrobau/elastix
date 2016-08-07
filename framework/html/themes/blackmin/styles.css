@@ -141,7 +141,6 @@ INPUT:disabled {
 #elx-blackmin-topnav-toolbar
 {
 	position: absolute;
-	width: 100%;
 	left: 0;
 	top: 0;
 	right: 0;
@@ -154,7 +153,6 @@ INPUT:disabled {
 #elx-blackmin-wrap
 {
 	position: absolute;
-	width: 100%;
 	left: 0;
 	bottom: 35px;
 	right: 0;
@@ -192,7 +190,6 @@ ul.elx-blackmin-topnav > li.navButton:hover
 #elx-blackmin-footerbox
 {
     position: absolute;
-    width: 100%;
     left: 0;
     bottom: 0;
     right: 0;
@@ -207,6 +204,28 @@ ul.elx-blackmin-topnav > li.navButton:hover
 {
 	color: #444;
 	text-decoration: none;
+}
+body.chat-visible #elx-blackmin-topnav-toolbar,
+body.chat-visible #elx-blackmin-wrap,
+body.chat-visible #elx-blackmin-footerbox
+{
+    right: 280px;
+}
+
+body > div#chat
+{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 280px;
+    background-color: black;
+    color: #7f8186;
+    display: none;
+}
+body.chat-visible > div#chat
+{
+    display: block;
 }
 
 #elx-blackmin-content-menu
@@ -318,6 +337,13 @@ li.elx-blackmin-menu>div>ul li:hover>ul
     -webkit-animation: elx-blackmin-menu-fadein 0.3s;
     animation: elx-blackmin-menu-fadein 0.3s;
 }
+li.navButton > a.fa-stack
+{
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    color: #cccccc;
+}
 li.navButton > div
 {
 	position: absolute;
@@ -326,6 +352,67 @@ li.navButton > div
 	min-width: 220px;
 }
 
+div#chat *
+{
+    box-sizing: border-box;
+}
+div#chat > h2.chat-header
+{
+    font-size: 16px;
+    padding: 30px 35px;
+    line-height: 1;
+    margin: 0;
+    position: relative;
+    border-bottom: 1px solid #343a45;
+}
+div#chat > h2.chat-header > a.chat-close
+{
+    position: absolute;
+    font-size: 15px;
+    text-decoration: none;
+    top: 50%;
+    right: 25px;
+    margin-top: -7px;
+    color: #bec0c2;
+    -webkit-opacity: 0.5;
+    -moz-opacity: 0.5;
+    opacity: 0.5;
+    filter: alpna(opacity=50);
+}
+div#chat > div#elastix-panels > h3
+{
+    border-top: 0px;
+    padding: 10px 15px;
+    margin: 0px;
+}
+div#chat > div#elastix-panels > h3.ui-state-hover
+{
+    color: #fff;
+    background-color: rgba(69, 74, 84, 0.5);
+}
+div#chat > div#elastix-panels > h3,
+div#chat > div#elastix-panels > div
+{
+    border-radius: 0px;
+    background: none;
+    /*color: #7f8186;*/
+    color: #999;
+    font-size: 12px;
+    border-color: rgba(69, 74, 84, 0.7);
+}
+div#chat > div#elastix-panels > h3 i
+{
+  position: relative;
+  font-size: 15px;
+  margin-right: 5px;
+
+  top: 1px;
+  display: inline-block;
+}
+div#chat > div#elastix-panels > div
+{
+    padding: 15px;
+}
 
 /* Definición del contenido de la página */
 #elx-blackmin-content

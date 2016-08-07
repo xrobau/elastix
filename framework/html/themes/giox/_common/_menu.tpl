@@ -43,37 +43,6 @@
 </div>
 
 <div id="cmenubox">
-{*
-    <div id="user" class="elxneo-menu">
-        <img src="themes/{$THEMENAME}/images/user.png" width="19" height="21" alt="user" border="0" />
-	    <div>
-          <div><a href="#" class="setadminpassword">{$CHANGE_PASSWORD}</a></div>
-	      <div><a class="logout" href="?logout=yes">{$LOGOUT} (<font style='color:#FFFFFF;font-style:italic'>{$USER_LOGIN}</font>)</a></div>
-	    </div>
-    </div>
-    <div id="addons">
-        <a href="index.php?menu=addons"><img src="themes/{$THEMENAME}/images/toolbar_addons.png" width="19" height="21" alt="elastix_addons" border="0" /></a>
-    </div>
-    <div id="info" class="elxneo-menu">
-        <img src="themes/{$THEMENAME}/images/information.png" width="19" height="21" alt="user_info" border="0" />
-        <div>
-            <div><a href="#" class="register_link">{$Registered}</a></div>
-            <div><a id="viewDetailsRPMs">{$VersionDetails}</a></div>
-            <div><a href="http://www.elastix.org" target="_blank">Elastix Website</a></div>
-            <div><a href="#" id="dialogaboutelastix">{$ABOUT_ELASTIX2}</a></div>
-        </div>
-    </div>
-    <div id="search" class="elxneo-menu">
-        <img src="themes/{$THEMENAME}/images/searchw.png" width="19" height="21" alt="user_search" border="0" />
-        <div>
-            <p>{$MODULES_SEARCH}</p>
-            <p><input type="search"  id="search_module_elastix" name="search_module_elastix"  value="" autofocus="autofocus" placeholder="search" /></p>
-        </div>
-    </div>
-    <div id="cpallet">
-        <img src="themes/{$THEMENAME}/images/cpallet.png" width="19" height="21" alt="color" />
-    </div>
-*}
     <div><a class="logout" href="?logout=yes">{$LOGOUT} (<font style='color:#FFFFFF;font-style:italic'>{$USER_LOGIN}</font>)</a></div>
     <div>
 {if !empty($idSubMenu2Selected)}
@@ -86,6 +55,9 @@
     <div><a href="#" id="dialogaboutelastix">{$ABOUT_ELASTIX2}</a></div>
     <div><a href="#" id="viewDetailsRPMs">{$VersionDetails}</a></div>
     <div><a href="#" class="register_link">{$Registered}</a></div>
+{if $ELASTIX_PANELS}
+    <div><a href="#" id="togglesidebar">{$LBL_ELASTIX_PANELS_SIDEBAR|escape:html}</a></div>
+{/if}
 </div>{* #cmenubox *}
 </div>{* #elxneo-topnav-toolbar *}
 <div id="elxneo-topnav-minitoolbar" style="display: none;">

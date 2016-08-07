@@ -391,6 +391,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug  6 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: implement support for Elastix Panels on themes: giox,
+  elastixwave, elastixneo.
+  SVN Rev[7685]
 - CHANGED: Framework: implement support for Elastix Panels on blackmin theme.
   SVN Rev[7684]
 

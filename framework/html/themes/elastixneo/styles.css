@@ -228,12 +228,11 @@ a {
 #elxneo-topnav-toolbar
 {
     position: absolute;
-    width: 100%;
     left: 0;
     top: 0;
     right: 0;
     height: 103px;
-/*    color: #ffffff;*/
+    background-color: #0f4f8c;
     background: url("images/headerbox-bg7.png") repeat-x scroll left top #ddd;
 }
 #elxneo-topnav-toolbar>div#logo
@@ -304,6 +303,13 @@ a {
 {
     /* IE8 no soporta :last-child */
 	background: url(images/tab2onbg2.png) repeat;
+}
+#cmenubox>div > a.fa-stack
+{
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    color: #666;
 }
 
 /* Menú de primer nivel */
@@ -733,7 +739,6 @@ div#elxneo-content
 div#elxneo-footerbox
 {
     position: absolute;
-    width: 100%;
     left: 0;
     bottom: 0;
     right: 0;
@@ -750,6 +755,91 @@ div#elxneo-footerbox > a
     color: #444;
     text-decoration: none;
 }
+body.chat-visible #elxneo-topnav-toolbar,
+body.chat-visible #elxneo-wrap,
+body.chat-visible #elxneo-footerbox
+{
+    right: 280px;
+}
+
+body > div#chat
+{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 280px;
+    background-color: #041424;
+    color: #7f8186;
+    display: none;
+}
+body.chat-visible > div#chat
+{
+    display: block;
+}
+
+
+div#chat *
+{
+    box-sizing: border-box;
+}
+div#chat > h2.chat-header
+{
+    font-size: 16px;
+    padding: 30px 35px;
+    line-height: 1;
+    margin: 0;
+    position: relative;
+    border-bottom: 1px solid #343a45;
+}
+div#chat > h2.chat-header > a.chat-close
+{
+    position: absolute;
+    font-size: 15px;
+    text-decoration: none;
+    top: 50%;
+    right: 25px;
+    margin-top: -7px;
+    color: #bec0c2;
+    -webkit-opacity: 0.5;
+    -moz-opacity: 0.5;
+    opacity: 0.5;
+    filter: alpna(opacity=50);
+}
+div#chat > div#elastix-panels > h3
+{
+    border-top: 0px;
+    padding: 10px 15px;
+    margin: 0px;
+}
+div#chat > div#elastix-panels > h3.ui-state-hover
+{
+    color: #fff;
+    background-color: rgba(69, 74, 84, 0.5);
+}
+div#chat > div#elastix-panels > h3,
+div#chat > div#elastix-panels > div
+{
+    border-radius: 0px;
+    background: none;
+    color: #999;
+    font-size: 12px;
+    border-color: rgba(69, 74, 84, 0.7);
+}
+div#chat > div#elastix-panels > h3 i
+{
+  position: relative;
+  font-size: 15px;
+  margin-right: 5px;
+
+  top: 1px;
+  display: inline-block;
+}
+div#chat > div#elastix-panels > div
+{
+    padding: 15px;
+}
+
 
 /* Grilla con controles de paloSantoGrid */
 form.elastix-standard-formgrid

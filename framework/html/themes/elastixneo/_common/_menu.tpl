@@ -47,6 +47,11 @@
             <p><input type="search"  id="search_module_elastix" name="search_module_elastix"  value="" autofocus="autofocus" placeholder="search" /></p>
         </div>
     </div>
+{if $ELASTIX_PANELS}
+    <div id="togglesidebar">
+        <a class="fa-stack" href="#"><i class="fa fa-th-list fa-stack-1x fa-lg"></i></a>
+    </div>
+{/if}
     <div id="cpallet">
         <img src="themes/{$THEMENAME}/images/cpallet.png" width="19" height="21" alt="color" />
     </div>

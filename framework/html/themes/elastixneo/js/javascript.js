@@ -126,6 +126,20 @@ $(document).ready(function() {
 			elxneo_remove_bookmarktab(arrData['idmenu']);
 		});
 	});
+
+	$('div#elxneo-topnav-toolbar > div#cmenubox > div#togglesidebar, div#chat > h2.chat-header > a.chat-close').click(function(e) {
+	    e.preventDefault();
+	    if ($('body').hasClass('chat-visible'))
+	        $('body').removeClass('chat-visible');
+	    else
+	        $('body').addClass('chat-visible');
+	    elxneo_adjust_mmenu();
+	});
+
+	$('div#chat > div#elastix-panels').accordion({
+	    heightStyle: 'content',
+	    icons: null
+	});
 });
 
 function elxneo_remove_bookmarktab(idmenu)

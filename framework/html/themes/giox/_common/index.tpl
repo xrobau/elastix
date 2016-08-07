@@ -38,6 +38,36 @@
     <a href="http://www.elastix.org" target='_blank'>Elastix</a> is licensed under <a href="http://www.opensource.org/licenses/gpl-license.php" target='_blank'>GPL</a> by <a href="http://www.palosanto.com" target='_blank'>PaloSanto Solutions</a>. 2006 - {$currentyear}.
 </div>
 
+{if $ELASTIX_PANELS}
+{* Panel derecho con paneles de plugines *}
+<div id="chat">
+    <h2 class="chat-header">
+        <a href="#" class="chat-close"><i class="entypo-cancel"></i></a>
+        <i class="entypo-users"></i>
+        <span id="panel-header-text">{$LBL_ELASTIX_PANELS_SIDEBAR|escape:html}</span>
+    </h2>
+    <div id="elastix-panels">
+        {foreach from=$ELASTIX_PANELS key=panelname item=paneldata name=elastixpanel}
+            <h3>
+                {if $paneldata.iconclass}
+                <i class="{$paneldata.iconclass}"></i>
+                {elseif $paneldata.icon}
+                <div style="display: inline-block; min-width: 15px; min-height: 15px; padding-right: 5px;">
+                <img alt="" src="{$paneldata.icon}" width="15" />
+                </div>
+                {else}
+                <i class="fa fa-file-o"></i>
+                {/if}
+                <span>{$paneldata.title|escape:html}</span>
+            </h3>
+            <div id="elastix-panel-{$panelname}">
+                <div class="panel-body">{$paneldata.content}</div>
+            </div>
+        {/foreach}
+    </div>
+</div>
+{/if}
+
 {* Popup de Sticky Note *}
 <div id="neo-sticky-note">
     <div id="neo-sticky-note-text"></div>

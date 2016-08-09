@@ -391,6 +391,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Aug  9 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: add new plugin-aware userlist module. At this point, this
+  module is still being replaced by the userlist module in elastix-system.
+  SVN Rev[7690]
 - DELETED: Framework: remove userlist module from framework. This module has
   been superseded by the userlist module in elastix-system since a long time
   ago. A later commit will replace it with the rewritten plugin-aware module.

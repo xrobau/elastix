@@ -390,6 +390,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Tue Aug  9 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- DELETED: Framework: remove userlist module from framework. This module has
+  been superseded by the userlist module in elastix-system since a long time
+  ago. A later commit will replace it with the rewritten plugin-aware module.
+  SVN Rev[7689]
+
 * Mon Aug 08 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-15
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

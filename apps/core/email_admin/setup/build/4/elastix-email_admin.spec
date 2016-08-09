@@ -206,6 +206,14 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Aug  9 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: User List/Webmail: the assignment of web mail credentials to an user is
+  properly an aspect of email_admin, not the core framework. As part of an
+  userlist module rewrite, split off webmail assignment into a plugin. The
+  userlist/plugins/webmail directory is a noop in previous versions of the
+  framework but will be automatically picked up by the rewritten module.
+  SVN Rev[7687]
+
 * Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Postfix Stats: check whether /etc/localtime is a symlink and use it as
   an additional way to find out the current timezone.

@@ -300,6 +300,14 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Aug  9 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- ADDED: User List/Extension: the assignment of a phone extension to an user is
+  properly an aspect of pbx, not the core framework. As part of an userlist
+  module rewrite, split off extension assignment into a plugin. The
+  userlist/plugins/extension directory is a noop in previous versions of the
+  framework but will be automatically picked up by the rewritten module.
+  SVN Rev[7688]
+
 * Fri Jul 15 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-7
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.

@@ -306,7 +306,7 @@ INFO_AUTH_MODULO;
      *
      * @return array    $result      An array of children or submenu where the father or main menu is $menu_name
      */
-   function getChilds($menu_name){
+    private function getChilds($menu_name){
         $query   = "SELECT * FROM menu where IdParent='$menu_name'";
         $result=$this->_DB->fetchTable($query, true);
         if($result==FALSE){
@@ -324,7 +324,7 @@ INFO_AUTH_MODULO;
      * @return int      An integer where such integer let us know if the menu was or not was removed from database
      */
 
-    function deleteChilds($menu_name){
+    private function deleteChilds($menu_name){
         $query   = "DELETE FROM menu where Id='$menu_name'";
         $result=$this->_DB->genQuery($query);
         if($result==FALSE){
@@ -334,8 +334,10 @@ INFO_AUTH_MODULO;
         return 1;
     }
 
-/**
-     * This function is a recursive function. The input is the name of main menu or father menu which will be removed from database with all children and the children of its children
+    /**
+     * This function is a recursive function. The input is the name of main menu
+     * or father menu which will be removed from database with all children and
+     * the children of its children.
      *
      * @param string    $menu_name   The name of the main menu or menu father
      * @param object    $acl   		 The class object ACL
@@ -343,7 +345,8 @@ INFO_AUTH_MODULO;
      * @return $menu_name   The menu which will be removed
      */
 
-    function deleteFather($menu_name,&$acl){
+    function deleteFather($menu_name, &$acl)
+    {
         $childs = $this->getChilds($menu_name);
         if(!$childs){
             $id_resource = $acl->getIdResource($menu_name); // get id Resource

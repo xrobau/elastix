@@ -391,6 +391,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: rename paloMenu::deleteFather to deleteMenu. Make
+  elastix-menuremove return a failure exit state on error, and silence output on
+  success. Add failure cause to error message.
+  SVN Rev[7695]
 - CHANGED: Framework: rewrite menu item removal without using recursion. Also
   remove non-leaf nodes that contained the referenced menu item if it was the
   last child. Remove redundant function call to paloACL.

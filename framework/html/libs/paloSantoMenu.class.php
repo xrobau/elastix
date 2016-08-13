@@ -310,7 +310,7 @@ INFO_AUTH_MODULO;
      * @return $menu_name   The menu which will be removed
      */
 
-    function deleteFather($menu_name, &$acl)
+    function deleteMenu($menu_name, &$acl)
     {
         /* Climb up the menu tree as long as the examined item is the only child
          * node of its parent. */

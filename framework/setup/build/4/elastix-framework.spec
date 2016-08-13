@@ -390,6 +390,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: new acl tables for per-module privileges. Step 1 of
+  implementation of per-module privileges to fix Elastix bug #1100.
+  SVN Rev[7691]
+
 * Tue Aug  9 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Framework: add new plugin-aware userlist module. At this point, this
   module is still being replaced by the userlist module in elastix-system.

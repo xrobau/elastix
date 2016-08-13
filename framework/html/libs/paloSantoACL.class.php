@@ -1276,25 +1276,6 @@ class paloACL {
         return $bExito;
     }
 
-    /**
-     * Procedimiento para eliminar los permisos de un grupo
-     *
-     * @param integer    $idresource  es el id del recurso
-     *
-     * @return bool    si es verdadero entonces se elimino bien
-     **************************************************************/
-    function deleteIdGroupPermission($idresource)
-    {
-        $id_resource = null;
-        $sPeticionSQL = "DELETE FROM acl_group_permission WHERE id_resource = ?";
-        $result = $this->_DB->genQuery($sPeticionSQL, array($idresource));
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true;
-    }
-
      /**
      * Procedimiento para obtener el nombre del grupo dado un id.
      *

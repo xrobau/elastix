@@ -391,6 +391,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: rewrite menu item removal without using recursion. Also
+  remove non-leaf nodes that contained the referenced menu item if it was the
+  last child. Remove redundant function call to paloACL.
+  SVN Rev[7694]
 - CHANGED: Framework: make paloACL aware of per-module privileges when removing
   groups, users and resources.
   SVN Rev[7692]

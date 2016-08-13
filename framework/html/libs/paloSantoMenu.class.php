@@ -299,47 +299,12 @@ INFO_AUTH_MODULO;
         return $bExiste;
     }
 
- /**
-     * This function is for obtaining all the submenu from menu
-     *
-     * @param string    $menu_name   The name of the main menu or menu father
-     *
-     * @return array    $result      An array of children or submenu where the father or main menu is $menu_name
-     */
-    private function getChilds($menu_name){
-        $query   = "SELECT * FROM menu where IdParent='$menu_name'";
-        $result=$this->_DB->fetchTable($query, true);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return $result;
-   }
-
- /**
-     * This function delete a specific menu from database
-     *
-     * @param string    $menu_name   The name of the main menu or menu father
-     *
-     * @return int      An integer where such integer let us know if the menu was or not was removed from database
-     */
-
-    private function deleteChilds($menu_name){
-        $query   = "DELETE FROM menu where Id='$menu_name'";
-        $result=$this->_DB->genQuery($query);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return 0;
-        }
-        return 1;
-    }
-
     /**
-     * This function is a recursive function. The input is the name of main menu
-     * or father menu which will be removed from database with all children and
-     * the children of its children.
+     * Delete the menu node from the menu database, as well as all its children.
+     * If the just-deleted node was the last child of its parent, the parent is
+     * also deleted.
      *
-     * @param string    $menu_name   The name of the main menu or menu father
+     * @param string    $menu_name   The name of the menu node
      * @param object    $acl   		 The class object ACL
      *
      * @return $menu_name   The menu which will be removed
@@ -347,26 +312,56 @@ INFO_AUTH_MODULO;
 
     function deleteFather($menu_name, &$acl)
     {
-        $childs = $this->getChilds($menu_name);
-        if(!$childs){
-            $id_resource = $acl->getIdResource($menu_name); // get id Resource
-            $ok1 = $acl->deleteIdGroupPermission($id_resource); // remove group permission
-            $ok2 = $acl->deleteIdResource($id_resource); // remove resource
-            $ok3 = $this->deleteChilds($menu_name); // remove child
-            return ($ok1 and $ok2 and $ok3);
-        }
-        else{
-            foreach($childs as $key => $value){
-                $ok = $this->deleteFather($value['id'],$acl);
-                if(!$ok) return false;
+        /* Climb up the menu tree as long as the examined item is the only child
+         * node of its parent. */
+        $sql_siblings = <<<SQL_SIBLINGS
+SELECT COUNT(*) AS N, IdParent FROM menu
+WHERE IdParent = (SELECT IdParent FROM menu WHERE id = ?)
+GROUP BY IdParent
+SQL_SIBLINGS;
+        do {
+            $tuple = $this->_DB->getFirstRowQuery($sql_siblings, TRUE, array($menu_name));
+            if (!is_array($tuple)) {
+                $this->errMsg = $this->_DB->errMsg;
+                return FALSE;
             }
+            if (count($tuple) <= 0) {
+                // Treat nonexistent menu node as success
+                return TRUE;
+            }
+            $siblings = $tuple['N'];
+            if ($siblings <= 1) $menu_name = $tuple['IdParent'];
+        } while ($siblings <= 1);
 
-            $id_resource = $acl->getIdResource($menu_name); // get id Resource
-            $ok1 = $acl->deleteIdGroupPermission($id_resource); // remove group permission
-            $ok2 = $acl->deleteIdResource($id_resource); // remove resource
-            $ok3 = $this->deleteChilds($menu_name); // remove child*/
-            return ($ok1 and $ok2 and $ok3);
+        $nodesToRemove = array(
+            array($menu_name, TRUE),
+        );
+
+        while (count($nodesToRemove) > 0) {
+            $n = array_pop($nodesToRemove);
+            if ($n[1]) {
+                // Child nodes need to be loaded into delete list
+                $rs = $this->_DB->fetchTable('SELECT id FROM menu where IdParent = ?', TRUE, array($n[0]));
+                if (!is_array($rs)) {
+                    $this->errMsg = $this->_DB->errMsg;
+                    return FALSE;
+                }
+                array_push($nodesToRemove, array($n[0], FALSE));
+                foreach ($rs as $tuple) array_push($nodesToRemove, array($tuple['id'], TRUE));
+            } else {
+                // Child nodes already deleted
+                $id_resource = $acl->getIdResource($n[0]);
+                if (!$acl->deleteIdResource($id_resource)) {
+                    $this->errMsg = $acl->errMsg;
+                    return FALSE;
+                }
+                if (!$this->_DB->genQuery('DELETE FROM menu where id = ?', array($n[0]))) {
+                    $this->errMsg = $this->_DB->errMsg;
+                    return FALSE;
+                }
+            }
         }
+
+        return TRUE;
     }
 }
-?>

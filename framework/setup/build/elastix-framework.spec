@@ -391,7 +391,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
-- CHANGE: Framework: use SQL parameters in paloMenu::createMenu and paloMenu::
+- CHANGED: Framework: code cleanup in paloSantoInstaller.class.php.
+  SVN Rev[7697]
+- CHANGED: Framework: use SQL parameters in paloMenu::createMenu and paloMenu::
   updateItemMenu. Introduce stricter checks on parameter consistency and
   existence of parent menu.
   SVN Rev[7696]

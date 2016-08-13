@@ -39,65 +39,51 @@ class Installer
 
     }
 
-    function addMenu($oMenu,$arrTmp){
-    //verificar si tiene que crear un nuevo menu raiz
-
-    $parentId = isset($arrTmp['parent'])?$arrTmp['parent']:"";
-    $link     = isset($arrTmp['link'])?$arrTmp['link']:"";
-    $order    = isset($arrTmp['order'])?$arrTmp['order']:"-1";
-    $tag      = isset($arrTmp['tag'])?$arrTmp['tag']:"";
-    $menuid   = isset($arrTmp['menuid'])?$arrTmp['menuid']:"";
-
-    if ($parentId=="")
-        $type="";
-    else{
-        if($link=="")
-          $type="module";
-        else
-          $type="framed";
+    private function _normalizeMenuAttributes($a)
+    {
+        foreach (array('parent', 'link', 'tag', 'menuid') as $k)
+            if (!isset($a[$k])) $a[$k] = '';
+        if (!isset($a['order'])) $a['order'] = '-1';
+        $a['type'] = ($a['parent'] != '')
+            ? (($a['link'] != '') ? 'framed' : 'module')
+            : '';
+        return $a;
     }
 
-    //creo el menu
-    $bExito = $oMenu->createMenu($menuid,$tag,$parentId,$type,$link,$order);
-    if (!$bExito){
+    function addMenu($oMenu, $arrTmp)
+    {
+        $arrTmp = $this->_normalizeMenuAttributes($arrTmp);
+        $bExito = $oMenu->createMenu($arrTmp['menuid'], $arrTmp['tag'],
+            $arrTmp['parent'], $arrTmp['type'], $arrTmp['link'],
+            $arrTmp['order']);
+        if (!$bExito) {
             $this->_errMsg = $oMenu->errMsg;
-            return false;
+            return FALSE;
         }
-    return true;
+        return TRUE;
     }
 
  /*****************************************************************************************************/
 // funcion para actualizar un item de menu
-    function UpdateMenu($oMenu,$arrTmp){
-        $parentId = isset($arrTmp['parent'])?$arrTmp['parent']:"";
-        $link     = isset($arrTmp['link'])?$arrTmp['link']:"";
-        $order    = isset($arrTmp['order'])?$arrTmp['order']:"-1";
-        $tag      = isset($arrTmp['tag'])?$arrTmp['tag']:"";
-        $menuid   = isset($arrTmp['menuid'])?$arrTmp['menuid']:"";
-
-        if ($parentId=="")
-            $type="";
-        else{
-            if($link=="")
-            $type="module";
-            else
-            $type="framed";
+    function UpdateMenu($oMenu,$arrTmp)
+    {
+        $arrTmp = $this->_normalizeMenuAttributes($arrTmp);
+        $bExito = $oMenu->updateItemMenu($arrTmp['menuid'], $arrTmp['tag'],
+            $arrTmp['parent'], $arrTmp['type'], $arrTmp['link'],
+            $arrTmp['order']);
+        if (!$bExito) {
+            $this->_errMsg = $oMenu->errMsg;
+            return FALSE;
         }
-
-        //creo el menu
-        $bExito = $oMenu->updateItemMenu($menuid,$tag,$parentId,$type,$link,$order);
-        if (!$bExito){
-                $this->_errMsg = $oMenu->errMsg;
-                return false;
-            }
-        return true;
+        return TRUE;
     }
 
-    function updateResourceMembership($oACL,$arrTmp, $arrGroup=array()){
+    function updateResourceMembership($oACL, $arrTmp, $arrGroup=array())
+    {
         $oACL->_DB->beginTransaction();
         $bExito = $oACL->createResource($arrTmp['menuid'], $arrTmp['tag']);
         if ($bExito){
-			$oACL->_DB->commit();
+            $oACL->_DB->commit();
         }else
             $oACL->_DB->rollBack();
         $this->_errMsg = $oACL->errMsg;
@@ -106,47 +92,49 @@ class Installer
 
 /*****************************************************************************************************/
 
-    function addResourceMembership($oACL,$arrTmp, $arrGroup=array()){
+    function addResourceMembership($oACL, $arrTmp, $arrGroup=array())
+    {
+        $bExito = TRUE;
+        $grouplist = array();
+
         $oACL->_DB->beginTransaction();
-        $bExito = $oACL->createResource($arrTmp['menuid'], $arrTmp['tag']);
-        if ($bExito){
-            //inserto en acl_group_permission
-            //recupero el id del recurso insertado
-            $resource_id= $oACL->getResourceId($arrTmp['menuid']);
-            $bExito = false;
-            if (!is_null($resource_id))
-            {
-                if(is_array($arrGroup) & !empty($arrGroup)){
-                    foreach($arrGroup as $key => $value){
-                        $idGroup   = $value['id'];
-                        $nameGroup = $value['name'];
-                        $descGroup = $value['desc'];
-                        $idGroupTmp = $oACL->getIdGroup($nameGroup);// obtiene el id del grupo dado su nombre
-                        if($idGroupTmp){
-                           $bExito = $oACL->saveGroupPermission($idGroupTmp,array($resource_id));
-                        }else{
-                           if(is_null($oACL->getGroupNameByid($idGroup))){// no existe el grupo
-                                $bExito = $oACL->createGroup($nameGroup, $descGroup);
-                                if(!$bExito){
-                                    $oACL->_DB->rollBack();
-                                    $this->_errMsg = $oACL->errMsg;
-                                    return $bExito;
-                                }
-                                $idGroup = $oACL->_DB->getLastInsertId();
-                           }
-                           $bExito = $oACL->saveGroupPermission($idGroup,array($resource_id));
+
+        if ($bExito)
+            $bExito = $oACL->createResource($arrTmp['menuid'], $arrTmp['tag']);
+        if ($bExito) {
+            $resource_id = $oACL->getResourceId($arrTmp['menuid']);
+            $bExito = !is_null($resource_id);
+        }
+        if ($bExito) {
+            if (!(is_array($arrGroup) && count($arrGroup) > 0)) {
+                $grouplist[] = 1;   // Esto asume que el grupo 1 es "admin"
+            } else {
+                foreach ($arrGroup as $g) {
+                    $id_group = $oACL->getIdGroup($g['name']);
+                    if (!$id_group) {
+                        if (!is_null($oACL->getGroupNameByid($g['id']))) {
+                            // TODO: verificar que el nombre del grupo es igual
+                            $id_group = $g['id'];
+                        } else {
+                            $bExito = $oACL->createGroup($g['name'], $g['desc']);
+                            if (!$bExito) break;
+                            $id_group = $oACL->_DB->getLastInsertId();
                         }
                     }
-                }else
-                    $bExito = $oACL->saveGroupPermission(1,array($resource_id));
-                if($bExito)
-                    $oACL->_DB->commit();
-                else
-                    $oACL->_DB->rollBack();
+                    $grouplist[] = $id_group;
+                }
             }
-        }else
-            $oACL->_DB->rollBack();
+        }
+        if ($bExito) foreach ($grouplist as $id_group) {
+            $bExito = $oACL->saveGroupPermission($id_group, array($resource_id));
+            if (!$bExito) break;
+        }
+
         $this->_errMsg = $oACL->errMsg;
+        if ($bExito)
+            $oACL->_DB->commit();
+        else
+            $oACL->_DB->rollBack();
         return $bExito;
     }
 
@@ -167,7 +155,7 @@ class Installer
         if($datos_conexion['locate'] == "")
             $datos_conexion['locate'] = "localhost";
         $GrantSQL = "GRANT SELECT, INSERT, UPDATE, DELETE ON $db_name.* TO ";
-        $GrantSQL .= $datos_conexion['user']."@".$datos_conexion['locate']." IDENTIFIED BY '".                          $datos_conexion['password']."'";
+        $GrantSQL .= $datos_conexion['user']."@".$datos_conexion['locate']." IDENTIFIED BY '".$datos_conexion['password']."'";
         $result = $pDB->genExec($GrantSQL);
         $comando="mysql --password=".escapeshellcmd($root_password)." --user=root $db_name < $path_script_db";
         exec($comando,$output,$retval);
@@ -191,4 +179,3 @@ class Installer
         return $flagStatus;
     }
 }
-?>

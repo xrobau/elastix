@@ -391,6 +391,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: make paloACL aware of per-module privileges when removing
+  groups, users and resources.
+  SVN Rev[7692]
 - ADDED: Framework: new acl tables for per-module privileges. Step 1 of
   implementation of per-module privileges to fix Elastix bug #1100.
   SVN Rev[7691]

@@ -354,6 +354,7 @@ class paloACL {
         } else {
             $this->errMsg = "";
             $listaSQL = array(
+                "DELETE FROM acl_module_user_permissions WHERE id_user = ?",
                 "DELETE FROM acl_notification WHERE id_user = ?",
                 "DELETE FROM acl_user_permission WHERE id_user = ?",
                 "DELETE FROM acl_membership WHERE id_user = ?",
@@ -1031,6 +1032,7 @@ class paloACL {
         } else {
             $this->errMsg = "";
             $listaSQL = array(
+                "DELETE FROM acl_module_group_permissions WHERE id_group = ?",
                 "DELETE FROM acl_membership WHERE id_group = ?",
                 "DELETE FROM acl_group_permission WHERE id_group = ?",
                 "DELETE FROM acl_group WHERE id = ?",
@@ -1251,6 +1253,9 @@ class paloACL {
     {
         $this->errMsg = "";
         $listaSQL = array(
+            "DELETE FROM acl_module_group_permissions WHERE id_module_privilege IN (SELECT id FROM acl_module_privileges WHERE id_resource = ?)",
+            "DELETE FROM acl_module_user_permissions WHERE id_module_privilege IN (SELECT id FROM acl_module_privileges WHERE id_resource = ?)",
+            "DELETE FROM acl_module_privileges WHERE id_resource = ?",
             "DELETE FROM acl_notification WHERE id_resource = ?",
             "DELETE FROM acl_group_permission WHERE id_resource = ?",
             "DELETE FROM acl_user_permission WHERE id_resource = ?",

@@ -172,7 +172,8 @@ INFO_AUTH_MODULO;
     }
 
     /**
-     * Procedimiento para obtener el listado de los menus
+     * Procedimiento para obtener el listado de los menus.
+     * MÉTODO DEPRECADO: sólo existe por compatibilidad con elastix-developer viejo.
      *
      * @return array    Listado de menus
      */
@@ -180,10 +181,10 @@ INFO_AUTH_MODULO;
     {
         $this->errMsg = "";
         $listaMenus = array();
-	$sQuery = "SELECT Id, Name FROM menu WHERE IdParent=''";
-	$arrMenus = $this->_DB->fetchTable($sQuery);
+        $sQuery = "SELECT Id, Name FROM menu WHERE IdParent=''";
+        $arrMenus = $this->_DB->fetchTable($sQuery);
         if (is_array($arrMenus)) {
-	   foreach ($arrMenus as $menu)
+           foreach ($arrMenus as $menu)
             {
                 $listaMenus[$menu[0]]=$menu[1];
             }
@@ -192,111 +193,143 @@ INFO_AUTH_MODULO;
             $this->errMsg = $this->_DB->errMsg;
         }
         return $listaMenus;
+    }
 
+    private function _validateMenuParams($id, $name, $id_parent, $type, &$link)
+    {
+        if ($id == '' || $name == '') {
+            $this->errMsg = "ID and module name cannot be empty";
+            return FALSE;
+        }
+        if (!in_array($type, array('', 'module', 'framed'))) {
+            $this->errMsg = "Invalid menuitem type";
+            return FALSE;
+        }
+        if (($id_parent == '' && $type != '') || ($id_parent != '' && $type == '')) {
+            $this->errMsg = "Conflict between menuitem type and first-level";
+            return FALSE;
+        }
+        if ($type == 'framed') {
+            if ($link != '') {
+                $this->errMsg = "Link for framed menuitem cannot be empty";
+                return FALSE;
+            }
+        } else {
+            $link = '';
+        }
+        return TRUE;
     }
 
     /**
-     * Procedimiento para crear un nuevo menu
+     * Crear un nuevo item de menú.
      *
-     * @param string    $id
-     * @param string    $name
-     * @param string    $id_parent
-     * @param string    $type
-     * @param string    $link
-     * @param string    $order
+     * @param string    $id         Nombre interno del módulo o nodo
+     * @param string    $name       Texto a mostrar en GUI para el nodo
+     * @param string    $id_parent  Nombre interno del nodo padre, o '' para primer nivel.
+     * @param string    $type       Uno de '' 'module' 'framed'. El módulo de primer nivel SIEMPRE es ''.
+     * @param string    $link       Para 'framed', el enlace a mostrar en el GUI en un <iframe>
+     * @param string    $order      Número de orden de presentación del item
      *
      * @return bool     VERDADERO si el menu se crea correctamente, FALSO en error
      */
-
-    function createMenu($id,$name, $id_parent, $type='module', $link='', $order=-1)
+    function createMenu($id, $name, $id_parent, $type = 'module', $link = '', $order = -1)
     {
-        $bExito = FALSE;
-        if ($id == "" && $name == "") {
-            $this->errMsg = "ID and module name can't be empty";
-        } else {
-            //verificar que no exista el mismo menu
-            $sPeticionSQL = "SELECT id FROM menu ".
-                " WHERE id = '$id' AND Name='$name' AND IdParent='$id_parent'";
-            $arr_result =& $this->_DB->fetchTable($sPeticionSQL);
-            if (is_array($arr_result) && count($arr_result)>0) {
-                $bExito = FALSE;
-                $this->errMsg = "Menu already exists";
-            }else{
-		if($order!=-1){
-                  $sPeticionSQL = paloDB::construirInsert("menu",
-                    array(
-                        "id"        =>  paloDB::DBCAMPO($id),
-                        "Name"      =>  paloDB::DBCAMPO($name),
-                        "Type"      =>  paloDB::DBCAMPO($type),
-                        "Link"      =>  paloDB::DBCAMPO($link),
-                        "IdParent"  =>  paloDB::DBCAMPO($id_parent),
-                        "order_no"  =>  paloDB::DBCAMPO($order),
-                      )
-                    );
+        if (!$this->_validateMenuParams($id, $name, $id_parent, $type, $link))
+            return FALSE;
 
-                }
-                else{
-                  $sPeticionSQL = paloDB::construirInsert("menu",
-                    array(
-                        "id"        =>  paloDB::DBCAMPO($id),
-                        "Name"      =>  paloDB::DBCAMPO($name),
-                        "Type"      =>  paloDB::DBCAMPO($type),
-                        "Link"      =>  paloDB::DBCAMPO($link),
-                        "IdParent"  =>  paloDB::DBCAMPO($id_parent),
-                      )
-                    );
-                }
+        // Verificación de existencia del menú
+        $e = $this->existeMenu($id); if (is_null($e)) return FALSE;
+        if ($e) {
+            $this->errMsg = "Menu already exists";
+            return FALSE;
+        }
 
-                if ($this->_DB->genQuery($sPeticionSQL)) {
-                    $bExito = TRUE;
-                } else {
-                    $this->errMsg = $this->_DB->errMsg;
-                }
+        // Verificación de existencia del padre
+        if ($id_parent != '') {
+            $e = $this->existeMenu($id_parent); if (is_null($e)) return FALSE;
+            if (!$e) {
+                $this->errMsg = "Requested parent does not exist";
+                return FALSE;
             }
         }
 
-        return $bExito;
+        $sqlfields = array(
+            'id'        =>  $id,
+            'Name'      =>  $name,
+            'Type'      =>  $type,
+            'Link'      =>  $link,
+            'IdParent'  =>  $id_parent,
+        );
+        if ($order != -1) $sqlfields['order_no'] = $order;
+        $sql = 'INSERT INTO menu ('.
+            implode(', ', array_keys($sqlfields)).') VALUES ('.
+            implode(', ', array_fill(0, count($sqlfields), '?')).')';
+        $r = $this->_DB->genQuery($sql, array_values($sqlfields));
+        if (!$r) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
     }
 
-    /*********************************************************************************************/
-    function updateItemMenu($id, $name, $id_parent, $type='module', $link='', $order=-1){
-        $bExito = FALSE;
-        if ($id == "" && $name == "") {
-            $this->errMsg = "ID and module name can't be empty";
-        }else{
-            $query = "";
-            if($order != -1){
-                $query = "UPDATE menu SET ".
-                    "Name='$name', IdParent='$id_parent', Link='$link', Type='$type', order_no='$order'".
-                    " WHERE id = '$id'";
-            }else{
-                $query = "UPDATE menu SET ".
-                    "Name='$name', IdParent='$id_parent', Link='$link', Type='$type'".
-                    " WHERE id = '$id'";
+    /**
+     * Actualizar item de menú existente.
+     *
+     * @param string    $id         Nombre interno del módulo o nodo
+     * @param string    $name       Texto a mostrar en GUI para el nodo
+     * @param string    $id_parent  Nombre interno del nodo padre, o '' para primer nivel.
+     * @param string    $type       Uno de '' 'module' 'framed'. El módulo de primer nivel SIEMPRE es ''.
+     * @param string    $link       Para 'framed', el enlace a mostrar en el GUI en un <iframe>
+     * @param string    $order      Número de orden de presentación del item
+     *
+     * @return bool     VERDADERO si el menu se crea correctamente, FALSO en error
+     */
+    function updateItemMenu($id, $name, $id_parent, $type = 'module', $link = '', $order = -1)
+    {
+        if (!$this->_validateMenuParams($id, $name, $id_parent, $type, $link))
+        return FALSE;
+
+        // Verificación de existencia del padre
+        if ($id_parent != '') {
+            $e = $this->existeMenu($id_parent); if (is_null($e)) return FALSE;
+            if (!$e) {
+                $this->errMsg = "Requested parent does not exist";
+                return FALSE;
             }
-            $result=$this->_DB->genQuery($query);
-            if($result==FALSE){
-                $this->errMsg = $this->_DB->errMsg;
-                return 0;
-            }
-            return 1;
         }
+
+        $sql = 'UPDATE menu SET Name = ?, Type = ?, Link = ?, IdParent = ?';
+        $params = array($name, $type, $link, $id_parent);
+        if ($order != -1) {
+            $sql .= ', order_no = ?';
+            $params[] = $order;
+        }
+        $sql .= ' WHERE id = ?';
+        $params[] = $id;
+        $r = $this->_DB->genQuery($sql, array_values($params));
+        if (!$r) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
     }
 
-
-
-/**********************************************************************************************/
-
-    function existeMenu($id_menu){
-        $bExiste=false;
-            //verificar que no exista el mismo menu
-        $sPeticionSQL = "SELECT id FROM menu WHERE id = '$id_menu'";
-        $arr_result =& $this->_DB->getFirstRowQuery($sPeticionSQL);
-        if (count($arr_result)>0)
-        {
-            $bExiste=true;
+    /**
+     * Procedimiento para verificar si un item de menú existe por id.
+     *
+     * @param   string  $id_menu    El item a buscar.
+     *
+     * @return mixed    NULL en caso de error, o VERDADERO/FALSO.
+     */
+    function existeMenu($id_menu)
+    {
+        $sql = 'SELECT COUNT(*) AS N FROM menu WHERE id = ?';
+        $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, array($id_menu));
+        if (!is_array($tupla)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
         }
-        return $bExiste;
+        return ($tupla['N'] > 0);
     }
 
     /**

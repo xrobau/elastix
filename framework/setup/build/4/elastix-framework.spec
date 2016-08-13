@@ -391,6 +391,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGE: Framework: use SQL parameters in paloMenu::createMenu and paloMenu::
+  updateItemMenu. Introduce stricter checks on parameter consistency and
+  existence of parent menu.
+  SVN Rev[7696]
 - CHANGED: Framework: rename paloMenu::deleteFather to deleteMenu. Make
   elastix-menuremove return a failure exit state on error, and silence output on
   success. Add failure cause to error message.

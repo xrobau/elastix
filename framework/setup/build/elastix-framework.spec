@@ -391,6 +391,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: implement paloACL::hasModulePrivilege() method. Step 2 of
+  implementation of per-module privileges to fix Elastix bug #1100.
+  SVN Rev[7698]
 - CHANGED: Framework: code cleanup in paloSantoInstaller.class.php.
   SVN Rev[7697]
 - CHANGED: Framework: use SQL parameters in paloMenu::createMenu and paloMenu::

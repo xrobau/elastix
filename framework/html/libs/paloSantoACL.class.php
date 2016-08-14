@@ -1453,4 +1453,86 @@ SQL_LEER_ID_PROFILE;
         }
         return TRUE;
     }
+
+    /**
+     * Procedimiento para interrogar si el usuario en $user está autorizado al
+     * privilegio personalizado $privilege que ha sido definido por el módulo
+     * indicado en $module. Las reglas de privilegios personalizados son:
+     * 1) Si el módulo no define privilegios personalizados, se devuelve valor
+     *    VERDADERO si el usuario es administrador, FALSO si no. Esto permite
+     *    funcionar a módulos que todavía no ingresan privilegios a la DB.
+     * 2) Si el módulo define privilegios, pero el requerido no está en el
+     *    conjunto definido, se devuelve FALSO.
+     * 3) Si el grupo al cual pertence el usuario indica que tiene el privilegio,
+     *    se devuelve VERDADERO.
+     * 4) Si el usuario, por sí mismo, tiene el privilegio, se devuelve VERDADERO.
+     * 5) Si nada de lo anterior se cumple, se devuelve FALSO.
+     *
+     * @param string    $user       Usuario para el cual se verifica privilegio
+     * @param string    $module     Módulo que define privilegio personalizado
+     * @param string    $privilege  Privilegio personalizado del módulo
+     */
+    function hasModulePrivilege($user, $module, $privilege)
+    {
+        // ¿Hay privilegios personalizados en este módulo?
+        $sql = <<<SQL_HAY_PRIVILEGIOS
+SELECT acl_module_privileges.privilege
+FROM acl_resource, acl_module_privileges
+WHERE acl_resource.id = acl_module_privileges.id_resource
+    AND acl_resource.name = ?
+SQL_HAY_PRIVILEGIOS;
+        $rs = $this->_DB->fetchTable($sql, TRUE, array($module));
+        if (!is_array($rs)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        if (count($rs) <= 0) return $this->isUserAdministratorGroup($user);
+
+        // ¿Está el privilegio requerido entre los definidos?
+        $present = FALSE;
+        foreach ($rs as $tupla) if ($tupla['privilege'] == $privilege) {
+            $present = TRUE;
+            break;
+        }
+        if (!$present) return FALSE;
+
+        // ¿Está el grupo del usuario autorizado para este privilegio?
+        $sql = <<<SQL_PRIVILEGIO_GRUPO
+SELECT COUNT(*) AS N
+FROM acl_user, acl_membership, acl_group, acl_module_group_permissions,
+    acl_module_privileges, acl_resource
+WHERE acl_user.name = ?
+    AND acl_user.id = acl_membership.id_user
+    AND acl_membership.id_group = acl_group.id
+    AND acl_group.id = acl_module_group_permissions.id_group
+    AND acl_module_group_permissions.id_module_privilege = acl_module_privileges.id
+    AND acl_module_privileges.privilege = ?
+    AND acl_module_privileges.id_resource = acl_resource.id
+    AND acl_resource.name = ?
+SQL_PRIVILEGIO_GRUPO;
+        $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, array($user, $privilege, $module));
+        if (!is_array($tupla)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        if ($tupla['N'] > 0) return TRUE;
+
+        // ¿Está el usuario personalmente autorizado para este privilegio?
+        $sql = <<<SQL_PRIVILEGIO_USUARIO
+SELECT COUNT(*) AS N
+FROM acl_user, acl_module_user_permissions, acl_module_privileges, acl_resource
+WHERE acl_user.name = ?
+    AND acl_user.id = acl_module_user_permissions.id_user
+    AND acl_module_user_permissions.id_module_privilege = acl_module_privileges.id
+    AND acl_module_privileges.privilege = ?
+    AND acl_module_privileges.id_resource = acl_resource.id
+    AND acl_resource.name = ?
+SQL_PRIVILEGIO_USUARIO;
+        $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, array($user, $privilege, $module));
+        if (!is_array($tupla)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return ($tupla['N'] > 0);
+    }
 }

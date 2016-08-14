@@ -391,6 +391,10 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: the menu.xml format has been extended to encode custom
+  module privileges. New methods have been implemented in paloACL to record them
+  into the ACL database.
+  SVN Rev[7699]
 - CHANGED: Framework: implement paloACL::hasModulePrivilege() method. Step 2 of
   implementation of per-module privileges to fix Elastix bug #1100.
   SVN Rev[7698]

@@ -1535,4 +1535,94 @@ SQL_PRIVILEGIO_USUARIO;
         }
         return ($tupla['N'] > 0);
     }
+
+    function createModulePrivilege($idresource, $name, $description = '')
+    {
+        $this->errMsg = '';
+        if ($name == '') {
+            $this->errMsg = 'Name cannot be empty';
+            return FALSE;
+        }
+        if ($description == '') $description = $name;
+
+        // Verificar si la tupla ya existe
+        $sql = 'SELECT desc_privilege FROM acl_module_privileges WHERE id_resource = ? AND privilege = ?';
+        $tupla = $this->_DB->getFirstRowQuery($sql, FALSE, array($idresource, $name));
+        if (!is_array($tupla)) {
+            // Ocurre error de DB en consulta
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        $sql = (count($tupla) == 0)
+            ? 'INSERT INTO acl_module_privileges (desc_privilege, id_resource, privilege) VALUES (?, ?, ?)'
+            : 'UPDATE acl_module_privileges SET desc_privilege = ? WHERE id_resource = ? AND privilege = ?';
+        $param = array($description, $idresource, $name);
+
+        // Se intenta crear acción idéntica a existente en DB?
+        if (count($tupla) > 0 && $tupla[0] == $description) return TRUE;
+
+        if (!$this->_DB->genQuery($sql, $param)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    function getIdModulePrivilege($idresource, $name)
+    {
+        if (!preg_match('/^([-_[:alnum:]]+[[a-z0-9\-_]+]*)$/', "$name")) {
+            $this->errMsg = "Resource Name is not valid";
+            return FALSE;
+        }
+
+        $this->errMsg = '';
+        $sql = 'SELECT id FROM acl_module_privileges WHERE id_resource = ? AND privilege = ?';
+        $result = $this->_DB->getFirstRowQuery($sql, FALSE, array($idresource, $name));
+        if ($result && is_array($result) && count($result) > 0) {
+            return $result[0];
+        }
+        $this->errMsg = $this->_DB->errMsg;
+        return FALSE;
+    }
+
+    function updateModulePrivilegeDescription($id_privilege, $description)
+    {
+        $sql = 'UPDATE acl_module_privileges SET desc_privilege = ? WHERE id = ?';
+        $param = array($description, $id_privilege);
+        if (!$this->_DB->genQuery($sql, $param)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    function grantModulePrivilege2Group($id_privilege, $id_group)
+    {
+        $sql = 'SELECT COUNT(*) AS N FROM acl_module_group_permissions '.
+            'WHERE id_group = ? AND id_module_privilege = ?';
+        $param = array($id_group, $id_privilege);
+        $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, $param);
+        if (!is_array($tupla)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        if ($tupla['N'] > 0) return TRUE;
+        $sql = 'INSERT INTO acl_module_group_permissions (id_group, id_module_privilege) VALUES (?, ?)';
+        if (!$this->_DB->genQuery($sql, $param)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    function revokeModulePrivilege2Group($id_privilege, $id_group)
+    {
+        $sql = 'DELETE FROM acl_module_group_permissions WHERE id_group = ? AND id_module_privilege = ?';
+        $param = array($id_group, $id_privilege);
+        if (!$this->_DB->genQuery($sql, $param)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        return TRUE;
+    }
 }

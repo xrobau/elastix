@@ -178,4 +178,32 @@ class Installer
 
         return $flagStatus;
     }
+
+    function addResourcePrivileges($oACL, $name, $privileges)
+    {
+        $bExito = TRUE;
+
+        $oACL->_DB->beginTransaction();
+
+        $resource_id = $oACL->getResourceId($name);
+        $bExito = !is_null($resource_id);
+
+        if ($bExito) foreach ($privileges as $privilege) {
+            $bExito = $oACL->createModulePrivilege($resource_id, $privilege['name'], $privilege['desc']);
+            if (!$bExito) break;
+            $id_privilege = $oACL->getIdModulePrivilege($resource_id, $privilege['name']);
+            foreach ($privilege['grant2group'] as $gname) {
+                $id_group = $oACL->getIdGroup($gname);
+                $bExito = $oACL->grantModulePrivilege2Group($id_privilege, $id_group);
+                if (!$bExito) break 2;
+            }
+        }
+
+        $this->_errMsg = $oACL->errMsg;
+        if ($bExito)
+            $oACL->_DB->commit();
+        else
+            $oACL->_DB->rollBack();
+        return $bExito;
+    }
 }

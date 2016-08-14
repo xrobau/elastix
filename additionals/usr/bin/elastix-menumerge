@@ -90,6 +90,19 @@ foreach ($xml->menulist->menuitem as $xml_menuitem) {
         }
     }
     
+    // Privilegios personalizados del <menuitem>
+    $privileges = array();
+    if (isset($xml_menuitem->privilege)) foreach ($xml_menuitem->privilege as $xml_privilege) {
+        $privilege = array(
+            'grant2group'   =>  array(),
+        );
+        foreach (array('name', 'desc') as $k) $privilege[$k] = (string)$xml_privilege[$k];
+        if (isset($xml_privilege->grant2group)) foreach ($xml_privilege->grant2group as $xml_grant2group) {
+            $privilege['grant2group'][] = (string)$xml_grant2group['name'];
+        }
+        $privileges[] = $privilege;
+    }
+    
     if ($oMenu->existeMenu($menuitem['menuid'])) {
         if (!$oInstaller->UpdateMenu($oMenu, $menuitem)) {
             error_exit("ERR: failed to update menuitem {$menuitem['menuid']} - {$oInstaller->_errMsg}\n");
@@ -107,6 +120,10 @@ foreach ($xml->menulist->menuitem as $xml_menuitem) {
         if ($menuitem['parent'] != '' && !$oInstaller->addResourceMembership($oACL, $menuitem, $groups)) {
             error_exit("ERR: failed to add group permissions for menuitem {$menuitem['menuid']} - {$oInstaller->_errMsg}\n");
         }
+    }
+    
+    if (count($privileges) > 0 && !$oInstaller->addResourcePrivileges($oACL, $menuitem['menuid'], $privileges)) {
+        error_exit("ERR: failed to add custom group privileges for menuitem {$menuitem['menuid']} - {$oInstaller->_errMsg}\n");
     }
 }
 

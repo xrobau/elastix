@@ -10,7 +10,7 @@ Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-7.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 4.0.0-14
 Prereq: asterisk
 Requires: php-jpgraph
 
@@ -93,6 +93,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: CDR Report: declare custom privileges reportany and deleteany for the
+  cdrreport module, and update minimum elastix-framework version to match. Part
+  of the fix for Elastix bug #1100.
+  SVN Rev[7700]
+
 * Fri Jul 15 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump version and release in specfile.

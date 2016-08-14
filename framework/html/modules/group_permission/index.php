@@ -48,29 +48,36 @@ function _moduleContent(&$smarty, $module_name)
     $templates_dir = (isset($arrConf['templates_dir'])) ? $arrConf['templates_dir']:'themes';
     $local_templates_dir = "$base_dir/modules/$module_name/".$templates_dir.'/'.$arrConf['theme'];
 
-    return reportGroupPermission($smarty, $module_name, $local_templates_dir);
+    $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : 'list';
+    switch ($action) {
+    case 'assigncustom':
+        return assignCustomPrivileges($smarty, $module_name, $local_templates_dir);
+    case 'list':
+    default:
+        return reportGroupPermission($smarty, $module_name, $local_templates_dir);
+    }
 }
 
 class paloSantoNavGrid extends paloSantoNavigationBase
 {
-    function buildGrid($admin)
+    function buildGrid($pACL, $customurlprefix, $admin)
     {
         $grid = array();
-        $this->_buildGridChildren($this->_menubase, $grid, 0, NULL, $admin);
+        $this->_buildGridChildren($pACL, $customurlprefix, $this->_menubase, $grid, 0, NULL, $admin);
         return $grid;
     }
 
-    private function _buildGridChildren($children, &$grid, $nlevel, $idparent, $admin)
+    private function _buildGridChildren($pACL, $customurlprefix, $children, &$grid, $nlevel, $idparent, $admin)
     {
-    	$total = $enabled = 0;
+        $total = $enabled = 0;
 
-    	$buttontag = '<button class="resource-branch-manip level-'.($nlevel+1).'">'.
+        $buttontag = '<button class="resource-branch-manip level-'.($nlevel+1).'">'.
             '&nbsp;</button>';
         $idparenttag = is_null($idparent)
             ? ''
             : '<input type="hidden" name="idparent" value="'.$idparent.'" />';
         foreach (array_keys($children) as $key) {
-        	$idcheck = 'resource-access-'.$key;
+            $idcheck = 'resource-access-'.$key;
             $disabledattr = ($admin && in_array($key, array('usermgr', 'grouplist', 'userlist', 'group_permission')))
                 ? 'disabled="disabled"' : '';
             $checktag = '<input '.
@@ -90,7 +97,8 @@ class paloSantoNavGrid extends paloSantoNavigationBase
                 htmlspecialchars($key, ENT_COMPAT, 'UTF-8'),
                 htmlspecialchars(_tr($children[$key]['Name']), ENT_COMPAT, 'UTF-8'),
                 '&nbsp;',
-            	'&nbsp;',
+                '&nbsp;',
+                '&nbsp;',
             );
             $tupla[$nlevel] = $idtag.(($children[$key]['HasChild']) ? $buttontag : $checktag);
 
@@ -100,7 +108,7 @@ class paloSantoNavGrid extends paloSantoNavigationBase
             // Si este no es un nodo final, se actualiza la cuenta de total y activos
             if ($children[$key]['HasChild']) {
                 list($childrentotal, $childrenenabled) = $this->_buildGridChildren(
-                	$children[$key]['children'], $grid, $nlevel + 1, $children[$key]['id'], $admin);
+                    $pACL, $customurlprefix, $children[$key]['children'], $grid, $nlevel + 1, $children[$key]['id'], $admin);
                 $grid[$curpos][5] = '<b>'.$childrentotal.'</b>';
                 $grid[$curpos][6] = '<span '.(($childrenenabled > 0) ? 'style="font-weight: bold;"' : '').' class="enabledcount">'.$childrenenabled."</span>";
                 $total += $childrentotal;
@@ -108,6 +116,11 @@ class paloSantoNavGrid extends paloSantoNavigationBase
             } else {
                 $total++;
                 if (in_array('access', $children[$key]['actions'])) $enabled++;
+
+                $privlist = $pACL->getModulePrivileges($key);
+                if (is_array($privlist) && count($privlist) > 0) {
+                    $grid[$curpos][7] = '<a href="'.$customurlprefix.'&amp;resource='.$key.'" >['._tr('Custom privileges').']</a>';
+                }
             }
         }
 
@@ -127,28 +140,28 @@ class paloSantoNavGrid extends paloSantoNavigationBase
      */
     function normalizeActions($k)
     {
-    	$this->_normalizeChildrenWithAction($this->_menubase, $k);
-    	foreach (array_keys($this->_menubase) as $nkey) {
-    		if ($this->_menubase[$nkey]['HasChild'])
-    		  $this->_menubase[$nkey]['actions'] = array();
-    	}
+        $this->_normalizeChildrenWithAction($this->_menubase, $k);
+        foreach (array_keys($this->_menubase) as $nkey) {
+            if ($this->_menubase[$nkey]['HasChild'])
+              $this->_menubase[$nkey]['actions'] = array();
+        }
     }
 
     // Normaliza en todos los hijos y devuelve número de hijos con acción
     private function _normalizeChildrenWithAction(&$children, $k)
     {
-    	$action_count = 0;
+        $action_count = 0;
         foreach (array_keys($children) as $nkey) {
             if ($children[$nkey]['HasChild']) {
                 // Hay hijos. Se anula la acción y se setea de nuevo según los hijos
-            	$children[$nkey]['actions'] = array_diff($children[$nkey]['actions'], array($k));
-            	$child_count = $this->_normalizeChildrenWithAction($children[$nkey]['children'], $k);
-            	if ($child_count > 0) $children[$nkey]['actions'][] = $k;
-            	$action_count += $child_count;
+                $children[$nkey]['actions'] = array_diff($children[$nkey]['actions'], array($k));
+                $child_count = $this->_normalizeChildrenWithAction($children[$nkey]['children'], $k);
+                if ($child_count > 0) $children[$nkey]['actions'][] = $k;
+                $action_count += $child_count;
             } else {
                 // No hay hijos, se suma 1 si tiene la acción
                 if (in_array($k, $children[$nkey]['actions']))
-                	$action_count++;
+                    $action_count++;
             }
         }
         return $action_count;
@@ -178,13 +191,16 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir)
     if (empty($id_group)) $id_group = $id_admin;
     $_POST['filter_group'] = $id_group;
 
+    // ¿Es este grupo el grupo administrador?
+    $bIsAdminGroup = ($id_group == 1);
+
     // Cargar el menú completo
     $oMenu = new paloMenu($arrConf['elastix_dsn']['menu']);
     $fullmenu = $oMenu->cargar_menu();
     foreach (array_keys($fullmenu) as $k) $fullmenu[$k]['actions'] = array();
 
     if (isset($_POST['apply']) && isset($_POST['resource_access']) && is_array($_POST['resource_access'])) {
-        applyNewGroupPermissions($smarty, $id_group, $fullmenu, ($id_group == 1));
+        applyNewGroupPermissions($smarty, $id_group, $fullmenu, $bIsAdminGroup);
     }
 
     // Cargar permisos de módulos
@@ -206,14 +222,15 @@ function reportGroupPermission($smarty, $module_name, $local_templates_dir)
 
     $oGrid = new paloSantoGrid($smarty);
     $oGrid->pagingShow(FALSE);
-    $oGrid->setColumns(array('', '', '', _tr('Resource'), _tr('Description'), _tr('Available'), _tr('Enabled')));
-    $oGrid->setData($oArbol->buildGrid($id_group == 1));
+    $oGrid->setColumns(array('', '', '', _tr('Resource'), _tr('Description'),
+        _tr('Available'), _tr('Enabled'), _tr('Custom Privileges')));
+    $oGrid->setData($oArbol->buildGrid($pACL, '?menu='.$module_name.'&amp;action=assigncustom&amp;id_group='.$id_group, $bIsAdminGroup));
     $oGrid->addSubmitAction('apply', _tr('Apply'));
     $oGrid->setIcon('images/list.png');
     $oGrid->setTitle(_tr("Group Permission"));
     $oGrid->showFilter(trim($oFilterForm->fetchForm("$local_templates_dir/filter.tpl","",$_POST)));
     $oGrid->addFilterControl(_tr("Filter applied ")._tr("Group")." = $sNombreGrupo",
-    	$_POST, array("filter_group" => 1), true);
+        $_POST, array("filter_group" => 1), true);
 
     return $oGrid->fetchGrid();
 }
@@ -246,11 +263,11 @@ function applyNewGroupPermissions($smarty, $id_group, $fullmenu, $is_admin)
 {
     global $pACL;
 
-	if ($is_admin) {
-	    $_POST['resource_access'] = array_unique(array_merge(
-	    	$_POST['resource_access'],
-	    	array('usermgr', 'grouplist', 'userlist', 'group_permission')));
-	}
+    if ($is_admin) {
+        $_POST['resource_access'] = array_unique(array_merge(
+            $_POST['resource_access'],
+            array('usermgr', 'grouplist', 'userlist', 'group_permission')));
+    }
     foreach ($_POST['resource_access'] as $resource_name) {
         if (isset($fullmenu[$resource_name]) &&
             !in_array('access', $fullmenu[$resource_name]['actions'])) {
@@ -262,8 +279,8 @@ function applyNewGroupPermissions($smarty, $id_group, $fullmenu, $is_admin)
     $modules_action_old = array();
     $mod_permissions = $pACL->loadGroupPermissions($id_group);
     foreach ($mod_permissions as $tupla) {
-    	if ($tupla['action_name'] == 'access')
-    		$modules_action_old[] = $tupla['resource_name'];
+        if ($tupla['action_name'] == 'access')
+            $modules_action_old[] = $tupla['resource_name'];
     }
     sort($modules_action_old);
 
@@ -287,19 +304,19 @@ function applyNewGroupPermissions($smarty, $id_group, $fullmenu, $is_admin)
     // Cargar IDs de los recursos
     $nres = $pACL->getNumResources('');
     if ($nres == 0) {
-    	$smarty->assign(array(
+        $smarty->assign(array(
             'mb_title'    =>  _tr('Cannot count resources'),
             'mb_message'  =>  $pACL->errMsg,
-    	));
-    	return;
+        ));
+        return;
     }
     $list_resources = $pACL->getListResources($nres, 0, '');
     if (count($list_resources) <= 0) {
-    	$smarty->assign(array(
+        $smarty->assign(array(
             'mb_title'    =>  _tr('Cannot load resource IDs'),
             'mb_message'  =>  $pACL->errMsg,
-    	));
-    	return;
+        ));
+        return;
     }
     $resource_ids = array();
     foreach ($list_resources as $tupla) {
@@ -313,22 +330,99 @@ function applyNewGroupPermissions($smarty, $id_group, $fullmenu, $is_admin)
 
     if (count($modules_id_toadd) > 0) {
         if (!$pACL->saveGroupPermissions('access', $id_group, $modules_id_toadd)) {
-        	$smarty->assign(array(
+            $smarty->assign(array(
                 'mb_title'    =>  _tr('Cannot add enabled resources'),
                 'mb_message'  =>  $pACL->errMsg,
-        	));
-        	return;
+            ));
+            return;
         }
     }
 
     if (count($modules_id_toremove) > 0) {
         if (!$pACL->deleteGroupPermissions('access', $id_group, $modules_id_toremove)) {
-        	$smarty->assign(array(
+            $smarty->assign(array(
                 'mb_title'    =>  _tr('Cannot remove disabled resources'),
                 'mb_message'  =>  $pACL->errMsg,
-        	));
-        	return;
+            ));
+            return;
         }
     }
 }
-?>
+
+function assignCustomPrivileges($smarty, $module_name, $local_templates_dir)
+{
+    global $arrConf;
+    global $pACL;
+
+    if (!isset($_REQUEST['id_group']) || !isset($_REQUEST['resource'])) {
+        Header('Location: ?menu='.$module_name);
+        return;
+    }
+
+    // Privilegios disponibles para el módulo
+    $privlist = $pACL->getModulePrivileges($_REQUEST['resource']);
+    if (!is_array($privlist) || count($privlist) <= 0) {
+        Header('Location: ?menu='.$module_name);
+        return;
+    }
+
+    // Conjunto de privilegios asignados al grupo para este módulo
+    $id_resource = $pACL->getIdResource($_REQUEST['resource']);
+    $currpriv = $pACL->getCurrentModulePrivilegesGroup(
+        $id_resource, $_REQUEST['id_group']);
+
+    // Guardar nuevo conjunto de privilegios
+    if (isset($_POST['apply'])) {
+        $bExito = TRUE;
+        $newpriv = array();
+        if (isset($_POST['privileges']) && is_array($_POST['privileges']))
+            $newpriv = $_POST['privileges'];
+        foreach ($privlist as $tupla) {
+            if (isset($currpriv[$tupla['id']]) && !in_array($tupla['id'], $newpriv)) {
+                // Privilegio a revocar
+                $bExito = $pACL->revokeModulePrivilege2Group($tupla['id'], $_REQUEST['id_group']);
+            } elseif (!isset($currpriv[$tupla['id']]) && in_array($tupla['id'], $newpriv)) {
+                // Privilegio a otorgar
+                $bExito = $pACL->grantModulePrivilege2Group($tupla['id'], $_REQUEST['id_group']);
+            }
+            if (!$bExito) break;
+        }
+        if (!$bExito) {
+            $smarty->assign(array(
+                'mb_title'    =>  _tr('Cannot update custom privileges'),
+                'mb_message'  =>  $pACL->errMsg,
+            ));
+        } else {
+            Header('Location: ?menu='.$module_name.'&filter_group='.$_REQUEST['id_group']);
+            return;
+        }
+    }
+
+    $arrData = array();
+    foreach ($privlist as $tupla) {
+        $idcheck = 'resource-privilege-'.$tupla['privilege'];
+        $arrData[] = array(
+            '<input type="checkbox" name="privileges[]" id="'.$idcheck.'" value="'.$tupla['id'].'" '.
+                (isset($currpriv[$tupla['id']]) ? 'checked' : '').' /><label for="'.$idcheck.'">&nbsp;</label>',
+            htmlentities($tupla['privilege'], ENT_COMPAT, 'UTF-8'),
+            htmlentities($tupla['desc_privilege'], ENT_COMPAT, 'UTF-8'),
+        );
+    }
+
+    $rs = $pACL->getResources($id_resource);
+    $rsname = _tr($rs[0][2]);
+    $gname = $pACL->getGroupNameByid($_REQUEST['id_group']);
+    $title = _tr('Custom privileges for {1} on {2}');
+    $title = str_replace('{1}', $gname, $title);
+    $title = str_replace('{2}', $rsname, $title);
+
+    $oGrid = new paloSantoGrid($smarty);
+    $oGrid->pagingShow(FALSE);
+    $oGrid->setColumns(array('', _tr('Privilege'), _tr('Description')));
+    $oGrid->setData($arrData);
+    $oGrid->addSubmitAction('apply', _tr('Save'));
+    $oGrid->setIcon('images/list.png');
+    $oGrid->setTitle($title);
+
+    return $oGrid->fetchGrid();
+}

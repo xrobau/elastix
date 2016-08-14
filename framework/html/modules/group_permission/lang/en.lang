@@ -37,5 +37,10 @@ $arrLangModule=array(
 "Create" => "Create",
 "Delete" => "Delete",
 "Update" => "Update",
+'Custom privileges for {1} on {2}' => 'Custom privileges for {1} on {2}',
+'Privilege' => 'Privilege',
+'Description' => 'Description',
+'Cannot update custom privileges' => 'Cannot update custom privileges',
+'Custom privileges' => 'Custom privileges',
 );
 ?>

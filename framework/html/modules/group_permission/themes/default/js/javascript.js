@@ -15,8 +15,17 @@ $(document).ready(function() {
         }
     });
 
-    $('input[type=checkbox][name="resource_access[]"]').each(function(index, element) {
+    $('input[type=checkbox][name="resource_access[]"], input[type=checkbox][name="privileges[]"]').each(function(index, element) {
         // Decorar los checkbox según cómo estén seteados
+        $(this).button({
+            icons: {
+                primary: $(this).is(':checked') ? 'ui-icon-check' : 'ui-icon-blank'
+            },
+            text: false
+        });
+    });
+    $('input[type=checkbox][name="privileges[]"]').click(function(event) {
+        // Actualizar el icono según el nuevo estado
         $(this).button({
             icons: {
                 primary: $(this).is(':checked') ? 'ui-icon-check' : 'ui-icon-blank'

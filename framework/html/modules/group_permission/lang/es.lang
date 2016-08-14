@@ -37,5 +37,10 @@ $arrLangModule=array(
 "Delete" => "Eliminar",
 "Update" => "Actualizar",
 "Group Permission" => "Permisos de Grupo",
+'Custom privileges for {1} on {2}' => 'Privilegios personalizados para {1} en {2}',
+'Privilege' => 'Privilegio',
+'Description' => 'Descripción',
+'Cannot update custom privileges' => 'No se puede actualizar privilegios personalizados',
+'Custom privileges' => 'Privilegios personalizados',
 );
 ?>

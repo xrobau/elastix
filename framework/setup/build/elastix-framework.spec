@@ -391,6 +391,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: fix reversed check on link for framed menuitem.
+  SVN Rev[7702]
 - CHANGED: Framework: the menu.xml format has been extended to encode custom
   module privileges. New methods have been implemented in paloACL to record them
   into the ACL database.

@@ -210,7 +210,7 @@ INFO_AUTH_MODULO;
             return FALSE;
         }
         if ($type == 'framed') {
-            if ($link != '') {
+            if ($link == '') {
                 $this->errMsg = "Link for framed menuitem cannot be empty";
                 return FALSE;
             }

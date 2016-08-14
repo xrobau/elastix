@@ -391,6 +391,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sun Aug 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: add new methods to paloACL required for custom privilege
+  assignment in Group Permission.
+  SVN Rev[7704]
 - CHANGED: Group Permission: create new option for each module that defines
   custom privileges, in order to grant or revoke them per group. Step 3 of
   implementation of per-module privileges to fix Elastix bug #1100.

@@ -1454,6 +1454,22 @@ SQL_LEER_ID_PROFILE;
         return TRUE;
     }
 
+    function getModulePrivileges($module)
+    {
+        $sql = <<<SQL_HAY_PRIVILEGIOS
+SELECT acl_module_privileges.id, acl_module_privileges.privilege, acl_module_privileges.desc_privilege
+FROM acl_resource, acl_module_privileges
+WHERE acl_resource.id = acl_module_privileges.id_resource
+    AND acl_resource.name = ?
+SQL_HAY_PRIVILEGIOS;
+        $rs = $this->_DB->fetchTable($sql, TRUE, array($module));
+        if (!is_array($rs)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
+        }
+        return $rs;
+    }
+
     /**
      * Procedimiento para interrogar si el usuario en $user está autorizado al
      * privilegio personalizado $privilege que ha sido definido por el módulo
@@ -1475,17 +1491,8 @@ SQL_LEER_ID_PROFILE;
     function hasModulePrivilege($user, $module, $privilege)
     {
         // ¿Hay privilegios personalizados en este módulo?
-        $sql = <<<SQL_HAY_PRIVILEGIOS
-SELECT acl_module_privileges.privilege
-FROM acl_resource, acl_module_privileges
-WHERE acl_resource.id = acl_module_privileges.id_resource
-    AND acl_resource.name = ?
-SQL_HAY_PRIVILEGIOS;
-        $rs = $this->_DB->fetchTable($sql, TRUE, array($module));
-        if (!is_array($rs)) {
-            $this->errMsg = $this->_DB->errMsg;
-            return FALSE;
-        }
+        $rs = $this->getModulePrivileges($module);
+        if (!is_array($rs)) return FALSE;
         if (count($rs) <= 0) return $this->isUserAdministratorGroup($user);
 
         // ¿Está el privilegio requerido entre los definidos?
@@ -1583,6 +1590,28 @@ SQL_PRIVILEGIO_USUARIO;
         }
         $this->errMsg = $this->_DB->errMsg;
         return FALSE;
+    }
+
+    function getCurrentModulePrivilegesGroup($idresource, $id_group)
+    {
+        $this->errMsg = '';
+        $sql = <<<SQL_CURRENT_GROUP_PRIVILEGES
+SELECT acl_module_privileges.id, acl_module_privileges.privilege
+FROM acl_module_privileges, acl_module_group_permissions
+WHERE acl_module_privileges.id_resource = ?
+    AND acl_module_privileges.id = acl_module_group_permissions.id_module_privilege
+    AND acl_module_group_permissions.id_group = ?;
+SQL_CURRENT_GROUP_PRIVILEGES;
+        $rs = $this->_DB->fetchTable($sql, TRUE, array($idresource, $id_group));
+        if (!is_array($rs)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return NULL;
+        }
+        $priv = array();
+        foreach ($rs as $tupla) {
+            $priv[$tupla['id']] = $tupla['privilege'];
+        }
+        return $priv;
     }
 
     function updateModulePrivilegeDescription($id_privilege, $description)

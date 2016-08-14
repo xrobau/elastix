@@ -9,7 +9,7 @@ Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-9
+Prereq: elastix-framework >= 2.5.0-16
 Prereq: elastix-my_extension >= 2.0.4-5
 Prereq: elastix-system >= 2.3.0-10
 Prereq: vsftpd
@@ -300,6 +300,13 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Sat Aug 13 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Monitoring,Voicemail: declare custom privileges reportany,
+  downloadany, deleteany for the voicemail and monitoring modules, and update
+  minimum elastix-framework version to match. Part of the fix for Elastix
+  bug #1100.
+  SVN Rev[7701]
+
 * Tue Aug  9 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: User List/Extension: the assignment of a phone extension to an user is
   properly an aspect of pbx, not the core framework. As part of an userlist

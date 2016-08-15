@@ -78,6 +78,21 @@ function _moduleContent(&$smarty, $module_name)
     return $content;
 }
 
+// Cargar correo del usuario actual logoneado
+function getEmailCurrentUser($pACL)
+{
+    $id_user = $pACL->getIdUser($_SESSION['elastix_user']);
+    $listaPropiedades = $pACL->getUserProfile($id_user, 'webmail');
+    $email = '';
+    if (is_array($listaPropiedades)) {
+        if (isset($listaPropiedades['login']))
+            $email = $listaPropiedades['login'];
+        if (isset($listaPropiedades['domain']))
+            $email .= '@'.$listaPropiedades['domain'];
+    }
+    return $email;
+}
+
 function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf)
 {
     $pVacations  = new paloSantoVacations($pDB);
@@ -97,14 +112,13 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
     //$_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
 
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $idUserInt = $pACL->getIdUser($userAccount);
 
     if($pACL->isUserAdministratorGroup($userAccount)){
         $link_emails = "<a href='javascript: popup_get_emails(\"?menu=$module_name&action=showAllEmails&rawmode=yes\");' name='getEmails' id='getEmails' style='cursor: pointer;'>"._tr("Choose other email account")."</a>";
         if(!isset($email) || $email == "")
-            $email = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
+            $email = getEmailCurrentUser($pACL);
     }else{
-        $email = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
+        $email = getEmailCurrentUser($pACL);
     }
 
     if(isset($email) && $email!="" && preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
@@ -195,8 +209,7 @@ function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$p
     $result     = "";
 
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $idUserInt = $pACL->getIdUser($userAccount);
-    $emails = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
+    $emails = getEmailCurrentUser($pACL);
 
     if(!$oForm->validateForm($_POST)) {
         // Falla la validación básica del formulario
@@ -307,8 +320,7 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
     $result     = "";
 
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $idUserInt = $pACL->getIdUser($userAccount);
-    $emails = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
+    $emails = getEmailCurrentUser($pACL);
 
     if(!$oForm->validateForm($_POST)) {
         // Falla la validación básica del formulario

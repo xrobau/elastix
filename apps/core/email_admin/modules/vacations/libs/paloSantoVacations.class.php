@@ -301,36 +301,6 @@ SCRIPT;
     }
 
     /*********************************************************************************
-    /* Funcion retorna la plantilla basica del script de vacaciones:
-    /* - $idUserInt:      id del usuario elastix en session
-    /* - $pDBACL:         conexion a la base de datos acl
-    /*
-    /*********************************************************************************/
-    function getAccountByIdUser($idUserInt, $pDBACL)
-    {
-	$data = array($idUserInt);
-	$account = "";
-	$query   = "select app.id_profile, app.property, app.value from acl_profile_properties app, acl_user_profile aup where aup.id_user=? AND app.id_profile=aup.id_profile order by property DESC";
-	$result  = $pDBACL->fetchTable($query, true, $data);
-
-        if($result==FALSE){
-            $this->errMsg = $pDBACL->errMsg;
-            return false;
-        }
-
-	foreach($result as $key => $value){
-	    $propiedad = $value['property'];
-	    $valor     = $value['value'];
-	    if($propiedad=="login")
-		$account .= $valor;
-	    if($propiedad=="domain")
-		$account .= "@$valor";
-	}
-	return $account;
-    }
-
-
-    /*********************************************************************************
     /* Funcion retorna el mensaje de vacaciones que se ha guardado dado un email:
     /* - $email:      email del usuario elastix en session
     /*

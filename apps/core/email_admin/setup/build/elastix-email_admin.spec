@@ -10,7 +10,7 @@ Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.3.0-5
+Prereq: elastix-framework >= 2.5.0-14
 Prereq: RoundCubeMail
 Prereq: php-imap
 Prereq: postfix, spamassassin, cyrus-imapd
@@ -206,6 +206,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sun Aug 14 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Vacations: replace handcoded and potentially buggy load of webmail
+  profile properties with the use of paloACL::getUserProfile. Change minimum
+  versions of elastix-framework to match.
+  SVN Rev[7708]
+
 * Tue Aug  9 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - ADDED: User List/Webmail: the assignment of web mail credentials to an user is
   properly an aspect of email_admin, not the core framework. As part of an

@@ -2,13 +2,13 @@
 <?php
 
 $command = NULL;
-if ($argc >= 2 && in_array($argv[1], array('list', 'add', 'remove')))
+if ($argc >= 2 && in_array($argv[1], array('list', 'add', 'xmlexport')))
     $command = $argv[1];
 if (is_null($command)) {
 ?>
 Uso: elastix-menuhack COMANDO [args...]
 
-Donde COMANDO puede ser: list add
+Donde COMANDO puede ser: [list|add|xmlexport]
 
 Para comando list:
     elastix-menuhack list
@@ -23,6 +23,15 @@ Para comando add:
     indicada existe con el mismo número de niveles, se actualiza su descripción
     si se la proporciona. Si la rama no existe, se la crea. Si se proporciona
     un link-target, el módulo es de tipo link. De otro modo es módulo normal.
+    
+Para comando export:
+    elastix-menuhack xmlexport MENUITEM [MENUITEM ...]
+    
+    Se mostrará en salida estándar un documento XML que contiene las definiciones
+    de todos los módulos indicados en la línea de comandos, junto a todos los
+    items que contienen a los items, hasta la raíz del menú. Además se emitirán
+    los permisos de grupo y privilegios requeridos para autorizar. Este documento
+    es adecuado para ser procesado por el programa elastix-menumerge.
 <?php
     exit(1);
 }
@@ -168,4 +177,125 @@ if ($command == 'list') {
         if (!$bExito) die("FATAL: no se puede actualizar - {$oInstaller->errMsg}");
     }
     exit(0);
+} elseif ($command == 'xmlexport') {
+    $modlist = $argv;
+    array_shift($modlist);
+    array_shift($modlist);
+
+    class paloSantoNavXML extends paloSantoNavigationBase
+    {
+        private $_xml = NULL;
+        private $_xml_menulist = NULL;
+        private $_existing = array();
+        private $_groups = array();
+        private $_groups_by_resource = array();
+        private $_priv_by_resource = array();
+        
+        function loadGroupPermissions($pACL)
+        {
+            foreach (array_keys($this->_menunodes) as $node) {
+                $p = $pACL->getModulePrivileges($node);
+                if (count($p) > 0) foreach ($p as $priv) {
+                    $this->_priv_by_resource[$node][$priv['privilege']] = array(
+                        'name'  =>  $priv['privilege'],
+                        'desc'  =>  $priv['desc_privilege'],
+                        'groups'=>  array(),
+                    );
+                }
+            }
+        
+            $t = $pACL->getGroups();
+            foreach ($t as $tp) {
+                $this->_groups[$tp[0]] = array(
+                    'id'    =>  $tp[0],
+                    'name'  =>  $tp[1],
+                    'desc'  =>  $tp[2],
+                );
+                
+                $p = $pACL->loadGroupPermissions($tp[0]);
+                foreach ($p as $gp) if ($gp['action_name'] == 'access') {
+                    if (!isset($this->_groups_by_resource[$gp['resource_name']]))
+                        $this->_groups_by_resource[$gp['resource_name']] = array();
+                    if (!in_array($tp[0], $this->_groups_by_resource[$gp['resource_name']]))
+                        $this->_groups_by_resource[$gp['resource_name']][] = $tp[0];
+
+                    if (isset($this->_priv_by_resource[$gp['resource_name']])) {
+                        $pr = $pACL->getCurrentModulePrivilegesGroup($gp['resource_id'], $tp[0]);
+                        foreach ($pr as $privilege) {
+                            if (!in_array($tp[0], $this->_priv_by_resource[$gp['resource_name']][$privilege]['groups']))
+                                $this->_priv_by_resource[$gp['resource_name']][$privilege]['groups'][] = $tp[0];
+                        }
+                    }
+                }
+            }
+        }
+        
+        function addModule($mod)
+        {
+            if (is_null($this->_xml)) {
+                $this->_xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><module/>');
+                $this->_xml_menulist = $this->_xml->addChild('menulist');
+            }
+            
+            $this->setSelectedModule($mod);
+            $path = $this->getSelectedModulePath();
+            foreach ($path as $node) {
+                if (!in_array($node, $this->_existing)) {
+                    $this->_existing[] = $node;
+
+                    $xml_menuitem = $this->_xml_menulist->addChild('menuitem');
+                    $xml_menuitem->addAttribute('menuid', $node);
+                    $xml_menuitem->addAttribute('desc', $this->_menunodes[$node]['Name']);
+                    if ($this->_menunodes[$node]['IdParent'] != '')
+                        $xml_menuitem->addAttribute('parent', $this->_menunodes[$node]['IdParent']);
+                    if ($this->_menunodes[$node]['Link'])
+                        $xml_menuitem->addAttribute('link', $this->_menunodes[$node]['Link']);
+                    $xml_menuitem->addAttribute('order', $this->_menunodes[$node]['order_no']);
+                    
+                    if (isset($this->_groups_by_resource[$node])) {
+                        $xml_permissions = $xml_menuitem->addChild('permissions');
+                        foreach ($this->_groups_by_resource[$node] as $g) {
+                            $xml_group = $xml_permissions->addChild('group');
+                            foreach ($this->_groups[$g] as $k => $v)
+                                $xml_group->addAttribute($k, $v);
+                        }
+                    }
+                    if (isset($this->_priv_by_resource[$node])) {
+                        foreach ($this->_priv_by_resource[$node] as $pr) {
+                            $xml_privilege = $xml_menuitem->addChild('privilege');
+                            $xml_privilege->addAttribute('name', $pr['name']);
+                            $xml_privilege->addAttribute('desc', $pr['desc']);
+                            foreach ($pr['groups'] as $g) {
+                                $xml_grant = $xml_privilege->addChild('grant2group');
+                                $xml_grant->addAttribute('name', $this->_groups[$g]['name']);
+                            }
+                        }
+                    }
+                }
+                
+                if ($node == $mod) break;
+            }
+        }
+        
+        function getXML() { return $this->_xml; }
+    }
+
+    $oPN = new paloSantoNavXML($oMenu->cargar_menu());
+
+    $pDBACL = new paloDB($arrConf['elastix_dsn']['acl']);
+    if(!empty($pDBACL->errMsg)) die("ERROR DE DB: {$pDBACL->errMsg}\n");
+    $oACL = new paloACL($pDBACL);
+    $oPN->loadGroupPermissions($oACL);
+    
+    foreach ($modlist as $mod) {
+        $oPN->addModule($mod);
+    }
+    
+    $dom = new DOMDocument(1.0);
+    $dom->preserveWhiteSpace = FALSE;
+    $dom->formatOutput = TRUE;
+    $dom->loadXML($oPN->getXML()->asXML());
+    print $dom->saveXML();
+    exit(0);
 }
+

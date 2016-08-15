@@ -70,6 +70,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Sun Aug 14 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: elastix-menuhack: implement xmlexport option that outputs a menu.xml
+  document from a list of menu options.
+  SVN Rev[7705]
+
 * Wed Jul  6 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: elastix-menuhack: allow ELASTIX_ROOT to specify location of base
   Elastix for command-line tools.

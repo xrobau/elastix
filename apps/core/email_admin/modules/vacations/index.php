@@ -60,20 +60,20 @@ function _moduleContent(&$smarty, $module_name)
     $content = "";
 
     switch($action){
-	case "activate":
-	    $content = activateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-	    break;
-	case "disactivate":
-	    $content = disactivateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-	    break;
-	case "showAllEmails":
-	    $html = showAllEmails($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-	    $smarty->assign("CONTENT",$html);
-	    $content = $smarty->display("$local_templates_dir/emailsGrid.tpl");
-	    break;
-        default: // view_form
-            $content = viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-            break;
+    case "activate":
+        $content = activateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        break;
+    case "disactivate":
+        $content = disactivateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        break;
+    case "showAllEmails":
+        $html = showAllEmails($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        $smarty->assign("CONTENT",$html);
+        $content = $smarty->display("$local_templates_dir/emailsGrid.tpl");
+        break;
+    default: // view_form
+        $content = viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        break;
     }
     return $content;
 }
@@ -100,43 +100,43 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
     $idUserInt = $pACL->getIdUser($userAccount);
 
     if($pACL->isUserAdministratorGroup($userAccount)){
-	$link_emails = "<a href='javascript: popup_get_emails(\"?menu=$module_name&action=showAllEmails&rawmode=yes\");' name='getEmails' id='getEmails' style='cursor: pointer;'>"._tr("Choose other email account")."</a>";
-	if(!isset($email) || $email == "")
-	    $email = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
+        $link_emails = "<a href='javascript: popup_get_emails(\"?menu=$module_name&action=showAllEmails&rawmode=yes\");' name='getEmails' id='getEmails' style='cursor: pointer;'>"._tr("Choose other email account")."</a>";
+        if(!isset($email) || $email == "")
+            $email = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
     }else{
-	$email = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
+        $email = $pVacations->getAccountByIdUser($idUserInt, $pDBACL);
     }
 
     if(isset($email) && $email!="" && preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
-	$_DATA['email'] = $email;
-	$rowsVacations = $pVacations->getMessageVacationByUser($email);
-	if(isset($rowsVacations) && $rowsVacations!=""){
-	    $_DATA['subject']  = isset($_POST['subject'])?$_POST['subject']:$rowsVacations['subject'];
-	    $_DATA['body']     = isset($_POST['body'])?$_POST['body']:$rowsVacations['body'];
-	    $_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:$rowsVacations['ini_date'];
-	    $_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:$rowsVacations['end_date'];
-	    $id = $rowsVacations['id'];
-	}else{
-	    $_DATA['subject'] = isset($_POST['subject'])?$_POST['subject']:_tr("Auto-Reply: Out of the office");
-	    $_DATA['body']    = isset($_POST['body'])?$_POST['body']:_tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
-	    $_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:date("d M Y");
-	    $_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
-	}
+        $_DATA['email'] = $email;
+        $rowsVacations = $pVacations->getMessageVacationByUser($email);
+        if(isset($rowsVacations) && $rowsVacations!=""){
+            $_DATA['subject']  = isset($_POST['subject'])?$_POST['subject']:$rowsVacations['subject'];
+            $_DATA['body']     = isset($_POST['body'])?$_POST['body']:$rowsVacations['body'];
+            $_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:$rowsVacations['ini_date'];
+            $_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:$rowsVacations['end_date'];
+            $id = $rowsVacations['id'];
+        }else{
+            $_DATA['subject'] = isset($_POST['subject'])?$_POST['subject']:_tr("Auto-Reply: Out of the office");
+            $_DATA['body']    = isset($_POST['body'])?$_POST['body']:_tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
+            $_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:date("d M Y");
+            $_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
+        }
     }else{
-	if(!$pACL->isUserAdministratorGroup($userAccount)){
-	    $smarty->assign("mb_title", _tr("Alert"));
-	    $smarty->assign("mb_message", _tr('Please contact your administrator if your user does not have an email account otherwise add it to System->User management->Users'));
-	}
-	$_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:date("d M Y");
-	$_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
-	$_DATA['subject'] = isset($_POST['subject'])?$_POST['subject']:_tr("Auto-Reply: Out of the office");
-	$_DATA['body']    = isset($_POST['body'])?$_POST['body']:_tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
+        if(!$pACL->isUserAdministratorGroup($userAccount)){
+            $smarty->assign("mb_title", _tr("Alert"));
+            $smarty->assign("mb_message", _tr('Please contact your administrator if your user does not have an email account otherwise add it to System->User management->Users'));
+        }
+        $_DATA['ini_date'] = isset($_POST['ini_date'])?$_POST['ini_date']:date("d M Y");
+        $_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
+        $_DATA['subject'] = isset($_POST['subject'])?$_POST['subject']:_tr("Auto-Reply: Out of the office");
+        $_DATA['body']    = isset($_POST['body'])?$_POST['body']:_tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
     }
     $smarty->assign("ID", $id); //persistence id with input hidden in tpl
 
     $statusSieve = $pVacations->verifySieveStatus();
     if(!$statusSieve['response']){
-	$smarty->assign("mb_title", _tr("Alert"));
+        $smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",$statusSieve['message']);
     }
 
@@ -144,8 +144,8 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
     $scripts = $objAntispam->existScriptSieve($email, "scriptTest.sieve");
 
     if($scripts['actived'] != ""){
-	if(preg_match("/vacations.sieve/",$scripts['actived']))
-	    $activate = "enabled";
+        if(preg_match("/vacations.sieve/",$scripts['actived']))
+            $activate = "enabled";
     }
 
     $timestamp1 = mktime(0,0,0,date("m",strtotime($_DATA['ini_date'])),date("d",strtotime($_DATA['ini_date'])),date("Y",strtotime($_DATA['ini_date'])));
@@ -207,23 +207,23 @@ function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$p
                 $strErrorMsg .= "$k: [$v[mensaje]] <br /> ";
             }
         }
-	$smarty->assign("mb_title", _tr("Validation Error"));
+        $smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", $strErrorMsg);
         return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
-	$smarty->assign("mb_title", _tr("Error"));
-	$smarty->assign("mb_message",_tr('Email is empty or is not correct. Please write the email account.'));
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        $smarty->assign("mb_title", _tr("Error"));
+        $smarty->assign("mb_message",_tr('Email is empty or is not correct. Please write the email account.'));
+        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     if($email != $emails){
-	if(!$pACL->isUserAdministratorGroup($userAccount)){
-	    $smarty->assign("mb_title", _tr("Error"));
-	    $smarty->assign("mb_message",_tr('Email is not correct or is not correct. Please write the email assigned to your elastix account.'));
-	    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-	}
+        if(!$pACL->isUserAdministratorGroup($userAccount)){
+            $smarty->assign("mb_title", _tr("Error"));
+            $smarty->assign("mb_message",_tr('Email is not correct or is not correct. Please write the email assigned to your elastix account.'));
+            return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        }
     }
 
     $timestamp0 = mktime(0,0,0,date("m"),date("d"),date("Y"));
@@ -238,54 +238,54 @@ function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$p
     $smarty->assign("num_days",$dias);
 
     if($seconds < 0){
-	$smarty->assign("mb_title", _tr("Alert"));
+        $smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",_tr("End date should be greater than the initial date"));
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     $statusSieve = $pVacations->verifySieveStatus();
     if(!$statusSieve['response']){
-	$smarty->assign("mb_title", _tr("Alert"));
+        $smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",$statusSieve['message']);
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
     $pDB->beginTransaction();
     $scripts = $objAntispam->existScriptSieve($email, "scriptTest.sieve");
     $spamCapture = false;// si CapturaSpam=OFF y Vacations=OFF
     if($scripts['actived'] != ""){// hay un script activo
-	if(preg_match("/scriptTest.sieve/",$scripts['actived'])) // si CapturaSpam=ON y Vacations=OFF
-	    $spamCapture = true;// si CapturaSpam=ON y Vacations=OFF
+        if(preg_match("/scriptTest.sieve/",$scripts['actived'])) // si CapturaSpam=ON y Vacations=OFF
+            $spamCapture = true;// si CapturaSpam=ON y Vacations=OFF
     }
 
     $band = $pVacations->existMessage($email);
     $res = "";
     if($band){//actualizacion
-	$arr_Vaca = $pVacations->getMessageVacationByUser($email);
-	if(count($arr_Vaca) > 1){
-	    $pVacations->deleteMessagesByUser($email, $subject, $body, $ini_date, $end_date);
-	    $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
-	}else
-	    $res = $pVacations->updateMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
+        $arr_Vaca = $pVacations->getMessageVacationByUser($email);
+        if(count($arr_Vaca) > 1){
+            $pVacations->deleteMessagesByUser($email, $subject, $body, $ini_date, $end_date);
+            $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
+        }else
+            $res = $pVacations->updateMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
     }else{// insersion
-	$res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
+        $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
     }
 
     if($res){
-	if($timeSince >= 0){
-	    $subject = str_replace("{END_DATE}", $end_date, $subject);
-	    $body = str_replace("{END_DATE}", $end_date, $body);
-	    $result = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture);
-	}else    $result = true;
+        if($timeSince >= 0){
+            $subject = str_replace("{END_DATE}", $end_date, $subject);
+            $body = str_replace("{END_DATE}", $end_date, $body);
+            $result = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture);
+        }else    $result = true;
     }else
-	$result = false;
+        $result = false;
 
     if($result){
-	$pDB->commit();
-	$smarty->assign("mb_message",_tr("Email's Vacations have been enabled"));
+        $pDB->commit();
+        $smarty->assign("mb_message",_tr("Email's Vacations have been enabled"));
     }else{
-	$pDB->rollBack();
-	$msgError = $pVacations->errMsg;
-	$smarty->assign("mb_message", $msgError);
+        $pDB->rollBack();
+        $msgError = $pVacations->errMsg;
+        $smarty->assign("mb_message", $msgError);
     }
     return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 }
@@ -319,23 +319,23 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
                 $strErrorMsg .= "$k: [$v[mensaje]] <br /> ";
             }
         }
-	$smarty->assign("mb_title", _tr("Validation Error"));
+        $smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", $strErrorMsg);
         return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
-	$smarty->assign("mb_title", _tr("Error"));
-	$smarty->assign("mb_message",_tr('Email is empty or is not correct. Please write the email account.'));
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        $smarty->assign("mb_title", _tr("Error"));
+        $smarty->assign("mb_message",_tr('Email is empty or is not correct. Please write the email account.'));
+        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     if($email != $emails){
-	if(!$pACL->isUserAdministratorGroup($userAccount)){
-	    $smarty->assign("mb_title", _tr("Error"));
-	    $smarty->assign("mb_message",_tr('Email is not correct. Please write the email assigned to your elastix account.'));
-	    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-	}
+        if(!$pACL->isUserAdministratorGroup($userAccount)){
+            $smarty->assign("mb_title", _tr("Error"));
+            $smarty->assign("mb_message",_tr('Email is not correct. Please write the email assigned to your elastix account.'));
+            return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        }
     }
 
     $timestamp0 = mktime(0,0,0,date("m"),date("d"),date("Y"));
@@ -350,16 +350,16 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
     $smarty->assign("num_days",$dias);
 
     if($seconds < 0){
-	$smarty->assign("mb_title", _tr("Alert"));
+        $smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",_tr("End date should be greater than the initial date"));
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     $statusSieve = $pVacations->verifySieveStatus();
     if(!$statusSieve['response']){
-	$smarty->assign("mb_title", _tr("Alert"));
+        $smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",$statusSieve['message']);
-	return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
     }
 
     $pDB->beginTransaction();
@@ -367,36 +367,36 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
     $scripts = $objAntispam->existScriptSieve($email, "scriptTest.sieve");
     $spamCapture = false;// si CapturaSpam=OFF y Vacations=OFF
     if($scripts['actived'] != ""){// hay un script activo
-	if(preg_match("/vacations.sieve/",$scripts['actived']) && $scripts['status']) // si CapturaSpam=? y Vacations=ON
-	    $spamCapture = true;// si CapturaSpam=ON y Vacations=OFF
+        if(preg_match("/vacations.sieve/",$scripts['actived']) && $scripts['status']) // si CapturaSpam=? y Vacations=ON
+            $spamCapture = true;// si CapturaSpam=ON y Vacations=OFF
 
-	$band = $pVacations->existMessage($email);
-	$res = "";
-	if($band){//actualizacion
-	    $arr_Vaca = $pVacations->getMessageVacationByUser($email);
-	    if(count($arr_Vaca) > 1){
-		$pVacations->deleteMessagesByUser($email, $subject, $body, $ini_date, $end_date);
-		$res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
-	    }else
-		$res = $pVacations->updateMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
-	}else{// insersion
-	    $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
-	}
-	if($res){
-	    if($timeSince >= 0)
-		$result = $pVacations->deleteVacationScript($email, $objAntispam, $spamCapture);
-	    else    $result = true;
-	}else
-	    $result = false;
+        $band = $pVacations->existMessage($email);
+        $res = "";
+        if($band){//actualizacion
+            $arr_Vaca = $pVacations->getMessageVacationByUser($email);
+            if(count($arr_Vaca) > 1){
+                $pVacations->deleteMessagesByUser($email, $subject, $body, $ini_date, $end_date);
+                $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
+            }else
+                $res = $pVacations->updateMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
+        }else{// insersion
+            $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
+        }
+        if($res){
+            if($timeSince >= 0)
+                $result = $pVacations->deleteVacationScript($email, $objAntispam, $spamCapture);
+            else    $result = true;
+        }else
+            $result = false;
     }
 
     if($result){
-	$pDB->commit();
-	$smarty->assign("mb_message",_tr("Email's Vacations have been disabled"));
+        $pDB->commit();
+        $smarty->assign("mb_message",_tr("Email's Vacations have been disabled"));
     }else{
-	$msgError = $pVacations->errMsg;
-	$pDB->rollBack();
-	$smarty->assign("mb_message", $msgError);
+        $msgError = $pVacations->errMsg;
+        $pDB->rollBack();
+        $smarty->assign("mb_message", $msgError);
     }
     return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
 }
@@ -419,98 +419,98 @@ function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDB
     );
 
     if(!$pACL->isUserAdministratorGroup($userAccount)){
-	  return _tr("User isn't allowed to view this content.");
+          return _tr("User isn't allowed to view this content.");
     }else{
-	  $totalEmail = $pVacations->getNumVacations($filter_field, $filter_value);
-	  $url = array_merge($url, array('rawmode' => 'yes'));
+          $totalEmail = $pVacations->getNumVacations($filter_field, $filter_value);
+          $url = array_merge($url, array('rawmode' => 'yes'));
 
-	  $oGrid->setURL($url);
-	  $oGrid->setTitle(_tr("Emails Account"));
+          $oGrid->setURL($url);
+          $oGrid->setTitle(_tr("Emails Account"));
 
-	  $limit  = 10;
-	  $total  = $totalEmail;
-	  $oGrid->setLimit($limit);
-	  $oGrid->setTotal($total);
-	  //$oGrid->enableExport(false);   // enable csv export.
-	  $oGrid->pagingShow(true); // show paging section.
+          $limit  = 10;
+          $total  = $totalEmail;
+          $oGrid->setLimit($limit);
+          $oGrid->setTotal($total);
+          //$oGrid->enableExport(false);   // enable csv export.
+          $oGrid->pagingShow(true); // show paging section.
 
-	  $offset = $oGrid->calculateOffset();
-	  $arrData = null;
+          $offset = $oGrid->calculateOffset();
+          $arrData = null;
 
-	  $arrResult =$pVacations->getVacations($limit, $offset, $filter_field, $filter_value);
-	  $tmpIDs = 1;
-	  $infoHtml = "<div id='infoDataAccount'>";
-	  if(is_array($arrResult) && $total>0){
-	      foreach($arrResult as $key => $value){
-		  $tmpAccountId = $tmpIDs."Id";
-		  $arrTmp[0] = "<a href='javascript:getAccount(\"".$value['username']."\",\"$tmpAccountId\");' class='getAccount' id='$tmpAccountId' >".$value['username']."</a>";
-		  $timestamp0 = mktime(0,0,0,date("m"),date("d"),date("Y"));
-		  $timestamp1 = mktime(0,0,0,date("m",strtotime($value['ini_date'])),date("d",strtotime($value['ini_date'])),date("Y",strtotime($value['ini_date'])));
-		  $timestamp2 = mktime(0,0,0,date("m",strtotime($value['end_date'])),date("d",strtotime($value['end_date'])),date("Y",strtotime($value['end_date'])));
+          $arrResult =$pVacations->getVacations($limit, $offset, $filter_field, $filter_value);
+          $tmpIDs = 1;
+          $infoHtml = "<div id='infoDataAccount'>";
+          if(is_array($arrResult) && $total>0){
+              foreach($arrResult as $key => $value){
+                  $tmpAccountId = $tmpIDs."Id";
+                  $arrTmp[0] = "<a href='javascript:getAccount(\"".$value['username']."\",\"$tmpAccountId\");' class='getAccount' id='$tmpAccountId' >".$value['username']."</a>";
+                  $timestamp0 = mktime(0,0,0,date("m"),date("d"),date("Y"));
+                  $timestamp1 = mktime(0,0,0,date("m",strtotime($value['ini_date'])),date("d",strtotime($value['ini_date'])),date("Y",strtotime($value['ini_date'])));
+                  $timestamp2 = mktime(0,0,0,date("m",strtotime($value['end_date'])),date("d",strtotime($value['end_date'])),date("Y",strtotime($value['end_date'])));
 
-		  if($timestamp0>=$timestamp1 && $timestamp0<=$timestamp2){
-		      if($value['vacation']=="yes")
-			  $arrTmp[1] = _tr("yes");
-		      else
-			  $arrTmp[1] = _tr("no");
-		  }else
-		      $arrTmp[1] = _tr("no");
+                  if($timestamp0>=$timestamp1 && $timestamp0<=$timestamp2){
+                      if($value['vacation']=="yes")
+                          $arrTmp[1] = _tr("yes");
+                      else
+                          $arrTmp[1] = _tr("no");
+                  }else
+                      $arrTmp[1] = _tr("no");
 
-		  if($value['vacation']=="yes")
-		      $arrTmp[2] = _tr("yes");
-		  else
-		      $arrTmp[2] = _tr("no");
+                  if($value['vacation']=="yes")
+                      $arrTmp[2] = _tr("yes");
+                  else
+                      $arrTmp[2] = _tr("no");
 
-		  if(!isset($value['subject']) || $value['subject'] == "")
-		      $value['subject'] = _tr("Auto-Reply: Out of the office");
+                  if(!isset($value['subject']) || $value['subject'] == "")
+                      $value['subject'] = _tr("Auto-Reply: Out of the office");
 
-		  if(!isset($value['body']) || $value['body'] == "")
-		      $value['body'] = _tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
+                  if(!isset($value['body']) || $value['body'] == "")
+                      $value['body'] = _tr("I will be out of the office until {END_DATE}.\n\n----\nBest Regards.");
 
-		  $value['ini_date'] = isset($value['ini_date'])?$value['ini_date']:date("d M Y");
-		  $value['end_date'] = isset($value['end_date'])?$value['end_date']:date("d M Y");
-		  $infoHtml .= "<div id='".$tmpIDs."Idinfo'>";
-		  $infoHtml .= "<div style='display: none;'>".$value['subject']."</div>";
-		  $infoHtml .= "<div style='display: none;'>".$value['body']."</div>";
-		  $infoHtml .= "<div style='display: none;'>".$value['vacation']."</div>";
-		  $infoHtml .= "<div style='display: none;'>".$value['ini_date']."</div>";
-		  $infoHtml .= "<div style='display: none;'>".$value['end_date']."</div>";
-		  $infoHtml .= "</div>";
-		  $arrData[] = $arrTmp;
-		  $tmpIDs++;
-	      }
-	  }
-	  $infoHtml .= "</div>";
-	  $arrColumns = array(_tr("Account"), _tr("Vacations in progress"), _tr("Vacations Activated"));
-	  $oGrid->setColumns($arrColumns);
+                  $value['ini_date'] = isset($value['ini_date'])?$value['ini_date']:date("d M Y");
+                  $value['end_date'] = isset($value['end_date'])?$value['end_date']:date("d M Y");
+                  $infoHtml .= "<div id='".$tmpIDs."Idinfo'>";
+                  $infoHtml .= "<div style='display: none;'>".$value['subject']."</div>";
+                  $infoHtml .= "<div style='display: none;'>".$value['body']."</div>";
+                  $infoHtml .= "<div style='display: none;'>".$value['vacation']."</div>";
+                  $infoHtml .= "<div style='display: none;'>".$value['ini_date']."</div>";
+                  $infoHtml .= "<div style='display: none;'>".$value['end_date']."</div>";
+                  $infoHtml .= "</div>";
+                  $arrData[] = $arrTmp;
+                  $tmpIDs++;
+              }
+          }
+          $infoHtml .= "</div>";
+          $arrColumns = array(_tr("Account"), _tr("Vacations in progress"), _tr("Vacations Activated"));
+          $oGrid->setColumns($arrColumns);
 
-	  $oGrid->setData($arrData);
-	  $size = count($arrData);
+          $oGrid->setData($arrData);
+          $size = count($arrData);
 
-	  //begin section filter
-	  $arrFormFilter = createFieldFilter();
-	  $oFilterForm = new paloForm($smarty, $arrFormFilter);
-	  $smarty->assign("SHOW", _tr("Show"));
+          //begin section filter
+          $arrFormFilter = createFieldFilter();
+          $oFilterForm = new paloForm($smarty, $arrFormFilter);
+          $smarty->assign("SHOW", _tr("Show"));
 
-		$arrFilter = array(
-		"username" => _tr("Account"),
-		"vacation" => _tr("Vacations Activated"),
-				);
+                $arrFilter = array(
+                "username" => _tr("Account"),
+                "vacation" => _tr("Vacations Activated"),
+                                );
 
-	  if(!is_null($filter_field)){
-		$nameField = $arrFilter[$filter_field];
-	  }else{
+          if(!is_null($filter_field)){
+                $nameField = $arrFilter[$filter_field];
+          }else{
         $nameField = "";
-	  }
+          }
 
-	  $oGrid->addFilterControl(_tr("Filter applied: ").$nameField." = ".$filter_value, $_POST, array("filter_field" => "username" ,"filter_value" => ""));
-	  $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filterEmailGrid.tpl","",$_POST);
-	  //end section filter
+          $oGrid->addFilterControl(_tr("Filter applied: ").$nameField." = ".$filter_value, $_POST, array("filter_field" => "username" ,"filter_value" => ""));
+          $htmlFilter = $oFilterForm->fetchForm("$local_templates_dir/filterEmailGrid.tpl","",$_POST);
+          //end section filter
 
-	  $oGrid->showFilter(trim($htmlFilter));
+          $oGrid->showFilter(trim($htmlFilter));
 
-	  $content = $oGrid->fetchGrid().$infoHtml;
-	  //end grid parameters
+          $content = $oGrid->fetchGrid().$infoHtml;
+          //end grid parameters
     }
     return $content;
 }
@@ -544,7 +544,7 @@ function createFieldForm()
                                             "ROWS"                   => "4",
                                             "VALIDATION_EXTRA_PARAM" => ""
                                             ),
-	    "ini_date"   => array(      "LABEL"                  => _tr("Initial Date"),
+            "ini_date"   => array(      "LABEL"                  => _tr("Initial Date"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "DATE",
                                             "INPUT_EXTRA_PARAM"      => array("FORMAT" => "%d %b %Y"),
@@ -552,7 +552,7 @@ function createFieldForm()
                                             "EDITABLE"               => "no",
                                             "VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}$"
                                             ),
-	    "end_date"   => array(      "LABEL"                  => _tr("End Date"),
+            "end_date"   => array(      "LABEL"                  => _tr("End Date"),
                                             "REQUIRED"               => "no",
                                             "INPUT_TYPE"             => "DATE",
                                             "INPUT_EXTRA_PARAM"      => array("FORMAT" => "%d %b %Y"),
@@ -566,8 +566,8 @@ function createFieldForm()
 
 function createFieldFilter(){
     $arrFilter = array(
-	    "username" => _tr("Account"),
-	    "vacation" => _tr("Vacations Activated"),
+            "username" => _tr("Account"),
+            "vacation" => _tr("Vacations Activated"),
                     );
 
     $arrFormElements = array(
@@ -596,7 +596,7 @@ function getAction()
     else if(getParameter("disactivate"))      //Get parameter by GET (command pattern, links)
         return "disactivate";
     else if(getParameter("action") == "showAllEmails")
-	return "showAllEmails";
+        return "showAllEmails";
     else
         return "report"; //cancel
 }

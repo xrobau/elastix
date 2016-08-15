@@ -146,7 +146,8 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/share/pear/DB/sqlite3.php   
 # ** setup ** #
 mv $RPM_BUILD_DIR/elastix-framework/framework/setup/usr/share/elastix/privileged/*   $RPM_BUILD_ROOT/usr/share/elastix/privileged/
 rmdir framework/setup/usr/share/elastix/privileged/ framework/setup/usr/share/elastix framework/setup/usr/share framework/setup/usr
-mv $RPM_BUILD_DIR/elastix-framework/framework/setup/ 	                             $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+mv $RPM_BUILD_DIR/elastix-framework/framework/setup/                                 $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
+mv $RPM_BUILD_DIR/elastix-framework/framework/menu.xml                               $RPM_BUILD_ROOT/usr/share/elastix/module_installer/%{name}-%{version}-%{release}/
 
 # ** elastix-* file ** #
 mv $RPM_BUILD_DIR/elastix-framework/additionals/usr/bin/elastix-menumerge            $RPM_BUILD_ROOT/usr/bin/
@@ -317,6 +318,8 @@ elif [ $1 -eq 2 ]; then #update
     fi
 fi
 
+# Merge current menu.xml for userlist custom privileges
+elastix-menumerge $pathModule/menu.xml
 
 %preun
 # Reverse the patching of php.conf
@@ -391,6 +394,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sun Aug 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: define a compatible menu.xml for elastix-framework. This
+  menu.xml contains custom privileges for the userlist module.
+  SVN Rev[7706]
 - CHANGED: Framework: add new methods to paloACL required for custom privilege
   assignment in Group Permission.
   SVN Rev[7704]

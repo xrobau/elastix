@@ -393,6 +393,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Aug 15 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- ADDED: Framework: add documentation on the sidebar panel API.
+  SVN Rev[7709]
+
 * Sun Aug 14 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Framework: define a compatible menu.xml for elastix-framework. This
   menu.xml contains custom privileges for the userlist module.

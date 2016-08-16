@@ -29,7 +29,6 @@
 
 include_once "/var/www/html/libs/cyradm.php";
 include_once "/var/www/html/modules/antispam/libs/sieve-php.lib.php";
-include_once "/var/www/html/modules/vacations/libs/paloSantoVacations.class.php";
 
 class paloSantoAntispam {
     var $fileMaster;
@@ -98,7 +97,7 @@ class paloSantoAntispam {
         }
         return TRUE;
     }
-    
+
     function disactivateSpamFilter()
     {
         $this->errMsg = '';
@@ -116,7 +115,7 @@ class paloSantoAntispam {
         }
         return TRUE;
     }
-    
+
     function changeFileLocal($level, $header)
     {
     	$this->errMsg = '';
@@ -137,7 +136,7 @@ class paloSantoAntispam {
         }
         return TRUE;
     }
-    
+
 /********************************************************************************************************************/
     //funcion que devuelve todas las cuentas de correos
     function getEmailList($pDB)

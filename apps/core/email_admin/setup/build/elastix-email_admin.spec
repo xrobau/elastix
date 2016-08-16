@@ -206,6 +206,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Aug 16 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Vacations: at some point, the sieve API now requires the sievescript to
+  be deactivated before being removed.
+  SVN Rev[7711]
+
 * Sun Aug 14 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Vacations: replace handcoded and potentially buggy load of webmail
   profile properties with the use of paloACL::getUserProfile. Change minimum

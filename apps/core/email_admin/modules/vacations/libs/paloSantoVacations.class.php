@@ -232,7 +232,7 @@ class paloSantoVacations {
 
         exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
         " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
-        " -e 'delete vacations.sieve'",$flags, $status);
+        " -e 'deactivate\ndelete vacations.sieve'",$flags, $status);
 
         if($status!=0){
             $this->errMsg = _tr("Error: Impossible remove ")."vacations.sieve";

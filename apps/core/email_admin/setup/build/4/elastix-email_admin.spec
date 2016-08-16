@@ -207,6 +207,11 @@ fi
 
 %changelog
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
+- CHANGED: Vacations: create method setMessageAccount to set the vacation
+  message regardless of previous content, and method updateVacationMessageAccount
+  to evaluate the current vacation state based on current date. This allows
+  factorization of code in vacations module.
+  SVN Rev[7714]
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
 

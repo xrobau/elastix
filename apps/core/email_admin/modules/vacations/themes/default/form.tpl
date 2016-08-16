@@ -10,7 +10,7 @@
         <td align="right" nowrap><span class="letra12"><span  class="required">*</span> {$REQUIRED_FIELD}</span></td>
     </tr>
 </table>
-<table class="tabForm" style="font-size: 16px;" width="100%" >
+<table class="tabForm" width="100%" >
     <tr class="letra12">
         <td align="left" width="10%"><b>{$DATE}: <span  class="required">*</span></b></td>
         <td align="left"><b>{$FROM}</b>&nbsp;&nbsp;&nbsp;&nbsp;{$ini_date.INPUT}&nbsp;&nbsp;&nbsp;&nbsp;<b>{$TO}</b>&nbsp;&nbsp;&nbsp;&nbsp;{$end_date.INPUT}&nbsp;&nbsp;&nbsp;&nbsp;<b><span id="num_days">{$num_days}</span>&nbsp;{$days}</b></td>

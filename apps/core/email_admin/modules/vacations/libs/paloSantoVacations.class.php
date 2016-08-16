@@ -410,7 +410,26 @@ SCRIPT;
         return true;
     }
 
-
+    function setMessageAccount($email, $subject, $body, $ini_date, $end_date, $status)
+    {
+        $sqls = array(
+            array(
+                'DELETE FROM messages_vacations WHERE account = ?',
+                array($email)),
+            array(
+                'INSERT INTO messages_vacations(account, subject, body, vacation, ini_date, end_date) '.
+                    'VALUES(?,?,?,?,?,?)',
+                array($email, $subject, $body, $status, $ini_date, $end_date)),
+        );
+        foreach ($sqls as $sql) {
+            $r = $this->_DB->genQuery($sql[0], $sql[1]);
+            if (!$r) {
+                $this->errMsg = $this->_DB->errMsg;
+                return FALSE;
+            }
+        }
+        return TRUE;
+    }
 
     /*********************************************************************************
     /* Funcion que inserta un mensaje dado los siguientes parametros:
@@ -513,6 +532,102 @@ SCRIPT;
         return TRUE;
     }
 
+    /**
+     * Método para evaluar el estado de vacaciones de todas las cuentas con
+     * vacación activa, y decidir, según la fecha, si finalizar la vacación.
+     *
+     * @param   object  $objAntispam    Objeto paloSantoAntispam para sieve
+     * @param   string  $date           Fecha a evaluar, o NULL para hoy
+     *
+     * @return  boolean FALSE en error, o TRUE para éxito
+     */
+    function updateVacationMessageAll($objAntispam, $date = NULL)
+    {
+        if (is_null($date)) $date = date('Y-m-d');
 
+        $sql = 'SELECT account, ini_date, end_date, subject, body, vacation '.
+            'FROM messages_vacations WHERE vacation = "yes"';
+        $rs = $this->_DB->fetchTable($sql, TRUE);
+        if (!is_array($rs)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        foreach ($rs as $tupla) {
+            if (!$this->_updateVacationMessageTupla($tupla, $objAntispam, $date))
+                return FALSE;
+        }
+        return TRUE;
+    }
+
+    /**
+     * Método para evaluar el estado de vacaciones de la cuenta indicada, y
+     * decidir, según la fecha, si iniciar o finalizar la vacación.
+     *
+     * @param   string  $email          Correo a evaluar para vacaciones
+     * @param   object  $objAntispam    Objeto paloSantoAntispam para sieve
+     * @param   string  $date           Fecha a evaluar, o NULL para hoy
+     *
+     * @return  boolean FALSE en error, o TRUE para éxito
+     */
+    function updateVacationMessageAccount($email, $objAntispam, $date = NULL)
+    {
+        if (is_null($date)) $date = date('Y-m-d');
+
+        $sql = 'SELECT account, ini_date, end_date, subject, body, vacation '.
+            'FROM messages_vacations WHERE account = ?';
+        $tupla = $this->_DB->getFirstRowQuery($sql, TRUE, array($email));
+        if (!is_array($tupla)) {
+            $this->errMsg = $this->_DB->errMsg;
+            return FALSE;
+        }
+        if (count($tupla) <= 0) {
+            $this->errMsg = 'Email account not found';
+            return FALSE;
+        }
+        return $this->_updateVacationMessageTupla($tupla, $objAntispam, $date);
+    }
+
+    private function _updateVacationMessageTupla($tupla, $objAntispam, $date)
+    {
+        // Listar script activo. Se asume antispam si scriptTest.sieve presente.
+        // TODO: reescribir con uso de objeto sieve-php
+        $scripts = $objAntispam->existScriptSieve($tupla['account'], 'scriptTest.sieve');
+        $bVacacionActiva = (strpos($scripts['actived'], 'vacations.sieve') !== FALSE);
+        $bAntispamActivo = $scripts['status'];
+
+        // Evaluar plantillas de fechas
+        foreach (array('subject', 'body') as $k) {
+            $tupla[$k] = str_replace("{END_DATE}", $tupla['end_date'], $tupla[$k]);
+        }
+
+        // Reformatear fechas a yyyy-mm-dd para comparar
+        $tupla['ini_date'] = date('Y-m-d', strtotime($tupla['ini_date']));
+        $tupla['end_date'] = date('Y-m-d', strtotime($tupla['end_date']));
+
+        // Nuevo estado de vacaciones
+        $bActivarVacacion = ($tupla['vacation'] == 'yes' &&
+            $tupla['ini_date'] <= $date && $date <= $tupla['end_date']);
+
+        // Finalizar vacación en DB si ya expiró
+        if ($tupla['vacation'] == 'yes' && $date > $tupla['end_date']) {
+            $sql = 'UPDATE messages_vacations SET vacation = ? WHERE account = ?';
+            $r = $this->_DB->genQuery($sql, array('no', $tupla['account']));
+            if (!$r) {
+                $this->errMsg = $this->_DB->errMsg;
+                return FALSE;
+            }
+        }
+
+        $r = TRUE;
+        if (!$bVacacionActiva && $bActivarVacacion) {
+            $r = $this->uploadVacationScript(
+                $tupla['account'], $tupla['subject'], $tupla['body'],
+                $objAntispam, $bAntispamActivo);
+        } elseif ($bVacacionActiva && !$bActivarVacacion) {
+            $r = $this->deleteVacationScript(
+                $tupla['account'],
+                $objAntispam, $bAntispamActivo);
+        }
+        return $r;
+    }
 }
-?>

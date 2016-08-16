@@ -61,10 +61,12 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
     case "activate":
-        $content = activateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        $content = updateEmailVacations($smarty, $module_name, $local_templates_dir,
+            $pDB, $pDBACL, $arrConf, 'yes');
         break;
     case "disactivate":
-        $content = disactivateEmailVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
+        $content = updateEmailVacations($smarty, $module_name, $local_templates_dir,
+            $pDB, $pDBACL, $arrConf, 'no');
         break;
     case "showAllEmails":
         $html = showAllEmails($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
@@ -192,118 +194,8 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
     return $content;
 }
 
-function activateEmailVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf)
-{
-    $pVacations = new paloSantoVacations($pDB);
-    $pACL = new paloACL($pDBACL);
-    $objAntispam = new paloSantoAntispam($arrConf['path_postfix'], $arrConf['path_spamassassin'],$arrConf['file_master_cf'], $arrConf['file_local_cf']);
-    $arrFormVacations = createFieldForm();
-    $oForm = new paloForm($smarty,$arrFormVacations);
-
-    $id         = getParameter("id");
-    $email      = getParameter("email");
-    $subject    = getParameter("subject");
-    $body       = getParameter("body");
-    $ini_date   = getParameter("ini_date");
-    $end_date   = getParameter("end_date");
-    $result     = "";
-
-    $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $emails = getEmailCurrentUser($pACL);
-
-    if(!$oForm->validateForm($_POST)) {
-        // Falla la validación básica del formulario
-        $strErrorMsg = "<b>"._tr('The following fields contain errors').":</b><br/>";
-        $arrErrores = $oForm->arrErroresValidacion;
-        if(is_array($arrErrores) && count($arrErrores) > 0){
-            foreach($arrErrores as $k=>$v) {
-                $strErrorMsg .= "$k: [$v[mensaje]] <br /> ";
-            }
-        }
-        $smarty->assign("mb_title", _tr("Validation Error"));
-        $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-    }
-
-    if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
-        $smarty->assign("mb_title", _tr("Error"));
-        $smarty->assign("mb_message",_tr('Email is empty or is not correct. Please write the email account.'));
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-    }
-
-    if($email != $emails){
-        if(!$pACL->isUserAdministratorGroup($userAccount)){
-            $smarty->assign("mb_title", _tr("Error"));
-            $smarty->assign("mb_message",_tr('Email is not correct or is not correct. Please write the email assigned to your elastix account.'));
-            return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-        }
-    }
-
-    $timestamp0 = mktime(0,0,0,date("m"),date("d"),date("Y"));
-    $timestamp1 = mktime(0,0,0,date("m",strtotime($ini_date)),date("d",strtotime($ini_date)),date("Y",strtotime($ini_date)));
-    $timestamp2 = mktime(0,0,0,date("m",strtotime($end_date)),date("d",strtotime($end_date)),date("Y",strtotime($end_date)));
-
-    $timeSince = $timestamp0 - $timestamp1;
-    //resto a una fecha la otra
-    $seconds = $timestamp2 - $timestamp1;
-    $dias = $seconds / (60 * 60 * 24);
-    $dias = floor($dias);
-    $smarty->assign("num_days",$dias);
-
-    if($seconds < 0){
-        $smarty->assign("mb_title", _tr("Alert"));
-        $smarty->assign("mb_message",_tr("End date should be greater than the initial date"));
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-    }
-
-    $statusSieve = $pVacations->verifySieveStatus();
-    if(!$statusSieve['response']){
-        $smarty->assign("mb_title", _tr("Alert"));
-        $smarty->assign("mb_message",$statusSieve['message']);
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-    }
-    $pDB->beginTransaction();
-    $scripts = $objAntispam->existScriptSieve($email, "scriptTest.sieve");
-    $spamCapture = false;// si CapturaSpam=OFF y Vacations=OFF
-    if($scripts['actived'] != ""){// hay un script activo
-        if(preg_match("/scriptTest.sieve/",$scripts['actived'])) // si CapturaSpam=ON y Vacations=OFF
-            $spamCapture = true;// si CapturaSpam=ON y Vacations=OFF
-    }
-
-    $band = $pVacations->existMessage($email);
-    $res = "";
-    if($band){//actualizacion
-        $arr_Vaca = $pVacations->getMessageVacationByUser($email);
-        if(count($arr_Vaca) > 1){
-            $pVacations->deleteMessagesByUser($email, $subject, $body, $ini_date, $end_date);
-            $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
-        }else
-            $res = $pVacations->updateMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
-    }else{// insersion
-        $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "yes");
-    }
-
-    if($res){
-        if($timeSince >= 0){
-            $subject = str_replace("{END_DATE}", $end_date, $subject);
-            $body = str_replace("{END_DATE}", $end_date, $body);
-            $result = $pVacations->uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture);
-        }else    $result = true;
-    }else
-        $result = false;
-
-    if($result){
-        $pDB->commit();
-        $smarty->assign("mb_message",_tr("Email's Vacations have been enabled"));
-    }else{
-        $pDB->rollBack();
-        $msgError = $pVacations->errMsg;
-        $smarty->assign("mb_message", $msgError);
-    }
-    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $arrConf);
-}
-
-function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $arrConf)
+function updateEmailVacations($smarty, $module_name, $local_templates_dir,
+    &$pDB, &$pDBACL, $arrConf, $nstatus)
 {
     $pVacations  = new paloSantoVacations($pDB);
     $pACL = new paloACL($pDBACL);
@@ -376,35 +268,14 @@ function disactivateEmailVacations($smarty, $module_name, $local_templates_dir, 
 
     $pDB->beginTransaction();
 
-    $scripts = $objAntispam->existScriptSieve($email, "scriptTest.sieve");
-    $spamCapture = false;// si CapturaSpam=OFF y Vacations=OFF
-    if($scripts['actived'] != ""){// hay un script activo
-        if(preg_match("/vacations.sieve/",$scripts['actived']) && $scripts['status']) // si CapturaSpam=? y Vacations=ON
-            $spamCapture = true;// si CapturaSpam=ON y Vacations=OFF
-
-        $band = $pVacations->existMessage($email);
-        $res = "";
-        if($band){//actualizacion
-            $arr_Vaca = $pVacations->getMessageVacationByUser($email);
-            if(count($arr_Vaca) > 1){
-                $pVacations->deleteMessagesByUser($email, $subject, $body, $ini_date, $end_date);
-                $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
-            }else
-                $res = $pVacations->updateMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
-        }else{// insersion
-            $res = $pVacations->insertMessageByUser($email, $subject, $body, $ini_date, $end_date, "no");
-        }
-        if($res){
-            if($timeSince >= 0)
-                $result = $pVacations->deleteVacationScript($email, $objAntispam, $spamCapture);
-            else    $result = true;
-        }else
-            $result = false;
-    }
+    $result = $pVacations->setMessageAccount($email, $subject, $body, $ini_date, $end_date, $nstatus);
+    if ($result) $result = $pVacations->updateVacationMessageAccount($email, $objAntispam);
 
     if($result){
         $pDB->commit();
-        $smarty->assign("mb_message",_tr("Email's Vacations have been disabled"));
+        $smarty->assign("mb_message", ($nstatus == 'yes')
+            ? _tr("Email's Vacations have been enabled")
+            : _tr("Email's Vacations have been disabled"));
     }else{
         $msgError = $pVacations->errMsg;
         $pDB->rollBack();

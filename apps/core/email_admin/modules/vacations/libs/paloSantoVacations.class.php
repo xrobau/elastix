@@ -54,32 +54,32 @@ class paloSantoVacations {
     function getNumVacations($filter_field, $filter_value)
     {
         $where = "";
-	$arrParam = array();
+        $arrParam = array();
 
         if(isset($filter_field) && $filter_field !="" && $filter_value != ""){
-	    if($filter_field == "username")
-		$filter_field = "a.$filter_field";
-	    else{
-		$filter_field = "v.$filter_field";
-	    }
-	    if($filter_field == "v.vacation" && strtolower($filter_value) == _tr("no")){
-		$where = " WHERE $filter_field ISNULL OR $filter_field like ? ";
-		$filter_value = "no";
-	    }else{
-		$where = " WHERE $filter_field like ? ";
-		if(strtolower($filter_value) === _tr("yes"))
-		    $filter_value = "yes";
-	    }
+            if($filter_field == "username")
+                $filter_field = "a.$filter_field";
+            else{
+                $filter_field = "v.$filter_field";
+            }
+            if($filter_field == "v.vacation" && strtolower($filter_value) == _tr("no")){
+                $where = " WHERE $filter_field ISNULL OR $filter_field like ? ";
+                $filter_value = "no";
+            }else{
+                $where = " WHERE $filter_field like ? ";
+                if(strtolower($filter_value) === _tr("yes"))
+                    $filter_value = "yes";
+            }
 
-	    $arrParam = array("$filter_value%");
-	}
+            $arrParam = array("$filter_value%");
+        }
 
         $query   = "SELECT
-		      COUNT(*)
-		    FROM
-		      accountuser a LEFT JOIN messages_vacations v ON a.username=v.account
-		    $where
-		    ORDER BY a.username;";
+                      COUNT(*)
+                    FROM
+                      accountuser a LEFT JOIN messages_vacations v ON a.username=v.account
+                    $where
+                    ORDER BY a.username;";
 
         $result=$this->_DB->getFirstRowQuery($query, false, $arrParam);
 
@@ -93,36 +93,36 @@ class paloSantoVacations {
     function getVacations($limit, $offset, $filter_field, $filter_value)
     {
         $where = "";
-	$arrParam = array();
+        $arrParam = array();
         if(isset($filter_field) && $filter_field !="" && $filter_value != ""){
-	    if($filter_field === "username")
-		$filter_field = "a.$filter_field";
-	    else{
-		$filter_field = "v.$filter_field";
-	    }
-	    if($filter_field === "v.vacation" && strtolower($filter_value) === _tr("no")){
-		$where = " WHERE $filter_field ISNULL OR $filter_field like ? ";
-		$filter_value = "no";
-	    }else{
-		$where = " WHERE $filter_field like ? ";
-		if(strtolower($filter_value) === _tr("yes"))
-		    $filter_value = "yes";
-	    }
+            if($filter_field === "username")
+                $filter_field = "a.$filter_field";
+            else{
+                $filter_field = "v.$filter_field";
+            }
+            if($filter_field === "v.vacation" && strtolower($filter_value) === _tr("no")){
+                $where = " WHERE $filter_field ISNULL OR $filter_field like ? ";
+                $filter_value = "no";
+            }else{
+                $where = " WHERE $filter_field like ? ";
+                if(strtolower($filter_value) === _tr("yes"))
+                    $filter_value = "yes";
+            }
 
-	    $arrParam = array("$filter_value%");
-	}
+            $arrParam = array("$filter_value%");
+        }
 
         $query   = "SELECT
-		      a.username as username,
-		      v.vacation as vacation,
-		      v.subject as subject,
-		      v.body as body,
-		      v.ini_date as ini_date,
-		      v.end_date as end_date
-		   FROM accountuser a LEFT JOIN messages_vacations v ON a.username=v.account
-		   $where
-		   ORDER BY a.username
-		   LIMIT $limit OFFSET $offset";
+                      a.username as username,
+                      v.vacation as vacation,
+                      v.subject as subject,
+                      v.body as body,
+                      v.ini_date as ini_date,
+                      v.end_date as end_date
+                   FROM accountuser a LEFT JOIN messages_vacations v ON a.username=v.account
+                   $where
+                   ORDER BY a.username
+                   LIMIT $limit OFFSET $offset";
         $result=$this->_DB->fetchTable($query, true, $arrParam);
 
         if($result==FALSE){
@@ -134,7 +134,7 @@ class paloSantoVacations {
 
     function getVacationsById($id)
     {
-	$data = array($id);
+        $data = array($id);
         $query = "SELECT * FROM getVacationsById WHERE id=?";
         $result=$this->_DB->getFirstRowQuery($query,true,$data);
 
@@ -157,54 +157,54 @@ class paloSantoVacations {
     /*********************************************************************************/
     function uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture){
 
-	$SIEVE  = array();
+        $SIEVE  = array();
         $SIEVE['HOST'] = "localhost";
         $SIEVE['PORT'] = 4190;
         $SIEVE['USER'] = "";
         $SIEVE['PASS'] = obtenerClaveCyrusAdmin("/var/www/html/");
         $SIEVE['AUTHTYPE'] = "PLAIN";
         $SIEVE['AUTHUSER'] = "cyrus";
-	$SIEVE['USER'] = $email;
+        $SIEVE['USER'] = $email;
 
-	$existCron = $this->existCronFile();
-	if(!$existCron)
-	    $this->createCronFile();
+        $existCron = $this->existCronFile();
+        if(!$existCron)
+            $this->createCronFile();
 
         $contentVacations  = $this->getVacationScript($subject, $body);
-	$contentSpamFilter = "";
+        $contentSpamFilter = "";
 
-	// si esta activada la captura de spam entonces se deber reemplazar <require "fileinto";> por require ["fileinto","vacation"];
-	if($spamCapture){
-	    $contentSpamFilter = $objAntispam->getContentScript();
-	    $contentSpamFilter = str_replace("require \"fileinto\";", "require [\"fileinto\",\"vacation\"];", $contentSpamFilter);
-	}else{
-	    $contentSpamFilter =  "require [\"fileinto\",\"vacation\"];";
-	}
-	$content = $contentSpamFilter."\n".$contentVacations;
+        // si esta activada la captura de spam entonces se deber reemplazar <require "fileinto";> por require ["fileinto","vacation"];
+        if($spamCapture){
+            $contentSpamFilter = $objAntispam->getContentScript();
+            $contentSpamFilter = str_replace("require \"fileinto\";", "require [\"fileinto\",\"vacation\"];", $contentSpamFilter);
+        }else{
+            $contentSpamFilter =  "require [\"fileinto\",\"vacation\"];";
+        }
+        $content = $contentSpamFilter."\n".$contentVacations;
         $fileScript = "/tmp/vacations.sieve";
         $fp = fopen($fileScript,'w');
         fwrite($fp,$content);
         fclose($fp);
 
-	exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+        exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
         " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
         " -e 'put $fileScript'",$flags, $status);
-	if($status!=0){
-	    $this->errMsg = _tr("Error: Impossible upload ")."vacations.sieve";
-	    return false;
-	}else{
-	    exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+        if($status!=0){
+            $this->errMsg = _tr("Error: Impossible upload ")."vacations.sieve";
+            return false;
+        }else{
+            exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
             " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
             " -e 'activate vacations.sieve'",$flags, $status);
-	    if($status!=0){
-		$this->errMsg = _tr("Error: Impossible activate ")."vacations.sieve";
-		return false;
-	    }
-	}
+            if($status!=0){
+                $this->errMsg = _tr("Error: Impossible activate ")."vacations.sieve";
+                return false;
+            }
+        }
 
         if(is_file($fileScript))
             unlink($fileScript);
-	return true;
+        return true;
     }
 
 
@@ -224,48 +224,48 @@ class paloSantoVacations {
         $SIEVE['PASS'] = obtenerClaveCyrusAdmin("/var/www/html/");
         $SIEVE['AUTHTYPE'] = "PLAIN";
         $SIEVE['AUTHUSER'] = "cyrus";
-	$SIEVE['USER'] = $email;
+        $SIEVE['USER'] = $email;
 
-	$existCron = $this->existCronFile();
-	if(!$existCron)
-	    $this->createCronFile();
+        $existCron = $this->existCronFile();
+        if(!$existCron)
+            $this->createCronFile();
 
-	exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+        exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
         " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
         " -e 'delete vacations.sieve'",$flags, $status);
 
-	if($status!=0){
-	    $this->errMsg = _tr("Error: Impossible remove ")."vacations.sieve";
-	    return false;
-	}
+        if($status!=0){
+            $this->errMsg = _tr("Error: Impossible remove ")."vacations.sieve";
+            return false;
+        }
 
-	if($spamCapture){
-	    $contentSpamFilter = $objAntispam->getContentScript();
-	    $fileScript = "/tmp/scriptTest.sieve";
-	    $fp = fopen($fileScript,'w');
-	    fwrite($fp,$contentSpamFilter);
-	    fclose($fp);
+        if($spamCapture){
+            $contentSpamFilter = $objAntispam->getContentScript();
+            $fileScript = "/tmp/scriptTest.sieve";
+            $fp = fopen($fileScript,'w');
+            fwrite($fp,$contentSpamFilter);
+            fclose($fp);
 
-	    exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+            exec("echo ".escapeshellarg($SIEVE['PASS'])." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
             " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
             " -e 'put $fileScript'",$flags, $status);
 
-	    if($status!=0){
-		$this->errMsg = _tr("Error: Impossible upload ")."scriptTest.sieve";
-		return false;
-	    }else{
-		exec("echo ".$SIEVE['PASS']." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
+            if($status!=0){
+                $this->errMsg = _tr("Error: Impossible upload ")."scriptTest.sieve";
+                return false;
+            }else{
+                exec("echo ".$SIEVE['PASS']." | sieveshell ".escapeshellarg("--username=".$SIEVE['USER']).
             " --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT'].
             " -e 'activate scriptTest.sieve'",$flags, $status);
-		if($status!=0){
-		    $this->errMsg = _tr("Error: Impossible activate ")."scriptTest.sieve";
-		    return false;
-		}
-	    }
-	    if(is_file($fileScript))
-		unlink($fileScript);
-	}
-	return true;
+                if($status!=0){
+                    $this->errMsg = _tr("Error: Impossible activate ")."scriptTest.sieve";
+                    return false;
+                }
+            }
+            if(is_file($fileScript))
+                unlink($fileScript);
+        }
+        return true;
     }
 
     /*********************************************************************************
@@ -309,14 +309,14 @@ SCRIPT;
     /*********************************************************************************/
     function getMessageVacationByUser($email)
     {
-	$data = array($email);
-	$query = "select * from messages_vacations where account=?";
-	$result=$this->_DB->getFirstRowQuery($query,true,$data);
-	if($result==FALSE){
+        $data = array($email);
+        $query = "select * from messages_vacations where account=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,$data);
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	return $result;
+        return $result;
     }
 
     /*********************************************************************************
@@ -329,17 +329,17 @@ SCRIPT;
     /*********************************************************************************/
     function existMessage($email)
     {
-	$data = array($email);
-	$query = "select * from messages_vacations where account=?";
-	$result=$this->_DB->getFirstRowQuery($query,true,$data);
-	if($result==FALSE){
+        $data = array($email);
+        $query = "select * from messages_vacations where account=?";
+        $result=$this->_DB->getFirstRowQuery($query,true,$data);
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	if(is_array($result) && count($result) > 0)
-	    return true;
-	else
-	    return false;
+        if(is_array($result) && count($result) > 0)
+            return true;
+        else
+            return false;
     }
 
     /*********************************************************************************
@@ -353,17 +353,17 @@ SCRIPT;
     /*********************************************************************************/
     function insertMessageByUser($email, $subject, $body, $ini_date, $end_date, $status)
     {
-	$data = array();
-	$query = "";
-	$query = "insert into messages_vacations(account,subject,body,vacation,ini_date,end_date) values(?,?,?,?,?,?)";
-	$data = array($email, $subject, $body, $status, $ini_date, $end_date);
+        $data = array();
+        $query = "";
+        $query = "insert into messages_vacations(account,subject,body,vacation,ini_date,end_date) values(?,?,?,?,?,?)";
+        $data = array($email, $subject, $body, $status, $ini_date, $end_date);
 
-	$result=$this->_DB->genQuery($query,$data);
-	if($result==FALSE){
+        $result=$this->_DB->genQuery($query,$data);
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	return true;
+        return true;
     }
 
     /*********************************************************************************
@@ -378,14 +378,14 @@ SCRIPT;
     /*********************************************************************************/
     function updateMessageByUser($email, $subject, $body, $ini_date, $end_date, $status=null)
     {
-	$data = array($subject, $body, $status, $ini_date, $end_date, $email);
-	$query = "update messages_vacations set subject=?,  body=? , vacation=?, ini_date=?, end_date=?  where account=?";
-	$result=$this->_DB->genQuery($query,$data);
-	if($result==FALSE){
+        $data = array($subject, $body, $status, $ini_date, $end_date, $email);
+        $query = "update messages_vacations set subject=?,  body=? , vacation=?, ini_date=?, end_date=?  where account=?";
+        $result=$this->_DB->genQuery($query,$data);
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	return true;
+        return true;
     }
 
     /*********************************************************************************
@@ -400,14 +400,14 @@ SCRIPT;
     /*********************************************************************************/
     function deleteMessagesByUser($email, $subject, $body, $ini_date, $end_date, $status=null)
     {
-	$data = array($email);
-	$query = "delete from messages_vacations where account=?";
-	$result=$this->_DB->genQuery($query,$data);
-	if($result==FALSE){
+        $data = array($email);
+        $query = "delete from messages_vacations where account=?";
+        $result=$this->_DB->genQuery($query,$data);
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	return true;
+        return true;
     }
 
 
@@ -423,14 +423,14 @@ SCRIPT;
     /*********************************************************************************/
     function setStatusMessageByUser($email, $id, $vacation)
     {
-	$data = array($vacation, $id, $email);
-	$query = "update messages_vacations set vacation=? where id=? and account=?";
-	$result=$this->_DB->genQuery($query,$data);
-	if($result==FALSE){
+        $data = array($vacation, $id, $email);
+        $query = "update messages_vacations set vacation=? where id=? and account=?";
+        $result=$this->_DB->genQuery($query,$data);
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	return true;
+        return true;
     }
 
 
@@ -443,16 +443,16 @@ SCRIPT;
     /*********************************************************************************/
     function verifySieveStatus()
     {
-	$response = array();
+        $response = array();
 
-	exec("sudo /sbin/service generic-cloexec cyrus-imapd status",$arrConsole,$flagStatus);
+        exec("sudo /sbin/service generic-cloexec cyrus-imapd status",$arrConsole,$flagStatus);
         if($flagStatus != 0){
-	    $response['response'] = false;
-	    $response['message'] = _tr("Cyrus Imap is down");
+            $response['response'] = false;
+            $response['message'] = _tr("Cyrus Imap is down");
         }else{
-	    $response['response'] = true;
-	    $response['message'] = _tr("Cyrus Imap is up");
-	}
+            $response['response'] = true;
+            $response['message'] = _tr("Cyrus Imap is up");
+        }
         return $response;
     }
 
@@ -465,13 +465,13 @@ SCRIPT;
     /*********************************************************************************/
     function getEmailsVacationON()
     {
-	$query = "SELECT id, account, ini_date, end_date, subject, body FROM messages_vacations WHERE vacation = 'yes'";
-	$result=$this->_DB->fetchTable($query,true);
-	if($result==FALSE){
+        $query = "SELECT id, account, ini_date, end_date, subject, body FROM messages_vacations WHERE vacation = 'yes'";
+        $result=$this->_DB->fetchTable($query,true);
+        if($result==FALSE){
             $this->errMsg = $this->_DB->errMsg;
             return false;
         }
-	return $result;
+        return $result;
     }
 
 

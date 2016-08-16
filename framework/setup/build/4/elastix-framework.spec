@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 4.0.0
-Release: 13
+Release: 14
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz
@@ -32,6 +32,7 @@ Conflicts: kernel-module-wanpipe
 Conflicts: kernel-module-dahdi-xen
 Conflicts: kernel-module-rhino-xen
 Conflicts: kernel-module-wanpipe-xen
+Conflicts: elastix-system <= 4.0.0-9
 Obsoletes: elastix <= 2.2.0-17
 Requires: php-Smarty
 Requires: php-jpgraph
@@ -104,7 +105,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/init.d
 
 ## ** Step 2: Installation of files and folders ** ##
 # ** Installating framework elastix webinterface ** #
-rm -rf $RPM_BUILD_DIR/elastix-framework/framework/html/modules/userlist/  # Este modulo no es el modificado para soporte de correo, eso se encuentra en modules-core
+#rm -rf $RPM_BUILD_DIR/elastix-framework/framework/html/modules/userlist/  # Este modulo no es el modificado para soporte de correo, eso se encuentra en modules-core
 mv $RPM_BUILD_DIR/elastix-framework/framework/html/*                              $RPM_BUILD_ROOT/var/www/html/
 
 # ** Installating modules elastix webinterface ** #
@@ -393,6 +394,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-14
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon Aug 15 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - ADDED: Framework: add documentation on the sidebar panel API.
   SVN Rev[7709]

@@ -3,14 +3,14 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 8
+Release: 9
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
 Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 4.0.0-12
+Prereq: elastix-framework >= 4.0.0-14
 Prereq: elastix-fax >= 2.2.0-4
 Prereq: php-soap
 Prereq: dahdi
@@ -78,6 +78,7 @@ mkdir -p    $RPM_BUILD_ROOT/var/www/backup
 mkdir -p    $RPM_BUILD_ROOT/usr/share/elastix/privileged
 mkdir -p    $RPM_BUILD_ROOT/var/www/db/
 mkdir -p    $RPM_BUILD_ROOT/usr/bin/
+rm -rf modules/userlist/
 mv modules/ $RPM_BUILD_ROOT/var/www/html/
 
 mv setup/paloSantoNetwork.class.php      $RPM_BUILD_ROOT/var/www/html/libs/
@@ -181,6 +182,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-9
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Fri Jul 15 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-8
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.

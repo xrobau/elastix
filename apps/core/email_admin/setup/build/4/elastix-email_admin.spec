@@ -3,7 +3,7 @@
 Summary: Elastix Module Email
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 4
+Release: 5
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -206,6 +206,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Version and Release in specfile.
+
 * Tue Aug 16 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Vacations: at some point, the sieve API now requires the sievescript to
   be deactivated before being removed.

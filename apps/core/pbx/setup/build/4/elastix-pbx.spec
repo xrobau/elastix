@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -300,6 +300,10 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-7
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Sat Aug 13 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Monitoring,Voicemail: declare custom privileges reportany,
   downloadany, deleteany for the voicemail and monitoring modules, and update

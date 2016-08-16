@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports
 Name:    elastix-reports
 Version: 2.5.0
-Release: 6
+Release: 7
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -93,6 +93,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-7
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
+
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: CDR Report: declare custom privileges reportany and deleteany for the
   cdrreport module, and update minimum elastix-framework version to match. Part

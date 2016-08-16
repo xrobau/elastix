@@ -359,6 +359,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/themes/blackmin
 /var/www/html/*.php
 /var/www/html/robots.txt
+/var/www/html/panels/README.en
+/var/www/html/panels/README.es
 /usr/share/elastix/*
 /usr/share/pear/DB/sqlite3.php
 /usr/local/elastix/sampler.php

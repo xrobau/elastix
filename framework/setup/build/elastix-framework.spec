@@ -18,7 +18,7 @@ Prereq: elastix-firstboot >= 2.3.0-4
 Prereq: /sbin/pidof
 Obsoletes: elastix-additionals
 Provides: elastix-additionals
-Conflicts: elastix-system <= 2.4.0-2
+Conflicts: elastix-system <= 2.5.0-5
 Conflicts: elastix-callcenter <= 2.0.0-16
 Conflicts: elastix-pbx <= 2.2.0-16
 Conflicts: elastix-fax <= 2.2.0-5
@@ -32,7 +32,6 @@ Conflicts: kernel-module-wanpipe
 Conflicts: kernel-module-dahdi-xen
 Conflicts: kernel-module-rhino-xen
 Conflicts: kernel-module-wanpipe-xen
-Conflicts: elastix-framework <= 2.5.0-6
 Obsoletes: elastix <= 2.2.0-17
 Requires: php-Smarty
 Requires: php-jpgraph

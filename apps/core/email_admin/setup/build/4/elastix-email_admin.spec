@@ -207,6 +207,10 @@ fi
 
 %changelog
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
+- CHANGED: Vacations: simplify the disable_vacations.php cron job by using the
+  new updateVacationMessageAll method of paloSantoVacations. Load default
+  timezone for Elastix 4.
+  SVN Rev[7716]
 - CHANGED: Vacations: create method setMessageAccount to set the vacation
   message regardless of previous content, and method updateVacationMessageAccount
   to evaluate the current vacation state based on current date. This allows

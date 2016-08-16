@@ -151,11 +151,10 @@ class paloSantoVacations {
     /* - $email:        cuenta de email a la cual se subira el script de vacaciones
     /* - $subject:      titulo del mensaje que se envia como respuesta
     /* - $body:         cuerpo o contenido del mensaje que se enviara
-    /* - $objAntispam   objeto Antispam
     /* - $spamCapture   boleano que indica si esta activo el eveto de captura de spam
     /*
     /*********************************************************************************/
-    function uploadVacationScript($email, $subject, $body, $objAntispam, $spamCapture){
+    function uploadVacationScript($email, $subject, $body, $spamCapture){
 
         $SIEVE  = array();
         $SIEVE['HOST'] = "localhost";
@@ -175,7 +174,7 @@ class paloSantoVacations {
 
         // si esta activada la captura de spam entonces se deber reemplazar <require "fileinto";> por require ["fileinto","vacation"];
         if($spamCapture){
-            $contentSpamFilter = $objAntispam->getContentScript();
+            $contentSpamFilter = $this->_getContentScript();
             $contentSpamFilter = str_replace("require \"fileinto\";", "require [\"fileinto\",\"vacation\"];", $contentSpamFilter);
         }else{
             $contentSpamFilter =  "require [\"fileinto\",\"vacation\"];";
@@ -211,11 +210,10 @@ class paloSantoVacations {
     /*********************************************************************************
     /* Funcion para eliminar un script de vacaciones dado los siguientes parametros:
     /* - $email:        cuenta de email a la cual se subira el script de vacaciones
-    /* - $objAntispam   objeto Antispam
     /* - $spamCapture   boleano que indica si esta activo el eveto de captura de spam
     /*
     /*********************************************************************************/
-    function deleteVacationScript($email, $objAntispam, $spamCapture){
+    function deleteVacationScript($email, $spamCapture){
 
         $SIEVE  = array();
         $SIEVE['HOST'] = "localhost";
@@ -240,7 +238,7 @@ class paloSantoVacations {
         }
 
         if($spamCapture){
-            $contentSpamFilter = $objAntispam->getContentScript();
+            $contentSpamFilter = $this->_getContentScript();
             $fileScript = "/tmp/scriptTest.sieve";
             $fp = fopen($fileScript,'w');
             fwrite($fp,$contentSpamFilter);
@@ -536,12 +534,11 @@ SCRIPT;
      * Método para evaluar el estado de vacaciones de todas las cuentas con
      * vacación activa, y decidir, según la fecha, si finalizar la vacación.
      *
-     * @param   object  $objAntispam    Objeto paloSantoAntispam para sieve
      * @param   string  $date           Fecha a evaluar, o NULL para hoy
      *
      * @return  boolean FALSE en error, o TRUE para éxito
      */
-    function updateVacationMessageAll($objAntispam, $date = NULL)
+    function updateVacationMessageAll($date = NULL)
     {
         if (is_null($date)) $date = date('Y-m-d');
 
@@ -553,7 +550,7 @@ SCRIPT;
             return FALSE;
         }
         foreach ($rs as $tupla) {
-            if (!$this->_updateVacationMessageTupla($tupla, $objAntispam, $date))
+            if (!$this->_updateVacationMessageTupla($tupla, $date))
                 return FALSE;
         }
         return TRUE;
@@ -564,12 +561,11 @@ SCRIPT;
      * decidir, según la fecha, si iniciar o finalizar la vacación.
      *
      * @param   string  $email          Correo a evaluar para vacaciones
-     * @param   object  $objAntispam    Objeto paloSantoAntispam para sieve
      * @param   string  $date           Fecha a evaluar, o NULL para hoy
      *
      * @return  boolean FALSE en error, o TRUE para éxito
      */
-    function updateVacationMessageAccount($email, $objAntispam, $date = NULL)
+    function updateVacationMessageAccount($email, $date = NULL)
     {
         if (is_null($date)) $date = date('Y-m-d');
 
@@ -584,14 +580,14 @@ SCRIPT;
             $this->errMsg = 'Email account not found';
             return FALSE;
         }
-        return $this->_updateVacationMessageTupla($tupla, $objAntispam, $date);
+        return $this->_updateVacationMessageTupla($tupla, $date);
     }
 
-    private function _updateVacationMessageTupla($tupla, $objAntispam, $date)
+    private function _updateVacationMessageTupla($tupla, $date)
     {
         // Listar script activo. Se asume antispam si scriptTest.sieve presente.
         // TODO: reescribir con uso de objeto sieve-php
-        $scripts = $objAntispam->existScriptSieve($tupla['account'], 'scriptTest.sieve');
+        $scripts = $this->existScriptSieve($tupla['account'], 'scriptTest.sieve');
         $bVacacionActiva = (strpos($scripts['actived'], 'vacations.sieve') !== FALSE);
         $bAntispamActivo = $scripts['status'];
 
@@ -622,12 +618,63 @@ SCRIPT;
         if (!$bVacacionActiva && $bActivarVacacion) {
             $r = $this->uploadVacationScript(
                 $tupla['account'], $tupla['subject'], $tupla['body'],
-                $objAntispam, $bAntispamActivo);
+                $bAntispamActivo);
         } elseif ($bVacacionActiva && !$bActivarVacacion) {
             $r = $this->deleteVacationScript(
                 $tupla['account'],
-                $objAntispam, $bAntispamActivo);
+                $bAntispamActivo);
         }
         return $r;
+    }
+
+    private function _getContentScript()
+    {
+        $script = <<<SCRIPT
+require "fileinto";
+if exists "X-Spam-Flag" {
+    if header :is "X-Spam-Flag" "YES" {
+        fileinto "Spam";
+        stop;
+    }
+}
+if exists "X-Spam-Status" {
+    if header :contains "X-Spam-Status" "Yes," {
+        fileinto "Spam";
+        stop;
+    }
+}
+SCRIPT;
+        return $script;
+    }
+
+    function existScriptSieve($email, $search)
+    {
+        $SIEVE  = array();
+        $SIEVE['HOST'] = "localhost";
+        $SIEVE['PORT'] = 4190;
+        $SIEVE['USER'] = "";
+        $SIEVE['PASS'] = obtenerClaveCyrusAdmin("/var/www/html/");
+        $SIEVE['AUTHTYPE'] = "PLAIN";
+        $SIEVE['AUTHUSER'] = "cyrus";
+        $SIEVE['USER'] = $email;
+        $result['status']  = false;
+        $result['actived'] = "";
+
+        exec("echo ".$SIEVE['PASS']." | sieveshell --username=".$SIEVE['USER']." --authname=".$SIEVE['AUTHUSER']." ".$SIEVE['HOST'].":".$SIEVE['PORT']." -e 'list'",$flags, $status);
+
+        if($status != 0){
+            return null;
+        }else{
+            for($i=0; $i<count($flags); $i++){
+                $value = trim($flags[$i]);
+                if(preg_match("/$search/", $value)){
+                    $result['status'] = true;
+                }
+                if(preg_match("/active script/", $value)){
+                    $result['actived'] = $value;
+                }
+            }
+        }
+        return $result;
     }
 }

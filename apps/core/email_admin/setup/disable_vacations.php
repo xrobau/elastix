@@ -38,21 +38,18 @@ require_once("$documentRoot/configs/default.conf.php");
 global $arrConf;
 global $arrLang;
 $module_name = "vacations";
-$module_name2  = "antispam";
 require_once "$arrConf[basePath]/libs/paloSantoDB.class.php";
 require_once "$arrConf[basePath]/configs/email.conf.php";
 require_once "$arrConf[basePath]/modules/$module_name/libs/paloSantoVacations.class.php";
-require_once "$arrConf[basePath]/modules/$module_name2/libs/paloSantoAntispam.class.php";
 
 load_default_timezone();
 
 $pDB = new paloDB("sqlite3:////var/www/db/email.db");
 $pVacations  = new paloSantoVacations($pDB);
-$objAntispam = new paloSantoAntispam("", "", "", "");
 
 load_language("/var/www/html/");
 
-if (!$pVacations->updateVacationMessageAll($objAntispam)) {
+if (!$pVacations->updateVacationMessageAll()) {
     fputs(STDERR, 'ERR:'.$pVacations->errMsg."\n");
     exit(1);
 }

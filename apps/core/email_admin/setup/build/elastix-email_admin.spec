@@ -207,6 +207,10 @@ fi
 
 %changelog
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-5
+- CHANGED: Vacations,Antispam: move two methods from paloSantoAntispam that are
+  used only in the vacations module to paloSantoVacations. This removes the
+  dependency and simplifies the code.
+  SVN Rev[7718]
 - CHANGED: Antispam: remove useless include of paloSantoVacations class.
   SVN Rev[7717]
 - CHANGED: Vacations: simplify the disable_vacations.php cron job by using the

@@ -206,6 +206,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Aug 17 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Vacations: fix visualization of popup on recent versions of themes.
+  Also fix date and day interval update for changed datepicker.
+  SVN Rev[7721]
+
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
 - CHANGED: Vacations: remove dead code, mark some methods as private.
   SVN Rev[7719]

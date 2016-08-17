@@ -132,20 +132,6 @@ class paloSantoVacations {
         return $result;
     }
 
-    function getVacationsById($id)
-    {
-        $data = array($id);
-        $query = "SELECT * FROM getVacationsById WHERE id=?";
-        $result=$this->_DB->getFirstRowQuery($query,true,$data);
-
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return null;
-        }
-        return $result;
-    }
-
-
     /*********************************************************************************
     /* Funcion para subir un script de vacaciones dado los siguientes parametros:
     /* - $email:        cuenta de email a la cual se subira el script de vacaciones
@@ -154,7 +140,7 @@ class paloSantoVacations {
     /* - $spamCapture   boleano que indica si esta activo el eveto de captura de spam
     /*
     /*********************************************************************************/
-    function uploadVacationScript($email, $subject, $body, $spamCapture){
+    private function uploadVacationScript($email, $subject, $body, $spamCapture){
 
         $SIEVE  = array();
         $SIEVE['HOST'] = "localhost";
@@ -213,7 +199,7 @@ class paloSantoVacations {
     /* - $spamCapture   boleano que indica si esta activo el eveto de captura de spam
     /*
     /*********************************************************************************/
-    function deleteVacationScript($email, $spamCapture){
+    private function deleteVacationScript($email, $spamCapture){
 
         $SIEVE  = array();
         $SIEVE['HOST'] = "localhost";
@@ -272,7 +258,7 @@ class paloSantoVacations {
     /* - $body:         cuerpo o contenido del mensaje que se enviara
     /*
     /*********************************************************************************/
-    function getVacationScript($subject, $body){
+    private function getVacationScript($subject, $body){
         $script = <<<SCRIPT
 
  vacation
@@ -317,97 +303,6 @@ SCRIPT;
         return $result;
     }
 
-    /*********************************************************************************
-    /* Funcion retorna si ya existe un mensage almacenado por un usuario dado:
-    /* - $email:      email del usuario elastix en session
-    /* - $id:         id del mensage
-    /*
-    /* Retorna:
-    /* - $result:     Un booleano con el resultado si existe un registro de un usuario
-    /*********************************************************************************/
-    function existMessage($email)
-    {
-        $data = array($email);
-        $query = "select * from messages_vacations where account=?";
-        $result=$this->_DB->getFirstRowQuery($query,true,$data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        if(is_array($result) && count($result) > 0)
-            return true;
-        else
-            return false;
-    }
-
-    /*********************************************************************************
-    /* Funcion que inserta un mensaje dado los siguientes parametros:
-    /* - $email:      email del usuario elastix en session
-    /* - $subject:    Titulo del mensaje
-    /* - $body:       Cuerpo del mensaje
-    /*
-    /* Retorna:
-    /* - $result:     Un booleano con el resultado si se inserto el registro
-    /*********************************************************************************/
-    function insertMessageByUser($email, $subject, $body, $ini_date, $end_date, $status)
-    {
-        $data = array();
-        $query = "";
-        $query = "insert into messages_vacations(account,subject,body,vacation,ini_date,end_date) values(?,?,?,?,?,?)";
-        $data = array($email, $subject, $body, $status, $ini_date, $end_date);
-
-        $result=$this->_DB->genQuery($query,$data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true;
-    }
-
-    /*********************************************************************************
-    /* Funcion que actualiza un mensaje dado los siguientes parametros:
-    /* - $email:      email del usuario elastix en session
-    /* - $subject:    Titulo del mensaje
-    /* - $body:       Cuerpo del mensaje
-    /* - $id:         id del mensage
-    /*
-    /* Retorna:
-    /* - $result:     Un booleano con el resultado si se actualizo el registro
-    /*********************************************************************************/
-    function updateMessageByUser($email, $subject, $body, $ini_date, $end_date, $status=null)
-    {
-        $data = array($subject, $body, $status, $ini_date, $end_date, $email);
-        $query = "update messages_vacations set subject=?,  body=? , vacation=?, ini_date=?, end_date=?  where account=?";
-        $result=$this->_DB->genQuery($query,$data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true;
-    }
-
-    /*********************************************************************************
-    /* Funcion que elimina los registros excesivos que se encuentran en una base de datos:
-    /* - $email:      email del usuario elastix en session
-    /* - $subject:    Titulo del mensaje
-    /* - $body:       Cuerpo del mensaje
-    /* - $id:         id del mensage
-    /*
-    /* Retorna:
-    /* - $result:     Un booleano con el resultado si se actualizo el registro
-    /*********************************************************************************/
-    function deleteMessagesByUser($email, $subject, $body, $ini_date, $end_date, $status=null)
-    {
-        $data = array($email);
-        $query = "delete from messages_vacations where account=?";
-        $result=$this->_DB->genQuery($query,$data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true;
-    }
-
     function setMessageAccount($email, $subject, $body, $ini_date, $end_date, $status)
     {
         $sqls = array(
@@ -428,28 +323,6 @@ SCRIPT;
         }
         return TRUE;
     }
-
-    /*********************************************************************************
-    /* Funcion que inserta un mensaje dado los siguientes parametros:
-    /* - $email:      email del usuario elastix en session
-    /* - $subject:    Titulo del mensaje
-    /* - $body:       Cuerpo del mensaje
-    /*
-    /* Retorna:
-    /* - $result:     Un booleano con el resultado si se inserto el registro
-    /*********************************************************************************/
-    function setStatusMessageByUser($email, $id, $vacation)
-    {
-        $data = array($vacation, $id, $email);
-        $query = "update messages_vacations set vacation=? where id=? and account=?";
-        $result=$this->_DB->genQuery($query,$data);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return true;
-    }
-
 
     /*********************************************************************************
     /* Funcion que verifica si el sieve esta corriendo.
@@ -474,31 +347,12 @@ SCRIPT;
     }
 
     /*********************************************************************************
-    /* Funcion que devuelve todos los correos electronicos con el script de vacaciones
-    /* activado:
-    /*
-    /* Retorna:
-    /* - $result:     Un arreglo con los emails con el script de vacaciones activo
-    /*********************************************************************************/
-    function getEmailsVacationON()
-    {
-        $query = "SELECT id, account, ini_date, end_date, subject, body FROM messages_vacations WHERE vacation = 'yes'";
-        $result=$this->_DB->fetchTable($query,true);
-        if($result==FALSE){
-            $this->errMsg = $this->_DB->errMsg;
-            return false;
-        }
-        return $result;
-    }
-
-
-    /*********************************************************************************
     /* Funcion que verifica si existe el archivo de cron del script de vacaciones:
     /*
     /* Retorna:
     /* - $result:     Un arreglo con los emails con el script de vacaciones activo
     /*********************************************************************************/
-    function existCronFile()
+    private function existCronFile()
     {
         $this->errMsg = '';
         $sComando = '/usr/bin/elastix-helper vacationconfig exist_cron';
@@ -517,7 +371,7 @@ SCRIPT;
     /* Retorna:
     /* - $result:     Un arreglo con los emails con el script de vacaciones activo
     /*********************************************************************************/
-    function createCronFile()
+    private function createCronFile()
     {
         $this->errMsg = '';
         $sComando = '/usr/bin/elastix-helper vacationconfig create_cron';

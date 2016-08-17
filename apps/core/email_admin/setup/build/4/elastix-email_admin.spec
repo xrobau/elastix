@@ -207,6 +207,8 @@ fi
 
 %changelog
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
+- CHANGED: Vacations: remove dead code, mark some methods as private.
+  SVN Rev[7719]
 - CHANGED: Vacations,Antispam: move two methods from paloSantoAntispam that are
   used only in the vacations module to paloSantoVacations. This removes the
   dependency and simplifies the code.

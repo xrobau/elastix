@@ -34,15 +34,18 @@
     </menuitem>
     <menuitem menuid="email_stats"    desc="Email stats"  parent="email_admin" module="yes" link="" order="8">
         <permissions>
-            <group id="1" name="administrator" desc="total access"></group>  
+            <group id="1" name="administrator" desc="total access"></group>
         </permissions>
     </menuitem>
     <menuitem menuid="vacations"      desc="Vacations"  parent="email_admin" module="yes" link="" order="9">
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
-	    <group id="2" name="Operator" desc="Operator"></group>
+            <group id="2" name="Operator" desc="Operator"></group>
             <group id="3" name="extension" desc="extension user"></group>
         </permissions>
+        <privilege name="setanyemail" desc="Update vacation status for any email account, not just their own">
+            <grant2group name="administrator" />
+        </privilege>
     </menuitem>
   </menulist>
 </module>

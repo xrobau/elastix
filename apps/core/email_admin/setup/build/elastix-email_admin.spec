@@ -207,6 +207,8 @@ fi
 
 %changelog
 * Wed Aug 17 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Vacations: update menu.xml with custom privilege setanyemail.
+  SVN Rev[7723]
 - CHANGED: Vacations: use hasModulePrivilege(setanyemail) to test whether user
   is allowed to change vacation status for any account. Update required version
   of framework to match. Part of fix for Elastix bug #1100.

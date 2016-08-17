@@ -395,6 +395,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Wed Aug 17 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Userlist: improve template correctness on user modification popup.
+  SVN Rev[7720]
+
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-16
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

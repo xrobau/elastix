@@ -1,11 +1,14 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
     <head>
         <title>Elastix</title>
-	<link rel="stylesheet" href="{$path}themes/{$THEMENAME}/styles.css">
-	<link rel="stylesheet" href="{$path}themes/{$THEMENAME}/help.css">
-	{$HEADER_LIBS_JQUERY}
-	<script src="{$path}libs/js/base.js"></script>
-	<script src="{$path}modules/{$MODULE_NAME}/themes/default/js/javascript.js"></script>
+        <link rel="stylesheet" href="{$path}themes/{$THEMENAME}/styles.css">
+        <link rel="stylesheet" href="{$path}themes/{$THEMENAME}/help.css">
+        {$HEADER_LIBS_JQUERY}
+        <script type="text/javascript" src="{$path}libs/js/base.js"></script>
+        {$HEADER}
+        {$HEADER_MODULES}
     </head>
     <body>
     {if $THEMENAME eq "elastixneo"}

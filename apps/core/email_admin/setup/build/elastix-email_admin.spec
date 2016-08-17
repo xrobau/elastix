@@ -10,7 +10,7 @@ Source0: %{modname}_%{version}-%{release}.tgz
 #Source0: %{modname}_%{version}-%{release}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildArch: noarch
-Prereq: elastix-framework >= 2.5.0-14
+Prereq: elastix-framework >= 2.5.0-16
 Prereq: RoundCubeMail
 Prereq: php-imap
 Prereq: postfix, spamassassin, cyrus-imapd
@@ -207,6 +207,10 @@ fi
 
 %changelog
 * Wed Aug 17 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Vacations: use hasModulePrivilege(setanyemail) to test whether user
+  is allowed to change vacation status for any account. Update required version
+  of framework to match. Part of fix for Elastix bug #1100.
+  SVN Rev[7722]
 - FIXED: Vacations: fix visualization of popup on recent versions of themes.
   Also fix date and day interval update for changed datepicker.
   SVN Rev[7721]

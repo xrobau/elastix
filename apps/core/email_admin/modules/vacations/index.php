@@ -57,22 +57,25 @@ function _moduleContent(&$smarty, $module_name)
     $action = getAction();
     $content = "";
 
+    $pACL = new paloACL($pDBACL);
+    $email_curr = getEmailCurrentUser($pACL);
+    $setany = $pACL->hasModulePrivilege($_SESSION['elastix_user'], $module_name, 'setanyemail');
+
     switch($action){
-    case "activate":
-        $content = updateEmailVacations($smarty, $module_name, $local_templates_dir,
-            $pDB, $pDBACL, 'yes');
-        break;
-    case "disactivate":
-        $content = updateEmailVacations($smarty, $module_name, $local_templates_dir,
-            $pDB, $pDBACL, 'no');
-        break;
     case "showAllEmails":
-        $html = showAllEmails($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL);
+        $html = showAllEmails($smarty, $module_name, $local_templates_dir,
+            $pDB, $setany);
         $smarty->assign("CONTENT",$html);
         $content = $smarty->display("$local_templates_dir/emailsGrid.tpl");
         break;
+    case "activate":
+    case "disactivate":
+        updateEmailVacations($smarty, $module_name, $local_templates_dir,
+            $pDB, $setany, $email_curr, (($action == 'activate') ? 'yes' : 'no') );
+        // cae al siguiente caso
     default: // view_form
-        $content = viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL);
+        $content = viewFormVacations($smarty, $module_name, $local_templates_dir,
+            $pDB, $setany, $email_curr);
         break;
     }
     return $content;
@@ -93,12 +96,12 @@ function getEmailCurrentUser($pACL)
     return $email;
 }
 
-function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL)
+function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB,
+    $setany, $email_curr)
 {
     $pVacations  = new paloSantoVacations($pDB);
     $arrFormVacations = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormVacations);
-    $pACL = new paloACL($pDBACL);
 
     //begin, Form data persistence to errors and other events.
     $_DATA   = $_POST;
@@ -112,12 +115,12 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
 
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
 
-    if($pACL->isUserAdministratorGroup($userAccount)){
+    if($setany){
         $link_emails = "<a href='javascript: popup_get_emails(\"?menu=$module_name&action=showAllEmails&rawmode=yes\");' name='getEmails' id='getEmails' style='cursor: pointer;'>"._tr("Choose other email account")."</a>";
         if(!isset($email) || $email == "")
-            $email = getEmailCurrentUser($pACL);
+            $email = $email_curr;
     }else{
-        $email = getEmailCurrentUser($pACL);
+        $email = $email_curr;
     }
 
     if(isset($email) && $email!="" && preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
@@ -136,7 +139,7 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
             $_DATA['end_date'] = isset($_POST['end_date'])?$_POST['end_date']:date("d M Y");
         }
     }else{
-        if(!$pACL->isUserAdministratorGroup($userAccount)){
+        if(!$setany){
             $smarty->assign("mb_title", _tr("Alert"));
             $smarty->assign("mb_message", _tr('Please contact your administrator if your user does not have an email account otherwise add it to System->User management->Users'));
         }
@@ -192,10 +195,9 @@ function viewFormVacations($smarty, $module_name, $local_templates_dir, &$pDB, &
 }
 
 function updateEmailVacations($smarty, $module_name, $local_templates_dir,
-    &$pDB, &$pDBACL, $nstatus)
+    &$pDB, $setany, $emails, $nstatus)
 {
     $pVacations  = new paloSantoVacations($pDB);
-    $pACL = new paloACL($pDBACL);
     $arrFormVacations = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormVacations);
 
@@ -208,7 +210,6 @@ function updateEmailVacations($smarty, $module_name, $local_templates_dir,
     $result     = "";
 
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $emails = getEmailCurrentUser($pACL);
 
     if(!$oForm->validateForm($_POST)) {
         // Falla la validación básica del formulario
@@ -221,20 +222,20 @@ function updateEmailVacations($smarty, $module_name, $local_templates_dir,
         }
         $smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", $strErrorMsg);
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL);
+        return;
     }
 
     if(!preg_match("/^[a-z0-9]+([\._\-]?[a-z0-9]+[_\-]?)*@[a-z0-9]+([\._\-]?[a-z0-9]+)*(\.[a-z0-9]{2,6})+$/", $email)){
         $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message",_tr('Email is empty or is not correct. Please write the email account.'));
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL);
+        return;
     }
 
     if($email != $emails){
-        if(!$pACL->isUserAdministratorGroup($userAccount)){
+        if(!$setany){
             $smarty->assign("mb_title", _tr("Error"));
             $smarty->assign("mb_message",_tr('Email is not correct. Please write the email assigned to your elastix account.'));
-            return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL);
+            return;
         }
     }
 
@@ -252,14 +253,14 @@ function updateEmailVacations($smarty, $module_name, $local_templates_dir,
     if($seconds < 0){
         $smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",_tr("End date should be greater than the initial date"));
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL);
+        return;
     }
 
     $statusSieve = $pVacations->verifySieveStatus();
     if(!$statusSieve['response']){
         $smarty->assign("mb_title", _tr("Alert"));
         $smarty->assign("mb_message",$statusSieve['message']);
-        return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL);
+        return;
     }
 
     $pDB->beginTransaction();
@@ -277,16 +278,16 @@ function updateEmailVacations($smarty, $module_name, $local_templates_dir,
         $pDB->rollBack();
         $smarty->assign("mb_message", $msgError);
     }
-    return viewFormVacations($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL);
+    return;
 }
 
-function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL)
+function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB,
+    $setany)
 {
     require_once "libs/paloSantoGrid.class.php";
 
     $pVacations    = new paloSantoVacations($pDB);
     $oGrid         = new paloSantoGrid($smarty);
-    $pACL          = new paloACL($pDBACL);
     $id            = getParameter("id");
     $filter_field  = getParameter("filter_field");
     $filter_value  = getParameter("filter_value");
@@ -299,7 +300,7 @@ function showAllEmails($smarty, $module_name, $local_templates_dir, &$pDB, &$pDB
         "filter_value" =>  $filter_value
     );
 
-    if(!$pACL->isUserAdministratorGroup($userAccount)){
+    if(!$setany){
           return _tr("User isn't allowed to view this content.");
     }else{
           $totalEmail = $pVacations->getNumVacations($filter_field, $filter_value);

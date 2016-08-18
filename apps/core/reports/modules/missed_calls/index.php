@@ -107,8 +107,8 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
     $_POST['date_end']   = $date_end;
 
     $parmFilter = array(
-	"date_start" => $date_start,
-	"date_end" => $date_end
+        "date_start" => $date_start,
+        "date_end" => $date_end
     );
 
     if (!$oFilterForm->validateForm($parmFilter)) {
@@ -117,8 +117,8 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
             'mb_message'    =>  '<b>'._tr('The following fields contain errors').':</b><br/>'.
                                 implode(', ', array_keys($oFilterForm->arrErroresValidacion)),
         ));
-	$date_start = date("d M Y").' 00:00';
-	$date_end   = date("d M Y").' 23:59';
+        $date_start = date("d M Y").' 00:00';
+        $date_end   = date("d M Y").' 23:59';
     }
 
     $url = array_merge($url, array('date_start' => $date_start,'date_end' => $date_end));
@@ -139,11 +139,11 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
     if($oGrid->isExportAction()){
         $limit  = $total; // max number of rows.
         $offset = 0;      // since the start.
-	$arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
-	$arrData = $pCallingReport->showDataReport($arrResult, $total);
+        $arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
+        $arrData = $pCallingReport->showDataReport($arrResult, $total);
 
-	$size = count($arrData);
-	$oGrid->setData($arrData);
+        $size = count($arrData);
+        $oGrid->setData($arrData);
     }
     else{
         $limit  = 20;
@@ -151,15 +151,15 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
         $arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
         $arrData = $pCallingReport->showDataReport($arrResult, $total);
         if ($pCallingReport->errMsg != '') {
-        	$smarty->assign('mb_message', $pCallingReport->errMsg);
+                $smarty->assign('mb_message', $pCallingReport->errMsg);
         }
 
-	//recalculando el total para la paginación
-	$size = count($arrData);
-	$oGrid->setTotal($size);
-	$offset = $oGrid->calculateOffset(); //echo $size." : ".$offset;
-	$arrResult = $pCallingReport->getDataByPagination($arrData, $limit, $offset);
-	$oGrid->setData($arrResult);
+        //recalculando el total para la paginación
+        $size = count($arrData);
+        $oGrid->setTotal($size);
+        $offset = $oGrid->calculateOffset(); //echo $size." : ".$offset;
+        $arrResult = $pCallingReport->getDataByPagination($arrData, $limit, $offset);
+        $oGrid->setData($arrResult);
     }
 
     //begin section filter
@@ -178,8 +178,8 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
 
 function createFieldFilter(){
     $arrFilter = array(
-	    "src" => _tr("Source"),
-	    "dst" => _tr("Destination"),
+            "src" => _tr("Source"),
+            "dst" => _tr("Destination"),
                     );
 
     $arrFormElements = array(
@@ -195,13 +195,13 @@ function createFieldFilter(){
                                     "INPUT_EXTRA_PARAM"      => "",
                                     "VALIDATION_TYPE"        => "text",
                                     "VALIDATION_EXTRA_PARAM" => ""),
-	    "date_start"  => array("LABEL"                  => _tr("Start Date"),
-				    "REQUIRED"               => "yes",
-				    "INPUT_TYPE"             => "DATE",
-				    "INPUT_EXTRA_PARAM"      => array("TIME" => true, "FORMAT" => "%d %b %Y %H:%M"),
-				    "VALIDATION_TYPE"        => "",
-				    "VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}[[:space:]]+[[:digit:]]{1,2}:[[:digit:]]{1,2}$"),
-	    "date_end"    => array("LABEL"                  => _tr("End Date"),
+            "date_start"  => array("LABEL"                  => _tr("Start Date"),
+                                    "REQUIRED"               => "yes",
+                                    "INPUT_TYPE"             => "DATE",
+                                    "INPUT_EXTRA_PARAM"      => array("TIME" => true, "FORMAT" => "%d %b %Y %H:%M"),
+                                    "VALIDATION_TYPE"        => "",
+                                    "VALIDATION_EXTRA_PARAM" => "^[[:digit:]]{1,2}[[:space:]]+[[:alnum:]]{3}[[:space:]]+[[:digit:]]{4}[[:space:]]+[[:digit:]]{1,2}:[[:digit:]]{1,2}$"),
+            "date_end"    => array("LABEL"                  => _tr("End Date"),
                                     "REQUIRED"               => "yes",
                                     "INPUT_TYPE"             => "DATE",
                                     "INPUT_EXTRA_PARAM"      => array("TIME" => true, "FORMAT" => "%d %b %Y %H:%M"),

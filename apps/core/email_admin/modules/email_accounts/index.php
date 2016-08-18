@@ -153,7 +153,6 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 
     $pACL = new paloACL(new paloDB($arrConf['elastix_dsn']['acl']));
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $isAdministrator = $pACL->isUserAdministratorGroup($userAccount);
 
     $reconstruir = _tr("Reconstruct");
 
@@ -172,8 +171,7 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
             $username=$account[0];
             $arrTmp[0] = "&nbsp;<a href='?menu=$module_name&action=view&username=$username'>$username</a>";
             $arrTmp[1] = obtener_quota_usuario($pEmail, $username,$module_name,$id_domain);
-            if($isAdministrator)
-                $arrTmp[2] = "&nbsp;<a href='?menu=$module_name&action=reconstruir&username=$username&domain=$id_domain'>$reconstruir</a>";
+            $arrTmp[2] = "&nbsp;<a href='?menu=$module_name&action=reconstruir&username=$username&domain=$id_domain'>$reconstruir</a>";
             $link_agregar_direccion="<a href='?action=add_address&id_domain=$id_domain&username=$username'>Add Address</a>";
             $link_modificar_direccion="<a href='?action=edit_addresses&id_domain=$id_domain&username=$username'>Addresses</a>";
             //$arrTmp[3]=$link_agregar_direccion."&nbsp;&nbsp; ".$link_modificar_direccion;
@@ -197,10 +195,7 @@ function viewFormAccount($smarty, $module_name, $local_templates_dir, &$pDB, $ar
 
     $arrDatosGrid = array_slice($arrData, $inicio-1, $leng+1);
 
-    if($isAdministrator)
-        $oGrid->setColumns(array(_tr("Account Name"),_tr("Used Space"),_tr("Reconstruct MailBox")));
-    else
-        $oGrid->setColumns(array(_tr("Account Name"),_tr("Used Space")));
+    $oGrid->setColumns(array(_tr("Account Name"),_tr("Used Space"),_tr("Reconstruct MailBox")));
 
     $arrGrid = array(
         "width"    => "99%",
@@ -225,16 +220,13 @@ function reconstruir_mailBox($smarty, $module_name, $local_templates_dir, &$pDB,
     $pEmail = new paloEmail($pDB);
 
     $userAccount = isset($_SESSION['elastix_user'])?$_SESSION['elastix_user']:"";
-    $isAdmisnistrator = $pACL->isUserAdministratorGroup($userAccount);
 
-    if($isAdmisnistrator){
-        if($pEmail->resconstruirMailBox(getParameter("username"))){
-            $smarty->assign("mb_title", _tr('MESSAGE').":");
-            $smarty->assign("mb_message", _tr("The MailBox was reconstructed succefully"));
-        }else{
-            $smarty->assign("mb_title", _tr('ERROR').":");
-            $smarty->assign("mb_message",_tr("The MailBox couldn't be reconstructed.\n".$pEmail->errMsg));
-        }
+    if($pEmail->resconstruirMailBox(getParameter("username"))){
+        $smarty->assign("mb_title", _tr('MESSAGE').":");
+        $smarty->assign("mb_message", _tr("The MailBox was reconstructed succefully"));
+    }else{
+        $smarty->assign("mb_title", _tr('ERROR').":");
+        $smarty->assign("mb_message",_tr("The MailBox couldn't be reconstructed.\n".$pEmail->errMsg));
     }
 
     unset($_GET['action']);

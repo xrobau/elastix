@@ -206,6 +206,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Aug 18 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Email Accounts: unconditionally allow mailbox reconstruction. It does
+  not make much sense for an user who is capable of creating and removing
+  accounts to be denied mailbox reconstruction if not an admin.
+  SVN Rev[7724]
+
 * Wed Aug 17 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Vacations: update menu.xml with custom privilege setanyemail.
   SVN Rev[7723]

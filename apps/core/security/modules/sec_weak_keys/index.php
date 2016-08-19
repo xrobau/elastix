@@ -27,11 +27,8 @@
   +----------------------------------------------------------------------+
   $Id: index.php,v 1.1 2010-12-21 09:08:11 Alberto Santos asantos@palosanto.com Exp $ */
 //include elastix framework
-include_once "libs/paloSantoGrid.class.php";
-include_once "libs/paloSantoForm.class.php";
-include_once "libs/paloSantoConfig.class.php";
-include_once "modules/extensions_batch/libs/paloSantoExtensionsBatch.class.php";
-include_once "libs/misc.lib.php";
+require_once "libs/paloSantoForm.class.php";
+require_once "libs/misc.lib.php";
 
 function _moduleContent(&$smarty, $module_name)
 {
@@ -55,12 +52,6 @@ function _moduleContent(&$smarty, $module_name)
     $dsn_asterisk = generarDSNSistema("asteriskuser","asterisk");
     $pDB = new paloDB($dsn_asterisk);
 
-    $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
-    $arrAMP  = $pConfig->leer_configuracion(false);
-
-    $pConfig = new paloConfig($arrAMP['ASTETCDIR']['valor'], "asterisk.conf", "=", "[[:space:]]*=[[:space:]]*");
-    $arrAST  = $pConfig->leer_configuracion(false);
-
     //actions
     $action = getAction();
     $content = "";
@@ -70,7 +61,7 @@ function _moduleContent(&$smarty, $module_name)
             $content = editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB);
             break;
         case "save":
-            $content = saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrAST, $arrAMP);
+            $content = saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
             break;
         default:
             $content = reportWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
@@ -81,6 +72,8 @@ function _moduleContent(&$smarty, $module_name)
 
 function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
 {
+    require_once "libs/paloSantoGrid.class.php";
+
     $pWeakKeys = new paloSantoWeakKeys($pDB);
     $filter_field = getParameter("filter_field");
     $filter_value = getParameter("filter_value");
@@ -215,7 +208,7 @@ function createFieldForm()
     return $arrFields;
 }
 
-function saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf, $arrAST, $arrAMP)
+function saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
 {
     $arrFormNew = createFieldForm($pDB);
     $arrValues['id'] = getParameter("Extension");
@@ -258,16 +251,33 @@ function saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
         $smarty->assign("mb_message", $pWeakKeys->errMsg);
         return editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
     }
-    $data_connection = array('host' => $arrConf['AMI_HOST'], 'user' => $arrConf['AMI_USER'], 'password' => $arrConf['AMI_PASS']);
-    $pLoadExtension = new paloSantoLoadExtension($pDB);
-    if(!$pLoadExtension->do_reloadAll($data_connection, $arrAST, $arrAMP)){
+
+    return (do_reloadAsterisk($pDB, $smarty))
+        ? reportWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
+        : editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
+}
+
+function do_reloadAsterisk($pDB, $smarty)
+{
+    require_once "libs/paloSantoConfig.class.php";
+    require_once "modules/extensions_batch/libs/paloSantoExtensionsBatch.class.php";
+
+    $pConfig = new paloConfig("/etc", "amportal.conf", "=", "[[:space:]]*=[[:space:]]*");
+    $arrAMP  = $pConfig->leer_configuracion(false);
+
+    $pConfig = new paloConfig($arrAMP['ASTETCDIR']['valor'], "asterisk.conf", "=", "[[:space:]]*=[[:space:]]*");
+    $arrAST  = $pConfig->leer_configuracion(false);
+
+    $o = new paloSantoExtensionsBatch($pDB, $arrAST, $arrAMP);
+    $r = $o->applyExtensions();
+    if ($r) {
+        $smarty->assign("mb_title", _tr("Message"));
+        $smarty->assign("mb_message", _tr("Successful Secret Update"));
+    } else {
         $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message", $pLoadExtension->errMsg);
-        return editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
     }
-    $smarty->assign("mb_title", _tr("Message"));
-    $smarty->assign("mb_message", _tr("Successful Secret Update"));
-    return  reportWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+    return $r;
 }
 
 function createFieldFilter(){

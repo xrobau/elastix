@@ -17,6 +17,10 @@ Requires: elastix-system
 Requires: php-mcrypt
 Requires: elastix-portknock
 
+# sec_weak_keys pulls extensions_batch/libs/paloSantoExtensionsBatch.class.php
+# to perform asterisk reload
+Requires: elastix-pbx >= 2.4.0-9
+
 # commands: cut
 Requires: coreutils
 
@@ -134,6 +138,10 @@ fi
 
 %changelog
 * Fri Aug 19 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Weak Keys: the extensions_batch rewrite of SVN commit #4955 broke the
+  asterisk reload of sec_weak_keys due to an undeclared dependency. Fixed for
+  new class method, and also add dependency.
+  SVN Rev[7728]
 - CHANGED: Weak Keys: non-administrators have little use for Weak Keys
   verification, so remove administrator check.
   SVN Rev[7727]

@@ -58,19 +58,19 @@ function _moduleContent(&$smarty, $module_name)
 
     switch($action){
         case "change":
-            $content = editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB);
+            $content = editWeakKeys($smarty, $module_name, $local_templates_dir, $pDB);
             break;
         case "save":
-            $content = saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            $content = saveNewKey($smarty, $module_name, $local_templates_dir, $pDB);
             break;
         default:
-            $content = reportWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
+            $content = reportWeakKeys($smarty, $module_name, $local_templates_dir, $pDB);
             break;
     }
     return $content;
 }
 
-function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arrConf)
+function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB)
 {
     require_once "libs/paloSantoGrid.class.php";
 
@@ -80,8 +80,6 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     //begin grid parameters
     $oGrid  = new paloSantoGrid($smarty);
     $total = $pWeakKeys->getNumWeakKeys($filter_field,$filter_value);
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['acl']);
-    $pACL = new paloACL($pDB2);
     $oGrid->enableExport();   // enable csv export.
     $oGrid->pagingShow(true); // show paging section.
     $oGrid->setTitle(_tr("Weak Secrets"));
@@ -147,13 +145,11 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
     return $content;
 }
 
-function editWeakKeys($smarty, $module_name, $local_templates_dir,$arrConf, $pDB, $Extension = "")
+function editWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $Extension = "")
 {
     $id = getParameter("id");
     if($id == "")
         $id = $Extension;
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['acl']);
-    $pACL = new paloACL($pDB2);
     $pWeakKeys = new paloSantoWeakKeys($pDB);
 
     $arrFormRules = createFieldForm();
@@ -208,15 +204,13 @@ function createFieldForm()
     return $arrFields;
 }
 
-function saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
+function saveNewKey($smarty, $module_name, $local_templates_dir, $pDB)
 {
     $arrFormNew = createFieldForm($pDB);
     $arrValues['id'] = getParameter("Extension");
     $arrValues['key'] = getParameter("Current_Secret");
     $arrValues['new_key'] = getParameter("New_Secret");
     $confirmation = getParameter("Confirm_New_Secret");
-    $pDB2 = new paloDB($arrConf['elastix_dsn']['acl']);
-    $pACL = new paloACL($pDB2);
     $oForm = new paloForm($smarty, $arrFormNew);
     if(!$oForm->validateForm($_POST)) {
         // Falla la validación básica del formulario
@@ -229,7 +223,7 @@ function saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
         }
         $smarty->assign("mb_title", _tr("Validation Error"));
         $smarty->assign("mb_message", $strErrorMsg);
-        return editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
+        return editWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrValues['id']);
     }
 
     $pWeakKeys = new paloSantoWeakKeys($pDB);
@@ -238,23 +232,23 @@ function saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
     if($arrValues['new_key'] != $confirmation){
         $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message", _tr("The New Secret does not match with the Confirmation Secret"));
-        return editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
+        return editWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrValues['id']);
     }
     $mensaje = getMensaje($arrValues['id'],$arrValues['new_key']);
     if($mensaje != "OK"){
         $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message", $mensaje);
-        return editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
+        return editWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrValues['id']);
     }
     if(!$pWeakKeys->saveNewKey($arrValues,$device['tech'])){
         $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message", $pWeakKeys->errMsg);
-        return editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
+        return editWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrValues['id']);
     }
 
     return (do_reloadAsterisk($pDB, $smarty))
-        ? reportWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrConf)
-        : editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
+        ? reportWeakKeys($smarty, $module_name, $local_templates_dir, $pDB)
+        : editWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrValues['id']);
 }
 
 function do_reloadAsterisk($pDB, $smarty)

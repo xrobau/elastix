@@ -138,6 +138,8 @@ fi
 
 %changelog
 * Fri Aug 19 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Weak Keys: remove useless parameter and paloACL object.
+  SVN Rev[7729]
 - FIXED: Weak Keys: the extensions_batch rewrite of SVN commit #4955 broke the
   asterisk reload of sec_weak_keys due to an undeclared dependency. Fixed for
   new class method, and also add dependency.

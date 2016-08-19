@@ -48,5 +48,6 @@ $arrLangModule = array(
     "UNKNOWN" => "DESCONOCIDO",
     "ANSWERED" => "CONTESTADA",
     "The following fields contain errors" => "Los siguientes campos contienen errores",
+    'No extension for missed calls. Contact your administrator.' => 'No hay extensión para llamadas perdidas. Contacte a su administrador.',
 );
 ?>

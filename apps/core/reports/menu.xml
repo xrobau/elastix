@@ -67,6 +67,9 @@
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
         </permissions>
+        <privilege name="viewany" desc="View missed calls from all users, not just their own">
+            <grant2group name="administrator" />
+        </privilege>
     </menuitem>
   </menulist>
 </module>

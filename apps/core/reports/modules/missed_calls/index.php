@@ -69,15 +69,25 @@ function _moduleContent(&$smarty, $module_name)
     $action = getAction();
     $content = "";
 
-    switch($action){
-        default:
-            $content = reportMissedCalls($smarty, $module_name, $local_templates_dir, $pDB, $pDBACL, $pACL, $arrConf);
-            break;
+    // Para usuarios que no son administradores, se restringe a los CDR de la
+    // propia extensión. Cuidado con no-admin que no tiene extensión.
+    $viewany = $pACL->hasModulePrivilege($_SESSION['elastix_user'],
+        $module_name, 'viewany');
+    $sExtension = $viewany ? '' : $pACL->getUserExtension($_SESSION['elastix_user']);
+    $sExtension = trim("$sExtension");
+    if (!$viewany && $sExtension == '') {
+        return _tr('No extension for missed calls. Contact your administrator.');
+    }
+
+    switch($action) {
+    default:
+        $content = reportMissedCalls($smarty, $module_name, $local_templates_dir, $pDB, $sExtension);
+        break;
     }
     return $content;
 }
 
-function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &$pDBACL, $pACL, $arrConf)
+function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, $sExtension)
 {
     ini_set('max_execution_time', 3600);
 
@@ -131,15 +141,15 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
     $arrData = null;
     $date_start_format = date('Y-m-d H:i:s',strtotime($date_start.":00"));
     $date_end_format   = date('Y-m-d H:i:s',strtotime($date_end.":59"));
-    // Para usuarios que no son administradores, se restringe a los CDR de la
-    // propia extensión
-    $sExtension = $pACL->isUserAdministratorGroup($_SESSION['elastix_user'])? '' : $pACL->getUserExtension($_SESSION['elastix_user']);
-    $total = $pCallingReport->getNumCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
+
+    $total = $pCallingReport->getNumCallingReport($date_start_format, $date_end_format,
+        $filter_field, $filter_value, $sExtension);
 
     if($oGrid->isExportAction()){
         $limit  = $total; // max number of rows.
         $offset = 0;      // since the start.
-        $arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
+        $arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format,
+            $filter_field, $filter_value, $sExtension);
         $arrData = $pCallingReport->showDataReport($arrResult, $total);
 
         $size = count($arrData);
@@ -148,7 +158,8 @@ function reportMissedCalls($smarty, $module_name, $local_templates_dir, &$pDB, &
     else{
         $limit  = 20;
         $oGrid->setLimit($limit);
-        $arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format, $filter_field, $filter_value, $sExtension);
+        $arrResult = $pCallingReport->getCallingReport($date_start_format, $date_end_format,
+            $filter_field, $filter_value, $sExtension);
         $arrData = $pCallingReport->showDataReport($arrResult, $total);
         if ($pCallingReport->errMsg != '') {
                 $smarty->assign('mb_message', $pCallingReport->errMsg);

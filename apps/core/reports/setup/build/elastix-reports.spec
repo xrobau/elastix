@@ -93,10 +93,14 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Fri Aug 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Missed Calls: declare custom privilege viewany on module. Part of the
+  fix for Elastix bug #1100. Also remove useless parameters.
+  SVN Rev[7726]
+
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-7
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
-
 
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: CDR Report: declare custom privileges reportany and deleteany for the

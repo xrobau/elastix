@@ -127,8 +127,7 @@ function reportWeakKeys($smarty, $module_name, $local_templates_dir, &$pDB, $arr
             $arrTmp[1] = $value['description'];
             $mensaje = getMensaje($value['id'],$value['data']);
             if($mensaje != "OK" && !$bExportation)
-                if($pACL->isUserAdministratorGroup($_SESSION['elastix_user']) || $pACL->getUserExtension($_SESSION['elastix_user'])==$value['id'])
-                    $mensaje = _tr("Weak Key").": $mensaje &nbsp;<a href='?menu=$module_name&action=change&id=$value[id]'>"._tr("Change Secret")."</a>";
+                $mensaje = _tr("Weak Key").": $mensaje &nbsp;<a href='?menu=$module_name&action=change&id=$value[id]'>"._tr("Change Secret")."</a>";
             $arrTmp[2] = $mensaje;
             $arrData[] = $arrTmp;
             }
@@ -163,19 +162,13 @@ function editWeakKeys($smarty, $module_name, $local_templates_dir,$arrConf, $pDB
     $pDB2 = new paloDB($arrConf['elastix_dsn']['acl']);
     $pACL = new paloACL($pDB2);
     $pWeakKeys = new paloSantoWeakKeys($pDB);
-    if(!$pACL->isUserAdministratorGroup($_SESSION['elastix_user']))
-        if($pACL->getUserExtension($_SESSION['elastix_user']) != $id){
-            $smarty->assign("mb_title",_tr("Error"));
-            $smarty->assign("mb_message",_tr("You are not authorized to enter to that extension"));
-            return reportWeakKeys($smarty, $module_name, $local_templates_dir, $pDB, $arrConf);
-        }
+
     $arrFormRules = createFieldForm();
     $oForm = new paloForm($smarty,$arrFormRules);
     $smarty->assign("SAVE", _tr("Save"));
     $smarty->assign("CANCEL", _tr("Cancel"));
     $smarty->assign("REQUIRED_FIELD", _tr("Required field"));
-    if($pACL->isUserAdministratorGroup($_SESSION['elastix_user']))
-        $smarty->assign("DISPLAY", "display:none;");
+    $smarty->assign("DISPLAY", "display:none;");
     $smarty->assign("icon", "images/list.png");
     $arrValues['Extension'] = $id;
     $htmlForm = $oForm->fetchForm("$local_templates_dir/change.tpl",_tr("Change Key"), $arrValues);
@@ -248,12 +241,7 @@ function saveNewKey($smarty, $module_name, $local_templates_dir, $pDB, $arrConf,
 
     $pWeakKeys = new paloSantoWeakKeys($pDB);
     $device = $pWeakKeys->getWeakKeyById($arrValues['id']);
-    if(!$pACL->isUserAdministratorGroup($_SESSION['elastix_user']))
-        if($arrValues['key'] != $device['data']){
-            $smarty->assign("mb_title", _tr("Error"));
-            $smarty->assign("mb_message", _tr("The Current Secret is invalid"));
-            return editWeakKeys($smarty, $module_name, $local_templates_dir, $arrConf, $pDB, $arrValues['id']);
-        }
+
     if($arrValues['new_key'] != $confirmation){
         $smarty->assign("mb_title", _tr("Error"));
         $smarty->assign("mb_message", _tr("The New Secret does not match with the Confirmation Secret"));

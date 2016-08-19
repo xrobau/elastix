@@ -133,6 +133,11 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Fri Aug 19 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- CHANGED: Weak Keys: non-administrators have little use for Weak Keys
+  verification, so remove administrator check.
+  SVN Rev[7727]
+
 * Fri Apr 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: security: check whether /etc/localtime is a symlink and use it as
   an additional way to find out the current timezone.

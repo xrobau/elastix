@@ -396,6 +396,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Fri Aug 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: expand filter panel on tenant theme to mitigate filter control wrapping.
+  SVN Rev[7332]
 - FIXED: fix misalignment of notification message components on tenant theme.
   SVN Rev[7331]
 

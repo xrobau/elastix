@@ -1191,7 +1191,7 @@ fi
 - CHANGED: Extensions Batch: rewrite the entire module to get rid of multiple
   opportunities for SQL injection and code execution. Tighten up and centralize
   validations on CSV fields. Improve readability and make the code smaller.
-  SVN Rev[4954]
+  SVN Rev[4955]
 
 * Mon May 13 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-3
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest

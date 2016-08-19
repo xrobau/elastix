@@ -1202,16 +1202,16 @@ div.div_msg_errors{
 }
 
 div.div_msg_errors_dismiss{
-    width: 100px;
-    float: right;
     text-align: right;
     padding: 3px;
-    right:20px;
-    position: absolute;
+    display: table-cell;
+}
+div.div_msg_errors_dismiss > i.fa-remove {
+    cursor: pointer;
 }
 
 div.div_msg_errors_title{
-    float: left;
+    display: table-cell;
 }
 
 .frameModule{

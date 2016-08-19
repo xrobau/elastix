@@ -40,16 +40,10 @@
                     {if !empty($mb_message)}
                     <div class="div_msg_errors" id="message_error">
                        {if !empty($mb_title)}
-                       <div class="div_msg_errors_title" style="padding-left:5px">
-                          <b style="color:red;">&nbsp;{$mb_title}</b>
-                       </div>
+                       <div class="div_msg_errors_title" style="padding-left:5px"><b style="color:red;">&nbsp;{$mb_title}</b></div>
                        {/if}
-                       <div class="div_msg_errors_dismiss">
-                           <i class="fa fa-remove" javascript="onclick='hide_message_error();'"></i>
-                       </div>
-                        <div style="padding:6px 30px 6px 15px">
-                        {$mb_message}
-                        </div>
+                        <div style="padding:6px 30px 6px 15px; display: table-cell;">{$mb_message}</div>
+                       <div class="div_msg_errors_dismiss"><i class="fa fa-remove" onclick="hide_message_error();"></i></div>
                     </div>
                     {/if}
                     {$CONTENT}

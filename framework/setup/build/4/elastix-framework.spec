@@ -395,6 +395,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Aug 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: fix misalignment of notification message components on tenant theme.
+  SVN Rev[7331]
+
 * Wed Aug 17 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Userlist: improve template correctness on user modification popup.
   SVN Rev[7720]

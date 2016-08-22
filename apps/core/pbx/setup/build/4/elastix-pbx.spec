@@ -3,7 +3,7 @@
 Summary: Elastix Module PBX
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -300,9 +300,18 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-8
+- CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
+* Fri Aug 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 
+  (trivial) Fix commit number.
+  SVN Rev[7730]
+
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-7
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[7712]
 
 * Sat Aug 13 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Monitoring,Voicemail: declare custom privileges reportany,
@@ -322,6 +331,7 @@ fi
 * Fri Jul 15 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-6
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
+  SVN Rev[7677]
 
 * Sun Jul 10 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: VoiceMail: add and use compatibility function hasModulePrivilege()

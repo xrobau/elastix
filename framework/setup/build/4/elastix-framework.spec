@@ -395,6 +395,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-15
+- CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Aug 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: expand filter panel on tenant theme to mitigate filter control wrapping.
   SVN Rev[7332]

@@ -3,7 +3,7 @@
 Summary: Elastix Security
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 3
+Release: 4
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -137,6 +137,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-4
+- CHANGED: security - Build/elastix-security.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Fri Aug 19 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Weak Keys: remove useless parameter and paloACL object.
   SVN Rev[7729]
@@ -161,6 +165,7 @@ fi
 * Thu Feb 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-3
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.
+  SVN Rev[7489]
 
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: security: replace hand-coded translation loading with

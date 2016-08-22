@@ -3,7 +3,7 @@
 Summary: Elastix Module Reports
 Name:    elastix-reports
 Version: 2.5.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -93,14 +93,23 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-8
+- CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
+  SVN history. Bump release in specfile.
+
 * Fri Aug 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Missed Calls: declare custom privilege viewany on module. Part of the
   fix for Elastix bug #1100. Also remove useless parameters.
   SVN Rev[7726]
 
+* Thu Aug 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 
+- CHANGED: (trivial) Missed Calls: replace tabs with spaces
+  SVN Rev[7725]
+
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-7
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump release in specfile.
+  SVN Rev[7712]
 
 * Sat Aug 13 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: CDR Report: declare custom privileges reportany and deleteany for the

@@ -3,7 +3,7 @@
 Summary: Elastix Module Email
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -206,6 +206,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-6
+- CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Thu Aug 18 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - CHANGED: Email Accounts: unconditionally allow mailbox reconstruction. It does
   not make much sense for an user who is capable of creating and removing

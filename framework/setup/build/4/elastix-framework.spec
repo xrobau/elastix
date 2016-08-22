@@ -2,7 +2,7 @@ Summary: Elastix is a Web based software to administrate a PBX based in open sou
 Name: elastix-framework
 Vendor: Palosanto Solutions S.A.
 Version: 4.0.0
-Release: 14
+Release: 15
 License: GPL
 Group: Applications/System
 #Source: elastix-framework_%{version}-%{release}.tgz

@@ -396,6 +396,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Tue Aug 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Framework: paloSantoSampler class now uses SQL parameters.
+  SVN Rev[7740]
 - FIXED: Framework: explicitly specify period as decimal separator and no
   thousands separator in number_format() in order to get locale-independent
   sample value in sampler.php.

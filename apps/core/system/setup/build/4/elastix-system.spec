@@ -182,6 +182,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Aug 30 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: container compatibility - allow sampling of macvlan ifaces.
+  SVN Rev[7737]
+
 * Tue Aug 16 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-9
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.

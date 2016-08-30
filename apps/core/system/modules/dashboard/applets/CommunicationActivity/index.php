@@ -34,7 +34,7 @@ require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
 class Applet_CommunicationActivity
 {
     private $errMsg = NULL;
-    
+
     function handleJSON_getContent($smarty, $module_name, $appletlist)
     {
         /* Se cierra la sesión para quitar el candado sobre la sesión y permitir
@@ -93,7 +93,7 @@ class Applet_CommunicationActivity
                 $trafico = $this->calcular_actividad_red($muestrared_1, $muestrared_2);
                 @session_start();
                 $_SESSION[$module_name]['networksample'] = $muestrared_2;
-            	
+
                 $smarty->assign(array(
                     'total'             => $channels['total_calls'],
                     'internal'          => $channels['internal_calls'],
@@ -119,11 +119,11 @@ class Applet_CommunicationActivity
                 $smarty->assign($totalTrunks);
             }
         }
-        
+
 
         $local_templates_dir = dirname($_SERVER['SCRIPT_FILENAME'])."/modules/$module_name/applets/CommunicationActivity/tpl";
         $respuesta['html'] = $smarty->fetch("$local_templates_dir/communication_activity.tpl");
-    
+
         $json = new Services_JSON();
         Header('Content-Type: application/json');
         return $json->encode($respuesta);
@@ -187,7 +187,7 @@ class Applet_CommunicationActivity
         if (!isset($r['Response']) || $r['Response'] == 'Error') {
             $this->errMsg = _tr('(internal) failed to run ami:sip show peers').print_r($r, TRUE);
             return NULL;
-        }        
+        }
         foreach (explode("\n", $r['data']) as $line) {
             //ex: Name/username              Host            Dyn Nat ACL Port     Status
             //    412/412                    192.168.1.82     D   N   A  5060     OK (17 ms)
@@ -218,7 +218,7 @@ class Applet_CommunicationActivity
         if (!isset($r['Response']) || $r['Response'] == 'Error') {
             $this->errMsg = _tr('(internal) failed to run ami:iax2 show peers').print_r($r, TRUE);
             return NULL;
-        }        
+        }
         foreach (explode("\n", $r['data']) as $line) {
             //ex: Name/Username    Host                 Mask             Port          Status
             //    512              127.0.0.1       (D)  255.255.255.255  40002         OK (3 ms)
@@ -313,7 +313,7 @@ class Applet_CommunicationActivity
             'rx_bytes'  =>  0,
             'tx_bytes'  =>  0,
         );
-        
+
         foreach (array_keys($muestrared_1['interface']) as $dev) {
         	$actividad['rx_bytes'] += $this->_info_sistema_diff_stat(
                 $muestrared_1['interface'][$dev]['rx_bytes'],
@@ -325,34 +325,34 @@ class Applet_CommunicationActivity
         $intervalo = $muestrared_2['timestamp'] - $muestrared_1['timestamp'];
         $actividad['rx_bytes'] = number_format((($actividad['rx_bytes'] / 1000.0) / $intervalo), 2);
         $actividad['tx_bytes'] = number_format((($actividad['tx_bytes'] / 1000.0) / $intervalo), 2);
-        
+
         return $actividad;
     }
 
     private function obtener_muestra_actividad_red()
     {
-    	$muestra = array(
+        $muestra = array(
             'timestamp' =>  microtime(TRUE),
             'interface' =>  array(),
         );
-        foreach (file('/proc/net/dev') as $s) {            
-            if (preg_match('/^(\w+):(.+)$/', trim($s), $regs)) {
-    			if (strpos($regs[1], 'eth') === 0) {
-    				$campos = preg_split('/\s+/', trim($regs[2]));
+        foreach (file('/proc/net/dev') as $s) {
+            if (preg_match('/^([\w-]+):(.+)$/', trim($s), $regs)) {
+                if (strpos($regs[1], 'eth') === 0 || strpos($regs[1], 'mv-') === 0) {
+                    $campos = preg_split('/\s+/', trim($regs[2]));
                     $muestra['interface'][$regs[1]] = array(
                         'rx_bytes'      =>  $campos[0],
                         'rx_packets'    =>  $campos[1],
                         'tx_bytes'      =>  $campos[8],
                         'tx_packets'    =>  $campos[9],
                     );
-    			}
-    		}
-    	}
+                }
+            }
+        }
         return $muestra;
     }
 
     /* Método para poder realizar la resta de dos cantidades enteras que pueden
-     * no caber en un entero de PHP, pero cuya diferencia es pequeña y puede 
+     * no caber en un entero de PHP, pero cuya diferencia es pequeña y puede
      * caber en el mismo entero. */
     private function _info_sistema_diff_stat($a, $b)
     {

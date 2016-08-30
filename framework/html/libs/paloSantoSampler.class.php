@@ -39,11 +39,11 @@ class paloSampler {
         $this->rutaDB = $arrConf['elastix_dsn']['samples'];
         //instanciar clase paloDB
         $pDB = new paloDB($this->rutaDB);
-	    if(!empty($pDB->errMsg)) {
-        	echo "$pDB->errMsg <br>";
-		}else{
-			$this->_db = $pDB;
-		}
+        if(!empty($pDB->errMsg)) {
+            echo "$pDB->errMsg <br>";
+        }else{
+            $this->_db = $pDB;
+        }
     }
 
     function insertSample($idLine, $timestamp, $value)
@@ -57,7 +57,7 @@ class paloSampler {
         }
     }
 
-    function getSamplesByLineId($idLine) 
+    function getSamplesByLineId($idLine)
     {
         $this->errMsg='';
         $query = "SELECT timestamp, value FROM samples WHERE id_line='$idLine'";
@@ -107,10 +107,9 @@ class paloSampler {
         $query = "DELETE FROM samples WHERE timestamp<=$timestamp";
         $bExito = $this->_db->genQuery($query);
         if (!$bExito) {
-        	$this->errMsg = $this->_db->errMsg;
-        	return false;
+            $this->errMsg = $this->_db->errMsg;
+            return false;
         }
-		return true;
+        return true;
     }
 }
-?>

@@ -182,6 +182,8 @@ fi
 
 %changelog
 * Tue Aug 30 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Dashboard: silence log spamming from AMI object on connect.
+  SVN Rev[7738]
 - FIXED: Dashboard: container compatibility - allow sampling of macvlan ifaces.
   SVN Rev[7737]
 

@@ -32,6 +32,8 @@ require_once("/var/www/html/configs/default.conf.php");
 require_once("/var/www/html/libs/paloSantoSampler.class.php");
 require_once("/var/www/html/libs/paloSantoDB.class.php");
 
+function nformat($x) { return number_format($x, 2, '.', ''); }
+
 $oSampler = new paloSampler();
 
 // NUMERO DE LLAMADAS SIMULTANEAS
@@ -69,12 +71,12 @@ $oSampler->insertSample(1, $timestamp, $simCalls);
 $arrSysInfo = obtener_info_de_sistema();
 
 // CPU Usage
-$cpuUsage = number_format($arrSysInfo['CpuUsage'] * 100, 2);
+$cpuUsage = nformat($arrSysInfo['CpuUsage'] * 100);
 $timestamp = time();
 $oSampler->insertSample(2, $timestamp, $cpuUsage);
 
 // Memory Usage
-$memUsage = number_format(($arrSysInfo['MemTotal'] - $arrSysInfo['MemFree'] - $arrSysInfo['Cached'] - $arrSysInfo['MemBuffers'])/1024, 2);
+$memUsage = nformat(($arrSysInfo['MemTotal'] - $arrSysInfo['MemFree'] - $arrSysInfo['Cached'] - $arrSysInfo['MemBuffers'])/1024);
 $timestamp = time();
 $oSampler->insertSample(3, $timestamp, $memUsage);
 

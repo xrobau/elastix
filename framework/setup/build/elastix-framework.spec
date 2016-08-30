@@ -395,6 +395,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Tue Aug 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Framework: explicitly specify period as decimal separator and no
+  thousands separator in number_format() in order to get locale-independent
+  sample value in sampler.php.
+  SVN Rev[7739]
+
 * Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-17
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

@@ -41,6 +41,6 @@ $arrLangModule=array(
 'Privilege' => 'Privilegio',
 'Description' => 'Descripción',
 'Cannot update custom privileges' => 'No se puede actualizar privilegios personalizados',
-'Custom privileges' => 'Privilegios personalizados',
+'Custom Privileges' => 'Privilegios personalizados',
 );
 ?>

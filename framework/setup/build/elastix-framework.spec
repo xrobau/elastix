@@ -395,6 +395,10 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Wed Aug 31 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Group Permission: fix capitalization that prevents i18n from being used.
+  SVN Rev[7742]
+
 * Tue Aug 30 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Framework: paloSantoSampler class now uses SQL parameters.
   SVN Rev[7740]

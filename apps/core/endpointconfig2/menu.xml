@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module>
   <menulist>
+    <menuitem menuid="pbxconfig"              desc="PBX"                     parent=""          module="no"  link=""      order="5"></menuitem>
+    <menuitem menuid="endpoints"              desc="Batch Configurations"    parent="pbxconfig" module="no"  link=""      order="5">
+        <permissions>
+            <group id="1" name="administrator" desc="total access"></group>
+        </permissions>
+    </menuitem>
     <menuitem menuid="endpoint_configurator"  desc="Endpoint Configurator"   parent="endpoints" module="yes" link=""  order="51">
         <permissions>
             <group id="1" name="administrator" desc="total access"></group>
@@ -8,4 +14,3 @@
     </menuitem>
   </menulist>
 </module>
-  

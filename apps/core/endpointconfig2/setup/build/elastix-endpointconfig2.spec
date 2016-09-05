@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Sep  5 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: fix failure to create menu item by declaring
+  required parent menus in menu.xml.
+  SVN Rev[7743]
+
 * Wed May 25 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-5
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

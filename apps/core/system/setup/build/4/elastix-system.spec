@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 4.0.0
-Release: 9
+Release: 10
 License: GPL
 Group:   Applications/System
 #Source0: %{modname}_%{version}-2.tgz
@@ -182,6 +182,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Sep 02 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-10
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed version and release in specfile.
+
 * Tue Aug 30 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Dashboard: silence log spamming from AMI object on connect.
   SVN Rev[7738]

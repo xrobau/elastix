@@ -3,7 +3,7 @@
 Summary: Elastix Module Distributed Dial Plan
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 5
+Release: 6
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -155,6 +155,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Sep 05 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-6
+- CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
+  SVN history. Bump Release in specfile.
+
 * Mon Sep  5 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: fix failure to create menu item by declaring
   required parent menus in menu.xml.

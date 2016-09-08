@@ -395,6 +395,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Thu Sep 08 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: further fix of notification message components under tenant theme to
+  force right-alignment of dismissal button.
+  SVN Rev[7745]
+
 * Fri Sep 02 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-18
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

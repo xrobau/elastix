@@ -1200,18 +1200,28 @@ div.div_msg_errors{
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px 5px 5px 5px;
 }
+div.div_msg_errors > div
+{
+    padding: 6px;
+}
 
+div.div_msg_errors_title{
+    float: left;
+    width: 75px;
+    margin: 0;
+}
 div.div_msg_errors_dismiss{
-    text-align: right;
-    padding: 3px;
-    display: table-cell;
+    text-align: center;
+    float: right;
+    width: 16px;
+    margin: 0;
 }
 div.div_msg_errors_dismiss > i.fa-remove {
     cursor: pointer;
 }
-
-div.div_msg_errors_title{
-    display: table-cell;
+div.div_msg_errors_content {
+    margin-left: 75px;
+    margin-right: 16px;
 }
 
 .frameModule{

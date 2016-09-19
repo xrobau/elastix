@@ -241,7 +241,7 @@ function handleJSON_extension_current_user($smarty, $local_templates_dir, $modul
         if ($pDB->errMsg != '') {
             $jsonObject->set_error($pDB->errMsg);
         } else {
-            $tupla = $pDB->getFirstRowQuery('SELECT id, tech FROM devices WHERE id = ? AND devicetype = "fixed"',
+            $tupla = $pDB->getFirstRowQuery('SELECT id, tech, description FROM devices WHERE id = ? AND devicetype = "fixed"',
                 TRUE, array($extension));
             if (!is_array($tupla)) {
                 $jsonObject->set_error($pDB->errMsg);
@@ -251,6 +251,7 @@ function handleJSON_extension_current_user($smarty, $local_templates_dir, $modul
                 $jsonObject->set_error(_tr('Unsupported technology'));
             } else {
                 $msg['tech'] = $tupla['tech'];
+                $msg['displayName'] = $tupla['description'];
 
                 $techtable = array('sip' => 'sip', 'iax2' => 'iax');
                 $tupla = $pDB->getFirstRowQuery('SELECT data FROM '.$techtable[$msg['tech']].' WHERE id = ? AND keyword = "secret"',

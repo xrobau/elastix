@@ -395,6 +395,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Mon Sep 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Transmit displayName of extension of current user. For use with
+  Elastix WebPhone Panel.
+  SVN Rev[7446]
+
 * Thu Sep 08 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: further fix of notification message components under tenant theme to
   force right-alignment of dismissal button.

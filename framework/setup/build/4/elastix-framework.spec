@@ -175,6 +175,8 @@ mv $RPM_BUILD_DIR/elastix-framework/additionals/etc/init.d/generic-cloexec      
 #Logrotate
 mkdir -p    $RPM_BUILD_ROOT/etc/logrotate.d/
 mv          $RPM_BUILD_DIR/elastix-framework/additionals/etc/logrotate.d/*           $RPM_BUILD_ROOT/etc/logrotate.d/
+# Los archivos de logrotate TIENEN que ser 0644 (http://bugs.elastix.org/view.php?id=2608)
+chmod 644 $RPM_BUILD_ROOT/etc/logrotate.d/*
 
 # File Elastix Access Audit log
 mkdir -p    $RPM_BUILD_ROOT/var/log/elastix
@@ -321,6 +323,10 @@ fi
 # Merge current menu.xml for userlist custom privileges
 elastix-menumerge $pathModule/menu.xml
 
+# Los archivos de logrotate TIENEN que ser 0644 (http://bugs.elastix.org/view.php?id=2608)
+chmod 644 /etc/logrotate.d/elastixAudit.logrotate
+chmod 644 /etc/logrotate.d/elastixEmailStats.logrotate
+
 %preun
 # Reverse the patching of php.conf
 sed --in-place "s,#php_value session.save_path,php_value session.save_path,g" /etc/httpd/conf.d/php.conf
@@ -395,6 +401,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Wed Sep 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: change permissions for logrotate files in /etc/logrotate.d/ to 0644.
+  Fixes Elastix bug #2608 for elastix-framework package.
+  SVN Rev[7747]
+
 * Mon Sep 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Transmit displayName of extension of current user. For use with
   Elastix WebPhone Panel.

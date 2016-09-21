@@ -101,6 +101,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Sep 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Address Book: add more French translations for module, contributed by
+  user danardf. Fixes Elastix bug #2592.
+  SVN Rev[7748]
+
 * Thu Dec 31 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Address Book: extend registration status report for list of all
   internal contacts. Tweak so that only one external command is required per

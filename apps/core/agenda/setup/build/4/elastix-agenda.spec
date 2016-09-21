@@ -101,6 +101,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Wed Sep 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Address Book: add more French translations for module, contributed by
+  user danardf. Fixes Elastix bug #2592.
+  SVN Rev[7748]
+
 * Wed Apr 13 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
 - CHANGED: Agenda - Build/elastix-agenda.spec: update specfile with latest
   SVN history. Bump version and release in specfile.

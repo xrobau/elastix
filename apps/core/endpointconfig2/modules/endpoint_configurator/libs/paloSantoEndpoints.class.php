@@ -37,13 +37,13 @@ class paloSantoEndpoints
     private function _getDB()
     {
         global $arrConf;
-        
+
         if (is_null($this->_db)) {
             $dsn = generarDSNSistema('asteriskuser', 'endpointconfig');
             $this->_db = new paloDB($dsn);
             if ($this->_db->errMsg != '') {
                 $this->_errMsg = $this->_db->errMsg;
-                $this->_db = NULL;            
+                $this->_db = NULL;
             } else {
             	$this->_db->genQuery('SET NAMES utf8');
             }
@@ -52,7 +52,7 @@ class paloSantoEndpoints
     }
 
     function getErrMsg() { return $this->_errMsg; }
-    
+
     function leerModelos()
     {
     	if (is_null($db = $this->_getDB())) return NULL;
@@ -82,10 +82,10 @@ class paloSantoEndpoints
         }
         return $models;
     }
-    
+
     function leerEndpoints()
     {
-        // TODO: idear manera de obtener diálogo a usar 
+        // TODO: idear manera de obtener diálogo a usar
         if (is_null($db = $this->_getDB())) return NULL;
         $sqlEndpoints = <<<SQL_LEER_ENDPOINTS
 SELECT endpoint.id AS id_endpoint, endpoint.id_manufacturer, IFNULL(endpoint.id_model, 'unknown') AS id_model,
@@ -134,7 +134,7 @@ SQL_LEER_ENDPOINTS;
             );
         }
         unset($recordset);
-        
+
         // Leer las propiedades de cada endpoint
         $sqlLeerProp = <<<SQL_LEER_PROP
 SELECT id_endpoint, property_key, property_value FROM endpoint_properties;
@@ -199,7 +199,7 @@ SQL_LEER_ACC_PROP;
 
         return $endpoints;
     }
-    
+
     function iniciarScanRed($netmask)
     {
     	$sComando = '/usr/bin/elastix-helper detect_endpoints '.escapeshellarg($netmask).' 2>&1';
@@ -214,7 +214,7 @@ SQL_LEER_ACC_PROP;
         	return NULL;
         }
         $sockFile = trim($output[0]);
-        
+
         // Esperar hasta 5 segundos a que aparezca el socket
         $s = microtime(TRUE);
         while (microtime(TRUE) - $s < 5.0 && !file_exists($sockFile)) {
@@ -226,7 +226,7 @@ SQL_LEER_ACC_PROP;
         }
         return $sockFile;
     }
-    
+
     function cancelarScanRed($socket)
     {
     	$errno = $errstr = NULL;
@@ -243,16 +243,16 @@ SQL_LEER_ACC_PROP;
         fclose($h);
         return TRUE;
     }
-    
+
     /**
-     * Procedimiento para asignar que un endpoint en particular es un nuevo 
+     * Procedimiento para asignar que un endpoint en particular es un nuevo
      * modelo.
-     * 
+     *
      * @param   int $id_endpoint    ID en la base de datos del endpoint
      * @param   int $id_model       ID en la base de datos del modelo
-     * 
+     *
      * @return  mixed   NULL en caso de error, 'unchanged' si el nuevo modelo es
-     * el mismo que estaba asignado antes, o la fecha actual (de modificación). 
+     * el mismo que estaba asignado antes, o la fecha actual (de modificación).
      */
     function asignarModeloEndpoint($id_endpoint, $id_model)
     {
@@ -264,7 +264,7 @@ SQL_LEER_ACC_PROP;
         else $db->commit();
         return $r;
     }
-    
+
     private function _asignarModeloEndpoint($db, $id_endpoint, $id_model)
     {
         if (!is_null($id_model)) {
@@ -289,13 +289,13 @@ SQL_FILTRO_ENDPOINT;
                 $this->_errMsg = _tr('Invalid model ID');
                 return NULL;
             }
-            
+
             // Si se especifica el mismo modelo, no se hace nada
             if ($tupla['id_old_model'] == $id_model) return 'unchanged';
-                        
+
             $iMaxCuentas = $tupla['max_accounts'];
-            
-            // Si el nuevo modelo permite menos cuentas que el anterior, se 
+
+            // Si el nuevo modelo permite menos cuentas que el anterior, se
             // quitan según la tecnología
             foreach (array('sip', 'iax2') as $tech) {
             	$sModelProperty = 'max_'.$tech.'_accounts';
@@ -307,7 +307,7 @@ SQL_FILTRO_ENDPOINT;
                     return NULL;
                 }
                 $iMaxTech = (count($tupla) > 0) ? (int)$tupla['property_value'] : 0;
-                
+
                 $listaEndpoints = $db->fetchTable(
                     'SELECT id FROM endpoint_account WHERE id_endpoint = ? AND tech = ? ORDER BY priority',
                     TRUE, array($id_endpoint, $tech));
@@ -324,7 +324,7 @@ SQL_FILTRO_ENDPOINT;
                     }
                 }
             }
-            
+
             // Si el número total todavía excede el máximo total, se quitan
             $listaEndpoints = $db->fetchTable(
                 'SELECT id FROM endpoint_account WHERE id_endpoint = ? ORDER BY priority',
@@ -355,7 +355,7 @@ SQL_FILTRO_ENDPOINT;
                 $this->_errMsg = '(internal) Failed to remove excess accounts for endpoint: '.$db->errMsg;
                 return NULL;
             }
-            
+
             // Anular el modelo asociado al endpoint
             $r = $db->genQuery(
                 'UPDATE endpoint SET id_model = NULL, last_modified = NOW() '.
@@ -366,37 +366,41 @@ SQL_FILTRO_ENDPOINT;
                 return NULL;
             }
         }
-    
+
         return date('Y-m-d H:i:s');
     }
 
     function leerCuentasNoAsignadas()
     {
         if (is_null($db = $this->_getDB())) return NULL;
-    	$sql = <<<SQL_CUENTAS_NO_ASIGNADAS
+        $this->_errMsg = NULL;
+        $db->genQuery('SET NAMES latin1');  // Cambiar a latin1 para leer descripción de FreePBX
+        $sql = <<<SQL_CUENTAS_NO_ASIGNADAS
 SELECT ad.id AS extension, ad.id AS account, ad.tech, ad.description, NULL as registerip
 FROM asterisk.devices ad
 LEFT JOIN (endpoint_account ea) ON ea.account = ad.id
 WHERE ea.account IS NULL ORDER BY extension
 SQL_CUENTAS_NO_ASIGNADAS;
         $recordset = $db->fetchTable($sql, TRUE);
+        $errMsg = $db->errMsg;
+        $db->genQuery('SET NAMES utf8');    // Restaurar UTF-8
         if (!is_array($recordset)) {
-            $this->_errMsg = '(internal) Failed to read accounts: '.$db->errMsg;
+            $this->_errMsg = '(internal) Failed to read accounts: '.$errMsg;
             return NULL;
         }
-        
+
         $cuentasRegistradas = $this->_recogerCuentasRegistradas();
         if (!is_null($cuentasRegistradas)) {
-        	for ($i = 0; $i < count($recordset); $i++) {
-        		if (isset($cuentasRegistradas[$recordset[$i]['tech']][$recordset[$i]['account']])) {
-        			$recordset[$i]['registerip'] = $cuentasRegistradas[$recordset[$i]['tech']][$recordset[$i]['account']];
-        		}
-        	}
+            for ($i = 0; $i < count($recordset); $i++) {
+                if (isset($cuentasRegistradas[$recordset[$i]['tech']][$recordset[$i]['account']])) {
+                    $recordset[$i]['registerip'] = $cuentasRegistradas[$recordset[$i]['tech']][$recordset[$i]['account']];
+                }
+            }
         }
-        
+
         return $recordset;
     }
-    
+
     private function _marcarSeleccion($selection)
     {
     	if (count($selection) <= 0) {
@@ -424,13 +428,13 @@ SQL_CUENTAS_NO_ASIGNADAS;
     private function _recogerCuentasRegistradas()
     {
         if (!file_exists("/var/lib/asterisk/agi-bin/phpagi-asmanager.php"))
-            return NULL; 
+            return NULL;
         require_once "/var/lib/asterisk/agi-bin/phpagi-asmanager.php";
         $astman = new AGI_AsteriskManager();
         if (!$astman->connect('localhost', 'admin', obtenerClaveAMIAdmin()))
             return NULL;
         $cuentasRegistradas = array();
-        
+
         $r = $astman->Command('sip show peers');
         if ($r['Response'] != 'Error') {
             foreach (explode("\n", $r['data']) as $s) {
@@ -445,7 +449,7 @@ SQL_CUENTAS_NO_ASIGNADAS;
                 }
             }
         }
-        
+
         $r = $astman->Command('iax2 show peers');
         if ($r['Response'] != 'Error') {
             foreach (explode("\n", $r['data']) as $s) {
@@ -459,17 +463,17 @@ SQL_CUENTAS_NO_ASIGNADAS;
                 }
             }
         }
-        
+
         $astman->disconnect();
         return $cuentasRegistradas;
     }
 
-    
+
     function olvidarSeleccionEndpoints($selection)
     {
     	if (!$this->_marcarSeleccion($selection)) return FALSE;
         if (is_null($db = $this->_getDB())) return FALSE;
-        
+
         // Invocar el programa python para borrar los archivos de configuración
         $output = $ret = NULL;
         exec('/usr/bin/elastix-endpointconfig --clearconfig 2>&1', $output, $ret);
@@ -477,7 +481,7 @@ SQL_CUENTAS_NO_ASIGNADAS;
             $this->_errMsg = implode("\n", $output);
             return NULL;
         }
-        
+
         foreach ($selection as $id_endpoint) {
             // Debido a DELETE CASCADE, esto borra todo lo asociado al endpoint
             if (!$db->genQuery('DELETE FROM endpoint WHERE id = ?', array($id_endpoint))) {
@@ -487,11 +491,11 @@ SQL_CUENTAS_NO_ASIGNADAS;
         }
         return TRUE;
     }
-    
+
     function iniciarConfiguracionEndpoints($selection)
     {
         if (!$this->_marcarSeleccion($selection)) return NULL;
-        
+
         // Invocar el programa python para ejecutar la configuración de endpoints
         $logfile = tempnam('/tmp', 'endpointconfig-');
         $output = $retval = NULL;
@@ -503,11 +507,11 @@ SQL_CUENTAS_NO_ASIGNADAS;
         }
         return $logfile;
     }
-    
+
     function leerLogConfiguracion()
     {
     	if (is_null($db = $this->_getDB())) return NULL;
-        
+
         $tupla = $db->getFirstRowQuery('SELECT lastlog FROM configlog LIMIT 1', TRUE);
         if (!is_array($tupla)) {
             $this->_errMsg = '(internal) Failed to read log: '.$db->errMsg;
@@ -534,7 +538,7 @@ SQL_CUENTAS_NO_ASIGNADAS;
 SELECT manufacturer.id AS id_manufacturer, model.id AS id_model, 'standard' AS detail_dialog
 FROM manufacturer, model
 WHERE manufacturer.id = model.id_manufacturer AND manufacturer.name = ?
-AND model.name = ? 
+AND model.name = ?
 SQL_DETAIL_DIALOG;
         foreach ($listaEndpoints as &$endpoint) {
             if (empty($endpoint['name_manufacturer'])) {
@@ -543,14 +547,14 @@ SQL_DETAIL_DIALOG;
                     $this->_errMsg .= ' '._tr('Source').': '.$endpoint['source'];
             	return NULL;
             }
-            
+
             if (empty($endpoint['name_model'])) {
                 $this->_errMsg = _tr('Model not specified for endpoint');
                 if (isset($endpoint['source']))
                     $this->_errMsg .= ' '._tr('Source').': '.$endpoint['source'];
                 return NULL;
             }
-            
+
             $tupla = $db->getFirstRowQuery($sql, TRUE,
                 array($endpoint['name_manufacturer'], $endpoint['name_model']));
             if (!is_array($tupla)) {
@@ -567,8 +571,8 @@ SQL_DETAIL_DIALOG;
             $endpoint['id_manufacturer'] = $tupla['id_manufacturer'];
             $endpoint['id_model'] = $tupla['id_model'];
             $endpoint['detail_dialog'] = $tupla['detail_dialog'];
-        } 
-        
+        }
+
         // Paso 2: validación de consistencia interna de la lista
         $macs = array();
         $validador = new PaloValidar();
@@ -580,7 +584,7 @@ SQL_DETAIL_DIALOG;
                     $this->_errMsg .= ' '._tr('Source').': '.$endpoint['source'];
                 return NULL;
             }
-            
+
             // Verificación de unicidad de MAC
             if (in_array($endpoint['mac_address'], $macs)) {
                 $this->_errMsg = _tr('Duplicate MAC').': '.$endpoint['mac_address'];
@@ -589,8 +593,8 @@ SQL_DETAIL_DIALOG;
                 return NULL;
             }
         }
-        
-        /* Paso 3: ingreso o modificación del registro principal a la tabla de 
+
+        /* Paso 3: ingreso o modificación del registro principal a la tabla de
          * endpoints. En caso de modificación, se actualiza únicamente el modelo,
          * y un cambio de vendedor es un error. */
         $nuevosEndpoints = array();
@@ -628,7 +632,7 @@ SQL_DETAIL_DIALOG;
                     $this->_errMsg = '(internal) Failed to update model for endpoint: '.$db->errMsg;
                     return NULL;
                 }
-                
+
                 // Borrar todas las cuentas asociadas al endpoint
                 $r = $db->genQuery('DELETE FROM endpoint_account WHERE id_endpoint = ?',
                     array($tupla['id']));
@@ -636,7 +640,7 @@ SQL_DETAIL_DIALOG;
                     $this->_errMsg = '(internal) Failed to clear accounts for endpoint: '.$db->errMsg;
                     return NULL;
                 }
-                
+
                 // Borrar todas las propiedades asociadas al endpoint
                 $r = $db->genQuery('DELETE FROM endpoint_properties WHERE id_endpoint = ?',
                     array($tupla['id']));
@@ -646,8 +650,8 @@ SQL_DETAIL_DIALOG;
                 }
             }
         }
-        
-        /* Paso 4: verificación de que todas las cuentas referenciadas existen. 
+
+        /* Paso 4: verificación de que todas las cuentas referenciadas existen.
          * Si no se sabía previamente la tecnología, se carga aquí. */
         // SQL dependiente de FreePBX
         $sql = 'SELECT tech FROM asterisk.devices WHERE id = ?';
@@ -674,7 +678,7 @@ SQL_DETAIL_DIALOG;
                 }
             }
         }
-        
+
         // Paso 5: combinación con los datos existentes en la base de datos
         $managers = array();
         foreach ($listaEndpoints as &$endpoint) {
@@ -684,14 +688,14 @@ SQL_DETAIL_DIALOG;
                 $managers[$endpoint['detail_dialog']] = new $classname;
             }
             $manager = $managers[$endpoint['detail_dialog']];
-            
+
             $r = $manager->guardarDetallesUpload($db, $endpoint['id_endpoint'], $endpoint);
             if (is_null($r)) {
                 $this->_errMsg = _tr('Failed to save endpoint details').': '.$manager->getErrMsg();
             	return NULL;
             }
         }
-        
+
         // Paso 6: resumen de los endpoints configurados
         $sqlEndpoints = <<<SQL_LEER_ENDPOINTS
 SELECT endpoint.id AS id_endpoint, endpoint.id_manufacturer, IFNULL(endpoint.id_model, 'unknown') AS id_model,

@@ -155,6 +155,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Sep 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: temporarily switch into latin1 database charset
+  when reading strings from FreePBX tables, in order to prevent mojibake on
+  unassigned account reporting. Fixes Elastix bug #2584.
+  SVN Rev[7749]
+
 * Mon Sep 05 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-6
 - CHANGED: endpointconfig2 - Build/elastix-endpointconfig2.spec: update specfile with latest
   SVN history. Bump Release in specfile.

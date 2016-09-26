@@ -155,6 +155,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Mon Sep 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: switch database charset in a second place where
+  description is read from FreePBX tables. Addresses incomplete fix for Elastix
+  bug #2584.
+  SVN Rev[7750]
+
 * Wed Sep 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: temporarily switch into latin1 database charset
   when reading strings from FreePBX tables, in order to prevent mojibake on

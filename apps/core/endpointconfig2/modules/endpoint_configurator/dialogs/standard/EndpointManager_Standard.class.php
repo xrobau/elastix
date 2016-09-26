@@ -35,22 +35,22 @@ class EndpointManager_Standard
     private $_db = NULL;
     private $_errMsg = NULL;
 
-    // Propiedades de sólo lectura y de libre modificación        
+    // Propiedades de sólo lectura y de libre modificación
     private $_ro_properties = array('max_sip_accounts', 'max_iax2_accounts');
     private $_rw_properties = array('http_username', 'http_password', 'telnet_username',
             'telnet_password', 'ssh_username', 'ssh_password', 'dhcp', 'static_ip',
             'static_gw', 'static_mask', 'static_dns1', 'static_dns2');
-    
+
     private function _getDB()
     {
         global $arrConf;
-        
+
         if (is_null($this->_db)) {
             $dsn = generarDSNSistema('asteriskuser', 'endpointconfig');
             $this->_db = new paloDB($dsn);
             if ($this->_db->errMsg != '') {
                 $this->_errMsg = $this->_db->errMsg;
-                $this->_db = NULL;            
+                $this->_db = NULL;
             } else {
                 $this->_db->genQuery('SET NAMES utf8');
             }
@@ -59,7 +59,7 @@ class EndpointManager_Standard
     }
 
     function getErrMsg() { return $this->_errMsg; }
-    
+
     // Cargar los detalles del endpoint a configurar
     function cargarDetalles($id_endpoint)
     {
@@ -67,7 +67,7 @@ class EndpointManager_Standard
         $detalles = array(
             'endpoint_property_overrides' => array(),
         );
-        
+
         // Cargar propiedades asociadas al modelo
         $sql = <<<SQL_MODEL_PROPERTIES
 SELECT property_key, property_value FROM model_properties, model, endpoint
@@ -84,7 +84,7 @@ SQL_MODEL_PROPERTIES;
         foreach ($recordset as $row) {
             $detalles['endpoint_properties'][$row['property_key']] = $row['property_value'];
         }
-        
+
         // Cargar propiedades asociadas al endpoint en particular
         $sql = 'SELECT property_key, property_value FROM endpoint_properties WHERE id_endpoint = ?';
         $recordset = $db->fetchTable($sql, TRUE, array($id_endpoint));
@@ -105,7 +105,7 @@ SQL_MODEL_PROPERTIES;
         foreach (array('dhcp') as $k)
             if (isset($detalles['endpoint_properties'][$k]))
                 $detalles['endpoint_properties'][$k] = (bool)$detalles['endpoint_properties'][$k];
-        
+
         // Todas las propiedades estándar se transportan al primer nivel de detalle
         foreach (array_merge($this->_ro_properties, $this->_rw_properties) as $k) {
             $value = NULL;
@@ -116,14 +116,15 @@ SQL_MODEL_PROPERTIES;
             }
             $detalles[$k] = $value;
         }
-        
+
         // Convertir en tuplas de clave y valor para facilitar operación javascript
         $a = array();
         foreach ($detalles['endpoint_properties'] as $k => $v)
             $a[] = array('key' => $k, 'value' => $v);
         $detalles['endpoint_properties'] = $a;
-        
+
         // Cargar cuentas asociadas al endpoint, de existir
+        $db->genQuery('SET NAMES latin1');
         $sql = <<<SQL_ENDPOINT_ACCOUNTS
 SELECT ea.id AS id_account, ea.tech, ea.account, ad.id AS extension, ea.priority, ad.description
 FROM endpoint_account ea, asterisk.devices ad
@@ -131,12 +132,14 @@ WHERE ea.id_endpoint = ? AND ea.account = ad.id
 ORDER BY priority
 SQL_ENDPOINT_ACCOUNTS;
         $recordset = $db->fetchTable($sql, TRUE, array($id_endpoint));
+        $errMsg = $db->errMsg;
+        $db->genQuery('SET NAMES UTF-8');
         if (!is_array($recordset)) {
-            $this->_errMsg = '(internal) Failed to read endpoint accounts: '.$db->errMsg;
+            $this->_errMsg = '(internal) Failed to read endpoint accounts: '.$errMsg;
             return NULL;
         }
         $detalles['endpoint_account'] = $recordset;
-        
+
         // Cargar propiedades asociadas a cada cuenta, de existir
         foreach (array_keys($detalles['endpoint_account']) as $i) {
             $sql =  'SELECT property_key, property_value FROM endpoint_account_properties '.
@@ -154,10 +157,10 @@ SQL_ENDPOINT_ACCOUNTS;
                 );
             }
         }
-        
+
         return $detalles;
     }
-    
+
     function guardarDetalles($id_endpoint, &$detalles)
     {
         if (is_null($db = $this->_getDB())) return NULL;
@@ -171,7 +174,7 @@ SQL_ENDPOINT_ACCOUNTS;
 
         return $r;
     }
-    
+
     function guardarDetallesUpload($db, $id_endpoint, $endpoint)
     {
     	$detalles = array();
@@ -194,14 +197,14 @@ SQL_ENDPOINT_ACCOUNTS;
             $account['properties'] = $p;
             $detalles['endpoint_account'][] = $account;
         }
-        
+
         return $this->_guardarDetalles($db, $id_endpoint, $detalles);
     }
-    
+
     private function _guardarDetalles($db, $id_endpoint, &$detalles)
     {
         $bExito = FALSE;
-        
+
         $detallesGuardar = array();
         foreach ($this->_rw_properties as $k) {
             $detallesGuardar[$k] = NULL;
@@ -209,7 +212,7 @@ SQL_ENDPOINT_ACCOUNTS;
                 $detallesGuardar[$k] = $detalles[$k];
             }
         }
-        
+
         // Verificaciones que no requieren acceso a DB
         $validador = new PaloValidar();
         if (!isset($detallesGuardar['dhcp'])) $detallesGuardar['dhcp'] = 'true';
@@ -237,7 +240,7 @@ SQL_ENDPOINT_ACCOUNTS;
                 }
             }
         }
-        
+
         // Verificar colisiones de propiedades personalizadas
         if (!isset($detalles['endpoint_properties']))
             $detalles['endpoint_properties'] = array();
@@ -256,7 +259,7 @@ SQL_ENDPOINT_ACCOUNTS;
         foreach ($detalles['endpoint_properties'] as $tupla) {
             if (trim($tupla['value']) != '') $detallesGuardar[$tupla['key']] = $tupla['value'];
         }
-        
+
         // Verificar cuentas telefónicas asignadas. Es válido (por ahora) no tener cuentas.
         if (!isset($detalles['endpoint_account'])) $detalles['endpoint_account'] = array();
         $cuentaPedida = array();
@@ -264,7 +267,7 @@ SQL_ENDPOINT_ACCOUNTS;
         for ($i = 0; $i < count($detalles['endpoint_account']); $i++) {
             if (!isset($detalles['endpoint_account'][$i]['properties']))
                 $detalles['endpoint_account'][$i]['properties'] = array();
-            
+
             // Todos los parámetros presentes
             foreach (array('tech', 'account', 'priority') as $k) {
                 if (!isset($detalles['endpoint_account'][$i][$k])) {
@@ -280,19 +283,19 @@ SQL_ENDPOINT_ACCOUNTS;
                             return NULL;
                         }
                     }
-                } 
+                }
             }
-            
+
             // Tecnología válida
             $tech = $detalles['endpoint_account'][$i]['tech'];
             if (!in_array($tech, array('sip', 'iax2'))) {
                 $this->_errMsg = _tr('Unsupported tech').': '.$detalles['endpoint_account'][$i]['tech'];
                 return NULL;
             }
-            
+
             if (!isset($countByTech[$tech])) $countByTech[$tech] = 0;
             $countByTech[$tech]++;
-            
+
             // Verificar duplicados dentro del endpoint
             $k = $detalles['endpoint_account'][$i]['tech'].'/'.$detalles['endpoint_account'][$i]['account'];
             if (in_array($k, $cuentaPedida)) {
@@ -317,7 +320,7 @@ SQL_ENDPOINT_ACCOUNTS;
         }
 
         $bExito = TRUE;
-        
+
         // Verificar si el endpoint tiene un modelo de teléfono asignado
         if ($bExito) {
             $tupla = $db->getFirstRowQuery('SELECT id_model FROM endpoint WHERE id = ?',
@@ -333,8 +336,8 @@ SQL_ENDPOINT_ACCOUNTS;
                 $bExito = FALSE;
             }
         }
-        
-        /* Verificar el total de cuentas por modelo. Ya que están en la misma 
+
+        /* Verificar el total de cuentas por modelo. Ya que están en la misma
          * tabla, se verifica además las banderas de IP estática y dinámica. */
         if ($bExito) {
             $tupla = $db->getFirstRowQuery(
@@ -359,7 +362,7 @@ SQL_ENDPOINT_ACCOUNTS;
                 $bExito = FALSE;
             }
         }
-        
+
         // Cargar las propiedades por omisión del modelo
         if ($bExito) {
             $sql = <<<MODEL_PROPERTIES
@@ -378,12 +381,12 @@ MODEL_PROPERTIES;
             }
         }
 
-        /* Verificar el total de cuentas por tecnología soportada. Si no se ha 
+        /* Verificar el total de cuentas por tecnología soportada. Si no se ha
          * definido max_TECH_accounts para el modelo, se asume 0 */
         if ($bExito) {
             foreach ($countByTech as $tech => $count) {
                 $maxtech = isset($modelProperties["max_{$tech}_accounts"])
-                    ? (int)$modelProperties["max_{$tech}_accounts"] 
+                    ? (int)$modelProperties["max_{$tech}_accounts"]
                     : 0;
                 if ($count > $maxtech) {
                     $this->_errMsg = _tr('Maximum number of accounts exceeded for tech').': '.$tech;
@@ -393,15 +396,15 @@ MODEL_PROPERTIES;
         }
 
         if ($bExito) {
-            /* Toda propiedad a guardar que exista con el mismo valor en la 
-             * lista por omisión con el mismo valor, se quita de la lista de 
+            /* Toda propiedad a guardar que exista con el mismo valor en la
+             * lista por omisión con el mismo valor, se quita de la lista de
              * propiedades a guardar. */
             foreach (array_keys($detallesGuardar) as $k) {
                 $v = $detallesGuardar[$k];
                 if (isset($modelProperties[$k]) && $modelProperties[$k] == $v)
                     unset($detallesGuardar[$k]);
             }
-            
+
             // Ejecutar el guardado de las propiedades
             if (!$db->genQuery('DELETE FROM endpoint_properties WHERE id_endpoint = ?', array($id_endpoint))) {
                 $this->_errMsg = _tr('(internal) Failed to remove old properties').' - '.$db->errMsg;
@@ -436,7 +439,7 @@ ENDPOINT_ACCOUNTS;
                 foreach ($recordset as $tupla) {
                     $availableAccounts[$tupla['tech']][$tupla['account']] = $tupla['id_endpoint'];
                 }
-                
+
                 foreach ($endpoint_account as $account) {
                     if (!in_array($account['account'], array_keys($availableAccounts[$account['tech']]))) {
                         // La cuenta requerida no existe
@@ -484,7 +487,7 @@ ENDPOINT_ACCOUNTS;
                             }
                         }
                     }
-                    
+
                     if (!$bExito) break;
                 }
             }
@@ -505,7 +508,7 @@ ENDPOINT_ACCOUNTS;
 
         return $bExito ? $sFechaModificacion : NULL;
     }
-    
+
     // TODO: implementar reseteo a defaults del teléfono en la base de datos
     // como DELETE FROM endpoint_properties/endpoint_account_properties WHERE id_endpoint = ...
 }

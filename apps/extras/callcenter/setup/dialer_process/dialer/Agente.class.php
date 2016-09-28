@@ -125,6 +125,8 @@ class Agente
     // Timestamp de inicio de login, debe setearse a NULL al entrar a estado logged-in
     private $_logging_inicio = NULL;
 
+    var $alarma_unregister = NULL;
+
     function __construct(ListaAgentes $lista, $idAgente, $iNumero, $sNombre,
         $bEstatus, $sType, $tuberia, $log)
     {

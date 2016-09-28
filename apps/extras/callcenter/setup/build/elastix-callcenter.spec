@@ -101,6 +101,12 @@ fi
 %{_bindir}/elastix-callcenter-load-dnc
 
 %changelog
+* Wed Sep 28 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Dialer: delay agent logoff due to extension unregistration in order
+  to allow webphone to refresh the page after login and recover active call.
+  Ported from CallCenterPRO.
+  SVN Rev[7751]
+
 * Fri Jul 29 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 2.2.0-17
 - Bump version for release
 

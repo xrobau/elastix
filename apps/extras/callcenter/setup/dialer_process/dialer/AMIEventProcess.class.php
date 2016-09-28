@@ -2361,12 +2361,37 @@ Uniqueid: 1429642067.241008
             // Alguna extensión se ha desregistrado. Verificar si es un agente logoneado
             $a = $this->_listaAgentes->buscar('extension', $params['Peer']);
             if (!is_null($a)) {
+                $timeout = 10;
                 // La extensión usada para login se ha desregistrado - deslogonear al agente
-                $this->_log->output('INFO: '.__METHOD__.' se detecta desregistro de '.
-                    $params['Peer'].' - deslogoneando '.$a->channel.'...');
-                $a->forzarLogoffAgente($this->_ami, $this->_log);
+                $a->alarma_unregister = $this->_agregarAlarma($timeout,
+                    array($this, '_cb_unregisteredTimeout'),
+                    array($a, $params['Peer']));
+                if ($this->DEBUG) {
+                    $this->_log->output('DEBUG: '.__METHOD__.' se deslogoneará '.
+                        $a->channel.' por desregistro de '.$params['Peer'].' luego de '.
+                        $timeout.' segundos.');
+                }
             }
-    	}
+        } elseif ($params['PeerStatus'] == 'Registered') {
+            // Verificar si registro corresponde a agente con alarma
+            $a = $this->_listaAgentes->buscar('extension', $params['Peer']);
+            if (!is_null($a) && !is_null($a->alarma_unregister)) {
+                $this->_cancelarAlarma($a->alarma_unregister);
+                $a->alarma_unregister = NULL;
+                if ($this->DEBUG) {
+                    $this->_log->output('DEBUG: '.__METHOD__.' cancelando deslogoneo de '.
+                        $a->channel.' pues '.$params['Peer'].' está registrado.');
+                }
+            }
+        }
+    }
+
+    private function _cb_unregisteredTimeout($a, $peer)
+    {
+        $a->alarma_unregister = NULL;
+        $this->_log->output('INFO: '.__METHOD__.
+            ' deslogoneando '.$a->channel.' debido a desregistro de '.$peer.'...');
+        $a->forzarLogoffAgente($this->_ami, $this->_log);
     }
 
     public function msg_QueueParams($sEvent, $params, $sServer, $iPort)

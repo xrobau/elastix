@@ -401,6 +401,12 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sat Oct  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: framework - add invisible submit button on filter grid for all themes
+  so visible buttons, such as the Delete button, are not selected as the default
+  submit button when pressing ENTER.
+  SVN Rev[7752]
+
 * Wed Sep 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: change permissions for logrotate files in /etc/logrotate.d/ to 0644.
   Fixes Elastix bug #2608 for elastix-framework package.

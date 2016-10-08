@@ -1,4 +1,6 @@
 <form  method="POST" style="margin-bottom:0;" action="{$url}">
+{* Botón invisible al inicio del form que impide que el primer botón visible del filtro, frecuentemente Borrar, sea default *}
+<input type="submit" name="" value="" style="height: 0; min-height: 0; font-size: 0; width: 0; border: none; outline: none; padding: 0px; margin: 0px; box-sizing: border-box; float: left;" />
     <table width="{$width}" align="center" border="0" cellpadding="0" cellspacing="0">
       {if !empty($arrActions) || !empty($contentFilter)}
         <tr>
@@ -29,19 +31,19 @@
                                         <img border="0" src="{$accion.icon}" align="absmiddle"  />
                                     {/if}
                                     <input type="button" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="table-action" />
-                                </div> 
+                                </div>
                             {elseif $accion.type eq 'submit'}
                                 <div class="{$clase}">
                                     {if !empty($accion.icon)}
                                         <img border="0" src="{$accion.icon}" align="absmiddle"  />
                                     {/if}
                                     <input type="submit" name="{$accion.task}" value="{$accion.alt}" {if !empty($accion.onclick)} onclick="{$accion.onclick}" {/if} class="table-action" />
-                                </div>                 
+                                </div>
                             {elseif $accion.type eq 'text'}
-                                <div class="{$clase}" style="cursor:default">                    
+                                <div class="{$clase}" style="cursor:default">
                                     <input type="text"   id="{$accion.name}" name="{$accion.name}" value="{$accion.value}" {if !empty($accion.onkeypress)} onkeypress="{$accion.onkeypress}" {/if} style="height:22px" />
                                     <input type="submit" name="{$accion.task}" value="{$accion.alt}" class="table-action" />
-                                </div>                 
+                                </div>
                             {elseif $accion.type eq 'combo'}
                                 <div class="{$clase}" style="cursor:default">
                                     <select name="{$accion.name}" id="{$accion.name}" {if !empty($accion.onchange)} onchange="{$accion.onchange}" {/if}>
@@ -51,10 +53,10 @@
                                             {html_options options=$accion.arrOptions}
                                         {/if}
                                     </select>
-                                    {if !empty($accion.task)} 
+                                    {if !empty($accion.task)}
                                         <input type="submit" name="{$accion.task}" value="{$accion.alt}" class="table-action" />
                                     {/if}
-                                </div> 
+                                </div>
                             {elseif $accion.type eq 'html'}
                                 <div class="{$clase}">
                                     {$accion.html}
@@ -91,31 +93,31 @@
                         {/if}
                     </td>
                     <td align="left" id="msg_status"></td>
-                    <td align="right"> 
-                    {if $pagingShow}  
+                    <td align="right">
+                    {if $pagingShow}
                         {if $start<=1}
                         <img
                         src='images/start_off.gif' alt='{$lblStart}' align='absmiddle'
-                        border='0' width='13' height='11'>&nbsp;{$lblStart}&nbsp;&nbsp;<img 
+                        border='0' width='13' height='11'>&nbsp;{$lblStart}&nbsp;&nbsp;<img
                         src='images/previous_off.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'>
                         {else}
                         <a href="{$url}&nav=start&start={$start}"><img
                         src='images/start.gif' alt='{$lblStart}' align='absmiddle'
-                        border='0' width='13' height='11'></a>&nbsp;{$lblStart}&nbsp;&nbsp;<a href="{$url}&nav=previous&start={$start}"><img 
+                        border='0' width='13' height='11'></a>&nbsp;{$lblStart}&nbsp;&nbsp;<a href="{$url}&nav=previous&start={$start}"><img
                         src='images/previous.gif' alt='{$lblPrevious}' align='absmiddle' border='0' width='8' height='11'></a>
                         {/if}
-                        &nbsp;{$lblPrevious}&nbsp;<span 
+                        &nbsp;{$lblPrevious}&nbsp;<span
                         class='pageNumbers'>({$start} - {$end} of {$total})</span>&nbsp;{$lblNext}&nbsp;
                         {if $end==$total}
-                        <img 
+                        <img
                         src='images/next_off.gif'
-                        alt='{$lblNext}' align='absmiddle' border='0' width='8' height='11'>&nbsp;{$lblEnd}&nbsp;<img 
+                        alt='{$lblNext}' align='absmiddle' border='0' width='8' height='11'>&nbsp;{$lblEnd}&nbsp;<img
                         src='images/end_off.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'>
                         {else}
                         <a href="{$url}&nav=next&start={$start}"><img
-                        src='images/next.gif' 
-                        alt='{$lblNext}' align='absmiddle' border='0' width='8' height='11'></a>&nbsp;{$lblEnd}&nbsp;<a 
-                        href="{$url}&nav=end&start={$start}"><img 
+                        src='images/next.gif'
+                        alt='{$lblNext}' align='absmiddle' border='0' width='8' height='11'></a>&nbsp;{$lblEnd}&nbsp;<a
+                        href="{$url}&nav=end&start={$start}"><img
                         src='images/end.gif' alt='{$lblEnd}' align='absmiddle' border='0' width='13' height='11'></a>
                         {/if}
                     {/if}
@@ -158,7 +160,7 @@
                 <tr>
                     <td align="left">&nbsp;</td>
                     <td align="right">
-                    {if $pagingShow}  
+                    {if $pagingShow}
                         {if $start<=1}
                         <img
                         src='images/start_off.gif' alt='{$lblStart}' align='absmiddle'

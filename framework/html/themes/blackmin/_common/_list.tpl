@@ -1,5 +1,7 @@
 <br/>
 <form class="elastix-standard-formgrid" method="POST" style="margin-bottom:0;" action="{$url}">
+{* Botón invisible al inicio del form que impide que el primer botón visible del filtro, frecuentemente Borrar, sea default *}
+<input type="submit" name="" value="" style="height: 0; min-height: 0; font-size: 0; width: 0; border: none; outline: none; padding: 0px; margin: 0px; box-sizing: border-box; float: left;" />
     {* INICIO: Bloque del filtro del contenido *}
     <div class="controls">
     {foreach from=$arrActions key=k item=accion name=actions}

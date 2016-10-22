@@ -1,6 +1,6 @@
 %define modname my_extension
 
-Summary: Elastix My Extension 
+Summary: Elastix My Extension
 Name:    elastix-%{modname}
 Version: 4.0.0
 Release: 2
@@ -85,11 +85,17 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sat Oct 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: my_extension: when manipulating DND and Call Forward, there are device
+  states that should also be assigned, but were not. They are now assigned so
+  that the DND and Call Forward states are properly signaled in Asterisk.
+  SVN Rev[7753]
+
 * Tue Oct 27 2015 Luis Abarca <labarca@palosanto.com> 4.0.0-2
 - CHANGED: my_extension - Build/elastix-my_extension.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 
-* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: my_extension: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7241]
 
@@ -107,12 +113,12 @@ fi
   SVN history. Bump Release in specfile.
   SVN Rev[6580]
 
-* Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com> 
+* Mon Jan 27 2014 Luis Abarca <labarca@palosanto.com>
 - CHANGED: framework,my_extension - index.html,paloSantoValidar.class.php: A
   correction in the name of variable numeric_rang has been made it.
   SVN Rev[6420]
 
-* Tue Jan 21 2014 Bruno Macias <bmacias@palosanto.com> 
+* Tue Jan 21 2014 Bruno Macias <bmacias@palosanto.com>
 - FIXED: module myex_config, [#1788] bugs.elastix.org. Fixed bugs related with
   FreePBX 2.11 integrated with elastix.
   SVN Rev[6398]
@@ -122,13 +128,13 @@ fi
   SVN history. Bump Release in specfile.
   SVN Rev[6379]
 
-* Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com> 
+* Fri Jan 10 2014 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Update to the changelog about the english and spanish help files in
   the myex_config module.
   SVN Rev[6363]
 
 * Fri Jan 10 2014 Jose Briones <jbriones@elastix.com>
-- CHANGED: myex_config: For each module listed here the english help file 
+- CHANGED: myex_config: For each module listed here the english help file
   was renamed to en.hlp and a spanish help file called es.hlp was ADDED.
   SVN Rev[6362]
 
@@ -147,11 +153,11 @@ fi
   SVN history. Bump Release in specfile.
   SVN Rev[5788]
 
-* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com> 
+* Thu Aug 08 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATED: Correction of some mistakes in the translation file fr.lang.
   SVN Rev[5643]
 
-* Tue Aug 06 2013 Jose Briones <jbriones@palosanto.com> 
+* Tue Aug 06 2013 Jose Briones <jbriones@palosanto.com>
 - UPDATE:  Added support for the translation of some words in the form, and
   added the translation file es.lang.
   SVN Rev[5569]
@@ -175,7 +181,7 @@ fi
   SVN Rev[4781]
 
 * Tue Jan 29 2013 Luis Abarca <labarca@palosanto.com> 2.4.0-1
-- CHANGED: my_extension - Build/elastix-my_extension.spec: Changed Version and Release in 
+- CHANGED: my_extension - Build/elastix-my_extension.spec: Changed Version and Release in
   specfile according to the current branch.
   SVN Rev[4641]
 
@@ -185,14 +191,14 @@ fi
   SVN Rev[4357]
 
 * Wed Oct 17 2012 Alex Villacis Lasso <a_villacis@palosanto.com>
-- Framework,Modules: remove temporary file preversion_MODULE.info under 
+- Framework,Modules: remove temporary file preversion_MODULE.info under
   /usr/share/elastix/module_installer/MODULE_VERSION/ which otherwise prevents
-  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on 
+  proper cleanup of /usr/share/elastix/module_installer/MODULE_VERSION/ on
   RPM update. Part of the fix for Elastix bug #1398.
 - Framework,Modules: switch as many files and directories as possible under
-  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for 
+  /var/www/html to root.root instead of asterisk.asterisk. Partial fix for
   Elastix bug #1399.
-- Framework,Modules: clean up specfiles by removing directories under 
+- Framework,Modules: clean up specfiles by removing directories under
   /usr/share/elastix/module_installer/MODULE_VERSION/setup/ that wind up empty
   because all of their files get moved to other places.
   SVN Rev[4347]
@@ -206,7 +212,7 @@ fi
 
 * Sat Oct 29 2011 Eduardo Cueva <ecueva@palosanto.com> 2.2.0-4
 - CHANGED: In spec file, changed prereq elastix >= 2.2.0-12
-- UPDATED: my extesion modules  templates files support new 
+- UPDATED: my extesion modules  templates files support new
   elastixneo theme. SVN Rev[3156]
 
 * Fri Oct 07 2011 Alberto Santos <asantos@palosanto.com> 2.2.0-3
@@ -227,19 +233,19 @@ fi
   SVN Rev[2882]
 
 * Tue Jul 28 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-7
-- CHANGED: module myex_config, changed message when user does not 
+- CHANGED: module myex_config, changed message when user does not
   have an extension associated. SVN Rev[2795]
-- CHANGED: module myex_config, The link here (when a user does not 
-  have an extension) now open a new window to edit the extension 
+- CHANGED: module myex_config, The link here (when a user does not
+  have an extension) now open a new window to edit the extension
   of the user logged in. SVN Rev[2789]
 
 * Tue Apr 26 2011 Alberto Santos <asantos@palosanto.com> 2.0.4-6
-- FIXED: module myex_config, undefined variables  
+- FIXED: module myex_config, undefined variables
   $request->recordIncoming and $request->recordOutgoing
   SVN Rev[2587]
-- CHANGED: module my_extension, changed class name to 
+- CHANGED: module my_extension, changed class name to
   core_MyExtension. SVN Rev[2579]
-- CHANGED: module my_extension, changed name from 
+- CHANGED: module my_extension, changed name from
   puntosF_MyExtension.class.php to core.class.php. SVN Rev[2572]
 - NEW: new scenarios for SOAP in myex_config
 - CHANGED: In Spec file add prerequisite elastix 2.0.4-19
@@ -248,14 +254,14 @@ fi
 - CHANGED:  In Spec file add prerequiste elastix 2.0.4-9
 
 * Thu Feb 03 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-4
-- CHANGED:  menu.xml to support new tag "permissions" where has 
-  all permissions of group per module and new attribute "desc" 
-  into tag  "group" for add a description of group. 
+- CHANGED:  menu.xml to support new tag "permissions" where has
+  all permissions of group per module and new attribute "desc"
+  into tag  "group" for add a description of group.
   SVN Rev[2294][2299]
 
 * Wed Jan 05 2011 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-3
-- FIXED: My Extension: In addition to technology table, the 
-  'users' table must be updated as well when modifying recording 
+- FIXED: My Extension: In addition to technology table, the
+  'users' table must be updated as well when modifying recording
   settings. SVN Rev[2222]
 
 * Tue Dec 28 2010 Eduardo Cueva <ecueva@palosanto.com> 2.0.4-2

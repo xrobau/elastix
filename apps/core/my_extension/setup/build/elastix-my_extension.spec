@@ -85,6 +85,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sat Oct 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: my_extension: when manipulating DND and Call Forward, there are device
+  states that should also be assigned, but were not. They are now assigned so
+  that the DND and Call Forward states are properly signaled in Asterisk.
+  SVN Rev[7753]
+
 * Fri Oct 23 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: my_extension: massive s/www.elastix.org/www.elastix.com/g
   SVN Rev[7241]

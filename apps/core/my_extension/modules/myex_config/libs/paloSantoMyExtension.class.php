@@ -110,10 +110,16 @@ class paloSantoMyExtension {
         ),
     );
 
+    private $_usedevstate = FALSE;
 
     function paloSantoMyExtension()
     {
         $this->astman = null;
+        if (is_readable('/etc/amportal.conf')) {
+            $ini = parse_ini_file('/etc/amportal.conf');
+            $this->_usedevstate = (isset($ini['USEDEVSTATE']) &&
+                in_array(strtolower($ini['USEDEVSTATE']), array('1', 'true')));
+        }
     }
 
     public function AMI_OpenConnect()
@@ -154,6 +160,7 @@ class paloSantoMyExtension {
             : $this->astman->database_put($db_family, $db_key, $db_val);
         if (!$r) return FALSE;
 
+        if (!$this->_usedevstate) return TRUE;
         if (!isset($this->_deviceStateChanges[$cfgkey]['DEVICE_STATE'])) return TRUE;
 
         // Evaluar lista de hints a modificar

@@ -85,6 +85,11 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Tue Oct 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: my_extension: honor USEDEVSTATE setting in /etc/amportal.conf when
+  manipulating device states on DND and Call Forward.
+  SVN Rev[7554]
+
 * Sat Oct 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: my_extension: when manipulating DND and Call Forward, there are device
   states that should also be assigned, but were not. They are now assigned so

@@ -401,6 +401,13 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Fri Nov 11 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: The ARI webpage from FreePBX contains a .htaccess file that must be
+  obeyed to harden the system against arbitrary file upload exploits on
+  /recordings, just as it is done for /admin. The Apache service must be
+  restarted after this update.
+  SVN Rev[7755]
+
 * Sat Oct  8 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: framework - add invisible submit button on filter grid for all themes
   so visible buttons, such as the Delete button, are not selected as the default

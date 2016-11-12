@@ -346,7 +346,8 @@ rm -rf $RPM_BUILD_ROOT
 # basic contains some reasonable sane basic tiles
 %files
 %defattr(-, asterisk, asterisk)
-/var/www/html/var
+/var/www/html/var/cache
+/var/www/html/var/templates_c
 /var/www/db
 /var/www/backup
 /var/log/elastix
@@ -366,6 +367,8 @@ rm -rf $RPM_BUILD_ROOT
 /var/www/html/robots.txt
 /var/www/html/panels/README.en
 /var/www/html/panels/README.es
+/var/www/html/var
+/var/www/html/var/.htaccess
 /usr/share/elastix/*
 /usr/share/pear/DB/sqlite3.php
 /usr/local/elastix/sampler.php
@@ -401,6 +404,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Sat Nov 12 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: add and enforce .htaccess file on /var/www/html/var. Change ownership
+  of /var/www/html/var to root.root.
+  SVN Rev[7756]
+
 * Fri Nov 11 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: The ARI webpage from FreePBX contains a .htaccess file that must be
   obeyed to harden the system against arbitrary file upload exploits on

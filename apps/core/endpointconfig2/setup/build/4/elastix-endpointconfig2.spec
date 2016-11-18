@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Fri Nov 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: the Elastix LXP200 can be rebooted by SSH just
+  like a GrandStream GXP140x, so add default credentials to enable this.
+  SVN Rev[7763]
 - FIXED: Endpoint Configurator: fix incorrect Python syntax for superclass
   method delegation in Elastix.py.
   SVN Rev[7762]

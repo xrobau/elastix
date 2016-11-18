@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Fri Nov 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: fix reboot method selection on Grandstream so
+  that later methods are NOT tried after one succeeds.
+  SVN Rev[7764]
 - FIXED: Endpoint Configurator: the Elastix LXP200 can be rebooted by SSH just
   like a GrandStream GXP140x, so add default credentials to enable this.
   SVN Rev[7763]

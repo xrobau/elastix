@@ -183,6 +183,9 @@ fi
 
 %changelog
 * Fri Nov 18 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: DHCP Server: allow dashes and @ifN in output of "ip addr show" in order
+  to collect addresses of macvlan interfaces.
+  SVN Rev[7760]
 - FIXED: Network Parameters: allow dashes in the interface regexp validation so
   that macvlan interfaces can be configured.
   SVN Rev[7759]

@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Fri Nov 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: fix incorrect Python syntax for superclass
+  method delegation in Elastix.py.
+  SVN Rev[7762]
+
 * Mon Sep 26 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: switch database charset in a second place where
   description is read from FreePBX tables. Addresses incomplete fix for Elastix

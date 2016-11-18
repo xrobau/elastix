@@ -70,7 +70,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
             except Exception, e:
                 logging.error('Endpoint %s@%s LXPx50 failed to authenticate - %s' %
                 (self._vendorname, self._ip, str(e)))
-                
+
 
         if sModel != None: self._saveModel(sModel)
 
@@ -81,18 +81,18 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
             return self._updateLocalConfig_LXPx50()
         else:
             # Delegate to old (Grandstream) configuration
-            return super(Endpoint, self).updateLocalConfig(self)
-    
+            return super(Endpoint, self).updateLocalConfig()
+
     # TODO: consolidar con método parecido de RCA
     def _updateLocalConfig_LXP180(self):
-        # This phone configuration is verbose on the network. 
-        
+        # This phone configuration is verbose on the network.
+
         # Not because it requires Digest authentication...
-        # ...but because nowhere in sight is a way to send the entire 
+        # ...but because nowhere in sight is a way to send the entire
         # configuration at once, such as a configuration file. Therefore
         # the following code needs to send each bit of configuration, on a
         # separate request:
-        
+
         # Delete each of the existing account configurations, one by one:
         postvars = [
             ('ConfPage', 'sipsetting'),
@@ -143,7 +143,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
             self._updateList(postvars, {'D7': idx})
             if not self._doAuthPostIP160s('/cgi-bin/config.cgi', postvars):
                 return False
-        
+
         # Now, send the new account configurations again, one by one:
         stdvars = self._prepareVarList()
         for idx in range(len(stdvars['sip'])):
@@ -181,7 +181,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
                 self._updateList(postvars, { 'textfield6': stdvars['static_dns2'] })
         if not self._doAuthPostIP160s('/cgi-bin/config.cgi', postvars):
             return False
-        
+
         self._unregister()
         self._setConfigured()
         return True
@@ -191,23 +191,23 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
         for i in range(len(postvars)):
             if postvars[i][0] in updatevars:
                 postvars[i] = (postvars[i][0], updatevars[postvars[i][0]])
-    
+
     # TODO: consolidar con mismo método de RCA
     def _doAuthPostIP160s(self, urlpath, postvars):
         '''Send a POST request to the IP160s phone, in the special way required.
-        
+
         The IP160s firmware has a shoddy implementation for processing of POST
         requests. When processing a POST request, the firmware expects each of
         the form variables to appear in a specific position in the encoding
-        string sent by the browser, rather than relying on the key/value 
+        string sent by the browser, rather than relying on the key/value
         structure that is implied by the encoding protocol. This firmware happens
         to work with ordinary web browsers because they, by lucky chance, send
         the variables in form order. However, if urllib is used to encode an
-        ordinary dictionary of variables, there is no ordering guarantee (in 
+        ordinary dictionary of variables, there is no ordering guarantee (in
         Python 2.4) and the variables get sent out of order. The firwmare will
         then set the variables according to the received position, which results
         in a broken setup.
-        
+
         An OrderedDict would be ideal for this, but for now I will manually build
         an array of 2-tuples and use that to encode the POST data.
         '''
@@ -218,7 +218,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
 
     def _getAuthOpener_LXP150(self, http_user, http_pass):
         ''' Create an authenticated opener for the LXPx50 series.
-        
+
         The LXPx50 HTTP authentication is again weird. First, a request must be
         sent to the phone with a Cookie with a SessionId set to a random number
         between 0 and 99999. Sending 0 works just as well. The first request must
@@ -234,7 +234,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
         sesscookie = cookielib.Cookie(None, 'SessionId', '0', None, False,
             self._ip, False, False,
             '/', False, False, str((int)(time.time() + 3600)),
-            False, 'SessionId', None, None)        
+            False, 'SessionId', None, None)
         cookiejar.set_cookie(sesscookie)
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
         response = opener.open('http://' + self._ip + '/fcgi/do?' + urllib.urlencode({
@@ -246,7 +246,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
         if m is None:
             return (None, None)
         encrypted_password = m.group(1)
-        
+
         sesscookie = cookielib.Cookie(None, 'UserName', http_user, None, False,
             self._ip, False, False, '/', False, False, str((int)(time.time() + 3600)),
             False, 'UserName', None, None)
@@ -255,9 +255,9 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
             self._ip, False, False, '/', False, False, str((int)(time.time() + 3600)),
             False, 'Password', None, None)
         cookiejar.set_cookie(sesscookie)
-        response = opener.open('http://' + self._ip + '/fcgi/do?id=1', 
+        response = opener.open('http://' + self._ip + '/fcgi/do?id=1',
             'SubmitData=begin%26Operation%3DCreateSession%26DestURL%3Did%6021%26SubmitData%3Dend')
-        
+
         # Find new SessionId value. What, no Set-Cookie header?
         body = response.read()
         m = re.search(r"id=hcSessionIdNow type=hidden value='(.+?)'", body)
@@ -265,29 +265,29 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
             sesscookie = cookielib.Cookie(None, 'SessionId', m.group(1), None, False,
                 self._ip, False, False,
                 '/', False, False, str((int)(time.time() + 3600)),
-                False, 'SessionId', None, None)        
+                False, 'SessionId', None, None)
             cookiejar.set_cookie(sesscookie)
         else:
             logging.error('Endpoint %s@%s LXPx50 failed to authenticate - new session ID not found in response' %
                 (self._vendorname, self._ip))
             return (None, None)
-        
+
         # Subsequent requests must NOT have the UserName/Password cookies
         cookiejar.clear(self._ip, '/', 'UserName')
         cookiejar.clear(self._ip, '/', 'Password')
         return (opener, body)
-    
+
     def _updateLocalConfig_LXPx50(self):
         # Need to calculate lowercase version of MAC address without colons
         sConfigFile = (self._mac.replace(':', '').lower()) + '.cfg'
         sConfigPath = self._tftpdir + '/' + sConfigFile
-        
+
         vars = self._prepareVarList()
-        
+
         # _writeTemplate is used instead of _fetchTemplate because file is
         # requested by TFTP on reboot
         self._writeTemplate('Elastix_LXPx50_cfg.tpl', vars, sConfigPath)
-        
+
         # Prepare an opener with authentication cookies
         try:
             opener, body = self._getAuthOpener_LXP150(self._http_username, self._http_password)
@@ -306,7 +306,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
             f = open(sConfigPath)
             cfgcontent = f.read()
             f.close()
-            
+
             boundary = '------------------ENDPOINTCONFIG'
             postdata = '--' + boundary + '\r\n' +\
                 'Content-Disposition: form-data; name="uploadType"\r\n' +\
@@ -318,15 +318,15 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
                 '\r\n' +\
                 cfgcontent + '\r\n' +\
                 '--' + boundary + '--\r\n'
-            
+
             request = urllib2.Request(
                 'http://' + self._ip + '/fcgi/do?id=6&id=2',
                 postdata,
                 {'Content-Type': ' multipart/form-data; boundary=' + boundary})
 
-            # The phone configuration restore is known to hang for 25-30 seconds 
+            # The phone configuration restore is known to hang for 25-30 seconds
             oldtimeout = socket.getdefaulttimeout()
-            socket.setdefaulttimeout(40)            
+            socket.setdefaulttimeout(40)
             try:
                 response = opener.open(request)
             finally:
@@ -346,10 +346,9 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
             logging.error('Endpoint %s@%s unable to send file - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        
+
         # Reboot the phone.
         self._amireboot('aastra-check-cfg')
         self._unregister()
         self._setConfigured()
         return True
-        

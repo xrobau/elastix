@@ -52,11 +52,11 @@ function _moduleContent(&$smarty, $module_name)
     $action = getParameter('action');
     switch ($action) {
     case 'updateRepositories':
-        return actualizarRepositorios($arrConf);
+        return actualizarRepositorios();
     case 'install':
-        return installPaquete($arrConf);
+        return installPaquete();
     case 'uninstall':
-        return uninstallPaquete($arrConf);
+        return uninstallPaquete();
     default:
         return listPackages($smarty, $module_name, $local_templates_dir, $arrConf);
     }
@@ -64,7 +64,7 @@ function _moduleContent(&$smarty, $module_name)
 
 function listPackages($smarty, $module_name, $local_templates_dir, $arrConf)
 {
-    $oPackages = new PaloSantoPackages($arrConf['ruta_yum']);
+    $oPackages = new PaloSantoPackages();
 
     $submitInstalado = getParameter('submitInstalado');
     $nombre_paquete = getParameter('nombre_paquete');
@@ -207,37 +207,38 @@ function filterField()
     return $arrFilter;
 }
 
-function actualizarRepositorios($arrConf)
+function actualizarRepositorios()
 {
-    $oPackages = new PaloSantoPackages($arrConf['ruta_yum']);
+    $oPackages = new PaloSantoPackages();
     $resultado = $oPackages->checkUpdate();
 
+    Header('Content-Type: application/json');
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status($resultado);
     return $jsonObject->createJSON();
 }
 
-function installPaquete($arrConf)
+function installPaquete()
 {
-    $oPackages = new PaloSantoPackages($arrConf['ruta_yum']);
+    $oPackages = new PaloSantoPackages();
     $paquete = getParameter("paquete");
     $val  = getParameter("val");
     $resultado = $oPackages->installPackage($paquete,$val);
 
+    Header('Content-Type: application/json');
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status($resultado);
     return $jsonObject->createJSON();
 }
 
-function uninstallPaquete($arrConf)
+function uninstallPaquete()
 {
-    $oPackages = new PaloSantoPackages($arrConf['ruta_yum']);
+    $oPackages = new PaloSantoPackages();
     $paquete = getParameter("paquete");
     $resultado = $oPackages->uninstallPackage($paquete);
 
+    Header('Content-Type: application/json');
     $jsonObject = new PaloSantoJSON();
     $jsonObject->set_status($resultado);
     return $jsonObject->createJSON();
 }
-
-?>

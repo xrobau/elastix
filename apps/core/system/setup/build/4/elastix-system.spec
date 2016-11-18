@@ -183,6 +183,10 @@ fi
 
 %changelog
 * Fri Nov 18 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Packages: update primary_db location algorithm to allow module to list
+  package versions and source repos correctly in Elastix 4. Additionally set
+  explicit Content-Type for AJAX requests.
+  SVN Rev[7761]
 - FIXED: DHCP Server: allow dashes and @ifN in output of "ip addr show" in order
   to collect addresses of macvlan interfaces.
   SVN Rev[7760]

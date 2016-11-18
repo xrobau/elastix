@@ -29,5 +29,4 @@
 global $arrConfModule;
 $arrConfModule['module_name'] = 'packages';
 $arrConfModule['templates_dir'] = 'themes';
-$arrConfModule['ruta_yum'] = '/var/cache/yum/';
-?>
+

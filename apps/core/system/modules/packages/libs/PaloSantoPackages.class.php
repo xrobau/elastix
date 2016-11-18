@@ -35,14 +35,46 @@ class PaloSantoPackages
     private $_ruta = NULL;
     private $_repodb = array();
 
-    function __construct($ruta) { $this->_ruta = $ruta; }
+    function __construct() {
+        $this->_ruta = '/var/cache/yum';
+
+        // El siguiente comando ejecuta python para averiguar los valores de
+        // $basearch y $releasever que se referencian en /etc/yum.conf en Fedora 17
+        $basearch = $releasever = NULL;
+        $sCmd = "python -c '".
+                "import yum; ".
+                "yb = yum.YumBase(); ".
+                "ba = yb.conf.yumvar[\"basearch\"]; ".
+                "rv = yb.conf.yumvar[\"releasever\"]; ".
+                "print \"BASEARCH-RELEASEVER:\", ba, rv;'";
+        $output = $retval = NULL;
+        exec($sCmd, $output, $retval);
+        foreach ($output as $s) {
+            $regs = NULL;
+            if (preg_match('/^BASEARCH-RELEASEVER:\s+(\S+)\s+(\S+)/', $s, $regs)) {
+                $basearch = $regs[1];
+                $releasever = $regs[2];
+            }
+        }
+        if (!is_null($basearch) && file_exists('/etc/yum.conf')) {
+            foreach (file('/etc/yum.conf') as $s) {
+                $regs = NULL;
+                if (preg_match('/^cachedir\s*=\s*(.+)/', trim($s), $regs)) {
+                    $this->_ruta = str_replace(
+                        array('$basearch', '$releasever'),
+                        array($basearch, $releasever),
+                        $regs[1]);
+                }
+            }
+        }
+    }
 
     function listarPaquetes($tipo, $filtro = NULL)
     {
     	if (!is_null($filtro)) $filtro = trim($filtro);
         if (!is_null($filtro) && !preg_match('/^[\w\.-]+$/', $filtro)) $filtro = NULL;
         if (!in_array($tipo, array('installed', 'all'))) $tipo = 'installed';
-        
+
         $this->_abrirRepoDB();
         switch ($tipo) {
         case 'installed':
@@ -55,45 +87,45 @@ class PaloSantoPackages
     private function _listarPaquetesInstalados($filtro)
     {
     	$rpmlist = array();
-        
+
         $p = $this->_abrirTuberiaRPM($filtro);
         $sql = 'SELECT version, release FROM packages WHERE name = ? AND arch = ?';
         while (!is_null($r = $this->_leerInstaladoRPM($p))) {
-        	foreach ($this->_repodb as $repo => $db) {
+            foreach ($this->_repodb as $repo => $db) {
                 $paramSQL = array($r['name'], $r['arch']);
                 $recordset = $db->fetchTable($sql, TRUE, $paramSQL);
                 foreach ($recordset as $tuple) {
-                	if (is_null($r['latestversion']) || 
+                    if (is_null($r['latestversion']) ||
                         $this->_compareRpmVersion(
                             array($tuple['version'], $tuple['release']),
                             array($r['latestversion'], $r['latestrelease'])) > 0) {
 
-                		$r['repo'] = $repo;
+                        $r['repo'] = $repo;
                         $r['latestversion'] = $tuple['version'];
                         $r['latestrelease'] = $tuple['release'];
-                	}
+                    }
                 }
         	}
-            
+
             // Verificar si este paquete es actualizable
             if (!is_null($r['latestversion']) && $this->_compareRpmVersion(
                 array($r['version'], $r['release']),
                 array($r['latestversion'], $r['latestrelease'])) < 0)
                 $r['canupdate'] = TRUE;
-            
+
             $rpmlist[$r['name'].'.'.$r['arch']] = $r;
         }
         pclose($p);
         ksort($rpmlist);
         return $rpmlist;
     }
-    
+
     private function _listarPaquetesTotales($filtro)
     {
         $rpmlist = array();
-        
+
         $p = $this->_abrirTuberiaRPM($filtro);
-        
+
         // Cargar la versión más reciente de cada RPM en los repos
         $sql = 'SELECT name, arch, version AS latestversion, release AS latestrelease, summary FROM packages';
         $paramSQL = NULL;
@@ -124,7 +156,7 @@ class PaloSantoPackages
                 }
             }
         }
-    	
+
         // Con los RPMs instalados, verificar si se puede actualizar
         while (!is_null($r = $this->_leerInstaladoRPM($p))) {
             $rpmkey = $r['name'].'.'.$r['arch'];
@@ -144,22 +176,22 @@ class PaloSantoPackages
             	$rpmlist[$rpmkey] = $r;
             }
         }
-        
+
         pclose($p);
         ksort($rpmlist);
         return $rpmlist;
     }
-    
+
     private function _abrirRepoDB()
     {
-    	if (count($this->_repodb) > 0) return;
-        
+        if (count($this->_repodb) > 0) return;
+
         $repos = glob($this->_ruta."/*");
         if (count($repos) <= 0) {
             //print "Faltan repos<br/>\n";
         	$this->bActualizar = TRUE;
         }
-        
+
         // Filtrar los repos activos según /etc/yum.repos.d/*.repo
         $reposValidos = array();
         $reposInactivos = array();
@@ -182,16 +214,54 @@ class PaloSantoPackages
             $repo = basename($rutarepo);
             if (!in_array($repo, $reposValidos)) continue;
             if (in_array($repo, $reposInactivos)) continue;
-            $rutas = glob("$rutarepo/*primary*sqlite");
-            if (count($rutas) > 0) {
+
+            $primary_db = NULL;
+            if (is_readable($rutarepo.'/repomd.xml')) {
+                // El siguiente código require el módulo php-xml
+                $repomd = new SimpleXMLElement(file_get_contents($rutarepo.'/repomd.xml'));
+                foreach ($repomd->data as $dataObj) {
+                    $test_paths = NULL;
+                    if ($dataObj['type'] == 'primary_db') {
+                        $sRutaPrimary = $dataObj->location['href'];
+                        $sRutaPrimary = basename($sRutaPrimary, '.bz2');
+                        $test_paths = array(
+                            $rutarepo.'/gen/primary_db.sqlite',
+                            $rutarepo.'/gen/'.$sRutaPrimary,
+                            $rutarepo.'/'.$sRutaPrimary,
+                        );
+                    } elseif (is_null($primary_db) && $dataObj['type'] == 'primary') {
+                        $sRutaPrimary = $dataObj->location['href'];
+                        $regs = NULL;
+                        if (preg_match('|^(.*)/(\S+)|', $sRutaPrimary, $regs)) {
+                            $sRutaPrimary = $regs[2];
+                        }
+
+                        // CentOS 5 usa $sRutaRepo/primary.xml.gz.sqlite
+                        // Fedora 17 usa $sRutaRepo/gen/primary.xml.sqlite
+                        $test_paths = array(
+                            $rutarepo.'/gen/'.basename($sRutaPrimary, '.gz').'.sqlite',
+                            $rutarepo.'/'.$sRutaPrimary.'.sqlite',
+                        );
+                    }
+                    if (!is_null($test_paths)) {
+                        foreach ($test_paths as $t) {
+                            if (file_exists($t)) {
+                                $primary_db = $t;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!is_null($primary_db)) {
                 // Pedir actualización si los repos tienen más de 1 semana
-                $st = stat($rutas[0]);
+                $st = stat($primary_db);
                 if (time() - $st['mtime'] > 3600 * 24 * 7) {
                     //print "Repo $repo es viejo<br/>\n";
                     $this->bActualizar = TRUE;
                 }
 
-                $dsn = $cadena_dsn = "sqlite3:///".$rutas[0];
+                $dsn = $cadena_dsn = "sqlite3:///{$primary_db}";
                 $dbconn = new paloDB($dsn);
                 if (empty($dbconn->errMsg)) $this->_repodb[$repo] = $dbconn;
             } else {
@@ -201,19 +271,19 @@ class PaloSantoPackages
             }
         }
     }
-    
+
     private function _abrirTuberiaRPM($filtro)
     {
     	/* Algunos paquetes tienen un resumen que contiene saltos de línea. Para
          * poder obtener el resumen completo sin truncamientos, se inserta un
          * caracter tubería deliberado al final del formato. Toda línea que NO
-         * termine en un caracter tubería está truncada y debe de leerse la 
+         * termine en un caracter tubería está truncada y debe de leerse la
          * siguiente línea para el resto. */
         $rpmcmd = "rpm -qa --queryformat '%{NAME}|%{ARCH}|%{VERSION}|%{RELEASE}|%{SUMMARY}|\n' ";
         if (!is_null($filtro)) $rpmcmd .= escapeshellarg("*$filtro*");
         return popen($rpmcmd, 'r');
     }
-    
+
     private function _leerInstaladoRPM($p)
     {
         $b = '';
@@ -246,7 +316,7 @@ class PaloSantoPackages
                 $v2 = preg_split("/[^a-zA-Z0-9]+/", $v2);
                 while (count($v1) > 0 && count($v2) > 0) {
                     $a = array_shift($v1); $b = array_shift($v2);
-                    $bADigit = ctype_digit($a); $bBDigit = ctype_digit($b);  
+                    $bADigit = ctype_digit($a); $bBDigit = ctype_digit($b);
                     if ($bADigit && $bBDigit) {
                         $a = (int)$a; $b = (int)$b;
                         if ($a > $b) return 1;
@@ -264,32 +334,32 @@ class PaloSantoPackages
                 return 0;
             }
         }
-        
+
         $r = _compareRpmVersion_string($a[0], $b[0]);
         if ($r != 0) return $r;
         return _compareRpmVersion_string($a[1], $b[1]);
     }
-    
+
     /**************************************************************************/
 
     function checkUpdate()
-    { 
+    {
         $respuesta = $retorno = NULL;
         exec('/usr/bin/elastix-helper ryum check-update ', $respuesta, $retorno);
         $tmp = array();
         if (is_array($respuesta)) {
             foreach($respuesta as $key => $linea){
-                /* Es algo no muy concreto si hay alguna manera de saber las 
-                 * posibles salidas hay que cambiar esta condicion para buscar 
+                /* Es algo no muy concreto si hay alguna manera de saber las
+                 * posibles salidas hay que cambiar esta condicion para buscar
                  * el error */
                 if (preg_match("/(\[Errno [[:digit:]]{1,}\])/",$linea,$reg))
                     return implode('', $respuesta);
-                if ((!preg_match("/^Excluding/",$linea,$reg)) && 
-                    (!preg_match("/^Finished/",$linea,$reg)) && 
+                if ((!preg_match("/^Excluding/",$linea,$reg)) &&
+                    (!preg_match("/^Finished/",$linea,$reg)) &&
                     (!preg_match("/^Loaded/",$linea,$reg)) &&
                     (!preg_match("/^\ /",$linea,$reg)) &&
                     (!preg_match("/^Loading/",$linea,$reg)) &&
-                    ($linea!="")) {     
+                    ($linea!="")) {
                     $var = explode(".",$linea);
                     $tmp[] = $var[0];
                 }
@@ -310,7 +380,7 @@ class PaloSantoPackages
             exec('/usr/bin/elastix-helper ryum install '.escapeshellarg($package), $respuesta, $retorno);
         else
             exec('/usr/bin/elastix-helper ryum update '.escapeshellarg($package), $respuesta, $retorno);
-    
+
         $indiceInicial = $indiceFinal = 0;
         $terminado = array();
         $paquetesIntall = false;
@@ -363,7 +433,7 @@ class PaloSantoPackages
         $total = 0;
         if (isset($datos['Installing'])) {
             $total = $total + count($datos['Installing']);
-            if ($val==0)  
+            if ($val==0)
                 $respuesta .= _tr('Installing')."\n";
             else
                 $respuesta .= _tr("Updating")."\n";
@@ -398,7 +468,7 @@ class PaloSantoPackages
             }
         }
         $respuesta .= _tr('Total Packages')." = $total";
-        if($val==1) 
+        if($val==1)
             $this->checkUpdate();
 
         return $respuesta;
@@ -416,7 +486,7 @@ class PaloSantoPackages
         $valor ="";
         $total=0;
         if(is_array($respuesta)) {
-            $valor .= _tr("Package(s) Uninstalled").":\n\n"; 
+            $valor .= _tr("Package(s) Uninstalled").":\n\n";
             foreach ($respuesta as $key => $linea) {
                 if (!preg_match("/[[:space:]]{1,}/",$linea)) {
                     $paquetesIntall = false;
@@ -432,7 +502,7 @@ class PaloSantoPackages
                 }
                 if (preg_match("/Erasing/",$linea)) {
                     $paquetesUnintall = true;
-                    $rep =  preg_split("/[\s]*[ ][\s]*/", $linea);                    
+                    $rep =  preg_split("/[\s]*[ ][\s]*/", $linea);
                     $valor .= $rep[4]." ".$rep[3]."\n";
                     $total++;
                 }

@@ -181,6 +181,12 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Fri Nov 18 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Network Parameters: teach netconfig privileged script to initialize
+  a systemd-nspawn macvlan interface from scratch. Also pass through the output
+  of a failed command that caused a command failure.
+  SVN Rev[7758]
+
 * Fri Sep 02 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-7
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed version and release in specfile.

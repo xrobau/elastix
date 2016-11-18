@@ -162,9 +162,17 @@ function action_generalConfiguration($opt)
     if ($bExito) {
         $output = $ret = NULL;
         exec("/sbin/service network restart 2>&1", $output, $ret);
-        if ($ret != 0) $bExito = FALSE;
+        if ($ret != 0) {
+            fputs(STDERR, "ERR: failed to restart network service. Output follows:\n");
+            fputs(STDERR, implode('', $output));
+            $bExito = FALSE;
+        }
         exec("/sbin/service postfix restart 2>&1", $output, $ret);
-        if ($ret != 0) $bExito = FALSE;
+        if ($ret != 0) {
+            fputs(STDERR, "ERR: failed to restart postfix service. Output follows:\n");
+            fputs(STDERR, implode('', $output));
+            $bExito = FALSE;
+        }
     }
 
 	return $bExito;
@@ -366,6 +374,13 @@ function action_interfaceConfiguration($opt)
             $settings['BROADCAST']  = construir_ip_broadcast($sIpAddr, $sNetMask);
             $settings['NETWORK']    = construir_ip_red($sIpAddr, $sNetMask);;
         }
+        
+        if (strpos($sDevice, 'mv-') === 0 && count($contenido) <= 0) {
+            /* Looks like an attempt to initialize a macvlan interface from 
+             * scratch under systemd-nspawn. Special settings are needed. */
+            $settings['TYPE'] = 'macvlan';
+            $settings['REALDEVICE'] = $sDevice;
+        }
 
         $contenidoNuevo = array();
         foreach ($contenido as $sLinea) {
@@ -397,7 +412,11 @@ function action_interfaceConfiguration($opt)
 
         $output = $ret = NULL;
         exec("/sbin/service network restart 2>&1", $output, $ret);
-        if ($ret != 0) $bExito = FALSE;
+        if ($ret != 0) {
+            fputs(STDERR, "ERR: failed to restart network service. Output follows:\n");
+            fputs(STDERR, implode('', $output));
+            $bExito = FALSE;
+        }
     }
     return $bExito;
 }

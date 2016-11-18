@@ -93,7 +93,7 @@ function _moduleContent(&$smarty, $module_name)
                                                      "INPUT_TYPE"             => "HIDDEN",
                                                      "INPUT_EXTRA_PARAM"      => "",
                                                      "VALIDATION_TYPE"        => "ereg",
-                                                     "VALIDATION_EXTRA_PARAM" => "^[[:alnum:]]+$"));
+                                                     "VALIDATION_EXTRA_PARAM" => "^[[:alnum:]-]+$"));
 
     $strReturn ="";
 
@@ -166,6 +166,7 @@ function _moduleContent(&$smarty, $module_name)
             if($pNet->escribirConfiguracionInterfaseRed($_POST['dev_id'], $_POST['type'], $_POST['ip'], $_POST['mask'])) {
                 header("Location: index.php?menu=network");
             } else {
+                $smarty->assign("mb_title", _tr("ERROR"));
                 $smarty->assign("mb_message", $pNet->errMsg);
             }
         } else {

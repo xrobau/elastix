@@ -182,6 +182,9 @@ fi
 
 %changelog
 * Fri Nov 18 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Network Parameters: allow dashes in the interface regexp validation so
+  that macvlan interfaces can be configured.
+  SVN Rev[7759]
 - FIXED: Network Parameters: teach netconfig privileged script to initialize
   a systemd-nspawn macvlan interface from scratch. Also pass through the output
   of a failed command that caused a command failure.

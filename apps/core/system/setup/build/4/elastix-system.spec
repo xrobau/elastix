@@ -85,7 +85,6 @@ mv setup/paloSantoNetwork.class.php      $RPM_BUILD_ROOT/var/www/html/libs/
 mv setup/automatic_backup.php            $RPM_BUILD_ROOT/var/www/backup/
 mv setup/usr/share/elastix/privileged/*  $RPM_BUILD_ROOT/usr/share/elastix/privileged
 mv setup/rpms_availables		 $RPM_BUILD_ROOT/var/www/db/
-mv setup/verify_rpm			 $RPM_BUILD_ROOT/usr/bin/
 
 rmdir setup/usr/share/elastix/privileged setup/usr/share/elastix setup/usr/share
 
@@ -177,11 +176,15 @@ fi
 /var/www/db/rpms_availables
 %defattr(755, root, root)
 /usr/sbin/switch_wanpipe_media
-/usr/bin/verify_rpm
 /usr/share/elastix/privileged/*
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Nov 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Packages: reimplement REST service to remove calls to verify_rpm
+  program and remove RCE.
+  SVN Rev[7765]
+
 * Fri Nov 18 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: update primary_db location algorithm to allow module to list
   package versions and source repos correctly in Elastix 4. Additionally set

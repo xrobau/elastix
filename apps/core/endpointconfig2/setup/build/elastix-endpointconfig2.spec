@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Tue Nov 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: update authentication for Fanvil X5 with newer
+  firmware.
+  SVN Rev[7766]
+
 * Fri Nov 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: fix reboot method selection on Grandstream so
   that later methods are NOT tried after one succeeds.

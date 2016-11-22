@@ -377,9 +377,7 @@ class Endpoint(BaseEndpoint):
             return m.group(1)
         return m.group(2)
 
-    def _setupAtcomAuthentication(self):
-        http = httplib.HTTPConnection(self._ip)
-
+    def _getNonce(self, http):
         noncesources = ('/', '/right.htm')
         for noncesource in noncesources:
             http.request('GET', noncesource, None, {'Connection' : 'keep-alive'})
@@ -388,7 +386,6 @@ class Endpoint(BaseEndpoint):
             if not resp.status in (200, 404):
                 logging.error('Endpoint %s@%s failed to fetch nonce for HTTP configuration - got response code %s' %
                     (self._vendorname, self._ip, resp.status))
-                http.close()
                 return (None, None)
             elif resp.status == 200:
                 m = re.search(r'<input type="hidden" name="nonce" value="([0-9a-zA-Z]+)">', htmlbody)
@@ -396,12 +393,20 @@ class Endpoint(BaseEndpoint):
         if m == None:
             logging.error('Endpoint %s@%s failed to locate nonce in HTTP response' %
                 (self._vendorname, self._ip))
-            http.close()
             return (None, None)
         nonce = m.group(1)
 
         # Identify firmware
         if noncesource == '/right.htm': self._firmware = 1 # Old firmware
+        return (nonce, noncesource)
+
+    def _setupAtcomAuthentication(self):
+        http = httplib.HTTPConnection(self._ip)
+
+        nonce, noncesource = self._getNonce(http)
+        if nonce == None:
+            http.close()
+            return (None, None)
 
         # Simulate POST to allow fetching rest of content
         extraheaders = {

@@ -71,6 +71,29 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
                     else:
                         self._saveModel('VI2006')
 
+    def _getNonce(self, http):
+        http.request('GET', '/key==nonce', None, {'Connection' : 'keep-alive'})
+        resp = http.getresponse()
+        htmlbody = resp.read()
+        if resp.status == 200:
+            m = re.match(r'([0-9a-zA-Z]{16})', htmlbody)
+            if m != None:
+                nonce = m.group(1)
+
+                # Some Fanvil X5 firmwares have severely broken HTTP stacks that
+                # mangle several copies of the intended output and write out
+                # more bytes than indicated by Content-Length. To synchronize
+                # with this, a HEAD request is made to consume the extra bytes.
+                # Failure to do this results in subsequent POST failing with
+                # a timeout because response headers are not recognized
+                http.request('HEAD', '/', None, {'Connection' : 'keep-alive'})
+                resp = http.getresponse()
+                dummybody = resp.read()
+
+                return (nonce, '/')
+
+        return super._getNonce(http)
+
     def isModelV2(self):
         return (self._model in ('X3', 'X3P', 'X5', 'X5P', 'C400', 'C400P', 'C600', 'C600P', 'D900'))
 
@@ -142,7 +165,7 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
                 logging.error('Endpoint %s@%s failed to post configuration - got response code %s' %
                     (self._vendorname, self._ip, resp.status))
                 status = False
-            elif not ('Submit Success' in htmlbody):
+            elif not (('Submit Success' in htmlbody) or ('rebooting' in htmlbody)):
                 logging.error('Endpoint %s@%s failed to post configuration - unknown body follows: %s' %
                     (self._vendorname, self._ip, htmlbody))
                 status = False

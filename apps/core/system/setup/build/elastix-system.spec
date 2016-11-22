@@ -3,7 +3,7 @@
 Summary: Elastix Module System
 Name:    elastix-%{modname}
 Version: 2.5.0
-Release: 7
+Release: 8
 License: GPL
 Group:   Applications/System
 Source0: %{modname}_%{version}-%{release}.tgz
@@ -179,6 +179,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Tue Nov 22 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-8
+- CHANGED: system - Build/elastix-system.spec: update specfile with latest
+  SVN history. Changed release in specfile.
+
 * Tue Nov 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Packages: reimplement REST service to remove calls to verify_rpm
   program and remove RCE.

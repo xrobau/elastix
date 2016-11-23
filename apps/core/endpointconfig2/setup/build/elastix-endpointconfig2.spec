@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Wed Nov 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: allow Snom model probing to use custom HTTP
+  credentials during model probe.
+  SVN Rev[7774]
 - CHANGED: Endpoint Configurator: enable many models to load custom credentials
   and use them to access protected endpoint resources to probe the phone model.
   SVN Rev[7773]

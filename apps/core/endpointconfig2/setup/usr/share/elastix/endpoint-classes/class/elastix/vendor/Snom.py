@@ -37,20 +37,20 @@ SNOM_HTTP_V2 = 2
 
 class Endpoint(BaseEndpoint):
     _global_serverip = None
-    
+
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Snom', amipool, dbpool, sServerIP, sIP, mac)
         if Endpoint._global_serverip == None:
             Endpoint._global_serverip = sServerIP
         elif Endpoint._global_serverip != sServerIP:
-            logging.warning('global server IP is %s but endpoint %s requires ' + 
+            logging.warning('global server IP is %s but endpoint %s requires ' +
                 'server IP %s - this endpoint might not work correctly.' %
                 (Endpoint._global_serverip, sIP, sServerIP))
         self._bridge = True
         self._timeZone = None
         self._cookie_v2 = None
         self._language = 'Español'
-        
+
     def setExtraParameters(self, param):
         if not BaseEndpoint.setExtraParameters(self, param): return False
         if self._getHttpInterfaceClass() == SNOM_HTTP_V2:
@@ -64,13 +64,21 @@ class Endpoint(BaseEndpoint):
 
     def probeModel(self):
         '''Probe specific model of the Snom phone
-        
-        The Snom phone displays the phone model in the title screen, which is 
+
+        The Snom phone displays the phone model in the title screen, which is
         unsecured by default.
         '''
+        self._loadCustomCredentials()
+
         sModel = None
         try:
-            response = urllib2.urlopen('http://' + self._ip + '/')
+            password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+            if self._http_password != None:
+                password_manager.add_password(None, 'http://' + self._ip + '/',
+                    self._http_username, self._http_password)
+            basic_auth_handler = urllib2.HTTPBasicAuthHandler(password_manager)
+            opener = urllib2.build_opener(basic_auth_handler)
+            response = opener.open('http://' + self._ip + '/')
             htmlbody = response.read()
             if response.code == 200:
                 # <TITLE>snom 320</TITLE>
@@ -82,17 +90,17 @@ class Endpoint(BaseEndpoint):
         #        if m != None: sModel = m.group(1)
         except Exception, e:
             pass
-        
+
         if sModel != None: self._saveModel(sModel)
 
     @staticmethod
     def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Configuration for Snom endpoints (global):
-        
+
         SIP global definition goes in /tftpboot/snom{300|320|360}.htm
         '''
         vars = {'server_ip' : Endpoint._global_serverip}
-        
+
         #for sConfigFile in ('snom300.htm', 'snom320.htm', 'snom360.htm', 'snom821.htm'):
         for sModel in ('300', '320', '360', '710', '720', '760', '821', '870'):
             try:
@@ -120,8 +128,8 @@ class Endpoint(BaseEndpoint):
             success = self._updateLocalConfig_V1()
         else:
             success = self._updateLocalConfig_V2()
-        
-        
+
+
         if success:
             self._unregister()
             self._setConfigured()
@@ -129,14 +137,14 @@ class Endpoint(BaseEndpoint):
 
     def _updateLocalConfig_V1(self):
         '''Configuration for Snom endpoints (local):
-        
-        The file snomMMM-XXXXXXXXXXXX.htm contains the SIP configuration. Here 
+
+        The file snomMMM-XXXXXXXXXXXX.htm contains the SIP configuration. Here
         XXXXXXXXXXXX is replaced by the UPPERCASE MAC address of the phone, and
         MMM is replaced by the specific model of the phone.
-        
+
         To reboot the phone, it is necessary to issue the AMI command:
-        sip notify reboot-snom {$EXTENSION}. Alternatively the phone can be 
-        rebooted by requesting the URL 
+        sip notify reboot-snom {$EXTENSION}. Alternatively the phone can be
+        rebooted by requesting the URL
         "http://{$this->_ip}/advanced_network.htm?reboot=Reboot".
         Verified with Snom 300.
         '''
@@ -155,11 +163,11 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s failed to write configuration file - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        
+
         if not self._setProvisionServer_V1(): return False
         (success, rebooting) = self._setNetworkConfig_V1()
         if not success: return False
-        
+
         if not rebooting:
             # Check if there is at least one registered extension. This is required
             # for sip notify to work
@@ -168,17 +176,17 @@ class Endpoint(BaseEndpoint):
             elif not self._rebootbyhttp_V1():
                 return False
         return True
-    
+
     def _updateLocalConfig_V2(self):
         '''Configuration for Snom endpoints, new versions (local):
-        
-        The file snom-MMM-XXXXXXXXXXXX.xml contains the SIP configuration. Here 
+
+        The file snom-MMM-XXXXXXXXXXXX.xml contains the SIP configuration. Here
         XXXXXXXXXXXX is replaced by the UPPERCASE MAC address of the phone, and
         MMM is replaced by the specific model of the phone.
-        
+
         To reboot the phone, it is necessary to issue the AMI command:
-        sip notify cisco-check-cfg {$EXTENSION}. Alternatively the phone can be 
-        rebooted by POSTING to /update.htm with Reboot=reboot.Verified with 
+        sip notify cisco-check-cfg {$EXTENSION}. Alternatively the phone can be
+        rebooted by POSTING to /update.htm with Reboot=reboot.Verified with
         Snom m9.
         '''
         # Need to calculate UPPERCASE version of MAC address without colons
@@ -198,14 +206,14 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s failed to write configuration file - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        
+
         if not self._loginHttp_V2(): return False
         if not self._setProvisionServer_V2(): return False
         #logging.error('Endpoint %s@%s unimplemented V2' %
         #    (self._vendorname, self._ip))
         (success, rebooting) = (True, False)
         if not success: return False
-        
+
         #if not rebooting:
         #    # Check if there is at least one registered extension. This is required
         #    # for sip notify to work
@@ -235,7 +243,7 @@ class Endpoint(BaseEndpoint):
                         (self._vendorname, self._ip))
                 return False
             self._cookie_v2 = response.headers['Set-Cookie']
-            
+
             # If the phone is used for the first time, it will show an EULA that
             # must be accepted in order to continue.
             m = re.search(r'<input type="radio" name="eula" value="(.+?)">', htmlbody)
@@ -332,11 +340,11 @@ class Endpoint(BaseEndpoint):
             if not self._dhcp:
                 postvars.update({
                     'dhcp'          :   'false',
-                    'ip_adr'        :   self._static_ip,  
-                    'netmask'       :   self._static_mask,  
-                    'gateway'       :   self._static_gw,  
-                    'dns_server1'   :   self._static_dns1,  
-                    'dns_server2'   :   self._static_dns2,  
+                    'ip_adr'        :   self._static_ip,
+                    'netmask'       :   self._static_mask,
+                    'gateway'       :   self._static_gw,
+                    'dns_server1'   :   self._static_dns1,
+                    'dns_server2'   :   self._static_dns2,
                 })
             response = urllib2.urlopen(urllib2.Request(
                 'http://' + self._ip + '/network.htm',
@@ -445,4 +453,4 @@ class Endpoint(BaseEndpoint):
         except socket.error, e:
             logging.error('Endpoint %s@%s failed to reboot phone - %s' %
                 (self._vendorname, self._ip, str(e)))
-        return False    
+        return False

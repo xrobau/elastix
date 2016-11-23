@@ -346,8 +346,6 @@ rm -rf $RPM_BUILD_ROOT
 # basic contains some reasonable sane basic tiles
 %files
 %defattr(-, asterisk, asterisk)
-/var/www/html/var/cache
-/var/www/html/var/templates_c
 /var/www/db
 /var/www/backup
 /var/log/elastix
@@ -396,6 +394,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/elastix/privileged/*
 %defattr(770, root, asterisk, 770)
 /var/lib/php/session-asterisk
+%defattr(-, asterisk, asterisk)
+/var/www/html/var/cache
+/var/www/html/var/templates_c
 
 %files themes-extra
 %defattr(-, root, root)
@@ -404,6 +405,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Wed Nov 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: fix file packaging ordering that results in /var/www/html/var/templates_c
+  and /var/www/html/var/cache being owned by root instead of asterisk.
+  SVN Rev[7768]
+
 * Thu Nov 17 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-17
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

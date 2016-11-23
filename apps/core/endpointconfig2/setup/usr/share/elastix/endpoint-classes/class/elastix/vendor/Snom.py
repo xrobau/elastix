@@ -83,7 +83,13 @@ class Endpoint(BaseEndpoint):
             if response.code == 200:
                 # <TITLE>snom 320</TITLE>
                 m = re.search(r'<TITLE>snom (\w+)</TITLE>', htmlbody, re.IGNORECASE)
-                if m != None: sModel = m.group(1)
+                if m != None:
+                    sModel = m.group(1)
+                else:
+                    # M300, M700
+                    m = re.search(r'<TITLE>(M\d+)</TITLE>', htmlbody, re.IGNORECASE)
+                    if m != None:
+                        sModel = m.group(1)
         #except urllib2.HTTPError, e:
         #    if e.code == 401 and 'WWW-Authenticate' in e.headers:
         #        m = re.search(r'realm="Aastra (.+)"', e.headers['WWW-Authenticate'])
@@ -113,7 +119,8 @@ class Endpoint(BaseEndpoint):
         return True
 
     def _getHttpInterfaceClass(self):
-        if self._model != None and self._model in ('m9'):
+        if self._model != None and self._model in ('m9', 'MeetingPoint', 'PA1',
+            'D305', 'D315', 'D345', 'D375', 'D715', 'D725', 'D745', 'D765'):
             return SNOM_HTTP_V2
         return SNOM_HTTP_V1
 

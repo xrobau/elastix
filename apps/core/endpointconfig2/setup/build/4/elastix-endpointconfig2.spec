@@ -156,6 +156,10 @@ fi
 
 %changelog
 * Wed Nov 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: add new Snom phone models. This only adds the
+  required strings to the database, and does not (yet) address any differences
+  in configuration. In particular, M300 and M700 might need reimplementation.
+  SVN Rev[7775]
 - CHANGED: Endpoint Configurator: allow Snom model probing to use custom HTTP
   credentials during model probe.
   SVN Rev[7774]

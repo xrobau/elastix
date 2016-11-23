@@ -156,6 +156,10 @@ fi
 
 %changelog
 * Wed Nov 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: allow assignment of authentication credentials
+  to endpoints without a detected model. This is required for a later commit that
+  loads endpoint properties before model probe.
+  SVN Rev[7771]
 - FIXED: Endpoint Configurator: teach elastix-endpointconfig to collect IP
   addresses from container macvlan configuration.
   SVN Rev[7770]

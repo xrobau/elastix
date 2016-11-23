@@ -321,7 +321,13 @@ SQL_ENDPOINT_ACCOUNTS;
 
         $bExito = TRUE;
 
-        // Verificar si el endpoint tiene un modelo de teléfono asignado
+        /* Verificar si el endpoint tiene un modelo de teléfono asignado. Como
+         * caso especial, si el endpoint no tiene modelo, es posible que la
+         * detección de tal modelo esté bloqueada debido a credenciales. Por lo
+         * tanto, se permitirá guardar únicamente credenciales si no se detectó
+         * el modelo.
+         */
+        $bHayModelo = FALSE;
         if ($bExito) {
             $tupla = $db->getFirstRowQuery('SELECT id_model FROM endpoint WHERE id = ?',
                 TRUE, array($id_endpoint));
@@ -332,14 +338,20 @@ SQL_ENDPOINT_ACCOUNTS;
                 $this->_errMsg = _tr('Endpoint not found');
                 $bExito = FALSE;
             } elseif (is_null($tupla['id_model'])) {
-                $this->_errMsg = _tr('Model not set for endpoint');
-                $bExito = FALSE;
+                $propSinModelo = array('http_username', 'http_password',
+                    'telnet_username', 'telnet_password', 'ssh_username',
+                    'ssh_password');
+                foreach (array_keys($detallesGuardar) as $k) {
+                    if (!in_array($k, $propSinModelo)) unset($detallesGuardar[$k]);
+                }
+            } else {
+                $bHayModelo = TRUE;
             }
         }
 
         /* Verificar el total de cuentas por modelo. Ya que están en la misma
          * tabla, se verifica además las banderas de IP estática y dinámica. */
-        if ($bExito) {
+        if ($bExito && $bHayModelo) {
             $tupla = $db->getFirstRowQuery(
                 'SELECT max_accounts, static_ip_supported, dynamic_ip_supported '.
                 'FROM endpoint, model '.
@@ -364,7 +376,8 @@ SQL_ENDPOINT_ACCOUNTS;
         }
 
         // Cargar las propiedades por omisión del modelo
-        if ($bExito) {
+        $modelProperties = array();
+        if ($bExito && $bHayModelo) {
             $sql = <<<MODEL_PROPERTIES
 SELECT model_properties.property_key, model_properties.property_value
 FROM endpoint, model, model_properties
@@ -375,7 +388,6 @@ MODEL_PROPERTIES;
                 $this->_errMsg = _tr('(internal) Failed to load model properties').' - '.$db->errMsg;
                 $bExito = FALSE;
             }
-            $modelProperties = array();
             foreach ($recordset as $tupla) {
                 $modelProperties[$tupla['property_key']] = $tupla['property_value'];
             }
@@ -383,7 +395,7 @@ MODEL_PROPERTIES;
 
         /* Verificar el total de cuentas por tecnología soportada. Si no se ha
          * definido max_TECH_accounts para el modelo, se asume 0 */
-        if ($bExito) {
+        if ($bExito && $bHayModelo) {
             foreach ($countByTech as $tech => $count) {
                 $maxtech = isset($modelProperties["max_{$tech}_accounts"])
                     ? (int)$modelProperties["max_{$tech}_accounts"]
@@ -423,7 +435,7 @@ MODEL_PROPERTIES;
         }
 
         // Verificar que cuenta asignada a endpoint no esté ya tomada por otro endpoint
-        if ($bExito) {
+        if ($bExito && $bHayModelo) {
             // SQL dependiente de FreePBX
             $sql = <<<ENDPOINT_ACCOUNTS
 SELECT ad.tech, ad.id AS account, ea.id_endpoint
@@ -465,7 +477,7 @@ ENDPOINT_ACCOUNTS;
                 $this->_errMsg = _tr('(internal) Failed to remove old account associations').' - '.$db->errMsg;
                 $bExito = FALSE;
             } else {
-                foreach ($endpoint_account as $account) {
+                if ($bHayModelo) foreach ($endpoint_account as $account) {
                     $r = $db->genQuery(
                         'INSERT INTO endpoint_account (id_endpoint, tech, account, priority) '.
                         'VALUES (?, ?, ?, ?)',

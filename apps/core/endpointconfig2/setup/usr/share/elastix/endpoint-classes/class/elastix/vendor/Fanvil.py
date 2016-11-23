@@ -92,7 +92,7 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
 
                 return (nonce, '/')
 
-        return super._getNonce(http)
+        return super(Endpoint, self)._getNonce(http)
 
     def isModelV2(self):
         return (self._model in ('X3', 'X3P', 'X5', 'X5P', 'C400', 'C400P', 'C600', 'C600P', 'D900'))

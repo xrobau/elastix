@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Wed Nov 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: fix incorrect Python syntax for superclass method
+  delegation in Fanvil.py.
+  SVN Rev[7772]
 - CHANGED: Endpoint Configurator: allow assignment of authentication credentials
   to endpoints without a detected model. This is required for a later commit that
   loads endpoint properties before model probe.

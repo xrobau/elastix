@@ -155,6 +155,11 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Wed Nov 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: teach elastix-endpointconfig to collect IP
+  addresses from container macvlan configuration.
+  SVN Rev[7770]
+
 * Tue Nov 22 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: update authentication for Fanvil X5 with newer
   firmware.

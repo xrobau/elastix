@@ -156,6 +156,9 @@ fi
 
 %changelog
 * Wed Nov 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Endpoint Configurator: enable many models to load custom credentials
+  and use them to access protected endpoint resources to probe the phone model.
+  SVN Rev[7773]
 - FIXED: Endpoint Configurator: fix incorrect Python syntax for superclass method
   delegation in Fanvil.py.
   SVN Rev[7772]

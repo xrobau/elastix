@@ -35,7 +35,7 @@ class Endpoint(BaseEndpoint):
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Yealink', amipool, dbpool, sServerIP, sIP, mac)
         self._bridge = True
-        
+
         # Time Zone, hour offset from GMT
         self._timeZone = '%g' % (BaseEndpoint.getTimezoneOffset() / 3600.0)
 
@@ -47,10 +47,10 @@ class Endpoint(BaseEndpoint):
 
     def probeModel(self):
         '''Probe specific model of Yealink phone
-        
-        The Yealink web admin interface uses Basic authentication for access 
+
+        The Yealink web admin interface uses Basic authentication for access
         control. The authentication realm exposes the phone model like this:
-        
+
         HTTP/1.0 401 Unauthorized
         Server: mini_httpd/1.19 19dec2003
         Date: Wed, 13 Feb 2013 22:54:25 GMT
@@ -58,13 +58,13 @@ class Endpoint(BaseEndpoint):
         WWW-Authenticate: Basic realm="Enterprise IP phone SIP-T20P"
         Content-Type: text/html; charset=%s
         Connection: close
-        
+
         In case there is not enough information from the auth realm, or if the
         url request does not trigger a 401 Unauthorized exception, we attempt
         to recover the configuration file through HTTP. Inside the binary file
-        there is a string "UserAgent = (Yealink) $MODEL $FW_VER" that can be 
+        there is a string "UserAgent = (Yealink) $MODEL $FW_VER" that can be
         used to fetch the phone model.
-        
+
         '''
         sModel = None
         realm = None
@@ -80,8 +80,8 @@ class Endpoint(BaseEndpoint):
             if e.code == 401 and 'WWW-Authenticate' in e.headers:
                 m = re.search(r'realm="(.+)"', e.headers['WWW-Authenticate'])
                 if m != None: realm = m.group(1)
-                
-                relist = (r'realm="Enterprise IP phone (.+)"', r'realm="Gigabit Color IP Phone (.+)"')                
+
+                relist = (r'realm="Enterprise IP phone (.+)"', r'realm="Gigabit Color IP Phone (.+)"')
                 for regexp in relist:
                     m = re.search(regexp, e.headers['WWW-Authenticate'])
                     if m != None:
@@ -96,14 +96,18 @@ class Endpoint(BaseEndpoint):
         except Exception, e:
             #print str(e)
             pass
-        
+
         if sModel == None:
             if realm != None:
+                self._loadCustomCredentials()
+                if self._http_username == None: self._http_username = 'admin'
+                if self._http_password == None: self._http_password = 'admin'
+
                 # The 401 Unauthorized provided unhelpful realm. Try fetching the phone config
                 configSources = (
                     (
                         '/cgi-bin/ConfigManApp.com?Id=26',
-                    ),            
+                    ),
                     (
                         '/cgi-bin/cgiServer.exx?command=msgSendMessage(%22app_vpPhone%22,%220x30007%22,%220%22,%221%22)',
                         '/cgi-bin/cgiServer.exx?command=getDownloadConfig(%221%22)',
@@ -115,8 +119,8 @@ class Endpoint(BaseEndpoint):
                     basic_auth_handler.add_password(
                         realm=realm,
                         uri='http://' + self._ip + '/',
-                        user='admin',
-                        passwd='admin')
+                        user=self._http_username,
+                        passwd=self._http_password)
                     opener = urllib2.build_opener(basic_auth_handler)
                     try:
                         for sourceUrl in sourceList:
@@ -146,7 +150,7 @@ class Endpoint(BaseEndpoint):
                 except Exception, e:
                     #print str(e)
                     pass
-        
+
         if sModel != None:
             # Remove trailing 'P' from SIP-T28P and VP530P
             if re.search(r'^SIP-T(\d+)P$', sModel):
@@ -164,12 +168,12 @@ class Endpoint(BaseEndpoint):
 
     def updateLocalConfig(self):
         '''Configuration for Yealink endpoints (local):
-        
-        The file XXXXXXXXXXXX.cfg contains the SIP configuration. Here 
-        XXXXXXXXXXXX is replaced by the lowercase MAC address of the phone. The 
-        file format is different for the SIP-T2x and the VP530, and the 
+
+        The file XXXXXXXXXXXX.cfg contains the SIP configuration. Here
+        XXXXXXXXXXXX is replaced by the lowercase MAC address of the phone. The
+        file format is different for the SIP-T2x and the VP530, and the
         difference is accounted for in the templates.
-        
+
         To reboot the phone, it is necessary to issue the AMI command:
         sip notify reboot-yealink {$IP}
         '''
@@ -208,7 +212,7 @@ class Endpoint(BaseEndpoint):
         else:
             success = self._setProvisioningServer_SIPT2x()
         if not success: return False
-        
+
         # Reboot the phone.
         self._amireboot('reboot-yealink')
         self._unregister()
@@ -220,11 +224,11 @@ class Endpoint(BaseEndpoint):
         provvars = ('1','tftp://'+ self._serverip,'','********','','********',
                     '1','','00:00','00:00','','********','1','1','5','3', '', '1')
 
-        # The Yealink firmware is very picky about the order of the POST 
+        # The Yealink firmware is very picky about the order of the POST
         # variables. The PAGEID variable must appear *before* CONFIG_DATA.
-        # Therefore, urllib.urlencode() cannot be used as-is, because it 
+        # Therefore, urllib.urlencode() cannot be used as-is, because it
         # places variables in alphabetical sort.
-        postvars =  'PAGEID=16&CONFIG_DATA=' + urllib.quote_plus(separator + separator.join(provvars))         
+        postvars =  'PAGEID=16&CONFIG_DATA=' + urllib.quote_plus(separator + separator.join(provvars))
 
         try:
             if not self._doAuthPost('/cgi-bin/ConfigManApp.com', postvars):
@@ -235,7 +239,7 @@ class Endpoint(BaseEndpoint):
                 (self._vendorname, self._ip, str(e)))
             return False
         return True
-    
+
     def _setProvisioningServer_VP530(self):
         syspath = ''
         if self._model in ('VP530'):

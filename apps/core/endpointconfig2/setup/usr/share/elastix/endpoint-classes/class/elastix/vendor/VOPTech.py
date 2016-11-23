@@ -39,13 +39,14 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
 
     def probeModel(self):
         '''Probe specific model of the VOPTech phone
-        
+
         Attempt to fetch /currentstat.htm . Although this page does not contain
         the phone model, it shows the number of accounts and can give hints on
         which model is being probed.
         '''
-        self._http_username = 'admin'
-        self._http_password = 'admin'
+        self._loadCustomCredentials()
+        if self._http_username == None: self._http_username = 'admin'
+        if self._http_password == None: self._http_password = 'admin'
         htmlres = self._fetchAtcomAuthenticatedPage(('/currentstat.htm',))
         if htmlres != None:
             resource, htmlbody = htmlres
@@ -61,9 +62,9 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
 
     def updateLocalConfig(self):
         '''Configuration for VOPTech endpoints
-        
-        This phone is essentially a rebranded Atcom AT530+ with slightly 
-        different configuration directives. Apart from the template, the 
+
+        This phone is essentially a rebranded Atcom AT530+ with slightly
+        different configuration directives. Apart from the template, the
         network-level interaction is identical to the AT530.
         '''
         # Check that there is at least one account to configure
@@ -71,7 +72,7 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
             logging.error('Endpoint %s@%s has no accounts to configure' %
                 (self._vendorname, self._ip))
             return False
-        
+
         configVersion = self._fetchOldConfigVersion()
         if configVersion == None: return False
         t = str(int(''.join(configVersion.split('.'))) + 1)
@@ -82,7 +83,7 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
         # Need to calculate lowercase version of MAC address without colons
         sConfigFile = (self._mac.replace(':', '').lower()) + '.cfg'
         self._writeAtcom530Template(configVersion, sConfigFile, 'VOPTech_local.tpl')
-        
+
         # Force download of new configuration followed by reboot
         if self._transferConfig2Phone(sConfigFile):
             self._unregister()

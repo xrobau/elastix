@@ -44,6 +44,10 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
     def probeModel(self):
         ''' Probe specific model of Elastix phone. This method should only be
             entered on non-Grandstream models (LXP-180) '''
+        self._loadCustomCredentials()
+        if self._http_username == None: self._http_username = 'admin'
+        if self._http_password == None: self._http_password = 'admin'
+
         sModel = None
         try:
             response = urllib2.urlopen('http://' + self._ip + '/')
@@ -59,7 +63,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
         if  sModel == None and 'fcgi/do?id=1' in htmlbody:
             # This condition means we got an LXP150 or LXP250
             try:
-                opener, body = self._getAuthOpener_LXP150('admin', 'admin')
+                opener, body = self._getAuthOpener_LXP150(self._http_username, self._http_password)
                 if not opener is None:
                     m = re.search(r"id=hcProductName type=hidden value='(.+?)'", body)
                     if m != None:

@@ -35,30 +35,33 @@ import base64
 
 class Endpoint(BaseEndpoint):
     _global_serverip = None
-    
+
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Aastra', amipool, dbpool, sServerIP, sIP, mac)
         if Endpoint._global_serverip == None:
             Endpoint._global_serverip = sServerIP
         elif Endpoint._global_serverip != sServerIP:
-            logging.warning('global server IP is %s but endpoint %s requires ' + 
+            logging.warning('global server IP is %s but endpoint %s requires ' +
                 'server IP %s - this endpoint might not work correctly.' %
                 (Endpoint._global_serverip, sIP, sServerIP))
 
     def probeModel(self):
         '''Probe specific model of Aastra phone
-        
-        The Aastra web admin interface uses Basic authentication for access 
+
+        The Aastra web admin interface uses Basic authentication for access
         control. The authentication realm exposes the phone model like this:
-        
+
         HTTP/1.1 401 Unauthorized
         Server: Aragorn
         WWW-Authenticate: Basic realm="Aastra 6757i"
         Connection: close
         Content-Length: 745
         Content-Type: text/html
-        
+
         '''
+        self._loadCustomCredentials()
+        if self._http_username == None: self._http_username = 'admin'
+        if self._http_password == None: self._http_password = '22222'
         sModel = None
         try:
             # Do not expect this to succeed. Only interested in exception.
@@ -69,8 +72,6 @@ class Endpoint(BaseEndpoint):
                 if m != None:
                     sModel = m.group(1)
                 else:
-                    self._http_username = 'admin'
-                    self._http_password = '22222'
                     password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
                     password_manager.add_password(None, 'http://' + self._ip + '/',
                         self._http_username, self._http_password)
@@ -90,14 +91,14 @@ class Endpoint(BaseEndpoint):
                         pass
         except Exception, e:
             pass
-        
+
         if sModel != None: self._saveModel(sModel)
 
     @staticmethod
     def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Configuration for Aastra endpoints (global)
-        
-        SIP global definition goes in /tftpboot/aastra.cfg. Even though its 
+
+        SIP global definition goes in /tftpboot/aastra.cfg. Even though its
         contents are very similar to the per-phone config, and it also defines
         a SIP server, this file must exist and have a "valid" (even if redundant)
         configuration, or the phone will refuse to boot.
@@ -111,13 +112,13 @@ class Endpoint(BaseEndpoint):
         except IOError, e:
             logging.error('Failed to write global config for Aastra - %s' % (str(e),))
             return False
-        
+
     def updateLocalConfig(self):
         '''Configuration for Aastra endpoints (local)
-        
+
         The file XXXXXXXXXXXX.cfg contains the plaintext SIP configuration. Here
         XXXXXXXXXXXX is replaced by the UPPERCASE MAC address of the phone.
-        
+
         To reboot the phone, it is necessary to issue the AMI command:
         sip notify aastra-check-cfg {$IP}. Verified with Aastra 57i and 6757i.
         '''
@@ -140,7 +141,7 @@ class Endpoint(BaseEndpoint):
 
         if not self._enableStaticProvisioning():
             return False
-        
+
         # Reboot the phone.
         self._amireboot('aastra-check-cfg')
         self._unregister()
@@ -157,9 +158,9 @@ class Endpoint(BaseEndpoint):
         # perform the POST.
         # Additionally, the TCP/IP and HTTP stack of the Aastra 6739i is buggy.
         # When performing a POST, the firmware wants the end of the headers and
-        # the start of the body in the same TCP/IP packet. If they are on 
-        # different packets, the request hangs. Due to the way urllib2 works, 
-        # it introduces a flush between the two, which triggers said hang. 
+        # the start of the body in the same TCP/IP packet. If they are on
+        # different packets, the request hangs. Due to the way urllib2 works,
+        # it introduces a flush between the two, which triggers said hang.
         # Therefore, the full POST request must be assembled and sent manually
         # as a single write.
         if not self._doAuthGet('/sysinfo.html'):
@@ -169,7 +170,7 @@ class Endpoint(BaseEndpoint):
         postvars = {
             'protocol'      :   'TFTP',
             'tftp'          :   self._serverip,
-            'tftppath'      :   '',            
+            'tftppath'      :   '',
             'alttftp'       :   self._serverip,
             'alttftppath'   :   '',
             'usealttftp'    :   '1',
@@ -204,14 +205,14 @@ class Endpoint(BaseEndpoint):
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((self._ip, 80))
             sock.sendall(postrequest)
-            
+
             # Rather than parse the response myself, I create an instance of
             # HTTPResponse. However, begin() is an internal method, and not
             # guaranteed to exist in future versions of the library.
             resp = httplib.HTTPResponse(sock, strict=1, method='POST')
             resp.begin()
             htmlbody = resp.read()
-            
+
             if resp.status <> 200:
                 logging.error('Endpoint %s@%s failed to post configuration - %s' %
                     (self._vendorname, self._ip, r))
@@ -219,7 +220,7 @@ class Endpoint(BaseEndpoint):
             if not 'Provisioning complete' in htmlbody:
                 logging.error('Endpoint %s@%s failed to set configuration server - not provisioned' %
                     (self._vendorname, self._ip))
-                return False            
+                return False
         except socket.error, e:
             logging.error('Endpoint %s@%s failed to connect - %s' %
                 (self._vendorname, self._ip, str(e)))

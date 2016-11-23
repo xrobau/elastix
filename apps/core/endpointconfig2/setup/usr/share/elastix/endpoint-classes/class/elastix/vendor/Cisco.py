@@ -38,13 +38,13 @@ telnetlib = eventlet.import_patched('telnetlib')
 
 class Endpoint(BaseEndpoint):
     _global_serverip = None
-    
+
     def __init__(self, amipool, dbpool, sServerIP, sIP, mac):
         BaseEndpoint.__init__(self, 'Cisco', amipool, dbpool, sServerIP, sIP, mac)
         if Endpoint._global_serverip == None:
             Endpoint._global_serverip = sServerIP
         elif Endpoint._global_serverip != sServerIP:
-            logging.warning('global server IP is %s but endpoint %s requires ' + 
+            logging.warning('global server IP is %s but endpoint %s requires ' +
                 'server IP %s - this endpoint might not work correctly.' %
                 (Endpoint._global_serverip, sIP, sServerIP))
 
@@ -52,10 +52,13 @@ class Endpoint(BaseEndpoint):
 
     def probeModel(self):
         ''' Probe specific model of the Cisco phone
-        
+
         This probe only works if the phone has access to a configuration that
         enables telnet.
         '''
+        self._loadCustomCredentials()
+        if self._telnet_password == None: self._telnet_password = 'cisco'
+
         try:
             telnet = telnetlib.Telnet()
             telnet.open(self._ip)
@@ -74,8 +77,8 @@ class Endpoint(BaseEndpoint):
         try:
             # Attempt login with default credentials
             telnet.read_until('Password :', 10)
-            telnet.write('cisco\r\n') # Password            
-            
+            telnet.write(self._telnet_password + '\r\n') # Password
+
             idx, m, text = telnet.expect([r'Password :', r'> '], 10)
             if idx == 0:
                 # Login failed
@@ -85,22 +88,22 @@ class Endpoint(BaseEndpoint):
             text = telnet.read_until('> ', 10)
             telnet.write('exit\r\n')
             telnet.close()
-            
+
             m = re.search(r'IP Phone CP-(\w+)', text)
             if m != None: sModel = m.group(1)
         except socket.error, e:
             logging.error('Endpoint %s@%s connection failure - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        
+
         if sModel != None: self._saveModel(sModel)
-        
+
 
     @staticmethod
     def updateGlobalConfig(serveriplist, amipool, endpoints):
         '''Configuration for Cisco endpoints (global)
-        
-        SIP global definition goes in /tftpboot/SIPDefault.cnf and has a 
+
+        SIP global definition goes in /tftpboot/SIPDefault.cnf and has a
         reference to a firmware file P0S*.sb2. If there are several files, the
         higher version is selected.
         '''
@@ -112,7 +115,7 @@ class Endpoint(BaseEndpoint):
         if sFirmwareVersion == None:
             logging.error('Failed to find firmware file P0S*.sb2 in ' + elastix.BaseEndpoint.TFTP_DIR)
             return False
-        
+
         vars = {
             'firmware_version'  : sFirmwareVersion,
             'phonesrv'          : BaseEndpoint._buildPhoneProv(Endpoint._global_serverip, 'Cisco', 'GLOBAL'),
@@ -128,10 +131,10 @@ class Endpoint(BaseEndpoint):
 
     def updateLocalConfig(self):
         '''Configuration for Cisco endpoints (local)
-        
-        The file SIPXXXXXXXXXXXX.cnf contains the SIP configuration. Here 
+
+        The file SIPXXXXXXXXXXXX.cnf contains the SIP configuration. Here
         XXXXXXXXXXXX is replaced by the UPPERCASE MAC address of the phone.
-        
+
         To reboot the phone, it is necessary to issue the AMI command:
         sip notify cisco-check-cfg {$EXTENSION}. Verified with Cisco 7960.
         '''
@@ -147,13 +150,13 @@ class Endpoint(BaseEndpoint):
         vars = self._prepareVarList()
         try:
             self._writeTemplate('Cisco_local_SIP.tpl', vars, sConfigPath)
-            
+
             # Must execute cisco-check-cfg with extension, not IP
             if self._hasRegisteredExtension():
                 self._amireboot('cisco-check-cfg')
             elif self._telnet_password != None and not self._rebootbytelnet():
                 return False
-            
+
             self._unregister()
             self._setConfigured()
             return True
@@ -180,8 +183,8 @@ class Endpoint(BaseEndpoint):
         try:
             # Attempt login with default credentials
             telnet.read_until('Password :', 10)
-            if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')            
-            
+            if self._telnet_password != None: telnet.write(self._telnet_password.encode() + '\r\n')
+
             idx, m, text = telnet.expect([r'Password :', r'> '], 10)
             if idx == 0:
                 # Login failed
@@ -191,10 +194,9 @@ class Endpoint(BaseEndpoint):
                 return False
             telnet.write('reset\r\n')
             telnet.close()
-            
+
             return True
         except socket.error, e:
             logging.error('Endpoint %s@%s connection failure - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        

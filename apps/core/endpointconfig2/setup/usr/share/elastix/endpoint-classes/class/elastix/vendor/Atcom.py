@@ -55,6 +55,10 @@ class Endpoint(BaseEndpoint):
         we log in with the default credentials, and check the prompt. The default
         prompt contains the phone model.
         '''
+        self._loadCustomCredentials()
+        if self._telnet_username == None: self._telnet_username = 'admin'
+        if self._telnet_password == None: self._telnet_password = 'admin'
+
         telnet = None
         try:
             telnet = telnetlib.Telnet()
@@ -79,8 +83,8 @@ class Endpoint(BaseEndpoint):
                     telnet.close()
                 else:
                     # Attempt login with default credentials
-                    telnet.write('admin\r\n') # Username
-                    telnet.write('admin\r\n') # Password
+                    telnet.write(self._telnet_username + '\r\n') # Username
+                    telnet.write(self._telnet_password + '\r\n') # Password
                     idx, m, text = telnet.expect([r'Login:', r'# '], 10)
                     telnet.close()
                     if idx == 0:

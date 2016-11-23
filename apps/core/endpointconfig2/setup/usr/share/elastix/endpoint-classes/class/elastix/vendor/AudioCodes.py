@@ -52,11 +52,15 @@ class Endpoint(BaseEndpoint):
 
     def probeModel(self):
         '''Probe specific model of the AudioCodes phone
-        
-        The phone is a small Linux system. The telnet login, if successful, 
+
+        The phone is a small Linux system. The telnet login, if successful,
         drops into a busybox shell prompt. The grep command is available, and
         the phone configuration file is at /phone/etc/main.cfg
         '''
+        self._loadCustomCredentials()
+        if self._telnet_username == None: self._telnet_username = 'admin'
+        if self._telnet_password == None: self._telnet_password = '1234'
+
         try:
             telnet = telnetlib.Telnet()
             telnet.open(self._ip)
@@ -75,10 +79,10 @@ class Endpoint(BaseEndpoint):
         try:
             # Attempt login with default credentials
             telnet.read_until('login: ', 10)
-            telnet.write('admin\r\n') # Username
+            telnet.write(self._telnet_username + '\r\n') # Username
             telnet.read_until('Password: ', 10)
-            telnet.write('1234\r\n') # Password            
-            
+            telnet.write(self._telnet_password + '\r\n') # Password
+
             idx, m, text = telnet.expect([r'login: ', r'\$ '], 10)
             if idx == 0:
                 # Login failed
@@ -88,24 +92,24 @@ class Endpoint(BaseEndpoint):
             text = telnet.read_until('$ ', 10)
             telnet.write('exit\r\n')
             telnet.close()
-            
+
             m = re.search(r'system/type=(\S+)', text)
             if m != None: sModel = m.group(1)
         except socket.error, e:
             logging.error('Endpoint %s@%s connection failure - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        
+
         if sModel != None: self._saveModel(sModel)
 
     def updateLocalConfig(self):
         '''Configuration for AudioCodes endpoints (local):
-        
-        The file XXXXXXXXXXXX.cfg contains the SIP configuration. Here 
+
+        The file XXXXXXXXXXXX.cfg contains the SIP configuration. Here
         XXXXXXXXXXXX is replaced by the lowercase MAC address of the phone.
-        
+
         To reboot the phone, it is necessary to issue the AMI command:
-        sip notify polycom-check-cfg {$IP}. Yes, this can also reboot an 
+        sip notify polycom-check-cfg {$IP}. Yes, this can also reboot an
         AudioCodes phone. Tested with a 310HD.
         '''
         # Check that there is at least one account to configure
@@ -160,10 +164,9 @@ class Endpoint(BaseEndpoint):
         }
         if not self._doAuthPost('/mainform.cgi/Auto_Provision.htm', postvars):
             return False
-        
+
         # Reboot the phone.
         self._amireboot('polycom-check-cfg')
         self._unregister()
         self._setConfigured()
         return True
-        

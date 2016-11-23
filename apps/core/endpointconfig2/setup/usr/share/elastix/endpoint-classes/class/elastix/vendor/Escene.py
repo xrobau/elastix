@@ -48,12 +48,18 @@ class Endpoint(BaseEndpoint):
         return True
 
     def probeModel(self):
-        '''Probe specific model of Escene phone 
-        
-        The phone is a small Linux system. The telnet login, if successful, 
+        '''Probe specific model of Escene phone
+
+        The phone is a small Linux system. The telnet login, if successful,
         drops into a busybox shell prompt. The cat command is available, and the
         specific phone model is at /mnt/system/PhoneType
         '''
+        self._loadCustomCredentials()
+        if self._telnet_username == None: self._telnet_username = 'root'
+        if self._telnet_password == None: self._telnet_password = 'root'
+        if self._http_username == None: self._http_username = 'root'
+        if self._http_password == None: self._http_password = 'root'
+
         try:
             telnet = telnetlib.Telnet()
             telnet.open(self._ip)
@@ -72,10 +78,10 @@ class Endpoint(BaseEndpoint):
         try:
             # Attempt login with default credentials
             telnet.read_until('login: ', 10)
-            telnet.write('root\r\n') # Username
+            telnet.write(self._telnet_username + '\r\n') # Username
             telnet.read_until('Password: ', 10)
-            telnet.write('root\r\n') # Password            
-            
+            telnet.write(self._telnet_password + '\r\n') # Password
+
             idx, m, text = telnet.expect([r'login: ', r'\# '], 10)
             if idx == 0:
                 # Login failed
@@ -85,22 +91,20 @@ class Endpoint(BaseEndpoint):
             text = telnet.read_until('# ', 10)
             telnet.write('exit\r\n')
             telnet.close()
-            
+
             m = re.search(r'type=(\w+)', text)
             if m != None: sModel = m.group(1)
         except socket.error, e:
             logging.error('Endpoint %s@%s connection failure - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        
+
         # If the model was not identified, this might be a RCA phone with the
         # Escene MAC prefix
         if sModel == None:
-            http_username = 'root'
-            http_password = 'root'
             password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
             password_manager.add_password(None, 'http://' + self._ip + '/',
-                http_username, http_password)
+                self._http_username, self._http_password)
             basic_auth_handler = urllib2.HTTPBasicAuthHandler(password_manager)
             opener = urllib2.build_opener(basic_auth_handler)
             try:
@@ -117,23 +121,23 @@ class Endpoint(BaseEndpoint):
                     sModel = m.group(1)
             except Exception, e:
                 pass
-        
+
         if sModel != None: self._saveModel(sModel)
-    
+
     def updateLocalConfig(self):
         return self._updateLocalConfig_Escene(
                 self._endpointdir + '/tpl/Escene_template.xml',
                 self._endpointdir + '/tpl/Escene_Extern_template.xml')
-    
+
     def _updateLocalConfig_Escene(self, templatepath, extrtemplatepath):
         '''Configuration for Escene endpoints (local)
-        
+
         The file XXXXXXXXXXXX.xml contains the plaintext SIP configuration. Here
-        XXXXXXXXXXXX is replaced by the lowercase MAC address of the phone. 
+        XXXXXXXXXXXX is replaced by the lowercase MAC address of the phone.
         After writing the XML file, a telnet session is opened to make the phone
-        retrieve the configuration file via TFTP and store it as its new 
+        retrieve the configuration file via TFTP and store it as its new
         configuration file.
-        
+
         To reboot the phone, it is necessary to issue the AMI command:
         sip notify reboot-yealink {$IP}. Verified with Escene ES620.
         '''
@@ -196,7 +200,7 @@ class Endpoint(BaseEndpoint):
             logging.error('Endpoint %s@%s connection failure - %s' %
                 (self._vendorname, self._ip, str(e)))
             return False
-        
+
         # Reboot the phone.
         self._amireboot('reboot-yealink')
         self._unregister()
@@ -205,7 +209,7 @@ class Endpoint(BaseEndpoint):
 
     def _replaceXMLConfigVariables(self, templatepath, sConfigFile):
         sConfigPath = self._tftpdir + '/' + sConfigFile
-        
+
         # Load DOM and substitute the relevant variables
         dom = parse(templatepath)
         for network in dom.getElementsByTagName('network'):
@@ -246,7 +250,7 @@ class Endpoint(BaseEndpoint):
                 sipUser.setAttribute('UserName', extension.account)
                 sipUser.setAttribute('UserNumber', extension.extension)
                 sipUser.setAttribute('approveName', extension.account)
-        
+
         try:
             self._writeContent(sConfigPath, dom.toxml())
         except IOError, e:
@@ -255,12 +259,12 @@ class Endpoint(BaseEndpoint):
             return False
         dom.unlink()
         dom = None
-        
+
         return True
 
     def _replaceXMLExternVariables(self, templatepath, sConfigFile):
         sConfigPath = self._tftpdir + '/' + sConfigFile
-        
+
         # Load DOM and substitute the relevant variables
         dom = parse(templatepath)
         for programbutton in dom.getElementsByTagName('Programbutton'):
@@ -271,7 +275,7 @@ class Endpoint(BaseEndpoint):
             programbutton.setAttribute('Type', '0')
             if idx < len(self._accounts):
                 programbutton.setAttribute('SipAccounts', str(idx))
-        
+
         try:
             self._writeContent(sConfigPath, dom.toxml())
         except IOError, e:
@@ -280,5 +284,5 @@ class Endpoint(BaseEndpoint):
             return False
         dom.unlink()
         dom = None
-        
+
         return True

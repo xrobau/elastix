@@ -43,8 +43,10 @@ class Endpoint(elastix.vendor.Atcom.Endpoint):
 
         Attempt to fetch /title.htm . This contains the phone model
         '''
-        self._http_username = 'admin'
-        self._http_password = 'admin'
+        self._loadCustomCredentials()
+        if self._http_username == None: self._http_username = 'admin'
+        if self._http_password == None: self._http_password = 'admin'
+
         htmlres = self._fetchAtcomAuthenticatedPage(('/title.htm', '/currentstat.htm',))
         if htmlres != None:
             resource, htmlbody = htmlres

@@ -41,16 +41,20 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
 
     def probeModel(self):
         '''Probe specific model of the Hanlong phone
-        
-        To probe for the specific model, a http session is tried. After 
+
+        To probe for the specific model, a http session is tried. After
         authentication, the status page reveals the phone model.
         '''
+        self._loadCustomCredentials()
+        if self._http_username == None: self._http_username = 'admin'
+        if self._http_password == None: self._http_password = 'admin'
+
         sModel = None
         # Try detecting Hanlong with updated firmware
         try:
             password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
             password_manager.add_password(None, 'http://' + self._ip + '/',
-                'admin', 'admin')
+                self._http_username, self._http_password)
             basic_auth_handler = urllib2.HTTPBasicAuthHandler(password_manager)
             opener = urllib2.build_opener(basic_auth_handler)
             response = opener.open('http://' + self._ip + '/')
@@ -63,16 +67,16 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
             if m != None:
                 sModel = m.group(1)
         except Exception, e:
-            pass        
-        
+            pass
+
         if sModel != None: self._saveModel(sModel)
-        
-        
+
+
     def _enableStaticProvisioning(self, vars):
-    
+
         vars.update({'Update' : 'SaveSet'})
-        return self._doAuthPost('/save_management.htm_auto_provision.htm', vars)        
-        
+        return self._doAuthPost('/save_management.htm_auto_provision.htm', vars)
+
     def _updateVarsByModel(self, stdvars, vars):
         if self._model in ('UC862',):
             vars.update({
@@ -83,12 +87,12 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
                 'P3316' :   'Elastix - Internal',
                 'P4402' :   stdvars['phonesrv'] + '/external.xml',
                 'P3312' :   'Elastix - External',
-                
+
                 # Allow DHCP to override config server (0/1)
                 'P145'  :   '0',
             })
 
-    def _grandstreamvarmap(self):                           
+    def _grandstreamvarmap(self):
         # The P-value for accountname is not used in Hanlong, but must exist
         # since it is referenced in the parent class
         varmap = [
@@ -153,7 +157,7 @@ class Endpoint(elastix.vendor.Grandstream.Endpoint):
              'autoanswercallinfo'   :   'P1838',# Enable auto-answer by Call-Info
             },
         ]
-        return varmap   
+        return varmap
 
     def _rebootbyhttp(self):
         return self._doAuthGet('/rb_phone.htm')

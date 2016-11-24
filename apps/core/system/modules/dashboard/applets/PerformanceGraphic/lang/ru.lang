@@ -28,10 +28,10 @@
   $Id: ru.lang,v 1.0 2015/10/10 14:10:42 Andrey Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Nothing to show yet" => "Nothing to show yet",
-    "Simultaneous calls, memory and CPU" => "Simultaneous calls, memory and CPU",
-    "Sim. calls" => "Sim. calls",
-    "CPU usage (%)" => "CPU usage (%)",
-    "Mem. usage (MB)" => "Mem. usage (MB)",
+    "Nothing to show yet" => "Нечего Показывать",
+    "Simultaneous calls, memory and CPU" => "Одновременные вызовы, память и CPU",
+    "Sim. calls" => "Sim. звонки",
+    "CPU usage (%)" => "Использование CPU (%)",
+    "Mem. usage (MB)" => "Исполь. Памяти (MB)",
 );
 ?>

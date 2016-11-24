@@ -180,6 +180,8 @@ fi
 
 %changelog
 * Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Fixed some Russian translations on Dashboard applets.
+  SVN Rev[7784]
 - CHANGED: Fixed some Russian translations.
   SVN Rev[7783]
 - CHANGED: Added Ukrainian translations to Dashboard applets.

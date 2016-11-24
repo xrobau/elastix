@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
   Codificación: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 1.6-12                                               |
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,31 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.0 2015/10/20 01:59:04 Andrey Exp $ */
+  $Id: ua.lang,v 1.7 2016/10/22 05:50:42 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Assign IP Address to Host" => "Резервирование DHCP",
-"Host Name" => "Имя Хоста",
-"IP Address" => "IP-адрес",
-"MAC Address" => "MAC-адрес",
-
-"Hostname" => "Имя хоста",
-"Assign IP Address" => "Зарезервировать IP-адрес",
-"View edit" => "Просмотр Редактирования",
-
-"Are you sure you wish to delete the DHCP configuration." => "Вы уверены, что хотите удалить настройки DHCP?",
-"The name of hostname is duplicated please changes to another name" => "Имя Хоста уже используется, пожалуйста, введите другое имя",
-"The following fields are duplicates or already exists" => "Следующие поля дублируются или уже существуют",
-"ex_hostname" => "(напр. myhostname)",
-"ex_ipaddress" => "(напр. 127.0.0.1)",
-"ex_mac_address" => "(напр. AA:BB:CC:DD:EE:FF)",
-'Invalid hostname' => 'Недействительное Имя Хоста',
-'Invalid IP address' => 'Недействительный IP-адрес',
-'Invalid MAC address' => 'Недействительный MAC-адрес',
-'Duplicate IP or MAC' => 'IP или MAC уже используется',
-"Show Filter" => "Показать Фильтр",
-"Hide Filter" => "Скрыть Фильтр",
-"Page" => "Страница",
-"No records match the filter criteria" => "Нет записей соответствуют критериям фильтра",
+$arrLangModule = array(
+    "You don't recibed faxes" => "Немає прийнятих факсів.",
+    "unknow" => "<b>невідомий</b>",
+    "fax recived" => "Отриманий факс {file} від {source} {date}.",
 );
 ?>

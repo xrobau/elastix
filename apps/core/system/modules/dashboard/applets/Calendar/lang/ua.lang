@@ -1,8 +1,8 @@
 <?php
-  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificacion: UTF-8
-  +----------------------------------------------------------------------+
-  | Elastix version 1.6-6                                               |
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
++----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,31 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.0 2016/10/13 06:13:29 support@lenet.com.ua LeNET Exp $ */
+  $Id: ua.lang,v 1.7 2016/10/22 04:47:42 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-
-"New Email list" => "Новий Cписок Електронної Пошти",
-"Are you sure you wish to delete the email list." => "Ви впевнені що хочете видалити список адрес електронної пошти?",
-"Email List Name" => "Ім'я Списока Електронної Пошти",
-
-"Email Member" => "Член Електронної Пошти",
-"Email List Members" => "Список адрес електронної пошти",
-
-"Number of Accounts" => "Кількість Користувачів",
-//nuevos
-"DHCP Client List" => "Список Клієнтів DHCP",
-"New Dhcp client" => "Новий Dhcp клієнт",
-"Are you sure you wish to delete the Ip." => "Ви впевнені що хочете видалити Ip ?",
-"Action" => "Дія",
-"See All DHCP Info" => "Повний Інформація про список DHCP ",
-
-"IP Address" => "IP-адрес",
-"Start Date" => "Початкова Дата",
-"End Date" => "Кінцева Дата",
-"MAC Address" => "MAC-адрес",
-"View Details" => "Перегляд Деталей",
-"Page" => "Сторінка",
-"No records match the filter criteria" => "Немає записів тих, що відповідають критеріям фільтру",
+$arrLangModule = array(
+    "You don't have events" => "У вас немає запланованих подій",
+    "Date" => "Дата",
+    "Call" => "Дзвінок",
 );
 ?>

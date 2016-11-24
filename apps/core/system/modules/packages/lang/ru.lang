@@ -81,5 +81,6 @@ $arrLangModule=array(
 "Completed!" => "Завершено!",
 "Are you sure want to Install this package?"=>"Вы уверены, что хотите Установить этот пакет?",
 "Total" => "Всего",
+"(not available)" => "(недоступен)",
 );
 ?>

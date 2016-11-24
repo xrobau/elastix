@@ -42,7 +42,7 @@ $arrLangModule = array(
     "Faxes" => "Факсы",
     "Telephony Hardware" => "Телефонное Оборудование",
     "Unimplemented method" => "Метод не реализован",
-    "Invalid request" => "Не верный запрос",
+    "Invalid request" => "Неверный запрос",
     "Emails" => "Электронная Почта",
     "Voicemails" => "Голосовая Почта",
 );

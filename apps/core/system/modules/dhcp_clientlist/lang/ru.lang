@@ -29,20 +29,20 @@
 global $arrLangModule;
 $arrLangModule=array(
 
-"New Email list" => "New Email list",
-"Are you sure you wish to delete the email list." => "Are you sure you wish to delete the email list.",
-"Email List Name" => "Email List Name",
+"New Email list" => "Новый Cписок Электронной Почты",
+"Are you sure you wish to delete the email list." => "Вы уверены, что хотите удалить список адресов электронной почты?",
+"Email List Name" => "Имя Списока Электронной Почты",
 
-"Email Member" => "Email Member",
-"Email List Members" => "Email List Members",
+"Email Member" => "Член Электронной Почты",
+"Email List Members" => "Список адресов электронной почты",
 
-"Number of Accounts" => "Number of Accounts",
+"Number of Accounts" => "Количество Пользователей",
 //nuevos
 "DHCP Client List" => "Список Клиентов DHCP",
-"New Dhcp client" => "New Dhcp client",
-"Are you sure you wish to delete the Ip." => "Are you sure you wish to delete the Ip.",
+"New Dhcp client" => "Новый Dhcp клиент",
+"Are you sure you wish to delete the Ip." => "Вы уверены, что хотите удалить Ip ?",
 "Action" => "Действие",
-"See All DHCP Info" => "See All DHCP Info",
+"See All DHCP Info" => "Полный Информация о списке DHCP ",
 
 "IP Address" => "IP-адрес",
 "Start Date" => "Начальная Дата",

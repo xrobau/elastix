@@ -34,8 +34,8 @@ $arrLangModule=array(
 "New Time" => "Новое Время",
 "New Timezone" => "Новая Временная Зона",
 "The change of date and time can concern important  system processes." => "Изменение даты и времени может повлиять на важные системные процессы",
-"System time changed correctly" => "System time changed correctly",
-"You can not change the system time" => "You can not change the system time",
-"Can not find file" => "Can not find file",
+"System time changed correctly" => "Системное время изменено успешно",
+"You can not change the system time" => "Вы не можете изменить системное время",
+"Can not find file" => "Не удается найти файл",
 );
 ?>

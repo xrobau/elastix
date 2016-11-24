@@ -29,7 +29,7 @@
 global $arrLangModule;
 $arrLangModule=array(
 "Repositories" => "Репозитории",
-"Active" => "Active",
+"Active" => "Активный",
 "Name" => "Имя",
 "Save/Update" => "Сохранить/Обновить",
 "Default" => "По умолчанию",
@@ -43,5 +43,6 @@ $arrLangModule=array(
 "Active" => "Активный",
 "Repo" => "Репозиторий",
 "records" => "записей",
+"of" => "из",
 );
 ?>

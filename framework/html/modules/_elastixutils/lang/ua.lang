@@ -31,9 +31,9 @@ $arrLangModule = array(
 'The bookmark maximum is 5. Please remove one in order to add this bookmark' =>
     'Максимально закладок 5. Будь ласка, видаліть непотрібну Вам вкладку, щоб додати нову закладку',
 'Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error' =>
-    'Закладка не може бути доданий. Будь ласка, спробуйте ще раз або зв'яжіться з Адміністратором Elastix і повідомити наступну помилку',
+    "Закладка не може бути доданий. Будь ласка, спробуйте ще раз або зв'яжіться з Адміністратором Elastix і повідомити наступну помилку",
 'Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error' =>
-    'Закладка не може бути видалений. Будь ласка, спробуйте ще раз або зв'яжіться з Адміністратором Elastix і повідомити наступну помилку',
+    "Закладка не може бути видалений. Будь ласка, спробуйте ще раз або зв'яжіться з Адміністратором Elastix і повідомити наступну помилку",
 'Bookmark has been removed.' => 'Закладка успішно видалена.',
 'Bookmark has been added.' => 'Закладка успішно додана.',
 );

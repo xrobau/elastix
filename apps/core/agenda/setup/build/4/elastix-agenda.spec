@@ -101,6 +101,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian translations. Fix Russian translations.
+  SVN Rev[7786]
+
 * Wed Sep 21 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Address Book: add more French translations for module, contributed by
   user danardf. Fixes Elastix bug #2592.

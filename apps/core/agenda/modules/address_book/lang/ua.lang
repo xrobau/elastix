@@ -1,0 +1,108 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: LeNET                                           |
+  | Email: support@lenet.com.ua                                         |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.0 2016/10/06 23:37:00 LeNET Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"New Contact"	=> "Новий Контакт",
+"Address Book"	=> "Адресна Книга",
+"Are you sure you wish to delete the contact." => "Ви впевнені що хочете видалити контакт?",
+"First Name"	=> "Ім'я",
+"Last Name"	=> "Прізвище",
+"Phone Number"	=> "Номер Телефона",
+"Extension" => "Внутрішній номер",
+"The call couldn't be realized" => "Виклик не може бути реалізований",
+"Internal" => "Внутрішній",
+"External" => "Зовнішній",
+"Call" => "Виклик",
+"Phone Directory" => "Телефонний Довідник",
+"CSV" => "CSV",
+"Download Address Book" => "Завантажити Адресну Книгу",
+"Can't exist a Name empty. Line" => "Поле 'Ім'я' не може бути порожнім. Строка",
+"Can't exist a Last Name empty. Line" => "Поле 'Прізвище' не може бути порожнім. Строка",
+"Can't exist a Phone Number/Job Phone Number empty. Line" => "Поля 'Телефон/Робочий Телефон' не можуть бути пустимі. Строка",
+"Total contacts created" => "Всього створено контактів",
+"Contact Data already exists" => "Дані Контакту вже існують",
+"Header File Address Book" => "Тема файлу повинен бути в першому рядку і містити як мінімум три стовпці: Ім'я, Прізвище, Телефонний Номер",
+"About Address Book" => "Якщо ви завантажуєте файл з даними контакту, які вже існують, то дані такого контакту не будуть використовуватися.",
+"Invalid file extension.- It must be csv" => "Недійсне розширення файлу.- Повинно бути csv",
+"There aren't contacts" => "Відсутні контакти",
+"Address Book from CSV" => "Адресна книга з CSV",
+"Name" => "Ім'я",
+"Page" => "Сторінка",
+"Filter" => "Фільтр",
+"Show" => "Показати",
+"Email" => "Електронна пошта",
+"File" => "Фаіл",
+"Possible file upload attack. Filename" => "Можливо атака завантаження файлу. ім'я файлу",
+"Please read the lines in the footer" => "Будь ласка, ознайомтеся з інформацією внизу сторінки",
+"Verify the header" => "Перевірте заголовок",
+"At minimum there must be the columns" => "Повинно бути як мінімум три стовпці",
+"Incomplete Columns" => "Incomplete Columns",
+"The file is incorrect or empty" => "Некоректний або порожній файл",
+"You don't have extension number associated with user" => "Немає внутрішнього номера асоційованого з поточним користувачем. Ви можете асоціювати внутрішній номер з вашим користувачем  <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">тут</a>",
+"ERROR" => "ПОМИЛКА",
+"Transfer" => "Перевод Дзвінка",
+"The transfer couldn't be realized, maybe you don't have any conversation now." => "Переклад не може бути виконаний, можливо зараз у вас немає активного виклику.",
+"Not_allowed_change" => "Ці зміни заборонені вашому користувачеві. Цей контакт не асоційований з вашої адресної книги",
+"picture" => "Фото",
+"Address" => "Адреса",
+"Company" => "Компанія",
+"Department" => "Відділ",
+"Cell Phone Number (SMS)" => "Мобільний Телефон (СМС)",
+"Home Phone Number" => "Домашній Телефон",
+"Work's Phone Number" => "Рабочий Телефон",
+"Contact person in your Company" => "Контактна особа у вашій Компанії",
+"Contact person's current position" => "Посада Контактної особи",
+"FAX Number 1" => "Факс 1",
+"FAX Number 2" => "Факс 2",
+"Address IM (XMPP, Openfire)" => "Миттєві Повідомлення (XMPP, Openfire)",
+"Province" => "Область",
+"City" => "Місто",
+"Manager" => "Керівник",
+"Current position" => "Посада",
+"Notes" => "Замітки",
+"Status" => "Статус",
+"Private Contact" => "Особистий Контакт",
+"Public Contact" => "Загальний Контакт",
+"Invalid file extension.- It must be png or jpg or jpeg" => "Невірне розширення файла.- Має бути png, jpg або jpeg і не містити спеціальних символів",
+"Validation Error" => "Помилка Валідації",
+"Error to Upload" => "Помилка Завантаження файлу",
+"Type Contact" => "Тип Контакту",
+"Internal Error" => "Будь ласка переконайтеся що параметри коректні",
+"Not_allowed_contact" => "Цього контакту немає у вашій адресній книзі",
+"Public editable" => "Загальний редагований",
+"Public not editable" => "Загальний нередагований",
+"Private" => "Особистий",
+"contact_admin" => "Немає внутрішнього номера асоційованого з поточним користувачем. Будь ласка, зв'яжіться з адміністратором.",
+"Show Filter" => "Показати Фільтр",
+"Hide Filter" => "Приховати Фільтр"
+);
+?>

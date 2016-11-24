@@ -156,6 +156,10 @@ fi
 
 %changelog
 * Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian translations. Fix Russian translations.
+  SVN Rev[7788]
+
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - FIXED: Endpoint Configurator: (Yealink) try '/' in addition to '/cgi-bin/' and
   ignore HTTP errors 404 and 400 when trying to tickle a 401 Unauthorized. This
   fixes detection of a Yealink SIP-T38G with updated firmware.

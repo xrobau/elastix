@@ -30,7 +30,7 @@ global $arrLangModule;
 $arrLangModule = array(
     "Configure" => "Настроить",
     "Endpoint Configurator" => "Настройка Телефонов",
-    "Showing" => "Показ",
+    "Showing" => "Страница",
     "Scan network for endpoints" => "Сканирование сети для поиска телефонов",
     "Step" => "Шаг",
     "Apply configuration to all selected endpoints" => "Применить настройки ко всем выбранным телефонам",

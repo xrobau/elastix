@@ -206,6 +206,10 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian, Russian translations.
+  SVN Rev[7787]
+
 * Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-6
 - CHANGED: Email_admin - Build/elastix-email_admin.spec: update specfile with latest
   SVN history. Bump Release in specfile.

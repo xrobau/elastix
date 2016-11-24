@@ -1,0 +1,45 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificacion: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.7 2016/10/15 18:24:42 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"main.cf file was updated successfully but when restarting the mail service failed" => "Файл main.cf було успішне оновлений але після перезавантаження сервіс пошти не запустився",
+"Relay" => "Релей",
+"message about email relay" => "Ці мережі можуть відправляти електронну пошту на зовнішні домени через Elastix <br> з використанням протоколу SMTP.
+Ви повинні вставити одну мережу на рядок і кожна мережа <br> повинна мати формат
+<b>IP/MASK</b>.<br>Для прикладу, щоб дозволити RELAY з Elastix ви повинні вставити 127.0.0.1/32. <br> Ми рекомендуємо зберегти мережу 127.0.0.1/32 в конфігурації, <br>тому що це потрібно для деяких процесів.",
+"Networks which can RELAY" => "Мережі, для яких дозволений RELAY",
+"Could not read the relay configuration." => "Неможливо прочитати конфігурацію Relay",
+"No network entered, you must keep at least the net 127.0.0.1/32" => "Жодної мережі не прописано, Ви повинні мати як мінімум мережу 127.0.0.1/32",
+"Configuration updated successfully" => "Конфігурація оновлена успішно",
+"Write error when writing the new configuration." => "Помилка при записі нової конфігурації",
+"Network" => "Мережа",
+"Error" => "Помилка",
+"Message" => "Повідомлення",
+);
+?>

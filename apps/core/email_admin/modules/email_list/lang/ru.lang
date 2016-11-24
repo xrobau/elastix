@@ -1,0 +1,95 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.4-28                                               |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ru.lang,v 1.1 2016-10-14 03:41:46 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Name1 Lastname1 <userEmail1@domain1.com>" => "Имя1 Фамилия1 ".htmlentities("<userEmail1@domain1.com>"),
+"Name2 Lastname2 <userEmail2@domain2.com>" => "Имя2 Фамилия2 ".htmlentities("<userEmail2@domain2.com>"),
+"Name3 Lastname3 <userEmail3@domain3.com>" => "Имя3 Фамилия3 ".htmlentities("<userEmail3@domain3.com>"),
+"Email List" => "Рассылка",
+"Are you sure you wish to delete the Email List(s)." => "Вы уверены, что хотите удалить список Email Рассылок?",
+"List name" => "Имя Рассылки",
+"Membership" => "Участники",
+"Action" => "Действие",
+"Add Members" => "Добавить Участника",
+"All" => "Все",
+"New Email list" => "Новая Рассылка",
+"Select a domain" => "Выберите домен",
+"Wrong List Name" => "Неверное имя Рассылки",
+"The Password List and Confirm Password List do not match" => "Список паролей и подтвердение списка паролей не совпадают",
+"The domain selected does not exist" => "Выбранный Домен не существует",
+"The List entered already exists" => "Имя Рассылки уже существует",
+"Could not create the list" => "Не удалось создать Рассылку",
+"Could not create the virtual alias" => "Не удалось создать виртуальный алиас",
+"The List was successfully created" => "Рассылка успешно создана",
+"You can also enter a name for each email, like the following" => "Вы можете также ввести имя для каждой электронной почты, подобно следующему",
+"New List Member" => "Новый Участник Рассылки",
+"The List entered does not exist" => "Введенная Рассылка не существует",
+"Already a member" => "Уже Используется",
+"Mailman could not add the members" => "Mailman не смог добавить Участника",
+"The following members were added to the list" => "Следующие Участник были добавлены в Рассылку",
+"The following members could not be added to the list" => "Следующие Участник не были добавлены в Рассылку",
+"Message" => "Сообщение",
+"Mailman could not remove the list" => "Mailman не смог переместить в Рассылку",
+"The email list(s) were successfully deleted" => "email были успешно удален из Рассылки",
+"Domain" => "Домен",
+"Email mailmam admin" => "Mailman Участники",
+"Password" => "Пароль",
+"Domain name" => "Имя Домена",
+"Confirm password list" => "Повторите Пароль",
+"Email admin list" => "Список Участников",
+"Members emails" => "Участники Рассылки",
+"Could not execute command list_lists" => "Не удалось выполнить командный list_lists",
+"Remove members" => "Удалить Участника",
+"Remove List Member" => "Удалить Рассылку Участников",
+"You must enter each email line by line, like the following" => "Вы должны ввести каждый email с новой строчки, как в примере ниже",
+"userEmail1@domain1.com" => "userEmail1@domain1.com",
+"userEmail2@domain2.com" => "userEmail2@domain2.com",
+"userEmail3@domain3.com" => "userEmail3@domain3.com",
+"Mailman could not remove the members" => "Mailman не может удалить Участника",
+"No such subscriber" => "Нет такого подписчика",
+"The following members were removed from the list" => "Следующие Участники были удалены из Рассылки",
+"The following members could not be removed from the list" => "Следующие Участники не могут быть удалены из Рассылки",
+"Add" => "Добавить",
+"Remove" => "Удалить",
+"New List Settings" => "Новые настройки Рассылки",
+"Mailman Admin Settings" => "Mailman Настройки Администратора",
+"There is no domain created. To use this module you need at least one domain. You can create a domain in the module Email->Domains" => "Нет ни одного домена, для того, чтобы использовать этот модуль вам нужно, по крайней мере минимум один домен. Вы можете его создать в модуле <a href='?menu=email_domains'>Почта->Домены</a>",
+"View members" => "Просмотр Участников",
+"Return" => "Вернуться",
+"List Members of" => "Список Рассылок",
+"Member name" => "Имя Участника",
+"Member email" => "Еmail Участника",
+"Name" => "Имя",
+"Email" => "Email",
+"Export Members" => "Экспорт Участников",
+"Show Filter" => "Показать Фильтр",
+"Hide Filter" => "Скрыть Фильтр",
+"Page" => "Страница",
+);
+?>

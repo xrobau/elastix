@@ -1,0 +1,68 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+   CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.3                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on "AS IS"     |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: LeNET                                           |
+  | Email: support@lenet.com.ua                                         |
+  +----------------------------------------------------------------------+
+  $Id: en.lang,v 1.7 2016/10/7 13:24:00 Sergey Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Antispam" => "Анти-Спам",
+"Spam Level" => "Спам Рівень",
+"Enabled" => "Включено",
+"Disabled" => "Відключено",
+"Commad failed, try activate spam filter" => "Помилка! Спробуйте активувати Спам-Фільтр",
+"Failed activate spam filter" => "Помилка активування Спам-Фильтра",
+"Commad failed, try change thoroughness level" => "Не вдалося змінити рівень Спаму",
+"Failed change thoroughness level and header" => "Не вдалося змінити рівень захисту від Спаму",
+"Failed disactivate spam filter" => "Не вдалося відключити Спам-Фільтр",
+"Commad failed, try disactivate spam filter" => "Помилка при спробі відключити Спам-Фільтр", 
+"Status" => "Статус",
+"Save" => "Зберегти",
+"Error" => "Помилка",
+"Legend" => "<i>Рівень 1 ловитиме більше спаму, але і збільшити вірогідність неправдивих спрацьовувань.<br>Рівень 10 ловитиме менше спаму, але знижує вірогідність неправдивих спрацьовувань.</br><br>Рекомендується 5</i>",
+"Message" => "Повідомлення",
+"Successfully Activated Service Antispam" => "Служба Анти-спам успішно активована",
+"Successfully Desactivated Service Antispam" => "Служба Анти-Спам успішно деактивована",
+"Antispam service is already activated" => "Служба Анти-Спам вже активована",
+"Antispam service is already desactivated" => "Служба Анти-спам вже деактивовано",
+"Could not give permissions to files" => "Не вдалося встановити дозвіл для файлу",
+"Could not make the configuration file" => "Не вдалося зберегти файл конфігурації",
+"Could not start the service antispam" => "Не вдалося запустити службу Анти-Спам",
+"Could not stop the service antispam" => "Не вдалося зупинити службу Анти-Спам",
+"Rewrite Header" => "Переписування Заголовка",
+"The command failed when attempting to change the header" => "Не вдалося змінити заголовок",
+"Level" => "Рівень",
+"Politics" => "Політика",
+"Spam Capture" => "Захоплення",
+"Mark Subject" => "Відмітити",
+"Empty Spam Folders" => "Папка Спам порожня",
+"Delete Spam for more than one week" => "Видаляти спам старше за тиждень",
+"Delete Spam for more than two week" => "Видаляти спам старше за два тижні",
+"Delete Spam for more than one month" => "Видаляти спам старше за один місяць",
+);
+?>

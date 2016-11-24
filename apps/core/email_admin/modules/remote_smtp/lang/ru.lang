@@ -1,0 +1,64 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.6-6                                               |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ru.lang,v 1.1 2016-10-19 07:21:56 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Host Name" => "Имя Хоста",
+"Remote SMTP Delivery" => "Удаленная SMTP Доставка",
+"Remote SMTP Server" => "Удаленный Сервер SMTP",
+"Port" => "Порт",
+"Username" => "Имя Пользователя",
+"Password" => "Пароль",
+"Autentification" => "Аутентификация",
+"Enable" => "Включить",
+"Disable" => "Отключить",
+"Enabled" => "Включен",
+"Disabled" => "Отключен",
+"Save" => "Сохранить",
+"Status" => "Статус",
+"Result transaction" => "Результат транзакции",
+"Configured successful" => "Настройка прошла успешно",
+"Invalid file extension.- It must be pem" => "Неверный файл расширения.- Должен быть pem",
+"Message Remote SMTP Server" => "<p>Параметр 'Домен' указывается хост по умолчанию для отправки почты. В случае SMTP укажите домен, хост, [host] или [address]; форма [host] выключает MX lookups.<br /><br />
+            Домен = [gateway.my.domain]<br />
+            Домен = uucphost<br />
+            Домен = [an.ip.add.ress]</p>",
+"Message Remote Autentification"=>"Эта опция позволяет проверку подлинности сертификата.",
+"Message Remote SMTP Cert"=>"Чтобы включить опцию сертификатов необходимо указать необходимые поля",
+"OTHER" => "ДРУГОЙ",
+"SMTP Server" => "Сервер SMTP",
+"Domain" => "Домен",
+"TLS Enable" => "Включить TLS",
+"Ex" => "Пример",
+"Failed to connect to server" => "Не удалось подключиться к серверу",
+"Failed to send hello command" => "Не удалось отправить команду hello",
+"Failed to start TLS" => "Не удалось запустить TLS",
+"Authenticate not accepted from server" => "Проверка подлинности не принимается от сервера",
+"Authenticate Error, TLS must be activated" => "Ошибка аутентификации, необходимо активировать TLS",
+);
+?>

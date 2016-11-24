@@ -1,0 +1,71 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.4-23                                               |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ru.lang,v 1.1 2016-10-25 08:00:29 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Vacations" => "Автоответчик",
+"Email Address" => "Email Адрес",
+"Subject" => "Тема",
+"Body" => "Текст",
+"Operation cannot be done. Please try Again." => "Операция не выполнено. Пожалуйста, попробуйте снова.",
+"Operation have been succesful." => "Операция прошла успешно.",
+"Succesful" => "Успешно",
+"Error" => "Ошибка",
+"Disable Message Vacations" => "Отключить Автоответчик",
+"Enable Message Vacations" => "Включить Автоответчик",
+"Alert" => "Предупредить",
+"Cyrus Imap is down" => "Cyrus Imap Выключен",
+"Cyrus Imap is up" => "Cyrus Imap Вклюен",
+"Error: Impossible remove " => "Ошибка: Невозможно удалить ",
+"Error: Impossible upload " => "Ошибка: Невозможно загрузить ",
+"Error: Impossible activate " => "Ошибка: Невозможно активировать ",
+"Email's Vacations have been enabled" => "Автоответчик Включен",
+"Email's Vacations have been disabled" => "Автоответчик Отключен",
+"Choose other email account" => "Выберите другую учетную запись электронной почты",
+"User isn't allowed to view this content." => "Пользователь не имеет права для просмотра этого контента.",
+"Account" => "Аккаунт",
+"Status" => "Статус",
+"Email is not correct. Please write the email assigned to your elastix account." => "Неверный Email.",
+"Emails Account" => "Emails Аккаунт",
+"Vacations Activated" => "Автоответчик Активировано",
+"Auto-Reply: Out of the office" => "Авто-Ответ: Не в офисе",
+"I will be out of the office until {END_DATE}.\n\n----\nBest Regards." => "Буду отсутствовать до {END_DATE}.\n\n----\nС Наилучшими Пожеланиями.",
+"yes" => "да",
+"no" => "нет",
+"Please contact your administrator if your user does not have an email account otherwise add it to System->Пожалуйста, обратитесь к администратору, если ваш пользователь не имеет учетную запись электронной почты в противном случае добавить его в <a href='?menu=userlist'>Система->Пользователи->Пользователь</a>",
+"Email is empty or is not correct. Please write the email account." => "Электронная почта пуста или не является правильным. Пожалуйста, напишите учетную запись электронной почты.",
+"Initial Date" => "Начальная Дата",
+"End Date" => "Дата Окончания",
+"TO" => "ПО",
+"FROM" => "С",
+"Date" => "Дата",
+"End date should be greater than the initial date" => "Дата окончания должна быть больше, чем начальная дата",
+"day(s)" => "день (дней)",
+"Period" => "Период",
+);
+?>

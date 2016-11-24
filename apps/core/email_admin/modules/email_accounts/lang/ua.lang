@@ -1,0 +1,91 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: LeNET                                           |
+  | Email: support@lenet.com.ua                                         |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.0 2015/10/28 16:04:00 Sergey Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Accounts"=>"Акаунти",
+"Email Account List"=>"Акаунти Електронної пошти",
+"Create Account"=>"Створити Акаунт",
+"Select a domain"=>"Виберіть домен",
+"Email Address"=>"Адреса Електронної пошти",
+"Account Name"=>"Ім'я Акаунту",
+"Used Space"=>"Використовуваний Простір",
+"Options"=>"Опції",
+"Reconstruct MailBox" => "Відновлення Поштової Скриньки",
+"Reconstruct" => "Відновити",
+"New Email Account"=>"Новий Акаунт",
+"Quota (Kb) "=>"Квота (КБ) ",
+"The e - mail address already exists"=>"Адреса електронної пошти вже існує",
+"View Account"=>"Перегляд Акаунту",
+"Edit Account"=>"Редагувати Акаунт",
+"Retype password" => "Введіть пароль повторно",
+"Domain" => "Домен",
+"Show" => "Показати",
+"Error" => "Помилка",
+"EDITABLE" => "EDITABLE",
+"MESSAGE" => "ПОВІДОМЛЕННЯ",
+"Page" => "Сторінка",
+"records" => "записів",
+"No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
+"The MailBox was reconstructed succefully" => "Поштова Скринька була успішно відновлена",
+"Error deleting user accounts from system"=>"Помилка при видаленні користувачів з системи",
+"Error deleting user accounts"=>"Помилка видалення користувачів",
+"Error deleting record from table domain"=>"Помилка видалення запису з таблиці доменів",
+"You must select a domain to create an account" => "Для того, щоб створити акаунт, ви повинні вибрати домен",
+"Could not query used disc space" => "Не вдалося запросити зайнятий дисковий простір",
+"The passwords are empty or don't match" => "Паролі порожні або не співпадають",
+"The passwords don't match" => "Паролі не співпадають",
+"Changes Applied successfully" => "Зміни успішно застосовані",
+"Error appliying changes" => "Помилка застосування змін",
+"Account deleted successfully" => "Акаунт успішно видалений",
+"File Upload" => "Завантажити Файл",
+"Account" => "Акаунт",
+"The format of the file must be csv (file.csv), like the following" => "Формат файлу має бути csv (file.csv), як показано нижче",
+"Username 1, Password1, Quota1 (Kb) " => "Ім'я_користувача 1, Пароль_1, Квота 1 (КБ) ",
+"Username 2, Password2, Quota2 (Kb) " => "Ім'я_користувача 2, Пароль_2, Квота 2 (КБ) ",
+"The value of Quota (Kb) must be a number, like 1000 or 2000, etc" => "Значення Квоти (КБ) має бути числом, наприклад 1000 або 2000",
+"Error reading the file" => "Помилка читання файлу",
+"Possible file upload attack. The file must end in .csv" => "Можливо атака завантаження файлу. Ім'я файлу повинне закінчуватися на .csv",
+"Wrong format for username" => "Неправильний формат імені користувача",
+"The following accounts were created" => "Наступні акаунти були створені",
+"The following accounts could not be created" => "Наступні акаунти не можуть бути створені",
+"Quota must be greater than 0" => "Квота має бути більше ніж 0",
+"The quota was reduced to the maximum of 5242880kb, if you want to more than this, edit this account" => "The quota was reduced to the maximum of 5242880kb, if you want more than this, edit this account",
+"Export Accounts" => "Експорт Акаунтів",
+"The file could not be opened" => "Файл не може бути відкритий",
+"At least three parameters are needed" => "Принаймні, потрібно три параметри",
+"Error saving the account" => "Помилка збереження Акаунту",
+"Edit quota" => "Редагувати квоту",
+"The following account does not exist" => "Наступний Акаунт не існує",
+"Edit quota to" => "Редагувати квоту",
+"The passwords must not be empty" => "Паролі не мають бути порожніми",
+);
+?>

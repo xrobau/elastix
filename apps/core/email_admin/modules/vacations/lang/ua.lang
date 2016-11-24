@@ -1,0 +1,71 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.4-23                                               |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.1 2016-10-25 08:10:29 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Vacations" => "Автовідповідач",
+"Email Address" => "Email Адреса",
+"Subject" => "Тема",
+"Body" => "Текст",
+"Operation cannot be done. Please try Again." => "Операція не виконано. Будь ласка, спробуйте знову.",
+"Operation have been succesful." => "Операція пройшла успішно.",
+"Succesful" => "Успішно",
+"Error" => "Помилка",
+"Disable Message Vacations" => "Відключити Автовідповідач",
+"Enable Message Vacations" => "Включити Автовідповідач",
+"Alert" => "Попередити",
+"Cyrus Imap is down" => "Cyrus Imap Вимкнений",
+"Cyrus Imap is up" => "Cyrus Imap Вклюен",
+"Error: Impossible remove " => "Помилка: Неможливо видалити ",
+"Error: Impossible upload " => "Помилка: Неможливо завантажити ",
+"Error: Impossible activate " => "Помилка: Неможливо активувати ",
+"Email' s Vacations have been enabled" => "Автовідповідач Включений",
+"Email' s Vacations have been disabled" => "Автовідповідач Відключений",
+"Choose other email account" => "Виберіть інший обліковий запис електронної пошти",
+"User isn't allowed to view this content." => "Користувач не має права для перегляду цього контенту.",
+"Account" => "Аккаунт",
+"Status" => "Статус",
+"Email is not correct. Please write the email assigned to your elastix account." => "Невірний Email.",
+"Emails Account" => "Emails Аккаунт",
+"Vacations Activated" => "Автовідповідач Активовано",
+"Auto-Reply: Out of the office" => "Авто-відповідь: Не в офісі",
+"I will be out of the office until {END_DATE}.\n\n----\nBest Regards." => "Буду відсутній до {END_DATE}.\n\n----\nЗ Найкращими Побажаннями.",
+"yes" => "так",
+"no" => "ні",
+"Please contact your administrator if your user does not have an email account otherwise add it to System->Будь ласка, звернетеся до адміністратора, якщо ваш користувач не має облікового запису електронної пошти інакше додати його <a href='?menu=userlist'>Система->Користувачі->Користувач</a>",
+"Email is empty or is not correct. Please write the email account." => "Електронна пошта порожня або не є правильним. Будь ласка, напишіть обліковий запис електронної пошти.",
+"Initial Date" => "Початкова Дата",
+"End Date" => "Дата Закінчення",
+"TO" => "ПО",
+"FROM" => "З",
+"Date" => "Дата",
+"End date should be greater than the initial date" => "Дата закінчення має бути більша, ніж початкова дата",
+"day(s)" => "день(днів)",
+"Period" => "Період",
+);
+?>

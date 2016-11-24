@@ -25,14 +25,25 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+  $Id: es.lang,v 1.7 2016/10/13 05:42:42 support@lenet.com.ua LeNET Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Billing Capable" => "Возможность выписок по счёту",
-    "Default Rate Configuration" => "Настройки Тарифов по Умолчанию",
-    "Default Rate" => "Тариф по Умолчанию",
-    "Default Rate Offset" => "Надбавка Тарифа по Умолчанию",
-    "Trunk Bill Configuration" => "Биллинговые настройки по транкам",
-    "Trunk" => "Транк",
+    "Filter" => "Фільтр",
+    "Start Date" => "Початкова дата",
+    "End Date" => "Кінцева дата",
+    "Destination Distribution" => "Розподіл по Напрямах",
+    "Criteria" => "Критерій",
+    "Distribution by Time" => "Розподіл за часом",
+    "Distribution by Number of Calls" => "Розподіл по кількості дзвінків",
+    "Distribution by Cost" => "Розподіл за вартістю",
+    "Date Range spans maximum number of days" => "Діапазон дат перекриває максимальну кількість днів",
+    "ERROR" => "ПОМИЛКА",
+    "Minutes" => "Хвилин",
+    "Number of Calls" => "Кількість дзвінків",
+    "others" => "інші",
+    "Rate Name" => "Назва тарифу",
+    "default" => "за умовчанням",
+    "Duration in seconds" => "Тривалість в секундах",
+    "Cost" => "Вартість",
 );
 ?>

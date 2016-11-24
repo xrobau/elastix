@@ -25,14 +25,20 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+  $Id: es.lang,v 1.7 2016/10/13 05:00:42 support@lenet.com.ua LeNET Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Billing Capable" => "Возможность выписок по счёту",
-    "Default Rate Configuration" => "Настройки Тарифов по Умолчанию",
-    "Default Rate" => "Тариф по Умолчанию",
-    "Default Rate Offset" => "Надбавка Тарифа по Умолчанию",
-    "Trunk Bill Configuration" => "Биллинговые настройки по транкам",
-    "Trunk" => "Транк",
+    "Simultaneous Channels (Total) " => "Зайнятість каналів (Всього) ",
+    "Simultaneous Zap Channels" => "Зайнятість каналів Zap",
+    "Simultaneous SIP Channels" => "Зайнятість каналів SIP",
+    "Simultaneous IAX Channels" => "Зайнятість каналів IAX",
+    "Simultaneous H323 Channels" => "Зайнятість каналів H323",
+    "Simultaneous Local Channels" => "Зайнятість каналів локальних",
+    "Total Channels" => "Всього каналів",
+    "Zap Channels" => "Каналів Zap",
+    "SIP Channels" => "Каналів SIP",
+    "IAX Channels" => "Каналів IAX",
+    "H 323 Channels" => "Каналів H323",
+    "Local Channels" => "Каналів локальних",
 );
 ?>

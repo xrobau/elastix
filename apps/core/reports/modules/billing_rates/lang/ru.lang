@@ -25,7 +25,7 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: es.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+  $Id: ru.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
     "Prefix" => "Префикс",
@@ -41,6 +41,6 @@ $arrLangModule = array(
     "Are you sure you wish to continue?" => "Вы уверены что хотите продолжить?",
     "create_rate" => "Создать новый тариф",
     "New_rate" => "Новый тариф",
-    "This option allow to create a new rate and keep the history of their rates, or if not only edit the current rate values." => "This option allows to modify the current rate while keeping the history of the different values this rate has adopted through time (good for keeping the records reflecting the actual value the rate had at a particular time).",
+    "This option allow to create a new rate and keep the history of their rates, or if not only edit the current rate values." => "Эта опция позволяет изменять текущую скорость, сохраняя при этом историю различных значений этот показатель принятых во времени (хорошо для хранения записей, отражающих фактическое значение скорость была в определенное время).",
 );
 ?>

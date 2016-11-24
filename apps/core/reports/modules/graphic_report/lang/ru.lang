@@ -1,0 +1,61 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+   CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 1.0                                             |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on "AS IS"     |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: LeNET                                     |
+  | Email: support@lenet.com.ua                                                        |
+  +----------------------------------------------------------------------+
+  $Id: ru.lang,v 1.7 2016/10/16 16:57:00 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Incoming Calls" => "Incoming Calls",
+"Outcoming Calls" => "Outgoing Calls",
+"Calls" => "Вызовы",
+"Start date" => "Начальная Дата",
+"End date" => "Конечная Дата",
+"Number" => "Номер",
+"Extensions" => "Внутренний Номер",
+"Required Field" => "Обязательное Поле",
+"Total Time" => "Общее Время",
+"In calls:" => "Входящие Вызовы:",
+"Out calls:" => "Исходящие Вызовы:",
+"There are no data to present" => "Отсутствует Данные",
+"Number of Calls" => "Количество Звонков",
+"Number Calls vs Queues" => "Количество вызовов в очереди",
+"Number of calls extension" => "Number of calls extension",
+"Here" => "Выберите Номер",
+"Graphic Report" => "Графический Отчет",
+"All" => "Все",
+"Show"=>"Показать",
+"No records found"=>"Записей не найдено",
+"No exist calls for this number" => "Нет доступных для этого числа вызовов",
+"The extension" => "Внутренние Номера",
+"does not have calls yet" => "Вызовы Отсутствуют",
+"The extension must be numeric and can not start with zero" => "Внутренний Номер должен быть числовым и не может начинаться с нуля",
+"Extention (Number)" => "Внутренний Номер",
+"Extention(number)" => "Внутренний Номер",
+);
+?>

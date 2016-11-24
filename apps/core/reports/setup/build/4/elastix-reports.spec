@@ -93,6 +93,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian translations.
+  SVN Rev[7793]
+
 * Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-6
 - CHANGED: reports - Build/elastix-reports.spec: update specfile with latest
   SVN history. Bump version and release in specfile.
@@ -102,7 +106,7 @@ fi
   fix for Elastix bug #1100. Also remove useless parameters.
   SVN Rev[7726]
 
-* Thu Aug 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Thu Aug 18 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: (trivial) Missed Calls: replace tabs with spaces
   SVN Rev[7725]
 

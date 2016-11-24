@@ -25,14 +25,36 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.7 2007/09/05 00:36:42 alex Exp $ */
+  $Id: ua.lang,v 1.7 2016/10/16 19:02:42 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
 $arrLangModule = array(
-    "Billing Capable" => "Возможность выписок по счёту",
-    "Default Rate Configuration" => "Настройки Тарифов по Умолчанию",
-    "Default Rate" => "Тариф по Умолчанию",
-    "Default Rate Offset" => "Надбавка Тарифа по Умолчанию",
-    "Trunk Bill Configuration" => "Биллинговые настройки по транкам",
-    "Trunk" => "Транк",
+    "Missed Calls" => "Пропущені Виклики",
+    "Date" => "Дата",
+    "Source" => "Від кого",
+    "Start Date" => "Початкова Дата",
+    "End Date" => "Кінцева Дата",
+    "Destination" => "Кому",
+    "Number of attempts" => "Число спроб",
+    "year (s) " => "рік",
+    "month (s) " => "місяців",
+    "day (s) " => "днів",
+    "hour (s) " => "годин",
+    "minute (s) " => "хвилин",
+    "second (s) " => "секунд",
+    "Status" => "Статус",
+    "NO ANSWER" => "НЕМАЄ ВІДПОВІДІ",
+    "NO ANSWER - VOICEMAIL" => "НЕМАЄ ВІДПОВІДІ І ГОЛОСОВОЇ ПОШТИ",
+    "UNKNOWN" => "НЕВІДОМИЙ",
+    "ANSWERED" => "ПИЙНЯТИІ",
+    "The following fields contain errors" => "Наступні поля містять помилки",
+    "Show Filter" => "Показати Фільтр",
+    "Hide Filter" => "Приховати Фільтр",
+    "Filter applied " => "Поточний фільтр: ",
+    "Page" => "Сторінка",
+    "records" => "записів",
+    "of" => "з",
+    "No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
+    "Time since last call" => "Пройшло часу з останнього виклику",
+    "Download" => "Зкачати",
 );
 ?>

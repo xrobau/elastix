@@ -300,11 +300,15 @@ fi
 /etc/cron.daily/asterisk_cleanup
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian translations.
+  SVN Rev[7792]
+
 * Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-8
 - CHANGED: pbx - Build/elastix-pbx.spec: update specfile with latest
   SVN history. Bump Release in specfile.
 
-* Fri Aug 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com> 
+* Fri Aug 19 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
   (trivial) Fix commit number.
   SVN Rev[7730]
 

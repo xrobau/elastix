@@ -1,0 +1,76 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.7 2016/10/16 09:59:42 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Extensions Batch" => "Група Внутрішніх номерів",
+    "Are you really sure you want to delete all the extensions in this server?" => "Ви дійсно упевнені, що хочете видалити усі внутрішні номери на цьому сервері?",
+    "Invalid file extension.- It must be csv" => "Недійсне раширение файла.- Має бути csv",
+    "Possible file upload attack. Filename" => "Можливо атака завантаження файлу. Ім'я файлу",
+    "Error" => "Помилка",
+    "Secret weak. Line" => "Слабкий пароль. Рядок",
+    "Error updating Tech" => "Помилка оновлення Tech",
+    "Error updating Users" => "Помилка оновлення Users",
+    "Error updating Devices" => "Помилка оновлення Devices",
+    "Error updating Voicemail" => "Помилка оновлення Voicemail",
+    "Error processing CallWaiting" => "Помилка оновлення CallWaiting",
+    "Total extension updated" => "Усі внутрішні номери оновлені",
+    "Error, extension" => "Помилка, внутрішній номер",
+    "with" => "з",
+    "The file is incorrect or empty" => "Невірний або порожній файл",
+    "Verify the header" => "Перевірте заголовок",
+    "At minimum there must be the columns" => "Як мінімум мають бути стовпці",
+    "Can' t exist a extension empty. Line" => "Внутрішній номер не може бути порожнім. Рядок",
+    "Can' t exist a display name empty. Line" => "Ім'я для відображення не може бути порожнім. Рядок",
+    "Header File Extensions Batch" => "Перша лінія повинна містити ім'я (чи назва) стовпців, і файл повинен мати як мінімум чотири стовпці: Display Name, User Extension, Secret, Tech. Для детальнішої інформації про усі підтримувані параметри, будь ласка, читайте у вбудованій довідковій документації.",
+    "About Update Extensions Batch" => "Якщо ви завантажуєте файл з раніше створеними внутрішніми номерами, то ці внутрішні номери будуть оновлені.",
+    "There aren't extensions" => "Немає внутрішніх номерів",
+    "Download Extensions" => "Зкачати поточні внутрішні номери в CSV форматі",
+    "Error processing Database Family" => "Помилка обробки Сімейства Бази Даних",
+    "Delete All Extensions" => "Видалити усі Внутрішні номери",
+    "All extensions deletes" => "Усі внутрішні номери видалені",
+    "Error to delete extensions" => "Помилка видалення внутрішніх номерів",
+    "Could not delete the database" => "Не вдається видалити базу даних",
+    "Could not delete the ASTERISK database" => "Не вдається видалити базу даних ASTERISK",
+    "Unable delete AMPUSER in database astDB" => "Не вдається видалити AMPUSER у базі даних astDB",
+    "Unable delete DEVICE in database astDB" => "Не вдається видалити DEVICE у базі даних astDB",
+    "Unable delete CW in database astDB" => "Не вдається видалити CW у базі даних astDB",
+    "Unable delete CF in database astDB" => "Не вдається видалити CF у базі даних astDB",
+    "Unable delete CFB in database astDB" => "Не вдається видалити CFB у базі даних astDB",
+    "Unable delete CFU in database astDB" => "Не вдається видалити CFU у базі даних astDB",
+    "File" => "Файл для Завантаження (*.csv) ",
+    "Message" => "Повідомлення",
+    "Save" => "Завантажити CSV Файл",
+    "Error to insert or update Direct DID" => "Помилка додавання або оновлення Direct DID",
+    "Can' t exist a technology empty. Line" => "Поле 'Tech' не може бути порожнім. Рядок",
+    "has a wrong tech in line" => "має неправильне значення tech в рядку",
+    "Tech must be sip or iax" => "Поле 'Tech' повинно бути sip або iax",
+    "The secret must be minimum" => "Пароль має бути не менше 6 символів і містити цифри і букви, включаючи верхній і нижній регістр.",
+    "Line" => "Рядок",
+);
+?>

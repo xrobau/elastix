@@ -1,0 +1,59 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.7 2016/10/16 14:37:42 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Command" => "Команда",
+    "Execute" => "Виконати",
+    "Result" => "Результат",
+    "File Editor" => "Редактор файлів Asterisk",
+    "File List" => "Ім'я Файлу",
+    "File Size" => "Розмір Файлу",
+    "Back" => "Назад",
+    "This file doesn't have permisses to read" => "Файл не може бути прочитаний",
+    "This file doesn't have permisses to write" => "Файл не може бути записаний",
+    "The changes was saved in the file" => "Зміни збережені у файлі",
+    "Doesn' t have permisses to read" => "Немає прав на читання",
+    "This is not a valid directory" => "Некоректна директорія",
+    "Please write the file name" => "Будь ласка, напишіть ім'я файлу",
+    "New File" => "Новий Файл",
+    "File already exist" => "Файл вже існує",
+    "File" => "Файл",
+    "Filter" => "Фільтр",
+    "Reload Asterisk" => "Перезавантажити Asterisk",
+    "Asterisk has been reloaded" => "Asterisk був перезавантажений",
+    "Error when connecting to Asterisk Manager" => "Помилка з'єднання з Asterisk Manager",
+    "Show Filter" => "Показати Фільтр",
+    "Hide Filter" => "Приховати Фільтр",
+    "Filter applied " => "Поточний фільтр: ",
+    "Page" => "Сторінка",
+    "records" => "записів",
+    "of" => "з",
+    "No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
+);
+?>

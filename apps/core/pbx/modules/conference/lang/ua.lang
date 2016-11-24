@@ -1,0 +1,87 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.7 2016/10/13 05:12:42 support@lenet.com.ua LeNET Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Conference" => "Конференція",
+    "State" => "Статус",
+    "Past Conferences" => "Минулі Конференції",
+    "Current Conferences" => "Поточні Конференції",
+    "Future Conferences" => "Майбутні Конференції",
+    "Conference #" => "Конференція #",
+    "Conference Name" => "Ім'я Конференції",
+    "Participants" => "Учасники",
+    "All" => "Все",
+    "New Conference" => "Нова Конференція",
+    "Conference Owner" => "Власник Конференції",
+    "Conference Number" => "Номер Конференції",
+    "Moderator PIN" => "PIN Модератора",
+    "Moderator Options" => "Опції Модератора",
+    "Announce" => "Вітання",
+    "Record" => "Запис",
+    "User PIN" => "PIN Користувача",
+    "Listen Only" => "Тільки Слухати",
+    "Wait for Leader" => "Чекати Ведучого",
+    "User Options" => "Опції Користувача",
+    "Start Time" => "Час Початку",
+    "Duration (HH: MM) " => "Тривалість (ГГ:ХХ) ",
+    "Max Participants" => "Макс. Учасників",
+    "Moderator and user PINs must not be equal" => "PIN-коды модератора і користувача не повинні співпадати",
+    "Are you sure you wish to delete conference (es) ?" => "Ви впевнені, що хочете видалити конференцію/конференції?",
+    "Mode" => "Режим",
+    "Mute" => "Відключити звук",
+    "Kick" => "Відключити",
+    "Are you sure you wish to Mute caller (s) ?" => "Ви упевнені, що хочете відключити звук учасник (у/ам) ?",
+    "Are you sure you wish to Kick caller (s) ?" => "Ви упевнені, що хочете відключити учасник (а/ів) ?",
+    "Muted" => "Без звуку",
+    "UnMuted" => "Звук включений",
+    "Error when connecting to Asterisk Manager" => "Помилка з'єднання з Asterisk Manager",
+    "The conference installation is almost done. To complete it please" => "Установка конференції майже виконана. Будь ласка, завершите її.",
+    "Kick All" => "Відключити Усіх",
+    "Invite Caller" => "Запросити Учасника",
+    "The device wasn't write" => "Пристрій не був записаний",
+    "The device must be numeric" => "Пристрій має бути числовим значенням",
+    "The device couldn't be added to the conference" => "Пристрій не може бути доданий в конференцію",
+    "Filter" => "Фільтр",
+    "Show" => "Показати",
+    "Duration" => "Тривалість",
+    "Status" => "Статус",
+    "Update" => "Оновити",
+    "No Extensions" => "Немає Внутрішніх номерів",
+    "Unselected" => "Невибраний",
+    "Period" => "Період",
+    "Show Filter" => "Показати Фільтр",
+    "Hide Filter" => "Приховати Фільтр",
+    "Filter applied: " => "Поточний фільтр: ",
+    "Page" => "Сторінка",
+    "records" => "записів",
+    "of" => "з",
+    "No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
+    "More Options" => "Більше Опцій",
+);
+?>

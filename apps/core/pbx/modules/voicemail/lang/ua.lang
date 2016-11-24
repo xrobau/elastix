@@ -1,0 +1,68 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.7 2016/10/25 08:36:42 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Pager Email Address" => "Email для повідомлення",
+    "Confirm Password" => "Підтвердження Пароля",
+    "Email Attachment" => "Вкладення електронної пошти",
+    "Play CID" => "Відтворити CID",
+    "Play Envelope" => "Відтворити Дату",
+    "Delete Vmail" => "Видалити Повідомлення",
+    "Required Field" => "Обов'язкове Поле",
+    "Filter" => "Фільтр",
+    "Configuration" => "Налаштування",
+    "Start Date" => "Початкова Дата",
+    "End Date" => "Кінцева Дата",
+    "Voicemail List" => "Список Голосових Повідомлень",
+    "Are you sure you wish to delete voicemails?" => "Ви уверенны, що хочете видалити голосові повідомлення?",
+    "Date" => "Дата",
+    "Time" => "Час",
+    "Message" => "Повідомлення",
+    "Extension" => "Внутрішній номер",
+    "Duration" => "Тривалість",
+    "Status" => "Статус",
+    "Enable" => "Дозволити",
+    "Disable" => "Заборонити",
+    "Yes" => "Так",
+    "No" => "Ні",
+    "no _ file" => "Файл не знайдений!",
+    "no _ extension" => "Цей файл не дозволений для скачування",
+    "Download" => "Викачати",
+    "Listen" => "Слухати",
+    "no_extension_assigned" => "Немає внутрішнього номера асоційованого з поточним користувачем. Ви можете асоціювати внутрішній номер з вашим користувачем <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">тут</a>",
+    "contact _ admin" => "Немає внутрішнього номера асоційованого з поточним користувачем. Будь ласка, зв'яжіться з адміністратором для призначення внутрішнього номера вашому користувачеві",
+    "Show Filter" => "Показати Фільтр",
+    "Hide Filter" => "Приховати Фільтр",
+    "Filter applied " => "Поточний фільтр: ",
+    "Page" => "Сторінка",
+    "records" => "записів",
+    "No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
+    "of" => "з",
+);
+?>

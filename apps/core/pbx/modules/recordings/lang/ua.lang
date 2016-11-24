@@ -1,0 +1,50 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.7 2016/10/19 06:55:42 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule = array(
+    "Recordings" => "Запис вітань",
+    "Record Name" => "Ім'я Записи",
+    "Record" => "Запис",
+    "Insert the Recording Name" => "Вкажіть Ім'я Записи",
+    "The recording couldn't be realized" => "Запис не може бути здійснений",
+    "The recording was saved" => "Запис був збережений",
+    "To continue: record a message then click on save" => "Для продовження: запишіть повідомлення потім натисніть Зберегти'",
+    "Destiny directory couldn't be created" => "Папка призначення не може бути створена",
+    "File Upload" => "Завантаження Файлу",
+    "ERROR" => "ПОМИЛКА",
+    "You don't have extension number associated with user" => "Немає внутрішнього номера асоційованого з поточним користувачем. Ви можете асоціювати внутрішній номер з вашим користувачем <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">тут</a>",
+    "The call couldn't be realized" => "Виклик не може бути здійснений",
+    "Error copying the file" => "Помилка копіювання файлу",
+    "Message" => "Повідомлення",
+    "Possible file upload attack" => "Можливо атака завантаження файлу",
+    "contact_admin" => "Немає внутрішнього номера асоційованого з поточним користувачем. Будь ласка, зв'яжіться з адміністратором для призначення внутрішнього номера вашому користувачеві",
+    "You can start your recording after you hear a beep in your phone. Once you have finished recording you must press the # key and then hangup" => "Ви можете почати запис після того, як почуєте звуковий сигнал в трубці вашого телефону. Як тільки ви закінчите запис, ви повинні натиснути клавішу # і потім повісити трубку",
+    "You do not need to add an extension to the record name" => "Вам не треба додавати внутрішній номер до імені запису",
+);
+?>

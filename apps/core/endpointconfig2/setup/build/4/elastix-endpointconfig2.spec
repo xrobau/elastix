@@ -155,6 +155,12 @@ fi
 /usr/share/elastix/privileged/*
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- FIXED: Endpoint Configurator: (Yealink) try '/' in addition to '/cgi-bin/' and
+  ignore HTTP errors 404 and 400 when trying to tickle a 401 Unauthorized. This
+  fixes detection of a Yealink SIP-T38G with updated firmware.
+  SVN Rev[7776]
+
 * Wed Nov 23 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Endpoint Configurator: add new Snom phone models. This only adds the
   required strings to the database, and does not (yet) address any differences

@@ -68,34 +68,43 @@ class Endpoint(BaseEndpoint):
         '''
         sModel = None
         realm = None
-        try:
-            # Attempt to tickle a 401 Unauthorized from the server.
-            response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/')
-            htmlbody = response.read()
-            urlmatch = re.findall(r'<a href="(.+?)">', htmlbody, re.IGNORECASE)
-            for url in urlmatch:
-                response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/' + url)
+        for urlpath in ('/cgi-bin/', '/'):
+            try:
+                # Attempt to tickle a 401 Unauthorized from the server.
+                response = urllib2.urlopen('http://' + self._ip + urlpath)
                 htmlbody = response.read()
-        except urllib2.HTTPError, e:
-            if e.code == 401 and 'WWW-Authenticate' in e.headers:
-                m = re.search(r'realm="(.+)"', e.headers['WWW-Authenticate'])
-                if m != None: realm = m.group(1)
+                urlmatch = re.findall(r'<a href="(.+?)">', htmlbody, re.IGNORECASE)
+                for url in urlmatch:
+                    response = urllib2.urlopen('http://' + self._ip + '/cgi-bin/' + url)
+                    htmlbody = response.read()
+            except urllib2.HTTPError, e:
+                if e.code == 401 and 'WWW-Authenticate' in e.headers:
+                    realm = None
+                    m = re.search(r'realm="(.+)"', e.headers['WWW-Authenticate'])
+                    if m != None: realm = m.group(1)
 
-                relist = (r'realm="Enterprise IP phone (.+)"', r'realm="Gigabit Color IP Phone (.+)"')
-                for regexp in relist:
-                    m = re.search(regexp, e.headers['WWW-Authenticate'])
-                    if m != None:
-                        sModel = m.group(1)
-                        break
-                if sModel == None:
+                    relist = (r'realm="Enterprise IP phone (.+)"', r'realm="Gigabit Color IP Phone (.+)"')
+                    for regexp in relist:
+                        m = re.search(regexp, e.headers['WWW-Authenticate'])
+                        if m != None:
+                            sModel = m.group(1)
+                            break
+                    if sModel == None:
+                        logging.warning('Endpoint %s@%s failed to identify model from WWW-Authenticate: %s' %
+                                (self._vendorname, self._ip, e.headers['WWW-Authenticate']))
+                elif e.code == 400:
+                    # Ignore Bad Request on newer SIP-T38G triggered by /cgi-bin/
+                    pass
+                elif e.code == 404:
+                    # Ignore Not Found on /cgi-bin/ on incompatible Yealink
+                    pass
+                else:
                     logging.warning('Endpoint %s@%s failed to identify model from WWW-Authenticate: %s' %
-                            (self._vendorname, self._ip, e.headers['WWW-Authenticate']))
-            else:
-                logging.warning('Endpoint %s@%s failed to identify model from WWW-Authenticate: %s' %
                         (self._vendorname, self._ip, str(e)))
-        except Exception, e:
-            #print str(e)
-            pass
+            except Exception, e:
+                #print str(e)
+                pass
+            if sModel != None: break
 
         if sModel == None:
             if realm != None:

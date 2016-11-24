@@ -1,0 +1,76 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.0-31                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 2.5 2016-10-20 05:43:11 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Weak Keys" => "Слабкі Паролі",
+"Extension" => "Внутрішній номер",
+"Description" => "Опис",
+"Reason" => "Причина",
+"Same Key" => "Пароль співпадає з внутрішнім номером",
+"Short Key" => "Пароль занадто короткий (довжина менше ніж 5 цифр) ",
+"Search" => "Шукати",
+"Show" => "Показати",
+"Change Key" => "Change Key",
+"Old Key" => "Old Key",
+"New Key" => "New Key",
+"Save" => "Сохранить",
+"Confirm New Key" => "Confirm New Key",
+"Required field" => "Обов'язкове поле",
+"Key" => "Key",
+"Validation Error" => "Помилка Валидации",
+"Error" => "Помилка",
+"The following fields contain errors" => "Наступні поля містять помилки",
+"The key does not match with the actual key" => "The key does not match with the actual key",
+"The New Key does not match with the Confirmation Key" => "The New Key does not match with the Confirmation Key",
+"Message" => "Повідомлення",
+"Successful Key Update" => "Успішне Оновлення Пароля",
+"Current Key" => "Поточний Пароль",
+"The Current Key is invalid" => "Поточний Пароль недійсний",
+"Cancel" => "Відміна",
+"You are not authorized to enter to that extension" => "Ви не авторизовані для входу в цей внутрішній номер",
+"Weak Secrets" => "Слабкі Паролі",
+"Current Secret" => "Поточний Пароль",
+"New Secret" => "Новий Пароль",
+"Confirm New Secret" => "Підтвердити Новий Пароль",
+"The Current Secret is invalid" => "Поточний Пароль недійсний",
+"The New Secret does not match with the Confirmation Secret" => "Новий Пароль не співпадає з підтвердженням пароля",
+"Successful Secret Update" => "Успішне Оновлення Пароля",
+"Change Secret" => "Змінити Пароль",
+"Weak Key" => "Слабкий Пароль",
+"Status" => "Статус",
+"Show Filter" => "Показати Фільтр",
+"Hide Filter" => "Приховати Фільтр",
+"Filter applied: " => "Поточний фільтр: ",
+"Page" => "Сторінка",
+"records" => "записів",
+"of" => "з",
+"No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
+"Download" => "Зкачати",
+);
+?>

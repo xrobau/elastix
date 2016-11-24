@@ -1,0 +1,75 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.2                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 2.5. 2016-10-20 05:09:33 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Port - Service" => "Порт - Служба",
+"Ports" => "Порти",
+"Port" => "Порт",
+"Option" => "Опції",
+"Protocol" => "Протокол",
+"Port (s) " => "Порт (ы) ",
+"Delete" => "Видалити",
+"View" => "Перегляд",
+"Edit" => "Редагувати",
+"New Port" => "Новий Порт",
+"Comment" => "Коментарий",
+"Save correctly" => "Збережено успішно",
+"Delete correctly" => "Видалено успішно",
+"Update correctly" => "Оновлено успішно",
+"Details" => "Деталі",
+"Message" => "Повідомлення",
+"Error" => "Помилка",
+"Are you sure you wish to delete the port(s).?" => "Ви впевнені, що хочете видалити порт (ы)?",
+"Filter by" => "Фільтрувати по",
+"Name" => "Назва",
+"Define Ports" => "Визначення Портів",
+"Define Port" => "Визначити Порт",
+"Edit Port" => "Редагувати Порт",
+"View Port" => "Перегляд Порту",
+"Protocol Number" => "Номер Протоколу",
+"Type" => "Тип",
+"Code" => "Код",
+"This port had already been defined" => "Цей порт вже був визначений",
+"The name and the port can not be empty fields" => "Назва і порт не можуть бути порожніми полями",
+"The name, type and code can not be empty fields" => "Назва, тип і код не можуть бути порожніми полями",
+"The name and the protocol number can not be empty fields" => "Назва і номер протоколу не можуть бути порожніми",
+"The following fields contain errors" => "Наступні поля містять помилки",
+"Validation Error" => "Помилка валидации",
+"Port used in a firewall rule" => "Порт використовується в правилі Мережевого Екрану",
+"You have to delete the rule related in order to delete this port" => "Вам необхідно спочатку видалити связаное правило, для того, щоб видалити цей порт",
+"Some rules could be deactivated due to these changes, please check the firewall rules" => "Деякі правила можуть деактивувати із-за цих змін, будь ласка, перевірте правила Мережевого Екрану",
+"Show Filter" => "Показати Фільтр",
+"Hide Filter" => "Приховати Фільтр",
+"Filter applied: " => "Поточний фільтр: ",
+"Page" => "Сторінка",
+"records" => "записів",
+"of" => "з",
+"No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
+);
+?>

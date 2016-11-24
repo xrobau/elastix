@@ -1,0 +1,60 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.4-5                                               |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 2.5 2016-10-20 03:38:31 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Advanced Security Settings" => "Розширені Налаштування Безпеки",
+"Enable direct access (Non - embedded) to FreePBX®" => "Рзрешить прямий доступ (Невбудований) до FreePBX®",
+"Change Password" => "Змінити Пароль",
+"Enable access" => "Дозволити доступ",
+"Database and Web Administration FreePBX® Password" => "Пароль для Web адміністрування і бази даних FreePBX®",
+"Password Confirmation" => "Підтвердження Пароля",
+"Password and confirmation do not match!" => "Пароль і підтверднення не співпадають!",
+"The following fields are required" => "Наступні поля є обов'язковими",
+"The following field contain errors" => "Наступні поля містять помилки",
+"Information" => "Інформація",
+"Password has been updated." => "Пароль був оновлений.",
+"Password has not been updated." => "Пароль не був оновлений.",
+"Access direct to FreePBX® has been enabled." => "Прямий доступ до FreePBX® був дозволений.",
+"Access direct to FreePBX® has not been enabled." => "Прямий доступ до FreePBX® не був дозволений.",
+"Access direct to FreePBX® has been disabled." => "Прямий доступ до FreePBX® був заборонений.",
+"Access direct to FreePBX® has not been disabled." => "Прямий доступ до FreePBX® не був заборонений.",
+" But the following files have been modified: " => " Але наступні файли були змінені: ",
+"Password may only contain alphanumeric characters, spaces, or the following: .&-@=_!<>." => "Пароль може містити тільки цифри і букви, пропуски або наступні символи : .&-@=_!<>.",
+"Advice" => "Рада",
+"Unauthorized" => "Неавторизований",
+"You are not authorized to access this page." => "Ви не авторизовані для доступу до цієї сторінки.",
+"Enable direct access (Non - embedded) to FreePBX in \u0022Security >> Advanced Security Settings\u0022 menu." => "Дозволити прямий доступ (Невбудований) до <a href='http://www.freepbx.org'>FreePBX®</a> в меню \"Безпека >> Розширені Налаштування\". <br /> (<a href='http://www.freepbx.org'>FreePBX®</a> являється зареєстрованій торговою маркою компанії <a href='http://www.schmoozecom.com'>Schmooze Com, Inc</a>.)",
+'Enable anonymous SIP calls' => 'Дозволити анонімні SIP виклики',
+'Anonymous SIP calls are now enabled.' => 'Анонімні SIP виклики зараз дозволені',
+'Anonymous SIP calls are now disabled.' => 'Анонімні SIP виклики зараз заборонені',
+'Anonymous SIP calls cannot be enabled.' => 'Анонімні SIP виклики не можуть бути дозволені.',
+'Anonymous SIP calls cannot be disabled.' => 'Anonymous SIP calls cannot be disabled.',
+"FreePBX® is a Registered Trademark of Schmooze Com, Inc" => "FreePBX® є зареєстрованою торговою маркою компанії Schmooze Com, Inc. Для отримання детальнішої інформації відвідаєте сайти www.freepbx.org и www.schmoozecom.com.",
+);
+?>

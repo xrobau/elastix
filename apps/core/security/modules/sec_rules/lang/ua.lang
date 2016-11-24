@@ -1,0 +1,116 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0                                             |
+  | http://www.elastix.org                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang v.2.5 2016-10-20 05:36:47 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Rules" => "Правила",
+"New" => "Новий",
+"Traffic" => "Трафік",
+"Interface IN" => "Вхідниї Інтерфейс",
+"Interface OUT" => "Вихідниї Інтерфейс",
+"IP Source" => "Адреса Джерела",
+"IP Destiny" => "Адреса Призначення",
+"ALL" => "ВСЕ",
+"Protocol" => "Протокол",
+"Target" => "Дія",
+"Action" => "Дія",
+"Port Source" => "Порт Джерела",
+"Port Destine" => "Порт Призначення",
+"Type" => "Тип",
+"ID" => "ID",
+"New Rule" => "Нове Правило",
+"Delete" => "Видалити",
+"Are you sure you wish to delete the Rule?" => "Ви упевнені, що хочете видалити Правило?",
+"Orden" => "Orden",
+"Filter Example" => "Приклад Фільтру",
+"Rule" => "Правило",
+"Activate" => "Активувати",
+"Desactivate" => "Деактивувати",
+"Rule List" => "Список Правив",
+"Source Port" => "Порт Джерела",
+"Destiny Port" => "Порт Призначення",
+"Protocol ICMP Type" => "Protocol ICMP Type",
+"Number Protocol IP" => "Number Protocol IP",
+"Order" => "Порядок",
+"Order/Activated" => "Order/Activated",
+"INPUT" => "ВХІДНИЙ",
+"OUTPUT" => "ВИІДНИЙ",
+"FORWARD" => "FORWARD",
+"ACCEPT" => "ДОЗВОЛИТИ",
+"DROP" => "ВІДКИНУТИ",
+"REJECT" => "ВІДХИЛИТИ",
+"ANY" => "БУДЬ-ХТО",
+"The bit masks must be values less than 33" => "Бітова маска повинна мати значення менше ніж 33",
+"Error" => "Помилка",
+"Validation Error" => "Помилка Валидации",
+"The following fields contain errors" => "Наступні поля містять помилки",
+"Edit Rule" => "Редагувати Правило",
+"Wrong Mask" => "Некоректна Маска",
+"Up" => "Вгору",
+"Down" => "Вниз",
+"Successful Change" => "Змінено Успішно",
+"Invalid Action" => "Невірна Дія",
+"Execute Rules" => "Виконання Правил",
+"Successful Save" => "Збережено",
+"Successful Update" => "Оновлений Успішно",
+"Error during execution of rules" => "Помилка під час застосування правил",
+"Interface" => "Інтерфейс",
+"IN" => "Вхідний",
+"OUT" => "Вихідний",
+"The rules have been executed in the system" => "Правила були застосовані в системі",
+"There have been changes and have not been executed in the system" => "Зміну виконано але не було виконано в системк",
+"Cancel" => "Відміна",
+"Wrong value for ip" => "Помилкове значення для ip",
+"Save Changes" => "Зберегти Зміни",
+"FireWall Rules" => "Правила Мережевого Екрану",
+"You have made changes to the definition of firewall rules, for this to take effect in the system press the next button" => "Ви внесли зміни в правила Мережевого Екрану, для того, щоб застосувати зміни в системі натисніть на кнопку 'Зберегти Изменения'",
+"The firewall is totally desactivated. It is recommended to activate the firewall rules" => "Нині Мережевий Екран деактивує. Рекомендується завжди тримати його активованим.",
+"Activate FireWall" => "Активувати Мережевий Екран",
+"Desactivate FireWall" => "Деактивувати Мережевий Екран",
+"The firewall has been activated" => "Мережевий Екран був активований",
+"The firewall has been desactivated" => "Мережевий Екран деактивував",
+"The firewall could not be desactivated" => "Мережевий Екран не може деактивувати",
+"STATE" => "СТАН",
+"Established" => "Established",
+"Related" => "Related",
+"You have to select at least one state" => "Вам треба вибрати як мінімум одно стан",
+"Details" => "Деталі",
+"MESSAGE"=>"ПОВІДОМЛЕННЯ",
+"IP DETAILS"=>"ДЕТАЛІ IP",
+"PROTOCOL DETAILS"=>"ДЕТАЛІ ПРОТОКОЛУ",
+"ACTION DETAIL"=>"ПОДРОБИЦІ ДІЇ",
+"Show Filter" => "Показати Фільтр",
+"Hide Filter" => "Приховати Фільтр",
+"Filter applied " => "Поточний фільтр: ",
+"Page" => "Сторінка",
+"records" => "записів",
+"of" => "з",
+"No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
+"WARNING" => "УВАГА",
+);
+?>

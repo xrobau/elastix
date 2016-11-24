@@ -137,6 +137,10 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian translations.
+  SVN Rev[7794]
+
 * Thu Nov 24 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Firewall Rules: add commands to actually enable iptables service on
   next reboot. Additionally, elastix-security on CentOS 7 needs iptables-services

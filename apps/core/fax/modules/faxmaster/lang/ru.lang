@@ -33,6 +33,6 @@ $arrLangModule=array(
 "Value for Fax Master is not valid" => "Некорректное имя Администратора Факса",
 "Fax Master Email" => "Email Администратора Факса",
 "Write the email address which will receive the notifications of received messages, errors and activity summary of the Fax Server" => "Введите email-адрес на который будут посылаться уведомления о полученных факсах, ошибках и отчёты о работе Факс-Сервера",
-"Error when saving Fax Master" => "Error when saving Fax Master",
+"Error when saving Fax Master" => "Ошибка при сохранении Мастер-Факс",
 );
 ?>

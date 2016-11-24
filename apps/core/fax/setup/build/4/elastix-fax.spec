@@ -193,6 +193,10 @@ fi
 %config(noreplace) /var/spool/hylafax/etc/config
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian, Russian translations.
+  SVN Rev[7790]
+
 * Fri Apr 22 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
 - FIXED: Fax Events: check whether /etc/localtime is a symlink and use it as
   an additional way to find out the current timezone.

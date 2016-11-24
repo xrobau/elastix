@@ -1,8 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  CodificaciГіn: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 1.0                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,20 +24,38 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Bruno Macias                                           |
+  | Email: bmacias@palosanto.com                                         |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: ua.lang,v 1.7 2016/10/16 14:30:00 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Virtual Fax Name" => "Имя виртуального факса",
-"New Virtual Fax" => "Новый виртуальный факс",
-"Edit Virtual Fax" => "Редактировать виртуальный факс",
-"View Virtual Fax" => "Посмотреть виртуальный факс",
-"Destination Email" => "Ассоциированный Email",
-"Fax Extension" => "Номер факса",
-"Secret" => "Код доступа",
-"Caller ID Name" => "Имя звонящего",
-"Caller ID Number" => "Номер звонящего",
-"Country Code" => "Код Страны",
-"Area Code" => "Код Города",
+"Fax Viewer" => "Перегляд Факсів",
+"Search" => "Пошук",
+"Company Name" => "Назва Компанії",
+"Company Fax" => "Факс Компанії",
+"Fax Date" => "Дата",
+"File" => "Файл",
+"Fax Destiny" => "Призначення",
+"No Data Found" => "Дані Не Знайдені",
+"Are you sure you wish to delete fax (es)?" => "Ви упевнені, що хочете видалити факс (ы)?",
+"Unable to eliminate pdf file from the path." => "Неможливо усунути PDF- файл.",
+"Unable to eliminate pdf file from the database." => "Неможливо усунути PDF- файл з бази даних.",
+"Type Fax" => "Тип Факсу",
+"All" => "Все",
+"in" => "вхідні",
+"out" => "вихідні",
+"ERROR" => "ПОМИЛКА",
+"Type" => "Тип",
+'done' => 'Готово',
+'failed' => 'Не вдалося',
+'killed' => 'Відміна',
+'timedout' => 'Час Витік',
+"Status" => "Статус",
+"Show Filter" => "Показати Фільтр",
+"Hide Filter" => "Приховати Фільтр",
+"Page" => "Сторінка",
+"of" => "з",
 );
 ?>

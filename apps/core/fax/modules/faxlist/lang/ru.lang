@@ -37,5 +37,8 @@ $arrLangModule=array(
 "Caller ID Number" => "Номер звонящего",
 "View Virtual Fax" => "Посмотреть виртуальный факс",
 "Status" => "Статус",
+"Page" => "Страница",
+"of" => "из",
+"No records match the filter criteria" => "Нет записей, соответствующих критериям фильтра",
 );
 ?>

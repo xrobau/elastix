@@ -1,6 +1,6 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  CodificaciГіn: UTF-8
   +----------------------------------------------------------------------+
   | Elastix version 0.5                                                  |
   | http://www.elastix.com                                               |
@@ -25,19 +25,31 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: ua.lang,v 1.1 2016/10/16 13:35:36 LeNET support@lenet.com.ua Exp $
+*/
 global $arrLangModule;
-$arrLangModule=array(
-"Virtual Fax Name" => "Имя виртуального факса",
-"New Virtual Fax" => "Новый виртуальный факс",
-"Edit Virtual Fax" => "Редактировать виртуальный факс",
-"View Virtual Fax" => "Посмотреть виртуальный факс",
-"Destination Email" => "Ассоциированный Email",
-"Fax Extension" => "Номер факса",
-"Secret" => "Код доступа",
-"Caller ID Name" => "Имя звонящего",
-"Caller ID Number" => "Номер звонящего",
-"Country Code" => "Код Страны",
-"Area Code" => "Код Города",
+$arrLangModule = array(
+'Fax Queue' => 'Черга Факсів',
+'Job ID' => 'ID Завдання',
+'Priority' => 'Пріоритет',
+'Destination' => 'Адресат',
+'Pages' =>  'Сторінок',
+'Retries' => 'Повтор',
+'Status' => 'Статус',
+'Sent %d pages of %d' => 'Відправлено %d сторінок з %d',
+'Try %d of %d' => 'Спроба %d з %d',
+'Busy signal detected' => 'Сигнал виявлений',
+'No carrier detected' => 'Носій не виявлено',
+'No answer from remote' => 'Немає відповіді від видаленого',
+'Could not read request file' => 'Не вдалося прочитати файл запиту',
+'Blocked by another job' => 'Блоковано іншим завданням',
+'Delayed by prior call' => 'Затримка за попереднім викликом',
+'Are you sure to cancel selected jobs?' => 'Ви упевнені що хочете відмінити вибрані завдання?',
+'Cancel job' => 'Відміна завдання',
+'Failed to cancel job' => 'Не вдалося відмінити завдання',
+// Note: truncation on faxstat output
+'Blocked by concurrent cal' => 'Блоковано конкуруючим викликом',
+"No local dialtone" => "Не вдалося набрати номер",
+"No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
 );
 ?>

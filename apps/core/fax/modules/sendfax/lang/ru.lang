@@ -1,8 +1,8 @@
 <?php
-/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 2.0.0-7                                               |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,19 +25,24 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: ru.lang,v 1.1 2016-10-20 05:55:12 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Virtual Fax Name" => "Имя виртуального факса",
-"New Virtual Fax" => "Новый виртуальный факс",
-"Edit Virtual Fax" => "Редактировать виртуальный факс",
-"View Virtual Fax" => "Посмотреть виртуальный факс",
-"Destination Email" => "Ассоциированный Email",
-"Fax Extension" => "Номер факса",
-"Secret" => "Код доступа",
-"Caller ID Name" => "Имя звонящего",
-"Caller ID Number" => "Номер звонящего",
-"Country Code" => "Код Страны",
-"Area Code" => "Код Города",
+"Send Fax" => "Отправка Факса",
+"Destination fax numbers" => "Номера Адресата",
+"Fax Device to use" => "Факс Устройство",
+"Text to FAX" => "Текст для Факса",
+"Send" => "Отправить",
+"Select the files to FAX" => "Выберите файлы для Факса",
+"File Upload" => "Загруженный Файл",
+"Text Information" => "Текстовая Информация",
+"Select a Fax Device" => "Выберите Факс Устройство",
+"File to upload is empty" => "Файл для загрузки пуст",
+"Wrong type of file" => "Неправильный тип файла",
+"Text to send is empty" => "Текст для отправки пуст",
+"Please, select a valid Fax Device" => "Пожалуйста, выберите Факс Устройство",
+"Types of files" => "Поддерживаются типы файлов: ",
+"Fax has been sent correctly" => "Факс был отправлен успешно",
+"Notification Sucessfull" => "Уведомление Успешно",
 );
 ?>

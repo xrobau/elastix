@@ -25,19 +25,18 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: ua.lang,v 1.6 2016/10/16 10:39:42 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Virtual Fax Name" => "Имя виртуального факса",
-"New Virtual Fax" => "Новый виртуальный факс",
-"Edit Virtual Fax" => "Редактировать виртуальный факс",
-"View Virtual Fax" => "Посмотреть виртуальный факс",
-"Destination Email" => "Ассоциированный Email",
-"Fax Extension" => "Номер факса",
-"Secret" => "Код доступа",
-"Caller ID Name" => "Имя звонящего",
-"Caller ID Number" => "Номер звонящего",
-"Country Code" => "Код Страны",
-"Area Code" => "Код Города",
+"Fax Clients" => "Факс-Клієнти",
+"Clients allowed to send faxes" => "Клієнти, яким дозволяється посилати факси",
+"No IP entered, you must keep at least the IP 127.0.0.1" => "Жодного IP- адреси не введено, має бути присутнім як мінімум 127.0.0.1",
+"These IPs are allowed to send faxes through Elastix.  You must insert one IP per row.  We recommend keeping localhost and 127.0.0.1  in the configuration because some processes could need them." => "Цим IP- адресам, дозволено відправляти факси Elastix.<br> Ви повинні вставити один IP в рядку. Ми рекомендуємо <br> localhost або 127.0.0.1 у конфігурації, оскільки деякі процеси <br> потребуватиме їх.",
+"Could not read the clients configuration." => "Неможливо прочитати конфігурацію клієнтів",
+"IP" => "IP",
+"Error" => "Помилка",
+"Message" => "Повідомлення",
+"Configuration updated successfully" => "Конфігурація оновлена успішно",
+"Write error when writing the new configuration." => "Помилка при записі нової конфігурації",
 );
 ?>

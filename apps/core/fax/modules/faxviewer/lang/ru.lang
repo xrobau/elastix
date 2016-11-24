@@ -1,8 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  CodificaciГіn: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 1.0                                                  |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -24,20 +24,38 @@
   +----------------------------------------------------------------------+
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  |                                                                      |
+  | Translate by: Bruno Macias                                           |
+  | Email: bmacias@palosanto.com                                         |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: ru.lang,v 1.7 2016/10/16 14:15:00 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Virtual Fax Name" => "Имя виртуального факса",
-"New Virtual Fax" => "Новый виртуальный факс",
-"Edit Virtual Fax" => "Редактировать виртуальный факс",
-"View Virtual Fax" => "Посмотреть виртуальный факс",
-"Destination Email" => "Ассоциированный Email",
-"Fax Extension" => "Номер факса",
-"Secret" => "Код доступа",
-"Caller ID Name" => "Имя звонящего",
-"Caller ID Number" => "Номер звонящего",
-"Country Code" => "Код Страны",
-"Area Code" => "Код Города",
+"Fax Viewer" => "Просмотр Факсов",      /*Bruno agrego modulo*/
+"Search"    => "Поиск",            /*Bruno agrego modulo*/
+"Company Name"    => "Название Компании",            /*Bruno agrego modulo*/
+"Company Fax"     => "Факс Компании",            /*Bruno agrego modulo*/
+"Fax Date"        => "Дата",        /*Bruno agrego modulo*/
+"File"            => "Файл",        /*Bruno agrego modulo*/
+"Fax Destiny"     => "Назначения", /*Bruno agrego modulo*/
+"No Data Found"   => "Данные Не Найдены", /*Bruno agrego modulo*/
+"Are you sure you wish to delete fax (es)?" => "Вы уверены, что хотите удалить факс(ы)?",
+"Unable to eliminate pdf file from the path." => "Невозможно устранить PDF-файл.",
+"Unable to eliminate pdf file from the database." => "Невозможно устранить PDF-файл из базы данных.",
+"Type Fax" => "Тип Факса",
+"All" => "Все",
+"in" => "входящий",
+"out" => "исходящий",
+"ERROR" => "ОШИБКА",
+"Type" => "Тип",
+'done' => 'Готово',
+'failed' => 'Не Удалось',
+'killed' => 'Отмена',
+'timedout' => 'Время Истекло',
+"Status" => "Статус",
+"Show Filter" => "Показать Фильтр",
+"Hide Filter" => "Скрыть Фильтр",
+"Page" => "Страница",
+"of" => "из",
 );
 ?>

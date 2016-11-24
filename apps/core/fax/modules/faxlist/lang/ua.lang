@@ -25,19 +25,20 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+  $Id: ua.lang,v 1.6 2016/10/16 10:49:42 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Virtual Fax Name" => "Имя виртуального факса",
-"New Virtual Fax" => "Новый виртуальный факс",
-"Edit Virtual Fax" => "Редактировать виртуальный факс",
-"View Virtual Fax" => "Посмотреть виртуальный факс",
-"Destination Email" => "Ассоциированный Email",
-"Fax Extension" => "Номер факса",
-"Secret" => "Код доступа",
-"Caller ID Name" => "Имя звонящего",
-"Caller ID Number" => "Номер звонящего",
-"Country Code" => "Код Страны",
-"Area Code" => "Код Города",
+"Virtual Fax List" => "Список віртуальних факсів",
+"Virtual Fax Name" => "Ім'я віртуального факсу",
+"Fax Extension" => "Номер факсу",
+"Secret" => "Код доступу",
+"Destination Email" => "Пов'язаний Email",
+"Caller ID Name" => "Ім'я того, що дзвонить",
+"Caller ID Number" => "Номер того, що дзвонить",
+"View Virtual Fax" => "Подивитися віртуальний факс",
+"Status" => "Статус",
+"Page" => "Сторінка",
+"of" => "з",
+"No records match the filter criteria" => "Немає записів, що відповідають критеріям фільтру",
 );
 ?>

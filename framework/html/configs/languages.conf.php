@@ -25,8 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: languages.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $ 
+  $Id: languages.conf.php,v 1.1.1.1 2007/07/06 21:31:56 gcarrillo Exp $
 */
+/* TODO: Having the master language list in a single file makes it awkward to
+ * just drop a brand new translation. This list should become a directory with
+ * one file per declared language label. */
 $languages=array(
 "bg"=>"Български", //bulgarian
 "ca"=>"Català",    //Catalan
@@ -43,7 +46,7 @@ $languages=array(
 "nl"=>"Nederlands",//ducth
 "no"=>"Norsk",     //Norwegian
 "pl"=>"Polski",    //polish
-"br"=>"Português (Brasil)", 
+"br"=>"Português (Brasil)",
 "ru"=>"Русский",   //ru
 "ro"=>"Română",    //romanian
 "sl"=>"Slovenščina", //slovenian
@@ -56,5 +59,6 @@ $languages=array(
 "tw"=>"繁體中文",   //Chinese (Traditional)
 "th"=>"ไทย",        //thai
 "sr"=>"Srpski",    //serbian
+"ua"=>"Українська",// Ukrainian
 );
 ?>

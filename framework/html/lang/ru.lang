@@ -137,7 +137,7 @@ $arrLang=array(
 "Address Book" => "Адресная Книга",
 
 /*Module Email*/
-"Email" => "Email",
+"Email" => "Почта",
 "Domains" => "Домены",
 "Accounts" => "Учётные Записи",
 "Relay" => "Relay",
@@ -146,13 +146,13 @@ $arrLang=array(
 "Remote SMTP" => "Удалённый SMTP",
 "Email list" => "Списки Рассылки",
 "Email stats" => "Статистика",
-"Vacations" => "Автоматический Ответ",
+"Vacations" => "Автоответчик",
 
 /*Module Fax*/
 "Fax" => "Факс",
 
 /*Module PBX*/
-"PBX" => "PBX",
+"PBX" => "АТС",
 "PBX Configuration" => "Настройка PBX",
 "Operator Panel" => "Панель Оператора",
 "Voicemail" => "Голосовая почта",
@@ -179,7 +179,7 @@ $arrLang=array(
 "Reports" => "Отчёты",
 
 "Extras" => "Extras",
-"Addons" => "Дополнения",
+"Addons" => "Плагины",
 "My Extension" => "Мой Номер",
 "Settings" => "Настройки",
 
@@ -325,6 +325,14 @@ implementations of Voice over IP around the globe.",
 "Asterisk Logs" => "Журнал Asterisk",
 "Graphic Report"  => "Графический Отчёт",
 "Summary"  => "Сводка",
-"Missed Calls"  => "Пропущенные Вызовы"
+"Missed Calls"  => "Пропущенные Вызовы",
+"Show Filter" => "Показать Фильтр",
+"Hide Filter" => "Скрыть Фильтр",
+"Page" => "Страница",
+"of" => "из",
+"Send" => "Отправка SMS",
+"Lists" => "Списки",
+"Trunks" => "Транки",
+"No records match the filter criteria" => "Записи не соответствуют критериям фильтра",
+"SMS" => "СМС",
 );
-?>

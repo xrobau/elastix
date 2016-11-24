@@ -1,0 +1,352 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 0.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ru.lang,v 1.6 2007/09/05 00:36:42 gcarrillo Exp $ */
+global $arrLang;
+$arrLang=array(
+/*System Info*/
+"Disk usage" => "Використання диска",
+"Used space" => "Зайнято",
+"Free space" => "Вільно",
+"Simultaneous calls, memory and CPU" => "Дзвінки, пам'ять і CPU разом",
+"Sim. calls" => "Одночасні дзвінки",
+"CPU usage (%)" => "Завантаження CPU (%)",
+"Mem. usage (MB)" => "Використання пам'яті (MB)",
+/*System Info*/
+
+"Export" => "Експорт",
+"Start" => "Початок",
+"End" => "Кінець",
+"Next" => "Наступний",
+"Previous" => "Попередній",
+
+"Validation Error" => "Помилка валідації",
+"The following fields contain errors" => "Наступні поля містять помилки",
+"Save" => "Зберегти",
+"Required field" => "Обов'язкове поле",
+"Apply changes" => "Застосувати зміни",
+"Cancel" => "Скасувати",
+
+/*Login to Elastix*/
+"Welcome to Elastix" => "Ласкаво просимо в Elastix",
+"Please enter your username and password" => "Будь ласка, введіть ім'я користувача та пароль",
+"Username" => "Ім'я користувача",
+"Password" => "Пароль",
+"Submit" => "Відправити",
+"Login page" => "Вхід в систему",
+/*end Login to Elastix*/
+
+/*start User Management*/
+"Group" => "Група",
+"User List" => "Список користувачів",
+"The group is wrong" => "Невірна група",
+"Are you sure you wish to continue?" => "Ви впевнені що хочете продовжити?",
+"Edit" => "Редагувати",
+"Delete" => "Видалити",
+"Accept" => "Прийняти",
+"Group Permission" => "Права групи",
+"Users" => "Користувачі",
+"Directory couldn't be opened" => "Директорія не може бути відкрита",
+/*end User Management*/
+
+/*start menu*/
+"System" => "Система",
+"System Info" => "Системна Інформація",
+"User Management" => "Користувачі",
+"Menu Administrator" => "Меню Адміністратора",
+/*end  menu*/
+
+/*Start Language*/
+"Language" => "Мова",
+"Change" => "Змінити",
+"Logout" => "Вихід",
+/*end Language*/
+
+/*version 0.7*/
+/*start paloSantoValidar.class.php*/
+"Options" => "Опції",
+"Empty field" => "Пусте поле",
+"Bad Format" => "Некоректний Формат",
+"No option was selected" => "Жодної опції не вибрано",
+"Octets out of range" => "Октети поза діапазону",
+"Undefined validation type" => "Невизначений тип перевірки",
+/*end paloSantoValidar.class.php*/
+
+/*version 0.8*/
+/*start user*/
+"View User" => "Перегляд Користувача",
+/*end user*/
+
+/*system - date/time*/
+"Date/Time" => "Дата та Час",
+/*end system - date/time*/
+
+/*History*/
+"History" => "Історія",
+
+/*load module*/
+"Load Module" => "Завантажити Модуль",
+"ID for new module (folder name)" => "ID для нового модуля (ім'я папки)",
+"Choose Menu" => "Виберіть Меню",
+"ID for new menu" => "ID для нового меню",
+"Menu Name" => "Назва Меню",
+"Defined Menu" => "Певний Меню",
+"New Menu" => "Нове Меню",
+"Module sucessfully loaded" => "Модуль успішно завантажений",
+"Folder name doesn't exist in module file" => "Ім'я папки не існує в файлі модуля",
+"Folder configs doesn't exist in module file" => "Конфігураційні файли папки не існує в файлі модуля",
+"Folder themes doesn't exist in module file" => "Теми папки не існує в файлі модуля",
+"File index.php doesn't exist in module file" => "Файл index.php не існує в файлі модуля",
+"File install.php doesn't exist in module file" => "Файл install.php не існує в файлі модуля",
+/*end load module*/
+
+// Elastix 0.9
+/*Start SubModule Themes*/
+"Themes" => "Теми",
+"Change Theme" => "Змінити Тему",
+/*end SubModule Themes*/
+
+
+/*Module Agenda*/
+"Agenda" => "Планувальник",
+"Calendar" => "Календар",
+"Address Book" => "Адресна Книга",
+
+/*Module Email*/
+"Email" => "Пошта",
+"Domains" => "Домени",
+"Accounts" => "Акаунти",
+"Relay" => "Relay",
+"Webmail" =>"Веб Пошта",
+"Antispam" => "Антиспам",
+"Remote SMTP" => "Віддалений SMTP",
+"Email list" => "Списки Розсилання",
+"Email stats" => "Статистика",
+"Vacations" => "Автовідповідач",
+
+/*Module Fax*/
+"Fax" => "Факс",
+
+/*Module PBX*/
+"PBX" => "АТС",
+"PBX Configuration" => "Налаштування АТС",
+"Operator Panel" => "Панель Оператора",
+"Voicemail" => "Голосова пошта",
+"Configuration" => "Налаштування",
+"Calls Recordings" => "Записи Розмов",
+"Batch Configurations" => "Групова Налаштування",
+"Endpoint Configurator" => "Налаштування Телефонів",
+"Batch of Extensions" => "Група Внутрішніх номерів",
+"Conference" => "Конференція",
+"Tools" => "Інструменти",
+"Asterisk-Cli" => "Командна строка Asterisk",
+"Asterisk File Editor" => "Редактор файлів Asterisk",
+"Recordings" => "Запис привітань",
+"Flash Operator Panel" => "Flash Панель Оператора",
+
+/*Module IM*/
+"IM" => "Миттєві Повідомлення",
+"OpenFire" => "OpenFire",
+"The service Openfire No running" => "Сервіс Openfire не запущено",
+"Webmin" => "Webmin",
+"The service Webmin No running" => "Послуга Webmin не активний в даний момент. Якщо ви хочете активувати його, будь ласка ",
+
+/*Module Reports*/
+"Reports" => "Звіти",
+
+"Extras" => "Додатково",
+"Addons" => "Плагіни",
+"My Extension" => "Мій Номер",
+"Settings" => "Налаштування",
+
+/*Module Security*/
+"Security" => "Безпека",
+"Firewall" => "Мережевий Екран",
+"Audit" => "Аудіт",
+"Weak Keys" => "Слабкі паролі",
+"Advanced Settings" => "Розширені налаштування",
+"Firewall Rules" => "Правила Мережевого Екрану",
+"Define Ports" => "Визначення Портів",
+"Port Knocking Interface" => "Port Knocking Інтерфейс",
+"Port Knocking Users" => "Port Knocking Користувачів",
+
+/*vTigerCRM*/
+
+"vTigerCRM" => "vTigerCRM",
+"The vTiger installation is almost done. To complete it please" => "The vTiger installation is almost done. To complete it please ",
+"click here" => "click here",
+
+/*Sugarcrm*/
+"SugarCRM" => "SugarCRM",
+"The SugarCRM installation is almost done. To complete it please" => "The SugarCRM installation is almost done. To complete it please",
+
+/*Dashboard*/
+"Dashboard" => "Панель Стану",
+"Dashboard Applet Admin" => "Налаштування Панелі Стану",
+
+/*Network*/
+"Network" => "Мережа",
+"Network Parameters" => "Мережеві Налаштування",
+"DHCP Server" => "DHCP-Сервер",
+"DHCP Client List" => "Список Клієнтів DHCP",
+"Assign IP Address to Host" => "Резервування DHCP",
+
+/*Shutdown*/
+"Shutdown" => "Вимкнення",
+
+/*Hardware Detector*/
+"Hardware Detector" => "Виявлення Обладнання",
+
+/*Updates*/
+"Updates" => "Оновлення",
+"Repositories" => "Репозиторії",
+"Packages" => "Пакети",
+
+/*Backup/Restore*/
+"Backup/Restore" => "Резервне Копіювання",
+
+/*Preferences*/
+"Preferences" => "Вподобання",
+"Currency" => "Валюта",
+
+/* Start About Elastix */
+"About Elastix" => "Про Elastix",
+"About Elastix2"=>"Про Elastix",
+"HELP"=>"Допомога",
+"About Elastix Content" => "Elastix was created under the premise of becoming a reliable, easy-to-use,web-based system for the management of communications over IP. This open
+source software started in Ecuador has become the solution of choice for
+implementations of Voice over IP around the globe.",
+"About Elastix Closed" => "Закрити",
+/* end About Elastix */
+
+//Elastix 0.9.1
+/*Start module Group List*/
+"Groups"=>"Групи",
+"Group List"=>"Список Груп",
+/*End module Group List*/
+
+/*Grouplist*/
+"administrator" => "Адміністратор",
+"operator" => "Оператор",
+"extension" => "Extension",
+"total access" => "Повний доступ",
+"extension user" => "Extension User",
+/*Grouplist*/
+"Title" => "Title",
+"Search" => "Шукати",
+"Show"   => "Показати",
+'md_message_title' => 'Прибрати',
+"ERROR" => "Помилка",
+"VersionDetails" => "Версія",
+"VersionPackage" => "Версії пакетів",
+"textMode" => "Режим Текст",
+"htmlMode" => "Режим Html",
+"Register" => "Реєстрація",
+"Registered" => "Зареєстрован",
+"Unauthorized" => "Неавторизованый",
+"You are not authorized to access to this page" => "Ви маєте прав на доступ до цієї сторінки",
+"You need administrator privileges" => "Вам потрібні права адміністратора",
+"Elastix Authentication" => "Elastix Аутентифікації",
+"You have not permissions to access to Flash Operator Panel. Please contact your administrator." => "Вам не разрешен доступ к Flash Панели Оператора. Пожалуйста, свяжитесь с администратором.",
+"Advice" => "Advice",
+
+/*Module Call Center*/
+
+"Call Center" => "Контакт-Центр",
+"Reports" => "Звіти",
+"Forms" => "Форми",
+"Breaks" => "Перерыви",
+"Agent Options" => "Налаштування Агента",
+"Ingoing Calls" => "Вхідні Виклики",
+"Outgoing Calls" => "Вихідні Виклики",
+"Campaigns"  => "Кампанії",
+"Do not Call List"  => "Список 'Не Дзвонити'",
+"External URLs"  => "Зовнішні URL",
+"Queues"  => "Черги",
+"Clients"  => "Клієнти",
+"Ingoing Campaigns" => "Вхідні Компані",
+"Agent Console" => "Консоль Агента",
+"Reports Break" => "Звіт про Перерву",
+"Calls Detail"  => "Деталізація Викликів",
+"Calls per hour" => "Викликів за годину",
+"Calls per Agent" => "Викликів Агенту",
+"Hold Time" => "Час Утримання",
+"Login Logout" => "Час Входу-Виходу",
+"Ingoing Calls Success" => "Вхідні Виклики Успішно",
+"Graphic Calls per hour" => "Графік Викликів за годину",
+"Agent Information" => "Інформація про Агента",
+"Agents Monitoring" => "Моніторинг Агентів",
+"Trunks used per hour" => "Зайнятість транков за годину",
+"Incoming calls monitoring" => "Моніторинг вхідних викликів",
+"Campaign monitoring" => "Моніторинг компанії",
+"Agents" => "Агенти",
+"ECCP Users" => "ECCP Користувачі",
+"Callback Extensions" => "Внутрішні номери для Зворотного виклику",
+"Form Designer" => "Дизайнер Форм",
+"Form Preview" => "Попередній перегляд Форм",
+
+/*New*/
+"Hide left panel" => "Приховати ліву панель",
+"Load left panel" => "Показати ліву панель",
+"Add Bookmark" => "Додати закладку",
+"Search modules" => "Пошук модулів",
+"Change Elastix Password" => "Змінити Пароль Elastix",
+"CDR Report" => "Звіт CDR",
+"Channels Usage" => "Використання Каналів",
+"Billing" => "Білінг",
+"Rates" => "Тарифи",
+"Billing Report" => "Билінговий звіт",
+"Destination Distribution" => "Напрями",
+"Billing Setup" => "Налаштування Білінгу",
+"Asterisk Logs" => "Журнал Asterisk",
+"Graphic Report"  => "Графічний Звіт",
+"Summary"  => "Зведення",
+"Missed Calls"  => "Пропущені Виклики",
+"Fax Clients" => "Факс-Клієнти",
+"Virtual Fax" => "Віртуальний Факс",
+"Fax Master" => "Майстер Факс",
+"Fax Viewer" => "Перегляд Факсів",
+"Email Template" => "Email Шаблон",
+"Virtual Fax List" => "Віртуальний Список Факсів",
+"New Virtual Fax" => "Створити Віртуальний Факс",
+"Send Fax" => "Відправити Факс",
+"Fax Queue" => "Черга Факсів",
+"Softphones" => "Софтфони",
+"Fax Utilities" => "Утиліти для Факсів",
+"Instant Messaging" => "Миттєві Повідомлення",
+"Downloads" => "Завантаження",
+"Calling Cards" => "Телефонні Карти",
+"Show Filter" => "Показати Фільтр",
+"Hide Filter" => "Приховати Фільтр",
+"Page" => "Сторінка",
+"of" => "з",
+"Send" => "Відправка SMS",
+"Lists" => "Списки",
+"Trunks" => "Транки",
+"No records match the filter criteria" => "Записи не відповідають критеріям фільтру",
+"SMS" => "СМС",
+);

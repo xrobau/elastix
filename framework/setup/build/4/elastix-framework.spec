@@ -405,6 +405,11 @@ rm -rf $RPM_BUILD_ROOT
 %exclude /var/www/html/themes/blackmin
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added new Ukrainian language option for language selection. Fix some
+  Russian strings on main language files.
+  SVN Rev[7777]
+
 * Wed Nov 23 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-18
 - CHANGED: framework - Build/elastix-framework.spec: update specfile with latest
   SVN history. Bump Release in specfile.

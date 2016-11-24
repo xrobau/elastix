@@ -1,0 +1,39 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.4.0-9                                               |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.1 2016-10-16 18:13:04 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Instant Messaging" => "Миттєві Повідомлення",
+"Developer Description" => "Опис Розробника",
+"Developer" => "Розробник",
+"Download Link" => "Силка на Скачування",
+
+"spark_software_description" => "Spark це найпростіша і краща програма для використання в незахищені мережі обміну миттєвими повідомленнями.",
+"spark_manufacturer_description" => "Spark є відкритим початковим кодом, кросс-платформенный клієнт миттєвих повідомлень оптимізовані для підприємств і організацій. Він оснащений вбудованою підтримкою груповий чат, інтеграції телефонії, а також високий рівень безпеки. Він також пропонує великий досвід для кінцевих користувачів з функціями, як в он-лайн перевірки орфографії, груповий чат кімнату, закладки, і вкладками розмови.",
+);
+?>

@@ -60,6 +60,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian, Russian translations.
+  SVN Rev[7789]
+
 * Fri Nov  6 2015 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Extras: replace "Manufacturer" with "Developer" everywhere.
   SVN Rev[7336]

@@ -1,0 +1,150 @@
+<?php
+/* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  Codificación: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.5                                                  |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.0 2016/10/07 18:28:42 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Are you sure you wish to delete backup (s)?" => "Вы уверены, что хотите удалить резервную копию (и)?",
+"Database" => "База Даних",
+"PDF" => "PDF",
+"Endpoint" => "Телефони",
+"Asterisk" => "Asterisk",
+"All options (Fax)" => "Всі опції (Факс)",
+"All options (Email)" => "Всі опції (Електронна пошта)",
+"All options (Endpoint)" => "Всі опції (Телефони)",
+"All options (Asterisk)" => "Всі опції (Asterisk)",
+"DAHDI Configuration" => "Налаштування DAHDI",
+"Others" => "Інші",
+"All options (Others)" => "Всі опції (Інші)",
+"SugarCRM Database" => "База Даних SugarCRM",
+"VtigerCRM Database" => "База Даних VtigerCRM",
+"A2billing Database" => "База Даних A2billing",
+"Mysql Database" => "База Даних Mysql",
+"Menus and Permissions" => "Меню і Права",
+"This process could take several minutes" => "Цей процес може зайняти кілька хвилин",
+"Mailbox" => "Поштові Ящики",
+"(Heavy Content)" => "(Великий Об'єм)",
+"Upload" => "Завантажити",
+"File Upload" => "файл Завантажений",
+"The backup file would have a tar extension" => "Файл резервної копії буде мати розширення tar",
+"Error copying the file" => "Помилка копіювання файлу",
+"The file was copied correctly" => "Файл був скопійований коректно",
+"Backup" => "Виконати Резервне Копіювання...",
+"Process" => "Обробка",
+"Restore" => "Відновити",
+"Elastix Database" => "База Даних Elastix",
+"Sounds" => "Звуки",
+"Configuration Files" => "Конфігураційні файли",
+"Monitors" => "Записи Розмов",
+"tFTP" => "tFTP",
+"Email Acccounts" => "Облікові записи електронної пошти",
+"Choose an option to backup" => "Виберіть опції для резервного копіювання",
+"Could not generate backup file" => "Неможливо згенерувати резервну копію",
+"Backup Complete!" => "Резервне копіювання завершене!",
+"Choose an option to restore" => "Виберіть опції для відновлення",
+"Backup file path can't be empty" => "Файл резервної копії не може бути порожнім",
+"File doesn't exist" => "Файл не існує",
+"Restore Complete!" => "Відновлення завершене!",
+"Backup File Location" => "Шлях до файлу резервної копії",
+"Select All options" => "Вибрати Усі опції",
+"Backup/Restore" => "Резервне Копіювання",
+"Backup List" => "Список резервних копій",
+"Name Backup" => "Ім'я резервної копії",
+"Error when deleting backup file" => "Помилка видалення резервної копії",
+"There are not backup file selected" => "Не вибрано жодної резервної копії",
+"Action" => "Дія",
+"Folder backup doesn't exist" => "Папка резервного копіювання не існує",
+"Flash Operator Panel Config Files" => "Файли налаштування Flash Панелі Оператора (FOP)",
+"Date" => "Дата",
+"Voicemails" => "Голосова пошта",
+"Fax" => "Факс",
+"Email" => "Електронна Пошта",
+"Dahdi Configuration" => "Налаштування Dahdi",
+"Cancel" => "Відмінити",
+"Select all in this section" => "Вибрати все в цьому розділі",
+"MOH" => "Музыка на Утриманні",
+"Others new" => "Інші",
+"Calendar  Database" => "База Даних Календаря",
+"Address Book Database" => "База Даних Адресної Книги",
+"Conference  Database" => "База Даних Конференцій",
+"FTP Backup" => "FTP Backup",
+"Server FTP" => "FTP-Сервер",
+"Port" => "Порт",
+"User" => "Користувач",
+"Password" => "Пароль",
+"Local" => "Локальний Сервер",
+"Download" => "Викачати",
+"Path Server FTP" => "Шлях на сервері FTP",
+"Error to connect" => "Будь ласка, заповните усі поля для підключення до сервера",
+"Error Connection" => "Не вдається підключитися до сервера",
+"Error user_password" => "Не можу з'єднатися з указаным ім'ям користувача і паролем",
+"Error to save" => "Будь ласка, заповните усі поля для того, щоб зберегти",
+"Error Drag Drop" => "Будь ласка перетягнете файл між списками",
+"Error to request" => "Виникла проблема з підключенням",
+"Successfully uploaded" => "Успішно завантажено",
+"Problem uploading" => "Виникла проблема із завантаженням",
+"Successfully written" => "Успішно записано",
+"Problem downloading" => "Виникла проблема із скачуванням",
+"TITLE" => "Будь ласка, перетягнете файл між списками для завантаження або скачування по FTP",
+"AUTOMATIC" => "Автоматичне Резервне Копіювання",
+"DAILY" => "Щодня",
+"MONTHLY" => "Щомісячно",
+"WEEKLY" => "Щотижня",
+"DISABLED" => "Відключено",
+"SUCCESSFUL" => "Процес успішно завершено",
+"Unabled write file" => "Неможливо записати файл",
+"Unabled open file" => "Неможливо відкрити файл",
+"EOP" => "EOP",
+"programs" => "Програми",
+"Warning" => "<b><font size='2' color='red'>УВАГА:</font></b> Версія для відновлення відрізняється від поточної. Можуть виникнути серйозні проблеми з роботою програм після відновлення. Натисніть 'Обробити', якщо хочете продовжити або 'Відміна', якщо ні.",
+"local_version" => "Поточна",
+"external_version" => "Резервній Копії",
+"details" => "подивитися деталі",
+"warning_details" => "Деталі Попередження",
+"no_file_xml" => "<b><font size='2' color='red'>УВАГА:</font></b> Немає даних про версію у файлі Резервної копії. Можуть виникнути серйозні проблеми з роботою програм після відновлення. Натисніть 'Обробити', якщо хочете продовжити або 'Відміна', якщо ні.",
+"asterisk" => "Asterisk",
+"dahdi" => "DAHDI",
+"wanpipe-util" => "Wanpipe-Util",
+"freepbx" => "Freepbx",
+"elastix" => "Elastix",
+"Package" => "Пакет",
+"elastix-pbx" => "Elastix PBX",
+"elastix-email_admin" => "Elastix Пошта",
+"elastix-agenda" => "Elastix Agenda",
+"elastix-fax" => "Elastix Факс",
+"elastix-vtigercrm" => "Elastix VtigerCRM",
+"elastix-a2billing" => "Elastix A2billing",
+"elastix-sugarcrm-addon" => "Elastix SugarCRM",
+"Package not installed" => "Не встановлений",
+"Version" => "Версія",
+"Please verify if the mysql password is the correct in /etc/elastix.conf (mysqlrootpwd)" => "Будь ласка, перевірте, якщо пароль MySQL є правильним у файлі /etc/elastix.conf (mysqlrootpwd)",
+"Page" => "Сторінка",
+"Options Backup" => "Опції Резервної Копії",
+"FTP server credentials not set" => "Не задані облікові дані FTP-сервера",
+"records" => "записів",
+);
+?>

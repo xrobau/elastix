@@ -179,6 +179,10 @@ fi
 %config(noreplace) /etc/dahdi/genconf_parameters
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian translations.
+  SVN Rev[7781]
+
 * Tue Nov 22 2016 Luis Abarca <labarca@palosanto.com> 2.5.0-8
 - CHANGED: system - Build/elastix-system.spec: update specfile with latest
   SVN history. Changed release in specfile.

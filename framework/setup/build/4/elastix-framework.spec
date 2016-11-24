@@ -406,6 +406,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian translations to framework modules.
+  SVN Rev[7779]
 - CHANGED: Added new Ukrainian language option for language selection. Fix some
   Russian strings on main language files.
   SVN Rev[7777]

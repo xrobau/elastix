@@ -25,17 +25,11 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 2.5 2015/10/20 18:21:42 gcarrillo Exp $ */
+  $Id: ua.lang,v 1.6 2016/10/16 18:40:42 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
 $arrLangModule=array(
-"Description"=>"Описание",
-"New Group"=>"Новая Группа",
-"Create New Group"=>"Создать Новую Группу",
-"View Group"=>"Просмотр Группы",
-"Edit Group"=>"Редактировать Группу",
-"The Group have users assigned. You can delete any group that does not have any users assigned in it."=>"Группа имеет связанных с ней пользователей. Вы можете удалить любую группу, в которой нет пользователей.",
-"The administrator group cannot be deleted because is the default Elastix Group. You can delete any other group."=>"Группа 'Administrator' не может быть удалена так как является группой по умолчанию в Elastix. Вы можете удалить любую другую группу.",
-"Page" => "Страница",
-"of" => "из",
+"Select language" => "Виберіть мову",
+"Continue" => "Продовжити",
+"You can't change language" => "Ви не можете змінити мову",
 );
 ?>

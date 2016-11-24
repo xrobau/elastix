@@ -25,17 +25,25 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 2.5 2015/10/20 18:21:42 gcarrillo Exp $ */
+  $Id: ua.lang,v 1.7 2016/10/20 06:43:42 LeNET support@lenet.com.ua Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Description"=>"Описание",
-"New Group"=>"Новая Группа",
-"Create New Group"=>"Создать Новую Группу",
-"View Group"=>"Просмотр Группы",
-"Edit Group"=>"Редактировать Группу",
-"The Group have users assigned. You can delete any group that does not have any users assigned in it."=>"Группа имеет связанных с ней пользователей. Вы можете удалить любую группу, в которой нет пользователей.",
-"The administrator group cannot be deleted because is the default Elastix Group. You can delete any other group."=>"Группа 'Administrator' не может быть удалена так как является группой по умолчанию в Elastix. Вы можете удалить любую другую группу.",
-"Page" => "Страница",
-"of" => "из",
+$arrLangModule = array(
+    "Create New User" => "Створити Нового Користувача",
+    "Name" => "Ім'я",
+    "Login" => "Ім'я користувача",
+    "Password" => "Пароль",
+    "Retype password" => "Введіть пароль повторно",
+    "New User" => "Новий Користувач",
+    "View User" => "Перегляд Користувача",
+    "Edit User" => "Редагувати Користувача",
+    "The passwords are empty or don't match" => "Паролі порожні або не співпадають",
+    "The admin user cannot be deleted because is the default Elastix administrator. You can delete any other user." => "Користувач admin, що є адміністратором Elastix по-умолчанию, не може бути видалений. Ви можете видалити будь-якого іншого користувача",
+    "User List" => "Список Користувачів",
+    "Real Name" => "Повне ім'я",
+    "(Ex. John Doe)" => "(Напр. Іван Кузнєцов)",
+    "Retype Webmail password" => "Введіть повторно Webmail пароль",
+    "userNoAllowed" => "Користувачеві не дозволено виконувати цю дію.",
+    "You are not authorized to access to information of that user" => "Ви не авторизовані для доступу до інформації цього користувача",
+    "Page" => "Сторінка",
 );
 ?>

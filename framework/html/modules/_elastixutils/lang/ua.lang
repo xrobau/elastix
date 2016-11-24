@@ -1,8 +1,8 @@
 <?php
 /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
-  Codificación: UTF-8
+  CodificaciГіn: UTF-8
   +----------------------------------------------------------------------+
-  | Elastix version 0.5                                                  |
+  | Elastix version 1.0-16                                               |
   | http://www.elastix.com                                               |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006 Palosanto Solutions S. A.                         |
@@ -25,17 +25,16 @@
   | The Original Code is: Elastix Open Source.                           |
   | The Initial Developer of the Original Code is PaloSanto Solutions    |
   +----------------------------------------------------------------------+
-  $Id: ru.lang,v 2.5 2015/10/20 18:21:42 gcarrillo Exp $ */
+  $Id: en.lang,v 1.1 2008-10-30 09:10:15 Bruno Macias bmacias@elastix.org Exp $ */
 global $arrLangModule;
-$arrLangModule=array(
-"Description"=>"Описание",
-"New Group"=>"Новая Группа",
-"Create New Group"=>"Создать Новую Группу",
-"View Group"=>"Просмотр Группы",
-"Edit Group"=>"Редактировать Группу",
-"The Group have users assigned. You can delete any group that does not have any users assigned in it."=>"Группа имеет связанных с ней пользователей. Вы можете удалить любую группу, в которой нет пользователей.",
-"The administrator group cannot be deleted because is the default Elastix Group. You can delete any other group."=>"Группа 'Administrator' не может быть удалена так как является группой по умолчанию в Elastix. Вы можете удалить любую другую группу.",
-"Page" => "Страница",
-"of" => "из",
+$arrLangModule = array(
+'The bookmark maximum is 5. Please remove one in order to add this bookmark' =>
+    'Максимально закладок 5. Будь ласка, видаліть непотрібну Вам вкладку, щоб додати нову закладку',
+'Bookmark cannot be added. Please try again or contact with your elastix administrator and notify the next error' =>
+    'Закладка не може бути доданий. Будь ласка, спробуйте ще раз або зв'яжіться з Адміністратором Elastix і повідомити наступну помилку',
+'Bookmark cannot be removed. Please try again or contact with your elastix administrator and notify the next error' =>
+    'Закладка не може бути видалений. Будь ласка, спробуйте ще раз або зв'яжіться з Адміністратором Elastix і повідомити наступну помилку',
+'Bookmark has been removed.' => 'Закладка успішно видалена.',
+'Bookmark has been added.' => 'Закладка успішно додана.',
 );
 ?>

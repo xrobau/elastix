@@ -1,0 +1,73 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.0-31                                               |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ua.lang,v 1.1 2016-10-19 1:11:51 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"My Extension" => "Мій Номер",
+"no_extension" => "Немає номера пов'язаний з поточному користувачеві. Ви можете додати номер, натиснувши <a href=\"javascript: openWindow('index.php?menu=userlist&amp;action=edit_userExtension&amp;rawmode=yes');\">сюди</a>",
+"Call Waiting" => "Очікування Виклику",
+"Do Not Disturb" => "Не турбувати",
+"Error processing CallWaiting" => "Помилка обробки Очікування Дзвінка",
+"Error processing Do Not Disturb" => "Сталася помилка при обробці Не турбувати",
+"Save Configuration" => "Зберегти Конфігурацію",
+"Your configuration has been saved correctly" => "Конфігурація успішно збережена",
+"Call Forward" => "Переадресація Виклику",
+"Call Forward on Unavailable" => "Переадресація виклику на недоступний",
+"Call Forward on Busy" => "Переадресація виклику якщо зайнято",
+"Configure a phone number here..." => "Встановіть Галочку...",
+"Validation Error" => "Помилка Перевірки",
+"Please check your phone number"      => "Будь ласка перевірте номер телефону",
+"Please check your phone number for Call Forward" => "Будь ласка перевірте номер телефону для автоматичної переадресації",
+"Please check your phone number for Call Forward On Unavailable" => "Будь ласка перевірте номер телефону для автоматичної переадресації на недоступний",
+"Please check your phone number for Call Forward On Busy" => "Будь ласка перевірте номер телефону для переадресація виклику якщо Зайнято",
+"Always" => "Завжди",
+"Never"  => "Ніколи",
+"On-Demand" => "На вимогу",
+"Inbound External Calls" => "Вхідні Зовнішні Виклики",
+"Outbound External Calls" => "Вихідні Зовнішні Виклики",
+"Inbound Internal Calls" => "Вхідні Внутрішні Виклики",
+"Outbound Internal Calls" => "Вихідніі Міжнародні Виклики",
+"On Demand Recording" => "Запис На вимогу",
+"Record Priority Policy" => "Пріоритет Запису",
+"Don't Care" => "Все одно",
+"Disable" => "Вимкнути",
+"Enable" => "Включити",    
+"SETTINGS FOR YOUR EXTENSION:" => "ПАРАМЕТРЫ ДЛЯ ВАШЕГО НОМЕРА:",
+"contact _ admin" => "Немає номера пов'язаний з поточному користувачеві. Будь ласка, звернетеся до адміністратора, щоб призначити номер",
+"Inbound External Calls option is not valid" => "Вхідні Зовнішні Виклики опція не діє",
+"Outbound External Calls option is not valid" => "Вихідні Зовнішніх Викликів опція не діє",
+"Inbound Internal Calls option is not valid" => "Вхідні Внутрішні Виклики опція не діє",
+"Outbound Internal Calls option is not valid" => "Вихідні Міжнародні Виклики опція не діє",
+"On Demand Recording  option is not valid" => "Запис На вимогу опція не діє",
+"Record Priority Policy is not numeric" => "Запис політики пріоритету не є числовим значенням",
+"Record Priority Policy must be a value between 0 and 20" => "Запис пріоритетних напрямів політики має бути значення від 0 до 20",
+"Error processing Recording options" => "Помилка опції обробки Запису",
+"Call Forward Configuration" => "Конфігурація Перенаправлення Дзвінків",
+"Call Monitor Settings" => "Налаштування Монітора Дзвінків",
+);
+?>

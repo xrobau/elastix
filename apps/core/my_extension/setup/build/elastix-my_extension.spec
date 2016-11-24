@@ -85,6 +85,10 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Ukrainian, Russian translations.
+  SVN Rev[7791]
+
 * Tue Oct 25 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: my_extension: honor USEDEVSTATE setting in /etc/amportal.conf when
   manipulating device states on DND and Call Forward.

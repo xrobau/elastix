@@ -136,6 +136,10 @@ fi
 /etc/yum.repos.d/*
 
 %changelog
+* Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Added Russian, Ukrainian translations.
+  SVN Rev[7785]
+
 * Mon Jun 20 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-5
 - CHANGED: Addons - Build/elastix-addons.spec: update specfile with latest
   SVN history. Bump Version and Release in specfile.

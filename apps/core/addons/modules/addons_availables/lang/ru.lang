@@ -1,0 +1,74 @@
+<?php
+/*
+  vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.0-15                                               |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ru.lang,v 1.1 2016/10/06 23:49:36 LeNET $
+*/
+global $arrLangModule;
+$arrLangModule = array(
+"Installing/Updating" => "Установка/Обновление",
+"Transaction" => "Трансакция",
+"Resolving dependencies" => "Разрешение зависимостей",
+"Downloading package" => "Загрузка пакета",
+"Installing package" => "Установка пакета",
+"Refreshing repos" => "Обновить Репозиторий",
+"Addon" => "Плагины",
+"was successfully" => "успешно",
+"Uninstalling" => "Удаление",
+"Removing package" => "Удаление пакета",
+"has no problem with dependencies" => "не имеет никаких проблем с зависимостями",
+"Checking Dependencies" => "Проверка зависимостей",
+"Sorry, you can not cancel the transaction on this stage" => "К сожалению, вы не можете отменить транзакцию на данном этапе",
+"Cancelling. This process could take several minutes, please wait" => "Отмена. Этот процесс может занять несколько минут, подождите пожалуйста",
+"The cancel signal was already sent, this could take several minutes, please wait" => " Сигнал отмены уже был послан, это может занять несколько минут, подождите пожалуйста",
+"Sorry, another transaction is already in process" => "К сожалению, другая транзакция уже в процессе",
+"No addons match your search criteria" => "Нет плагинов, не соответствуют заданным критериям поиска",
+"Filter by" => "Сортировать по",
+"Available" => "Доступный",
+"Installed" => "Установлен",
+"Purchased" => "Купленный",
+"Update Available" => "Доступно Обновление",
+"Name" => "Имя",
+"Showing" => "Показано",
+"of" => "из",
+"by" => "Автор:",
+"TRIAL" => "ТРИАЛ",
+"BUY" => "КУПИТЬ",
+"INSTALL" => "УСТАНОВИТЬ",
+"UPDATE" => "ОБНОВИТЬ",
+"UNINSTALL" => "УДАЛИТЬ",
+"More info" => "Больше инф",
+"Addon Market" => "Маркет Приложений",
+"Are you sure you want to cancel this transaction?" => "Вы уверены, что хотите прервать эту транзакцию?",
+"Location" => "После установки расположен",
+"Please wait..." => "Пожалуйста подождите...",
+"Warning" => "Предупреждение",
+"Note" => "Заметка",
+"Server id is not defined, you need to register your Elastix" => "Идентификатор сервера не определен, вы должны зарегистрировать Elastix",
+
+);
+?>

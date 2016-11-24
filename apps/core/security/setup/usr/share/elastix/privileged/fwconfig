@@ -310,6 +310,13 @@ PETICION_PK;
         if ($ret) $bExito = FALSE;
     }
 
+    // Ensure that iptables will actually be restored on reboot
+    if ($bExito) {
+        $ret = NULL;
+        system('/sbin/chkconfig iptables on', $ret);
+        if ($ret) { $bExito = FALSE; break; }
+    }
+
     return $bExito;
 }
 ?>

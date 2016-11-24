@@ -13,6 +13,8 @@ BuildArch: noarch
 Prereq: elastix-framework >= 2.3.0-5
 Prereq: freePBX >= 2.8.1-2
 Prereq: iptables
+# On CentOS 7 only, iptables does *not* install any service files
+Prereq: iptables-services
 Requires: elastix-system
 Requires: php-mcrypt
 Requires: elastix-portknock
@@ -137,6 +139,12 @@ fi
 %{_bindir}/elastix-portknock-validate
 
 %changelog
+* Thu Nov 24 2016 Alex Villacis Lasso <a_villacis@palosanto.com>
+- FIXED: Firewall Rules: add commands to actually enable iptables service on
+  next reboot. Additionally, elastix-security on CentOS 7 needs iptables-services
+  since the iptables package no longer provides a service file.
+  SVN Rev[7778]
+
 * Mon Aug 22 2016 Luis Abarca <labarca@palosanto.com> 4.0.0-4
 - CHANGED: security - Build/elastix-security.spec: update specfile with latest
   SVN history. Bump Release in specfile.

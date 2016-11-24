@@ -1,0 +1,95 @@
+<?php
+  /* vim: set expandtab tabstop=4 softtabstop=4 shiftwidth=4:
+  CodificaciГіn: UTF-8
+  +----------------------------------------------------------------------+
+  | Elastix version 2.0.0-31                                               |
+  | http://www.elastix.com                                               |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 2006 Palosanto Solutions S. A.                         |
+  +----------------------------------------------------------------------+
+  | Cdla. Nueva Kennedy Calle E 222 y 9na. Este                          |
+  | Telfs. 2283-268, 2294-440, 2284-356                                  |
+  | Guayaquil - Ecuador                                                  |
+  | http://www.palosanto.com                                             |
+  +----------------------------------------------------------------------+
+  | The contents of this file are subject to the General Public License  |
+  | (GPL) Version 2 (the "License"); you may not use this file except in |
+  | compliance with the License. You may obtain a copy of the License at |
+  | http://www.opensource.org/licenses/gpl-license.php                   |
+  |                                                                      |
+  | Software distributed under the License is distributed on an "AS IS"  |
+  | basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See  |
+  | the License for the specific language governing rights and           |
+  | limitations under the License.                                       |
+  +----------------------------------------------------------------------+
+  | The Original Code is: Elastix Open Source.                           |
+  | The Initial Developer of the Original Code is PaloSanto Solutions    |
+  +----------------------------------------------------------------------+
+  $Id: ru.lang,v 1.1 2016-10-24 01:35:51 LeNET support@lenet.com.ua Exp $ */
+global $arrLangModule;
+$arrLangModule=array(
+"Contact Name" => "Контактное Лицо",
+"Email" => "Email",
+"Email Confirm" => "Подтвердите Email",
+"Password" => "Пароль",
+"Password Confirm" => "Подтвердите Пароль",    
+"Phone" => "Телефон",
+"Country" => "Страна",
+"Company" => "Компания",
+"Address" => "Адрес",
+"City" => "Город",
+"idPartner" => "idПартнер",
+"registration" => "Форма Регистрации Elastix Сервера",
+"registration_server" => "Зарегистрируйте Сервер Elastix",    
+"alert_message_unregister" => "При регистрации сервера Elastix, вы будете иметь возможность установить аддоны для Elastix. Чтобы получить доступ к галерее доступных аддонов, просто нажмите на вкладке Плагтны. Если у вас уже есть учетная запись Elatix Облако, продолжить регистрацию.",
+"alert_message_form" => "Обязательно правильно заполнить поля этой формы, и помните, поле электронной почты, потому что по имени пользователя, позволит в дальнейшим вам получить доступ к вашему Elastix Облако интерфейсу также к лицензии аддонов, которые вы купили в будущем.",
+"alert_message_registered" => "Спасибо за зарегистрировать Elastix Server. Теперь вы можете установить Elastix Addons. Чтобы получить доступ к галерее доступных аддонов, нажмите на вкладке Плагины. <br />Ваш Elastix Сервер ЗАРЕГИСТРИРОВАН в Elastix Cloud.",    
+"Activate registration" => "Активировать регистрацию",
+"Update Information" => "Обновить Информацию",
+"Cancel" => "Отмена",
+"Save information and sending data" => "Сохранение информации и передача данных о реестре",
+"Not user allowed to access this content" => "Не разрешено пользователю получить доступ к содержимому",
+"Your information cannot be saved. Please try again." => "Ваша информация не может быть сохранена на Elastix Облаке. Пожалуйста, попробуйте еще раз.",
+"Your information has been saved." => "Ваша информация успешно сохранена.",
+"Impossible connect to Elastix Web services. Please check your internet connection." => "Невозможно подключиться к Веб Службам Elastix. Пожалуйста, проверьте подключение к интернету.",
+"Impossible connect to Elastix Web services. Please check your internet connection. Showing local information cache." => "Невозможно подключиться к Веб Службам Elastix. Пожалуйста, проверьте подключение к интернету. Отображение локального кэша информации.",
+"Your Server ID" => "Ваш Сервер ID",
+"Getting infomation from Elastix Web Services." => "Получение информации из Elastix Веб Служб.",
+"Your Server ID is not valid. Please update your information to generate a new Server ID." => "Ваш идентификатор сервера не является действительным. Необходимо обновить информацию для создания нового Сервера ID.",
+"There are some problem with the local database. Information cannot be saved in database." => "Информация регистрации не может быть сохранен в локальной базе данных.",
+"* Contact Name: Only text " => "* Контактное Лицо: Не должно быть пустым",
+"* Email: Only format email " => "* Email. Недопустимый формат, должен быть user@domain",
+"* Email Confirm: Only format email " => "* Email Подтверждение: Недопустимый формат, должен быть user@domain",    
+"* Phone: number " => "* Телефон: Может указываться только цифры, +, -",
+"* Company: text " => "* Компания: Не должно быть пустым",
+"* City: text " => "* Город: Не должно быть пустым",
+"* Country: Selected a country " => "* Страна: Укажите Вашу Страну",
+"* Address: text " => "* Адрес: Не должно быть пустым",
+"Please fill the correct values in fields: " => "Заполните, пожалуйста, правильные значения в полях: ",
+"The table register does not exist and could not be created" => "Регистрационная таблица не существует и не может быть создан",
+"EMAIL" => "Email",
+"PASSWORD" => "Пароль",  
+"Don't have an Elastix Cloud account?" => "Нет аккаунта в Elastix Облако?",
+"is licensed under" => "распространяется под лицензией",
+"by" => "о",    
+"REGISTER_ACTION" => "Логин",    
+"USERNAME" => "Пользователь",  
+"Your Elastix server is registered" => "Ваш Elastix Сервер зарегистрирован",
+"Access my account Elastix Cloud" =>  "Доступ к моему аккаунту \"Elastix Cloud\"",
+"The column 'has_account' does not exist and could not be created" => "В столбце 'has_account' не существует и не может быть создан",
+"Incomplete registration" => "Неполная регистрация",
+"Your Elastix Server is not registered" => "Ваш Elastix Сервер не зарегистрирован",    
+"Unable to get local information cache. Nor from Elastix Web services." => "Невозможно получить локальный кэш информации.",    
+"* Emails do not match " => "* Emails не совпадают",    
+"* Passwords do not match " => "* Пароли не совпадают",
+"* Password: Must be at least 10 " => "* Пароль: Должно быть не менее 10 символов и содержать, по меньшей мере, одну заглавную букву, по меньшей мере, одну букву в нижнем регистре, и, по меньшей мере, одну цифру",    
+"* Password Confirm: Must be at least 10 " => "* Подтверждение пароля: должно быть не менее 10 символов и содержать, по меньшей мере, одну заглавную букву, по меньшей мере, одну букву в нижнем регистре, и, по меньшей мере, одну цифру",
+"FIELD VALIDATION" => "Данные клиента является недействительными.",  
+"INVALID LOGIN" => "Email/или пароль неверны.", 
+"ACCOUNT EXISTS" => "Веденный Email и Аккаунт, уже используется.",
+"Customer could not be created" => "Аккаунт не может быть создан.", 
+"Installation data could not be saved" => "Установленные данные не могут быть сохранены.",    
+"SIGN_UP"=>"Зарегистрироваться",
+"INFO_REGISTER" =>"Вы должны войти в систему, чтобы установить плагины"
+);
+?>

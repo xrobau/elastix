@@ -247,17 +247,6 @@ function handleJSON_previewtts($smarty, $module_name, $local_templates_dir)
     return $json->encode($response);
 }
 
-function handleJSON_searchcontacts($smarty, $module_name, $local_templates_dir)
-{
-    $json = new Services_JSON();
-    Header('Content-Type: application/json');
-
-    return $json->encode(searchCalendarContacts(
-        getParameter('search'),
-        $_SESSION['elastix_user']
-    ));
-}
-
 // TODO: redirigir al módulo address_book
 // FIXME: el módulo graphic_report también invoca el listado de teléfonos
 function handleJSON_phone_numbers($smarty, $module_name, $local_templates_dir)

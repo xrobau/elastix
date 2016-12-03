@@ -101,6 +101,12 @@ fi
 /usr/share/elastix/module_installer/*
 
 %changelog
+* Sat Dec  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book, Calendar: move implementation of email contact search
+  from Calendar Module to Address Book REST, since this requires an address
+  book access.
+  SVN REV[7796]
+
 * Thu Nov 24 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
 - CHANGED: Added Ukrainian translations. Fix Russian translations.
   SVN Rev[7786]

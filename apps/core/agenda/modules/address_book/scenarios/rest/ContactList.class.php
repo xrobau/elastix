@@ -91,7 +91,9 @@ class ContactList
                 else{
                     $id = array_shift($this->resourcePath);
                     if(count($this->resourcePath) <= 0)
-                        $uriObject = new ExternalContact($id);
+                        $uriObject = ($id == 'emailsearch')
+                            ? new EmailSearch()
+                            : new ExternalContact($id);
                     elseif(array_shift($this->resourcePath) == "icon"){
                         if(count($this->resourcePath) <= 0)
                             $uriObject = new ContactImg($id,"no","external");
@@ -261,6 +263,53 @@ class Contact extends REST_Resource
         $tupla['url'] = '/rest.php/address_book/ContactList/'.$this->_addressBookType.'/'.$this->_idNumero;
         $json = new Services_JSON();
         return $json->encode($tupla);
+    }
+}
+
+class EmailSearch
+{
+    function HTTP_GET()
+    {
+        global $arrConf;
+
+        $elastixuser = $_SERVER['PHP_AUTH_USER'];
+
+        $json = new paloSantoJSON();
+        $response = array();
+        if (isset($_GET['q']) && trim($_GET['q']) != '') {
+            // Obtener ID de ACL del usuario, dado el nombre de usuario
+            $pACL = new paloACL(new paloDB($arrConf['elastix_dsn']['acl']));
+            $id_user = $pACL->getIdUser($elastixuser);
+
+            $search = trim($_GET['q']);
+
+            // Buscar coincidencias de la búsqueda
+            $pDBAddress = new paloDB($arrConf['dsn_conn_database']);
+            $sql = <<<SQL_BUSCAR
+SELECT name, last_name, email, id
+FROM contact
+WHERE (iduser = ? OR status = 'isPublic')
+    AND email <> ''
+    AND (name LIKE ? OR last_name LIKE ? OR email LIKE ?)
+ORDER BY last_name, name, email, id
+SQL_BUSCAR;
+            $recordset = $pDBAddress->fetchTable($sql, TRUE,
+                array($id_user, "%$search%", "%$search%", "%$search%"));
+            if (!is_array($recordset)) $recordset = array();
+            foreach ($recordset as $tupla) {
+                $response[] = array(
+                    'label' =>  trim($tupla['name']).
+                                ((trim($tupla['last_name']) == '')
+                                    ? ''
+                                    : ' '.' '.trim($tupla['last_name'])).
+                                ' <'.$tupla['email'].'>',
+                    'value' =>  $tupla['id'],
+                );
+            }
+
+        }
+        $json = new Services_JSON();
+        return $json->encode($response);
     }
 }
 

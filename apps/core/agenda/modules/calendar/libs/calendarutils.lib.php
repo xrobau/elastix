@@ -57,42 +57,6 @@ function previewTTS($call_to, $tts)
     return NULL;
 }
 
-function searchCalendarContacts($search, $elastixuser)
-{
-    global $arrConf;
-    $response = array();
-
-    // Obtener ID de ACL del usuario, dado el nombre de usuario
-    $pACL = new paloACL(new paloDB($arrConf['elastix_dsn']['acl']));
-    $id_user = $pACL->getIdUser($elastixuser);
-
-    // Buscar coincidencias de la búsqueda
-    $pDBAddress = new paloDB($arrConf['dsn_conn_database3']);
-    $sql = <<<SQL_BUSCAR
-SELECT name, last_name, email, id
-FROM contact
-WHERE (iduser = ? OR status = 'isPublic')
-    AND email <> ''
-    AND (name LIKE ? OR last_name LIKE ? OR email LIKE ?)
-ORDER BY last_name, name, email, id
-SQL_BUSCAR;
-    $recordset = $pDBAddress->fetchTable($sql, TRUE,
-        array($id_user, "%$search%", "%$search%", "%$search%"));
-    if (!is_array($recordset)) $recordset = array();
-    foreach ($recordset as $tupla) {
-        $response[] = array(
-            'label' =>  trim($tupla['name']).
-                        ((trim($tupla['last_name']) == '')
-                            ? '' 
-                            : ' '.' '.trim($tupla['last_name'])).
-                        ' <'.$tupla['email'].'>',
-            'value' =>  $tupla['id'],
-        );
-    }
-
-    return $response;
-}
-
 function isFestivalActive()
 {
     $output = $retval = NULL;

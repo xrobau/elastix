@@ -259,11 +259,8 @@ $(document).ready(function() {
             }
 
             // Se espera que la respuesta sea un arreglo de {label, value}
-            $.get('index.php', {
-                menu:       getCurrentElastixModule(),
-                action:     'searchcontacts',
-                rawmode:    'yes',
-                search:     search
+            $.get('rest.php/address_book/ContactList/external/emailsearch', {
+                q:  search
             }, response)
             .fail(function() {
                 // En fallo, el API requiere que se llame response() siempre

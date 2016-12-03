@@ -259,8 +259,9 @@ $(document).ready(function() {
             }
 
             // Se espera que la respuesta sea un arreglo de {label, value}
-            $.get('rest.php/address_book/ContactList/external/emailsearch', {
-                q:  search
+            $.get('rest.php/address_book/ContactList/external', {
+                querytype:  'emailsearch',
+                q:          search
             }, response)
             .fail(function() {
                 // En fallo, el API requiere que se llame response() siempre

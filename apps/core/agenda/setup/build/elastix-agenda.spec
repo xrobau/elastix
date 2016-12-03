@@ -102,6 +102,10 @@ fi
 
 %changelog
 * Sat Dec  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book, Calendar: different representation of email contact
+  search. The new representation more properly represents the operation as a
+  query on external contacts instead of a special resource.
+  SVN Rev[7797]
 - CHANGED: Address Book, Calendar: move implementation of email contact search
   from Calendar Module to Address Book REST, since this requires an address
   book access.

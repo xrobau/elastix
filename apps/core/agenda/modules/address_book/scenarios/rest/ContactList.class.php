@@ -91,9 +91,7 @@ class ContactList
                 else{
                     $id = array_shift($this->resourcePath);
                     if(count($this->resourcePath) <= 0)
-                        $uriObject = ($id == 'emailsearch')
-                            ? new EmailSearch()
-                            : new ExternalContact($id);
+                        $uriObject = new ExternalContact($id);
                     elseif(array_shift($this->resourcePath) == "icon"){
                         if(count($this->resourcePath) <= 0)
                             $uriObject = new ContactImg($id,"no","external");
@@ -174,6 +172,15 @@ class ExternalContactList extends ContactListResource
         parent::__construct('external');
     }
 
+    function HTTP_GET()
+    {
+        if (isset($_GET['querytype'])) switch ($_GET['querytype']) {
+        case 'emailsearch':
+            return $this->_emailSearch();
+        }
+        return parent::HTTP_GET();
+    }
+
     function HTTP_POST()
     {
         $json = new paloSantoJSON();
@@ -222,53 +229,8 @@ class ExternalContactList extends ContactListResource
             return $json->createJSON();
         }
     }
-}
 
-class Contact extends REST_Resource
-{
-    protected $_addressBookType;
-    protected $_idNumero;
-
-        function __construct($sAddressBookType, $sIdNumero)
-    {
-        $this->_addressBookType = $sAddressBookType;
-        $this->_idNumero = $sIdNumero;
-    }
-
-    function HTTP_GET()
-    {
-        $pCore_AddressBook = new core_AddressBook();
-        $json = new paloSantoJSON();
-
-        $result = $pCore_AddressBook->listAddressBook($this->_addressBookType,
-            NULL, NULL, $this->_idNumero);
-        if (!is_array($result)) {
-            $error = $pCore_AddressBook->getError();
-            if ($error["fc"] == "DBERROR")
-                header("HTTP/1.1 500 Internal Server Error");
-            else
-                header("HTTP/1.1 400 Bad Request");
-            $json->set_status("ERROR");
-            $json->set_error($error);
-            return $json->createJSON();
-        }
-        if (count($result['extension']) <= 0) {
-                header("HTTP/1.1 404 Not Found");
-            $json->set_status("ERROR");
-            $json->set_error('No contact was found');
-            return $json->createJSON();
-        }
-
-        $tupla = $result['extension'][0];
-        $tupla['url'] = '/rest.php/address_book/ContactList/'.$this->_addressBookType.'/'.$this->_idNumero;
-        $json = new Services_JSON();
-        return $json->encode($tupla);
-    }
-}
-
-class EmailSearch
-{
-    function HTTP_GET()
+    private function _emailSearch()
     {
         global $arrConf;
 
@@ -310,6 +272,48 @@ SQL_BUSCAR;
         }
         $json = new Services_JSON();
         return $json->encode($response);
+    }
+}
+
+class Contact extends REST_Resource
+{
+    protected $_addressBookType;
+    protected $_idNumero;
+
+        function __construct($sAddressBookType, $sIdNumero)
+    {
+        $this->_addressBookType = $sAddressBookType;
+        $this->_idNumero = $sIdNumero;
+    }
+
+    function HTTP_GET()
+    {
+        $pCore_AddressBook = new core_AddressBook();
+        $json = new paloSantoJSON();
+
+        $result = $pCore_AddressBook->listAddressBook($this->_addressBookType,
+            NULL, NULL, $this->_idNumero);
+        if (!is_array($result)) {
+            $error = $pCore_AddressBook->getError();
+            if ($error["fc"] == "DBERROR")
+                header("HTTP/1.1 500 Internal Server Error");
+            else
+                header("HTTP/1.1 400 Bad Request");
+            $json->set_status("ERROR");
+            $json->set_error($error);
+            return $json->createJSON();
+        }
+        if (count($result['extension']) <= 0) {
+                header("HTTP/1.1 404 Not Found");
+            $json->set_status("ERROR");
+            $json->set_error('No contact was found');
+            return $json->createJSON();
+        }
+
+        $tupla = $result['extension'][0];
+        $tupla['url'] = '/rest.php/address_book/ContactList/'.$this->_addressBookType.'/'.$this->_idNumero;
+        $json = new Services_JSON();
+        return $json->encode($tupla);
     }
 }
 

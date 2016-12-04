@@ -343,12 +343,20 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
     $user	  = $_SESSION["elastix_user"];
     $id_user      = $pACL->getIdUser($user);
     $extension	  = $pACL->getUserExtension($user);
-    if(is_null($extension) || $extension==""){
-	if($pACL->isUserAdministratorGroup($user)){
-            $smarty->assign("mb_title", _tr("MESSAGE"));
-	    $smarty->assign("mb_message", "<b>"._tr("You don't have extension number associated with user")."</b>");
-	}else
-	    $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
+
+    // Formato de grilla
+    $gridFormat = getParameter('gridformat');
+    if (!in_array($gridFormat, array('default', 'phonepick')))
+        $gridFormat = 'default';
+
+    if (in_array($gridFormat, array('default'))) {
+        if(is_null($extension) || $extension==""){
+            if($pACL->isUserAdministratorGroup($user)){
+                $smarty->assign("mb_title", _tr("MESSAGE"));
+                $smarty->assign("mb_message", "<b>"._tr("You don't have extension number associated with user")."</b>");
+            }else
+                $smarty->assign("mb_message", "<b>"._tr("contact_admin")."</b>");
+        }
     }
     if(getParameter('select_directory_type') != null && getParameter('select_directory_type')=='external')
     {
@@ -360,7 +368,6 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
         $directory_type = 'internal';
     }
     $_POST['select_directory_type'] = $directory_type;
-
 
     $arrComboElements = array(  "name"        =>_tr("Name"),
                                 "telefono"    => ($directory_type=='external')?_tr("Work's Phone Number"):_tr("Extension"));
@@ -451,61 +458,102 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
             $arrMails = $padress_book->getMailsFromVoicemail();
 
         foreach($arrResult as $key => $adress_book){
-            $idt = ($directory_type=="external")?$adress_book['id']:$adress_book['id_on_address_book_db'];
-            $pic = isset($adress_book["picture"])?$adress_book["picture"]:0;
 
-            $exten   = explode(".",$pic);
-            if(isset($exten[count($exten)-1]))
-                $exten   = $exten[count($exten)-1];
-            $picture = "/var/www/address_book_images/{$idt}_Thumbnail.$exten";
+            $email = ($directory_type == 'internal')
+                ? (isset($arrMails[$adress_book['id']]) ? $arrMails[$adress_book['id']] : '')
+                : $adress_book['email'];
 
-            if(file_exists($picture))
-                $arrTmp[1] = "<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='image' border='0' src='index.php?menu=$module_name&type=".$directory_type."&action=getImage&idPhoto=$adress_book[id]&thumbnail=yes&rawmode=yes'/></a>";
-            else{
-                $defaultPicture = "modules/$module_name/images/Icon-user_Thumbnail.png";
-                $arrTmp[1] = "<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img border='0' alt='image' src='$defaultPicture'/></a>";
+            switch ($gridFormat) {
+            case 'phonepick':
+                $arrData[] = array(
+                    ($directory_type == 'internal')
+                        ? htmlspecialchars($adress_book['description'], ENT_QUOTES, "UTF-8")
+                        : htmlspecialchars($adress_book['last_name'], ENT_QUOTES, "UTF-8")." ".htmlspecialchars($adress_book['name'], ENT_QUOTES, "UTF-8"),
+                    "<a href=\"#\" class=\"selected_contact_phone\">".(($directory_type == 'internal') ? $adress_book['id'] : $adress_book['work_phone'])."</a>",
+                    $email,
+                );
+                break;
+            default:
+                $idt = ($directory_type=="external")?$adress_book['id']:$adress_book['id_on_address_book_db'];
+                $pic = isset($adress_book["picture"])?$adress_book["picture"]:0;
+
+                $exten   = explode(".",$pic);
+                if(isset($exten[count($exten)-1]))
+                    $exten   = $exten[count($exten)-1];
+                $picture = "/var/www/address_book_images/{$idt}_Thumbnail.$exten";
+
+                if(file_exists($picture))
+                    $arrTmp[1] = "<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='image' border='0' src='index.php?menu=$module_name&type=".$directory_type."&action=getImage&idPhoto=$adress_book[id]&thumbnail=yes&rawmode=yes'/></a>";
+                else{
+                    $defaultPicture = "modules/$module_name/images/Icon-user_Thumbnail.png";
+                    $arrTmp[1] = "<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img border='0' alt='image' src='$defaultPicture'/></a>";
+                }
+
+                $arrTmp[0]  = ($directory_type=='external')?"<input type='checkbox' name='contact_{$adress_book['id']}'  />":'';
+                if($directory_type=='external'){
+                    if($adress_book['status']=='isPublic'){
+                        if($id_user == $adress_book['iduser']){
+                            $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='public' style='padding: 5px;' title='"._tr('Public Contact')."' border='0' src='modules/$module_name/images/public_edit.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Public editable')."</span></div></div>";
+                            $arrTmp[0]  = "<input type='checkbox' name='contact_{$adress_book['id']}'  />";
+                        }else{
+                            $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='public' style='padding: 5px;' title='"._tr('Public Contact')."' border='0' src='modules/$module_name/images/public.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Public not editable')."</span></div></div>";
+                            $arrTmp[0]  = "";
+                        }
+                    }else
+                        $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='private' style='padding: 5px;' title='"._tr('Private Contact')."' border='0' src='modules/$module_name/images/contact.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Private')."</span></div></div>";
+                }else{
+                    $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='public' style='padding: 5px;' title='"._tr('Public Contact')."' border='0' src='modules/$module_name/images/public.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Public not editable')."</span></div></div>";
+                }
+
+
+                $arrTmp[2]  = ($directory_type=='external')?"<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'>".htmlspecialchars($adress_book['last_name'], ENT_QUOTES, "UTF-8")." ".htmlspecialchars($adress_book['name'], ENT_QUOTES, "UTF-8")."</a>":"<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'>".$adress_book['description']."</a>";
+                $arrTmp[3]  = ($directory_type=='external')?$adress_book['work_phone']:$adress_book['id'];
+                $arrTmp[4]  = $email;
+                $arrTmp[5]  = "<a href='#' onclick='callContact({$adress_book['id']},\"{$directory_type}\");'><img border=0 src='/modules/$module_name/images/call.png' /></a>";
+                //$arrTmp[6]  = "<a href='?menu=$module_name&action=transfer_call&id=".$adress_book['id']."&type=".$directory_type."'>"._tr("Transfer")."</a>";
+                $arrTmp[6]  = "<a href='#' onclick='transferCall({$adress_book['id']},\"{$directory_type}\");'>"._tr("Transfer")."</a>";
+                $arrTmp[7]  = $typeContact;
+                $arrData[]  = $arrTmp;
+
+                break;
             }
-
-            $arrTmp[0]  = ($directory_type=='external')?"<input type='checkbox' name='contact_{$adress_book['id']}'  />":'';
-            if($directory_type=='external'){
-                $email = $adress_book['email'];
-                if($adress_book['status']=='isPublic'){
-                    if($id_user == $adress_book['iduser']){
-                        $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='public' style='padding: 5px;' title='"._tr('Public Contact')."' border='0' src='modules/$module_name/images/public_edit.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Public editable')."</span></div></div>";
-                        $arrTmp[0]  = "<input type='checkbox' name='contact_{$adress_book['id']}'  />";
-                    }else{
-                        $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='public' style='padding: 5px;' title='"._tr('Public Contact')."' border='0' src='modules/$module_name/images/public.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Public not editable')."</span></div></div>";
-                        $arrTmp[0]  = "";
-                    }
-                }else
-                    $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='private' style='padding: 5px;' title='"._tr('Private Contact')."' border='0' src='modules/$module_name/images/contact.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Private')."</span></div></div>";
-            }else if(isset($arrMails[$adress_book['id']])){
-                $email = $arrMails[$adress_book['id']];
-                $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='public'  style='padding: 5px; 'title='"._tr('Public Contact')."' border='0' src='modules/$module_name/images/public.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Public not editable')."</span></div></div>";
-            }else{
-                $email = '';
-                $typeContact = "<div><div style='float: left;'><a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'><img alt='public' style='padding: 5px;' title='"._tr('Public Contact')."' border='0' src='modules/$module_name/images/public.png' /></a></div><div style='padding: 16px 0px 0px 5px; text-align:center;'><span style='visibility: hidden;'>"._tr('Public not editable')."</span></div></div>";
-            }
-
-
-            $arrTmp[2]  = ($directory_type=='external')?"<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'>".htmlspecialchars($adress_book['last_name'], ENT_QUOTES, "UTF-8")." ".htmlspecialchars($adress_book['name'], ENT_QUOTES, "UTF-8")."</a>":"<a href='?menu=$module_name&action=show&type=".$directory_type."&id=".$adress_book['id']."'>".$adress_book['description']."</a>";
-            $arrTmp[3]  = ($directory_type=='external')?$adress_book['work_phone']:$adress_book['id'];
-            $arrTmp[4]  = $email;
-            $arrTmp[5]  = "<a href='#' onclick='callContact({$adress_book['id']},\"{$directory_type}\");'><img border=0 src='/modules/$module_name/images/call.png' /></a>";
-            //$arrTmp[6]  = "<a href='?menu=$module_name&action=transfer_call&id=".$adress_book['id']."&type=".$directory_type."'>"._tr("Transfer")."</a>";
-            $arrTmp[6]  = "<a href='#' onclick='transferCall({$adress_book['id']},\"{$directory_type}\");'>"._tr("Transfer")."</a>";
-            $arrTmp[7]  = $typeContact;
-            $arrData[]  = $arrTmp;
         }
     }
-    if($directory_type=='external'){
-	$name = "";
-        $oGrid->deleteList(_tr("Are you sure you wish to delete the contact."),"delete",_tr("Delete"));
-    }
-    else {
-        $name = "";
+    $name = '';
+    if ($gridFormat == 'default') {
+        if($directory_type=='external'){
+            $oGrid->deleteList(_tr("Are you sure you wish to delete the contact."),"delete",_tr("Delete"));
+        }
     }
 
+    switch ($gridFormat) {
+    case 'phonepick':
+        $columns = array(
+            array('name' =>  _tr('Name')),
+            array('name' => ($directory_type=='external')?_tr("Work's Phone Number"):_tr("Extension")),
+            array('name' => _tr("Email"))
+        );
+        break;
+    default:
+        $columns = array(0 => array("name"      => $name,
+                                "property1" => ""),
+                        1 => array("name"      => _tr("picture"),
+                                "property1" => ""),
+                        2 => array("name"      => _tr("Name"),
+                                "property1" => ""),
+                        3 => array("name"      => ($directory_type=='external')?_tr("Work's Phone Number"):_tr("Extension"),
+                                "property1" => ""),
+                        4 => array("name"      => _tr("Email"),
+                                "property1" => ""),
+                        5 => array("name"      => _tr("Call"),
+                                "property1" => ""),
+                        6 => array("name"      => _tr("Transfer"),
+                                "property1" => ""),
+                        7 => array("name"      => _tr("Type Contact"),
+                                "property1" => "")
+                    );
+        break;
+    }
     $arrGrid = array(   "title"    => _tr("Address Book"),
                         "url"      => array('menu' => $module_name, 'filter' => $pattern, 'select_directory_type' => $directory_type),
                         "icon"     => "modules/$module_name/images/address_book.png",
@@ -513,27 +561,21 @@ function report_adress_book($smarty, $module_name, $local_templates_dir, $pDB, $
                         "start"    => $inicio,
                         "end"      => $end,
                         "total"    => $total,
-                        "columns"  => array(0 => array("name"      => $name,
-                                                    "property1" => ""),
-                                            1 => array("name"      => _tr("picture"),
-                                                    "property1" => ""),
-                                            2 => array("name"      => _tr("Name"),
-                                                    "property1" => ""),
-                                            3 => array("name"      => ($directory_type=='external')?_tr("Work's Phone Number"):_tr("Extension"),
-                                                    "property1" => ""),
-                                            4 => array("name"      => _tr("Email"),
-                                                    "property1" => ""),
-                                            5 => array("name"      => _tr("Call"),
-                                                    "property1" => ""),
-                                            6 => array("name"      => _tr("Transfer"),
-                                                    "property1" => ""),
-                                            7 => array("name"      => _tr("Type Contact"),
-                                                    "property1" => "")
-                                        )
+                        "columns"  => $columns,
                     );
-    $oGrid->addNew("new",_tr("New Contact"));
+    if ($gridFormat == 'default') $oGrid->addNew("new",_tr("New Contact"));
     $oGrid->showFilter(trim($htmlFilter));
     $contenidoModulo = $oGrid->fetchGrid($arrGrid, $arrData);
+
+    if ($gridFormat != 'default' && getParameter('rawmode') == 'yes') {
+        $smarty->assign(array(
+            'CONTENT'   =>  $contenidoModulo,
+            'THEMENAME' =>  $arrConf['mainTheme'],
+            'path'      =>  '',
+        ));
+        $contenidoModulo = $smarty->display("$local_templates_dir/address_book_list.tpl");
+    }
+
     return $contenidoModulo;
 }
 

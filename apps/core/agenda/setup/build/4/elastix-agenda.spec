@@ -102,6 +102,12 @@ fi
 
 %changelog
 * Sat Dec  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book, Calendar: move implementation of phone picker popup
+  window from Calendar to Address Book, where it belongs. This allows the
+  picker to be implemented as a modification of the standard report. A redirect
+  now exists in Calendar to handle modules (such as Graphic Report) that want
+  the picker too and request it to Calendar.
+  SVN Rev[7798]
 - CHANGED: Address Book, Calendar: different representation of email contact
   search. The new representation more properly represents the operation as a
   query on external contacts instead of a special resource.

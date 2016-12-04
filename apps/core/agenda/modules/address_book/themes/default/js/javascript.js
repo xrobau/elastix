@@ -11,6 +11,11 @@ $(document).ready(function(){
             var dd = $(this).children(':last-child').children(':first-child').children(':last-child').children(':first-child').attr("style", "visibility: hidden;");
     });
 
+    // Esta clase sólo existe dentro del popup de contactos telefónicos
+    $('.selected_contact_phone').click(function() {
+        $(opener.document).find('#call_to').val($(this).text());
+        window.close();
+    });
 });
 
 function callContact(idContact,typeContact){

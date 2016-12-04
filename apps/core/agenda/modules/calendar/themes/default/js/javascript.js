@@ -292,18 +292,12 @@ $(document).ready(function() {
         var winiz = (screen.width-ancho)/2;
         var winal = (screen.height-alto)/2;
         my_window = window.open(
-                '?menu=' + getCurrentElastixModule() + '&action=phone_numbers&rawmode=yes',
+                '?menu=address_book&gridformat=phonepick&rawmode=yes',
                 "my_window",
                 "width="+ancho+",height="+alto+",top="+winal+",left="+winiz+
-                    ",location=yes,status=yes,resizable=yes,scrollbars=yes,fullscreen=no,toolbar=yes");
+                    ",location=no,status=no,resizable=yes,scrollbars=yes,fullscreen=no,toolbar=no");
         my_window.document.close();
 
-    });
-
-    // Esta clase sólo existe dentro del popup de contactos telefónicos
-    $('.selected_contact_phone').click(function() {
-        $(opener.document).find('#call_to').val($(this).text());
-        window.close();
     });
 
     if ($('input[name="event_id"]').length > 0) {

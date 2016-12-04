@@ -5,12 +5,43 @@
         <title>Elastix</title>
         <link rel="stylesheet" href="{$path}themes/{$THEMENAME}/styles.css">
         <link rel="stylesheet" href="{$path}themes/{$THEMENAME}/help.css">
+{if $THEMENAME eq "tenant"}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700,400italic">
+    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/bootstrap.css">
+    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/neon-core.css">
+    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/neon-theme.css">
+    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/neon-forms.css">
+    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/css/custom.css">
+
+    <link rel="stylesheet" href="{$WEBPATH}themes/{$THEMENAME}/widgets.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/header.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/content.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/applet.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}libs/js/sticky_note/sticky_note.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/table.css" />
+    <link rel="stylesheet" media="screen" type="text/css" href="{$WEBPATH}themes/{$THEMENAME}/rightbar.css" />
+{/if}
         {$HEADER_LIBS_JQUERY}
         <script src="{$path}libs/js/base.js"></script>
         <script src="{$path}modules/{$module_name}/themes/default/js/javascript.js"></script>
     </head>
     <body {$BODYPARAMS}>
-        {if $THEMENAME eq "elastixneo"}
+        {if $THEMENAME eq "tenant"}
+            <div class="neo-module-content">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" class="message_board">
+              <tbody style="display:none" id="table_error"><tr>
+                <td valign="middle" class="mb_title" id="mb_title"></td>
+                </tr>
+                <tr>
+                    <td valign="middle" class="mb_message" id="mb_message"></td>
+                </tr>
+            </tbody></table>
+            <div class="moduleTitle">
+              &nbsp;&nbsp;<img src="{$icon}" border="0" align="absmiddle">&nbsp;&nbsp;{$title}
+            </div>
+            {$CONTENT}
+            </div>
+        {elseif $THEMENAME eq "elastixneo"}
           <div>
             <div class="elxneo-module-title">
                 <div class="name-left"></div>
@@ -49,5 +80,17 @@
             </div>
             {$CONTENT}
         {/if}
+{if $THEMENAME eq "tenant"}
+        <!-- Bottom Scripts -->
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/gsap/main-gsap.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/bootstrap.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/joinable.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/resizeable.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-api.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/jquery.validate.min.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-login.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-custom.js"></script>
+        <script type='text/javascript' src="{$WEBPATH}themes/{$THEMENAME}/js/neon-demo.js"></script>
+{/if}
     </body>
 </html>

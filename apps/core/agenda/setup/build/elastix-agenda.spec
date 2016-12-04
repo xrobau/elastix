@@ -102,6 +102,8 @@ fi
 
 %changelog
 * Sat Dec  3 2016 Alex Villacís Lasso <a_villacis@palosanto.com>
+- CHANGED: Address Book: fixes for phone picker popup under Tenant theme.
+  SVN Rev[7799]
 - CHANGED: Address Book, Calendar: move implementation of phone picker popup
   window from Calendar to Address Book, where it belongs. This allows the
   picker to be implemented as a modification of the standard report. A redirect
